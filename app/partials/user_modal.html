@@ -1,0 +1,25 @@
+<div class="user_modal_wrap">
+
+  <div class="modal-header">
+    <!-- <a class="modal-close-link" ng-click="$close()">Close</a> -->
+    <h4 class="modal-title">Info</h4>
+  </div>
+
+
+  <div class="modal-body">
+
+    <div class="user_modal_image_wrap pull-left">
+      <img class="user_modal_image" my-load-thumb thumb="user.thumb"/>
+    </div>
+
+    <div class="user_modal_info_wrap clearfix">
+      <h4 class="user_modal_header">{{user | userName}}</h4>
+      <p class="user_modal_status" ng-if="user.status">{{user | userStatus}}</p>
+
+      <p class="user_modal_phone" ng-if="user.phone">{{user.phone | phoneNumber}}</p>
+      <button class="btn btn-link user_modal_send_btn" ng-click="goToHistory()">Send message</button>
+    </div>
+
+  </div>
+
+</div>

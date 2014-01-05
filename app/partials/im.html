@@ -1,0 +1,118 @@
+<div ng-include="'partials/head.html'"></div>
+
+<div class="im_page_wrap">
+
+  <div class="im_page_split clearfix">
+
+    <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController">
+      <div class="im_dialogs_search">
+        <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="searchQuery"/>
+      </div>
+      <div my-dialogs-list class="im_dialogs_col">
+        <div class="im_dialogs_wrap nano">
+          <div class="im_dialogs_scrollable_wrap content">
+            <ul class="nav nav-pills nav-stacked">
+              <li my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs | filter:searchQuery" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
+      <div ng-if="state.notSelected" class="im_history_not_selected">No history to display</div>
+
+      <div ng-if="state.loaded">
+        <div my-history class="im_history_col">
+
+          <div class="im_history_panel_wrap">
+
+            <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
+              <div class="im_history_panel_title">
+
+                <div ng-if="historyPeer.id < 0">
+                  <h4>
+                    <!-- <a class="im_history_panel_info_link pull-right" ng-click="openChat(-historyPeer.id)">Info</a> -->
+                    <span ng-bind-html="historyPeer.data.rTitle"></span>
+                    <small class="im_chat_users">
+                      <ng-pluralize count="historyPeer.data.participants_count"
+                                       when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
+                      </ng-pluralize>
+                    </small>
+                  </h4>
+                </div>
+
+                <div ng-if="historyPeer.id > 0">
+                  <h4>
+                    <!-- <a class="im_history_panel_info_link pull-right" ng-click="openUser(historyPeer.id)">Info</a> -->
+                    <span ng-bind-html="historyPeer.data.rFullName"></span>
+                    <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
+                  </h4>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="im_history_wrap nano">
+
+            <div class="im_history_scrollable_wrap content">
+
+              <div class="im_history_scrollable">
+
+                  <div class="im_history">
+                    <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
+                  </div>
+
+                  <div class="im_history_typing_wrap">
+                    <div class="im_history_typing" ng-animate="{enter:'animate-show', leave:'animate-hide'}" ng-if="typing.user">
+                      <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing..
+                    </div>
+                  </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
+            <div class="pull-right im_panel_peer_photo" ng-click="openUser(historyPeer.id)" ng-if="historyPeer.id > 0">
+              <img class="im_panel_peer_photo" my-load-thumb thumb="historyPeer.photo" />
+              <i class="icon im_panel_peer_online" ng-show="historyPeer.data.status._ == 'userStatusOnline'"></i>
+            </div>
+            <div class="pull-right im_panel_peer_photo" ng-click="openChat(-historyPeer.id)" ng-if="historyPeer.id < 0">
+              <img class="im_panel_peer_photo" my-load-thumb thumb="historyPeer.photo" />
+            </div>
+            <div class="pull-left im_panel_own_photo">
+              <img class="im_panel_own_photo" my-load-thumb thumb="ownPhoto" />
+            </div>
+            <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
+              <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
+              <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
+
+              <div class="im_emoji_btn pull-right">
+                <i class="icon icon-emoji"></i>
+              </div>
+
+              <div class="im_attach pull-right">
+                <input type="file" class="im_attach_input" size="28" multiple="true" />
+                <i class="icon icon-paperclip"></i>
+              </div>
+
+              <button type="submit" class="btn btn-tg im_submit">Send</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+</div>
+

@@ -1,0 +1,41 @@
+<div class="chat_modal_wrap">
+
+  <div class="modal-header">
+    <!-- <a class="modal-close-link" ng-click="$close()">Close</a> -->
+    <h4 class="modal-title">Group Info</h4>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="chat_modal_image_wrap pull-left">
+      <img class="chat_modal_image" my-load-thumb thumb="chatFull.thumb"/>
+    </div>
+
+    <div class="chat_modal_info_wrap clearfix">
+      <h4 class="chat_modal_header">{{chatFull.chat | chatTitle}}</h4>
+      <p class="chat_modal_members_count" ng-if="chatFull.participants._ == 'chatParticipants'">
+        <ng-pluralize count="chatFull.participants.participants.length"
+                         when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
+        </ng-pluralize>
+      </p>
+
+      <button class="btn btn-link chat_modal_invite_btn">Add member</button>
+    </div>
+
+    <h5 class="chat_modal_members_header">Members</h5>
+    <div class="chat_modal_members_list">
+
+      <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants">
+        <a ng-click="openUser(participant.user_id)" class="chat_modal_participant_photo pull-left">
+          <img class="chat_modal_participant_photo" my-load-thumb thumb="participant.userPhoto"/>
+        </a>
+        <div class="chat_modal_participant_name">{{participant.user | userName}}</div>
+        <!--div class="chat_modal_participant_desc">invited by {{participant.inviter | userName}} {{participant.date | dateOrTime}}</div-->
+        <div class="chat_modal_participant_status">{{participant.user | userStatus}}</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
