@@ -78,7 +78,7 @@ Besides frameworks mentioned above, other libraries are used for protocol and UI
 * [gemoji](https://github.com/github/gemoji)
 * [emoji-data](https://github.com/iamcal/emoji-data)
 
-Many thanks to all these libraries' authors and contributors. Detailed list with descriptions and licenses is available [here](/app/vendors).
+Many thanks to all these libraries' authors and contributors. Detailed list with descriptions and licenses is available [here](/app/vendor).
 
 
 ### Licensing
