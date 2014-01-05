@@ -1,0 +1,91 @@
+<div class="im_message_wrap clearfix" ng-class="{im_message_out: historyMessage.out}">
+
+  <div class="im_service_message_wrap" ng-if="historyMessage._ == 'messageService'">
+    <div class="im_service_message">
+
+      <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFirstName"></a>
+
+      <span class="im_message_service" ng-switch="historyMessage.action['_']">
+        <span ng-switch-when="messageActionChatCreate">
+          created the group &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
+        </span>
+        <span ng-switch-when="messageActionChatEditTitle">
+          changed group name to  &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
+        </span>
+        <span ng-switch-when="messageActionChatEditPhoto">
+          changed group photo
+        </span>
+        <span ng-switch-when="messageActionChatDeletePhoto">
+          removed group photo
+        </span>
+        <span ng-switch-when="messageActionChatAddUser">
+          invited <span ng-bind-html="historyMessage.action.user.rFullName"></span>
+        </span>
+        <span ng-switch-when="messageActionChatDeleteUser">
+          kicked <span ng-bind-html="historyMessage.action.user.rFullName"></span>
+        </span>
+
+        <span ng-switch-default>
+          unsupported action {{historyMessage.action}}
+        </span>
+      </span>
+
+    </div>
+
+    <a ng-if="historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb"  href="" ng-click="openPhoto(historyMessage.action.photo.id)">
+      <img class="im_service_message_photo_thumb" my-load-thumb thumb="historyMessage.action.photo.thumb" width="{{historyMessage.action.photo.thumb.width}}" height="{{historyMessage.action.photo.thumb.height}}" />
+    </a>
+
+  </div>
+
+  <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
+    <i ng-if="historyMessage.unread" class="icon icon-message-status-unread"></i>
+    <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
+      <img class="im_message_from_photo" my-load-thumb thumb="historyMessage.fromPhoto"/>
+    </a>
+    <div class="im_message_meta pull-right text-right">
+      <i ng-if="historyMessage.out" class="icon icon-message-status-tick" ng-class="{'message-status-delivered-tick': true, 'message-status-unread-tick': historyMessage.unread}"></i>
+      <span class="im_message_date">{{historyMessage.date | dateOrTime}}</span>
+    </div>
+
+    <div class="im_message_body">
+
+      <div class="im_message_author" ng-bind-html="historyMessage.fromUser.rFirstName"></div>
+
+      <div class="im_message_media" ng-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" ng-switch="historyMessage.media._">
+
+        <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" >
+          <img class="im_message_photo_thumb" my-load-thumb thumb="historyMessage.media.photo.thumb" width="{{historyMessage.media.photo.thumb.width}}" height="{{historyMessage.media.photo.thumb.height}}" />
+        </a>
+
+        <a ng-switch-when="messageMediaVideo" class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)">
+          <img class="im_message_video_thumb" my-load-thumb thumb="historyMessage.media.video.thumb" width="{{historyMessage.media.video.thumb.width}}" height="{{historyMessage.media.video.thumb.height}}" />
+          <div class="im_message_video_duration_wrap" style="width: {{historyMessage.media.video.thumb.width}}px;">
+            <span class="im_message_video_duration pull-right">{{historyMessage.media.video.duration | duration}}</span>
+            <span class="glyphicon glyphicon-facetime-video"></span>
+          </div>
+        </a>
+
+        <a ng-switch-when="messageMediaDocument" class="im_message_document" href="" ng-click="openDoc(historyMessage.media.document.id)">
+          <i class="icon icon-document"></i>
+          <div class="im_message_document_name"><strong>{{historyMessage.media.document.file_name}}</strong> {{historyMessage.media.document.size | formatSize}}</div>
+        </a>
+
+        <a ng-switch-when="messageMediaGeo" my-map-point point="historyMessage.media.geo" class="im_message_geopoint">
+          <i class="icon icon-geo-point"></i>
+        </a>
+
+        <div ng-switch-when="messageMediaContact">
+          <a ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left" ng-if="historyMessage.media.user">
+            <img class="im_message_contact_photo" my-load-thumb thumb="historyMessage.media.userPhoto"/>
+          </a>
+          <div class="im_message_contact_name"><span class="glyphicon glyphicon-user"></span> {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}</div>
+          <div class="im_message_contact_phone">{{historyMessage.media.phone_number}}</div>
+        </div>
+      </div>
+
+      <div class="im_message_text" ng-if="historyMessage.message" ng-bind-html="historyMessage.richMessage"></div>
+    </div>
+
+  </div>
+</div>

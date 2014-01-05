@@ -1,0 +1,73 @@
+<a class="im_dialog clearfix" href="#/im?p={{dialogMessage.peerString}}">
+
+  <div class="im_dialog_meta pull-right text-right">
+    <div class="im_dialog_date">
+      {{dialogMessage.date | dateOrTime}}
+    </div>
+    <span class="im_dialog_badge badge" ng-show="dialogMessage.unreadCount > 0">
+      {{dialogMessage.unreadCount}}
+    </span>
+  </div>
+
+  <div class="im_dialog_photo pull-left">
+   <img class="im_dialog_photo" my-load-thumb thumb="dialogMessage.peerPhoto" aaa="{{dialogMessage.peerPhoto.location}}" />
+  </div>
+
+  <div class="im_dialog_message_wrap">
+
+    <div class="im_dialog_peer">
+      <span class="im_dialog_chat" ng-if="dialogMessage.chatID">
+        <i class="icon icon-group"></i> <span  ng-bind-html="dialogMessage.peerData.rTitle"></span>
+      </span>
+      <span class="im_dialog_user" ng-if="dialogMessage.peerID > 0" ng-bind-html="dialogMessage.peerData.rFullName"></span>
+    </div>
+
+    <div class="im_dialog_message">
+      <span class="im_dialog_chat_from_wrap">
+        <span class="im_dialog_chat_from" ng-if="!dialogMessage.out &amp;&amp; dialogMessage.chatID" ng-bind-html="dialogMessage.fromUser.rFirstName"></span><span class="im_dialog_chat_from" ng-if="dialogMessage.out">You</span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
+      </span>
+
+      <span class="im_dialog_message_media" ng-if="dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty'" ng-switch="dialogMessage.media._">
+        <span ng-switch-when="messageMediaPhoto">
+          <span class="glyphicon glyphicon-camera"></span> Photo
+        </span>
+        <span ng-switch-when="messageMediaVideo">
+          <span class="glyphicon glyphicon-facetime-video"></span>  Video
+        </span>
+        <span ng-switch-when="messageMediaDocument">
+          <span class="glyphicon glyphicon-document"></span> Document
+        </span>
+        <span ng-switch-when="messageMediaGeo">
+          <span class="glyphicon glyphicon-map-marker"></span> Location
+        </span>
+        <span ng-switch-when="messageMediaContact">
+          <span class="glyphicon glyphicon-user"></span> Contact
+        </span>
+      </span>
+
+      <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
+        <span ng-switch-when="messageActionChatCreate">
+          created the group
+        </span>
+        <span ng-switch-when="messageActionChatEditTitle">
+          changed group name
+        </span>
+        <span ng-switch-when="messageActionChatEditPhoto">
+          changed group photo
+        </span>
+        <span ng-switch-when="messageActionChatDeletePhoto">
+          removed group photo
+        </span>
+        <span ng-switch-when="messageActionChatAddUser">
+          invited <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+        </span>
+        <span ng-switch-when="messageActionChatDeleteUser">
+          kicked <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+        </span>
+      </span>
+
+      <span class="im_dialog_message_text" ng-if="dialogMessage.message" ng-bind-html="dialogMessage.richMessage"></span>
+    </div>
+
+  </div>
+</a>

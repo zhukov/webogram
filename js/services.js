@@ -1,0 +1,1439 @@
+/*!
+ * Webogram v0.1 - messaging web application for MTProto
+ * https://github.com/zhukov/webogram
+ * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
+ * https://github.com/zhukov/webogram/blob/master/LICENSE
+ */
+
+'use strict';
+
+/* Services */
+
+angular.module('myApp.services', [])
+
+.service('AppConfigManager', function ($q) {
+  var testPrefix = window._testMode ? 't_' : '';
+  var cache = {};
+  var useLs = !window.chrome || !chrome.storage || !chrome.storage.local;
+
+  function getValue() {
+    var keys = Array.prototype.slice.call(arguments),
+        result = [],
+        single = keys.length == 1,
+        allFound = true;
+
+    for (var i = 0; i < keys.length; i++) {
+      keys[i] = testPrefix + keys[i];
+    }
+
+    angular.forEach(keys, function (key) {
+      if (cache[key] !== undefined) {
+        result.push(cache[key]);
+      }
+      else if (useLs) {
+        var value = localStorage.getItem(key);
+        value = (value === undefined || value === null) ? false : JSON.parse(value);
+        result.push(cache[key] = value);
+      }
+      else {
+        allFound = false;
+      }
+    });
+
+    if (allFound) {
+      return $q.when(single ? result[0] : result);
+    }
+
+    var deferred = $q.defer();
+
+    // dLog('get', keys);
+    chrome.storage.local.get(keys, function (resultObj) {
+      // dLog('got', resultObj);
+      result = [];
+      angular.forEach(keys, function (key) {
+        var value = resultObj[key];
+        // dLog('p1', key, value);
+        value = value === undefined || value === null ? false : JSON.parse(value);
+        // dLog('p2', value);
+        result.push(cache[key] = value);
+      });
+
+      // dLog('got parsed', result);
+      deferred.resolve(single ? result[0] : result);
+    });
+
+    return deferred.promise;
+  };
+
+  function setValue(obj) {
+    var keyValues = {};
+    angular.forEach(obj, function (value, key) {
+      keyValues[testPrefix + key] = JSON.stringify(value);
+      cache[testPrefix + key] = value;
+    });
+
+    if (useLs) {
+      angular.forEach(keyValues, function (value, key) {
+        localStorage.setItem(key, value);
+      });
+      return $q.when();
+    }
+
+    var deferred = $q.defer();
+
+    chrome.storage.local.set(keyValues, function () {
+      deferred.resolve();
+    });
+
+    return deferred.promise;
+  };
+
+  function removeValue () {
+    var keys = Array.prototype.slice.call(arguments);
+
+    for (var i = 0; i < keys.length; i++) {
+      keys[i] = testPrefix + keys[i];
+    }
+
+    angular.forEach(keys, function(key){
+      delete cache[key];
+    });
+
+    if (useLs) {
+      angular.forEach(keys, function(key){
+        localStorage.removeItem(key);
+      });
+
+      return $q.when();
+    }
+
+    var deferred = $q.defer();
+
+    chrome.storage.local.remove(keys, function () {
+      deferred.resolve();
+    });
+
+    return deferred.promise;
+  };
+
+  return {
+    get: getValue,
+    set: setValue,
+    remove: removeValue
+  };
+})
+
+.service('AppUsersManager', function ($rootScope, $modal, MtpApiFileManager, MtpApiManager, RichTextProcessor) {
+  var users = {};
+
+  function saveApiUsers (apiUsers) {
+    angular.forEach(apiUsers, saveApiUser);
+  };
+
+  function saveApiUser (apiUser) {
+    if (!angular.isObject(apiUser)) {
+      return;
+    }
+
+    if (apiUser.first_name) {
+      apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
+      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true});
+    } else {
+      apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+    }
+
+    if (users[apiUser.id] === undefined) {
+      users[apiUser.id] = apiUser;
+    } else {
+      angular.extend(users[apiUser.id], apiUser);
+    }
+  };
+
+  function getUser (id) {
+    if (angular.isObject(id)) {
+      return id;
+    }
+    return users[id] || {id: id, deleted: true};
+  }
+
+  function getUserPhoto(id, placeholder) {
+    var user = getUser(id);
+
+    return {
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
+      location: user && user.photo && user.photo.photo_small
+    };
+  }
+
+  function getUserString (id) {
+    var user = getUser(id);
+    return 'u' + id + (user.access_hash ? '_' + user.access_hash : '');
+  }
+
+  function getUserInput (id) {
+    var user = getUser(id);
+    if (user._ == 'userSelf') {
+      return {_: 'inputUserSelf'};
+    }
+    return {
+      _: 'inputUserForeign',
+      user_id: id,
+      access_hash: user.access_hash || 0
+    };
+  }
+
+  function wrapForFull (id) {
+    var user = getUser(id);
+
+    user.thumb = {
+      placeholder: 'img/placeholders/UserAvatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
+      location: user && user.photo && user.photo.photo_small,
+      width: 120,
+      height: 120,
+      size: 0
+    };
+    user.peerString = getUserString(id);
+
+    return user;
+  }
+
+  function openUser (userID, accessHash) {
+    var scope = $rootScope.$new();
+    scope.userID = userID;
+
+    var modalInstance = $modal.open({
+      templateUrl: 'partials/user_modal.html',
+      controller: 'UserModalController',
+      scope: scope,
+      windowClass: 'user_modal_window',
+      resolve: {
+        userFull: MtpApiManager.invokeApi('users.getFullUser', {
+          id: getUserInput(userID)
+        }).then(function (result) {
+          saveApiUser(result.user);
+          return result;
+        })
+      }
+    });
+  }
+
+  $rootScope.openUser = openUser;
+
+  $rootScope.$on('apiUpdate', function (e, update) {
+    // dLog('on apiUpdate', update);
+    switch (update._) {
+      case 'updateUserStatus':
+        var userID = update.user_id;
+        if (users[userID]) {
+          users[userID].status = update.status;
+          $rootScope.$broadcast('user_update', userID);
+        }
+        break;
+
+      case 'updateUserPhoto':
+        var userID = update.user_id;
+        if (users[userID]) {
+          users[userID].photo = update.photo;
+          $rootScope.$broadcast('user_update', userID);
+        }
+        break;
+    }
+  });
+
+
+  return {
+    saveApiUsers: saveApiUsers,
+    saveApiUser: saveApiUser,
+    getUser: getUser,
+    getUserPhoto: getUserPhoto,
+    getUserString: getUserString,
+    wrapForFull: wrapForFull,
+    openUser: openUser
+  }
+})
+
+.service('AppChatsManager', function ($rootScope, $modal, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
+  var chats = {};
+
+  function saveApiChats (apiChats) {
+    angular.forEach(apiChats, saveApiChat);
+  };
+
+  function saveApiChat (apiChat) {
+    if (!angular.isObject(apiChat)) {
+      return;
+    }
+    apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+    if (chats[apiChat.id] === undefined) {
+      chats[apiChat.id] = apiChat;
+    } else {
+      angular.extend(chats[apiChat.id], apiChat);
+    }
+  };
+
+  function getChat (id) {
+    return chats[id] || {id: id, deleted: true};
+  }
+
+  function getChatPhoto(id, placeholder) {
+    var chat = getChat(id);
+
+    return {
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 4) + 1)+'@2x.png',
+      location: chat && chat.photo && chat.photo.photo_small
+    };
+  }
+
+  function getChatString (id) {
+    var chat = getChat(id);
+    return 'g' + id;
+  }
+
+  function wrapForFull (id, fullChat) {
+    var chatFull = angular.copy(fullChat),
+        chat = getChat(id);
+
+    if (chatFull.participants._ == 'chatParticipants') {
+      angular.forEach(chatFull.participants.participants, function(participant){
+        participant.user = AppUsersManager.getUser(participant.user_id);
+        participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
+        participant.inviter = AppUsersManager.getUser(participant.inviter_id);
+      });
+    }
+
+    chatFull.thumb = {
+      placeholder: 'img/placeholders/GroupAvatar'+((Math.abs(id) % 4) + 1)+'@2x.png',
+      location: chat && chat.photo && chat.photo.photo_small,
+      width: 120,
+      height: 120,
+      size: 0
+    };
+    chatFull.peerString = getChatString(id);
+    chatFull.chat = chat;
+
+    return chatFull;
+  }
+
+  function openChat (chatID, accessHash) {
+    var scope = $rootScope.$new();
+    scope.chatID = chatID;
+
+    var modalInstance = $modal.open({
+      templateUrl: 'partials/chat_modal.html',
+      controller: 'ChatModalController',
+      windowClass: 'chat_modal_window',
+      scope: scope,
+      resolve: {
+        fullChat: function () {
+          return MtpApiManager.invokeApi('messages.getFullChat', {
+            chat_id: chatID
+          }).then(function (result) {
+            saveApiChats(result.chats);
+            AppUsersManager.saveApiUsers(result.users);
+            return result.full_chat;
+          })
+        }
+      }
+    });
+  }
+
+  $rootScope.openChat = openChat;
+
+
+  return {
+    saveApiChats: saveApiChats,
+    saveApiChat: saveApiChat,
+    getChat: getChat,
+    getChatPhoto: getChatPhoto,
+    getChatString: getChatString,
+    wrapForFull: wrapForFull,
+    openChat: openChat
+  }
+})
+
+.service('AppPeersManager', function (AppUsersManager, AppChatsManager) {
+  return {
+    getInputPeer: function (peerString) {
+      var isUser = peerString.charAt(0) == 'u',
+          peerParams = peerString.substr(1).split('_');
+
+      return isUser
+            ? {_: 'inputPeerForeign', user_id: peerParams[0], access_hash: peerParams[1]}
+            : {_: 'inputPeerChat', chat_id: peerParams[0]};
+    },
+    getInputPeerByID: function (peerID) {
+      if (peerID > 0) {
+        return {
+          _: 'inputPeerForeign',
+          user_id: peerID,
+          access_hash: AppUsersManager.getUser(peerID).access_hash || 0
+        };
+      } else if (peerID < 0) {
+        return {
+          _: 'inputPeerChat',
+          chat_id: -peerID
+        };
+      }
+    },
+    getOutputPeer: function (peerID) {
+      return peerID > 0
+            ? {_: 'peerUser', user_id: peerID}
+            : {_: 'peerChat', chat_id: -peerID};
+    },
+    getPeerID: function (peerString) {
+      if (angular.isObject(peerString)) {
+        return peerString.user_id
+          ? peerString.user_id
+          : -peerString.chat_id;
+      }
+      var isUser = peerString.charAt(0) == 'u',
+          peerParams = peerString.substr(1).split('_');
+
+      return isUser ? peerParams[0] : -peerParams[0] || 0;
+    },
+    getPeer: function (peerID) {
+      return peerID > 0
+        ? AppUsersManager.getUser(peerID)
+        : AppChatsManager.getChat(-peerID);
+    },
+    getPeerPhoto: function (peerID, userPlaceholder, chatPlaceholder) {
+      return peerID > 0
+        ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
+        : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
+    }
+  }
+})
+
+.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, RichTextProcessor) {
+
+  var messagesStorage = {};
+  var messagesForHistory = {};
+  var historiesStorage = {};
+  var dialogsStorage = {count: null, dialogs: []};
+
+  function getDialogs (offset, limit) {
+    if (dialogsStorage.count !== null && dialogsStorage.dialogs.length >= offset + limit) {
+      return $q.when({
+        count: dialogsStorage.count,
+        dialogs: dialogsStorage.dialogs.slice(offset, offset + limit)
+      });
+    }
+
+    var deferred = $q.defer();
+
+    MtpApiManager.invokeApi('messages.getDialogs', {
+      offset: offset,
+      limit: limit,
+      max_id: 0
+    }).then(function (dialogsResult) {
+      AppUsersManager.saveApiUsers(dialogsResult.users);
+      AppChatsManager.saveApiChats(dialogsResult.chats);
+      saveMessages(dialogsResult.messages);
+
+      dialogsStorage.count = dialogsResult._ == 'messages.dialogsSlice'
+        ? dialogsResult.count
+        : dialogsResult.dialogs.length;
+
+      angular.forEach(dialogsResult.dialogs, function (dialog) {
+        dialogsStorage.dialogs.push({
+          peerID: AppPeersManager.getPeerID(dialog.peer),
+          top_message: dialog.top_message,
+          unread_count: dialog.unread_count
+        });
+      });
+
+      deferred.resolve({
+        count: dialogsStorage.count,
+        dialogs: dialogsStorage.dialogs.slice(offset, offset + limit)
+      });
+    }, function (error) {
+      deferred.reject(error);
+    });
+
+    return deferred.promise;
+  }
+
+  function getHistory (inputPeer, maxID, limit) {
+
+    var peerID = AppPeersManager.getPeerID(inputPeer),
+        historyStorage = historiesStorage[peerID],
+        offset = 0;
+
+    if (historyStorage === undefined) {
+      historyStorage = historiesStorage[peerID] = {count: null, history: []};
+    }
+
+
+    if (maxID > 0) {
+      for (offset = 0; offset < historyStorage.history.length; offset++) {
+        if (maxID > historyStorage.history[offset]) {
+          break;
+        }
+      }
+    }
+    // dLog('history storage', angular.copy(historyStorage.history), maxID, offset);
+
+    if (historyStorage.count !== null && historyStorage.history.length >= offset + limit) {
+      return $q.when({
+        count: historyStorage.count,
+        history: historyStorage.history.slice(offset, offset + limit)
+      });
+    }
+
+    var deferred = $q.defer();
+
+    MtpApiManager.invokeApi('messages.getHistory', {
+      peer: inputPeer,
+      offset: offset,
+      limit: limit,
+      max_id: 0
+    }).then(function (historyResult) {
+      AppUsersManager.saveApiUsers(historyResult.users);
+      AppChatsManager.saveApiChats(historyResult.chats);
+      saveMessages(historyResult.messages);
+
+      historyStorage.count = historyResult._ == 'messages.messagesSlice'
+        ? historyResult.count
+        : historyResult.messages.length;
+
+      offset = 0;
+      if (maxID > 0) {
+        for (offset = 0; offset < historyStorage.history.length; offset++) {
+          if (maxID > historyStorage.history[offset]) {
+            break;
+          }
+        }
+      }
+
+      // dLog('history storage after', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
+
+      historyStorage.history.splice(offset, historyStorage.history.length - offset);
+      angular.forEach(historyResult.messages, function (message) {
+        historyStorage.history.push(message.id);
+      });
+
+      deferred.resolve({
+        count: historyStorage.count,
+        history: historyStorage.history.slice(offset, offset + limit)
+      });
+    }, function (error) {
+      deferred.reject(error);
+    });
+
+    return deferred.promise;
+  }
+
+  function processAffectedHistory (inputPeer, affectedHistory) {
+    if (!ApiUpdatesManager.saveSeq(affectedHistory.seq)) {
+      return false;
+    }
+    if (!affectedHistory.offset) {
+      return $q.when();
+    }
+
+    return MtpApiManager.invokeApi('messages.readHistory', {
+      peer: inputPeer,
+      offset: affectedHistory.offset,
+      max_id: 0
+    }).then(function (affectedHistory) {
+      return processAffectedHistory(inputPeer, affectedHistory);
+    });
+  }
+
+  function readHistory (inputPeer) {
+    // dLog('start read');
+    var peerID = AppPeersManager.getPeerID(inputPeer),
+        historyStorage = historiesStorage[peerID],
+        foundDialog = getDialogByPeerID(peerID);
+
+    if (!historyStorage ||
+        !historyStorage.history.length ||
+        foundDialog[0] && !foundDialog[0].unread_count) {
+      // dLog('bad1');
+      return false;
+    }
+
+    var wasUnread = false;
+    // dLog(historyStorage);
+    for (i = 0; i < historyStorage.history.length; i++) {
+      messageID = historyStorage.history[i];
+      message = messagesStorage[messageID];
+      // dLog('ms', message);
+      if (message && !message.out) {
+        if (message.unread) {
+          // dLog('unread');
+          wasUnread = true;
+        } else if (!wasUnread) {
+          // dLog('bad2');
+          return false;
+        }
+      }
+    }
+
+    var promise = MtpApiManager.invokeApi('messages.readHistory', {
+      peer: inputPeer,
+      offset: 0,
+      max_id: 0
+    }).then(function (affectedHistory) {
+      return processAffectedHistory(inputPeer, affectedHistory);
+    }).then(function () {
+      if (foundDialog[0]) {
+        foundDialog[0].unread_count = 0;
+        $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0});
+      }
+    });
+
+
+    var messageID, message, i, peerID, foundDialog, dialog;
+    for (i = 0; i < historyStorage.history.length; i++) {
+      messageID = historyStorage.history[i];
+      message = messagesStorage[messageID];
+      if (message && !message.out) {
+        message.unread = false;
+        if (messagesForHistory[messageID]) {
+          messagesForHistory[messageID].unread = false;
+        }
+      }
+    }
+
+    return promise;
+  }
+
+  function saveMessages (apiMessages) {
+    angular.forEach(apiMessages, function (apiMessage) {
+      messagesStorage[apiMessage.id] = apiMessage;
+
+      if (apiMessage.media && apiMessage.media._ == 'messageMediaPhoto') {
+        AppPhotosManager.savePhoto(apiMessage.media.photo);
+      }
+      if (apiMessage.media && apiMessage.media._ == 'messageMediaVideo') {
+        AppVideoManager.saveVideo(apiMessage.media.video);
+      }
+      if (apiMessage.media && apiMessage.media._ == 'messageMediaDocument') {
+        AppDocsManager.saveDoc(apiMessage.media.document);
+      }
+      if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
+        AppPhotosManager.savePhoto(apiMessage.action.photo);
+      }
+    });
+  }
+
+  function getMessagePeer (message) {
+    var toID = message.to_id && AppPeersManager.getPeerID(message.to_id) || 0;
+
+    if (toID < 0) {
+      return toID;
+    } else if (message.out) {
+      return toID
+    }
+    return message.from_id;
+  }
+
+  function wrapForDialog (msgID, unreadCount) {
+    var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
+
+    message.fromUser = AppUsersManager.getUser(message.from_id);
+
+    if (message.chatID = message.to_id.chat_id) {
+      message.peerID = -message.chatID;
+      message.peerData = AppChatsManager.getChat(message.chatID);
+      message.peerString = AppChatsManager.getChatString(message.chatID);
+    } else {
+      message.peerID = message.out ? message.to_id.user_id : message.from_id;
+      message.peerData = AppUsersManager.getUser(message.peerID);
+      message.peerString = AppUsersManager.getUserString(message.peerID);
+    }
+
+    message.peerPhoto = AppPeersManager.getPeerPhoto(message.peerID, 'User', 'Group');
+    message.unreadCount = unreadCount;
+
+    if (message._ == 'messageService' && message.action.user_id) {
+      message.action.user = AppUsersManager.getUser(message.action.user_id);
+    }
+
+    if (message.message && message.message.length) {
+      message.richMessage = RichTextProcessor.wrapRichText(message.message.substr(0, 64), {noLinks: true, noLinebreaks: true});
+    }
+
+
+    return message;
+  }
+
+  function wrapForHistory (msgID) {
+    if (messagesForHistory[msgID] !== undefined) {
+      return messagesForHistory[msgID];
+    }
+
+    var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
+
+    message.fromUser = AppUsersManager.getUser(message.from_id);
+    message.fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
+
+    if (message.media) {
+      switch (message.media._) {
+        case 'messageMediaPhoto':
+          message.media.photo = AppPhotosManager.wrapForHistory(message.media.photo.id)
+          break;
+
+        case 'messageMediaVideo':
+          message.media.video = AppVideoManager.wrapForHistory(message.media.video.id);
+          break;
+      }
+
+      if (message.media.user_id) {
+        message.media.user = AppUsersManager.getUser(message.media.user_id);
+        message.media.userPhoto = AppUsersManager.getUserPhoto(message.media.user_id, 'User');
+      }
+    }
+    else if (message.action) {
+      if (message.action._ == 'messageActionChatEditPhoto') {
+        message.action.photo = AppPhotosManager.wrapForHistory(message.action.photo.id);
+      }
+
+      if (message.action.user_id) {
+        message.action.user = AppUsersManager.getUser(message.action.user_id);
+        message.action.userPhoto = AppUsersManager.getUserPhoto(message.action.user_id, 'User');
+      }
+    }
+
+    if (message.message && message.message.length) {
+      message.richMessage = RichTextProcessor.wrapRichText(message.message);
+    }
+
+    return messagesForHistory[msgID] = message;
+  }
+
+  function getDialogByPeerID (peerID) {
+    for (var i = 0; i < dialogsStorage.dialogs.length; i++) {
+      if (dialogsStorage.dialogs[i].peerID == peerID) {
+        return [dialogsStorage.dialogs[i], i];
+      }
+    }
+
+    return [];
+  }
+
+
+  $rootScope.$on('apiUpdate', function (e, update) {
+    dLog('on apiUpdate', update);
+    switch (update._) {
+      case 'updateNewMessage':
+        var message = update.message,
+            peerID = getMessagePeer(message),
+            historyStorage = historiesStorage[peerID];
+
+        if (historyStorage !== undefined) {
+          var topMsgID = historiesStorage[peerID].history[0];
+          if (message.id <= topMsgID) {
+            return false;
+          }
+        } else {
+          historyStorage = historiesStorage[peerID] = {count: null, history: []};
+        }
+
+        saveMessages([message]);
+
+        if (historyStorage.count !== null) {
+          historyStorage.count++;
+        }
+        historyStorage.history.unshift(message.id);
+        $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
+
+        var foundDialog = getDialogByPeerID(peerID),
+            dialog;
+
+        if (foundDialog.length) {
+          dialog = foundDialog[0];
+          dialogsStorage.dialogs.splice(foundDialog[1], 1);
+        } else {
+          dialog = {peerID: peerID, unread_count: 0, top_message: false}
+        }
+        if (!message.out && message.unread) {
+          dialog.unread_count++;
+        }
+        dialog.top_message = message.id;
+        dialogsStorage.dialogs.unshift(dialog);
+        $rootScope.$broadcast('dialogs_update', dialog);
+        break;
+
+      case 'updateReadMessages':
+        var dialogsUpdated = {},
+            messageID, message, i, peerID, foundDialog, dialog;
+        for (i = 0; i < update.messages.length; i++) {
+          messageID = update.messages[i];
+          message = messagesStorage[messageID];
+          // dLog('read', messageID, message);
+          if (message) {
+            message.unread = false;
+            if (messagesForHistory[messageID]) {
+              messagesForHistory[messageID].unread = false;
+            }
+            peerID = getMessagePeer(message);
+            if (!message.out) {
+              foundDialog = getDialogByPeerID(peerID);
+              if (foundDialog) {
+                dialogsUpdated[peerID] = --foundDialog[0].unread_count;
+              }
+            }
+          }
+        }
+
+        angular.forEach(dialogsUpdated, function(count, peerID) {
+          $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: count});
+        });
+        break;
+    }
+  });
+
+  return {
+    getDialogs: getDialogs,
+    getHistory: getHistory,
+    readHistory: readHistory,
+    saveMessages: saveMessages,
+    getMessagePeer: getMessagePeer,
+    wrapForDialog: wrapForDialog,
+    wrapForHistory: wrapForHistory
+  }
+})
+
+.service('AppPhotosManager', function ($modal, $window, $rootScope, MtpApiFileManager, AppUsersManager) {
+  var photos = {};
+
+  function savePhoto (apiPhoto) {
+    photos[apiPhoto.id] = apiPhoto;
+    angular.forEach(apiPhoto.sizes, function (photoSize) {
+      if (photoSize._ == 'photoCachedSize') {
+        MtpApiFileManager.saveSmallFile(photoSize.location, photoSize.bytes);
+
+        // Memory
+        photoSize.size = photoSize.bytes.length;
+        delete photoSize.bytes;
+        photoSize._ = 'photoSize';
+      }
+    });
+  };
+
+  function choosePhotoSize (photo, width, height) {
+    var bestPhotoSize = {_: 'photoSizeEmpty'},
+        bestDiff = 0xFFFFFF;
+
+    angular.forEach(photo.sizes, function (photoSize) {
+      var diff = Math.abs(photoSize.w * photoSize.h - width * height);
+      if (diff < bestDiff) {
+        bestPhotoSize = photoSize;
+        bestDiff = diff;
+      }
+    });
+
+    return bestPhotoSize;
+  }
+
+  function wrapForHistory (photoID) {
+    var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
+        width = 100,
+        height = 100,
+        thumbPhotoSize = choosePhotoSize(photo, width, height),
+        thumb = {
+          placeholder: 'img/placeholders/PhotoThumbConversation.jpg',
+          width: width,
+          height: height
+        };
+
+        // dLog('chosen photo size', photoID, thumbPhotoSize);
+    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
+      } else {
+        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+      }
+
+      thumb.location = thumbPhotoSize.location;
+      thumb.size = thumbPhotoSize.size;
+    }
+
+    photo.thumb = thumb;
+
+    return photo;
+  }
+
+  function wrapForFull (photoID) {
+    var photo = wrapForHistory(photoID),
+        fullWidth = 542,
+        fullHeight = $($window).height() - 150,
+        fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
+        full = {
+          placeholder: 'img/placeholders/PhotoThumbModal.jpg',
+          width: fullWidth,
+          height: fullHeight
+        };
+
+    if (fullPhotoSize && fullPhotoSize._ != 'photoSizeEmpty') {
+      if (fullPhotoSize.w > fullPhotoSize.h) {
+        full.height = parseInt(fullPhotoSize.h * fullWidth / fullPhotoSize.w);
+      } else {
+        full.width = parseInt(fullPhotoSize.w * fullHeight / fullPhotoSize.h);
+        if (full.width > fullWidth) {
+          full.height = parseInt(full.height * fullWidth / full.width);
+          full.width = fullWidth;
+        }
+      }
+
+      full.location = fullPhotoSize.location;
+      full.size = fullPhotoSize.size;
+    }
+
+    photo.full = full;
+    photo.fromUser = AppUsersManager.getUser(photo.user_id);
+
+    return photo;
+  }
+
+  function openPhoto (photoID, accessHash) {
+    var scope = $rootScope.$new(true);
+    scope.photoID = photoID;
+
+    var modalInstance = $modal.open({
+      templateUrl: 'partials/photo_modal.html',
+      controller: 'PhotoModalController',
+      scope: scope,
+      backdrop: 'static'
+    });
+  }
+
+  $rootScope.openPhoto = openPhoto;
+
+
+  return {
+    savePhoto: savePhoto,
+    wrapForHistory: wrapForHistory,
+    wrapForFull: wrapForFull,
+    openPhoto: openPhoto
+  }
+})
+
+
+.service('AppVideoManager', function ($rootScope, $modal, $window, MtpApiFileManager, AppUsersManager) {
+  var videos = {};
+
+  function saveVideo (apiVideo) {
+    videos[apiVideo.id] = apiVideo;
+
+    if (apiVideo.thumb && apiVideo.thumb._ == 'photoCachedSize') {
+      MtpApiFileManager.saveSmallFile(apiVideo.thumb.location, apiVideo.thumb.bytes);
+
+      // Memory
+      apiVideo.thumb.size = apiVideo.thumb.bytes.length;
+      delete apiVideo.thumb.bytes;
+      apiVideo.thumb._ = 'photoSize';
+    }
+  };
+
+  function wrapForHistory (videoID) {
+    var video = angular.copy(videos[videoID]),
+        width = 100,
+        height = 100,
+        thumbPhotoSize = video.thumb,
+        thumb = {
+          placeholder: 'img/placeholders/VideoThumbConversation.jpg',
+          width: width,
+          height: height
+        };
+
+    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
+      } else {
+        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+      }
+
+      thumb.location = thumbPhotoSize.location;
+      thumb.size = thumbPhotoSize.size;
+    }
+
+    video.thumb = thumb;
+
+    return video;
+  }
+
+  function wrapForFull (videoID) {
+    var video = wrapForHistory(videoID),
+        fullWidth = 542,
+        fullHeight = $($window).height() - 150,
+        fullPhotoSize = video,
+        full = {
+          placeholder: 'img/placeholders/VideoThumbModal.jpg',
+          width: fullWidth,
+          height: fullHeight,
+        };
+
+    if (video.w > video.h) {
+      full.height = parseInt(video.h * fullWidth / video.w);
+    } else {
+      full.width = parseInt(video.w * fullHeight / video.h);
+      if (full.width > fullWidth) {
+        full.height = parseInt(full.height * fullWidth / full.width);
+        full.width = fullWidth;
+      }
+    }
+
+    video.full = full;
+    video.fromUser = AppUsersManager.getUser(video.user_id);
+
+    return video;
+  }
+
+  function openVideo (videoID, accessHash) {
+    var scope = $rootScope.$new(true);
+    scope.videoID = videoID;
+    scope.progress = {enabled: false};
+    scope.player = {};
+    scope.close = function () {
+      modalInstance.close();
+    }
+
+    var modalInstance = $modal.open({
+      templateUrl: 'partials/video_modal.html',
+      controller: 'VideoModalController',
+      scope: scope
+    });
+  }
+
+  $rootScope.openVideo = openVideo;
+
+  return {
+    saveVideo: saveVideo,
+    wrapForHistory: wrapForHistory,
+    wrapForFull: wrapForFull,
+    openVideo: openVideo
+  }
+})
+
+.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager) {
+  var docs = {};
+
+  function saveDoc (apiDoc) {
+    docs[apiDoc.id] = apiDoc;
+
+    if (apiDoc.thumb && apiDoc.thumb._ == 'photoCachedSize') {
+      MtpApiFileManager.saveSmallFile(apiDoc.thumb.location, apiDoc.thumb.bytes);
+
+      // Memory
+      apiDoc.thumb.size = apiDoc.thumb.bytes.length;
+      delete apiDoc.thumb.bytes;
+      apiDoc.thumb._ = 'photoSize';
+    }
+  };
+
+  function wrapForHistory (docID) {
+    var doc = angular.copy(docs[docID]),
+        width = 100,
+        height = 100,
+        thumbPhotoSize = doc.thumb,
+        thumb = {
+          placeholder: 'img/placeholders/DocThumbConversation.jpg',
+          width: width,
+          height: height
+        };
+
+    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
+      } else {
+        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+      }
+
+      thumb.location = thumbPhotoSize.location;
+      thumb.size = thumbPhotoSize.size;
+    }
+
+    doc.thumb = thumb;
+
+    return doc;
+  }
+
+  function openDoc (docID, accessHash) {
+    var doc = docs[docID],
+        inputFileLocation = {
+          _: 'inputDocumentFileLocation',
+          id: docID,
+          access_hash: accessHash || doc.access_hash
+        },
+        scope = {};
+
+    scope.progress = {enabled: true, percent: 1};
+
+
+    if (window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry) {
+      var ext = (doc.file_name.split('.', 2) || [])[1] || '',
+          mime = doc.mime_type;
+      chrome.fileSystem.chooseEntry({
+        type: 'saveFile',
+        suggestedName: doc.file_name,
+        accepts: [{
+          mimeTypes: [mime],
+          extensions: [ext]
+        }]
+      }, function (writableFileEntry) {
+        MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, writableFileEntry).then(function (url) {
+          dLog('file save done');
+        });
+
+      });
+    } else {
+      MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size).then(function (url) {
+        scope.progress.enabled = false;
+
+        var a = $('<a>Download</a>').attr('href', url).attr('target', '_blank').attr('download', doc.file_name).appendTo('body');
+        a[0].dataset.downloadurl = ['png', doc.file_name, url].join(':');
+        a[0].click();
+        $timeout(function () {
+          a.remove();
+        }, 100);
+      }, function (e) {
+        dLog('document download failed', e);
+      }, function (progress) {
+        scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+      });
+    }
+  }
+
+  $rootScope.openDoc = openDoc;
+
+  return {
+    saveDoc: saveDoc,
+    wrapForHistory: wrapForHistory,
+    openDoc: openDoc
+  }
+})
+
+.service('ExternalResourcesManager', function ($q, $http) {
+  var urlPromises = {};
+
+  function downloadImage (url) {
+    if (urlPromises[url] !== undefined) {
+      return urlPromises[url];
+    }
+
+    var deferred = $q.defer();
+
+    $http.get(url, {responseType: 'blob', transformRequest: null})
+      .then(
+        function (response) {
+          deferred.resolve(window.webkitURL.createObjectURL(response.data));
+        }, function (error) {
+          deferred.reject(error);
+        }
+      );
+
+    return urlPromises[url] = deferred.promise;
+  }
+
+  return {
+    downloadImage: downloadImage
+  }
+})
+
+
+.service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
+
+  var curState = {invalid: true};
+
+  function processUpdateMessage (updateMessage) {
+    if (curState.invalid) {
+      return false;
+    }
+
+    if (updateMessage.seq) {
+      if (!saveSeq(updateMessage.seq, updateMessage.seq_start)) {
+        return false;
+      }
+      if (updateMessage.date) {
+        curState.date = updateMessage.date;
+      }
+    }
+
+
+    switch (updateMessage._) {
+      case 'updatesTooLong':
+        getDifference();
+        break;
+
+      case 'updateShort':
+        saveUpdate(updateMessage.update);
+        break;
+
+      case 'updatesCombined':
+      case 'updates':
+        AppUsersManager.saveApiUsers(updateMessage.users);
+        AppChatsManager.saveApiChats(updateMessage.chats);
+
+        angular.forEach(updateMessage.updates, function (update) {
+          saveUpdate(update);
+        });
+        break;
+
+      case 'updateShortMessage':
+        var fromUser = AppUsersManager.getUser(updateMessage.from_id);
+        if (!fromUser || fromUser.deleted) {
+          getDifference();
+          break;
+        }
+        saveUpdate({
+          _: 'updateNewMessage',
+          message: {
+            _: 'message',
+            id: updateMessage.id,
+            from_id: updateMessage.from_id,
+            to_id: AppPeersManager.getOutputPeer(MtpApiManager.getUserID()),
+            out: false,
+            unread: true,
+            date: updateMessage.date,
+            message: updateMessage.message,
+            media: {_: 'messageMediaEmpty'}
+          },
+          pts: updateMessage.pts
+        });
+        break;
+
+      case 'updateShortChatMessage':
+        var fromUser = AppUsersManager.getUser(updateMessage.from_id),
+            chat = AppChatsManager.getChat(updateMessage.chat_id);
+
+        if (!fromUser || fromUser.deleted || !chat || chat.deleted) {
+          getDifference();
+          break;
+        }
+        saveUpdate({
+          _: 'updateNewMessage',
+          message: {
+            _: 'message',
+            id: updateMessage.id,
+            from_id: updateMessage.from_id,
+            to_id: AppPeersManager.getOutputPeer(-updateMessage.chat_id),
+            out: false,
+            unread: true,
+            date: updateMessage.date,
+            message: updateMessage.message,
+            media: {_: 'messageMediaEmpty'}
+          },
+          pts: updateMessage.pts
+        });
+        break;
+    }
+  }
+
+  function getDifference (force) {
+    if (curState.invalid && !force) {
+      return false;
+    }
+
+    curState.invalid = true;
+    MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: 0}).then(function (differenceResult) {
+      if (differenceResult._ == 'updates.differenceEmpty') {
+        curState.date = differenceResult.date;
+        curState.seq = differenceResult.seq;
+        delete curState.invalid;
+        return false;
+      }
+
+      AppUsersManager.saveApiUsers(differenceResult.users);
+      AppChatsManager.saveApiChats(differenceResult.chats);
+
+      angular.forEach(differenceResult.new_messages, function (apiMessage) {
+        saveUpdate({
+          _: 'updateNewMessage',
+          message: apiMessage,
+          pts: curState.pts
+        }, true);
+      });
+
+      angular.forEach(differenceResult.other_updates, function(update){
+        saveUpdate(update, true);
+      });
+
+      var nextState = differenceResult.intermediate_state || differenceResult.state;
+      curState.seq = nextState.seq;
+      curState.pts = nextState.pts;
+      curState.date = nextState.date;
+
+      if (differenceResult._ == 'updates.differenceSlice') {
+        getDifference(true);
+      } else {
+        delete curState.invalid;
+      }
+    });
+  }
+
+  function saveUpdate (update, force) {
+    if (curState.invalid && !force) {
+      return false;
+    }
+    if (update.pts) {
+      curState.pts = update.pts;
+    }
+
+    $rootScope.$broadcast('apiUpdate', update);
+  }
+
+  function saveSeq (seq, seqStart) {
+    // dLog('saving seq', curState.invalid, seq, seqStart, curState.seq);
+
+    if (curState.invalid) {
+      return false;
+    }
+
+    seqStart = seqStart || seq;
+
+    if (seqStart != curState.seq + 1) {
+      // dLog('seq hole', seqStart, curState.seq);
+      if (seqStart != curState.seq) {
+        getDifference();
+      }
+      return false;
+    }
+
+    curState.seq = seq;
+
+    return true;
+  }
+
+  function attach () {
+    MtpNetworkerFactory.setUpdatesProcessor(processUpdateMessage);
+    MtpApiManager.invokeApi('updates.getState').then(function (stateResult) {
+      curState.seq = stateResult.seq;
+      curState.pts = stateResult.pts;
+      curState.date = stateResult.date;
+      delete curState.invalid;
+    })
+  }
+
+
+  return {
+    saveUpdate: saveUpdate,
+    saveSeq: saveSeq,
+    attach: attach
+  }
+})
+
+.service('RichTextProcessor', function ($sce, $sanitize) {
+
+  var emojiUtf = [],
+      emojiMap = {},
+      emojiData = Config.Emoji,
+      emojiCode;
+
+  for (emojiCode in emojiData) {
+    emojiUtf.push(emojiData[emojiCode][0]);
+    emojiMap[emojiData[emojiCode][0]] = emojiCode;
+  }
+
+  var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')', 'i');
+
+  // dLog(regExp);
+
+
+  return {
+    wrapRichText: wrapRichText
+  };
+
+  function encodeEntities(value) {
+    return value.
+      replace(/&/g, '&amp;').
+      replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
+        return '&#' + value.charCodeAt(0) + ';';
+      }).
+      replace(/</g, '&lt;').
+      replace(/>/g, '&gt;');
+  };
+
+
+  function wrapRichText(text, options) {
+    if (!text || !text.length) {
+      return '';
+    }
+
+    options = options || {};
+
+    text = text.replace(/\ufe0f/g, '', text);
+
+    var match,
+        raw = text,
+        html = [],
+        url,
+        emojiTitle,
+        emojiFound = false;
+
+
+    while ((match = raw.match(regExp))) {
+      // dLog(2, match);
+      html.push(encodeEntities(raw.substr(0, match.index)));
+
+      if (match[1]) { // URL
+        if (!options.noLinks) {
+          if (match[3]) {
+            html.push(
+              '<a href="',
+              encodeEntities('mailto:' + match[3] + match[4]),
+              '" target="_blank">',
+              encodeEntities(match[3] + match[4]),
+              '</a>'
+            );
+          } else {
+            html.push(
+              '<a href="',
+              encodeEntities(match[2] + '://' + match[4]),
+              '" target="_blank">',
+              encodeEntities((match[2] != 'http' ? match[2] + '://' : '') + match[4]),
+              '</a>'
+            );
+          }
+        } else {
+          html.push(encodeEntities(match[0]));
+        }
+      }
+      else if (match[5]) { // New line
+        if (!options.noLinebreaks) {
+          html.push('<br/>');
+        } else {
+          html.push(' ');
+        }
+      }
+      else if (match[6]) {
+
+        if (emojiCode = emojiMap[match[6]]) {
+          emojiFound = true;
+          emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
+          html.push(
+            '<span class="emoji emoji-file-',
+            encodeEntities(emojiCode),
+            '" title="',
+            emojiTitle,
+            '">:',
+            emojiTitle,
+            ':</span>'
+          );
+        } else {
+          html.push(encodeEntities(match[6]));
+        }
+      }
+      raw = raw.substr(match.index + match[0].length);
+    }
+
+    html.push(encodeEntities(raw));
+
+    text = $sanitize(html.join(''));
+
+    // dLog(3, text, html);
+
+    if (emojiFound) {
+      text = text.replace(/<span class="emoji emoji-file-([0-9a-f]+?)"(.+?)<\/span>/g,
+                          '<span class="emoji" style="background-image: url(\'vendor/gemoji/images/$1.png\')"$2</span>');
+    }
+
+    // dLog(4, text, html);
+
+    return $sce.trustAs('html', text);
+  }
+
+})
