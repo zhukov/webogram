@@ -405,12 +405,15 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, RichTextProcessor) {
+.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, MtpApiFileManager, RichTextProcessor) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
   var historiesStorage = {};
   var dialogsStorage = {count: null, dialogs: []};
+  var pendingByRandomID = {};
+  var pendingByMessageID = {};
+  var tempID = -1;
 
   function getDialogs (offset, limit) {
     if (dialogsStorage.count !== null && dialogsStorage.dialogs.length >= offset + limit) {
@@ -458,10 +461,14 @@ angular.module('myApp.services', [])
 
     var peerID = AppPeersManager.getPeerID(inputPeer),
         historyStorage = historiesStorage[peerID],
-        offset = 0;
+        offset = 0,
+        resultPending = [];
 
     if (historyStorage === undefined) {
-      historyStorage = historiesStorage[peerID] = {count: null, history: []};
+      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+    }
+    else if (!maxID && historyStorage.pending.length) {
+      resultPending = historyStorage.pending.slice();
     }
 
 
@@ -477,7 +484,7 @@ angular.module('myApp.services', [])
     if (historyStorage.count !== null && historyStorage.history.length >= offset + limit) {
       return $q.when({
         count: historyStorage.count,
-        history: historyStorage.history.slice(offset, offset + limit)
+        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit))
       });
     }
 
@@ -515,7 +522,7 @@ angular.module('myApp.services', [])
 
       deferred.resolve({
         count: historyStorage.count,
-        history: historyStorage.history.slice(offset, offset + limit)
+        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit))
       });
     }, function (error) {
       deferred.reject(error);
@@ -619,6 +626,205 @@ angular.module('myApp.services', [])
     });
   }
 
+  function sendText(peerID, text) {
+    var messageID = tempID--,
+        randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
+        randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
+        historyStorage = historiesStorage[peerID],
+        inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        message;
+
+    if (historyStorage === undefined) {
+      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+    }
+
+    MtpApiManager.getUserID().then(function (fromID) {
+      message = {
+        _: 'message',
+        id: messageID,
+        from_id: fromID,
+        to_id: AppPeersManager.getOutputPeer(peerID),
+        out: true,
+        unread: true,
+        date: (+new Date()) / 1000,
+        message: text,
+        media: {_: 'messageMediaEmpty'},
+        random_id: randomIDS,
+        pending: true
+      };
+
+      message.send = function () {
+        MtpApiManager.invokeApi('messages.sendMessage', {
+          peer: inputPeer,
+          message: text,
+          random_id: randomID
+        }).then(function (result) {
+          if (ApiUpdatesManager.saveSeq(result.seq)) {
+            ApiUpdatesManager.saveUpdate({
+              _: 'updateMessageID',
+              random_id: randomIDS,
+              id: result.id
+            });
+
+            message.date = result.date;
+            message.id = result.id;
+            ApiUpdatesManager.saveUpdate({
+              _: 'updateNewMessage',
+              message: message,
+              pts: result.pts
+            });
+          }
+        });
+      };
+
+      saveMessages([message]);
+      historyStorage.pending.unshift(messageID);
+      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID});
+
+      // setTimeout(function () {
+        message.send();
+      // }, 5000);
+    });
+
+    pendingByRandomID[randomIDS] = [peerID, messageID];
+  };
+
+  function sendFile(peerID, file, options) {
+    var messageID = tempID--,
+        randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
+        randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
+        historyStorage = historiesStorage[peerID],
+        inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        isPhoto = file.type == 'image/jpeg' && file.size <= 5242880; // 5Mb
+
+    if (historyStorage === undefined) {
+      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+    }
+
+    MtpApiManager.getUserID().then(function (fromID) {
+      var media = {
+        _: 'messageMediaPending',
+        type: isPhoto ? 'photo' : 'doc',
+        file_name: file.name,
+        size: file.size,
+        progress: {percent: 1}
+      };
+
+      var message = {
+        _: 'message',
+        id: messageID,
+        from_id: fromID,
+        to_id: AppPeersManager.getOutputPeer(peerID),
+        out: true,
+        unread: true,
+        date: (+new Date()) / 1000,
+        message: '',
+        media: media,
+        random_id: randomIDS,
+        pending: true
+      };
+
+      message.send = function () {
+        MtpApiFileManager.uploadFile(file).then(function (inputFile) {
+          var inputMedia;
+          if (isPhoto) {
+            inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
+          } else {
+            inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
+          }
+          MtpApiManager.invokeApi('messages.sendMedia', {
+            peer: inputPeer,
+            media: inputMedia,
+            random_id: randomID
+          }).then(function (result) {
+            if (ApiUpdatesManager.saveSeq(result.seq)) {
+              ApiUpdatesManager.saveUpdate({
+                _: 'updateMessageID',
+                random_id: randomIDS,
+                id: result.message.id
+              });
+
+              message.date = result.message.date;
+              message.id = result.message.id;
+              message.media = result.message.media;
+
+              ApiUpdatesManager.saveUpdate({
+                _: 'updateNewMessage',
+                message: message,
+                pts: result.pts
+              });
+            }
+
+          });
+        }, null, function (progress) {
+          // dLog('upload progress', progress);
+          var historyMessage = messagesForHistory[messageID],
+              percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+
+          media.progress.percent = percent;
+          if (historyMessage) {
+            historyMessage.media.progress.percent = percent;
+            $rootScope.$broadcast('history_update', {peerID: peerID});
+          }
+        });
+      };
+
+      saveMessages([message]);
+      historyStorage.pending.unshift(messageID);
+      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID});
+
+      // setTimeout(function () {
+        message.send();
+      // }, 5000);
+    });
+
+    pendingByRandomID[randomIDS] = [peerID, messageID];
+  }
+
+
+  function finalizePendingMessage(randomID, finalMessage) {
+    var pendingData = pendingByRandomID[randomID];
+    // dLog('pdata', randomID, pendingData);
+
+    if (pendingData) {
+      var peerID = pendingData[0],
+          tempID = pendingData[1],
+          historyStorage = historiesStorage[peerID],
+          index = false,
+          message = false,
+          historyMessage = false,
+          i;
+
+      // dLog('pending', randomID, historyStorage.pending);
+      for (i = 0; i < historyStorage.pending.length; i++) {
+        if (historyStorage.pending[i] == tempID) {
+          historyStorage.pending.splice(i, 1);
+          break;
+        }
+      }
+
+      if (message = messagesStorage[tempID]) {
+        delete message.pending;
+        delete message.random_id;
+        delete message.send;
+      }
+
+      if (historyMessage = messagesForHistory[tempID]) {
+        messagesForHistory[finalMessage.id] = angular.extend(historyMessage, wrapForHistory(finalMessage.id));
+        delete historyMessage.pending;
+        delete historyMessage.random_id;
+        delete historyMessage.send;
+      }
+
+      delete messagesForHistory[tempID];
+      delete messagesStorage[tempID];
+
+      return message;
+    }
+
+    return false;
+  }
+
   function getMessagePeer (message) {
     var toID = message.to_id && AppPeersManager.getPeerID(message.to_id) || 0;
 
@@ -660,8 +866,8 @@ angular.module('myApp.services', [])
     return message;
   }
 
-  function wrapForHistory (msgID) {
-    if (messagesForHistory[msgID] !== undefined) {
+  function wrapForHistory (msgID, force) {
+    if (!force && messagesForHistory[msgID] !== undefined) {
       return messagesForHistory[msgID];
     }
 
@@ -678,6 +884,10 @@ angular.module('myApp.services', [])
 
         case 'messageMediaVideo':
           message.media.video = AppVideoManager.wrapForHistory(message.media.video.id);
+          break;
+
+        case 'messageMediaDocument':
+          message.media.document = AppDocsManager.wrapForHistory(message.media.document.id);
           break;
       }
 
@@ -714,10 +924,13 @@ angular.module('myApp.services', [])
     return [];
   }
 
-
   $rootScope.$on('apiUpdate', function (e, update) {
     dLog('on apiUpdate', update);
     switch (update._) {
+      case 'updateMessageID':
+        pendingByMessageID[update.id] = update.random_id;
+        break;
+
       case 'updateNewMessage':
         var message = update.message,
             peerID = getMessagePeer(message),
@@ -729,7 +942,7 @@ angular.module('myApp.services', [])
             return false;
           }
         } else {
-          historyStorage = historiesStorage[peerID] = {count: null, history: []};
+          historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
         }
 
         saveMessages([message]);
@@ -737,8 +950,23 @@ angular.module('myApp.services', [])
         if (historyStorage.count !== null) {
           historyStorage.count++;
         }
+
         historyStorage.history.unshift(message.id);
-        $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
+        var randomID = pendingByMessageID[message.id],
+            pendingMessage;
+
+
+        if (randomID) {
+          if (pendingMessage = finalizePendingMessage(randomID, message)) {
+            $rootScope.$broadcast('history_update', {peerID: peerID});
+          }
+          delete pendingByMessageID[message.id];
+        }
+
+        // dLog(11, randomID, pendingMessage);
+        if (!pendingMessage) {
+          $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
+        }
 
         var foundDialog = getDialogByPeerID(peerID),
             dialog;
@@ -767,6 +995,7 @@ angular.module('myApp.services', [])
           if (message) {
             message.unread = false;
             if (messagesForHistory[messageID]) {
+              // dLog(222, messagesForHistory[messageID]);
               messagesForHistory[messageID].unread = false;
             }
             peerID = getMessagePeer(message);
@@ -782,6 +1011,7 @@ angular.module('myApp.services', [])
         angular.forEach(dialogsUpdated, function(count, peerID) {
           $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: count});
         });
+        // $rootScope.$broadcast('history_update');
         break;
     }
   });
@@ -791,6 +1021,8 @@ angular.module('myApp.services', [])
     getHistory: getHistory,
     readHistory: readHistory,
     saveMessages: saveMessages,
+    sendText: sendText,
+    sendFile: sendFile,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory
@@ -1011,6 +1243,7 @@ angular.module('myApp.services', [])
 
 .service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager) {
   var docs = {};
+  var docsForHistory = {};
 
   function saveDoc (apiDoc) {
     docs[apiDoc.id] = apiDoc;
@@ -1026,6 +1259,10 @@ angular.module('myApp.services', [])
   };
 
   function wrapForHistory (docID) {
+    if (docsForHistory[docID] !== undefined) {
+      return docsForHistory[docID];
+    }
+
     var doc = angular.copy(docs[docID]),
         width = 100,
         height = 100,
@@ -1045,23 +1282,31 @@ angular.module('myApp.services', [])
 
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
+    } else {
+      thumb = false;
     }
 
     doc.thumb = thumb;
 
-    return doc;
+    return docsForHistory[docID] = doc;
   }
 
   function openDoc (docID, accessHash) {
     var doc = docs[docID],
+        historyDoc = docsForHistory[docID] || doc || {},
         inputFileLocation = {
           _: 'inputDocumentFileLocation',
           id: docID,
           access_hash: accessHash || doc.access_hash
-        },
-        scope = {};
+        };
 
-    scope.progress = {enabled: true, percent: 1};
+    historyDoc.progress = {enabled: true, percent: 1};
+
+    function updateDownloadProgress (progress) {
+      dLog('dl progress', progress);
+      historyDoc.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+      $rootScope.$broadcast('history_update');
+    }
 
 
     if (window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry) {
@@ -1076,13 +1321,16 @@ angular.module('myApp.services', [])
         }]
       }, function (writableFileEntry) {
         MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, writableFileEntry).then(function (url) {
+          delete historyDoc.progress;
           dLog('file save done');
-        });
-
+        }, function (e) {
+          dLog('document download failed', e);
+          historyDoc.progress.enabled = false;
+        }, updateDownloadProgress);
       });
     } else {
       MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size).then(function (url) {
-        scope.progress.enabled = false;
+        delete historyDoc.progress;
 
         var a = $('<a>Download</a>').attr('href', url).attr('target', '_blank').attr('download', doc.file_name).appendTo('body');
         a[0].dataset.downloadurl = ['png', doc.file_name, url].join(':');
@@ -1092,9 +1340,8 @@ angular.module('myApp.services', [])
         }, 100);
       }, function (e) {
         dLog('document download failed', e);
-      }, function (progress) {
-        scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      });
+        historyDoc.progress.enabled = false;
+      }, updateDownloadProgress);
     }
   }
 
@@ -1240,16 +1487,17 @@ angular.module('myApp.services', [])
       AppUsersManager.saveApiUsers(differenceResult.users);
       AppChatsManager.saveApiChats(differenceResult.chats);
 
+      // Should be first because of updateMessageID
+      angular.forEach(differenceResult.other_updates, function(update){
+        saveUpdate(update, true);
+      });
+
       angular.forEach(differenceResult.new_messages, function (apiMessage) {
         saveUpdate({
           _: 'updateNewMessage',
           message: apiMessage,
           pts: curState.pts
         }, true);
-      });
-
-      angular.forEach(differenceResult.other_updates, function(update){
-        saveUpdate(update, true);
       });
 
       var nextState = differenceResult.intermediate_state || differenceResult.state;

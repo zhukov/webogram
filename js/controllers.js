@@ -301,6 +301,8 @@ angular.module('myApp.controllers', [])
 
     var typingTimeouts = {};
 
+    $scope.$on('history_update', angular.noop);
+
     $scope.$on('history_append', function (e, addedMessage) {
       if (addedMessage.peerID == $scope.curDialog.peerID) {
         dLog('append', addedMessage);
@@ -383,7 +385,7 @@ angular.module('myApp.controllers', [])
 
       var text = $scope.draftMessage.text;
 
-      if ($scope.draftMessage.sending || !text.length) {
+      if (!text.length) {
         return false;
       }
 
@@ -395,50 +397,16 @@ angular.module('myApp.controllers', [])
         return all;
       });
 
-      $scope.draftMessage.sending = true;
+      AppMessagesManager.sendText($scope.curDialog.peerID, text);
+      resetDraft();
+      $scope.$broadcast('ui_message_send');
 
-      MtpApiManager.invokeApi('messages.sendMessage', {
-        peer: $scope.curDialog.inputPeer,
-        message: text,
-        random_id: $scope.draftMessage.randomID
-      }).then(function (result) {
-
-        if (ApiUpdatesManager.saveSeq(result.seq)) {
-
-          MtpApiManager.getUserID().then(function (fromID) {
-            ApiUpdatesManager.saveUpdate({
-              _: 'updateNewMessage',
-              message: {
-                _: 'message',
-                id: result.id,
-                from_id: fromID,
-                to_id: AppPeersManager.getOutputPeer($scope.curDialog.peerID),
-                out: true,
-                unread: true,
-                date: result.date,
-                message: text,
-                media: {_: 'messageMediaEmpty'}
-              },
-              pts: result.pts
-            });
-          });
-
-        }
-
-        $scope.$broadcast('ui_message_send');
-
-        resetDraft();
-      }, function () {
-        delete $scope.draftMessage.sending;
-      });
-
-      return cancelEvent(e);
+      return false;
     }
 
 
     function resetDraft () {
       $scope.draftMessage = {
-        randomID: [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         text: ''
       };
     }
@@ -449,35 +417,8 @@ angular.module('myApp.controllers', [])
       }
 
       for (var i = 0; i < newVal.length; i++) {
-        (function (file, randomID) {
-          MtpApiFileManager.uploadFile(file).then(function (inputFile) {
-            var inputMedia;
-            if (file.type == 'image/jpeg') {
-              inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
-            } else {
-              inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
-            }
-            MtpApiManager.invokeApi('messages.sendMedia', {
-              peer: $scope.curDialog.inputPeer,
-              media: inputMedia,
-              random_id: randomID
-            }).then(function (result) {
-
-              if (ApiUpdatesManager.saveSeq(result.seq)) {
-                ApiUpdatesManager.saveUpdate({
-                  _: 'updateNewMessage',
-                  message: result.message,
-                  pts: result.pts
-                });
-              }
-
-              $scope.$broadcast('ui_message_send');
-            });
-          }, function (error) {
-            dLog('upload error', error);
-          })
-
-        })(newVal[i], [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
+        AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i]);
+        $scope.$broadcast('ui_message_send');
       }
     }
 

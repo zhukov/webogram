@@ -227,7 +227,7 @@ function aesEncrypt (bytes, keyBytes, ivBytes) {
 }
 
 function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
-  dLog('AES decrypt start', encryptedBytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+  // dLog('AES decrypt start', encryptedBytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
 
   var decryptedWords = CryptoJS.AES.decrypt({ciphertext: bytesToWords(encryptedBytes)}, bytesToWords(keyBytes), {
     iv: bytesToWords(ivBytes),
@@ -237,7 +237,7 @@ function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
 
   var bytes = bytesFromWords(decryptedWords);
 
-  dLog('AES decrypt finish');
+  // dLog('AES decrypt finish');
 
   return bytes;
 }
@@ -1088,7 +1088,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       auth.pq = response.pq;
       auth.fingerprints = response.server_public_key_fingerprints;
 
-      dLog('ResPQ', bytesToHex(auth.serverNonce), bytesToHex(auth.pq), auth.fingerprints);
+      // dLog('ResPQ', bytesToHex(auth.serverNonce), bytesToHex(auth.pq), auth.fingerprints);
 
       auth.publicKey = MtpRsaKeysManager.select(auth.fingerprints);
 
@@ -1306,7 +1306,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
           }
 
           var serverSalt = bytesXor(auth.newNonce.slice(0, 8), auth.serverNonce.slice(0, 8));
-          dLog('Auth successfull!', authKeyID, authKey, serverSalt);
+          // dLog('Auth successfull!', authKeyID, authKey, serverSalt);
 
           auth.authKeyID = authKeyID;
           auth.authKey = authKey;
@@ -2130,7 +2130,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
           deferred.resolve(result);
           // setTimeout(function () {
           //   deferred.resolve(result);
-          // },1000);
+          // }, 1000);
         },
         function (error) {
           dLog('error', error.code, error.type, baseDcID, dcID);
@@ -2481,7 +2481,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
           fileEntry.file(function(file) {
             dLog('check size', file.size, size);
-            if (file.size >= size && false) {
+            if (file.size >= size) {
               deferred.resolve(fileEntry.toURL());
             } else {
               dLog('File bad size', file, size);
