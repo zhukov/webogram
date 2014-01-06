@@ -39,7 +39,6 @@
   </div>
 
   <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
-    {{historyMessage}}
     <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}"></i>
 
     <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
