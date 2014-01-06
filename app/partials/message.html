@@ -39,7 +39,9 @@
   </div>
 
   <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
-    <i ng-if="historyMessage.unread" class="icon icon-message-status-unread"></i>
+    {{historyMessage}}
+    <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}"></i>
+
     <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
       <img class="im_message_from_photo" my-load-thumb thumb="historyMessage.fromPhoto"/>
     </a>
@@ -66,10 +68,20 @@
           </div>
         </a>
 
-        <a ng-switch-when="messageMediaDocument" class="im_message_document" href="" ng-click="openDoc(historyMessage.media.document.id)">
-          <i class="icon icon-document"></i>
-          <div class="im_message_document_name"><strong>{{historyMessage.media.document.file_name}}</strong> {{historyMessage.media.document.size | formatSize}}</div>
-        </a>
+        <div ng-switch-when="messageMediaDocument">
+          <a  class="im_message_document" href="" ng-click="openDoc(historyMessage.media.document.id)">
+            <i class="icon icon-document"></i>
+            <div class="im_message_document_name"><strong>{{historyMessage.media.document.file_name}}</strong> {{historyMessage.media.document.size | formatSize}}</div>
+          </a>
+
+          <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
+            <div class="progress tg_down_progress">
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.document.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.document.progress.percent}}%">
+                <span class="sr-only">{{historyMessage.media.document.progress.percent}}% Complete (success)</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <a ng-switch-when="messageMediaGeo" my-map-point point="historyMessage.media.geo" class="im_message_geopoint">
           <i class="icon icon-geo-point"></i>
@@ -82,6 +94,21 @@
           <div class="im_message_contact_name"><span class="glyphicon glyphicon-user"></span> {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}</div>
           <div class="im_message_contact_phone">{{historyMessage.media.phone_number}}</div>
         </div>
+
+        <div ng-switch-when="messageMediaPending" class="im_message_upload_file im_message_upload_{{historyMessage.media.type}}">
+          <i class="icon icon-document"></i>
+          <div class="im_message_document_name"><strong>{{historyMessage.media.file_name}}</strong> {{historyMessage.media.size | formatSize}}</div>
+
+          <div class="im_message_upload_progress_wrap">
+            <div class="progress tg_up_progress">
+              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.progress.percent}}%">
+                <span class="sr-only">{{historyMessage.media.progress.percent}}% Complete (success)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div>
 
       <div class="im_message_text" ng-if="historyMessage.message" ng-bind-html="historyMessage.richMessage"></div>

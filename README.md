@@ -1,4 +1,4 @@
-## [Webogram](http://zhukov.github.io/webogram) - Telegram UNOFFICIAL web app
+## [Webogram](http://zhukov.github.io/webogram) – UNOFFICIAL Telegram Web App
 
 Telegram offers great [apps for mobile communication](https://www.telegram.org). It is based on the [MTProto protocol](https://core.telegram.org/protocol) and has an [Open API](http://core.telegram.org/api). I personally like Telegram for its speed and cloud-support (that makes a web app possible, unlike in the case of WA and others).
 

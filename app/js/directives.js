@@ -450,7 +450,8 @@ angular.module('myApp.directives', ['myApp.filters'])
             <img class="img_fullsize" my-load-thumb thumb="video.thumb" width="{{video.full.width}}" height="{{video.full.height}}" />\
           </div>\
           <div class="video_full_player" ng-if="player.src">\
-            <video width="{{video.full.width}}" height="{{video.full.height}}" controls autoplay>\
+            <embed ng-src="{{player.src}}" width="{{video.full.width}}" height="{{video.full.height}}" autoplay="true" CONTROLLER="TRUE" loop="false" pluginspace="http://www.apple.com/quicktime/" ng-if="player.quicktime"/>\
+            <video width="{{video.full.width}}" height="{{video.full.height}}" controls autoplay  ng-if="!player.quicktime">\
               <source ng-src="{{player.src}}" type="video/mp4">\
             </video>\
           </div>\
@@ -471,9 +472,19 @@ angular.module('myApp.directives', ['myApp.filters'])
         access_hash: scope.video.access_hash
       };
 
+      var hasQt = false, i;
+      // if (navigator.plugins) {
+      //   for (i = 0; i < navigator.plugins.length; i++) {
+      //     if (navigator.plugins[i].name.indexOf('QuickTime') >= 0) {
+      //       hasQt = true;
+      //     }
+      //   }
+      // }
+
       MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size).then(function (url) {
         scope.progress.enabled = false;
         // scope.progress = {enabled: true, percent: 50};
+        scope.player.quicktime = hasQt;
         scope.player.src = $sce.trustAsResourceUrl(url);
       }, function (e) {
         dLog('Download image failed', e, scope.fullPhoto.location);
@@ -509,4 +520,34 @@ angular.module('myApp.directives', ['myApp.filters'])
       element.attr('target','_blank');
     }
 
+  })
+
+
+  .directive('myTypingDots', function($interval) {
+
+    return {
+      link: link,
+    };
+
+    var interval;
+
+    function link (scope, element, attrs) {
+      var promise = $interval(function () {
+        var time = +new Date(),
+            cnt = 3;
+
+        if (time % 1000 <= 200) {
+          cnt = 0;
+        } else if (time % 1000 <= 400) {
+          cnt = 1;
+        } else if (time % 1000 <= 600) {
+          cnt = 2;
+        }
+        element.html((new Array(cnt + 1)).join('.'));
+      }, 200);
+
+      scope.$on('$destroy', function cleanup() {
+        $interval.cancel(promise);
+      });
+    }
   })

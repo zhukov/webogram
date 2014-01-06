@@ -2130,7 +2130,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
           deferred.resolve(result);
           // setTimeout(function () {
           //   deferred.resolve(result);
-          // },1000);
+          // }, 1000);
         },
         function (error) {
           dLog('error', error.code, error.type, baseDcID, dcID);
@@ -2481,7 +2481,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
           fileEntry.file(function(file) {
             dLog('check size', file.size, size);
-            if (file.size >= size && false) {
+            if (file.size >= size) {
               deferred.resolve(fileEntry.toURL());
             } else {
               dLog('File bad size', file, size);

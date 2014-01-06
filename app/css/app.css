@@ -709,7 +709,8 @@ div.im_message_video_thumb {
 
 
 
-.im_message_document {
+.im_message_document,
+.im_message_upload_file {
   margin-top: 3px;
   border-radius: 3px;
   display: inline-block;
@@ -728,7 +729,7 @@ div.im_message_video_thumb {
 .im_message_document .icon-group {
   background-image: url(../img/icons/DialogListGroupChatIcon_Highlighted@2x.png);
 }
-.im_message_document .im_message_document_name {
+.im_message_document_name {
   color: #999;
   vertical-align: text-top;
   display: inline-block;
@@ -756,6 +757,33 @@ div.im_message_video_thumb {
   padding-right: 3px;
 }
 
+.im_message_upload_progress_wrap,
+.im_message_download_progress_wrap {
+  margin-top: 5px;
+}
+
+.tg_up_progress,
+.tg_down_progress {
+  height: 5px;
+  margin: 0;
+  padding: 0;
+  background: rgba(0,0,0, 0.1);
+  border: 0;
+  border-radius: 4px;
+}
+.tg_up_progress .progress-bar,
+.tg_down_progress .progress-bar {
+  height: 5px;
+  line-height: 5px;
+  background: #43A4DB;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.tg_down_progress .progress-bar {
+  background: #6DBF69;
+}
+
+
 
 .im_service_message_wrap {
   text-align: center;
@@ -782,7 +810,7 @@ div.im_message_video_thumb {
 .im_content_message_wrap {
   margin: 10px 0 5px;
 }
-.icon-message-status-unread {
+.icon-message-status {
   background: #43A4DB;
   border: 1px solid #FFF;
   display: block;
@@ -793,7 +821,21 @@ div.im_message_video_thumb {
   position: absolute;
   margin-left: -27px;
   margin-top: 14px;
+  opacity: 0;
+
+  -webkit-transition: opacity ease-in-out 0.15s;
+  transition: opacity ease-in-out 0.15s;
 }
+.icon-message-status-unread {
+  opacity: 1.0;
+}
+.icon-message-status-pending {
+  opacity: 0.5;
+}
+/*.icon-message-status-done {
+  opacity: 0;
+}*/
+
 .icon-message-status-tick {
   /*display: inline-block;*/
   display: none;
