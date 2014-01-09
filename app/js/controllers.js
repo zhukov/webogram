@@ -207,11 +207,13 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, IdleManager) {
 
     $scope.$watch('curDialog.peer', applyDialogSelect);
 
     ApiUpdatesManager.attach();
+
+    IdleManager.start();
 
     $scope.history = [];
     $scope.typing = {};
@@ -227,9 +229,36 @@ angular.module('myApp.controllers', [])
       $scope.curDialog.inputPeer = AppPeersManager.getInputPeer(newPeer);
 
       if (peerID) {
+        updateHistoryPeer(true);
         loadHistory(peerID);
       } else {
         showEmptyHistory();
+      }
+    }
+
+    function updateHistoryPeer(preload) {
+      var peerData = AppPeersManager.getPeer(peerID);
+      dLog('update', preload, peerData);
+      if (!peerData || peerData.deleted) {
+        return false;
+      }
+
+      $scope.history = [];
+
+      $scope.historyPeer = {
+        id: peerID,
+        data: peerData,
+        photo: AppPeersManager.getPeerPhoto(peerID, 'User', 'Group')
+      };
+
+      MtpApiManager.getUserID().then(function (id) {
+        $scope.ownPhoto = AppUsersManager.getUserPhoto(id, 'User');
+      });
+
+      if (preload) {
+        $scope.typing = {};
+        $scope.state = {loaded: true};
+        $scope.$broadcast('ui_peer_change');
       }
     }
 
@@ -264,23 +293,11 @@ angular.module('myApp.controllers', [])
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
 
-        $scope.history = [];
+        updateHistoryPeer();
         angular.forEach(historyResult.history, function (id) {
           $scope.history.push(AppMessagesManager.wrapForHistory(id));
         });
         $scope.history.reverse();
-
-        $scope.historyPeer = {
-          id: peerID,
-          data: AppPeersManager.getPeer(peerID),
-          photo: AppPeersManager.getPeerPhoto(peerID, 'User', 'Group')
-        };
-
-        $scope.typing = {};
-
-        MtpApiManager.getUserID().then(function (id) {
-          $scope.ownPhoto = AppUsersManager.getUserPhoto(id, 'User');
-        });
 
         $scope.state = {loaded: true};
 
@@ -305,12 +322,19 @@ angular.module('myApp.controllers', [])
 
     $scope.$on('history_append', function (e, addedMessage) {
       if (addedMessage.peerID == $scope.curDialog.peerID) {
-        dLog('append', addedMessage);
+        // dLog('append', addedMessage);
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
         $scope.typing = {};
         $scope.$broadcast('ui_history_append');
-        offset++
+        offset++;
+
+        // dLog('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
+        if (!$rootScope.idle.isIDLE) {
+          $timeout(function () {
+            AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+          });
+        }
       }
     });
 
@@ -345,6 +369,12 @@ angular.module('myApp.controllers', [])
 
     $scope.$on('history_need_more', function () {
       showMoreHistory();
+    });
+
+    $rootScope.$watch('idle.isIDLE', function (newVal) {
+      if (!newVal && $scope.curDialog && $scope.curDialog.peerID) {
+        AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+      }
     });
 
   })

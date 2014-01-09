@@ -1566,10 +1566,10 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       serializer.storeInt(962726977, 'InokeWithLayer10');
       serializer.storeInt(0x69796de9, 'initConnection');
       serializer.storeInt(777, 'api_id');
-      serializer.storeString(navigator.userAgent, 'device_model');
-      serializer.storeString(navigator.platform, 'system_version');
+      serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');
+      serializer.storeString(navigator.platform  || 'Unknown Platform', 'system_version');
       serializer.storeString('0.1', 'app_version');
-      serializer.storeString(navigator.language, 'lang_code');
+      serializer.storeString(navigator.language || 'en', 'lang_code');
     }
 
     serializer.storeMethod(method, params);

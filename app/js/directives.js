@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html'
+      templateUrl: 'partials/message.html?1'
     };
   })
 
@@ -114,12 +114,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       scope.$on('ui_history_append', function () {
-        var st = scrollableWrap.scrollTop;
+        // var st = scrollableWrap.scrollTop;
         $(scrollableWrap).addClass('im_history_to_bottom');
+        $(scrollable).css({bottom: 0});
+
         if (atBottom) {
           onContentLoaded(function () {
             $(scrollableWrap).removeClass('im_history_to_bottom');
-            updateSizes();
+            $(scrollable).css({bottom: ''});
+            // updateSizes(true);
             $(historyWrap).nanoScroller({scrollBottom: 0});
             // scrollableWrap.scrollTop = st;
             // $(scrollableWrap).animate({
@@ -175,10 +178,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      function updateSizes () {
+      function updateSizes (heightOnly) {
         $(historyWrap).css({
           height: $($window).height() - panelWrap.offsetHeight - sendFormWrap.offsetHeight - 90
         });
+
+        if (heightOnly) return;
         if (atBottom) {
           onContentLoaded(function () {
             $(historyWrap).nanoScroller({scroll: 'bottom'});
@@ -243,7 +248,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (submit) {
           $(element).trigger('submit');
-          dLog('after submit');
+          // dLog('after submit');
           return cancelEvent(e);
         }
       });
@@ -261,9 +266,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
 
-      scope.$on('ui_history_change', focusField);
-      scope.$on('ui_message_send', focusField);
-
+      scope.$on('ui_peer_change ui_history_change ui_message_send', focusField);
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
       });
