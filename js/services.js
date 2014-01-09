@@ -405,7 +405,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, MtpApiFileManager, RichTextProcessor) {
+.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, $location, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -414,6 +414,8 @@ angular.module('myApp.services', [])
   var pendingByRandomID = {};
   var pendingByMessageID = {};
   var tempID = -1;
+
+  NotificationsManager.start();
 
   function getDialogs (offset, limit) {
     if (dialogsStorage.count !== null && dialogsStorage.dialogs.length >= offset + limit) {
@@ -494,7 +496,7 @@ angular.module('myApp.services', [])
       peer: inputPeer,
       offset: offset,
       limit: limit,
-      max_id: 0
+      max_id: maxID || 0
     }).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
       AppChatsManager.saveApiChats(historyResult.chats);
@@ -519,6 +521,7 @@ angular.module('myApp.services', [])
       angular.forEach(historyResult.messages, function (message) {
         historyStorage.history.push(message.id);
       });
+      // dLog('history storage final', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
 
       deferred.resolve({
         count: historyStorage.count,
@@ -557,7 +560,7 @@ angular.module('myApp.services', [])
     if (!historyStorage ||
         !historyStorage.history.length ||
         foundDialog[0] && !foundDialog[0].unread_count) {
-      // dLog('bad1');
+      // dLog('bad1', historyStorage, foundDialog[0]);
       return false;
     }
 
@@ -866,8 +869,8 @@ angular.module('myApp.services', [])
     return message;
   }
 
-  function wrapForHistory (msgID, force) {
-    if (!force && messagesForHistory[msgID] !== undefined) {
+  function wrapForHistory (msgID) {
+    if (messagesForHistory[msgID] !== undefined) {
       return messagesForHistory[msgID];
     }
 
@@ -983,6 +986,58 @@ angular.module('myApp.services', [])
         dialog.top_message = message.id;
         dialogsStorage.dialogs.unshift(dialog);
         $rootScope.$broadcast('dialogs_update', dialog);
+
+
+        if ($rootScope.idle.isIDLE && !message.out && message.unread) {
+          var fromUser = AppUsersManager.getUser(message.from_id);
+          var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
+          var peerString;
+          var notification = {},
+              notificationPhoto;
+
+          if (peerID > 0) {
+            notification.title = (fromUser.first_name || '') +
+                                 (fromUser.first_name && fromUser.last_name ? ' ' : '') +
+                                 (fromUser.last_name || '');
+
+            notification.message = message.message;
+
+            notificationPhoto = fromPhoto;
+
+            peerString = AppUsersManager.getUserString(peerID);
+
+          } else {
+            notification.title = fromUser.first_name || fromUser.last_name || 'Somebody' +
+                                 ' @ ' +
+                                AppChatsManager.getChat(-peerID).title || 'Unknown chat';
+
+            notification.message = message.message;
+
+            notificationPhoto = AppChatsManager.getChatPhoto(-peerID);
+
+            peerString = AppChatsManager.getChatString(-peerID);
+          }
+
+          notification.onclick = function () {
+            $location.url('/im?p=' + peerString);
+          };
+
+          notification.image = notificationPhoto.placeholder;
+
+          if (notificationPhoto.location) {
+            MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
+              notification.image = url;
+
+              if (message.unread) {
+                // dLog(111, notification);
+                NotificationsManager.notify(notification);
+              }
+            });
+          } else {
+            // dLog(222, notification);
+            NotificationsManager.notify(notification);
+          }
+        }
         break;
 
       case 'updateReadMessages':
@@ -1685,3 +1740,151 @@ angular.module('myApp.services', [])
   }
 
 })
+
+
+.service('IdleManager', function ($rootScope, $window, $timeout) {
+
+  $rootScope.idle = {isIDLE: false};
+
+  var toPromise;
+
+  return {
+    start: start
+  };
+
+  function start () {
+    $($window).on('blur focus keydown mousedown touchstart', onEvent);
+  }
+
+  function onEvent (e) {
+    // dLog('event', e.type);
+    if (e.type == 'mousemove') {
+      $($window).off('mousemove', onEvent);
+    }
+    var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
+
+    $timeout.cancel(toPromise);
+    if (!isIDLE) {
+      // dLog('update timeout');
+      toPromise = $timeout(function () {
+        onEvent({type: 'timeout'});
+      }, 30000);
+    }
+
+    if ($rootScope.idle.isIDLE == isIDLE) {
+      return;
+    }
+
+    // dLog('IDLE changed', isIDLE);
+    $rootScope.$apply(function () {
+      $rootScope.idle.isIDLE = isIDLE;
+    });
+
+    if (isIDLE && e.type == 'timeout') {
+      $($window).on('mousemove', onEvent);
+    }
+  }
+})
+
+
+.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, IdleManager) {
+
+  var notificationsUiSupport = window.webkitNotifications !== undefined;
+  var notificationsShown = [];
+  var notificationsCount = 0;
+  var titleBackup = document.title,
+      titlePromise;
+
+  $rootScope.$watch('idle.isIDLE', function (newVal) {
+    // dLog('isIDLE watch', newVal);
+    $interval.cancel(titlePromise);
+
+    if (!newVal) {
+      notificationsCount = 0;
+      document.title = titleBackup;
+      notificationsClear();
+    } else {
+      titleBackup = document.title;
+
+      titlePromise = $interval(function () {
+        var time = +new Date();
+        // dLog('check title', notificationsCount, time % 2000 > 1000);
+        if (!notificationsCount || time % 2000 > 1000) {
+          document.title = titleBackup;
+        } else {
+          document.title = notificationsCount + ' notifications';
+        }
+      }, 1000);
+    }
+  });
+
+  return {
+    start: start,
+    notify: notify
+  };
+
+  function start () {
+    if (!notificationsUiSupport) {
+      return false;
+    }
+
+    var havePermission = window.webkitNotifications.checkPermission();
+    // dLog('perm', havePermission);
+
+    if (havePermission != 0) { // 0 is PERMISSION_ALLOWED
+      $($window).on('click', requestPermission);
+    }
+
+    $($window).on('beforeunload', notificationsClear);
+  }
+
+  function requestPermission() {
+    window.webkitNotifications.requestPermission();
+    $($window).off('click', requestPermission);
+  }
+
+  function notify (data) {
+    // dLog('notify', $rootScope.idle.isIDLE);
+    if (!$rootScope.idle.isIDLE) {
+      return false;
+    }
+
+    notificationsCount++;
+
+    if (!notificationsUiSupport ||
+        window.webkitNotifications.checkPermission() != 0) {
+      return false;
+    }
+
+    var notification = window.webkitNotifications.createNotification(
+      data.image || '',
+      data.title || '',
+      data.message || ''
+    );
+
+    notification.onclick = function () {
+      notification.close();
+      window.focus();
+      notificationsClear();
+      if (data.onclick) {
+        data.onclick();
+      }
+    };
+
+    // dLog('notify', notification);
+
+    notification.show();
+
+    notificationsShown.push(notification);
+  };
+
+  function notificationsClear() {
+    angular.forEach(notificationsShown, function (notification) {
+      notification.close();
+    });
+    notificationsShown = [];
+  }
+})
+
+
+

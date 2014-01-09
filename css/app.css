@@ -715,6 +715,8 @@ div.im_message_video_thumb {
   border-radius: 3px;
   display: inline-block;
   line-height: 0;
+
+  width: 300px;
 }
 .icon-document {
   display: inline-block;
@@ -729,8 +731,26 @@ div.im_message_video_thumb {
 .im_message_document .icon-group {
   background-image: url(../img/icons/DialogListGroupChatIcon_Highlighted@2x.png);
 }
-.im_message_document_name {
+
+.im_message_document_size {
   color: #999;
+  float: right;
+
+  vertical-align: text-top;
+  display: inline-block;
+  line-height: 20px;
+  padding: 9px 3px 9px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.im_message_document:hover .im_message_document_size {
+  color: #698192;
+}
+
+.im_message_document_name {
+  color: #000;
+  font-weight: bold;
   vertical-align: text-top;
   display: inline-block;
   line-height: 20px;
@@ -749,17 +769,11 @@ div.im_message_video_thumb {
   background: #EBF0F5 url(../img/icons/DocBlue_2x.png) 8px 10px no-repeat;
   background-size: 20px 20px;
 }
-.im_message_document:hover .im_message_document_name {
-  color: #698192;
-}
-.im_message_document_name strong {
-  color: #000;
-  padding-right: 3px;
-}
 
 .im_message_upload_progress_wrap,
 .im_message_download_progress_wrap {
   margin-top: 5px;
+  width: 300px;
 }
 
 .tg_up_progress,
@@ -767,21 +781,30 @@ div.im_message_video_thumb {
   height: 5px;
   margin: 0;
   padding: 0;
-  background: rgba(0,0,0, 0.1);
+  /*background: rgba(0,0,0, 0.1);*/
+  background: #E9EBED;
   border: 0;
   border-radius: 4px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 .tg_up_progress .progress-bar,
 .tg_down_progress .progress-bar {
   height: 5px;
   line-height: 5px;
-  background: #43A4DB;
+  /*background: #43A4DB;*/
+  background: #B3BFC7;
   border-radius: 3px;
   overflow: hidden;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 .tg_down_progress .progress-bar {
-  background: #6DBF69;
+  background: #A1D2ED;
+  /*background: #6DBF69;*/
 }
+/*.tg_up_progress .progress-bar {
+}*/
 
 
 

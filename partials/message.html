@@ -19,10 +19,10 @@
           removed group photo
         </span>
         <span ng-switch-when="messageActionChatAddUser">
-          invited <span ng-bind-html="historyMessage.action.user.rFullName"></span>
+          invited <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
         </span>
         <span ng-switch-when="messageActionChatDeleteUser">
-          kicked <span ng-bind-html="historyMessage.action.user.rFullName"></span>
+          kicked <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
         </span>
 
         <span ng-switch-default>
@@ -51,7 +51,7 @@
 
     <div class="im_message_body">
 
-      <div class="im_message_author" ng-bind-html="historyMessage.fromUser.rFirstName"></div>
+      <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName"></a>
 
       <div class="im_message_media" ng-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" ng-switch="historyMessage.media._">
 
@@ -68,9 +68,10 @@
         </a>
 
         <div ng-switch-when="messageMediaDocument">
-          <a  class="im_message_document" href="" ng-click="openDoc(historyMessage.media.document.id)">
+          <a class="im_message_document" href="" ng-click="openDoc(historyMessage.media.document.id)">
+            <div class="im_message_document_size">{{historyMessage.media.document.size | formatSize}}</div>
             <i class="icon icon-document"></i>
-            <div class="im_message_document_name"><strong>{{historyMessage.media.document.file_name}}</strong> {{historyMessage.media.document.size | formatSize}}</div>
+            <div class="im_message_document_name">{{historyMessage.media.document.file_name}}</div>
           </a>
 
           <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
@@ -95,8 +96,9 @@
         </div>
 
         <div ng-switch-when="messageMediaPending" class="im_message_upload_file im_message_upload_{{historyMessage.media.type}}">
+          <div class="im_message_document_size">{{historyMessage.media.size | formatSize}}</div>
           <i class="icon icon-document"></i>
-          <div class="im_message_document_name"><strong>{{historyMessage.media.file_name}}</strong> {{historyMessage.media.size | formatSize}}</div>
+          <div class="im_message_document_name">{{historyMessage.media.file_name}}</div>
 
           <div class="im_message_upload_progress_wrap">
             <div class="progress tg_up_progress">
