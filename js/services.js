@@ -927,6 +927,76 @@ angular.module('myApp.services', [])
     return [];
   }
 
+  function notifyAboutMessage (message) {
+    var peerID = getMessagePeer(message);
+    var fromUser = AppUsersManager.getUser(message.from_id);
+    var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
+    var peerString;
+    var notification = {},
+        notificationMessage = false,
+        notificationPhoto;
+
+    if (message.message) {
+      notificationMessage = message.message;
+    } else if (message.media && message.media._ != 'messageMediaEmpty') {
+      switch (message.media._) {
+        case 'messageMediaPhoto': notificationMessage = 'Photo'; break;
+        case 'messageMediaVideo': notificationMessage = 'Video'; break;
+        case 'messageMediaDocument': notificationMessage = 'Document'; break;
+        case 'messageMediaGeo': notificationMessage = 'Location'; break;
+        case 'messageMediaContact': notificationMessage = 'Contact'; break;
+        default: notificationMessage = 'Attachment'; break;
+      }
+    } else if (message._ == 'messageService') {
+      switch (message.action._) {
+        case 'messageActionChatCreate': notificationMessage = 'created the group'; break;
+        case 'messageActionChatEditTitle': notificationMessage = 'changed group name'; break;
+        case 'messageActionChatEditPhoto': notificationMessage = 'changed group photo'; break;
+        case 'messageActionChatDeletePhoto': notificationMessage = 'removed group photo'; break;
+        case 'messageActionChatAddUser': notificationMessage = 'invited user'; break;
+        case 'messageActionChatDeleteUser': notificationMessage = 'kicked user'; break;
+      }
+    }
+
+    if (peerID > 0) {
+      notification.title = (fromUser.first_name || '') +
+                           (fromUser.first_name && fromUser.last_name ? ' ' : '') +
+                           (fromUser.last_name || '');
+
+      notificationPhoto = fromPhoto;
+
+      peerString = AppUsersManager.getUserString(peerID);
+
+    } else {
+      notification.title = (fromUser.first_name || fromUser.last_name || 'Somebody') +
+                           ' @ ' +
+                           (AppChatsManager.getChat(-peerID).title || 'Unknown chat');
+
+      notificationPhoto = AppChatsManager.getChatPhoto(-peerID, 'Chat');
+
+      peerString = AppChatsManager.getChatString(-peerID);
+    }
+
+    notification.onclick = function () {
+      $location.url('/im?p=' + peerString);
+    };
+
+    notification.message = notificationMessage;
+    notification.image = notificationPhoto.placeholder;
+
+    if (notificationPhoto.location) {
+      MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
+        notification.image = url;
+
+        if (message.unread) {
+          NotificationsManager.notify(notification);
+        }
+      });
+    } else {
+      NotificationsManager.notify(notification);
+    }
+  }
+
   $rootScope.$on('apiUpdate', function (e, update) {
     dLog('on apiUpdate', update);
     switch (update._) {
@@ -989,54 +1059,12 @@ angular.module('myApp.services', [])
 
 
         if ($rootScope.idle.isIDLE && !message.out && message.unread) {
-          var fromUser = AppUsersManager.getUser(message.from_id);
-          var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
-          var peerString;
-          var notification = {},
-              notificationPhoto;
-
-          if (peerID > 0) {
-            notification.title = (fromUser.first_name || '') +
-                                 (fromUser.first_name && fromUser.last_name ? ' ' : '') +
-                                 (fromUser.last_name || '');
-
-            notification.message = message.message;
-
-            notificationPhoto = fromPhoto;
-
-            peerString = AppUsersManager.getUserString(peerID);
-
-          } else {
-            notification.title = fromUser.first_name || fromUser.last_name || 'Somebody' +
-                                 ' @ ' +
-                                AppChatsManager.getChat(-peerID).title || 'Unknown chat';
-
-            notification.message = message.message;
-
-            notificationPhoto = AppChatsManager.getChatPhoto(-peerID);
-
-            peerString = AppChatsManager.getChatString(-peerID);
-          }
-
-          notification.onclick = function () {
-            $location.url('/im?p=' + peerString);
-          };
-
-          notification.image = notificationPhoto.placeholder;
-
-          if (notificationPhoto.location) {
-            MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
-              notification.image = url;
-
-              if (message.unread) {
-                // dLog(111, notification);
-                NotificationsManager.notify(notification);
-              }
-            });
-          } else {
-            // dLog(222, notification);
-            NotificationsManager.notify(notification);
-          }
+          NotificationsManager.getPeerSettings(peerID).then(function (muted) {
+            if (!message.unread || muted) {
+              return;
+            }
+            notifyAboutMessage(message);
+          });
         }
         break;
 
@@ -1787,11 +1815,12 @@ angular.module('myApp.services', [])
 })
 
 
-.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, IdleManager) {
+.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, MtpApiManager, AppPeersManager, IdleManager) {
 
   var notificationsUiSupport = window.webkitNotifications !== undefined;
   var notificationsShown = [];
   var notificationsCount = 0;
+  var peerSettings = {};
   var titleBackup = document.title,
       titlePromise;
 
@@ -1820,8 +1849,26 @@ angular.module('myApp.services', [])
 
   return {
     start: start,
-    notify: notify
+    notify: notify,
+    getPeerSettings: getPeerSettings
   };
+
+  function getPeerSettings (peerID) {
+    if (peerSettings[peerID] !== undefined) {
+      return peerSettings[peerID];
+    }
+
+    return peerSettings[peerID] = MtpApiManager.invokeApi('account.getNotifySettings', {
+      peer: {
+        _: 'inputNotifyPeer',
+        peer: AppPeersManager.getInputPeerByID(peerID)
+      }
+    }).then(function (peerNotifySettings) {
+      // dLog('got settings', peerID, peerNotifySettings);
+      return peerNotifySettings._ == 'peerNotifySettings' &&
+             peerNotifySettings.mute_until * 1000 > (+new Date());
+    });
+  }
 
   function start () {
     if (!notificationsUiSupport) {

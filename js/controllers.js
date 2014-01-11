@@ -25,6 +25,7 @@ angular.module('myApp.controllers', [])
     var dcID = 1;
 
     $scope.credentials = {};
+    $scope.progress = {};
 
     function saveAuth (result) {
       MtpApiManager.setUserAuth(dcID, {
@@ -36,18 +37,21 @@ angular.module('myApp.controllers', [])
     };
 
     $scope.sendCode = function () {
+      $scope.progress.enabled = true;
       MtpApiManager.invokeApi('auth.sendCode', {
         phone_number: $scope.credentials.phone_number,
         sms_type: 0,
         api_id: 2496,
         api_hash: '8da85b0d5bfe62527e5b244c209159c3'
       }, {dcID: dcID}).then(function (sentCode) {
+        $scope.progress.enabled = false;
 
         $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
         $scope.credentials.phone_occupied = sentCode.phone_registered;
         $scope.error = {};
 
       }, function (error) {
+        $scope.progress.enabled = false;
         dLog('sendCode', error);
         if (error.code == 303) {
           var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_)(\d+)/)[2];
@@ -79,12 +83,15 @@ angular.module('myApp.controllers', [])
         });
       }
 
+      $scope.progress.enabled = true;
       MtpApiManager.invokeApi(method, params, {dcID: dcID}).then(saveAuth, function (error) {
+        $scope.progress.enabled = false;
         if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
           return $scope.logIn(true);
         } else if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
           return $scope.logIn(false);
         }
+
 
         switch (error.type) {
           case 'FIRSTNAME_INVALID':
