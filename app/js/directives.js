@@ -97,6 +97,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link (scope, element, attrs) {
       var historyWrap = $('.im_history_wrap')[0],
+          historyEl = $('.im_history')[0],
           scrollableWrap = $('.im_history_scrollable_wrap')[0],
           scrollable = $('.im_history_scrollable')[0],
           panelWrap = $('.im_history_panel_wrap', element)[0],
@@ -181,6 +182,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       function updateSizes (heightOnly) {
         $(historyWrap).css({
           height: $($window).height() - panelWrap.offsetHeight - sendFormWrap.offsetHeight - 90
+        });
+        $(historyEl).css({
+          minHeight: $($window).height() - panelWrap.offsetHeight - sendFormWrap.offsetHeight - 90 - 44
         });
 
         if (heightOnly) return;
@@ -329,10 +333,9 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link (scope, element, attrs) {
-
       scope.$watch('thumb.location', function (newVal) {
         if (!scope.thumb || !scope.thumb.location) {
-          element.attr('src', scope.thumb.placeholder || '');
+          element.attr('src', scope.thumb && scope.thumb.placeholder || '');
           return;
         }
 
