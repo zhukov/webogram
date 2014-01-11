@@ -2117,14 +2117,23 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
   };
 
   function mtpInvokeApi (method, params, options) {
-    var deferred = $q.defer();
-
     options = options || {};
-    var dcID = options.dcID || baseDcID || 1;
+
+    var deferred = $q.defer(),
+        dcID,
+        networkerPromise;
+
+    if (dcID = options.dcID) {
+      networkerPromise = mtpGetNetworker(dcID);
+    } else {
+      networkerPromise = AppConfigManager.get('dc').then(function (baseDcID) {
+        return mtpGetNetworker(dcID = baseDcID || 1);
+      });
+    }
 
     var cachedNetworker;
 
-    mtpGetNetworker(dcID).then(function (networker) {
+    networkerPromise.then(function (networker) {
       return (cachedNetworker = networker).wrapApiCall(method, params, options).then(
         function (result) {
           deferred.resolve(result);
@@ -2175,13 +2184,9 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
   };
 
   function mtpGetUserID () {
-    var deferred = $q.defer();
-
-    AppConfigManager.get('user_auth').then(function (auth) {
-      deferred.resolve(auth.id || 0);
+    return AppConfigManager.get('user_auth').then(function (auth) {
+      return auth.id || 0;
     });
-
-    return deferred.promise;
   }
 
   return {

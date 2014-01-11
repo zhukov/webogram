@@ -1013,7 +1013,7 @@ angular.module('myApp.services', [])
 
             notification.message = message.message;
 
-            notificationPhoto = AppChatsManager.getChatPhoto(-peerID);
+            notificationPhoto = AppChatsManager.getChatPhoto(-peerID, 'Chat');
 
             peerString = AppChatsManager.getChatString(-peerID);
           }

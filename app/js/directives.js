@@ -331,8 +331,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link (scope, element, attrs) {
 
       scope.$watch('thumb.location', function (newVal) {
-        if (!scope.thumb) dLog(222, scope);
-        if (!scope.thumb.location) {
+        if (!scope.thumb || !scope.thumb.location) {
           element.attr('src', scope.thumb.placeholder || '');
           return;
         }
