@@ -157,6 +157,10 @@ angular.module('myApp.services', [])
     return users[id] || {id: id, deleted: true};
   }
 
+  function hasUser(id) {
+    return angular.isObject(users[id]);
+  }
+
   function getUserPhoto(id, placeholder) {
     var user = getUser(id);
 
@@ -254,6 +258,7 @@ angular.module('myApp.services', [])
     getUser: getUser,
     getUserPhoto: getUserPhoto,
     getUserString: getUserString,
+    hasUser: hasUser,
     wrapForFull: wrapForFull,
     openUser: openUser
   }
@@ -280,6 +285,10 @@ angular.module('myApp.services', [])
 
   function getChat (id) {
     return chats[id] || {id: id, deleted: true};
+  }
+
+  function hasChat (id) {
+    return angular.isObject(chats[id]);
   }
 
   function getChatPhoto(id, placeholder) {
@@ -353,6 +362,7 @@ angular.module('myApp.services', [])
     getChat: getChat,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
+    hasChat: hasChat,
     wrapForFull: wrapForFull,
     openChat: openChat
   }
@@ -1511,14 +1521,34 @@ angular.module('myApp.services', [])
         AppUsersManager.saveApiUsers(updateMessage.users);
         AppChatsManager.saveApiChats(updateMessage.chats);
 
+        var i, update, message;
+        for (var i = 0; i < updateMessage.updates.length; i++) {
+          update = updateMessage.updates[i];
+          switch (update._) {
+            case 'updateNewMessage':
+              message = update.message;
+              if (message.from_id && !AppUsersManager.hasUser(message.from_id)) {
+                dLog('User not found', message.from_id, 'getDiff');
+                getDifference();
+                return false;
+              }
+              if (message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
+                dLog('Chat not found', message.to_id.chat_id, 'getDiff');
+                getDifference();
+                return false;
+              }
+              break;
+          }
+        }
+
         angular.forEach(updateMessage.updates, function (update) {
           saveUpdate(update);
         });
         break;
 
       case 'updateShortMessage':
-        var fromUser = AppUsersManager.getUser(updateMessage.from_id);
-        if (!fromUser || fromUser.deleted) {
+        if (!AppUsersManager.hasUser(updateMessage.from_id)) {
+          dLog('User not found', updateMessage.from_id, 'getDiff');
           getDifference();
           break;
         }
@@ -1540,10 +1570,9 @@ angular.module('myApp.services', [])
         break;
 
       case 'updateShortChatMessage':
-        var fromUser = AppUsersManager.getUser(updateMessage.from_id),
-            chat = AppChatsManager.getChat(updateMessage.chat_id);
-
-        if (!fromUser || fromUser.deleted || !chat || chat.deleted) {
+        if (!AppUsersManager.hasUser(updateMessage.from_id) ||
+            !AppChatsManager.hasChat(updateMessage.chat_id)) {
+          dLog('User or chat not found', updateMessage.from_id, updateMessage.chat_id, 'getDiff');
           getDifference();
           break;
         }
@@ -1564,6 +1593,8 @@ angular.module('myApp.services', [])
         });
         break;
     }
+
+    return true;
   }
 
   function getDifference (force) {

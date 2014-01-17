@@ -359,7 +359,7 @@ angular.module('myApp.controllers', [])
       // dLog('on apiUpdate inline', update);
       switch (update._) {
         case 'updateUserTyping':
-          if (update.user_id == $scope.curDialog.peerID) {
+          if (update.user_id == $scope.curDialog.peerID && AppUsersManager.hasUser(update.user_id)) {
             $scope.typing = {user: AppUsersManager.getUser(update.user_id)};
 
             $timeout.cancel(typingTimeouts[update.user_id]);
