@@ -14,14 +14,14 @@ angular.module('myApp.controllers', [])
   .controller('AppWelcomeController', function($scope, $location, MtpApiManager) {
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
-        $location.path('/im');
+        $location.url('/im');
       } else {
-        $location.path('/login');
+        $location.url('/login');
       }
     });
   })
 
-  .controller('AppLoginController', function ($scope, $location, MtpApiManager) {
+  .controller('AppLoginController', function ($scope, $location, MtpApiManager, ErrorService) {
     var dcID = 1;
 
     $scope.credentials = {};
@@ -33,7 +33,7 @@ angular.module('myApp.controllers', [])
         id: result.user.id
       });
 
-      $location.path('/im');
+      $location.url('/im');
     };
 
     $scope.sendCode = function () {
@@ -45,6 +45,11 @@ angular.module('myApp.controllers', [])
         api_hash: '8da85b0d5bfe62527e5b244c209159c3'
       }, {dcID: dcID}).then(function (sentCode) {
         $scope.progress.enabled = false;
+
+        if (!sentCode.phone_registered) {
+          ErrorService.showSimpleError('No account', 'Sorry, there is no Telegram account for ' + $scope.credentials.phone_number + '. Please sign up using our mobile apps.');
+          return false;
+        }
 
         $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
         $scope.credentials.phone_occupied = sentCode.phone_registered;
@@ -88,7 +93,7 @@ angular.module('myApp.controllers', [])
         $scope.progress.enabled = false;
         if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
           return $scope.logIn(true);
-        } else if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
+        } else if (error.code == 400 && error.type == 'PHONE_NUMBER_OCCUPIED') {
           return $scope.logIn(false);
         }
 
@@ -116,9 +121,14 @@ angular.module('myApp.controllers', [])
     $scope.isLoggedIn = true;
     $scope.logOut = function () {
       MtpApiManager.logOut().then(function () {
-        $location.path('/login');
+        location.href = 'login';
       });
     }
+
+    // $scope.userID = 0;
+    // MtpApiManager.getUserID().then(function (userID) {
+    //   $scope.userID = userID;
+    // });
 
     updateCurDialog();
 
@@ -190,7 +200,7 @@ angular.module('myApp.controllers', [])
         $scope.$broadcast('ui_dialogs_change');
       }, function (error) {
         if (error.code == 401) {
-          $location.path('/login');
+          $location.url('/login');
         }
       });
     }
@@ -245,7 +255,7 @@ angular.module('myApp.controllers', [])
 
     function updateHistoryPeer(preload) {
       var peerData = AppPeersManager.getPeer(peerID);
-      dLog('update', preload, peerData);
+      // dLog('update', preload, peerData);
       if (!peerData || peerData.deleted) {
         return false;
       }
@@ -274,7 +284,7 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      console.trace('load history');
+      // console.trace('load history');
       AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit).then(function (historyResult) {
         offset += limit;
         hasMore = offset < historyResult.count;

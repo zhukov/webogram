@@ -2,6 +2,8 @@
 
 html {
   background: #dee4e9 url(../img/bg_tile.png?1) 0 0 repeat;
+  /*background-size: 300px 468px;*/
+
   /*background: #dee4e9 url(../img/bg_full.png) 0 0 no-repeat;*/
   /*background-size: cover;*/
   /*background-size: contain;*/
@@ -166,11 +168,13 @@ fieldset[disabled] .btn-tg.active {
   border-radius: 2px;
   overflow: hidden;
 }
-
+.modal {
+  overflow-y: auto;
+}
 .modal-content {
   border-radius: 4px;
-  -webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 .modal_close_wrap {
   cursor: pointer;
@@ -287,10 +291,26 @@ fieldset[disabled] .btn-tg.active {
   -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
   -moz-box-shadow:    0px 1px 2px rgba(0, 0, 0, 0.1);
   box-shadow:         0px 1px 2px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
+  /*margin-bottom: 40px;*/
 
   border-radius: 0 0 3px 3px;
   overflow: hidden;
+}
+
+.im_page_footer {
+  font-size: 11px;
+  text-align: center;
+  color: #9cacb9;
+  line-height: 40px;
+}
+.im_page_footer_brand {
+  color: #9cacb9;
+  font-weight: bold;
+}
+.im_page_footer_brand:hover,
+.im_page_footer_brand:active {
+  color: #8499aa;
+  text-decoration: none;
 }
 
 .im_dialogs_col_wrap {
@@ -511,6 +531,7 @@ a.im_dialog:hover .im_dialog_message_text {
 }
 
 .im_history_panel_wrap {
+  cursor: pointer;
   position: relative;
   -webkit-box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.12);
   -moz-box-shadow:    0px 2px 0px rgba(0, 0, 0, 0.12);
@@ -573,6 +594,7 @@ a.im_dialog:hover .im_dialog_message_text {
   width: 100%;
   margin-bottom: 13px;
   overflow: hidden;
+  -webkit-user-select: none;
 }
 .im_history_typing {
   font-size: 11px;
@@ -714,66 +736,53 @@ div.im_message_video_thumb {
   margin-top: 3px;
   border-radius: 3px;
   display: inline-block;
-  line-height: 0;
+  /*line-height: 0;*/
 
-  width: 300px;
+  width: 340px;
 }
 .icon-document {
-  display: inline-block;
+  display: block;
+  float: left;
   width: 38px;
   height: 38px;
   vertical-align: text-top;
   background: #F2F2F2 url(../img/icons/DocGrey_2x.png) 8px 10px no-repeat;
   background-size: 20px 20px;
   border-radius: 3px;
-  margin-right: 0;
-}
-.im_message_document .icon-group {
-  background-image: url(../img/icons/DialogListGroupChatIcon_Highlighted@2x.png);
+  margin-right: 10px;
 }
 
-.im_message_document_size {
-  color: #999;
-  float: right;
+.im_message_document_info {
+  float: left;
+}
 
-  vertical-align: text-top;
-  display: inline-block;
-  line-height: 20px;
-  padding: 9px 3px 9px 0;
+.im_message_document_name_wrap {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-.im_message_document:hover .im_message_document_size {
-  color: #698192;
+  width: 290px;
+  padding: 0 0 1px;
 }
 
 .im_message_document_name {
   color: #000;
-  font-weight: bold;
-  vertical-align: text-top;
   display: inline-block;
-  line-height: 20px;
-  padding: 9px 5px 9px 0;
+  font-weight: bold;
   max-width: 200px;
   overflow: hidden;
+  vertical-align: text-top;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.im_message_document:hover,
-.im_message_document:hover .icon-document {
-  background: #EBF0F5;
-  text-decoration: none;
-}
-.im_message_document:hover .icon-document {
-  background: #EBF0F5 url(../img/icons/DocBlue_2x.png) 8px 10px no-repeat;
-  background-size: 20px 20px;
+.im_message_document_size {
+  color: #999;
+  padding-left: 2px;
 }
 
 .im_message_upload_progress_wrap,
 .im_message_download_progress_wrap {
   margin-top: 5px;
-  width: 300px;
+  width: 290px;
 }
 
 .tg_up_progress,
@@ -781,10 +790,9 @@ div.im_message_video_thumb {
   height: 5px;
   margin: 0;
   padding: 0;
-  /*background: rgba(0,0,0, 0.1);*/
-  background: #E9EBED;
+  background: #F2F2F2;
   border: 0;
-  border-radius: 4px;
+  border-radius: 0;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
@@ -792,19 +800,12 @@ div.im_message_video_thumb {
 .tg_down_progress .progress-bar {
   height: 5px;
   line-height: 5px;
-  /*background: #43A4DB;*/
-  background: #B3BFC7;
-  border-radius: 3px;
+  background: #6B9ABD;
+  border-radius: 0;
   overflow: hidden;
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-.tg_down_progress .progress-bar {
-  background: #A1D2ED;
-  /*background: #6DBF69;*/
-}
-/*.tg_up_progress .progress-bar {
-}*/
 
 
 
@@ -839,7 +840,7 @@ div.im_message_video_thumb {
   display: block;
   width: 11px;
   height: 11px;
-  border-radius: 5px;
+  border-radius: 7px;
   overflow: hidden;
   position: absolute;
   margin-left: -27px;
@@ -884,6 +885,10 @@ div.im_message_body {
   border-radius: 2px;
   display: block;
   overflow: hidden;
+}
+
+div.im_message_fwd_header {
+  font-weight: bold;
 }
 
 .im_message_text {
@@ -1028,11 +1033,23 @@ div.im_panel_own_photo {
   display: block;
   width: 11px;
   height: 11px;
-  border-radius: 5px;
+  border-radius: 6px;
   overflow: hidden;
   position: absolute;
   margin-top: -7px;
   margin-left: 43px;
+}
+.modal_participant_online {
+  background: #6DBF69;
+  border: 1px solid #FFF;
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: absolute;
+  margin-top: -7px;
+  margin-left: 33px;
 }
 
 
@@ -1086,6 +1103,7 @@ img.img_fullsize {
 .chat_modal_window .modal-dialog {
   max-width: 506px;
 }
+
 .chat_modal_wrap .modal-body {
   padding: 23px 25px 15px;
 }
@@ -1111,24 +1129,25 @@ img.img_fullsize {
 }
 
 .chat_modal_members_header {
-  margin-top: 15px;
+  margin: 20px 0 6px;
 }
 
 .chat_modal_participant_wrap {
   padding: 8px 7px;
-  border-top: 1px solid #E0E0E0;
+  border-top: 1px solid #F0F0F0;
 }
 .chat_modal_participant_name {
+  display: block;
   color: #3C6E97;
   font-weight: bold;
-  margin: 4px 0 5px;
+  margin: 1px 0 2px;
 }
 .chat_modal_participant_status {
   color: #999;
 }
 .chat_modal_participant_photo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
   overflow: hidden;
 }
@@ -1224,4 +1243,13 @@ img.img_fullsize {
   /*-moz-border-radius    : 0;
   -webkit-border-radius : 0;
   border-radius         : 0;*/
+}
+
+
+.error_modal_window .modal-dialog {
+  max-width: 400px;
+}
+.error_modal_description {
+  text-align: center;
+  padding: 40px 20px;
 }

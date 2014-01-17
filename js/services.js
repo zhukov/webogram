@@ -160,6 +160,12 @@ angular.module('myApp.services', [])
   function getUserPhoto(id, placeholder) {
     var user = getUser(id);
 
+    if (id == 333000) {
+      return {
+        placeholder: 'img/placeholders/DialogListAvatarSystem@2x.png'
+      }
+    };
+
     return {
       placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
       location: user && user.photo && user.photo.photo_small
@@ -320,7 +326,7 @@ angular.module('myApp.services', [])
     scope.chatID = chatID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html',
+      templateUrl: 'partials/chat_modal.html?1',
       controller: 'ChatModalController',
       windowClass: 'chat_modal_window',
       scope: scope,
@@ -710,7 +716,7 @@ angular.module('myApp.services', [])
         type: isPhoto ? 'photo' : 'doc',
         file_name: file.name,
         size: file.size,
-        progress: {percent: 1}
+        progress: {percent: 1, total: file.size}
       };
 
       var message = {
@@ -764,8 +770,10 @@ angular.module('myApp.services', [])
           var historyMessage = messagesForHistory[messageID],
               percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
 
+          media.progress.done = progress.done;
           media.progress.percent = percent;
           if (historyMessage) {
+            historyMessage.media.progress.done = progress.done;
             historyMessage.media.progress.percent = percent;
             $rootScope.$broadcast('history_update', {peerID: peerID});
           }
@@ -878,6 +886,10 @@ angular.module('myApp.services', [])
 
     message.fromUser = AppUsersManager.getUser(message.from_id);
     message.fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
+
+    if (message._ == 'messageForwarded') {
+      message.fwdUser = AppUsersManager.getUser(message.fwd_from_id);
+    }
 
     if (message.media) {
       switch (message.media._) {
@@ -1303,9 +1315,9 @@ angular.module('myApp.services', [])
     scope.videoID = videoID;
     scope.progress = {enabled: false};
     scope.player = {};
-    scope.close = function () {
-      modalInstance.close();
-    }
+    // scope.close = function () {
+    //   modalInstance.close();
+    // }
 
     var modalInstance = $modal.open({
       templateUrl: 'partials/video_modal.html',
@@ -1383,10 +1395,11 @@ angular.module('myApp.services', [])
           access_hash: accessHash || doc.access_hash
         };
 
-    historyDoc.progress = {enabled: true, percent: 1};
+    historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
 
     function updateDownloadProgress (progress) {
       dLog('dl progress', progress);
+      historyDoc.progress.done = progress.done;
       historyDoc.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
     }
@@ -1927,11 +1940,44 @@ angular.module('myApp.services', [])
 
   function notificationsClear() {
     angular.forEach(notificationsShown, function (notification) {
-      notification.close();
+      try {
+        if (notification.close) {
+          notification.close()
+        } else if (notification.cancel) {
+          notification.cancel();
+        }
+      } catch (e) {}
     });
     notificationsShown = [];
   }
 })
 
 
+.service('ErrorService', function ($rootScope, $modal) {
 
+  function showError (templateUrl, params, options) {
+    var scope = $rootScope.$new();
+    angular.extend(scope, params);
+
+    return $modal.open({
+      templateUrl: templateUrl,
+      // controller: 'ErrorModalController',
+      scope: scope,
+      windowClass: options.windowClass || ''
+    });
+  }
+
+  function showSimpleError (title, description) {
+    return showError ('partials/error_modal.html', {
+      title: title,
+      description: description
+    }, {
+      windowClass: 'error_modal_window'
+    });
+  };
+
+  return {
+    showError: showError,
+    showSimpleError: showSimpleError
+  }
+})

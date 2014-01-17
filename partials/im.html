@@ -1,4 +1,4 @@
-<div ng-include="'partials/head.html'"></div>
+<div ng-include="'partials/head.html?1'"></div>
 
 <div class="im_page_wrap">
 
@@ -30,9 +30,9 @@
             <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
               <div class="im_history_panel_title">
 
-                <div ng-if="historyPeer.id < 0">
+                <div ng-if="historyPeer.id < 0" ng-click="openChat(-historyPeer.id)">
                   <h4>
-                    <!-- <a class="im_history_panel_info_link pull-right" ng-click="openChat(-historyPeer.id)">Info</a> -->
+                    <a class="im_history_panel_info_link pull-right" ng-click="openChat(-historyPeer.id)">Info</a>
                     <span ng-bind-html="historyPeer.data.rTitle"></span>
                     <small class="im_chat_users">
                       <ng-pluralize count="historyPeer.data.participants_count"
@@ -42,9 +42,9 @@
                   </h4>
                 </div>
 
-                <div ng-if="historyPeer.id > 0">
+                <div ng-if="historyPeer.id > 0" ng-click="openUser(historyPeer.id)">
                   <h4>
-                    <!-- <a class="im_history_panel_info_link pull-right" ng-click="openUser(historyPeer.id)">Info</a> -->
+                    <a class="im_history_panel_info_link pull-right" ng-click="openUser(historyPeer.id)">Info</a>
                     <span ng-bind-html="historyPeer.data.rFullName"></span>
                     <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
                   </h4>
@@ -80,14 +80,14 @@
 
           <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
             <div class="pull-right im_panel_peer_photo" ng-click="openUser(historyPeer.id)" ng-if="historyPeer.id > 0">
-              <img class="im_panel_peer_photo" my-load-thumb thumb="historyPeer.photo" />
+              <img class="im_panel_peer_photo" src="img/blank.gif" my-load-thumb thumb="historyPeer.photo" />
               <i class="icon im_panel_peer_online" ng-show="historyPeer.data.status._ == 'userStatusOnline'"></i>
             </div>
             <div class="pull-right im_panel_peer_photo" ng-click="openChat(-historyPeer.id)" ng-if="historyPeer.id < 0">
-              <img class="im_panel_peer_photo" my-load-thumb thumb="historyPeer.photo" />
+              <img class="im_panel_peer_photo" src="img/blank.gif" my-load-thumb thumb="historyPeer.photo" />
             </div>
             <div class="pull-left im_panel_own_photo">
-              <img class="im_panel_own_photo" my-load-thumb thumb="ownPhoto" />
+              <img class="im_panel_own_photo" src="img/blank.gif" my-load-thumb thumb="ownPhoto" />
             </div>
             <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
               <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
@@ -114,5 +114,9 @@
   </div>
 
 
+</div>
+
+<div class="im_page_footer font-light">
+  <a class="im_page_footer_brand" target="_blank" href="https://github.com/zhukov/webogram">Telegram alpha</a> by izhukov &amp; toberg
 </div>
 
