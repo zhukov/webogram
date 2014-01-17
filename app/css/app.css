@@ -2,7 +2,7 @@
 
 html {
   background: #dee4e9 url(../img/bg_tile.png?1) 0 0 repeat;
-  background-size: 300px 468px;
+  /*background-size: 300px 468px;*/
 
   /*background: #dee4e9 url(../img/bg_full.png) 0 0 no-repeat;*/
   /*background-size: cover;*/
@@ -1103,6 +1103,7 @@ img.img_fullsize {
 .chat_modal_window .modal-dialog {
   max-width: 506px;
 }
+
 .chat_modal_wrap .modal-body {
   padding: 23px 25px 15px;
 }
@@ -1242,4 +1243,13 @@ img.img_fullsize {
   /*-moz-border-radius    : 0;
   -webkit-border-radius : 0;
   border-radius         : 0;*/
+}
+
+
+.error_modal_window .modal-dialog {
+  max-width: 400px;
+}
+.error_modal_description {
+  text-align: center;
+  padding: 40px 20px;
 }

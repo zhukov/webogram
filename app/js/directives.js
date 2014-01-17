@@ -16,7 +16,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/dialog.html'
+      templateUrl: 'partials/dialog.html?1'
     };
   })
 
@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html?1'
+      templateUrl: 'partials/message.html?2'
     };
   })
 

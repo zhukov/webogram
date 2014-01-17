@@ -21,7 +21,7 @@ angular.module('myApp.controllers', [])
     });
   })
 
-  .controller('AppLoginController', function ($scope, $location, MtpApiManager) {
+  .controller('AppLoginController', function ($scope, $location, MtpApiManager, ErrorService) {
     var dcID = 1;
 
     $scope.credentials = {};
@@ -45,6 +45,11 @@ angular.module('myApp.controllers', [])
         api_hash: '8da85b0d5bfe62527e5b244c209159c3'
       }, {dcID: dcID}).then(function (sentCode) {
         $scope.progress.enabled = false;
+
+        if (!sentCode.phone_registered) {
+          ErrorService.showSimpleError('No account', 'Sorry, there is no Telegram account for ' + $scope.credentials.phone_number + '. Please sign up using our mobile apps.');
+          return false;
+        }
 
         $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
         $scope.credentials.phone_occupied = sentCode.phone_registered;
@@ -88,7 +93,7 @@ angular.module('myApp.controllers', [])
         $scope.progress.enabled = false;
         if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
           return $scope.logIn(true);
-        } else if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
+        } else if (error.code == 400 && error.type == 'PHONE_NUMBER_OCCUPIED') {
           return $scope.logIn(false);
         }
 

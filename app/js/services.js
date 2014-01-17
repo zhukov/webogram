@@ -160,6 +160,12 @@ angular.module('myApp.services', [])
   function getUserPhoto(id, placeholder) {
     var user = getUser(id);
 
+    if (id == 333000) {
+      return {
+        placeholder: 'img/placeholders/DialogListAvatarSystem@2x.png'
+      }
+    };
+
     return {
       placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
       location: user && user.photo && user.photo.photo_small
@@ -320,7 +326,7 @@ angular.module('myApp.services', [])
     scope.chatID = chatID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html',
+      templateUrl: 'partials/chat_modal.html?1',
       controller: 'ChatModalController',
       windowClass: 'chat_modal_window',
       scope: scope,
@@ -1309,9 +1315,9 @@ angular.module('myApp.services', [])
     scope.videoID = videoID;
     scope.progress = {enabled: false};
     scope.player = {};
-    scope.close = function () {
-      modalInstance.close();
-    }
+    // scope.close = function () {
+    //   modalInstance.close();
+    // }
 
     var modalInstance = $modal.open({
       templateUrl: 'partials/video_modal.html',
@@ -1943,5 +1949,35 @@ angular.module('myApp.services', [])
       } catch (e) {}
     });
     notificationsShown = [];
+  }
+})
+
+
+.service('ErrorService', function ($rootScope, $modal) {
+
+  function showError (templateUrl, params, options) {
+    var scope = $rootScope.$new();
+    angular.extend(scope, params);
+
+    return $modal.open({
+      templateUrl: templateUrl,
+      // controller: 'ErrorModalController',
+      scope: scope,
+      windowClass: options.windowClass || ''
+    });
+  }
+
+  function showSimpleError (title, description) {
+    return showError ('partials/error_modal.html', {
+      title: title,
+      description: description
+    }, {
+      windowClass: 'error_modal_window'
+    });
+  };
+
+  return {
+    showError: showError,
+    showSimpleError: showSimpleError
   }
 })
