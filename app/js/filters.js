@@ -82,7 +82,8 @@ angular.module('myApp.filters', [])
 
   .filter('phoneNumber', [function() {
     return function (phoneRaw) {
-      if (phoneRaw.charAt(0) == '7') {
+      phoneRaw = (phoneRaw || '').replace(/\D/g, '');
+      if (phoneRaw.charAt(0) == '7' && phoneRaw.length == 11) {
         return '+' + phoneRaw.charAt(0) + ' (' + phoneRaw.substr(1, 3) + ') ' + phoneRaw.substr(4, 3) + '-' + phoneRaw.substr(7, 2) + '-' + phoneRaw.substr(9, 2);
       }
       return '+' + phoneRaw;
@@ -91,7 +92,31 @@ angular.module('myApp.filters', [])
 
   .filter('formatSize', [function () {
     return function (size) {
-      return Math.round(size / 1024) + 'Kb';
+      if (!size) {
+        return '0';
+      }
+      else if (size < 1024) {
+        return size + ' b';
+      }
+      else if (size < 1048576) {
+        return (Math.round(size / 1024 * 10) / 10) + ' Kb';
+      }
+
+      return (Math.round(size / 1048576 * 100) / 100) + ' Mb';
+    }
+  }])
+
+  .filter('formatSizeProgress', ['$filter', function ($filter) {
+    return function (progress) {
+      var done = $filter('formatSize')(progress.done),
+          doneParts = done.split(' '),
+          total = $filter('formatSize')(progress.total),
+          totalParts = total.split(' ');
+
+      if (totalParts[1] === doneParts[1]) {
+        return doneParts[0] + ' of ' + totalParts[0] + ' ' + (doneParts[1] || '');
+      }
+      return done + ' of ' + total;
     }
   }])
 

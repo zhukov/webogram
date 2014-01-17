@@ -19,7 +19,7 @@
         </ng-pluralize>
       </p>
 
-      <button class="btn btn-link chat_modal_invite_btn">Add member</button>
+      <!--button class="btn btn-link chat_modal_invite_btn">Add member</button-->
     </div>
 
     <h5 class="chat_modal_members_header">Members</h5>
@@ -28,9 +28,11 @@
       <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants">
         <a ng-click="openUser(participant.user_id)" class="chat_modal_participant_photo pull-left">
           <img class="chat_modal_participant_photo" my-load-thumb thumb="participant.userPhoto"/>
+          <i class="icon modal_participant_online" ng-show="participant.user.status._ == 'userStatusOnline'"></i>
         </a>
-        <div class="chat_modal_participant_name">{{participant.user | userName}}</div>
-        <!--div class="chat_modal_participant_desc">invited by {{participant.inviter | userName}} {{participant.date | dateOrTime}}</div-->
+        <div class="chat_modal_participant_name">
+          <a ng-click="openUser(participant.user.id)" ng-bind-html="participant.user.rFullName"></a>
+        </div>
         <div class="chat_modal_participant_status">{{participant.user | userStatus}}</div>
       </div>
 

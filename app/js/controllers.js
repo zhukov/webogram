@@ -14,9 +14,9 @@ angular.module('myApp.controllers', [])
   .controller('AppWelcomeController', function($scope, $location, MtpApiManager) {
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
-        $location.path('/im');
+        $location.url('/im');
       } else {
-        $location.path('/login');
+        $location.url('/login');
       }
     });
   })
@@ -33,7 +33,7 @@ angular.module('myApp.controllers', [])
         id: result.user.id
       });
 
-      $location.path('/im');
+      $location.url('/im');
     };
 
     $scope.sendCode = function () {
@@ -116,9 +116,14 @@ angular.module('myApp.controllers', [])
     $scope.isLoggedIn = true;
     $scope.logOut = function () {
       MtpApiManager.logOut().then(function () {
-        $location.path('/login');
+        location.href = 'login';
       });
     }
+
+    // $scope.userID = 0;
+    // MtpApiManager.getUserID().then(function (userID) {
+    //   $scope.userID = userID;
+    // });
 
     updateCurDialog();
 
@@ -190,7 +195,7 @@ angular.module('myApp.controllers', [])
         $scope.$broadcast('ui_dialogs_change');
       }, function (error) {
         if (error.code == 401) {
-          $location.path('/login');
+          $location.url('/login');
         }
       });
     }
@@ -245,7 +250,7 @@ angular.module('myApp.controllers', [])
 
     function updateHistoryPeer(preload) {
       var peerData = AppPeersManager.getPeer(peerID);
-      dLog('update', preload, peerData);
+      // dLog('update', preload, peerData);
       if (!peerData || peerData.deleted) {
         return false;
       }
@@ -274,7 +279,7 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      console.trace('load history');
+      // console.trace('load history');
       AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit).then(function (historyResult) {
         offset += limit;
         hasMore = offset < historyResult.count;

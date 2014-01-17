@@ -10,7 +10,7 @@
   </div>
 
   <div class="im_dialog_photo pull-left">
-   <img class="im_dialog_photo" my-load-thumb thumb="dialogMessage.peerPhoto" aaa="{{dialogMessage.peerPhoto.location}}" />
+   <img class="im_dialog_photo" src="img/blank.gif" my-load-thumb thumb="dialogMessage.peerPhoto" aaa="{{dialogMessage.peerPhoto.location}}" />
   </div>
 
   <div class="im_dialog_message_wrap">
@@ -58,11 +58,23 @@
         <span ng-switch-when="messageActionChatDeletePhoto">
           removed group photo
         </span>
+
         <span ng-switch-when="messageActionChatAddUser">
-          invited <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">
+            invited <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+          </span>
+          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id">
+            returned to group
+          </span>
         </span>
+
         <span ng-switch-when="messageActionChatDeleteUser">
-          kicked <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">
+            kicked <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+          </span>
+          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id">
+            left group
+          </span>
         </span>
       </span>
 

@@ -105,33 +105,52 @@ angular.module('myApp.directives', ['myApp.filters'])
           moreNotified = false;
 
       onContentLoaded(function () {
-        $(historyWrap).nanoScroller({preventPageScrolling: true, scroll: 'bottom', tabIndex: -1});
+        scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+        $(historyWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1});
       });
 
       var updateScroller = function (delay) {
         $timeout(function () {
-          $(historyWrap).nanoScroller();
+          if (!$(scrollableWrap).hasClass('im_history_to_bottom')) {
+            $(historyWrap).nanoScroller();
+          }
         }, delay || 0);
       }
 
+      var animated = true,
+          curAnimation = false;
       scope.$on('ui_history_append', function () {
-        // var st = scrollableWrap.scrollTop;
-        $(scrollableWrap).addClass('im_history_to_bottom');
-        $(scrollable).css({bottom: 0});
+        if (!atBottom) {
+          return;
+        }
+        if (animated) {
+          $(scrollableWrap).stop();
+        } else {
+          $(scrollable).css({bottom: 0});
+          $(scrollableWrap).addClass('im_history_to_bottom');
+        }
 
-        if (atBottom) {
-          onContentLoaded(function () {
+        onContentLoaded(function () {
+          if (animated) {
+            curAnimation = true;
+            $(scrollableWrap).stop().animate({
+              scrollTop: scrollableWrap.scrollHeight - scrollableWrap.clientHeight
+            }, {
+              duration: 200,
+              always: function () {
+                curAnimation = false;
+                updateScroller();
+              }
+            });
+            updateScroller();
+          } else {
             $(scrollableWrap).removeClass('im_history_to_bottom');
             $(scrollable).css({bottom: ''});
-            // updateSizes(true);
-            $(historyWrap).nanoScroller({scrollBottom: 0});
-            // scrollableWrap.scrollTop = st;
-            // $(scrollableWrap).animate({
-            //   scrollTop: scrollableWrap.scrollHeight - scrollableWrap.clientHeight
-            // }, 200);
-            updateScroller();
-          });
-        }
+            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+            $(historyWrap).nanoScroller();
+          }
+
+        });
       });
 
       scope.$on('ui_history_change', function () {
@@ -141,9 +160,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(scrollableWrap).removeClass('im_history_to_bottom');
           $(scrollable).css({bottom: ''});
           updateSizes();
-          $(historyWrap).nanoScroller();
-          $(historyWrap).nanoScroller({scrollBottom: 0});
-          updateScroller(100);
+          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          updateScroller();
           moreNotified = false;
         });
       });
@@ -160,17 +178,21 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
           $(scrollable).css({bottom: ''});
-          $(historyWrap).nanoScroller();
-          $(historyWrap).nanoScroller({scrollTop: st + scrollableWrap.scrollHeight - sh});
+          scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
 
-          // updateScroller();
-          updateScroller(50);
+          updateScroller();
           moreNotified = false;
         });
       });
 
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
+        if ($(scrollableWrap).hasClass('im_history_to_bottom')) {
+          return cancelEvent(e);
+        }
+        if (curAnimation) {
+          return;
+        }
         atBottom = scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
 
         if (!moreNotified && scrollableWrap.scrollTop <= 300) {
@@ -190,7 +212,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (heightOnly) return;
         if (atBottom) {
           onContentLoaded(function () {
-            $(historyWrap).nanoScroller({scroll: 'bottom'});
+            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+            updateScroller();
+            // $(historyWrap).nanoScroller({scroll: 'bottom'});
           });
         }
         updateScroller(100);
@@ -252,7 +276,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (submit) {
           $(element).trigger('submit');
-          // dLog('after submit');
           return cancelEvent(e);
         }
       });
@@ -270,7 +293,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
 
-      scope.$on('ui_peer_change ui_history_change ui_message_send', focusField);
+      scope.$on('ui_peer_change', focusField);
+      scope.$on('ui_history_change', focusField);
+      scope.$on('ui_message_send', focusField);
+
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
       });
@@ -333,6 +359,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link (scope, element, attrs) {
+      element.src = 'img/blank.gif';
       scope.$watch('thumb.location', function (newVal) {
         if (!scope.thumb || !scope.thumb.location) {
           element.attr('src', scope.thumb && scope.thumb.placeholder || '');
