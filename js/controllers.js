@@ -61,6 +61,7 @@ angular.module('myApp.controllers', [])
           $scope.error = {};
 
         }, function (error) {
+          dLog(error);
           $scope.progress.enabled = false;
           dLog('sendCode error', error);
           switch (error.type) {
@@ -71,11 +72,13 @@ angular.module('myApp.controllers', [])
         });
       }, function (error) {
         $scope.progress.enabled = false;
-        dLog('checkPhone error', error);
         switch (error.type) {
           case 'PHONE_NUMBER_INVALID':
             $scope.error = {field: 'phone'};
             break;
+
+          default:
+            ErrorService.showSimpleError('Unknown error occured', 'Please check your internet connection or install the latest version of Google Chrome browser.');
         }
       });
     }
