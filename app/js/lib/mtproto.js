@@ -2240,7 +2240,20 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
             }, function (error) {
               deferred.reject(error);
             });
-          } else {
+          }
+          else if (error.code == 303) {
+            var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_)(\d+)/)[2];
+            if (newDcID != dcID) {
+              mtpGetNetworker(newDcID).then(function (networker) {
+                networker.wrapApiCall(method, params, options).then(function (result) {
+                  deferred.resolve(result);
+                }, function (error) {
+                  deferred.reject(error);
+                });
+              });
+            }
+          }
+          else {
             deferred.reject(error);
           }
         });

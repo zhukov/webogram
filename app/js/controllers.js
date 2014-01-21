@@ -38,34 +38,40 @@ angular.module('myApp.controllers', [])
 
     $scope.sendCode = function () {
       $scope.progress.enabled = true;
-      MtpApiManager.invokeApi('auth.sendCode', {
-        phone_number: $scope.credentials.phone_number,
-        sms_type: 0,
-        api_id: 2496,
-        api_hash: '8da85b0d5bfe62527e5b244c209159c3'
-      }, {dcID: dcID}).then(function (sentCode) {
+      MtpApiManager.invokeApi('auth.checkPhone', {
+        phone_number: $scope.credentials.phone_number
+      }, {dcID: dcID}).then(function (result) {
         $scope.progress.enabled = false;
-
-        if (!sentCode.phone_registered) {
+        if (!result.phone_registered) {
           ErrorService.showSimpleError('No account', 'Sorry, there is no Telegram account for ' + $scope.credentials.phone_number + '. Please sign up using our mobile apps.');
           return false;
         }
 
-        $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
-        $scope.credentials.phone_occupied = sentCode.phone_registered;
-        $scope.error = {};
+        $scope.progress.enabled = true;
+        MtpApiManager.invokeApi('auth.sendCode', {
+          phone_number: $scope.credentials.phone_number,
+          sms_type: 0,
+          api_id: 2496,
+          api_hash: '8da85b0d5bfe62527e5b244c209159c3'
+        }, {dcID: dcID}).then(function (sentCode) {
+          $scope.progress.enabled = false;
 
+          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
+          $scope.credentials.phone_occupied = sentCode.phone_registered;
+          $scope.error = {};
+
+        }, function (error) {
+          $scope.progress.enabled = false;
+          dLog('sendCode error', error);
+          switch (error.type) {
+            case 'PHONE_NUMBER_INVALID':
+              $scope.error = {field: 'phone'};
+              break;
+          }
+        });
       }, function (error) {
         $scope.progress.enabled = false;
-        dLog('sendCode', error);
-        if (error.code == 303) {
-          var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_)(\d+)/)[2];
-          if (newDcID != dcID) {
-            dcID = newDcID;
-            $scope.sendCode();
-            return;
-          }
-        }
+        dLog('checkPhone error', error);
         switch (error.type) {
           case 'PHONE_NUMBER_INVALID':
             $scope.error = {field: 'phone'};
