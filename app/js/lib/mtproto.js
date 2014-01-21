@@ -2177,7 +2177,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         return cachedNetworkers[dcID] = MtpNetworkerFactory.getNetworker(dcID, auth.authKey, auth.serverSalt);
       }, function (error) {
         dLog('Get networker error', error, error.stack);
-        return error;
+        return $q.reject(error);
       });
     });
   };
@@ -2257,6 +2257,8 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
             deferred.reject(error);
           }
         });
+    }, function (error) {
+      deferred.reject(error);
     });
 
     return deferred.promise;
