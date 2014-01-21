@@ -16,7 +16,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/dialog.html?1'
+      templateUrl: 'partials/dialog.html?2'
     };
   })
 
@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html?2'
+      templateUrl: 'partials/message.html?3'
     };
   })
 
@@ -399,6 +399,10 @@ angular.module('myApp.directives', ['myApp.filters'])
               <img class="photo_modal_image" width="{{fullPhoto.width}}" height="{{fullPhoto.height}}" />\
             </a>\
           </div>\
+          <div class="photo_modal_error_wrap" ng-if="error">\
+            <div class="photo_modal_error" ng-if="error.html" ng-bind-html="error.html"></div>\
+            <div class="photo_modal_error" ng-if="error.text">{{error.text}}</div>\
+          </div>\
         </div>',
       scope: {
         fullPhoto: '=',
@@ -411,8 +415,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           fullLoaded = false;
 
 
+      imgElement.attr('src', scope.fullPhoto.placeholder || 'img/blank.gif');
+
       if (!scope.fullPhoto.location) {
-        imgElement.attr('src', scope.fullPhoto.placeholder || '');
         return;
       }
 
@@ -450,10 +455,12 @@ angular.module('myApp.directives', ['myApp.filters'])
       }, function (e) {
         dLog('Download image failed', e, scope.fullPhoto.location);
         scope.progress.enabled = false;
-        imgElement
-          .attr('src', scope.fullPhoto.placeholder || '')
-          .removeClass('thumb_blurred');
 
+        if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
+          scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+        } else {
+          scope.error = {text: 'Download failed', error: e};
+        }
       }, function (progress) {
         scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
@@ -487,6 +494,10 @@ angular.module('myApp.directives', ['myApp.filters'])
               <source ng-src="{{player.src}}" type="video/mp4">\
             </video>\
           </div>\
+          <div class="video_full_error_wrap" ng-if="error">\
+            <div class="video_full_error" ng-if="error.html" ng-bind-html="error.html"></div>\
+            <div class="video_full_error" ng-if="error.text">{{error.text}}</div>\
+          </div>\
         </div>',
       scope: {
         video: '='
@@ -519,9 +530,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         scope.player.quicktime = hasQt;
         scope.player.src = $sce.trustAsResourceUrl(url);
       }, function (e) {
-        dLog('Download image failed', e, scope.fullPhoto.location);
+        dLog('Download video failed', e, scope.video);
         scope.progress.enabled = false;
         scope.player.src = '';
+
+        if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
+          scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+        } else {
+          scope.error = {text: 'Video download failed', error: e};
+        }
+
       }, function (progress) {
         scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });

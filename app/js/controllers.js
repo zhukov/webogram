@@ -121,7 +121,8 @@ angular.module('myApp.controllers', [])
     $scope.isLoggedIn = true;
     $scope.logOut = function () {
       MtpApiManager.logOut().then(function () {
-        location.href = 'login';
+        location.hash = '/login';
+        location.reload();
       });
     }
 
@@ -487,8 +488,17 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('ChatModalController', function ($scope, AppUsersManager, AppChatsManager, fullChat) {
-    $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, fullChat);
+  .controller('ChatModalController', function ($scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager) {
+    $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
+
+    MtpApiManager.invokeApi('messages.getFullChat', {
+      chat_id: $scope.chatID
+    }).then(function (result) {
+      AppChatsManager.saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+
+      $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, result.full_chat);
+    });
   })
 
 

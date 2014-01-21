@@ -52,7 +52,14 @@ angular.module('myApp.filters', [])
   }])
 
   .filter('dateOrTime', ['$filter', function($filter) {
+    var cachedDates = {};
+
     return function (timestamp) {
+
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
+      }
+
       var ticks = timestamp * 1000,
           diff = Math.abs(+new Date() - ticks),
           format = 'HH:mm';
@@ -63,7 +70,7 @@ angular.module('myApp.filters', [])
       else if (diff > 43200000) { // 12 hours
         format = 'EEE';
       }
-      return $filter('date')(ticks, format);
+      return cachedDates[timestamp] = $filter('date')(ticks, format);
     }
   }])
 

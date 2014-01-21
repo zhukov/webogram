@@ -25,7 +25,7 @@ angular.module('myApp', [
 config(['$locationProvider', '$routeProvider', '$compileProvider', function($locationProvider, $routeProvider, $compileProvider) {
 
   var icons = {}, reverseIcons = {}, i, j, hex, name, dataItem,
-      ranges = [[0x1f600, 0x1f637], [0x270a, 0x270c], [0x1f446, 0x1f450]];
+      ranges = [[0x1f600, 0x1f637], [0x261d, 0x263f], [0x270a, 0x270c], [0x1f446, 0x1f450]];
 
   for (j in ranges) {
     for (i = ranges[j][0]; i <= ranges[j][1]; i++) {

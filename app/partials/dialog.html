@@ -4,13 +4,11 @@
     <div class="im_dialog_date">
       {{dialogMessage.date | dateOrTime}}
     </div>
-    <span class="im_dialog_badge badge" ng-show="dialogMessage.unreadCount > 0">
-      {{dialogMessage.unreadCount}}
-    </span>
+    <span class="im_dialog_badge badge" ng-show="dialogMessage.unreadCount > 0" ng-bind="dialogMessage.unreadCount"></span>
   </div>
 
   <div class="im_dialog_photo pull-left">
-   <img class="im_dialog_photo" src="img/blank.gif" my-load-thumb thumb="dialogMessage.peerPhoto" aaa="{{dialogMessage.peerPhoto.location}}" />
+   <img class="im_dialog_photo" src="img/blank.gif" my-load-thumb thumb="dialogMessage.peerPhoto" />
   </div>
 
   <div class="im_dialog_message_wrap">

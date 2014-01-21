@@ -8,13 +8,13 @@
   <div class="modal-body">
 
     <div class="chat_modal_image_wrap pull-left">
-      <img class="chat_modal_image" my-load-thumb thumb="chatFull.thumb"/>
+      <img class="chat_modal_image" src="img/blank.gif" my-load-thumb thumb="chatFull.thumb"/>
     </div>
 
     <div class="chat_modal_info_wrap clearfix">
-      <h4 class="chat_modal_header">{{chatFull.chat | chatTitle}}</h4>
-      <p class="chat_modal_members_count" ng-if="chatFull.participants._ == 'chatParticipants'">
-        <ng-pluralize count="chatFull.participants.participants.length"
+      <h4 class="chat_modal_header" ng-bind-html="chatFull.chat.rTitle"></h4>
+      <p class="chat_modal_members_count" ng-if="chatFull.chat.participants_count > 0">
+        <ng-pluralize count="chatFull.chat.participants_count"
                          when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
         </ng-pluralize>
       </p>
