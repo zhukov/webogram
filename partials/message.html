@@ -86,7 +86,9 @@
           <i class="icon icon-document"></i>
           <div class="im_message_document_info">
             <div class="im_message_document_name_wrap">
-              <span class="im_message_document_name">{{historyMessage.media.document.file_name}}</span>
+              <span class="im_message_document_name">
+                {{historyMessage.media.document.file_name}}
+              </span>
               <span class="im_message_document_size" ng-if="!historyMessage.media.document.progress.enabled">
                 {{historyMessage.media.document.size | formatSize}}
               </span>
@@ -100,7 +102,9 @@
             <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
               <div class="progress tg_down_progress">
                 <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.document.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.document.progress.percent}}%">
-                  <span class="sr-only">{{historyMessage.media.document.progress.percent}}% Complete (success)</span>
+                  <span class="sr-only">
+                    {{historyMessage.media.document.progress.percent}}% Complete (success)
+                  </span>
                 </div>
               </div>
             </div>
@@ -115,15 +119,21 @@
           <a ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left" ng-if="historyMessage.media.user">
             <img class="im_message_contact_photo" src="img/blank.gif" my-load-thumb thumb="historyMessage.media.userPhoto"/>
           </a>
-          <div class="im_message_contact_name"><span class="glyphicon glyphicon-user"></span> {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}</div>
-          <div class="im_message_contact_phone">{{historyMessage.media.phone_number}}</div>
+          <div class="im_message_contact_name"><span class="glyphicon glyphicon-user"></span>
+            {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}
+          </div>
+          <div class="im_message_contact_phone">
+            {{historyMessage.media.phone_number}}
+          </div>
         </div>
 
         <div ng-switch-when="messageMediaPending" class="im_message_upload_file im_message_upload_{{historyMessage.media.type}}">
           <i class="icon icon-document"></i>
           <div class="im_message_document_info">
             <div class="im_message_document_name_wrap">
-              <span class="im_message_document_name">{{historyMessage.media.file_name}}</span>
+              <span class="im_message_document_name">
+                {{historyMessage.media.file_name}}
+              </span>
               <span class="im_message_document_size" ng-if="historyMessage.media.progress">
                 {{historyMessage.media.progress | formatSizeProgress}}
               </span>
@@ -131,7 +141,9 @@
             <div class="im_message_download_progress_wrap">
               <div class="progress tg_down_progress">
                 <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.progress.percent}}%">
-                  <span class="sr-only">{{historyMessage.media.progress.percent}}% Complete (success)</span>
+                  <span class="sr-only">
+                    {{historyMessage.media.progress.percent}}% Complete (success)
+                  </span>
                 </div>
               </div>
             </div>

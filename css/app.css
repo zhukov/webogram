@@ -226,6 +226,7 @@ fieldset[disabled] .btn-tg.active {
 }
 
 
+
 .img_fullsize_with_progress_wrap {
   position: relative;
   /*margin: 0 auto 20px;*/
@@ -286,7 +287,8 @@ fieldset[disabled] .btn-tg.active {
 
 .im_page_wrap {
   background: #FFF;
-  max-width: 1000px;
+  /*max-width: 1000px;*/
+  width: 1000px;
   margin: 0 auto;
 
   -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
@@ -328,11 +330,13 @@ fieldset[disabled] .btn-tg.active {
 
 
 /* Dialogs list */
-
+.im_dialogs_col {
+  width: 315px;
+}
 .im_dialogs_col .nano > .pane {
   background : rgba(0,0,0,.0);
   width      : 12px;
-  right: -7px;
+  right: 0px;
   -webkit-transition    : .2s;
   -moz-transition       : .2s;
   -o-transition         : .2s;
@@ -372,15 +376,10 @@ fieldset[disabled] .btn-tg.active {
 
 
 .im_dialogs_wrap {
-  overflow: visible;
-  overflow-x: visible !important;
-  overflow-y: visible;
 }
 .im_dialogs_scrollable_wrap {
-  /*border-right: 2px solid #E9EBED;*/
-  padding: 0 12px;
+  padding: 0 19px 0 12px;
   outline: none ! important;
-  overflow-x: visible;
 }
 .im_dialogs_scrollable_wrap .nav-stacked > li + li {
   margin-top: 0;
@@ -538,6 +537,9 @@ a.im_dialog:hover .im_dialog_message_text {
   -moz-box-shadow:    0px 2px 0px rgba(0, 0, 0, 0.12);
   box-shadow:         0px 2px 0px rgba(0, 0, 0, 0.12);
   margin-right: 15px;
+
+  position: relative;
+  z-index: 2;
 }
 .im_history_panel {
   padding: 10px 4px 0;
@@ -1104,7 +1106,6 @@ img.img_fullsize {
 .chat_modal_window .modal-dialog {
   max-width: 506px;
 }
-
 .chat_modal_wrap .modal-body {
   padding: 23px 25px 15px;
 }
@@ -1253,4 +1254,32 @@ img.img_fullsize {
 .error_modal_description {
   text-align: center;
   padding: 40px 20px;
+}
+
+
+
+.photo_modal_error {
+  color: #999;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  margin-top: -20px;
+  padding: 0 20px;
+  text-align: center;
+  font-size: 1.4em;
+  line-height: 160%;
+}
+
+.video_full_error {
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.6);
+  color: #FFF;
+  position: absolute;
+  top: 50%;
+  margin: -40px 10px 0;
+  padding: 10px 10px;
+  text-align: center;
+  font-size: 1.4em;
+  line-height: 160%;
 }

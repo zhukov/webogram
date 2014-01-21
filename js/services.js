@@ -309,7 +309,7 @@ angular.module('myApp.services', [])
     var chatFull = angular.copy(fullChat),
         chat = getChat(id);
 
-    if (chatFull.participants._ == 'chatParticipants') {
+    if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
       angular.forEach(chatFull.participants.participants, function(participant){
         participant.user = AppUsersManager.getUser(participant.user_id);
         participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
@@ -335,21 +335,10 @@ angular.module('myApp.services', [])
     scope.chatID = chatID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html?1',
+      templateUrl: 'partials/chat_modal.html?2',
       controller: 'ChatModalController',
       windowClass: 'chat_modal_window',
-      scope: scope,
-      resolve: {
-        fullChat: function () {
-          return MtpApiManager.invokeApi('messages.getFullChat', {
-            chat_id: chatID
-          }).then(function (result) {
-            saveApiChats(result.chats);
-            AppUsersManager.saveApiUsers(result.users);
-            return result.full_chat;
-          })
-        }
-      }
+      scope: scope
     });
   }
 
@@ -1172,7 +1161,7 @@ angular.module('myApp.services', [])
         height = 100,
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
-          placeholder: 'img/placeholders/PhotoThumbConversation.jpg',
+          placeholder: 'img/placeholders/PhotoThumbConversation.gif',
           width: width,
           height: height
         };
@@ -1200,7 +1189,7 @@ angular.module('myApp.services', [])
         fullHeight = $($window).height() - 150,
         fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
         full = {
-          placeholder: 'img/placeholders/PhotoThumbModal.jpg',
+          placeholder: 'img/placeholders/PhotoThumbModal.gif',
           width: fullWidth,
           height: fullHeight
         };
@@ -1272,7 +1261,7 @@ angular.module('myApp.services', [])
         height = 100,
         thumbPhotoSize = video.thumb,
         thumb = {
-          placeholder: 'img/placeholders/VideoThumbConversation.jpg',
+          placeholder: 'img/placeholders/VideoThumbConversation.gif',
           width: width,
           height: height
         };
@@ -1299,7 +1288,7 @@ angular.module('myApp.services', [])
         fullHeight = $($window).height() - 150,
         fullPhotoSize = video,
         full = {
-          placeholder: 'img/placeholders/VideoThumbModal.jpg',
+          placeholder: 'img/placeholders/VideoThumbModal.gif',
           width: fullWidth,
           height: fullHeight,
         };
@@ -1865,7 +1854,10 @@ angular.module('myApp.services', [])
   var notificationsShown = [];
   var notificationsCount = 0;
   var peerSettings = {};
+  var faviconEl = $('link[rel="icon"]');
+
   var titleBackup = document.title,
+      faviconBackup = faviconEl.attr('href'),
       titlePromise;
 
   $rootScope.$watch('idle.isIDLE', function (newVal) {
@@ -1875,6 +1867,7 @@ angular.module('myApp.services', [])
     if (!newVal) {
       notificationsCount = 0;
       document.title = titleBackup;
+      faviconEl.attr('href', faviconBackup);
       notificationsClear();
     } else {
       titleBackup = document.title;
@@ -1884,8 +1877,10 @@ angular.module('myApp.services', [])
         // dLog('check title', notificationsCount, time % 2000 > 1000);
         if (!notificationsCount || time % 2000 > 1000) {
           document.title = titleBackup;
+          faviconEl.attr('href', faviconBackup);
         } else {
           document.title = notificationsCount + ' notifications';
+          faviconEl.attr('href', 'favicon_unread.ico');
         }
       }, 1000);
     }
