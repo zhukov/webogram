@@ -22,13 +22,13 @@ angular.module('myApp.controllers', [])
   })
 
   .controller('AppLoginController', function ($scope, $location, MtpApiManager, ErrorService) {
-    var dcID = 1;
+    var options = {dcID: 1};
 
     $scope.credentials = {};
     $scope.progress = {};
 
     function saveAuth (result) {
-      MtpApiManager.setUserAuth(dcID, {
+      MtpApiManager.setUserAuth(options.dcID, {
         expires: result.expires,
         id: result.user.id
       });
@@ -40,7 +40,7 @@ angular.module('myApp.controllers', [])
       $scope.progress.enabled = true;
       MtpApiManager.invokeApi('auth.checkPhone', {
         phone_number: $scope.credentials.phone_number
-      }, {dcID: dcID}).then(function (result) {
+      }, options).then(function (result) {
         $scope.progress.enabled = false;
         if (!result.phone_registered) {
           ErrorService.showSimpleError('No account', 'Sorry, there is no Telegram account for ' + $scope.credentials.phone_number + '. Please sign up using our mobile apps.');
@@ -53,7 +53,7 @@ angular.module('myApp.controllers', [])
           sms_type: 0,
           api_id: 2496,
           api_hash: '8da85b0d5bfe62527e5b244c209159c3'
-        }, {dcID: dcID}).then(function (sentCode) {
+        }, options).then(function (sentCode) {
           $scope.progress.enabled = false;
 
           $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
@@ -98,7 +98,7 @@ angular.module('myApp.controllers', [])
       }
 
       $scope.progress.enabled = true;
-      MtpApiManager.invokeApi(method, params, {dcID: dcID}).then(saveAuth, function (error) {
+      MtpApiManager.invokeApi(method, params, options).then(saveAuth, function (error) {
         $scope.progress.enabled = false;
         if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
           return $scope.logIn(true);
