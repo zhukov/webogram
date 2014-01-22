@@ -2244,6 +2244,8 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
           else if (error.code == 303) {
             var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_)(\d+)/)[2];
             if (newDcID != dcID) {
+              AppConfigManager.set({dc: baseDcID = dcID});
+
               mtpGetNetworker(newDcID).then(function (networker) {
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
