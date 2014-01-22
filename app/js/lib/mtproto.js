@@ -1624,13 +1624,14 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.checkLongPoll = function(force) {
+    var isClean = this.cleanupSent();
     // dLog('Check lp', this.longPollPending, (new Date().getTime()));
     if (this.longPollPending && (new Date().getTime()) < this.longPollPending) {
       return false;
     }
     var self = this;
     AppConfigManager.get('dc').then(function (baseDcID) {
-      if (baseDcID != self.dcID && self.cleanupSent()) {
+      if (baseDcID != self.dcID && isClean) {
         // console.warn('send long-poll for guest DC is delayed', self.dcID);
         return;
       }
@@ -1798,7 +1799,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
           }
         });
 
-        self.cleanupSent();
+        self.checkLongPoll();
       });
     });
   };
