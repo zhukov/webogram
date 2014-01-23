@@ -232,13 +232,14 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, IdleManager) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, IdleManager, StatusManager) {
 
     $scope.$watch('curDialog.peer', applyDialogSelect);
 
     ApiUpdatesManager.attach();
 
     IdleManager.start();
+    StatusManager.start();
 
     $scope.history = [];
     $scope.typing = {};

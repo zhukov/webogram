@@ -1807,14 +1807,17 @@ angular.module('myApp.services', [])
 
   $rootScope.idle = {isIDLE: false};
 
-  var toPromise;
+  var toPromise, started = false;
 
   return {
     start: start
   };
 
   function start () {
-    $($window).on('blur focus keydown mousedown touchstart', onEvent);
+    if (!started) {
+      started = true;
+      $($window).on('blur focus keydown mousedown touchstart', onEvent);
+    }
   }
 
   function onEvent (e) {
@@ -1847,6 +1850,46 @@ angular.module('myApp.services', [])
   }
 })
 
+.service('StatusManager', function ($timeout, $rootScope, MtpApiManager, IdleManager) {
+
+  var toPromise, lastOnlineUpdated = 0, started = false;
+
+  return {
+    start: start
+  };
+
+  function start() {
+    if (!started) {
+      started = true;
+      $rootScope.$watch('idle.isIDLE', checkIDLE);
+    }
+  }
+
+  function sendUpdateStatusReq(offline) {
+    var date = (1 * new Date());
+    if (offline && !lastOnlineUpdated ||
+        !offline && (date - lastOnlineUpdated) < 50000) {
+      return;
+    }
+    lastOnlineUpdated = offline ? 0 : date;
+    return MtpApiManager.invokeApi('account.updateStatus', {
+      offline: offline
+    });
+  }
+
+  function checkIDLE() {
+    toPromise && $timeout.cancel(toPromise);
+    if ($rootScope.idle.isIDLE) {
+      toPromise = $timeout(function () {
+        sendUpdateStatusReq(true);
+      }, 5000);
+    } else {
+      sendUpdateStatusReq(false);
+      toPromise = $timeout(checkIDLE, 60000);
+    }
+  }
+
+})
 
 .service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, MtpApiManager, AppPeersManager, IdleManager) {
 
@@ -1921,7 +1964,9 @@ angular.module('myApp.services', [])
       $($window).on('click', requestPermission);
     }
 
-    $($window).on('beforeunload', notificationsClear);
+    try {
+      $($window).on('beforeunload', notificationsClear);
+    } catch (e) {}
   }
 
   function requestPermission() {
