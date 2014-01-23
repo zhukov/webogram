@@ -8,7 +8,10 @@
   <div class="modal-body">
 
     <div class="chat_modal_image_wrap pull-left">
-      <img class="chat_modal_image" src="img/blank.gif" my-load-thumb thumb="chatFull.thumb"/>
+      <img
+        class="chat_modal_image"
+        my-load-thumb
+        thumb="chatFull.thumb"/>
     </div>
 
     <div class="chat_modal_info_wrap clearfix">
@@ -27,7 +30,11 @@
 
       <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants">
         <a ng-click="openUser(participant.user_id)" class="chat_modal_participant_photo pull-left">
-          <img class="chat_modal_participant_photo" my-load-thumb thumb="participant.userPhoto"/>
+          <img
+            class="chat_modal_participant_photo"
+            my-load-thumb
+            thumb="participant.userPhoto"
+          />
           <i class="icon modal_participant_online" ng-show="participant.user.status._ == 'userStatusOnline'"></i>
         </a>
         <div class="chat_modal_participant_name">

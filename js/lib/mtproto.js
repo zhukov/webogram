@@ -2297,14 +2297,16 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   var apiUploadPromise = $q.when();
   var cachedSavePromises = {};
   var cachedDownloadPromises = {};
+  var cachedDownloads = {};
 
   var downloadPulls = {};
-  var downloadActive = 0;
+  var downloadActives = {};
   var downloadLimit = 5;
 
   function downloadRequest(dcID, cb, activeDelta) {
     if (downloadPulls[dcID] === undefined) {
       downloadPulls[dcID] = [];
+      downloadActives[dcID] = 0
     }
     var downloadPull = downloadPulls[dcID];
     var deferred = $q.defer();
@@ -2319,25 +2321,25 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   function downloadCheck(dcID) {
     var downloadPull = downloadPulls[dcID];
 
-    if (downloadActive >= downloadLimit || !downloadPull || !downloadPull.length) {
+    if (downloadActives[dcID] >= downloadLimit || !downloadPull || !downloadPull.length) {
       return false;
     }
 
     var data = downloadPull.shift(),
         activeDelta = data.activeDelta || 1;
 
-    downloadActive += activeDelta;
+    downloadActives[dcID] += activeDelta;
 
     var a = index++;
     data.cb()
       .then(function (result) {
-        downloadActive -= activeDelta;
+        downloadActives[dcID] -= activeDelta;
         downloadCheck(dcID);
 
         data.deferred.resolve(result);
 
       }, function (error) {
-        downloadActive -= activeDelta;
+        downloadActives[dcID] -= activeDelta;
         downloadCheck(dcID);
 
         data.deferred.reject(error);
@@ -2351,7 +2353,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
     $window.requestFileSystem = $window.requestFileSystem || $window.webkitRequestFileSystem;
 
-    if (!$window.requestFileSystem) {
+    if (!$window.requestFileSystem/* || true*/) {
       return $q.reject({type: 'FS_BROWSER_UNSUPPORTED', description: 'requestFileSystem not present'});
     }
 
@@ -2404,23 +2406,12 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   };
 
   function getCachedFile (location) {
+    if (!location) {
+      return false;
+    }
     var fileName = getFileName(location);
 
-    if (cachedSavePromises[fileName]) {
-      return cachedSavePromises[fileName];
-    }
-    var deferred = $q.defer(),
-        errorHandler = function (error) {
-          deferred.reject();
-        };
-
-    requestFS().then(function () {
-      cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
-        deferred.resolve(fileEntry.toURL());
-      }, errorHandler);
-    }, errorHandler);
-
-    return deferred.promise;
+    return cachedDownloads[fileName] || false;
   }
 
   function saveSmallFile (location, bytes) {
@@ -2434,17 +2425,18 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         errorHandler = function (error) {
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate();
+          errorHandler = angular.noop;
         };
 
     requestFS().then(function () {
       cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
-        deferred.resolve(fileEntry.toURL());
+        deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
       }, function () {
         cachedFS.root.getFile(fileName, {create: true}, function(fileEntry) {
           fileEntry.createWriter(function (fileWriter) {
             cacheFileWriter = fileWriter;
             fileWriteBytes(fileWriter, bytes).then(function () {
-              deferred.resolve(fileEntry.toURL());
+              deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
             }, errorHandler);
           }, errorHandler);
         }, errorHandler);
@@ -2468,6 +2460,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         errorHandler = function (error) {
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate();
+          errorHandler = angular.noop;
         },
         doDownload = function () {
           cachedFS.root.getFile(fileName, {create: true}, function(fileEntry) {
@@ -2485,7 +2478,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               downloadPromise.then(function (result) {
                 fileWriteBytes(fileWriter, result.bytes).then(function () {
                   // dLog('Success', location, fileEntry.toURL());
-                  deferred.resolve(fileEntry.toURL());
+                  deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
                 }, errorHandler);
               }, errorHandler);
             }, errorHandler);
@@ -2496,7 +2489,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
         fileEntry.file(function(file) {
           if (file.size) {
-            deferred.resolve(fileEntry.toURL());
+            deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
           } else {
             dLog('Small file empty', file);
             doDownload();
@@ -2513,7 +2506,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           limit: 0
         }, {dcID: location.dc_id});
       }).then(function (result) {
-        deferred.resolve('data:image/jpeg;base64,' + bytesToBase64(result.bytes))
+        deferred.resolve(cachedDownloads[fileName] = 'data:image/jpeg;base64,' + bytesToBase64(result.bytes))
       }, errorHandler);
     });
 
@@ -2536,6 +2529,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           // dLog('fail');
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate();
+          errorHandler = angular.noop;
         },
         saveToFileEntry = function (fileEntry) {
           fileEntry.createWriter(function (fileWriter) {
@@ -2571,7 +2565,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                     }, errorHandler).then(function () {
 
                       if (isFinal) {
-                        deferred.resolve(fileEntry.toURL('image/jpeg'));
+                        deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL('image/jpeg'));
                       } else {
                         // dLog('notify', {done: offset + limit, total: size});
                         deferred.notify({done: offset + limit, total: size});
@@ -2590,9 +2584,6 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
             }
           }, errorHandler);
 
-        },
-        doDownload = function () {
-          cachedFS.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler);
         };
 
     if (fileEntry) {
@@ -2603,14 +2594,68 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           fileEntry.file(function(file) {
             dLog('check size', file.size, size);
             if (file.size >= size) {
-              deferred.resolve(fileEntry.toURL());
+              deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
             } else {
               dLog('File bad size', file, size);
-              doDownload();
+              cachedFS.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
             }
           }, errorHandler);
-        }, doDownload);
-      }, errorHandler);
+        }, function () {
+          cachedFS.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
+        });
+      }, function () {
+
+        var blobParts = [];
+        var limit = size > 30400 ? 524288 : 4096;
+        var writeBlobPromise = $q.when(),
+            writeBlobDeferred;
+        for (var offset = 0; offset < size; offset += limit) {
+          writeBlobDeferred = $q.defer();
+          (function (isFinal, offset, writeBlobDeferred, writeBlobPromise) {
+            return downloadRequest(dcID, function () {
+              return MtpApiManager.invokeApi('upload.getFile', {
+                location: location,
+                offset: offset,
+                limit: limit
+              }, {dcID: dcID});
+            }, 6).then(function (result) {
+              writeBlobPromise.then(function () {
+                try {
+                  blobParts.push(bytesToArrayBuffer(result.bytes));
+                  writeBlobDeferred.resolve();
+
+                  if (isFinal) {
+                    try {
+                      var blob = new Blob(blobParts, {type: 'image/jpeg'});
+                    } catch (e) {
+                      window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+                      var bb = new BlobBuilder;
+                      angular.forEach(blobParts, function(blobPart) {
+                        bb.append(blobPart);
+                      });
+                      var blob = bb.getBlob('image/jpeg');
+                    }
+
+
+                    window.URL = window.URL || window.webkitURL;
+                    deferred.resolve(cachedDownloads[fileName] = URL.createObjectURL(blob));
+                  } else {
+                    deferred.notify({done: offset + limit, total: size});
+                  };
+                } catch (e) {
+                  errorHandler(e);
+                }
+              }, errorHandler);
+
+            });
+
+          })(offset + limit >= size, offset, writeBlobDeferred, writeBlobPromise);
+
+          writeBlobPromise = writeBlobDeferred.promise;
+
+        }
+
+      });
     }
 
     return cachedDownloadPromises[fileName] = deferred.promise;
@@ -2626,6 +2671,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           dLog('fail');
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate();
+          errorHandler = angular.noop;
         };
 
     requestFS().then(function () {
@@ -2660,6 +2706,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         errorHandler = function (error) {
           dLog('error', error);
           deferred.reject(error);
+          errorHandler = angular.noop;
         },
         part = 0,
         offset,
@@ -2725,6 +2772,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     uploadFile: uploadFile
   };
 })
+
 
 
 

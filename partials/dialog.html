@@ -4,11 +4,19 @@
     <div class="im_dialog_date">
       {{dialogMessage.date | dateOrTime}}
     </div>
-    <span class="im_dialog_badge badge" ng-show="dialogMessage.unreadCount > 0" ng-bind="dialogMessage.unreadCount"></span>
+    <span
+      class="im_dialog_badge badge"
+      ng-show="dialogMessage.unreadCount > 0"
+      ng-bind="dialogMessage.unreadCount"
+    ></span>
   </div>
 
   <div class="im_dialog_photo pull-left">
-   <img class="im_dialog_photo" src="img/blank.gif" my-load-thumb thumb="dialogMessage.peerPhoto" />
+    <img
+      class="im_dialog_photo"
+      my-load-thumb
+      thumb="dialogMessage.peerPhoto"
+    />
   </div>
 
   <div class="im_dialog_message_wrap">
@@ -22,7 +30,14 @@
 
     <div class="im_dialog_message">
       <span class="im_dialog_chat_from_wrap">
-        <span class="im_dialog_chat_from" ng-if="!dialogMessage.out &amp;&amp; dialogMessage.chatID" ng-bind-html="dialogMessage.fromUser.rFirstName"></span><span class="im_dialog_chat_from" ng-if="dialogMessage.out">You</span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
+        <span
+          class="im_dialog_chat_from"
+          ng-if="!dialogMessage.out &amp;&amp; dialogMessage.chatID"
+          ng-bind-html="dialogMessage.fromUser.rFirstName"
+        ></span><span
+          class="im_dialog_chat_from"
+          ng-if="dialogMessage.out"
+        >You</span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
       </span>
 
       <span class="im_dialog_message_media" ng-if="dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty'" ng-switch="dialogMessage.media._">

@@ -80,14 +80,26 @@
 
           <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
             <div class="pull-right im_panel_peer_photo" ng-click="openUser(historyPeer.id)" ng-if="historyPeer.id > 0">
-              <img class="im_panel_peer_photo" src="img/blank.gif" my-load-thumb thumb="historyPeer.photo" />
+              <img
+                class="im_panel_peer_photo"
+                my-load-thumb
+                thumb="historyPeer.photo"
+              />
               <i class="icon im_panel_peer_online" ng-show="historyPeer.data.status._ == 'userStatusOnline'"></i>
             </div>
             <div class="pull-right im_panel_peer_photo" ng-click="openChat(-historyPeer.id)" ng-if="historyPeer.id < 0">
-              <img class="im_panel_peer_photo" src="img/blank.gif" my-load-thumb thumb="historyPeer.photo" />
+              <img
+                class="im_panel_peer_photo"
+                my-load-thumb
+                thumb="historyPeer.photo"
+              />
             </div>
             <div class="pull-left im_panel_own_photo">
-              <img class="im_panel_own_photo" src="img/blank.gif" my-load-thumb thumb="ownPhoto" />
+              <img
+                class="im_panel_own_photo"
+                my-load-thumb
+                thumb="ownPhoto"
+              />
             </div>
             <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
               <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
