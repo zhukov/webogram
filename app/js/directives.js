@@ -16,7 +16,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/dialog.html?2'
+      templateUrl: 'partials/dialog.html?3'
     };
   })
 
@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html?3'
+      templateUrl: 'partials/message.html?4'
     };
   })
 
@@ -359,18 +359,31 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link (scope, element, attrs) {
-      element.src = 'img/blank.gif';
+      var counter = 0;
       scope.$watch('thumb.location', function (newVal) {
+        var counterSaved = ++counter;
         if (!scope.thumb || !scope.thumb.location) {
-          element.attr('src', scope.thumb && scope.thumb.placeholder || '');
+          element.attr('src', scope.thumb && scope.thumb.placeholder || 'img/blank.gif');
           return;
         }
 
+        var cachedSrc = MtpApiFileManager.getCachedFile(location);
+        if (cachedSrc) {
+          element.attr('src', cachedSrc);
+          return;
+        }
+
+        element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+
         MtpApiFileManager.downloadSmallFile(scope.thumb.location, scope.thumb.size).then(function (url) {
-          element.attr('src', url);
+          if (counterSaved == counter) {
+            element.attr('src', url);
+          }
         }, function (e) {
           dLog('Download image failed', e, scope.thumb.location);
-          element.attr('src', scope.thumb.placeholder || '');
+          if (counterSaved == counter) {
+            element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+          }
         });
       })
 
@@ -411,24 +424,18 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link (scope, element, attrs) {
-      var imgElement = $('img', element),
-          fullLoaded = false;
 
+      var imgElement = $('img', element);
 
-      imgElement.attr('src', scope.fullPhoto.placeholder || 'img/blank.gif');
+      imgElement
+          .attr('src', MtpApiFileManager.getCachedFile(scope.thumbLocation) || 'img/blank.gif')
+          .addClass('thumb_blurred')
+          .addClass('thumb_blur_animation');
 
       if (!scope.fullPhoto.location) {
         return;
       }
 
-      MtpApiFileManager.getCachedFile(scope.thumbLocation).then(function (url) {
-        if (!fullLoaded) {
-          imgElement
-            .attr('src', url)
-            .addClass('thumb_blurred')
-            .addClass('thumb_blur_animation');
-        }
-      });
 
       var apiPromise;
       if (scope.fullPhoto.size) {
@@ -446,7 +453,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope.progress = {enabled: true, percent: 1};
 
       apiPromise.then(function (url) {
-        fullLoaded = true;
         scope.progress.enabled = false;
         imgElement
           .attr('src', url)
@@ -486,7 +492,13 @@ angular.module('myApp.directives', ['myApp.filters'])
             </div>\
           </div>\
           <div class="img_fullsize_wrap" ng-if="!player.src">\
-            <img class="img_fullsize" my-load-thumb thumb="video.thumb" width="{{video.full.width}}" height="{{video.full.height}}" />\
+            <img\
+              class="img_fullsize"\
+              my-load-thumb\
+              thumb="video.thumb"\
+              width="{{video.full.width}}"\
+              height="{{video.full.height}}"\
+            />\
           </div>\
           <div class="video_full_player" ng-if="player.src">\
             <embed ng-src="{{player.src}}" width="{{video.full.width}}" height="{{video.full.height}}" autoplay="true" CONTROLLER="TRUE" loop="false" pluginspace="http://www.apple.com/quicktime/" ng-if="player.quicktime"/>\

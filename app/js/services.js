@@ -213,7 +213,7 @@ angular.module('myApp.services', [])
     scope.userID = userID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/user_modal.html',
+      templateUrl: 'partials/user_modal.html?1',
       controller: 'UserModalController',
       scope: scope,
       windowClass: 'user_modal_window',
@@ -335,7 +335,7 @@ angular.module('myApp.services', [])
     scope.chatID = chatID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html?2',
+      templateUrl: 'partials/chat_modal.html?3',
       controller: 'ChatModalController',
       windowClass: 'chat_modal_window',
       scope: scope
