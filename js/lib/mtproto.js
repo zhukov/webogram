@@ -1099,6 +1099,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
 
     request.storeMethod('req_pq', {nonce: auth.nonce});
 
+    dLog('Send req_pq', bytesToHex(auth.nonce));
     mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
       var deserializer = result.data;
       var response = deserializer.fetchObject('ResPQ');
@@ -1115,7 +1116,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       auth.pq = response.pq;
       auth.fingerprints = response.server_public_key_fingerprints;
 
-      // dLog('ResPQ', bytesToHex(auth.serverNonce), bytesToHex(auth.pq), auth.fingerprints);
+      dLog('Got ResPQ', bytesToHex(auth.serverNonce), bytesToHex(auth.pq), auth.fingerprints);
 
       auth.publicKey = MtpRsaKeysManager.select(auth.fingerprints);
 
@@ -1123,6 +1124,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
         throw new Error('No public key found');
       }
 
+      dLog('PQ factorization start');
       if (!!window.Worker) {
         var worker = new Worker('js/lib/pq_worker.js');
 
@@ -1181,6 +1183,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       encrypted_data: rsaEncrypt(auth.publicKey, dataWithHash)
     });
 
+    dLog('Send req_DH_params');
     mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
       var deserializer = result.data;
       var response = deserializer.fetchObject('Server_DH_Params', 'RESPONSE');
@@ -1250,6 +1253,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       throw new Error('server_DH_inner_data serverNonce mismatch');
     }
 
+    dLog('Done decrypting answer');
     auth.g          = response.g;
     auth.dhPrime    = response.dh_prime;
     auth.gA         = response.g_a;
@@ -1296,6 +1300,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       encrypted_data: encryptedData
     });
 
+    dLog('Send set_client_DH_params');
     mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
       var deserializer = result.data;
       var response = deserializer.fetchObject('Set_client_DH_params_answer');
@@ -1323,6 +1328,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
           authKeyAux  = authKeyHash.slice(0, 8),
           authKeyID   = authKeyHash.slice(-8);
 
+      dLog('Got Set_client_DH_params_answer', response._);
       switch (response._) {
         case 'dh_gen_ok':
           var newNonceHash1 = sha1Hash(auth.newNonce.concat([1], authKeyAux)).slice(-16);

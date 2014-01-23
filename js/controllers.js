@@ -410,7 +410,7 @@ angular.module('myApp.controllers', [])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, MtpApiManager, AppPeersManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, AppPeersManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -438,27 +438,28 @@ angular.module('myApp.controllers', [])
     $scope.$watch('draftMessage.files', onFilesSelected);
 
     function sendMessage (e) {
-      cancelEvent(e);
 
-      var text = $scope.draftMessage.text;
+      $timeout(function () {
+        var text = $scope.draftMessage.text;
 
-      if (!text.length) {
-        return false;
-      }
-
-      text = text.replace(/:\s*(.+?)\s*:/g, function (all, name) {
-        var utfChar = $.emojiarea.reverseIcons[name];
-        if (utfChar !== undefined) {
-          return utfChar;
+        if (!text.length) {
+          return false;
         }
-        return all;
+
+        text = text.replace(/:\s*(.+?)\s*:/g, function (all, name) {
+          var utfChar = $.emojiarea.reverseIcons[name];
+          if (utfChar !== undefined) {
+            return utfChar;
+          }
+          return all;
+        });
+
+        AppMessagesManager.sendText($scope.curDialog.peerID, text);
+        resetDraft();
+        $scope.$broadcast('ui_message_send');
       });
 
-      AppMessagesManager.sendText($scope.curDialog.peerID, text);
-      resetDraft();
-      $scope.$broadcast('ui_message_send');
-
-      return false;
+      return cancelEvent(e);
     }
 
 
