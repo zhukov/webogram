@@ -46,19 +46,19 @@ angular.module('myApp.services', [])
 
     var deferred = $q.defer();
 
-    // dLog('get', keys);
+    // console.log('get', keys);
     chrome.storage.local.get(keys, function (resultObj) {
-      // dLog('got', resultObj);
+      // console.log('got', resultObj);
       result = [];
       angular.forEach(keys, function (key) {
         var value = resultObj[key];
-        // dLog('p1', key, value);
+        // console.log('p1', key, value);
         value = value === undefined || value === null ? false : JSON.parse(value);
-        // dLog('p2', value);
+        // console.log('p2', value);
         result.push(cache[key] = value);
       });
 
-      // dLog('got parsed', result);
+      // console.log('got parsed', result);
       deferred.resolve(single ? result[0] : result);
     });
 
@@ -231,7 +231,7 @@ angular.module('myApp.services', [])
   $rootScope.openUser = openUser;
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    // dLog('on apiUpdate', update);
+    // console.log('on apiUpdate', update);
     switch (update._) {
       case 'updateUserStatus':
         var userID = update.user_id;
@@ -486,7 +486,7 @@ angular.module('myApp.services', [])
         }
       }
     }
-    // dLog('history storage', angular.copy(historyStorage.history), maxID, offset);
+    // console.log('history storage', angular.copy(historyStorage.history), maxID, offset);
 
     if (historyStorage.count !== null && historyStorage.history.length >= offset + limit) {
       return $q.when({
@@ -520,13 +520,13 @@ angular.module('myApp.services', [])
         }
       }
 
-      // dLog('history storage after', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
+      // console.log('history storage after', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
 
       historyStorage.history.splice(offset, historyStorage.history.length - offset);
       angular.forEach(historyResult.messages, function (message) {
         historyStorage.history.push(message.id);
       });
-      // dLog('history storage final', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
+      // console.log('history storage final', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
 
       deferred.resolve({
         count: historyStorage.count,
@@ -557,7 +557,7 @@ angular.module('myApp.services', [])
   }
 
   function readHistory (inputPeer) {
-    // dLog('start read');
+    // console.log('start read');
     var peerID = AppPeersManager.getPeerID(inputPeer),
         historyStorage = historiesStorage[peerID],
         foundDialog = getDialogByPeerID(peerID);
@@ -565,22 +565,22 @@ angular.module('myApp.services', [])
     if (!historyStorage ||
         !historyStorage.history.length ||
         foundDialog[0] && !foundDialog[0].unread_count) {
-      // dLog('bad1', historyStorage, foundDialog[0]);
+      // console.log('bad1', historyStorage, foundDialog[0]);
       return false;
     }
 
     var wasUnread = false;
-    // dLog(historyStorage);
+    // console.log(historyStorage);
     for (i = 0; i < historyStorage.history.length; i++) {
       messageID = historyStorage.history[i];
       message = messagesStorage[messageID];
-      // dLog('ms', message);
+      // console.log('ms', message);
       if (message && !message.out) {
         if (message.unread) {
-          // dLog('unread');
+          // console.log('unread');
           wasUnread = true;
         } else if (!wasUnread) {
-          // dLog('bad2');
+          // console.log('bad2');
           return false;
         }
       }
@@ -765,7 +765,7 @@ angular.module('myApp.services', [])
 
           });
         }, null, function (progress) {
-          // dLog('upload progress', progress);
+          // console.log('upload progress', progress);
           var historyMessage = messagesForHistory[messageID],
               percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
 
@@ -794,7 +794,7 @@ angular.module('myApp.services', [])
 
   function finalizePendingMessage(randomID, finalMessage) {
     var pendingData = pendingByRandomID[randomID];
-    // dLog('pdata', randomID, pendingData);
+    // console.log('pdata', randomID, pendingData);
 
     if (pendingData) {
       var peerID = pendingData[0],
@@ -805,7 +805,7 @@ angular.module('myApp.services', [])
           historyMessage = false,
           i;
 
-      // dLog('pending', randomID, historyStorage.pending);
+      // console.log('pending', randomID, historyStorage.pending);
       for (i = 0; i < historyStorage.pending.length; i++) {
         if (historyStorage.pending[i] == tempID) {
           historyStorage.pending.splice(i, 1);
@@ -1009,7 +1009,7 @@ angular.module('myApp.services', [])
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    dLog('on apiUpdate', update);
+    console.log('on apiUpdate', update);
     switch (update._) {
       case 'updateMessageID':
         pendingByMessageID[update.id] = update.random_id;
@@ -1047,7 +1047,7 @@ angular.module('myApp.services', [])
           delete pendingByMessageID[message.id];
         }
 
-        // dLog(11, randomID, pendingMessage);
+        // console.log(11, randomID, pendingMessage);
         if (!pendingMessage) {
           $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
         }
@@ -1085,11 +1085,11 @@ angular.module('myApp.services', [])
         for (i = 0; i < update.messages.length; i++) {
           messageID = update.messages[i];
           message = messagesStorage[messageID];
-          // dLog('read', messageID, message);
+          // console.log('read', messageID, message);
           if (message) {
             message.unread = false;
             if (messagesForHistory[messageID]) {
-              // dLog(222, messagesForHistory[messageID]);
+              // console.log(222, messagesForHistory[messageID]);
               messagesForHistory[messageID].unread = false;
             }
             peerID = getMessagePeer(message);
@@ -1166,7 +1166,7 @@ angular.module('myApp.services', [])
           height: height
         };
 
-        // dLog('chosen photo size', photoID, thumbPhotoSize);
+        // console.log('chosen photo size', photoID, thumbPhotoSize);
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
       if (thumbPhotoSize.w > thumbPhotoSize.h) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
@@ -1397,7 +1397,7 @@ angular.module('myApp.services', [])
     historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
 
     function updateDownloadProgress (progress) {
-      dLog('dl progress', progress);
+      console.log('dl progress', progress);
       historyDoc.progress.done = progress.done;
       historyDoc.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
@@ -1417,9 +1417,9 @@ angular.module('myApp.services', [])
       }, function (writableFileEntry) {
         MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, writableFileEntry).then(function (url) {
           delete historyDoc.progress;
-          dLog('file save done');
+          console.log('file save done');
         }, function (e) {
-          dLog('document download failed', e);
+          console.log('document download failed', e);
           historyDoc.progress.enabled = false;
         }, updateDownloadProgress);
       });
@@ -1434,7 +1434,7 @@ angular.module('myApp.services', [])
           a.remove();
         }, 100);
       }, function (e) {
-        dLog('document download failed', e);
+        console.log('document download failed', e);
         historyDoc.progress.enabled = false;
       }, updateDownloadProgress);
     }
@@ -1517,12 +1517,12 @@ angular.module('myApp.services', [])
             case 'updateNewMessage':
               message = update.message;
               if (message.from_id && !AppUsersManager.hasUser(message.from_id)) {
-                dLog('User not found', message.from_id, 'getDiff');
+                console.log('User not found', message.from_id, 'getDiff');
                 getDifference();
                 return false;
               }
               if (message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
-                dLog('Chat not found', message.to_id.chat_id, 'getDiff');
+                console.log('Chat not found', message.to_id.chat_id, 'getDiff');
                 getDifference();
                 return false;
               }
@@ -1537,7 +1537,7 @@ angular.module('myApp.services', [])
 
       case 'updateShortMessage':
         if (!AppUsersManager.hasUser(updateMessage.from_id)) {
-          dLog('User not found', updateMessage.from_id, 'getDiff');
+          console.log('User not found', updateMessage.from_id, 'getDiff');
           getDifference();
           break;
         }
@@ -1561,7 +1561,7 @@ angular.module('myApp.services', [])
       case 'updateShortChatMessage':
         if (!AppUsersManager.hasUser(updateMessage.from_id) ||
             !AppChatsManager.hasChat(updateMessage.chat_id)) {
-          dLog('User or chat not found', updateMessage.from_id, updateMessage.chat_id, 'getDiff');
+          console.log('User or chat not found', updateMessage.from_id, updateMessage.chat_id, 'getDiff');
           getDifference();
           break;
         }
@@ -1641,7 +1641,7 @@ angular.module('myApp.services', [])
   }
 
   function saveSeq (seq, seqStart) {
-    // dLog('saving seq', curState.invalid, seq, seqStart, curState.seq);
+    // console.log('saving seq', curState.invalid, seq, seqStart, curState.seq);
 
     if (curState.invalid) {
       return false;
@@ -1650,7 +1650,7 @@ angular.module('myApp.services', [])
     seqStart = seqStart || seq;
 
     if (seqStart != curState.seq + 1) {
-      // dLog('seq hole', seqStart, curState.seq);
+      // console.log('seq hole', seqStart, curState.seq);
       if (seqStart != curState.seq) {
         getDifference();
       }
@@ -1694,7 +1694,7 @@ angular.module('myApp.services', [])
 
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')', 'i');
 
-  // dLog(regExp);
+  // console.log(regExp);
 
 
   return {
@@ -1730,7 +1730,7 @@ angular.module('myApp.services', [])
 
 
     while ((match = raw.match(regExp))) {
-      // dLog(2, match);
+      // console.log(2, match);
       html.push(encodeEntities(raw.substr(0, match.index)));
 
       if (match[1]) { // URL
@@ -1788,14 +1788,14 @@ angular.module('myApp.services', [])
 
     text = $sanitize(html.join(''));
 
-    // dLog(3, text, html);
+    // console.log(3, text, html);
 
     if (emojiFound) {
       text = text.replace(/<span class="emoji emoji-file-([0-9a-f]+?)"(.+?)<\/span>/g,
                           '<span class="emoji" style="background-image: url(\'vendor/gemoji/images/$1.png\')"$2</span>');
     }
 
-    // dLog(4, text, html);
+    // console.log(4, text, html);
 
     return $sce.trustAs('html', text);
   }
@@ -1807,18 +1807,21 @@ angular.module('myApp.services', [])
 
   $rootScope.idle = {isIDLE: false};
 
-  var toPromise;
+  var toPromise, started = false;
 
   return {
     start: start
   };
 
   function start () {
-    $($window).on('blur focus keydown mousedown touchstart', onEvent);
+    if (!started) {
+      started = true;
+      $($window).on('blur focus keydown mousedown touchstart', onEvent);
+    }
   }
 
   function onEvent (e) {
-    // dLog('event', e.type);
+    // console.log('event', e.type);
     if (e.type == 'mousemove') {
       $($window).off('mousemove', onEvent);
     }
@@ -1826,7 +1829,7 @@ angular.module('myApp.services', [])
 
     $timeout.cancel(toPromise);
     if (!isIDLE) {
-      // dLog('update timeout');
+      // console.log('update timeout');
       toPromise = $timeout(function () {
         onEvent({type: 'timeout'});
       }, 30000);
@@ -1836,7 +1839,7 @@ angular.module('myApp.services', [])
       return;
     }
 
-    // dLog('IDLE changed', isIDLE);
+    // console.log('IDLE changed', isIDLE);
     $rootScope.$apply(function () {
       $rootScope.idle.isIDLE = isIDLE;
     });
@@ -1847,6 +1850,46 @@ angular.module('myApp.services', [])
   }
 })
 
+.service('StatusManager', function ($timeout, $rootScope, MtpApiManager, IdleManager) {
+
+  var toPromise, lastOnlineUpdated = 0, started = false;
+
+  return {
+    start: start
+  };
+
+  function start() {
+    if (!started) {
+      started = true;
+      $rootScope.$watch('idle.isIDLE', checkIDLE);
+    }
+  }
+
+  function sendUpdateStatusReq(offline) {
+    var date = (1 * new Date());
+    if (offline && !lastOnlineUpdated ||
+        !offline && (date - lastOnlineUpdated) < 50000) {
+      return;
+    }
+    lastOnlineUpdated = offline ? 0 : date;
+    return MtpApiManager.invokeApi('account.updateStatus', {
+      offline: offline
+    });
+  }
+
+  function checkIDLE() {
+    toPromise && $timeout.cancel(toPromise);
+    if ($rootScope.idle.isIDLE) {
+      toPromise = $timeout(function () {
+        sendUpdateStatusReq(true);
+      }, 5000);
+    } else {
+      sendUpdateStatusReq(false);
+      toPromise = $timeout(checkIDLE, 60000);
+    }
+  }
+
+})
 
 .service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, MtpApiManager, AppPeersManager, IdleManager) {
 
@@ -1861,7 +1904,7 @@ angular.module('myApp.services', [])
       titlePromise;
 
   $rootScope.$watch('idle.isIDLE', function (newVal) {
-    // dLog('isIDLE watch', newVal);
+    // console.log('isIDLE watch', newVal);
     $interval.cancel(titlePromise);
 
     if (!newVal) {
@@ -1874,7 +1917,7 @@ angular.module('myApp.services', [])
 
       titlePromise = $interval(function () {
         var time = +new Date();
-        // dLog('check title', notificationsCount, time % 2000 > 1000);
+        // console.log('check title', notificationsCount, time % 2000 > 1000);
         if (!notificationsCount || time % 2000 > 1000) {
           document.title = titleBackup;
           faviconEl.attr('href', faviconBackup);
@@ -1903,7 +1946,7 @@ angular.module('myApp.services', [])
         peer: AppPeersManager.getInputPeerByID(peerID)
       }
     }).then(function (peerNotifySettings) {
-      // dLog('got settings', peerID, peerNotifySettings);
+      // console.log('got settings', peerID, peerNotifySettings);
       return peerNotifySettings._ == 'peerNotifySettings' &&
              peerNotifySettings.mute_until * 1000 > (+new Date());
     });
@@ -1915,13 +1958,15 @@ angular.module('myApp.services', [])
     }
 
     var havePermission = window.webkitNotifications.checkPermission();
-    // dLog('perm', havePermission);
+    // console.log('perm', havePermission);
 
     if (havePermission != 0) { // 0 is PERMISSION_ALLOWED
       $($window).on('click', requestPermission);
     }
 
-    $($window).on('beforeunload', notificationsClear);
+    try {
+      $($window).on('beforeunload', notificationsClear);
+    } catch (e) {}
   }
 
   function requestPermission() {
@@ -1930,7 +1975,7 @@ angular.module('myApp.services', [])
   }
 
   function notify (data) {
-    // dLog('notify', $rootScope.idle.isIDLE);
+    // console.log('notify', $rootScope.idle.isIDLE);
     if (!$rootScope.idle.isIDLE) {
       return false;
     }
@@ -1957,7 +2002,7 @@ angular.module('myApp.services', [])
       }
     };
 
-    // dLog('notify', notification);
+    // console.log('notify', notification);
 
     notification.show();
 

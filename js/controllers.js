@@ -59,9 +59,9 @@ angular.module('myApp.controllers', [])
           $scope.error = {};
 
         }, function (error) {
-          dLog(error);
+          console.log(error);
           $scope.progress.enabled = false;
-          dLog('sendCode error', error);
+          console.log('sendCode error', error);
           switch (error.type) {
             case 'PHONE_NUMBER_INVALID':
               $scope.error = {field: 'phone'};
@@ -232,13 +232,14 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, IdleManager) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, IdleManager, StatusManager) {
 
     $scope.$watch('curDialog.peer', applyDialogSelect);
 
     ApiUpdatesManager.attach();
 
     IdleManager.start();
+    StatusManager.start();
 
     $scope.history = [];
     $scope.typing = {};
@@ -263,7 +264,7 @@ angular.module('myApp.controllers', [])
 
     function updateHistoryPeer(preload) {
       var peerData = AppPeersManager.getPeer(peerID);
-      // dLog('update', preload, peerData);
+      // console.log('update', preload, peerData);
       if (!peerData || peerData.deleted) {
         return false;
       }
@@ -348,14 +349,14 @@ angular.module('myApp.controllers', [])
 
     $scope.$on('history_append', function (e, addedMessage) {
       if (addedMessage.peerID == $scope.curDialog.peerID) {
-        // dLog('append', addedMessage);
+        // console.log('append', addedMessage);
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
         $scope.typing = {};
         $scope.$broadcast('ui_history_append');
         offset++;
 
-        // dLog('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
+        // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
         if (!$rootScope.idle.isIDLE) {
           $timeout(function () {
             AppMessagesManager.readHistory($scope.curDialog.inputPeer);
@@ -365,7 +366,7 @@ angular.module('myApp.controllers', [])
     });
 
     $scope.$on('apiUpdate', function (e, update) {
-      // dLog('on apiUpdate inline', update);
+      // console.log('on apiUpdate inline', update);
       switch (update._) {
         case 'updateUserTyping':
           if (update.user_id == $scope.curDialog.peerID && AppUsersManager.hasUser(update.user_id)) {
@@ -424,10 +425,10 @@ angular.module('myApp.controllers', [])
         var backupDraftObj = {};
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         AppConfigManager.set(backupDraftObj);
-        // dLog('draft save', backupDraftObj);
+        // console.log('draft save', backupDraftObj);
       } else {
         AppConfigManager.remove('draft' + $scope.curDialog.peerID);
-        // dLog('draft delete', 'draft' + $scope.curDialog.peerID);
+        // console.log('draft delete', 'draft' + $scope.curDialog.peerID);
       }
 
       var now = +new Date();
@@ -475,13 +476,13 @@ angular.module('myApp.controllers', [])
     function resetDraft (newPeer) {
       if (newPeer) {
         AppConfigManager.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
-          // dLog('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
+          // console.log('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
           $scope.draftMessage.text = draftText || '';
-          // dLog('send broadcast', $scope.draftMessage);
+          // console.log('send broadcast', $scope.draftMessage);
           $scope.$broadcast('ui_peer_draft');
         });
       } else {
-        // dLog('Reset peer');
+        // console.log('Reset peer');
         $scope.draftMessage.text = '';
       }
     }

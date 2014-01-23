@@ -5,20 +5,6 @@
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
-var _logTimer = (new Date()).getTime();
-function dLog () {
-  try {
-    var t = '[' + (((new Date()).getTime() - _logTimer) / 1000).toFixed(3) + '] ';
-    if (window.console && console.log) {
-      var args = Array.prototype.slice.call(arguments);
-      args.unshift(t);
-      console.log.apply(console, args);
-    }
-  } catch (e) {}
-
-  return true;
-}
-
 function bigint (num) {
   return new BigInteger(num.toString(16), 16);
 }
@@ -199,9 +185,9 @@ function uintToInt (val) {
 }
 
 function sha1Hash (bytes) {
-  // dLog('SHA-1 hash start');
+  // console.log('SHA-1 hash start');
   var hashBytes = sha1.hash(bytes, true);
-  // dLog('SHA-1 hash finish');
+  // console.log('SHA-1 hash finish');
 
   return hashBytes;
 }
@@ -217,20 +203,20 @@ function rsaEncrypt (publicKey, bytes) {
     bytes = bytes.concat(padding);
   }
 
-  // dLog('RSA encrypt start');
+  // console.log('RSA encrypt start');
   var N = new BigInteger(publicKey.modulus, 16),
       E = new BigInteger(publicKey.exponent, 16),
       X = new BigInteger(bytes),
       encryptedBigInt = X.modPowInt(E, N),
       encryptedBytes  = bytesFromBigInt(encryptedBigInt, 256);
 
-  // dLog('RSA encrypt finish');
+  // console.log('RSA encrypt finish');
 
   return encryptedBytes;
 }
 
 function aesEncrypt (bytes, keyBytes, ivBytes) {
-  // dLog('AES encrypt start', bytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+  // console.log('AES encrypt start', bytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
 
   var needPadding = 16 - (bytes.length % 16);
   if (needPadding > 0 && needPadding < 16) {
@@ -248,13 +234,13 @@ function aesEncrypt (bytes, keyBytes, ivBytes) {
 
   var encryptedBytes = bytesFromWords(encryptedWords);
 
-  // dLog('AES encrypt finish');
+  // console.log('AES encrypt finish');
 
   return encryptedBytes;
 }
 
 function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
-  // dLog('AES decrypt start', encryptedBytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+  // console.log('AES decrypt start', encryptedBytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
 
   var decryptedWords = CryptoJS.AES.decrypt({ciphertext: bytesToWords(encryptedBytes)}, bytesToWords(keyBytes), {
     iv: bytesToWords(ivBytes),
@@ -264,15 +250,15 @@ function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
 
   var bytes = bytesFromWords(decryptedWords);
 
-  // dLog('AES decrypt finish');
+  // console.log('AES decrypt finish');
 
   return bytes;
 }
 
 function gzipUncompress (bytes) {
-  // dLog('Gzip uncompress start');
+  // console.log('Gzip uncompress start');
   var result = (new Zlib.Gunzip(bytes)).decompress();
-  // dLog('Gzip uncompress finish');
+  // console.log('Gzip uncompress finish');
   return result;
 }
 
@@ -281,7 +267,7 @@ function nextRandomInt (maxValue) {
 };
 
 function pqPrimeFactorization (pqBytes) {
-  dLog('PQ start');
+  console.log('PQ start');
 
   var what = new BigInteger(pqBytes),
       g;
@@ -338,7 +324,7 @@ function pqPrimeFactorization (pqBytes) {
     Q = f;
   }
 
-  dLog('PQ finish', it + ' iterations');
+  console.log('PQ finish', it + ' iterations');
 
   return [bytesFromBigInt(P), bytesFromBigInt(Q)];
 }
@@ -388,7 +374,7 @@ TLSerialization.prototype.checkLength = function (needBytes) {
     return;
   }
 
-  dLog('Increase buffer', this.offset, needBytes, this.maxLength);
+  console.log('Increase buffer', this.offset, needBytes, this.maxLength);
   console.trace();
   this.maxLength = Math.max(this.maxLength * 2, this.offset + needBytes + 16);
   var previousBuffer = this.buffer,
@@ -400,7 +386,7 @@ TLSerialization.prototype.checkLength = function (needBytes) {
 };
 
 TLSerialization.prototype.writeInt = function (i, field) {
-  this.debug && dLog('>>>', i.toString(16), i, field);
+  this.debug && console.log('>>>', i.toString(16), i, field);
 
   this.checkLength(4);
   this.intView[this.offset / 4] = i;
@@ -451,7 +437,7 @@ TLSerialization.prototype.storeDouble = function (f) {
 };
 
 TLSerialization.prototype.storeString = function (s, field) {
-  this.debug && dLog('>>>', s, (field || '') + ':string');
+  this.debug && console.log('>>>', s, (field || '') + ':string');
 
   var sUTF8 = unescape(encodeURIComponent(s));
 
@@ -479,7 +465,7 @@ TLSerialization.prototype.storeString = function (s, field) {
 
 
 TLSerialization.prototype.storeBytes = function (bytes, field) {
-  this.debug && dLog('>>>', bytesToHex(bytes), (field || '') + ':bytes');
+  this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 
   this.checkLength(bytes.length + 8);
 
@@ -508,7 +494,7 @@ TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
     throw new Error('Invalid bits: ' + bits + ', ' + bytes.length);
   }
 
-  this.debug && dLog('>>>', bytesToHex(bytes), (field || '') + ':int' + bits);
+  this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':int' + bits);
   this.checkLength(len);
 
   for (var i = 0; i < len; i++) {
@@ -519,7 +505,7 @@ TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
 TLSerialization.prototype.storeRawBytes = function (bytes, field) {
   var len = bytes.length;
 
-  this.debug && dLog('>>>', bytesToHex(bytes), (field || ''));
+  this.debug && console.log('>>>', bytesToHex(bytes), (field || ''));
   this.checkLength(len);
 
   for (var i = 0; i < len; i++) {
@@ -643,7 +629,7 @@ TLDeserialization.prototype.readInt = function (field) {
 
   var i = this.intView[this.offset / 4];
 
-  this.debug && dLog('<<<', i.toString(16), i, field);
+  this.debug && console.log('<<<', i.toString(16), i, field);
 
   this.offset += 4;
 
@@ -709,7 +695,7 @@ TLDeserialization.prototype.fetchString = function (field) {
     var s = sUTF8;
   }
 
-  this.debug && dLog('<<<', s, (field || '') + ':string');
+  this.debug && console.log('<<<', s, (field || '') + ':string');
 
   return s;
 }
@@ -734,7 +720,7 @@ TLDeserialization.prototype.fetchBytes = function (field) {
     this.offset++;
   }
 
-  this.debug && dLog('<<<', bytesToHex(bytes), (field || '') + ':bytes');
+  this.debug && console.log('<<<', bytesToHex(bytes), (field || '') + ':bytes');
 
   return bytes;
 }
@@ -750,7 +736,7 @@ TLDeserialization.prototype.fetchIntBytes = function (bits, field) {
     bytes.push(this.byteView[this.offset++]);
   }
 
-  this.debug && dLog('<<<', bytesToHex(bytes), (field || '') + ':int' + bits);
+  this.debug && console.log('<<<', bytesToHex(bytes), (field || '') + ':int' + bits);
 
   return bytes;
 };
@@ -766,7 +752,7 @@ TLDeserialization.prototype.fetchRawBytes = function (len, field) {
     bytes.push(this.byteView[this.offset++]);
   }
 
-  this.debug && dLog('<<<', bytesToHex(bytes), (field || ''));
+  this.debug && console.log('<<<', bytesToHex(bytes), (field || ''));
 
   return bytes;
 };
@@ -1035,14 +1021,14 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
 
     lastMessageID = messageID;
 
-    // dLog('generated msg id', messageID);
+    // console.log('generated msg id', messageID);
 
     return longFromInts(messageID[0], messageID[1]);
   };
 
   function applyServerTime (serverTime, localTime) {
     timeOffset = serverTime - Math.floor((localTime || +new Date()) / 1000);
-    dLog('Apply server time', serverTime, localTime, timeOffset);
+    console.log('Apply server time', serverTime, localTime, timeOffset);
     AppConfigManager.set({server_time_offset: timeOffset});
   };
 
@@ -1100,7 +1086,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
 
     request.storeMethod('req_pq', {nonce: auth.nonce});
 
-    dLog('Send req_pq', bytesToHex(auth.nonce));
+    console.log('Send req_pq', bytesToHex(auth.nonce));
     mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
       var deserializer = result.data;
       var response = deserializer.fetchObject('ResPQ');
@@ -1117,7 +1103,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       auth.pq = response.pq;
       auth.fingerprints = response.server_public_key_fingerprints;
 
-      dLog('Got ResPQ', bytesToHex(auth.serverNonce), bytesToHex(auth.pq), auth.fingerprints);
+      console.log('Got ResPQ', bytesToHex(auth.serverNonce), bytesToHex(auth.pq), auth.fingerprints);
 
       auth.publicKey = MtpRsaKeysManager.select(auth.fingerprints);
 
@@ -1125,7 +1111,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
         throw new Error('No public key found');
       }
 
-      dLog('PQ factorization start');
+      console.log('PQ factorization start');
       if (!!window.Worker) {
         var worker = new Worker('js/lib/pq_worker.js');
 
@@ -1135,7 +1121,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
           mtpSendReqDhParams(auth);
         };
         worker.onerror = function(error) {
-          dLog('Worker error', error);
+          console.log('Worker error', error);
           deferred.reject(error);
         };
         worker.postMessage(auth.pq)
@@ -1184,7 +1170,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       encrypted_data: rsaEncrypt(auth.publicKey, dataWithHash)
     });
 
-    dLog('Send req_DH_params');
+    console.log('Send req_DH_params');
     mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
       var deserializer = result.data;
       var response = deserializer.fetchObject('Server_DH_Params', 'RESPONSE');
@@ -1254,7 +1240,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       throw new Error('server_DH_inner_data serverNonce mismatch');
     }
 
-    dLog('Done decrypting answer');
+    console.log('Done decrypting answer');
     auth.g          = response.g;
     auth.dhPrime    = response.dh_prime;
     auth.gA         = response.g_a;
@@ -1301,7 +1287,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       encrypted_data: encryptedData
     });
 
-    dLog('Send set_client_DH_params');
+    console.log('Send set_client_DH_params');
     mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
       var deserializer = result.data;
       var response = deserializer.fetchObject('Set_client_DH_params_answer');
@@ -1329,7 +1315,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
           authKeyAux  = authKeyHash.slice(0, 8),
           authKeyID   = authKeyHash.slice(-8);
 
-      dLog('Got Set_client_DH_params_answer', response._);
+      console.log('Got Set_client_DH_params_answer', response._);
       switch (response._) {
         case 'dh_gen_ok':
           var newNonceHash1 = sha1Hash(auth.newNonce.concat([1], authKeyAux)).slice(-16);
@@ -1340,7 +1326,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
           }
 
           var serverSalt = bytesXor(auth.newNonce.slice(0, 8), auth.serverNonce.slice(0, 8));
-          // dLog('Auth successfull!', authKeyID, authKey, serverSalt);
+          // console.log('Auth successfull!', authKeyID, authKey, serverSalt);
 
           auth.authKeyID = authKeyID;
           auth.authKey = authKey;
@@ -1431,10 +1417,10 @@ factory('MtpAesService', function ($q) {
       deferred.resolve(e.data.result);
       delete awaiting[e.data.taskID];
     }
-    // dLog('AES worker message', e.data, deferred);
+    // console.log('AES worker message', e.data, deferred);
   };
   worker.onerror = function(error) {
-    dLog('AES Worker error', error);
+    console.log('AES Worker error', error);
   };
 
   return {
@@ -1443,7 +1429,7 @@ factory('MtpAesService', function ($q) {
 
       awaiting[taskID] = deferred;
 
-      // dLog('AES post message', {taskID: taskID, task: 'encrypt', bytes: bytes, keyBytes: keyBytes, ivBytes: ivBytes})
+      // console.log('AES post message', {taskID: taskID, task: 'encrypt', bytes: bytes, keyBytes: keyBytes, ivBytes: ivBytes})
       worker.postMessage({taskID: taskID, task: 'encrypt', bytes: bytes, keyBytes: keyBytes, ivBytes: ivBytes});
 
       taskID++
@@ -1483,10 +1469,10 @@ factory('MtpSha1Service', function ($q) {
       deferred.resolve(e.data.result);
       delete awaiting[e.data.taskID];
     }
-    // dLog('sha1 got message', e.data, deferred);
+    // console.log('sha1 got message', e.data, deferred);
   };
   worker.onerror = function(error) {
-    dLog('SHA-1 Worker error', error);
+    console.log('SHA-1 Worker error', error);
   };
 
   return {
@@ -1494,7 +1480,7 @@ factory('MtpSha1Service', function ($q) {
       var deferred = $q.defer();
 
       awaiting[taskID] = deferred;
-      // dLog(11, taskID, bytes);
+      // console.log(11, taskID, bytes);
       worker.postMessage({taskID: taskID, bytes: bytes});
 
       taskID++;
@@ -1519,7 +1505,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     // if (1 == dcID) {
     //   var self = this;
     //   (function () {
-    //     dLog('update server salt');
+    //     console.log('update server salt');
     //     self.serverSalt = [0,0,0,0,0,0,0,0];
     //     setTimeout(arguments.callee, nextRandomInt(2000, 12345));
     //   })();
@@ -1577,7 +1563,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     };
 
     if (window._debugMode) {
-      dLog('MT call', method, params, messageID, seqNo);
+      console.log('MT call', method, params, messageID, seqNo);
     }
 
     return this.pushMessage(message, options);
@@ -1598,7 +1584,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     };
 
     if (window._debugMode) {
-      dLog('MT message', object, messageID, seqNo);
+      console.log('MT message', object, messageID, seqNo);
     }
 
     return this.pushMessage(message, options);
@@ -1629,9 +1615,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     };
 
     if (window._debugMode) {
-      dLog('Api call', method, params, messageID, seqNo)
+      console.log('Api call', method, params, messageID, seqNo)
     } else {
-      dLog('Api call', method, messageID, seqNo);
+      console.log('Api call', method, messageID, seqNo);
     }
 
     return this.pushMessage(message, options);
@@ -1639,7 +1625,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
   MtpNetworker.prototype.checkLongPoll = function(force) {
     var isClean = this.cleanupSent();
-    // dLog('Check lp', this.longPollPending, (new Date().getTime()));
+    // console.log('Check lp', this.longPollPending, (new Date().getTime()));
     if (this.longPollPending && (new Date().getTime()) < this.longPollPending) {
       return false;
     }
@@ -1656,7 +1642,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   MtpNetworker.prototype.sendLongPoll = function() {
     var maxWait = 25000;
     this.longPollPending = (new Date().getTime()) + maxWait;
-    // dLog('Set lp', this.longPollPending, (new Date().getTime()));
+    // console.log('Set lp', this.longPollPending, (new Date().getTime()));
 
     this.wrapMtpCall('http_wait', {max_delay: 0, wait_after: 0, max_wait: maxWait}, {noResponse: true}).
       then((function () {
@@ -1689,7 +1675,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       this.pendingMessages[messageID] = value;
     }
 
-    // dLog('Resend due', messageID, this.pendingMessages);
+    // console.log('Resend due', messageID, this.pendingMessages);
 
     this.sheduleRequest(delay);
   };
@@ -1715,14 +1701,14 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
 
   MtpNetworker.prototype.performSheduledRequest = function() {
-    // dLog('start sheduled');
+    // console.log('start sheduled');
     delete this.nextReq;
     if (this.pendingAcks.length) {
       var ackMsgIDs = [];
       for (var i = 0; i < this.pendingAcks.length; i++) {
         ackMsgIDs.push(this.pendingAcks[i]);
       }
-      // dLog('acking messages', ackMsgIDs);
+      // console.log('acking messages', ackMsgIDs);
       this.wrapMtpMessage({_: 'msgs_ack', msg_ids: ackMsgIDs}, {notContentRelated: true, noShedule: true});
     }
 
@@ -1731,7 +1717,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       for (var i = 0; i < this.pendingResends.length; i++) {
         resendMsgIDs.push(this.pendingResends[i]);
       }
-      // dLog('resendReq messages', resendMsgIDs);
+      // console.log('resendReq messages', resendMsgIDs);
       this.wrapMtpMessage({_: 'msg_resend_req', msg_ids: resendMsgIDs}, {noShedule: true});
     }
 
@@ -1747,14 +1733,14 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
           messages.push(message);
           messagesByteLen += message.body.length + 32;
         } else {
-          // dLog(message, messageID);
+          // console.log(message, messageID);
         }
         delete self.pendingMessages[messageID];
       }
     });
 
     if (!messages.length) {
-      // dLog('no sheduled messages');
+      // console.log('no sheduled messages');
       return;
     }
 
@@ -1789,7 +1775,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       this.sentMessages[message.msg_id] = containerSentMessage;
 
       if (window._debugMode) {
-        dLog('Container', innerMessages, message.msg_id, message.seq_no);
+        console.log('Container', innerMessages, message.msg_id, message.seq_no);
       }
     } else {
       if (message.noResponse) {
@@ -1804,7 +1790,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     this.sendEncryptedRequest(message).then(function (result) {
       self.parseResponse(result.data).then(function (response) {
         if (window._debugMode) {
-          dLog('Server response', self.dcID, response);
+          console.log('Server response', self.dcID, response);
         }
 
         self.processMessage(response.response, response.messageID, response.sessionID);
@@ -1825,15 +1811,15 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
     var self = this;
 
-    // dLog('enc', bytes);
+    // console.log('enc', bytes);
 
     return MtpSha1Service.hash(bytes).then(function (bytesHash) {
-      // dLog('bytesHash', bytesHash);
+      // console.log('bytesHash', bytesHash);
       var msgKey = bytesHash.slice(-16);
       return self.getMsgKeyIv(msgKey, true).then(function (keyIv) {
-        // dLog('keyIv', keyIv);
+        // console.log('keyIv', keyIv);
         return MtpAesService.encrypt(bytes, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
-          // dLog('encryptedBytes', encryptedBytes);
+          // console.log('encryptedBytes', encryptedBytes);
           return {
             bytes: encryptedBytes,
             msgKey: msgKey
@@ -1851,7 +1837,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
   MtpNetworker.prototype.sendEncryptedRequest = function (message) {
     var self = this;
-    // dLog('send encrypted', message);
+    // console.log('send encrypted', message);
     // console.trace();
     var data = new TLSerialization({startMaxLength: message.body.length + 64});
 
@@ -1865,7 +1851,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     data.storeRawBytes(message.body, 'message_data');
 
     return this.getEncryptedMessage(data.getBytes()).then(function (encryptedResult) {
-      // dLog('got enc result', encryptedResult);
+      // console.log('got enc result', encryptedResult);
       var request = new TLSerialization({startMaxLength: encryptedResult.bytes.length + 256});
       request.storeIntBytes(self.authKeyID, 64, 'auth_key_id');
       request.storeIntBytes(encryptedResult.msgKey, 128, 'msg_key');
@@ -1948,7 +1934,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       return false;
     }
 
-    // dLog('shedule req', delay);
+    // console.log('shedule req', delay);
     // console.trace();
 
     clearTimeout(this.nextReqTO);
@@ -1958,17 +1944,17 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.onSessionCreate = function (sessionID, messageID) {
-    dLog('New session created', bytesToHex(sessionID));
+    console.log('New session created', bytesToHex(sessionID));
   };
 
   MtpNetworker.prototype.ackMessage = function (msgID) {
-    // dLog('ack message', msgID);
+    // console.log('ack message', msgID);
     this.pendingAcks.push(msgID);
     this.sheduleRequest(30000);
   };
 
   MtpNetworker.prototype.reqResendMessage = function (msgID) {
-    dLog('req resend', msgID);
+    console.log('req resend', msgID);
     this.pendingResends.push(msgID);
     this.sheduleRequest(100);
   };
@@ -1976,22 +1962,22 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   MtpNetworker.prototype.cleanupSent = function () {
     var self = this;
     var notEmpty = false;
-    // dLog('clean start', this.dcID/*, this.sentMessages*/);
+    // console.log('clean start', this.dcID/*, this.sentMessages*/);
     angular.forEach(this.sentMessages, function(message, msgID) {
-      // dLog('clean iter', msgID, message);
+      // console.log('clean iter', msgID, message);
       if (message.notContentRelated && self.pendingMessages[msgID] === undefined) {
-        // dLog('clean notContentRelated', msgID);
+        // console.log('clean notContentRelated', msgID);
         delete self.sentMessages[msgID];
       }
       else if (message.container) {
         for (var i = 0; i < message.inner.length; i++) {
           if (self.sentMessages[message.inner[i]] !== undefined) {
-            // dLog('clean failed, found', msgID, message.inner[i], self.sentMessages[message.inner[i]].seq_no);
+            // console.log('clean failed, found', msgID, message.inner[i], self.sentMessages[message.inner[i]].seq_no);
             notEmpty = true;
             return;
           }
         }
-        // dLog('clean container', msgID);
+        // console.log('clean container', msgID);
         delete self.sentMessages[msgID];
       } else {
         notEmpty = true;
@@ -2028,7 +2014,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
 
   MtpNetworker.prototype.processMessage = function (message, messageID, sessionID) {
-    // dLog('process message', message, messageID, sessionID);
+    // console.log('process message', message, messageID, sessionID);
     switch (message._) {
       case 'msg_container':
         var len = message.messages.length;
@@ -2038,10 +2024,10 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         break;
 
       case 'bad_server_salt':
-        dLog('Bad server salt', message);
+        console.log('Bad server salt', message);
         var sentMsg = this.sentMessages[message.bad_msg_id];
         if (!sentMsg || sentMsg.seq_no != message.bad_msg_seqno) {
-          dLog(message.bad_msg_id, message.bad_msg_seqno);
+          console.log(message.bad_msg_id, message.bad_msg_seqno);
           throw new Error('Bad server salt for invalid message');
         }
 
@@ -2051,10 +2037,10 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         break;
 
       case 'bad_msg_notification':
-        dLog('Bad msg notification', message);
+        console.log('Bad msg notification', message);
         var sentMsg = this.sentMessages[message.bad_msg_id];
         if (!sentMsg || sentMsg.seq_no != message.bad_msg_seqno) {
-          dLog(message.bad_msg_id, message.bad_msg_seqno);
+          console.log(message.bad_msg_id, message.bad_msg_seqno);
           throw new Error('Bad msg notification for invalid message');
         }
 
@@ -2105,13 +2091,13 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
           var deferred = sentMessage.deferred;
           if (message.result._ == 'rpc_error') {
             var error = this.processError(message.result);
-            dLog('rpc error', error)
+            console.log('rpc error', error)
             if (deferred) {
               deferred.reject(error)
             }
           } else {
             if (deferred) {
-              dLog('rpc response', message.result._);
+              console.log('rpc response', message.result._);
               sentMessage.deferred.resolve(message.result);
             }
             if (sentMessage.isAPI) {
@@ -2126,7 +2112,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       default:
         this.ackMessage(messageID);
 
-        // dLog('Update', message);
+        // console.log('Update', message);
         if (updatesProcessor) {
           updatesProcessor(message);
         }
@@ -2194,7 +2180,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
       var authKeyHex = result[0],
           serverSaltHex = result[1];
-      // dLog('ass', dcID, authKeyHex, serverSaltHex);
+      // console.log('ass', dcID, authKeyHex, serverSaltHex);
       if (authKeyHex && authKeyHex.length == 512) {
         var authKey    = bytesFromHex(authKeyHex);
         var serverSalt = bytesFromHex(serverSaltHex);
@@ -2210,7 +2196,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
         return cachedNetworkers[dcID] = MtpNetworkerFactory.getNetworker(dcID, auth.authKey, auth.serverSalt);
       }, function (error) {
-        dLog('Get networker error', error, error.stack);
+        console.log('Get networker error', error, error.stack);
         return $q.reject(error);
       });
     });
@@ -2242,7 +2228,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
           // }, 1000);
         },
         function (error) {
-          dLog('error', error.code, error.type, baseDcID, dcID);
+          console.log('error', error.code, error.type, baseDcID, dcID);
           if (error.code == 401 && error.type == 'AUTH_KEY_UNREGISTERED' && baseDcID && dcID != baseDcID) {
             if (cachedExportPromise[dcID] === undefined) {
               var exportDeferred = $q.defer();
@@ -2263,7 +2249,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
               cachedExportPromise[dcID] = exportDeferred.promise;
             }
 
-            // dLog('promise', cachedExportPromise[dcID]);
+            // console.log('promise', cachedExportPromise[dcID]);
 
             cachedExportPromise[dcID] = cachedExportPromise[dcID].then(function () {
               (cachedNetworker = networker).wrapApiCall(method, params, options).then(function (result) {
@@ -2480,7 +2466,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   }
 
   function downloadSmallFile(location) {
-    // dLog('dload small', location);
+    // console.log('dload small', location);
     var fileName = getFileName(location),
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
 
@@ -2498,7 +2484,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         doDownload = function () {
           cachedFS.root.getFile(fileName, {create: true}, function(fileEntry) {
             var downloadPromise = downloadRequest(location.dc_id, function () {
-              // dLog('next small promise');
+              // console.log('next small promise');
               return MtpApiManager.invokeApi('upload.getFile', {
                 location: angular.extend({}, location, {_: 'inputFileLocation'}),
                 offset: 0,
@@ -2510,7 +2496,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               cacheFileWriter = fileWriter;
               downloadPromise.then(function (result) {
                 fileWriteBytes(fileWriter, result.bytes).then(function () {
-                  // dLog('Success', location, fileEntry.toURL());
+                  // console.log('Success', location, fileEntry.toURL());
                   deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
                 }, errorHandler);
               }, errorHandler);
@@ -2524,7 +2510,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           if (file.size) {
             deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
           } else {
-            dLog('Small file empty', file);
+            console.log('Small file empty', file);
             doDownload();
           }
         }, errorHandler);
@@ -2532,7 +2518,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     }, function (error) {
 
       downloadRequest(location.dc_id, function () {
-        // dLog('next small promise');
+        // console.log('next small promise');
         return MtpApiManager.invokeApi('upload.getFile', {
           location: angular.extend({}, location, {_: 'inputFileLocation'}),
           offset: 0,
@@ -2547,7 +2533,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   }
 
   function downloadFile (dcID, location, size, fileEntry) {
-    dLog('dload file', dcID, location, size);
+    console.log('dload file', dcID, location, size);
     var fileName = getFileName(location),
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
 
@@ -2559,7 +2545,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           console.error(error);
-          // dLog('fail');
+          // console.log('fail');
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
@@ -2577,7 +2563,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               writeFileDeferred = $q.defer();
               (function (isFinal, offset, writeFileDeferred, writeFilePromise) {
                 return downloadRequest(dcID, function () {
-                // dLog('next big promise');
+                // console.log('next big promise');
                   return MtpApiManager.invokeApi('upload.getFile', {
                     location: location,
                     offset: offset,
@@ -2586,13 +2572,13 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
                 }, 6).then(function (result) {
 
-                  // dLog('waiting for file promise', offset);
+                  // console.log('waiting for file promise', offset);
                   writeFilePromise.then(function () {
-                    // dLog('resolved file promise', offset);
+                    // console.log('resolved file promise', offset);
 
                     return fileWriteBytes(fileWriter, result.bytes).then(function () {
 
-                      // dLog('resolve file promise', offset);
+                      // console.log('resolve file promise', offset);
                       writeFileDeferred.resolve();
 
                     }, errorHandler).then(function () {
@@ -2600,7 +2586,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                       if (isFinal) {
                         deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL('image/jpeg'));
                       } else {
-                        // dLog('notify', {done: offset + limit, total: size});
+                        // console.log('notify', {done: offset + limit, total: size});
                         deferred.notify({done: offset + limit, total: size});
                       };
 
@@ -2625,11 +2611,11 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       requestFS().then(function () {
         cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
           fileEntry.file(function(file) {
-            dLog('check size', file.size, size);
+            console.log('check size', file.size, size);
             if (file.size >= size) {
               deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
             } else {
-              dLog('File bad size', file, size);
+              console.log('File bad size', file, size);
               cachedFS.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
             }
           }, errorHandler);
@@ -2695,13 +2681,13 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   }
 
   function writeFile (file) {
-    dLog('write file', file);
+    console.log('write file', file);
     var fileName = getTempFileName(file);
 
     var deferred = $q.defer(),
         cacheFileWriter,
         errorHandler = function (error) {
-          dLog('fail');
+          console.log('fail');
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
@@ -2737,7 +2723,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     var fileID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         deferred = $q.defer(),
         errorHandler = function (error) {
-          dLog('error', error);
+          console.log('error', error);
           deferred.reject(error);
           errorHandler = angular.noop;
         },
@@ -2780,7 +2766,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               if (doneParts >= totalParts) {
                 deferred.resolve(resultInputFile);
               } else {
-                dLog('Progress', doneParts * partSize / fileSize);
+                console.log('Progress', doneParts * partSize / fileSize);
                 deferred.notify({done: doneParts * partSize, total: fileSize});
               }
             }, errorHandler);
