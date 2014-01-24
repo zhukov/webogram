@@ -351,7 +351,7 @@ function TLSerialization (options) {
 
   this.createBuffer();
 
-  // this.debug = options.debug !== undefined ? options.debug : true;
+  this.debug = options.debug !== undefined ? options.debug : window._debugMode;
   this.mtproto = options.mtproto || false;
   return this;
 }
@@ -631,7 +631,7 @@ function TLDeserialization (buffer, options) {
   this.intView  = new Uint32Array(this.buffer);
   this.byteView = new Uint8Array(this.buffer);
 
-  // this.debug = options.debug !== undefined ? options.debug : true;
+  this.debug = options.debug !== undefined ? options.debug : window._debugMode;
   this.mtproto = options.mtproto || false;
   return this;
 }
@@ -1575,7 +1575,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       body: serializer.getBytes()
     };
 
-    // dLog('MT call', method, params, messageID, seqNo);
+    if (window._debugMode) {
+      dLog('MT call', method, params, messageID, seqNo);
+    }
 
     return this.pushMessage(message, options);
   };
@@ -1594,7 +1596,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       body: serializer.getBytes()
     };
 
-    // dLog('MT message', object, messageID, seqNo);
+    if (window._debugMode) {
+      dLog('MT message', object, messageID, seqNo);
+    }
 
     return this.pushMessage(message, options);
   };
@@ -1623,8 +1627,11 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       isAPI: true
     };
 
-    dLog('Api call', method, messageID, seqNo);
-    // dLog('Api call', method, params, messageID, seqNo);
+    if (window._debugMode) {
+      dLog('Api call', method, params, messageID, seqNo)
+    } else {
+      dLog('Api call', method, messageID, seqNo);
+    }
 
     return this.pushMessage(message, options);
   };
@@ -1793,7 +1800,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     var self = this;
     this.sendEncryptedRequest(message).then(function (result) {
       self.parseResponse(result.data).then(function (response) {
-        // dLog('Server response', self.dcID, response);
+        if (window._debugMode) {
+          dLog('Server response', self.dcID, response);
+        }
 
         self.processMessage(response.response, response.messageID, response.sessionID);
 

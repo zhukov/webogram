@@ -15,8 +15,6 @@ angular.module('myApp.controllers', [])
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
-      } else {
-        $location.url('/login');
       }
     });
   })

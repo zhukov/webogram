@@ -5,7 +5,7 @@
   <div class="error" ng-if="error.message">{{ error.message }}</div>
   <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
     <h3 class="login_form_head">Sign in</h3>
-    <p class="login_form_lead">Welcome to an experimental web-client of Telegram messenger</p>
+    <p class="login_form_lead">Please enter your full phone number with country code.</p>
 
     <div class="form-group" ng-class="{'has-error': error.field == 'phone'}">
       <label class="control-label" for="phone_number" ng-if="error.field == 'phone'">Incorrect phone number</label>

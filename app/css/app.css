@@ -2,7 +2,7 @@
 
 html {
   background: #dee4e9 url(../img/bg_tile.png?1) 0 0 repeat;
-  /*background-size: 300px 468px;*/
+  background-size: 300px 468px;
 
   /*background: #dee4e9 url(../img/bg_full.png) 0 0 no-repeat;*/
   /*background-size: cover;*/
@@ -251,9 +251,33 @@ fieldset[disabled] .btn-tg.active {
 
 
 /* Welcome */
-.jumbotron {
-  background: none;
+
+.welcome_logo {
+  background: url(../img/logo_dogogram.png) 0 0 no-repeat;
+  background-size: 111px 112px;
+  display: block;
+  width: 112px;
+  height: 112px;
+  margin: 100px auto 0;
 }
+.welcome_box_wrap {
+  max-width: 310px;
+  padding: 25px;
+  background: #FFF;
+  margin: 30px auto 0;
+  border-radius: 1px;
+  overflow: hidden;
+
+  -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow:    0px 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow:         0px 1px 2px rgba(0, 0, 0, 0.1);
+}
+.welcome_text {
+  color: #999;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
 
 /* Login page */
 .login_form_wrap {
@@ -261,7 +285,7 @@ fieldset[disabled] .btn-tg.active {
   padding: 25px;
   background: #FFF;
   margin: 200px auto 0;
-  border-radius: 3px;
+  border-radius: 1px;
   overflow: hidden;
 
   -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
