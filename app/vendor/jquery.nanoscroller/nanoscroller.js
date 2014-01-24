@@ -409,7 +409,7 @@
       this.prevScrollTop = this.contentScrollTop || 0;
       this.contentScrollTop = content.scrollTop;
       if (!this.iOSNativeScrolling) {
-        // dLog(this.maxScrollTop, this.contentScrollTop, this.maxSliderTop, this.maxScrollTop);
+        // console.log(this.maxScrollTop, this.contentScrollTop, this.maxSliderTop, this.maxScrollTop);
         // console.trace();
         this.maxSliderTop = this.paneHeight - this.sliderHeight;
         this.sliderTop = this.maxScrollTop === 0 ? 0 : this.contentScrollTop * this.maxSliderTop / this.maxScrollTop;
@@ -431,7 +431,7 @@
         cssValue = {};
         cssValue[transform] = "translate(0, " + this.sliderTop + "px)";
 
-        // dLog(this.sliderTop, cssValue, this.scrollRAF, rAF);
+        // console.log(this.sliderTop, cssValue, this.scrollRAF, rAF);
       } else {
         cssValue = {
           top: this.sliderTop
@@ -440,7 +440,7 @@
       if (rAF) {
         if (!this.scrollRAF) {
           this.scrollRAF = rAF(function() {
-            // dLog('raf called', cssValue);
+            // console.log('raf called', cssValue);
             _this.scrollRAF = null;
             _this.slider.css(cssValue);
           });
