@@ -71,10 +71,10 @@ angular.module('ui.bootstrap.modal', [])
         });
 
         scope.close = function (evt) {
-          dLog('close', evt);
+          console.log('close', evt);
           var modal = $modalStack.getTop();
           if (modal && modal.value.backdrop && modal.value.backdrop != 'static') {
-            dLog('backdrop click');
+            console.log('backdrop click');
             evt.preventDefault();
             evt.stopPropagation();
             $modalStack.dismiss(modal.key, 'backdrop click');
@@ -94,7 +94,7 @@ angular.module('ui.bootstrap.modal', [])
       transclude: true,
       templateUrl: 'template/modal/window.html',
       link: function (scope, element, attrs) {
-        dLog('init window');
+        console.log('init window');
         scope.windowClass = attrs.windowClass || '';
 
         //trigger CSS transitions
@@ -170,7 +170,7 @@ angular.module('ui.bootstrap.modal', [])
       });
 
       $modalStack.open = function (modalInstance, modal) {
-        dLog('open', 11);
+        console.log('open', 11);
 
         openedWindows.add(modalInstance, {
           deferred: modal.deferred,
@@ -196,7 +196,7 @@ angular.module('ui.bootstrap.modal', [])
       };
 
       $modalStack.close = function (modalInstance, result) {
-        // dLog('close');
+        // console.log('close');
         console.trace();
         var modal = openedWindows.get(modalInstance);
         if (modal) {
@@ -260,14 +260,14 @@ angular.module('ui.bootstrap.modal', [])
               result: modalResultDeferred.promise,
               opened: modalOpenedDeferred.promise,
               close: function (result) {
-                dLog('close');
+                console.log('close');
                 $modalStack.close(modalInstance, result);
               },
               dismiss: function (reason) {
                 $modalStack.dismiss(modalInstance, reason);
               }
             };
-            dLog('modal', modalInstance);
+            console.log('modal', modalInstance);
 
             //merge and clean up options
             modalOptions = angular.extend({}, $modalProvider.options, modalOptions);

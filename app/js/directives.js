@@ -282,7 +282,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (richTextarea) {
         scope.$watch('draftMessage.text', function (newVal) {
-          dLog('on update', newVal);
           if (!newVal.length && !messageField.value.length) {
             $timeout(function () {
               updateField();
@@ -292,8 +291,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function updateField () {
-        dLog(scope.draftMessage);
-        dLog('update field', scope.draftMessage.text);
         $(richTextarea).text(scope.draftMessage.text || '');
       }
 
@@ -387,7 +384,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             element.attr('src', url);
           }
         }, function (e) {
-          dLog('Download image failed', e, scope.thumb.location);
+          console.log('Download image failed', e, scope.thumb.location);
           if (counterSaved == counter) {
             element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
           }
@@ -466,7 +463,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           .removeClass('thumb_blurred');
 
       }, function (e) {
-        dLog('Download image failed', e, scope.fullPhoto.location);
+        console.log('Download image failed', e, scope.fullPhoto.location);
         scope.progress.enabled = false;
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
@@ -549,7 +546,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         scope.player.quicktime = hasQt;
         scope.player.src = $sce.trustAsResourceUrl(url);
       }, function (e) {
-        dLog('Download video failed', e, scope.video);
+        console.log('Download video failed', e, scope.video);
         scope.progress.enabled = false;
         scope.player.src = '';
 
