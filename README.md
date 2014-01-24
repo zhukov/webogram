@@ -57,7 +57,7 @@ The app is based on AngularJS JavaScript framework, written in pure JavaScript (
 #### Running web-server
 
 Project repository is based on angularjs-seed and includes a simple web-server, so it's easy to launch the app locally on your desktop.
-Install [node.js](http://nodejs.org/) and run `scripts/web-server.js`. Open page http://localhost:8000/app/index.html in your browser.
+Install [node.js](http://nodejs.org/) and run `node server.js`. Open page http://localhost:8000/app/index.html in your browser.
 
 #### Running as Chrome Packaged App
 
