@@ -5,7 +5,12 @@
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
-importScripts('mtproto.js', '../../vendor/jsbn/jsbn_combined.js', '../../vendor/cryptoJS/crypto.js');
+importScripts(
+  '../../vendor/console-polyfill/console-polyfill.js?1',
+  'mtproto.js',
+  '../../vendor/jsbn/jsbn_combined.js',
+  '../../vendor/cryptoJS/crypto.js'
+);
 
 onmessage = function (e) {
   // console.log('AES worker in', e.data);

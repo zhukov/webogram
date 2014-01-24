@@ -12,4 +12,6 @@
      'time,timeEnd,trace,warn').split(',');
   while (prop = properties.pop()) con[prop] = con[prop] || empty;
   while (method = methods.pop()) con[method] = con[method] || dummy;
-})(window.console = window.console || {});
+})(this.console = this.console || {});
+
+// For Workers compatibility `window` object is replaced with `this` keyword
