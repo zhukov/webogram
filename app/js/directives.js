@@ -282,7 +282,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (richTextarea) {
         scope.$watch('draftMessage.text', function (newVal) {
-          console.log('on update', newVal);
           if (!newVal.length && !messageField.value.length) {
             $timeout(function () {
               updateField();
@@ -292,8 +291,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function updateField () {
-        console.log(scope.draftMessage);
-        console.log('update field', scope.draftMessage.text);
         $(richTextarea).text(scope.draftMessage.text || '');
       }
 
