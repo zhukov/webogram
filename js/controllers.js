@@ -329,6 +329,7 @@ angular.module('myApp.controllers', [])
         $scope.$broadcast('ui_history_change');
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+
       }, function () {
         $scope.state = {error: true};
       });
@@ -408,7 +409,7 @@ angular.module('myApp.controllers', [])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, AppPeersManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, AppConfigManager, AppPeersManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -418,6 +419,16 @@ angular.module('myApp.controllers', [])
     var lastTyping = false;
     $scope.$watch('draftMessage.text', function (newVal) {
       AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+
+      if (newVal.length) {
+        var backupDraftObj = {};
+        backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
+        AppConfigManager.set(backupDraftObj);
+        // dLog('draft save', backupDraftObj);
+      } else {
+        AppConfigManager.remove('draft' + $scope.curDialog.peerID);
+        // dLog('draft delete', 'draft' + $scope.curDialog.peerID);
+      }
 
       var now = +new Date();
       if (newVal === undefined || !newVal.length || now - lastTyping < 6000) {
@@ -461,10 +472,18 @@ angular.module('myApp.controllers', [])
     }
 
 
-    function resetDraft () {
-      $scope.draftMessage = {
-        text: ''
-      };
+    function resetDraft (newPeer) {
+      if (newPeer) {
+        AppConfigManager.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
+          // dLog('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
+          $scope.draftMessage.text = draftText || '';
+          // dLog('send broadcast', $scope.draftMessage);
+          $scope.$broadcast('ui_peer_draft');
+        });
+      } else {
+        // dLog('Reset peer');
+        $scope.draftMessage.text = '';
+      }
     }
 
     function onFilesSelected (newVal) {
