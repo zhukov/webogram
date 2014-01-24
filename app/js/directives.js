@@ -282,20 +282,27 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (richTextarea) {
         scope.$watch('draftMessage.text', function (newVal) {
+          dLog('on update', newVal);
           if (!newVal.length && !messageField.value.length) {
             $timeout(function () {
-              $(richTextarea).html('');
+              updateField();
             }, 0);
           }
         });
       }
 
+      function updateField () {
+        dLog(scope.draftMessage);
+        dLog('update field', scope.draftMessage.text);
+        $(richTextarea).text(scope.draftMessage.text || '');
+      }
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
 
       scope.$on('ui_peer_change', focusField);
       scope.$on('ui_history_change', focusField);
       scope.$on('ui_message_send', focusField);
+      scope.$on('ui_peer_draft', updateField);
 
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);

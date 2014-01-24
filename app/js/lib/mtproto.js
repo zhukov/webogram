@@ -351,7 +351,7 @@ function TLSerialization (options) {
 
   this.createBuffer();
 
-  this.debug = options.debug !== undefined ? options.debug : window._debugMode;
+  // this.debug = options.debug !== undefined ? options.debug : window._debugMode;
   this.mtproto = options.mtproto || false;
   return this;
 }
@@ -631,7 +631,7 @@ function TLDeserialization (buffer, options) {
   this.intView  = new Uint32Array(this.buffer);
   this.byteView = new Uint8Array(this.buffer);
 
-  this.debug = options.debug !== undefined ? options.debug : window._debugMode;
+  // this.debug = options.debug !== undefined ? options.debug : window._debugMode;
   this.mtproto = options.mtproto || false;
   return this;
 }
@@ -1021,7 +1021,7 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
   });
 
   function generateMessageID () {
-    var timeTicks = +new Date() + timeOffset,
+    var timeTicks = +new Date() + (timeOffset * 1000),
         timeSec   = Math.floor(timeTicks / 1000),
         timeMSec  = timeTicks % 1000,
         random    = nextRandomInt(0xFFFF);
@@ -1042,6 +1042,7 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
 
   function applyServerTime (serverTime, localTime) {
     timeOffset = serverTime - Math.floor((localTime || +new Date()) / 1000);
+    dLog('Apply server time', serverTime, localTime, timeOffset);
     AppConfigManager.set({server_time_offset: timeOffset});
   };
 
@@ -1787,7 +1788,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
       this.sentMessages[message.msg_id] = containerSentMessage;
 
-      // dLog('Container', innerMessages, message.msg_id, message.seq_no);
+      if (window._debugMode) {
+        dLog('Container', innerMessages, message.msg_id, message.seq_no);
+      }
     } else {
       if (message.noResponse) {
         noResponseMsgs.push(message.msg_id);
@@ -2035,7 +2038,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         break;
 
       case 'bad_server_salt':
-        dLog('bad server salt', message);
+        dLog('Bad server salt', message);
         var sentMsg = this.sentMessages[message.bad_msg_id];
         if (!sentMsg || sentMsg.seq_no != message.bad_msg_seqno) {
           dLog(message.bad_msg_id, message.bad_msg_seqno);
@@ -2045,6 +2048,21 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         this.applyServerSalt(message.new_server_salt);
         this.pushResend(message.bad_msg_id);
         this.ackMessage(messageID);
+        break;
+
+      case 'bad_msg_notification':
+        dLog('Bad msg notification', message);
+        var sentMsg = this.sentMessages[message.bad_msg_id];
+        if (!sentMsg || sentMsg.seq_no != message.bad_msg_seqno) {
+          dLog(message.bad_msg_id, message.bad_msg_seqno);
+          throw new Error('Bad msg notification for invalid message');
+        }
+
+        if (message.error_code == 16 || message.error_code == 17) {
+          MtpMessageIdGenerator.applyServerTime((new BigInteger(messageID, 10)).shiftRight(32).toString(10));
+          this.pushResend(message.bad_msg_id);
+          this.ackMessage(messageID);
+        }
         break;
 
       case 'message':
@@ -2439,7 +2457,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate();
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
         };
 
@@ -2474,7 +2492,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate();
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
         },
         doDownload = function () {
@@ -2543,7 +2561,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           console.error(error);
           // dLog('fail');
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate();
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
         },
         saveToFileEntry = function (fileEntry) {
@@ -2685,7 +2703,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         errorHandler = function (error) {
           dLog('fail');
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate();
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
         };
 
