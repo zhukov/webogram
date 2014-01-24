@@ -7,7 +7,8 @@
 
 'use strict';
 
-// window._testMode = 1;
+window._testMode = location.search.indexOf('test=1') > 0;
+window._debugMode = location.search.indexOf('debug=1') > 0;
 
 
 // Declare app level module which depends on filters, and services
@@ -47,8 +48,8 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
 
 
   // $locationProvider.html5Mode(true);
-  $routeProvider.when('/', {templateUrl: 'partials/welcome.html', controller: 'AppWelcomeController'});
-  $routeProvider.when('/login', {templateUrl: 'partials/login.html?1', controller: 'AppLoginController'});
+  $routeProvider.when('/', {templateUrl: 'partials/welcome.html?1', controller: 'AppWelcomeController'});
+  $routeProvider.when('/login', {templateUrl: 'partials/login.html?2', controller: 'AppLoginController'});
   $routeProvider.when('/im', {templateUrl: 'partials/im.html?3', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
