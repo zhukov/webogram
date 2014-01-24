@@ -2,7 +2,7 @@
 
 html {
   background: #dee4e9 url(../img/bg_tile.png?1) 0 0 repeat;
-  background-size: 300px 468px;
+  /*background-size: 300px 468px;*/
 
   /*background: #dee4e9 url(../img/bg_full.png) 0 0 no-repeat;*/
   /*background-size: cover;*/
@@ -276,6 +276,7 @@ fieldset[disabled] .btn-tg.active {
   color: #999;
   text-align: center;
   margin-bottom: 25px;
+  font-size: 13px;
 }
 
 
