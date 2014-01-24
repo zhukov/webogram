@@ -5,7 +5,11 @@
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
-importScripts('mtproto.js', '../../vendor/jsbn/jsbn_combined.js');
+importScripts(
+  '../../vendor/console-polyfill/console-polyfill.js?1',
+  'mtproto.js',
+  '../../vendor/jsbn/jsbn_combined.js'
+);
 
 onmessage = function (e) {
   postMessage(pqPrimeFactorization(e.data));

@@ -5,7 +5,11 @@
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
-importScripts('mtproto.js', '../../vendor/cryptoJS/crypto.js');
+importScripts(
+  '../../vendor/console-polyfill/console-polyfill.js?1',
+  'mtproto.js',
+  '../../vendor/cryptoJS/crypto.js'
+);
 
 onmessage = function (e) {
   var taskID = e.data.taskID;

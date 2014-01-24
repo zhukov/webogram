@@ -1113,7 +1113,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
 
       console.log('PQ factorization start');
       if (!!window.Worker) {
-        var worker = new Worker('js/lib/pq_worker.js');
+        var worker = new Worker('js/lib/pq_worker.js?1');
 
         worker.onmessage = function (e) {
           auth.p = e.data[0];
@@ -1407,7 +1407,7 @@ factory('MtpAesService', function ($q) {
     };
   }
 
-  var worker = new Worker('js/lib/aes_worker.js'),
+  var worker = new Worker('js/lib/aes_worker.js?1'),
       taskID = 0,
       awaiting = {};
 
@@ -1459,7 +1459,7 @@ factory('MtpSha1Service', function ($q) {
     };
   }
 
-  var worker = new Worker('js/lib/sha1_worker.js'),
+  var worker = new Worker('js/lib/sha1_worker.js?1'),
       taskID = 0,
       awaiting = {};
 
@@ -1511,13 +1511,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     //   })();
     // }
 
-    this.sessionID = new Array(8);
-    MtpSecureRandom.nextBytes(this.sessionID);
-
-    if (false) {
-      this.sessionID[0] = 0xAB;
-      this.sessionID[1] = 0xCD;
-    }
+    this.updateSession();
 
     this.seqNo = 0;
     this.currentRequests = 0;
@@ -1537,6 +1531,15 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     this.checkLongPoll();
   };
 
+  MtpNetworker.prototype.updateSession = function () {
+    this.sessionID = new Array(8);
+    MtpSecureRandom.nextBytes(this.sessionID);
+
+    if (false) {
+      this.sessionID[0] = 0xAB;
+      this.sessionID[1] = 0xCD;
+    }
+  }
 
   MtpNetworker.prototype.generateSeqNo = function (notContentRelated) {
     var seqNo = this.seqNo * 2;
@@ -2046,6 +2049,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
         if (message.error_code == 16 || message.error_code == 17) {
           MtpMessageIdGenerator.applyServerTime((new BigInteger(messageID, 10)).shiftRight(32).toString(10));
+          this.updateSession();
           this.pushResend(message.bad_msg_id);
           this.ackMessage(messageID);
         }
@@ -2229,7 +2233,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         },
         function (error) {
           console.log('error', error.code, error.type, baseDcID, dcID);
-          if (error.code == 401 && error.type == 'AUTH_KEY_UNREGISTERED' && baseDcID && dcID != baseDcID) {
+          if (error.code == 401 && baseDcID && dcID != baseDcID) {
             if (cachedExportPromise[dcID] === undefined) {
               var exportDeferred = $q.defer();
 
