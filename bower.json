@@ -1,0 +1,31 @@
+{
+  "name": "angular-brunch-seed",
+  "repo": "scotch/angular-brunch-seed",
+  "version": "0.3.0",
+  "main": "_public/js/app.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "dependencies": {
+    "console-polyfill": "~0.1.0",
+    "jquery": "~2.1.0",
+    "angular-bootstrap": "~0.5.0",
+    "angular": "~1.2.5",
+    "angular-sanitize": "~1.2.5",
+    "angular-route": "~1.2.5",
+    "angular-animate": "~1.2.5",
+    "nanoscroller": "~0.7.6",
+    "angular-ui-bootstrap-bower": "~0.10.0",
+    "bootstrap": "~3.0.3"
+  },
+  "overrides": {
+    "nanoscroller": {
+      "main": [
+        "./bin/css/nanoscroller.css",
+        "./bin/javascripts/jquery.nanoscroller.js"
+      ]
+    }
+  }
+}
