@@ -9,6 +9,10 @@ function bigint (num) {
   return new BigInteger(num.toString(16), 16);
 }
 
+function bigStringInt (strNum) {
+  return new BigInteger(strNum, 10);
+}
+
 function dHexDump (bytes) {
   var arr = [];
   for (var i = 0; i < bytes.length; i++) {
@@ -156,7 +160,7 @@ function bytesFromArrayBuffer (buffer) {
 }
 
 function longToInts (sLong) {
-  var divRem = new BigInteger(sLong, 10).divideAndRemainder(bigint(0x100000000));
+  var divRem = bigStringInt(sLong).divideAndRemainder(bigint(0x100000000));
 
   return [divRem[0].intValue(), divRem[1].intValue()];
 }
@@ -419,7 +423,7 @@ TLSerialization.prototype.storeLong = function (sLong, field) {
     }
   }
 
-  var divRem = new BigInteger(sLong, 10).divideAndRemainder(bigint(0x100000000));
+  var divRem = bigStringInt(sLong).divideAndRemainder(bigint(0x100000000));
 
   this.writeInt(intToUint(divRem[1].intValue()), (field || '') + ':long[low]');
   this.writeInt(intToUint(divRem[0].intValue()), (field || '') + ':long[high]');
@@ -979,7 +983,7 @@ factory('MtpRsaKeysManager', function () {
 
     var fingerprintHex, foundKey, i;
     for (i = 0; i < fingerprints.length; i++) {
-      fingerprintHex = new BigInteger(fingerprints[i], 10).toString(16);
+      fingerprintHex = bigStringInt(fingerprints[i]).toString(16);
       if (foundKey = publicKeysParsed[fingerprintHex]) {
         return angular.extend({fingerprint: fingerprints[i]}, foundKey);
       }
@@ -1007,8 +1011,8 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
   });
 
   function generateMessageID () {
-    var timeTicks = +new Date() + (timeOffset * 1000),
-        timeSec   = Math.floor(timeTicks / 1000),
+    var timeTicks = 1 * (new Date()),
+        timeSec   = Math.floor(timeTicks / 1000) + timeOffset,
         timeMSec  = timeTicks % 1000,
         random    = nextRandomInt(0xFFFF);
 
@@ -1027,9 +1031,15 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
   };
 
   function applyServerTime (serverTime, localTime) {
-    timeOffset = serverTime - Math.floor((localTime || +new Date()) / 1000);
-    console.log('Apply server time', serverTime, localTime, timeOffset);
-    AppConfigManager.set({server_time_offset: timeOffset});
+    var newTimeOffset = serverTime - Math.floor((localTime || +new Date()) / 1000),
+        changed = Math.abs(timeOffset - newTimeOffset) > 10;
+    AppConfigManager.set({server_time_offset: newTimeOffset});
+
+    lastMessageID = [0, 0];
+    timeOffset = newTimeOffset;
+    console.log('Apply server time', serverTime, localTime, newTimeOffset, changed);
+
+    return changed;
   };
 
   return {
@@ -1513,7 +1523,6 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     this.updateSession();
 
-    this.seqNo = 0;
     this.currentRequests = 0;
 
     this.sentMessages = {};
@@ -1531,7 +1540,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     this.checkLongPoll();
   };
 
-  MtpNetworker.prototype.updateSession = function () {
+  MtpNetworker.prototype.updateSession = function (updateMessageID) {
+    console.log('Update session');
+    this.seqNo = 0;
     this.sessionID = new Array(8);
     MtpSecureRandom.nextBytes(this.sessionID);
 
@@ -1539,7 +1550,35 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       this.sessionID[0] = 0xAB;
       this.sessionID[1] = 0xCD;
     }
-  }
+  };
+
+  MtpNetworker.prototype.updateSentMessage = function (sentMessageID) {
+    var sentMessage = this.sentMessages[sentMessageID];
+    if (!sentMessage) {
+      return false;
+    }
+    var self = this;
+    if (sentMessage.container) {
+      var newInner = [];
+      angular.forEach(sentMessage.inner, function(innerSentMessageID){
+        var innerSentMessage = self.updateSentMessage(innerSentMessageID);
+        if (innerSentMessage) {
+          newInner.push(innerSentMessage.msg_id);
+        }
+      });
+      sentMessage.inner = newInner;
+    }
+
+    sentMessage.msg_id = MtpMessageIdGenerator.generateID();
+    sentMessage.seq_no = this.generateSeqNo(
+      sentMessage.notContentRelated ||
+      sentMessage.container
+    );
+    this.sentMessages[sentMessage.msg_id] = sentMessage;
+    delete self.sentMessages[sentMessageID];
+
+    return sentMessage;
+  };
 
   MtpNetworker.prototype.generateSeqNo = function (notContentRelated) {
     var seqNo = this.seqNo * 2;
@@ -2028,8 +2067,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
       case 'bad_server_salt':
         console.log('Bad server salt', message);
-        var sentMsg = this.sentMessages[message.bad_msg_id];
-        if (!sentMsg || sentMsg.seq_no != message.bad_msg_seqno) {
+        var sentMessage = this.sentMessages[message.bad_msg_id];
+        if (!sentMessage || sentMessage.seq_no != message.bad_msg_seqno) {
           console.log(message.bad_msg_id, message.bad_msg_seqno);
           throw new Error('Bad server salt for invalid message');
         }
@@ -2041,16 +2080,20 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
       case 'bad_msg_notification':
         console.log('Bad msg notification', message);
-        var sentMsg = this.sentMessages[message.bad_msg_id];
-        if (!sentMsg || sentMsg.seq_no != message.bad_msg_seqno) {
+        var sentMessage = this.sentMessages[message.bad_msg_id];
+        if (!sentMessage || sentMessage.seq_no != message.bad_msg_seqno) {
           console.log(message.bad_msg_id, message.bad_msg_seqno);
           throw new Error('Bad msg notification for invalid message');
         }
 
         if (message.error_code == 16 || message.error_code == 17) {
-          MtpMessageIdGenerator.applyServerTime((new BigInteger(messageID, 10)).shiftRight(32).toString(10));
-          this.updateSession();
-          this.pushResend(message.bad_msg_id);
+          if (MtpMessageIdGenerator.applyServerTime(
+            bigStringInt(messageID).shiftRight(32).toString(10)
+          )) {
+            this.updateSession();
+          }
+          var badMessage = this.updateSentMessage(message.bad_msg_id);
+          this.pushResend(badMessage.msg_id);
           this.ackMessage(messageID);
         }
         break;
