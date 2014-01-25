@@ -1,0 +1,30 @@
+{
+  "author": "Your Name",
+  "name": "package-name",
+  "description": "Package description",
+  "version": "0.0.1",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "start": "node_modules/.bin/brunch watch --server",
+    "test": "node_modules/.bin/karma start test/karma.conf.js"
+  },
+  "dependencies": {
+    "brunch": "~1.7",
+
+    "javascript-brunch": ">= 1.0 < 1.8",
+    "coffee-script-brunch": ">= 1.0 < 1.8",
+
+    "css-brunch": ">= 1.0 < 1.8",
+    "less-brunch": ">= 1.0 < 1.8",
+    "stylus-brunch": ">= 1.0 < 1.8",
+
+    "auto-reload-brunch": ">= 1.0 < 1.8",
+
+    "uglify-js-brunch": ">= 1.0 < 1.8",
+    "clean-css-brunch": ">= 1.0 < 1.8"
+  }
+}
