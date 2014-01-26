@@ -423,7 +423,10 @@ angular.module('myApp.services', [])
   NotificationsManager.start();
 
   function getDialogs (offset, limit) {
-    if (dialogsStorage.count !== null && dialogsStorage.dialogs.length >= offset + limit) {
+    if (dialogsStorage.count !== null && (
+          dialogsStorage.dialogs.length >= offset + limit ||
+          dialogsStorage.dialogs.length == dialogsStorage.count
+        )) {
       return $q.when({
         count: dialogsStorage.count,
         dialogs: dialogsStorage.dialogs.slice(offset, offset + limit)
