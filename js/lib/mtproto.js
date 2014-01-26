@@ -1131,7 +1131,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
           mtpSendReqDhParams(auth);
         };
         worker.onerror = function(error) {
-          console.log('Worker error', error);
+          console.log('Worker error', error, error.stack);
           deferred.reject(error);
         };
         worker.postMessage(auth.pq)
@@ -1417,7 +1417,7 @@ factory('MtpAesService', function ($q) {
     };
   }
 
-  var worker = new Worker('js/lib/aes_worker.js?1'),
+  var worker = new Worker('js/lib/aes_worker.js?2'),
       taskID = 0,
       awaiting = {};
 
@@ -1430,7 +1430,7 @@ factory('MtpAesService', function ($q) {
     // console.log('AES worker message', e.data, deferred);
   };
   worker.onerror = function(error) {
-    console.log('AES Worker error', error);
+    console.log('AES Worker error', error, error.stack);
   };
 
   return {
@@ -1469,7 +1469,7 @@ factory('MtpSha1Service', function ($q) {
     };
   }
 
-  var worker = new Worker('js/lib/sha1_worker.js?1'),
+  var worker = new Worker('js/lib/sha1_worker.js?2'),
       taskID = 0,
       awaiting = {};
 
@@ -1482,7 +1482,7 @@ factory('MtpSha1Service', function ($q) {
     // console.log('sha1 got message', e.data, deferred);
   };
   worker.onerror = function(error) {
-    console.log('SHA-1 Worker error', error);
+    console.log('SHA-1 Worker error', error, error.stack);
   };
 
   return {

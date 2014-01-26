@@ -223,7 +223,12 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 }
             } else {
                 // Copy all words at once
-                thisWords.push.apply(thisWords, thatWords);
+                // thisWords.push.apply(thisWords, thatWords);
+
+                // HOTFIX from: https://code.google.com/p/crypto-js/issues/detail?id=90
+                for (var i = 0; i < thatWords.length; i++) {
+                  thisWords.push(thatWords[i]);
+                }
             }
             this.sigBytes += thatSigBytes;
 
