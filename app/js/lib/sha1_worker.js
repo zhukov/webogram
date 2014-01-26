@@ -8,7 +8,7 @@
 importScripts(
   '../../vendor/console-polyfill/console-polyfill.js?1',
   'mtproto.js',
-  '../../vendor/cryptoJS/crypto.js'
+  '../../vendor/cryptoJS/crypto.js?1'
 );
 
 onmessage = function (e) {
