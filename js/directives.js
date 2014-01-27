@@ -35,10 +35,13 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
+
     function link (scope, element, attrs) {
-      var dialogsWrap = $('.im_dialogs_wrap')[0],
-          scrollableWrap = $('.im_dialogs_scrollable_wrap')[0],
-          // dialogsSearch = $('im_dialogs_search')[0],
+      // console.log('init directive', element);
+
+      var dialogsWrap = $('.im_dialogs_wrap', element)[0],
+          scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
+          // dialogsSearch = $('im_dialogs_search', element)[0],
           moreNotified = false;
 
       onContentLoaded(function () {
@@ -69,7 +72,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $(scrollableWrap).on('scroll', function (e) {
+        // console.log('scroll', moreNotified);
         if (!moreNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+          // console.log('emit need more');
           scope.$emit('dialogs_need_more');
           moreNotified = true;
         }
@@ -96,10 +101,10 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link (scope, element, attrs) {
-      var historyWrap = $('.im_history_wrap')[0],
-          historyEl = $('.im_history')[0],
-          scrollableWrap = $('.im_history_scrollable_wrap')[0],
-          scrollable = $('.im_history_scrollable')[0],
+      var historyWrap = $('.im_history_wrap', element)[0],
+          historyEl = $('.im_history', element)[0],
+          scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
+          scrollable = $('.im_history_scrollable', element)[0],
           panelWrap = $('.im_history_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           moreNotified = false;
@@ -244,7 +249,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           editorElement = messageField,
           dragStarted, dragTimeout,
           emojiArea = $(messageField).emojiarea({button: emojiButton}),
-          emojiMenu = $('.emoji-menu')[0],
+          emojiMenu = $('.emoji-menu', element)[0],
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
       if (richTextarea) {

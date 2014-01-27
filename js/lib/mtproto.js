@@ -2144,7 +2144,11 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
             }
           } else {
             if (deferred) {
-              console.log('rpc response', message.result._);
+              if (window._debugMode) {
+                console.log('rpc response', message.result);
+              } else {
+                console.log('rpc response', message.result._);
+              }
               sentMessage.deferred.resolve(message.result);
             }
             if (sentMessage.isAPI) {

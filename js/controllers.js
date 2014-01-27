@@ -133,13 +133,7 @@ angular.module('myApp.controllers', [])
       });
     }
 
-    // $scope.userID = 0;
-    // MtpApiManager.getUserID().then(function (userID) {
-    //   $scope.userID = userID;
-    // });
-
     updateCurDialog();
-
 
     function updateCurDialog() {
       $scope.curDialog = {
@@ -150,15 +144,19 @@ angular.module('myApp.controllers', [])
 
   .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager) {
 
+    // console.log('init controller');
+
     $scope.dialogs = [];
 
     var offset = 0,
+        maxID = 0,
         hasMore = false,
         limit = 20;
 
 
     MtpApiManager.invokeApi('account.updateStatus', {offline: false});
     $scope.$on('dialogs_need_more', function () {
+      // console.log('on need more');
       showMoreDialogs();
     });
 
@@ -193,11 +191,13 @@ angular.module('myApp.controllers', [])
 
     function loadDialogs (startLimit) {
       offset = 0;
+      maxID = 0;
       hasMore = false;
       startLimit = startLimit || limit;
 
-      AppMessagesManager.getDialogs(offset, startLimit).then(function (dialogsResult) {
+      AppMessagesManager.getDialogs(maxID, startLimit).then(function (dialogsResult) {
         offset += startLimit;
+        maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
         hasMore = offset < dialogsResult.count;
 
         $scope.dialogs = [];
@@ -218,8 +218,9 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      AppMessagesManager.getDialogs(offset, limit).then(function (dialogsResult) {
+      AppMessagesManager.getDialogs(maxID, limit).then(function (dialogsResult) {
         offset += limit;
+        maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
         hasMore = offset < dialogsResult.count;
 
         angular.forEach(dialogsResult.dialogs, function (dialog) {

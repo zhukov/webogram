@@ -422,7 +422,16 @@ angular.module('myApp.services', [])
 
   NotificationsManager.start();
 
-  function getDialogs (offset, limit) {
+  function getDialogs (maxID, limit) {
+    var offset = 0;
+    if (maxID > 0) {
+      for (offset = 0; offset < dialogsStorage.dialogs.length; offset++) {
+        if (maxID > dialogsStorage.dialogs[offset].top_message) {
+          break;
+        }
+      }
+    }
+
     if (dialogsStorage.count !== null && (
           dialogsStorage.dialogs.length >= offset + limit ||
           dialogsStorage.dialogs.length == dialogsStorage.count
@@ -438,16 +447,25 @@ angular.module('myApp.services', [])
     MtpApiManager.invokeApi('messages.getDialogs', {
       offset: offset,
       limit: limit,
-      max_id: 0
+      max_id: maxID || 0
     }).then(function (dialogsResult) {
       AppUsersManager.saveApiUsers(dialogsResult.users);
       AppChatsManager.saveApiChats(dialogsResult.chats);
       saveMessages(dialogsResult.messages);
 
+      if (maxID > 0) {
+        for (offset = 0; offset < dialogsStorage.dialogs.length; offset++) {
+          if (maxID > dialogsStorage.dialogs[offset].top_message) {
+            break;
+          }
+        }
+      }
+
       dialogsStorage.count = dialogsResult._ == 'messages.dialogsSlice'
         ? dialogsResult.count
         : dialogsResult.dialogs.length;
 
+      dialogsStorage.dialogs.splice(offset, dialogsStorage.dialogs.length - offset);
       angular.forEach(dialogsResult.dialogs, function (dialog) {
         dialogsStorage.dialogs.push({
           peerID: AppPeersManager.getPeerID(dialog.peer),
@@ -491,7 +509,10 @@ angular.module('myApp.services', [])
     }
     // console.log('history storage', angular.copy(historyStorage.history), maxID, offset);
 
-    if (historyStorage.count !== null && historyStorage.history.length >= offset + limit) {
+    if (historyStorage.count !== null && (
+      historyStorage.history.length >= offset + limit ||
+      historyStorage.history.length == historyStorage.count
+    )) {
       return $q.when({
         count: historyStorage.count,
         history: resultPending.concat(historyStorage.history.slice(offset, offset + limit))
