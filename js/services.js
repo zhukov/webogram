@@ -1171,13 +1171,15 @@ angular.module('myApp.services', [])
       }
     });
 
+    console.log('choosing', photo, width, height, bestPhotoSize);
+
     return bestPhotoSize;
   }
 
   function wrapForHistory (photoID) {
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = 100,
-        height = 100,
+        width = 260,
+        height = 260,
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -1185,7 +1187,7 @@ angular.module('myApp.services', [])
           height: height
         };
 
-        // console.log('chosen photo size', photoID, thumbPhotoSize);
+    // console.log('chosen photo size', photoID, thumbPhotoSize);
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
       if (thumbPhotoSize.w > thumbPhotoSize.h) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
@@ -1195,6 +1197,9 @@ angular.module('myApp.services', [])
 
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
+    } else {
+      thumb.width = 100;
+      thumb.height = 100;
     }
 
     photo.thumb = thumb;
