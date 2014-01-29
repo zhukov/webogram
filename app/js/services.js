@@ -46,19 +46,14 @@ angular.module('myApp.services', [])
 
     var deferred = $q.defer();
 
-    // console.log('get', keys);
     chrome.storage.local.get(keys, function (resultObj) {
-      // console.log('got', resultObj);
       result = [];
       angular.forEach(keys, function (key) {
         var value = resultObj[key];
-        // console.log('p1', key, value);
         value = value === undefined || value === null ? false : JSON.parse(value);
-        // console.log('p2', value);
         result.push(cache[key] = value);
       });
 
-      // console.log('got parsed', result);
       deferred.resolve(single ? result[0] : result);
     });
 
@@ -711,7 +706,7 @@ angular.module('myApp.services', [])
 
       saveMessages([message]);
       historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID});
+      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
       // setTimeout(function () {
         message.send();
@@ -805,7 +800,7 @@ angular.module('myApp.services', [])
 
       saveMessages([message]);
       historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID});
+      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
       // setTimeout(function () {
         message.send();
@@ -1013,7 +1008,7 @@ angular.module('myApp.services', [])
     }
 
     notification.onclick = function () {
-      $location.url('/im?p=' + peerString);
+      $rootScope.$broadcast('history_focus', {peerString: peerString});
     };
 
     notification.message = notificationMessage;

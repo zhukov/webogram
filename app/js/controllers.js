@@ -59,7 +59,6 @@ angular.module('myApp.controllers', [])
           $scope.error = {};
 
         }, function (error) {
-          console.log(error);
           $scope.progress.enabled = false;
           console.log('sendCode error', error);
           switch (error.type) {
@@ -124,6 +123,15 @@ angular.module('myApp.controllers', [])
   .controller('AppIMController', function ($scope, $location, $routeParams, MtpApiManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
+
+    $scope.$on('history_focus', function (e, peerData) {
+      if (peerData.peerString == $scope.curDialog.peer) {
+        $scope.$broadcast('ui_history_focus');
+      } else {
+        $location.url('/im?p=' + peerData.peerString);
+      }
+    });
+
 
     $scope.isLoggedIn = true;
     $scope.logOut = function () {
@@ -354,7 +362,7 @@ angular.module('myApp.controllers', [])
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
         $scope.typing = {};
-        $scope.$broadcast('ui_history_append');
+        $scope.$broadcast('ui_history_append', {my: addedMessage.my});
         offset++;
 
         // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
@@ -382,7 +390,7 @@ angular.module('myApp.controllers', [])
           break;
 
         case 'updateChatUserTyping':
-          if (-update.chat_id == $scope.curDialog.peerID) {
+          if (-update.chat_id == $scope.curDialog.peerID && AppUsersManager.hasUser(update.user_id)) {
             $scope.typing = {user: AppUsersManager.getUser(update.user_id)};
 
             $timeout.cancel(typingTimeouts[update.user_id]);
@@ -420,6 +428,8 @@ angular.module('myApp.controllers', [])
 
     var lastTyping = false;
     $scope.$watch('draftMessage.text', function (newVal) {
+      // console.log('ctrl text changed', newVal);
+      // console.trace('ctrl text changed', newVal);
       AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
       if (newVal.length) {
@@ -457,7 +467,7 @@ angular.module('myApp.controllers', [])
           return false;
         }
 
-        text = text.replace(/:\s*(.+?)\s*:/g, function (all, name) {
+        text = text.replace(/:([a-z0-9\-_]+?):/gi, function (all, name) {
           var utfChar = $.emojiarea.reverseIcons[name];
           if (utfChar !== undefined) {
             return utfChar;
@@ -485,6 +495,7 @@ angular.module('myApp.controllers', [])
       } else {
         // console.log('Reset peer');
         $scope.draftMessage.text = '';
+        $scope.$broadcast('ui_peer_draft');
       }
     }
 
@@ -509,11 +520,11 @@ angular.module('myApp.controllers', [])
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
   })
 
-  .controller('UserModalController', function ($scope, $location, AppUsersManager) {
+  .controller('UserModalController', function ($scope, $location, $rootScope, $modalStack, AppUsersManager) {
     $scope.user = AppUsersManager.wrapForFull($scope.userID);
     $scope.goToHistory = function () {
-      $scope.$close();
-      $location.url('/im?p=' + $scope.user.peerString);
+      $modalStack.dismissAll();
+      $rootScope.$broadcast('history_focus', {peerString: $scope.user.peerString});
     };
   })
 

@@ -16,7 +16,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/dialog.html?3'
+      templateUrl: 'partials/dialog.html?4'
     };
   })
 
@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html?4'
+      templateUrl: 'partials/message.html?5'
     };
   })
 
@@ -124,8 +124,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var animated = true,
           curAnimation = false;
-      scope.$on('ui_history_append', function () {
-        if (!atBottom) {
+      scope.$on('ui_history_append', function (e, options) {
+        if (!atBottom && !options.my) {
           return;
         }
         if (animated) {
@@ -143,8 +143,8 @@ angular.module('myApp.directives', ['myApp.filters'])
             }, {
               duration: 200,
               always: function () {
-                curAnimation = false;
                 updateScroller();
+                curAnimation = false;
               }
             });
             updateScroller();
@@ -171,6 +171,13 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
+      scope.$on('ui_history_focus', function () {
+        if (!atBottom) {
+          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          updateScroller();
+          atBottom = true;
+        }
+      });
 
       scope.$on('ui_history_prepend', function () {
         var sh = scrollableWrap.scrollHeight,
@@ -264,6 +271,11 @@ angular.module('myApp.directives', ['myApp.filters'])
       $(fileSelect).on('change', function () {
         scope.$apply(function () {
           scope.draftMessage.files = Array.prototype.slice.call(fileSelect.files);
+          setTimeout(function () {
+            try {
+              fileSelect.value = '';
+            } catch (e) {};
+          }, 1000);
         });
       });
 
@@ -287,6 +299,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (richTextarea) {
         scope.$watch('draftMessage.text', function (newVal) {
+          // console.log('dir text change', newVal);
           if (!newVal.length && !messageField.value.length) {
             $timeout(function () {
               updateField();
@@ -296,12 +309,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function updateField () {
-        $(richTextarea).text(scope.draftMessage.text || '');
+        var html = $('<div>').text(scope.draftMessage.text || '').html();
+        html = html.replace(/\n/g, '<br/>');
+        $(richTextarea).html(html)
       }
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
 
       scope.$on('ui_peer_change', focusField);
+      scope.$on('ui_history_focus', focusField);
       scope.$on('ui_history_change', focusField);
       scope.$on('ui_message_send', focusField);
       scope.$on('ui_peer_draft', updateField);
