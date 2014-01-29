@@ -50,7 +50,7 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
   // $locationProvider.html5Mode(true);
   $routeProvider.when('/', {templateUrl: 'partials/welcome.html?1', controller: 'AppWelcomeController'});
   $routeProvider.when('/login', {templateUrl: 'partials/login.html?2', controller: 'AppLoginController'});
-  $routeProvider.when('/im', {templateUrl: 'partials/im.html?3', controller: 'AppIMController', reloadOnSearch: false});
+  $routeProvider.when('/im', {templateUrl: 'partials/im.html?4', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
 }]);

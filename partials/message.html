@@ -105,7 +105,11 @@
         </a>
 
         <div ng-switch-when="messageMediaDocument" class="im_message_document">
-          <i class="icon icon-document"></i>
+          <a href="" ng-click="openDoc(historyMessage.media.document.id)" ng-if="!historyMessage.media.document.progress.enabled">
+            <i class="icon icon-document"></i>
+          </a>
+          <i class="icon icon-document" ng-if="historyMessage.media.document.progress.enabled"></i>
+
           <div class="im_message_document_info">
             <div class="im_message_document_name_wrap">
               <span class="im_message_document_name">
@@ -179,7 +183,7 @@
 
       </div>
 
-      <div class="im_message_text" ng-if="historyMessage.message" ng-bind-html="historyMessage.richMessage"></div>
+      <div class="im_message_text" ng-if="historyMessage.message.length" ng-bind-html="historyMessage.richMessage"></div>
     </div>
 
   </div>

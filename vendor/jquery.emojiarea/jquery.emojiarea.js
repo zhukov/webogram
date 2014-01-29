@@ -16,7 +16,7 @@
 
  /**
  * This file also contains some modifications by Igor Zhukov in order to add custom scrollbars to EmojiMenu
- * See keyword `MODIFICATION: ` in source code.
+ * See keyword `MODIFICATION` in source code.
  */
 
 (function($, window, document) {
@@ -254,7 +254,7 @@
 		this.$editor = $('<div>').addClass('emoji-wysiwyg-editor');
 		this.$editor.text($textarea.val());
 		this.$editor.attr({contenteditable: 'true'});
-		this.$editor.on('blur keyup paste', function() { return self.onChange.apply(self, arguments); });
+		this.$editor.on('blur keyup paste', function(e) { return self.onChange.apply(self, [e]); });
 		this.$editor.on('mousedown focus', function() { document.execCommand('enableObjectResizing', false, false); });
 		this.$editor.on('blur', function() { document.execCommand('enableObjectResizing', true, true); });
 
@@ -278,7 +278,19 @@
 		});
 	};
 
-	EmojiArea_WYSIWYG.prototype.onChange = function() {
+	EmojiArea_WYSIWYG.prototype.onChange = function(e) {
+		if (e && e.type == 'paste') {
+	    var text = (e.originalEvent || e).clipboardData.getData('text/plain'),
+	    		self = this;
+	    setTimeout(function () {
+		    self.onChange();
+	    }, 0);
+	    if (text.length) {
+  	    document.execCommand('insertText', false, text);
+  	    return cancelEvent();
+	    }
+	    return true;
+		}
 		this.$textarea.val(this.val()).trigger('change');
 	};
 
@@ -363,13 +375,18 @@
 		this.$menu.addClass('emoji-menu');
 		this.$menu.hide();
 
-		/* MODIFICATION: Following 2 lines are modified by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
-		this.$itemsWrap = $('<div class="emoji-items-wrap nano"></div>').appendTo(this.$menu);
+		/*! MODIFICATION START
+			Following code was modified by Igor Zhukov, in order to add scrollbars and tail to EmojiMenu
+		*/
+		this.$itemsTailWrap = $('<div class="emoji-items-wrap1"></div>').appendTo(this.$menu);
+		this.$itemsWrap = $('<div class="emoji-items-wrap nano"></div>').appendTo(this.$itemsTailWrap);
 		this.$items = $('<div class="emoji-items content">').appendTo(this.$itemsWrap);
+		$('<div class="emoji-menu-tail">').appendTo(this.$menu);
+		/*! MODIFICATION END */
 
 		$body.append(this.$menu);
 
-		/* MODIFICATION: Following line is added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
+		/*! MODIFICATION: Following line is added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
 		this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
 
 		$body.on('keydown', function(e) {
@@ -378,7 +395,19 @@
 			}
 		});
 
-		$body.on('mouseup', function() {
+		$body.on('mouseup', function(e) {
+			/*! MODIFICATION START
+				Following code was added by Igor Zhukov, in order to prevent close on click on EmojiMenu scrollbar
+			*/
+			e = e.originalEvent || e;
+			var target = e.originalTarget || e.target || window;
+			while (target && target != window) {
+				target = target.parentNode;
+				if (target == self.$menu[0]) {
+					return;
+				}
+			}
+			/*! MODIFICATION END */
 			self.hide();
 		});
 
@@ -394,7 +423,14 @@
 		this.$menu.on('click', 'a', function(e) {
 			var emoji = $('.label', $(this)).text();
 			window.setTimeout(function() {
-				self.onItemSelected.apply(self, [emoji]);
+				/*! MODIFICATION START
+					Following code was modified by Igor Zhukov, in order to prevent close on shift-, ctrl-, alt- emoji select
+				*/
+				self.onItemSelected(emoji);
+				if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+					self.hide();
+				}
+				/*! MODIFICATION END */
 			}, 0);
 			e.stopPropagation();
 			return false;
@@ -405,7 +441,6 @@
 
 	EmojiMenu.prototype.onItemSelected = function(emoji) {
 		this.emojiarea.insert(emoji);
-		this.hide();
 	};
 
 	EmojiMenu.prototype.load = function() {
@@ -425,7 +460,7 @@
 
 		this.$items.html(html.join(''));
 
-		/* MODIFICATION: Following 4 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
+		/*! MODIFICATION: Following 4 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
 		var self = this;
 		setTimeout(function () {
 			self.$itemsWrap.nanoScroller();
@@ -450,12 +485,15 @@
 			this.emojiarea.$button.removeClass('on');
 			this.emojiarea = null;
 		}
+
+
 		this.visible = false;
 		this.$menu.hide();
 	};
 
 	EmojiMenu.prototype.show = function(emojiarea) {
 		if (this.emojiarea && this.emojiarea === emojiarea) return;
+		emojiarea.$button.addClass('on');
 		this.emojiarea = emojiarea;
 		this.emojiarea.menu = this;
 

@@ -580,7 +580,7 @@ a.im_dialog:hover .im_dialog_message_text {
   margin-left: 5px;
 }
 .im_history_panel_info_link {
-  /*color: #999;*/
+  color: #999;
   font-size: 13px;
   font-weight: normal;
   padding-top: 5px;
@@ -1000,9 +1000,14 @@ textarea.im_message_field {
   vertical-align: text-top;
   background: url(../img/icons/Attach_2x.png) 0 0 no-repeat;
   background-size: 19px 22px;
+  opacity: 0.6;
 }
 .im_attach:hover .icon-paperclip {
+  opacity: 1;
+}
+.im_attach:active .icon-paperclip {
   background-image: url(../img/icons/Attach_pressed_2x.png);
+  opacity: 1;
 }
 
 .im_emoji_btn {
@@ -1021,9 +1026,15 @@ textarea.im_message_field {
   vertical-align: text-top;
   background: url(../img/icons/Smile_2x.png) 0 0 no-repeat;
   background-size: 22px 22px;
+  opacity: 0.6;
 }
 .im_emoji_btn:hover .icon-emoji {
+  opacity: 1;
+}
+.im_emoji_btn:active .icon-emoji,
+.im_emoji_btn.on .icon-emoji {
   background-image: url(../img/icons/Smile_pressed_2x.png);
+  opacity: 1;
 }
 
 .im_attach_input {
@@ -1184,9 +1195,13 @@ img.img_fullsize {
 
 
 /* Emoji area */
-.emoji-wysiwyg-editor:empty:before{
-  content:attr(placeholder);
+.emoji-wysiwyg-editor:empty:before {
+  content: attr(placeholder);
   color: #9aa2ab;
+}
+.emoji-wysiwyg-editor:active:before,
+.emoji-wysiwyg-editor:focus:before {
+  content: '' !important;
 }
 
 .emoji-wysiwyg-editor {
@@ -1215,15 +1230,16 @@ img.img_fullsize {
   position: absolute;
   z-index: 999;
   width: 180px;
+  margin-left: -90px;
+  margin-top: -232px;
+  overflow: hidden;
+}
+.emoji-items-wrap1 {
+  background: rgba(0,0,0, 0.65);
   padding: 5px 2px 5px 5px;
-  margin-left: -88px;
-  margin-top: -225px;
-
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
-  background: rgba(0,0,0, 0.7);
-  overflow: hidden;
 }
 .emoji-menu .emoji-items-wrap {
   position: relative;
@@ -1257,6 +1273,14 @@ img.img_fullsize {
 }
 .emoji-menu a .label {
   display: none;
+}
+
+.emoji-menu-tail {
+  background: url(../img/icons/Arrow_2x.png) 0 0 no-repeat;
+  background-size: 14px 7px;
+  width: 14px;
+  height: 7px;
+  margin: 0 83px;
 }
 
 

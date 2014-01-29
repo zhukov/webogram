@@ -31,8 +31,8 @@
               <div class="im_history_panel_title">
 
                 <div ng-if="historyPeer.id < 0" ng-click="openChat(-historyPeer.id)">
+                  <span class="im_history_panel_info_link pull-right">Info</span>
                   <h4>
-                    <a class="im_history_panel_info_link pull-right" ng-click="openChat(-historyPeer.id)">Info</a>
                     <span ng-bind-html="historyPeer.data.rTitle"></span>
                     <small class="im_chat_users">
                       <ng-pluralize count="historyPeer.data.participants_count"

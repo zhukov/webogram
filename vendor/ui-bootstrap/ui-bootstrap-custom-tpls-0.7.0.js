@@ -210,6 +210,15 @@ angular.module('ui.bootstrap.modal', [])
         }
       };
 
+      $modalStack.dismissAll = function () {
+        var modal;
+        while (openedWindows.length()) {
+          if (modal = openedWindows.top()) {
+            $modalStack.dismiss(modal.key);
+          }
+        }
+      }
+
       $modalStack.getTop = function () {
         return openedWindows.top();
       };
