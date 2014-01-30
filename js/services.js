@@ -1013,6 +1013,7 @@ angular.module('myApp.services', [])
 
     notification.message = notificationMessage;
     notification.image = notificationPhoto.placeholder;
+    notification.key = 'msg' + message.id;
 
     if (notificationPhoto.location) {
       MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
@@ -1117,6 +1118,8 @@ angular.module('myApp.services', [])
               if (foundDialog) {
                 dialogsUpdated[peerID] = --foundDialog[0].unread_count;
               }
+
+              NotificationsManager.cancel('msg' + messageID);
             }
           }
         }
@@ -1917,8 +1920,10 @@ angular.module('myApp.services', [])
 
 .service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, MtpApiManager, AppPeersManager, IdleManager) {
 
-  var notificationsUiSupport = window.webkitNotifications !== undefined;
-  var notificationsShown = [];
+  var notificationsUiSupport = 'Notification' in window;
+  var notificationsShown = {};
+  // var lastClosed = [];
+  var notificationIndex = 0;
   var notificationsCount = 0;
   var peerSettings = {};
   var faviconEl = $('link[rel="icon"]');
@@ -1956,6 +1961,7 @@ angular.module('myApp.services', [])
   return {
     start: start,
     notify: notify,
+    cancel: notificationCancel,
     getPeerSettings: getPeerSettings
   };
 
@@ -1981,12 +1987,10 @@ angular.module('myApp.services', [])
       return false;
     }
 
-    var havePermission = window.webkitNotifications.checkPermission();
-    // console.log('perm', havePermission);
-
-    if (havePermission != 0) { // 0 is PERMISSION_ALLOWED
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
       $($window).on('click', requestPermission);
     }
+
 
     try {
       $($window).on('beforeunload', notificationsClear);
@@ -1994,12 +1998,12 @@ angular.module('myApp.services', [])
   }
 
   function requestPermission() {
-    window.webkitNotifications.requestPermission();
+    Notification.requestPermission();
     $($window).off('click', requestPermission);
   }
 
   function notify (data) {
-    // console.log('notify', $rootScope.idle.isIDLE);
+    // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
     if (!$rootScope.idle.isIDLE) {
       return false;
     }
@@ -2007,15 +2011,17 @@ angular.module('myApp.services', [])
     notificationsCount++;
 
     if (!notificationsUiSupport ||
-        window.webkitNotifications.checkPermission() != 0) {
+        Notification.permission !== 'granted') {
       return false;
     }
 
-    var notification = window.webkitNotifications.createNotification(
-      data.image || '',
-      data.title || '',
-      data.message || ''
-    );
+    var idx = ++notificationIndex,
+        key = data.key || 'k' + idx;
+
+    var notification = new Notification(data.title, {
+      icon: data.image || '',
+      body: data.message || ''
+    });
 
     notification.onclick = function () {
       notification.close();
@@ -2026,24 +2032,39 @@ angular.module('myApp.services', [])
       }
     };
 
+    notification.onclose = function () {
+      delete notificationsShown[key];
+      // lastClosed.push(+new Date());
+      notificationsClear();
+    };
+
     // console.log('notify', notification);
 
     notification.show();
 
-    notificationsShown.push(notification);
+    notificationsShown[key] = notification;
   };
+
+  function notificationCancel (key) {
+    var notification = notificationsShown[key];
+    if (notification) {
+      try {
+        if (notification.close) {
+          notification.close();
+        }
+      } catch (e) {}
+    }
+  }
 
   function notificationsClear() {
     angular.forEach(notificationsShown, function (notification) {
       try {
         if (notification.close) {
           notification.close()
-        } else if (notification.cancel) {
-          notification.cancel();
         }
       } catch (e) {}
     });
-    notificationsShown = [];
+    notificationsShown = {};
   }
 })
 

@@ -7,6 +7,9 @@
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController">
       <div class="im_dialogs_search">
         <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="searchQuery"/>
+        <a class="im_dialogs_search_clear" ng-click="searchQuery = ''" ng-show="searchQuery.length">
+          <span class=" glyphicon glyphicon-remove"></span>
+        </a>
       </div>
       <div my-dialogs-list class="im_dialogs_col">
         <div class="im_dialogs_wrap nano">

@@ -80,7 +80,7 @@
 
       <div class="im_message_media" ng-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" ng-switch="historyMessage.media._">
 
-        <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" >
+        <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" style="width: {{historyMessage.media.photo.thumb.width}}px;">
           <img
             class="im_message_photo_thumb"
             my-load-thumb
@@ -90,7 +90,7 @@
           />
         </a>
 
-        <a ng-switch-when="messageMediaVideo" class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)">
+        <a ng-switch-when="messageMediaVideo" class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)" style="width: {{historyMessage.media.video.thumb.width}}px;">
           <img
             class="im_message_video_thumb"
             my-load-thumb

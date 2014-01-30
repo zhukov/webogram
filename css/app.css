@@ -400,6 +400,14 @@ fieldset[disabled] .btn-tg.active {
   background-color: #FFF;
 }
 
+.im_dialogs_search_clear {
+  position: absolute;
+  margin-left: 260px;
+  margin-top: -25px;
+  color: #999;
+  font-size: 15px;
+}
+
 
 
 .im_dialogs_wrap {
@@ -890,7 +898,6 @@ div.im_message_video_thumb {
 }
 div.im_message_author,
 div.im_message_body {
-  border-radius: 2px;
   display: block;
   overflow: hidden;
 }
