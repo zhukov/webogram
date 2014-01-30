@@ -11,12 +11,19 @@ html {
 }
 body {
   background: none;
-
-  /*font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif;*/
-  /*font: 12px/18px Arial, "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;*/
   font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
   /*-webkit-font-smoothing: antialiased;*/
 }
+.font-light {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Light", Helvetica, Arial , Verdana, sans-serif;
+  font-weight: 300;
+}
+body.non_osx,
+.non_osx .font-light {
+  font: 12px/18px Verdana, Tahoma, sans-serif, Arial, Helvetica;
+  font-weight: normal;
+}
+
 a {
   color: #3a6d99;
 }
@@ -97,11 +104,6 @@ fieldset[disabled] .btn-tg:active,
 fieldset[disabled] .btn-tg.active {
   background-color: #999;
   border-color: #999;
-}
-
-.font-light {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Light", Helvetica, Arial , Verdana, sans-serif;
-  font-weight: 300;
 }
 
 .tg_page_head .container {
@@ -406,44 +408,23 @@ fieldset[disabled] .btn-tg.active {
   padding: 0 19px 0 12px;
   outline: none ! important;
 }
-.im_dialogs_scrollable_wrap .nav-stacked > li + li {
-  margin-top: 0;
-  margin-left: 0;
-}
-
 .im_dialogs_scrollable_wrap a.im_dialog {
+  clear: both;
+  overflow: hidden;
   color: #000;
   padding: 8px 9px;
   border-radius: 0;
-  border-bottom: 1px solid #FFF;
-}
-.im_dialogs_scrollable_wrap li:last-child a.im_dialog {
-  border-bottom: 1px solid #FFF;
-}
-
-.im_dialogs_scrollable_wrap a.im_dialog:hover,
-.im_dialogs_scrollable_wrap .active a.im_dialog {
-  margin-top: -1px;
-  overflow: hidden;
 }
 .im_dialogs_scrollable_wrap a.im_dialog:hover {
+  border-radius: 2px;
   background: #f2f6fa;
-  border-top: 1px solid #f2f6fa;
-  border-bottom-color: #f2f6fa;
 }
 .im_dialogs_scrollable_wrap .active a.im_dialog {
   border-radius: 2px;
   background-color: #5785A5;
-  border-top: 1px solid #5785A5;
-  border-bottom-color: #5785A5;
 }
 .im_dialogs_scrollable_wrap .active a.im_dialog:hover {
   background-color: #5785A5;
-}
-.im_dialogs_scrollable_wrap li:first-child a.im_dialog,
-.im_dialogs_scrollable_wrap .active + li > a.im_dialog {
-  margin-top: 0;
-  border-top: 0;
 }
 
 .im_dialogs_scrollable_wrap a.im_dialog .icon,

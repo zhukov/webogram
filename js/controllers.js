@@ -15,6 +15,8 @@ angular.module('myApp.controllers', [])
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
+      } else {
+        $scope.showWelcome = true;
       }
     });
   })
@@ -467,7 +469,7 @@ angular.module('myApp.controllers', [])
           return false;
         }
 
-        text = text.replace(/:([a-z0-9\-_]+?):/gi, function (all, name) {
+        text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
           var utfChar = $.emojiarea.reverseIcons[name];
           if (utfChar !== undefined) {
             return utfChar;
