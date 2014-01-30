@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html?5'
+      templateUrl: 'partials/message.html?6'
     };
   })
 
