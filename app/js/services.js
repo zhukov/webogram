@@ -1926,10 +1926,10 @@ angular.module('myApp.services', [])
   var notificationIndex = 0;
   var notificationsCount = 0;
   var peerSettings = {};
-  var faviconEl = $('link[rel="icon"]');
+  var faviconBackupEl = $('link[rel="icon"]'),
+      faviconNewEl = $('<link rel="icon" href="favicon_unread.ico" type="image/x-icon" />');
 
   var titleBackup = document.title,
-      faviconBackup = faviconEl.attr('href'),
       titlePromise;
 
   $rootScope.$watch('idle.isIDLE', function (newVal) {
@@ -1939,20 +1939,22 @@ angular.module('myApp.services', [])
     if (!newVal) {
       notificationsCount = 0;
       document.title = titleBackup;
-      faviconEl.attr('href', faviconBackup);
+      $('link[rel="icon"]').replaceWith(faviconBackupEl);
       notificationsClear();
     } else {
       titleBackup = document.title;
 
       titlePromise = $interval(function () {
         var time = +new Date();
-        // console.log('check title', notificationsCount, time % 2000 > 1000);
         if (!notificationsCount || time % 2000 > 1000) {
           document.title = titleBackup;
-          faviconEl.attr('href', faviconBackup);
+          $('link[rel="icon"]').replaceWith(faviconBackupEl);
         } else {
-          document.title = notificationsCount + ' notifications';
-          faviconEl.attr('href', 'favicon_unread.ico');
+          document.title = notificationsCount > 1
+            ? (notificationsCount + ' notifications')
+            : '1 notification';
+
+          $('link[rel="icon"]').replaceWith(faviconNewEl);
         }
       }, 1000);
     }
