@@ -43,8 +43,8 @@
                 </div>
 
                 <div ng-if="historyPeer.id > 0" ng-click="openUser(historyPeer.id)">
+                  <span class="im_history_panel_info_link pull-right">Info</span>
                   <h4>
-                    <a class="im_history_panel_info_link pull-right" ng-click="openUser(historyPeer.id)">Info</a>
                     <span ng-bind-html="historyPeer.data.rFullName"></span>
                     <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
                   </h4>
