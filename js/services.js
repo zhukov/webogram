@@ -1454,7 +1454,7 @@ angular.module('myApp.services', [])
       MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size).then(function (url) {
         delete historyDoc.progress;
 
-        var a = $('<a>Download</a>').attr('href', url).attr('target', '_blank').attr('download', doc.file_name).appendTo('body');
+        var a = $('<a>Download</a>').css({position: 'absolute'}).attr('href', url).attr('target', '_blank').attr('download', doc.file_name).appendTo('body');
         a[0].dataset.downloadurl = ['png', doc.file_name, url].join(':');
         a[0].click();
         $timeout(function () {
