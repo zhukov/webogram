@@ -15,7 +15,7 @@ body {
   /*font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif;*/
   /*font: 12px/18px Arial, "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;*/
   font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  /*-webkit-font-smoothing: antialiased;*/
 }
 a {
   color: #3a6d99;
@@ -853,7 +853,6 @@ div.im_message_video_thumb {
 
 .im_service_message_photo_thumb {
   display: block;
-  width: 100px;
   margin: 0 auto;
 }
 

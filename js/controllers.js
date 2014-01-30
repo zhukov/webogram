@@ -443,7 +443,7 @@ angular.module('myApp.controllers', [])
       }
 
       var now = +new Date();
-      if (newVal === undefined || !newVal.length || now - lastTyping < 6000) {
+      if (newVal === undefined || !newVal.length || now - lastTyping < 5000) {
         return;
       }
       lastTyping = now;
