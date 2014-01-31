@@ -20,6 +20,12 @@
     <h3 class="login_form_head">{{ credentials.phone_number | phoneNumber }} <small>(<a href="#/auth">edit</a>)</small></h3>
     <p class="login_form_lead">We have sent you a code via SMS.<br/>Please enter it below.</p>
 
+    <p class="login_form_lead">
+      <span ng-show="callPending.remaining > 0">Telegram will call you in {{callPending.remaining | duration}}</span>
+      <span ng-show="!callPending.remaining &amp;&amp; !callPending.success">Telegram is calling you</span>
+      <span ng-show="!callPending.remaining &amp;&amp; callPending.success">Telegram dialed your number</span>
+    </p>
+
     <div class="form-group" ng-class="{'has-error': error.field == 'phone_code'}">
       <label class="control-label" for="phone_code" ng-if="error.field == 'phone_code'">Incorrect SMS code</label>
       <input type="text" class="form-control" name="phone_code" ng-model="credentials.phone_code" placeholder="Enter your code" required>

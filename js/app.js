@@ -54,7 +54,7 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
 
   // $locationProvider.html5Mode(true);
   $routeProvider.when('/', {templateUrl: 'partials/welcome.html?2', controller: 'AppWelcomeController'});
-  $routeProvider.when('/login', {templateUrl: 'partials/login.html?2', controller: 'AppLoginController'});
+  $routeProvider.when('/login', {templateUrl: 'partials/login.html?3', controller: 'AppLoginController'});
   $routeProvider.when('/im', {templateUrl: 'partials/im.html?6', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
