@@ -287,7 +287,7 @@
 	    }, 0);
 	    if (text.length) {
   	    document.execCommand('insertText', false, text);
-  	    return cancelEvent();
+  	    return cancelEvent(e);
 	    }
 	    return true;
 		}
