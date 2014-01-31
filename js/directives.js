@@ -206,6 +206,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         } else {
           $(sendFormWrap1).css({height: 'auto'});
           $(sendPanelWrap).removeClass('im_panel_fixed_bottom');
+          updateSizes();
         }
       });
 
