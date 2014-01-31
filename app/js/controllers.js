@@ -21,22 +21,42 @@ angular.module('myApp.controllers', [])
     });
   })
 
-  .controller('AppLoginController', function ($scope, $location, MtpApiManager, ErrorService) {
+  .controller('AppLoginController', function ($scope, $location, $timeout, MtpApiManager, ErrorService) {
     var options = {dcID: 1};
 
     $scope.credentials = {};
     $scope.progress = {};
+    $scope.callPending = {};
+
+    var callTimeout;
 
     function saveAuth (result) {
       MtpApiManager.setUserAuth(options.dcID, {
         expires: result.expires,
         id: result.user.id
       });
+      $timeout.cancel(callTimeout);
 
       $location.url('/im');
     };
 
+    function callCheck () {
+      $timeout.cancel(callTimeout);
+      if (!(--$scope.callPending.remaining)) {
+        $scope.callPending.success = false;
+        MtpApiManager.invokeApi('auth.sendCall', {
+          phone_number: $scope.credentials.phone_number,
+          phone_code_hash: $scope.credentials.phone_code_hash
+        }).then(function () {
+          $scope.callPending.success = true;
+        });
+      } else {
+        callTimeout = $timeout(callCheck, 1000);
+      }
+    }
+
     $scope.sendCode = function () {
+      $timeout.cancel(callTimeout);
       $scope.progress.enabled = true;
       MtpApiManager.invokeApi('auth.checkPhone', {
         phone_number: $scope.credentials.phone_number
@@ -59,6 +79,9 @@ angular.module('myApp.controllers', [])
           $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
           $scope.credentials.phone_occupied = sentCode.phone_registered;
           $scope.error = {};
+
+          $scope.callPending.remaining = 10;
+          callCheck();
 
         }, function (error) {
           $scope.progress.enabled = false;
