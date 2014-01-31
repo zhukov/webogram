@@ -2040,10 +2040,6 @@ angular.module('myApp.services', [])
       notificationsClear();
     };
 
-    // console.log('notify', notification);
-
-    notification.show();
-
     notificationsShown[key] = notification;
   };
 
