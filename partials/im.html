@@ -79,49 +79,58 @@
 
           </div>
 
-          <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
-            <div class="pull-right im_panel_peer_photo" ng-click="openUser(historyPeer.id)" ng-if="historyPeer.id > 0">
-              <img
-                class="im_panel_peer_photo"
-                my-load-thumb
-                thumb="historyPeer.photo"
-              />
-              <i class="icon im_panel_peer_online" ng-show="historyPeer.data.status._ == 'userStatusOnline'"></i>
-            </div>
-            <div class="pull-right im_panel_peer_photo" ng-click="openChat(-historyPeer.id)" ng-if="historyPeer.id < 0">
-              <img
-                class="im_panel_peer_photo"
-                my-load-thumb
-                thumb="historyPeer.photo"
-              />
-            </div>
-            <div class="pull-left im_panel_own_photo">
-              <img
-                class="im_panel_own_photo"
-                my-load-thumb
-                thumb="ownPhoto"
-              />
-            </div>
-            <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
-              <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
-              <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
+          <div class="im_send_panel_wrap">
 
-              <div class="im_emoji_btn pull-right">
-                <i class="icon icon-emoji"></i>
+            <div class="im_send_form_wrap1">
+
+              <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
+                <div class="pull-right im_panel_peer_photo" ng-click="openUser(historyPeer.id)" ng-if="historyPeer.id > 0">
+                  <img
+                    class="im_panel_peer_photo"
+                    my-load-thumb
+                    thumb="historyPeer.photo"
+                  />
+                  <i class="icon im_panel_peer_online" ng-show="historyPeer.data.status._ == 'userStatusOnline'"></i>
+                </div>
+                <div class="pull-right im_panel_peer_photo" ng-click="openChat(-historyPeer.id)" ng-if="historyPeer.id < 0">
+                  <img
+                    class="im_panel_peer_photo"
+                    my-load-thumb
+                    thumb="historyPeer.photo"
+                  />
+                </div>
+                <div class="pull-left im_panel_own_photo">
+                  <img
+                    class="im_panel_own_photo"
+                    my-load-thumb
+                    thumb="ownPhoto"
+                  />
+                </div>
+                <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
+                  <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
+                  <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
+
+                  <div class="im_emoji_btn pull-right">
+                    <i class="icon icon-emoji"></i>
+                  </div>
+
+                  <div class="im_attach pull-right">
+                    <input type="file" class="im_attach_input" size="28" multiple="true" />
+                    <i class="icon icon-paperclip"></i>
+                  </div>
+
+                  <div class="im_media_attach pull-right">
+                    <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*" />
+                    <i class="icon icon-camera"></i>
+                  </div>
+
+                  <button type="submit" class="btn btn-tg im_submit">Send</button>
+                </form>
               </div>
 
-              <div class="im_attach pull-right">
-                <input type="file" class="im_attach_input" size="28" multiple="true" />
-                <i class="icon icon-paperclip"></i>
-              </div>
+            </div>
 
-              <div class="im_media_attach pull-right">
-                <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*" />
-                <i class="icon icon-camera"></i>
-              </div>
 
-              <button type="submit" class="btn btn-tg im_submit">Send</button>
-            </form>
           </div>
 
         </div>

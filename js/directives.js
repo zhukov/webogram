@@ -106,6 +106,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
           panelWrap = $('.im_history_panel_wrap', element)[0],
+          sendPanelWrap = $('.im_send_panel_wrap', element)[0],
+          sendFormWrap1 = $('.im_send_form_wrap1', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           moreNotified = false;
 
@@ -197,6 +199,18 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
+      scope.$on('ui_editor_change', function (e, data) {
+        if (data.start) {
+          $(sendFormWrap1).css({height: $(sendFormWrap).height()});
+          $(sendPanelWrap).addClass('im_panel_fixed_bottom');
+        } else {
+          $(sendFormWrap1).css({height: 'auto'});
+          $(sendPanelWrap).removeClass('im_panel_fixed_bottom');
+        }
+      });
+
+      scope.$on('ui_editor_resize', updateSizes);
+
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
         if ($(scrollableWrap).hasClass('im_history_to_bottom')) {
@@ -215,10 +229,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes (heightOnly) {
         $(historyWrap).css({
-          height: $($window).height() - panelWrap.offsetHeight - sendFormWrap.offsetHeight - 90
+          height: $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - 90
         });
         $(historyEl).css({
-          minHeight: $($window).height() - panelWrap.offsetHeight - sendFormWrap.offsetHeight - 90 - 44
+          minHeight: $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - 90 - 44
         });
 
         if (heightOnly) return;
@@ -263,6 +277,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         editorElement = richTextarea;
         $(richTextarea).addClass('form-control');
         $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+
+        var h = $(richTextarea).height();
+        $(richTextarea).on('keydown keyup change', function (e) {
+          scope.$emit('ui_editor_change', {start: e.type == 'keydown'});
+          var newH = $(richTextarea).height();
+          if (h != newH) {
+            h = newH;
+            scope.$emit('ui_editor_resize');
+          }
+        });
       }
 
       // $(emojiMenu.firstChild).addClass('nano').nanoScroller({preventPageScrolling: true, tabIndex: -1});
@@ -313,7 +337,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       function updateField () {
         var html = $('<div>').text(scope.draftMessage.text || '').html();
         html = html.replace(/\n/g, '<br/>');
-        $(richTextarea).html(html)
+        $(richTextarea).html(html);
+        $(richTextarea).trigger('change');
       }
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
