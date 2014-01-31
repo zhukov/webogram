@@ -1188,7 +1188,7 @@ img.img_fullsize {
 }
 .emoji-wysiwyg-editor:active:before,
 .emoji-wysiwyg-editor:focus:before {
-  content: '' !important;
+  content: none;
 }
 
 .emoji-wysiwyg-editor {
