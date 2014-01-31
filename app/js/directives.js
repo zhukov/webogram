@@ -250,7 +250,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link (scope, element, attrs) {
       var messageField = $('textarea', element)[0],
-          fileSelect = $('input', element)[0],
+          fileSelects = $('input', element),
           dropbox = $('.im_send_dropbox_wrap', element)[0],
           emojiButton = $('.im_emoji_btn', element)[0],
           editorElement = messageField,
@@ -268,12 +268,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       // $(emojiMenu.firstChild).addClass('nano').nanoScroller({preventPageScrolling: true, tabIndex: -1});
 
 
-      $(fileSelect).on('change', function () {
+      fileSelects.on('change', function () {
+        var self = this;
         scope.$apply(function () {
-          scope.draftMessage.files = Array.prototype.slice.call(fileSelect.files);
+          scope.draftMessage.files = Array.prototype.slice.call(self.files);
+          scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
           setTimeout(function () {
             try {
-              fileSelect.value = '';
+              self.value = '';
             } catch (e) {};
           }, 1000);
         });
@@ -358,6 +360,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             if (e.type == 'drop') {
               scope.$apply(function () {
                 scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files);
+                scope.draftMessage.isMedia = false;
               });
             }
             dragTimeout = setTimeout(function () {

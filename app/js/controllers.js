@@ -530,7 +530,9 @@ angular.module('myApp.controllers', [])
       }
 
       for (var i = 0; i < newVal.length; i++) {
-        AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i]);
+        AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i], {
+          isMedia: $scope.draftMessage.isMedia
+        });
         $scope.$broadcast('ui_message_send');
       }
     }

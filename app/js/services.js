@@ -717,12 +717,23 @@ angular.module('myApp.services', [])
   };
 
   function sendFile(peerID, file, options) {
+    options = options || {};
     var messageID = tempID--,
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        isPhoto = file.type == 'image/jpeg' && file.size <= 5242880; // 5Mb
+        attachType;
+
+    if (!options.isMedia) {
+      attachType = 'doc';
+    } else if (['image/jpeg', 'image/gif', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
+      attachType = 'photo';
+    } else if (file.type.substr(0, 6) == 'video/') {
+      attachType = 'video';
+    } else {
+      attachType = 'doc';
+    }
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -731,7 +742,7 @@ angular.module('myApp.services', [])
     MtpApiManager.getUserID().then(function (fromID) {
       var media = {
         _: 'messageMediaPending',
-        type: isPhoto ? 'photo' : 'doc',
+        type: attachType,
         file_name: file.name,
         size: file.size,
         progress: {percent: 1, total: file.size}
@@ -754,10 +765,18 @@ angular.module('myApp.services', [])
       message.send = function () {
         MtpApiFileManager.uploadFile(file).then(function (inputFile) {
           var inputMedia;
-          if (isPhoto) {
-            inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
-          } else {
-            inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
+          switch (attachType) {
+            case 'photo':
+              inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
+              break;
+
+            case 'video':
+              inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0};
+              break;
+
+            case 'doc':
+            default:
+              inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
           }
           MtpApiManager.invokeApi('messages.sendMedia', {
             peer: inputPeer,
