@@ -319,6 +319,7 @@ angular.module('myApp.controllers', [])
         $scope.typing = {};
         $scope.state = {loaded: true};
         $scope.$broadcast('ui_peer_change');
+        $scope.$broadcast('ui_history_change');
       }
     }
 
@@ -373,6 +374,8 @@ angular.module('myApp.controllers', [])
     function showEmptyHistory () {
       $scope.state = {notSelected: true};
       $scope.history = [];
+
+      $scope.$broadcast('ui_history_change');
     }
 
 

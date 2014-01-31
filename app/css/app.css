@@ -950,14 +950,20 @@ span.emoji {
   padding: 200px 50px 0;
 }
 
-.im_send_form_wrap {
-  /*width: 581px;*/
+.im_send_panel_wrap {
   width: 526px;
   margin: 0 auto;
   padding: 10px 12px 22px 0;
 }
+.im_panel_fixed_bottom .im_send_form_wrap1 {
+  position: relative;
+}
+.im_panel_fixed_bottom .im_send_form_wrap {
+  width: 514px;
+  position: absolute;
+  bottom: 0;
+}
 .im_send_form {
-  /*width: 444px;*/
   width: 389px;
   float: left;
 }
@@ -965,6 +971,7 @@ span.emoji {
   padding: 5px 12px;
   font-size: 13px;
   line-height: 17px;
+  min-width: 60px;
 }
 
 .im_send_dropbox_wrap {
@@ -1252,8 +1259,8 @@ img.img_fullsize {
   margin-bottom: 10px;
   padding: 6px;
   min-height: 50px;
-  height: 50px;
-  resize: none;
+  height: auto;
+  max-height: 300px;
   overflow: auto;
 
   border: 1px solid #d9dbde;
