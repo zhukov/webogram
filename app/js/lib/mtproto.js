@@ -1500,7 +1500,7 @@ factory('MtpSha1Service', function ($q) {
   }
 }).
 
-factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, MtpSha1Service, MtpAesService, AppConfigManager, $http, $q, $timeout) {
+factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, MtpSha1Service, MtpAesService, AppConfigManager, $http, $q, $timeout, $interval) {
 
   var updatesProcessor;
 
@@ -1517,7 +1517,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     //   (function () {
     //     console.log('update server salt');
     //     self.serverSalt = [0,0,0,0,0,0,0,0];
-    //     setTimeout(arguments.callee, nextRandomInt(2000, 12345));
+    //     $timeout(arguments.callee, nextRandomInt(2000, 12345));
     //   })();
     // }
 
@@ -1536,7 +1536,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     this.pendingTimeouts = [];
 
-    this.longPollInt = setInterval(this.checkLongPoll.bind(this), 10000);
+    this.longPollInt = $interval(this.checkLongPoll.bind(this), 10000);
     this.checkLongPoll();
   };
 
@@ -1689,7 +1689,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     this.wrapMtpCall('http_wait', {max_delay: 0, wait_after: 0, max_wait: maxWait}, {noResponse: true}).
       then((function () {
         delete this.longPollPending;
-        setTimeout(this.checkLongPoll.bind(this), 0);
+        $timeout(this.checkLongPoll.bind(this), 0);
       }).bind(this));
   };
 
@@ -1981,7 +1981,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     clearTimeout(this.nextReqTO);
 
-    this.nextReqTO = setTimeout(this.performSheduledRequest.bind(this), delay || 0);
+    this.nextReqTO = $timeout(this.performSheduledRequest.bind(this), delay || 0);
     this.nextReq = nextReq;
   };
 
@@ -2274,7 +2274,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
       return (cachedNetworker = networker).wrapApiCall(method, params, options).then(
         function (result) {
           deferred.resolve(result);
-          // setTimeout(function () {
+          // $timeout(function () {
           //   deferred.resolve(result);
           // }, 1000);
         },
