@@ -16,7 +16,8 @@ That said, I'm using this app myself and I'd like to share its sources, so anyon
 
 Here are some screenshots of the interface:
 
-[ To be added soon :) ]
+![Sample screenshot 1](/app/img/screenshot1.png)
+
 
 ### Implemented functionality list
 
