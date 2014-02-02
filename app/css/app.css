@@ -1382,3 +1382,16 @@ img.img_fullsize {
   font-size: 1.4em;
   line-height: 160%;
 }
+
+
+
+@media (max-width: 480px) {
+  .login_form_wrap {
+    border-radius: 0;
+    max-width: auto;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    margin: 30px auto 10px;
+  }
+
+}
