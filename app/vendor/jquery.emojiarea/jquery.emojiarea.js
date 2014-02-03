@@ -249,7 +249,7 @@
 	var EmojiArea_WYSIWYG = function($textarea, options) {
 		var self = this;
 
-		this.options = options;
+		this.options = options || {};
 		this.$textarea = $textarea;
 		this.$editor = $('<div>').addClass('emoji-wysiwyg-editor');
 		this.$editor.text($textarea.val());
@@ -257,8 +257,12 @@
 		/*! MODIFICATION START
 			Following code was modified by Igor Zhukov, in order to improve rich text paste
 		*/
+		var changeEvents = 'blur change';
+		if (!this.options.norealTime) {
+			changeEvents += ' keyup';
+		}
+		this.$editor.on(changeEvents, function(e) { return self.onChange.apply(self, [e]); });
 		this.$editor.on('paste', function(e) { return self.onPaste.apply(self, [e]); });
-		this.$editor.on('blur keyup', function(e) { return self.onChange.apply(self, [e]); });
 		/*! MODIFICATION END */
 
 		this.$editor.on('mousedown focus', function() { document.execCommand('enableObjectResizing', false, false); });
