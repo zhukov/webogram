@@ -254,7 +254,13 @@
 		this.$editor = $('<div>').addClass('emoji-wysiwyg-editor');
 		this.$editor.text($textarea.val());
 		this.$editor.attr({contenteditable: 'true'});
-		this.$editor.on('blur keyup paste', function(e) { return self.onChange.apply(self, [e]); });
+		/*! MODIFICATION START
+			Following code was modified by Igor Zhukov, in order to improve rich text paste
+		*/
+		this.$editor.on('paste', function(e) { return self.onPaste.apply(self, [e]); });
+		this.$editor.on('blur keyup', function(e) { return self.onChange.apply(self, [e]); });
+		/*! MODIFICATION END */
+
 		this.$editor.on('mousedown focus', function() { document.execCommand('enableObjectResizing', false, false); });
 		this.$editor.on('blur', function() { document.execCommand('enableObjectResizing', true, true); });
 
@@ -278,19 +284,24 @@
 		});
 	};
 
+	/*! MODIFICATION START
+			Following code was modified by Igor Zhukov, in order to improve rich text paste
+		*/
+	EmojiArea_WYSIWYG.prototype.onPaste = function(e) {
+    var text = (e.originalEvent || e).clipboardData.getData('text/plain'),
+    		self = this;
+    setTimeout(function () {
+	    self.onChange();
+    }, 0);
+    if (text.length) {
+	    document.execCommand('insertText', false, text);
+	    return cancelEvent(e);
+    }
+    return true;
+	}
+	/*! MODIFICATION END */
+
 	EmojiArea_WYSIWYG.prototype.onChange = function(e) {
-		if (e && e.type == 'paste') {
-	    var text = (e.originalEvent || e).clipboardData.getData('text/plain'),
-	    		self = this;
-	    setTimeout(function () {
-		    self.onChange();
-	    }, 0);
-	    if (text.length) {
-  	    document.execCommand('insertText', false, text);
-  	    return cancelEvent(e);
-	    }
-	    return true;
-		}
 		this.$textarea.val(this.val()).trigger('change');
 	};
 

@@ -201,8 +201,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       scope.$on('ui_editor_change', function (e, data) {
         if (data.start) {
-          $(sendFormWrap1).css({height: $(sendFormWrap).height()});
-          $(sendPanelWrap).addClass('im_panel_fixed_bottom');
+          if (!$(sendPanelWrap).hasClass('im_panel_fixed_bottom')) {
+            $(sendFormWrap1).css({height: $(sendFormWrap).height()});
+            $(sendPanelWrap).addClass('im_panel_fixed_bottom');
+          }
         } else {
           $(sendFormWrap1).css({height: 'auto'});
           $(sendPanelWrap).removeClass('im_panel_fixed_bottom');

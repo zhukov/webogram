@@ -10,6 +10,7 @@ html {
   /*background-size: 248px 382px;*/
 }
 body {
+  color: #000;
   background: none;
   font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
   /*-webkit-font-smoothing: antialiased;*/
@@ -22,6 +23,9 @@ body.non_osx,
 .non_osx .font-light {
   font: 13px/18px Tahoma, sans-serif, Arial, Helvetica;
   font-weight: normal;
+}
+h1, h2, h3, h4, h5 {
+  color: #222;
 }
 .non_osx h4 {
   font-size: 17px;
@@ -214,6 +218,7 @@ fieldset[disabled] .btn-tg.active {
   margin: 0 18px;
 }
 .modal-title {
+  color: #222;
   font-weight: bold;
   font-size: 17px;
   line-height: 1.4;
@@ -398,6 +403,10 @@ fieldset[disabled] .btn-tg.active {
   margin-bottom: 0;
   margin: 0;
 }
+.is_1x .im_dialogs_search_field {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
+
 .im_dialogs_search_field:focus,
 .im_dialogs_search_field:active {
   background-color: #FFF;
@@ -415,6 +424,9 @@ fieldset[disabled] .btn-tg.active {
   background-size: 42px 280px;
   opacity: 0.6;
 }
+.is_1x .im_dialogs_search_clear {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
 .im_dialogs_search_clear:hover {
   opacity: 1;
 }
@@ -426,6 +438,9 @@ fieldset[disabled] .btn-tg.active {
 .im_dialogs_scrollable_wrap {
   padding: 0 19px 0 12px;
   outline: none ! important;
+}
+.im_dialogs_scrollable_wrap .im_dialog_wrap {
+  margin-top: 0;
 }
 .im_dialogs_scrollable_wrap a.im_dialog {
   clear: both;
@@ -440,10 +455,10 @@ fieldset[disabled] .btn-tg.active {
 }
 .im_dialogs_scrollable_wrap .active a.im_dialog {
   border-radius: 2px;
-  background-color: #5785A5;
+  background-color: #6490b1;
 }
 .im_dialogs_scrollable_wrap .active a.im_dialog:hover {
-  background-color: #5785A5;
+  background-color: #6490b1;
 }
 
 .im_dialogs_scrollable_wrap a.im_dialog .icon,
@@ -481,9 +496,13 @@ a.im_dialog:hover .im_dialog_message_text {
 
 }
 .im_dialog_peer {
+  color: #222;
   font-weight: bold;
   margin-top: 2px;
   margin-bottom: 2px;
+}
+.active .im_dialog_peer {
+  color: #FFF;
 }
 
 .im_dialog_badge {
@@ -570,7 +589,6 @@ a.im_dialog:hover .im_dialog_message_text {
   padding: 10px 4px 0;
 }
 .im_history_panel_title h4 {
-  color: #333333;
   margin-bottom: 7px;
   font-size: 17px;
 }
@@ -759,7 +777,7 @@ div.im_message_video_thumb {
   width: 10px;
   height: 14px;
 
-  background: url(../img/icons/Location_Active.png) 0 0 no-repeat;
+  background: url(../img/icons/Location_Active.png?1) 0 0 no-repeat;
   background-size: 10px 14px;
 }
 
@@ -786,6 +804,9 @@ div.im_message_video_thumb {
   border-radius: 3px;
   margin-right: 10px;
 }
+.is_1x .icon-document {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
 
 .im_message_document_info {
   float: left;
@@ -800,7 +821,7 @@ div.im_message_video_thumb {
 }
 
 .im_message_document_name {
-  color: #000;
+  color: #222;
   display: inline-block;
   font-weight: bold;
   max-width: 200px;
@@ -911,8 +932,7 @@ div.im_message_video_thumb {
 }
 .im_message_date {
   color: #adadad;
-  font-size: 0.9em;
-  /*font-size: 0.8em;*/
+  font-size: 0.8em;
 }
 div.im_message_author,
 div.im_message_body {
@@ -1015,6 +1035,9 @@ textarea.im_message_field {
   background-size: 42px 280px;
   opacity: 0.8;
 }
+.is_1x .icon-paperclip {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
 .im_attach:hover .icon-paperclip {
   opacity: 1;
 }
@@ -1040,6 +1063,9 @@ textarea.im_message_field {
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
   background-size: 42px 280px;
   opacity: 0.8;
+}
+.is_1x .icon-emoji {
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_emoji_btn:hover .icon-emoji {
   opacity: 1;
@@ -1085,6 +1111,9 @@ textarea.im_message_field {
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
   background-size: 42px 280px;
   opacity: 0.8;
+}
+.is_1x .icon-camera {
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_media_attach:hover .icon-camera {
   opacity: 1;
@@ -1332,6 +1361,9 @@ img.img_fullsize {
   height: 7px;
   margin: 0 83px;
 }
+.is_1x .emoji-menu-tail {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
 
 
 .emoji-menu .nano > .pane {
@@ -1381,4 +1413,17 @@ img.img_fullsize {
   text-align: center;
   font-size: 1.4em;
   line-height: 160%;
+}
+
+
+
+@media (max-width: 480px) {
+  .login_form_wrap {
+    border-radius: 0;
+    max-width: auto;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    margin: 30px auto 10px;
+  }
+
 }
