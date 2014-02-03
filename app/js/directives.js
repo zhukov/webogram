@@ -202,11 +202,11 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope.$on('ui_editor_change', function (e, data) {
         if (data.start) {
           if (!$(sendPanelWrap).hasClass('im_panel_fixed_bottom')) {
-            $(sendFormWrap1).css({height: $(sendFormWrap).height()});
+            sendFormWrap1.style.height = sendFormWrap.offsetHeight + 'px';
             $(sendPanelWrap).addClass('im_panel_fixed_bottom');
           }
         } else {
-          $(sendFormWrap1).css({height: 'auto'});
+          sendFormWrap1.style.height = 'auto';
           $(sendPanelWrap).removeClass('im_panel_fixed_bottom');
         }
       });
@@ -237,7 +237,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           minHeight: $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - 90 - 44
         });
 
-        if (heightOnly) return;
+        if (heightOnly == true) return;
         if (atBottom) {
           onContentLoaded(function () {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
@@ -356,11 +356,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var height = $(richTextarea).height();
+      var height = richTextarea.offsetHeight;
       function updateHeight () {
-        var newHeight = $(richTextarea).height();
+        var newHeight = richTextarea.offsetHeight;
         if (height != newHeight) {
           height = newHeight;
+          scope.$emit('ui_editor_change', {start: false});
           scope.$emit('ui_editor_resize');
         }
       };
