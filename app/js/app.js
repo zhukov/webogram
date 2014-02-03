@@ -11,10 +11,12 @@ window._testMode = location.search.indexOf('test=1') > 0;
 window._debugMode = location.search.indexOf('debug=1') > 0;
 window._osX = (navigator.platform || '').toLowerCase().indexOf('mac') != -1 ||
               (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1;
+window._retina = window.devicePixelRatio > 1;
 
 if (!window._osX) {
   $('body').addClass('non_osx');
 }
+$('body').addClass(window._retina ? 'is_2x' : 'is_1x');
 
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
@@ -55,7 +57,7 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
   // $locationProvider.html5Mode(true);
   $routeProvider.when('/', {templateUrl: 'partials/welcome.html?2', controller: 'AppWelcomeController'});
   $routeProvider.when('/login', {templateUrl: 'partials/login.html?3', controller: 'AppLoginController'});
-  $routeProvider.when('/im', {templateUrl: 'partials/im.html?8', controller: 'AppIMController', reloadOnSearch: false});
+  $routeProvider.when('/im', {templateUrl: 'partials/im.html?9', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
 }]);
