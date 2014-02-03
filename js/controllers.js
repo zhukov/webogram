@@ -451,42 +451,17 @@ angular.module('myApp.controllers', [])
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
+    $scope.$on('ui_typing', onTyping);
 
     $scope.draftMessage = {text: ''};
+    $scope.$watch('draftMessage.text', onMessageChange);
+    $scope.$watch('draftMessage.files', onFilesSelected);
 
-    var lastTyping = false;
-    $scope.$watch('draftMessage.text', function (newVal) {
-      // console.log('ctrl text changed', newVal);
-      // console.trace('ctrl text changed', newVal);
-      AppMessagesManager.readHistory($scope.curDialog.inputPeer);
-
-      if (newVal.length) {
-        var backupDraftObj = {};
-        backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
-        AppConfigManager.set(backupDraftObj);
-        // console.log('draft save', backupDraftObj);
-      } else {
-        AppConfigManager.remove('draft' + $scope.curDialog.peerID);
-        // console.log('draft delete', 'draft' + $scope.curDialog.peerID);
-      }
-
-      var now = +new Date();
-      if (newVal === undefined || !newVal.length || now - lastTyping < 5000) {
-        return;
-      }
-      lastTyping = now;
-
-      MtpApiManager.invokeApi('messages.setTyping', {
-        peer: $scope.curDialog.inputPeer,
-        typing: true
-      });
-    });
 
     $scope.sendMessage = sendMessage;
 
-    $scope.$watch('draftMessage.files', onFilesSelected);
-
     function sendMessage (e) {
+      $scope.$broadcast('ui_message_before_send');
 
       $timeout(function () {
         var text = $scope.draftMessage.text;
@@ -525,6 +500,29 @@ angular.module('myApp.controllers', [])
         $scope.draftMessage.text = '';
         $scope.$broadcast('ui_peer_draft');
       }
+    }
+
+    function onMessageChange(newVal) {
+      // console.log('ctrl text changed', newVal);
+      // console.trace('ctrl text changed', newVal);
+      AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+
+      if (newVal.length) {
+        var backupDraftObj = {};
+        backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
+        AppConfigManager.set(backupDraftObj);
+        // console.log('draft save', backupDraftObj);
+      } else {
+        AppConfigManager.remove('draft' + $scope.curDialog.peerID);
+        // console.log('draft delete', 'draft' + $scope.curDialog.peerID);
+      }
+    }
+
+    function onTyping () {
+      MtpApiManager.invokeApi('messages.setTyping', {
+        peer: $scope.curDialog.inputPeer,
+        typing: true
+      });
     }
 
     function onFilesSelected (newVal) {

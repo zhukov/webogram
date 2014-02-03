@@ -208,7 +208,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         } else {
           $(sendFormWrap1).css({height: 'auto'});
           $(sendPanelWrap).removeClass('im_panel_fixed_bottom');
-          updateSizes();
         }
       });
 
@@ -272,7 +271,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           emojiButton = $('.im_emoji_btn', element)[0],
           editorElement = messageField,
           dragStarted, dragTimeout,
-          emojiArea = $(messageField).emojiarea({button: emojiButton}),
+          emojiArea = $(messageField).emojiarea({button: emojiButton, norealTime: true}),
           emojiMenu = $('.emoji-menu', element)[0],
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
@@ -281,19 +280,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).addClass('form-control');
         $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
 
-        var h = $(richTextarea).height();
-        $(richTextarea).on('keydown keyup change', function (e) {
-          scope.$emit('ui_editor_change', {start: e.type == 'keydown'});
-          var newH = $(richTextarea).height();
-          if (h != newH) {
-            h = newH;
-            scope.$emit('ui_editor_resize');
-          }
+        var updatePromise;
+        $(richTextarea).on('keyup', function (e) {
+          scope.$emit('ui_editor_change', {start: false});
+          updateHeight();
+
+          scope.draftMessage.text = richTextarea.innerText;
+
+          $timeout.cancel(updatePromise);
+          updatePromise = $timeout(updateValue, 1000);
         });
       }
-
-      // $(emojiMenu.firstChild).addClass('nano').nanoScroller({preventPageScrolling: true, tabIndex: -1});
-
 
       fileSelects.on('change', function () {
         var self = this;
@@ -310,39 +307,63 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var sendOnEnter = true;
       $(editorElement).on('keydown', function (e) {
-        if (e.keyCode != 13) {
-          return;
-        }
-        var submit = false;
-        if (sendOnEnter && !e.shiftKey) {
-          submit = true;
-        } else if (!sendOnEnter && (e.ctrlKey || e.metaKey)) {
-          submit = true;
+        if (e.keyCode == 13) {
+          var submit = false;
+          if (sendOnEnter && !e.shiftKey) {
+            submit = true;
+          } else if (!sendOnEnter && (e.ctrlKey || e.metaKey)) {
+            submit = true;
+          }
+
+          if (submit) {
+            scope.$emit('ui_editor_change', {start: false});
+            updateHeight();
+            $(element).trigger('submit');
+            return cancelEvent(e);
+          }
         }
 
-        if (submit) {
-          $(element).trigger('submit');
-          return cancelEvent(e);
+        if (richTextarea) {
+          scope.$emit('ui_editor_change', {start: true});
+          updateHeight();
         }
       });
 
-      if (richTextarea) {
-        scope.$watch('draftMessage.text', function (newVal) {
-          // console.log('dir text change', newVal);
-          if (!newVal.length && !messageField.value.length) {
-            $timeout(function () {
-              updateField();
-            }, 0);
-          }
-        });
-      }
+      var lastTyping = 0;
+      $(editorElement).on('keyup', function (e) {
+        var now = +new Date();
+        if (now - lastTyping < 5000) {
+          return;
+        }
+        lastTyping = now;
+        scope.$emit('ui_typing');
+      });
 
       function updateField () {
-        var html = $('<div>').text(scope.draftMessage.text || '').html();
-        html = html.replace(/\n/g, '<br/>');
-        $(richTextarea).html(html);
-        $(richTextarea).trigger('change');
+        if (richTextarea) {
+          $timeout.cancel(updatePromise);
+          var html = $('<div>').text(scope.draftMessage.text || '').html();
+          html = html.replace(/\n/g, '<br/>');
+          $(richTextarea).html(html);
+          updateHeight();
+        }
       }
+
+      function updateValue () {
+        if (richTextarea) {
+          $(richTextarea).trigger('change');
+          updateHeight();
+        }
+      }
+
+      var height = $(richTextarea).height();
+      function updateHeight () {
+        var newHeight = $(richTextarea).height();
+        if (height != newHeight) {
+          height = newHeight;
+          scope.$emit('ui_editor_resize');
+        }
+      };
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
 
@@ -351,6 +372,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope.$on('ui_history_change', focusField);
       scope.$on('ui_message_send', focusField);
       scope.$on('ui_peer_draft', updateField);
+      scope.$on('ui_message_before_send', updateValue);
+
 
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
@@ -360,7 +383,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function focusField () {
         onContentLoaded(function () {
-          $(editorElement).focus();
+          editorElement.focus();
         });
       }
 
@@ -416,14 +439,20 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link (scope, element, attrs) {
       var counter = 0;
-      scope.$watch('thumb.location', function (newVal) {
+
+      var cachedSrc = MtpApiFileManager.getCachedFile(scope.thumb && scope.thumb.location);
+      if (cachedSrc) {
+        element.attr('src', cachedSrc);
+      }
+
+      scope.$watch('thumb.location', function (newLocation) {
         var counterSaved = ++counter;
-        if (!scope.thumb || !scope.thumb.location) {
+        if (!newLocation) {
           element.attr('src', scope.thumb && scope.thumb.placeholder || 'img/blank.gif');
           return;
         }
 
-        var cachedSrc = MtpApiFileManager.getCachedFile(location);
+        var cachedSrc = MtpApiFileManager.getCachedFile(newLocation);
         if (cachedSrc) {
           element.attr('src', cachedSrc);
           return;
