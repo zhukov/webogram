@@ -1463,6 +1463,13 @@ img.img_fullsize {
   background-color: #FFF;
 }
 
+.settings_send_choose_form input {
+  margin-top: 2px;
+}
+.settings_send_choose_form {
+  margin-bottom: 20px;
+}
+
 .settings_user_phone,
 .settings_version {
   color: #999;

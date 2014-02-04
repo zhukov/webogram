@@ -255,7 +255,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout) {
+  .directive('mySendForm', function ($timeout, AppConfigManager) {
 
     return {
       link: link,
@@ -305,7 +305,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      var sendOnEnter = true;
+      var sendOnEnter = true,
+          updateSendSettings = function () {
+            AppConfigManager.get('send_ctrlenter').then(function (sendOnCtrl) {
+              sendOnEnter = !sendOnCtrl;
+            });
+          };
+
+      scope.$on('settings_changed', updateSendSettings);
+      updateSendSettings();
+
       $(editorElement).on('keydown', function (e) {
         if (e.keyCode == 13) {
           var submit = false;
