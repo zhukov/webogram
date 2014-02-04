@@ -1937,7 +1937,7 @@ angular.module('myApp.services', [])
 
 })
 
-.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, MtpApiManager, AppPeersManager, IdleManager) {
+.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, MtpApiManager, AppPeersManager, IdleManager, AppConfigManager) {
 
   var notificationsUiSupport = 'Notification' in window;
   var notificationsShown = {};
@@ -1983,6 +1983,7 @@ angular.module('myApp.services', [])
     start: start,
     notify: notify,
     cancel: notificationCancel,
+    clear: notificationsClear,
     getPeerSettings: getPeerSettings
   };
 
@@ -2036,31 +2037,47 @@ angular.module('myApp.services', [])
       return false;
     }
 
-    var idx = ++notificationIndex,
-        key = data.key || 'k' + idx;
-
-    var notification = new Notification(data.title, {
-      icon: data.image || '',
-      body: data.message || ''
-    });
-
-    notification.onclick = function () {
-      notification.close();
-      window.focus();
-      notificationsClear();
-      if (data.onclick) {
-        data.onclick();
+    AppConfigManager.get('notify_nosound').then(function (noSound) {
+      if (!noSound) {
+        playSound();
       }
-    };
+    })
 
-    notification.onclose = function () {
-      delete notificationsShown[key];
-      // lastClosed.push(+new Date());
-      notificationsClear();
-    };
+    AppConfigManager.get('notify_nodesktop').then(function (noShow) {
+      if (noShow) {
+        return;
+      }
+      var idx = ++notificationIndex,
+          key = data.key || 'k' + idx;
 
-    notificationsShown[key] = notification;
+      var notification = new Notification(data.title, {
+        icon: data.image || '',
+        body: data.message || ''
+      });
+
+      notification.onclick = function () {
+        notification.close();
+        window.focus();
+        notificationsClear();
+        if (data.onclick) {
+          data.onclick();
+        }
+      };
+
+      notification.onclose = function () {
+        delete notificationsShown[key];
+        // lastClosed.push(+new Date());
+        notificationsClear();
+      };
+
+      notificationsShown[key] = notification;
+    });
   };
+
+  function playSound () {
+    var filename = 'img/sound_a.wav';
+    $('#notify_sound').html('<audio autoplay="autoplay"><source src="' + filename + '" type="audio/mpeg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'" /></audio>');
+  }
 
   function notificationCancel (key) {
     var notification = notificationsShown[key];
