@@ -26,6 +26,21 @@
       </div>
     </form>
 
+    <form class="settings_send_choose_form">
+      <div class="radio">
+        <label>
+          <input type="radio" value="1" ng-model="send.enter">
+          <strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" value="" ng-model="send.enter">
+          <strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line
+        </label>
+      </div>
+    </form>
+
     <p>
       <strong>Sound: </strong>
       <a ng-click="notify.sound = !notify.sound">{{notify.sound ? 'ON' : 'OFF'}}</a>

@@ -162,7 +162,7 @@ angular.module('myApp.controllers', [])
     $scope.isLoggedIn = true;
     $scope.openSettings = function () {
       $modal.open({
-        templateUrl: 'partials/settings_modal.html?1',
+        templateUrl: 'partials/settings_modal.html?2',
         controller: 'SettingsModalController',
         scope: $rootScope.$new(),
         windowClass: 'settings_modal_window'
@@ -587,7 +587,7 @@ angular.module('myApp.controllers', [])
     });
   })
 
-  .controller('SettingsModalController', function ($scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager) {
 
     $scope.profile = {};
 
@@ -600,10 +600,13 @@ angular.module('myApp.controllers', [])
     });
 
     $scope.notify = {};
+    $scope.send = {};
 
-    AppConfigManager.get(['notify_nodesktop', 'notify_nosound']).then(function (settings) {
+    AppConfigManager.get(['notify_nodesktop', 'notify_nosound', 'send_ctrlenter']).then(function (settings) {
       $scope.notify.sound = !settings.notify_nosound;
       $scope.notify.desktop = !settings.notify_nodesktop;
+      $scope.send.enter = settings.send_ctrlenter ? '' : '1';
+      console.log($scope.send.enter);
     });
 
     $scope.$watch('notify.sound', function(newValue) {
@@ -621,6 +624,15 @@ angular.module('myApp.controllers', [])
       } else {
         AppConfigManager.set({notify_nodesktop: true});
       }
+    });
+
+    $scope.$watch('send.enter', function(newValue) {
+      if (newValue) {
+        AppConfigManager.remove('send_ctrlenter');
+      } else {
+        AppConfigManager.set({send_ctrlenter: true});
+      }
+      $rootScope.$broadcast('settings_changed');
     });
 
     $scope.error = {};
