@@ -321,6 +321,16 @@
 			util.restoreSelection(this.selection);
 		}
 		try { util.replaceSelection($img[0]); } catch (e) {}
+
+		/*! MODIFICATION START
+			Following code was modified by Igor Zhukov, in order to improve selection handling
+		*/
+		var self = this;
+		setTimeout(function () {
+			self.selection = util.saveSelection();
+		}, 100);
+		/*! MODIFICATION END */
+
 		this.onChange();
 	};
 
@@ -418,7 +428,7 @@
 			var target = e.originalTarget || e.target || window;
 			while (target && target != window) {
 				target = target.parentNode;
-				if (target == self.$menu[0]) {
+				if (target == self.$menu[0] || self.emojiarea && target == self.emojiarea.$button[0]) {
 					return;
 				}
 			}
@@ -438,11 +448,11 @@
 		this.$menu.on('click', 'a', function(e) {
 			var emoji = $('.label', $(this)).text();
 			window.setTimeout(function() {
-				/*! MODIFICATION START
-					Following code was modified by Igor Zhukov, in order to prevent close on shift-, ctrl-, alt- emoji select
-				*/
 				self.onItemSelected(emoji);
-				if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+				/*! MODIFICATION START
+					Following code was modified by Igor Zhukov, in order to close only on ctrl-, alt- emoji select
+				*/
+				if (e.ctrlKey || e.metaKey) {
 					self.hide();
 				}
 				/*! MODIFICATION END */
@@ -507,7 +517,8 @@
 	};
 
 	EmojiMenu.prototype.show = function(emojiarea) {
-		if (this.emojiarea && this.emojiarea === emojiarea) return;
+		/* MODIFICATION: Following line was modified by Igor Zhukov, in order to improve EmojiMenu behaviour */
+		if (this.emojiarea && this.emojiarea === emojiarea) return this.hide();
 		emojiarea.$button.addClass('on');
 		this.emojiarea = emojiarea;
 		this.emojiarea.menu = this;

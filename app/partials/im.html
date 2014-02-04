@@ -6,14 +6,14 @@
 
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController">
       <div class="im_dialogs_search">
-        <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="searchQuery"/>
-        <a class="im_dialogs_search_clear" ng-click="searchQuery = ''" ng-show="searchQuery.length"></a>
+        <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
+        <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
       </div>
       <div my-dialogs-list class="im_dialogs_col">
         <div class="im_dialogs_wrap nano">
           <div class="im_dialogs_scrollable_wrap content">
             <ul class="nav nav-pills nav-stacked">
-              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs | filter:searchQuery" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
             </ul>
           </div>
         </div>
