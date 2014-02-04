@@ -1,0 +1,55 @@
+<div class="settings_modal_wrap">
+
+  <div class="modal-header">
+    <a class="modal-close-link" ng-click="$close()">Close</a>
+    <a class="modal-save-link" ng-click="save()">Save</a>
+    <h4 class="modal-title">Settings</h4>
+  </div>
+
+  <div class="modal-body">
+
+    <form class="settings_profile_edit_form clearfix">
+      <div class="form-group settings_profile_first_name" ng-class="{'has-error': error.field == 'first_name'}">
+        <label class="control-label" for="first_name">
+          <span ng-if="error.field == 'first_name'">Invalid First Name</span>
+          <span ng-if="error.field != 'first_name'">First Name</span>
+        </label>
+        <input type="text" class="form-control" name="first_name" ng-model="profile.first_name" required />
+      </div>
+
+      <div class="form-group settings_profile_last_name" ng-class="{'has-error': error.field == 'last_name'}">
+        <label class="control-label" for="last_name">
+          <span ng-if="error.field == 'last_name'">Invalid Last Name</span>
+          <span ng-if="error.field != 'last_name'">Last Name</span>
+        </label>
+        <input type="text" class="form-control" name="last_name" ng-model="profile.last_name" />
+      </div>
+    </form>
+
+    <p>
+      <strong>Sound: </strong>
+      <a ng-click="notify.sound = !notify.sound">{{notify.sound ? 'ON' : 'OFF'}}</a>
+    </p>
+
+    <p>
+      <strong>Desktop Notifications: </strong>
+      <a ng-click="notify.desktop = !notify.desktop">{{notify.desktop ? 'ON' : 'OFF'}}</a>
+    </p>
+
+    <p>
+      <strong>User: </strong>
+      <span class="settings_user_phone">{{phone | phoneNumber}}</span>
+    </p>
+
+    <p>
+      <strong>Version: </strong>
+      <span class="settings_version">alpha 0.0.12</span>
+    </p>
+
+    <hr/>
+
+    <div class="settings_logout_wrap">
+      <a href="" ng-click="logOut()">Log out</a>
+    </div>
+  </div>
+</div>
