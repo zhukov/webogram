@@ -376,6 +376,17 @@ angular.module('myApp.services', [])
         };
       }
     },
+    getPeerSearchText: function (peerID) {
+      var text;
+      if (peerID > 0) {
+        var user = AppUsersManager.getUser(peerID);
+        text = (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '');
+      } else if (peerID < 0) {
+        var chat = AppChatsManager.getChat(-peerID);
+        text = chat.title || '';
+      }
+      return text;
+    },
     getOutputPeer: function (peerID) {
       return peerID > 0
             ? {_: 'peerUser', user_id: peerID}
@@ -405,7 +416,94 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, $location, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager) {
+.service('SearchIndexManager', function () {
+  var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
+      trimRe = /^\s+|\s$/g;
+
+  return {
+    createIndex: createIndex,
+    indexObject: indexObject,
+    search: search
+  };
+
+  function createIndex () {
+    return {
+      shortIndexes: {},
+      fullTexts: {}
+    }
+  }
+
+  function indexObject (id, searchText, searchIndex) {
+    if (searchIndex.fullTexts[id] !== undefined) {
+      return false;
+    }
+
+    searchText = searchText.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    if (!searchText.length) {
+      return false;
+    }
+
+    var shortIndexes = searchIndex.shortIndexes;
+
+    searchIndex.fullTexts[id] = searchText;
+
+    angular.forEach(searchText.split(' '), function(searchWord) {
+      var len = Math.min(searchWord.length, 3),
+          wordPart, i;
+      for (i = 1; i <= len; i++) {
+        wordPart = searchWord.substr(0, i);
+        if (shortIndexes[wordPart] === undefined) {
+          shortIndexes[wordPart] = [id];
+        } else {
+          shortIndexes[wordPart].push(id);
+        }
+      }
+    });
+  }
+
+  function search (query, searchIndex) {
+    var shortIndexes = searchIndex.shortIndexes,
+        fullTexts = searchIndex.fullTexts;
+
+    query = query.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    var queryWords = query.split(' '),
+        foundObjs = false,
+        newFoundObjs, i, j, searchText, found;
+
+    for (i = 0; i < queryWords.length; i++) {
+      newFoundObjs = shortIndexes[queryWords[i].substr(0, 3)];
+      if (!newFoundObjs) {
+        foundObjs = [];
+        break;
+      }
+      if (foundObjs === false || foundObjs.length > newFoundObjs.length) {
+        foundObjs = newFoundObjs;
+      }
+    }
+
+    newFoundObjs = {};
+
+    for (j = 0; j < foundObjs.length; j++) {
+      found = true;
+      searchText = fullTexts[foundObjs[j]];
+      for (i = 0; i < queryWords.length; i++) {
+        if (searchText.indexOf(queryWords[i]) == -1) {
+          found = false;
+          break;
+        }
+      }
+      if (found) {
+        newFoundObjs[foundObjs[j]] = true;
+      }
+    }
+
+    return newFoundObjs;
+  }
+})
+
+.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, $location, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -415,25 +513,51 @@ angular.module('myApp.services', [])
   var pendingByMessageID = {};
   var tempID = -1;
 
+
+  var dialogsIndex = SearchIndexManager.createIndex(),
+      cachedResults = {query: false};
+
   NotificationsManager.start();
 
-  function getDialogs (maxID, limit) {
+  function getDialogs (query, maxID, limit) {
+
+    var curDialogStorage = dialogsStorage;
+
+    if (angular.isString(query) && query.length) {
+      if (!limit || cachedResults.query !== query) {
+        cachedResults.query = query;
+
+        var results = SearchIndexManager.search(query, dialogsIndex);
+
+        cachedResults.dialogs = [];
+        angular.forEach(dialogsStorage.dialogs, function (dialog) {
+          if (results[dialog.peerID]) {
+            cachedResults.dialogs.push(dialog);
+          }
+        });
+        cachedResults.count = cachedResults.dialogs.length;
+      }
+      curDialogStorage = cachedResults;
+    } else {
+      cachedResults.query = false;
+    }
+
     var offset = 0;
     if (maxID > 0) {
-      for (offset = 0; offset < dialogsStorage.dialogs.length; offset++) {
-        if (maxID > dialogsStorage.dialogs[offset].top_message) {
+      for (offset = 0; offset < curDialogStorage.dialogs.length; offset++) {
+        if (maxID > curDialogStorage.dialogs[offset].top_message) {
           break;
         }
       }
     }
 
-    if (dialogsStorage.count !== null && (
-          dialogsStorage.dialogs.length >= offset + limit ||
-          dialogsStorage.dialogs.length == dialogsStorage.count
+    if (curDialogStorage.count !== null && (
+          curDialogStorage.dialogs.length >= offset + limit ||
+          curDialogStorage.dialogs.length == curDialogStorage.count
         )) {
       return $q.when({
-        count: dialogsStorage.count,
-        dialogs: dialogsStorage.dialogs.slice(offset, offset + limit)
+        count: curDialogStorage.count,
+        dialogs: curDialogStorage.dialogs.slice(offset, offset + limit)
       });
     }
 
@@ -449,29 +573,34 @@ angular.module('myApp.services', [])
       saveMessages(dialogsResult.messages);
 
       if (maxID > 0) {
-        for (offset = 0; offset < dialogsStorage.dialogs.length; offset++) {
-          if (maxID > dialogsStorage.dialogs[offset].top_message) {
+        for (offset = 0; offset < curDialogStorage.dialogs.length; offset++) {
+          if (maxID > curDialogStorage.dialogs[offset].top_message) {
             break;
           }
         }
       }
 
-      dialogsStorage.count = dialogsResult._ == 'messages.dialogsSlice'
+      curDialogStorage.count = dialogsResult._ == 'messages.dialogsSlice'
         ? dialogsResult.count
         : dialogsResult.dialogs.length;
 
-      dialogsStorage.dialogs.splice(offset, dialogsStorage.dialogs.length - offset);
+      curDialogStorage.dialogs.splice(offset, curDialogStorage.dialogs.length - offset);
       angular.forEach(dialogsResult.dialogs, function (dialog) {
-        dialogsStorage.dialogs.push({
-          peerID: AppPeersManager.getPeerID(dialog.peer),
+        var peerID = AppPeersManager.getPeerID(dialog.peer),
+            peerText = AppPeersManager.getPeerSearchText(peerID);
+
+        SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
+
+        curDialogStorage.dialogs.push({
+          peerID: peerID,
           top_message: dialog.top_message,
           unread_count: dialog.unread_count
         });
       });
 
       deferred.resolve({
-        count: dialogsStorage.count,
-        dialogs: dialogsStorage.dialogs.slice(offset, offset + limit)
+        count: curDialogStorage.count,
+        dialogs: curDialogStorage.dialogs.slice(offset, offset + limit)
       });
     }, function (error) {
       deferred.reject(error);
@@ -1104,6 +1233,9 @@ angular.module('myApp.services', [])
           dialog.unread_count++;
         }
         dialog.top_message = message.id;
+
+        SearchIndexManager.indexObject(peerID, AppPeersManager.getPeerSearchText(peerID), dialogsIndex);
+
         dialogsStorage.dialogs.unshift(dialog);
         $rootScope.$broadcast('dialogs_update', dialog);
 
@@ -1193,7 +1325,7 @@ angular.module('myApp.services', [])
       }
     });
 
-    console.log('choosing', photo, width, height, bestPhotoSize);
+    // console.log('choosing', photo, width, height, bestPhotoSize);
 
     return bestPhotoSize;
   }
@@ -1266,7 +1398,7 @@ angular.module('myApp.services', [])
     scope.photoID = photoID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/photo_modal.html',
+      templateUrl: 'partials/photo_modal.html?1',
       controller: 'PhotoModalController',
       scope: scope,
       backdrop: 'static'
@@ -1360,12 +1492,9 @@ angular.module('myApp.services', [])
     scope.videoID = videoID;
     scope.progress = {enabled: false};
     scope.player = {};
-    // scope.close = function () {
-    //   modalInstance.close();
-    // }
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/video_modal.html',
+      templateUrl: 'partials/video_modal.html?1',
       controller: 'VideoModalController',
       scope: scope
     });
@@ -1739,9 +1868,6 @@ angular.module('myApp.services', [])
   }
 
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')', 'i');
-
-  // console.log(regExp);
-
 
   return {
     wrapRichText: wrapRichText

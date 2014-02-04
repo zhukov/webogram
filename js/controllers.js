@@ -145,11 +145,12 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, MtpApiManager) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
     $scope.$on('history_focus', function (e, peerData) {
+      $modalStack.dismissAll();
       if (peerData.peerString == $scope.curDialog.peer) {
         $scope.$broadcast('ui_history_focus');
       } else {
@@ -182,12 +183,13 @@ angular.module('myApp.controllers', [])
     // console.log('init controller');
 
     $scope.dialogs = [];
+    $scope.search = {};
 
     var offset = 0,
         maxID = 0,
         hasMore = false,
-        limit = 20;
-
+        startLimit = 20,
+        limit = 100;
 
     MtpApiManager.invokeApi('account.updateStatus', {offline: false});
     $scope.$on('dialogs_need_more', function () {
@@ -204,6 +206,10 @@ angular.module('myApp.controllers', [])
     });
 
     $scope.$on('dialogs_update', function (e, dialog) {
+      if ($scope.search.query !== undefined && $scope.search.query.length) {
+        return false;
+      }
+
       var pos = false;
       angular.forEach($scope.dialogs, function(curDialog, curPos) {
         if (curDialog.peerID == dialog.peerID) {
@@ -220,27 +226,33 @@ angular.module('myApp.controllers', [])
       $scope.dialogs.unshift(wrappedDialog);
     });
 
-    loadDialogs();
+    $scope.$watch('search.query', loadDialogs);
 
-
-
-    function loadDialogs (startLimit) {
+    function loadDialogs () {
       offset = 0;
       maxID = 0;
       hasMore = false;
-      startLimit = startLimit || limit;
 
-      AppMessagesManager.getDialogs(maxID, startLimit).then(function (dialogsResult) {
-        offset += startLimit;
-        maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
-        hasMore = offset < dialogsResult.count;
-
+      AppMessagesManager.getDialogs($scope.search.query, maxID, startLimit).then(function (dialogsResult) {
         $scope.dialogs = [];
-        angular.forEach(dialogsResult.dialogs, function (dialog) {
-          $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
-        });
+
+        if (dialogsResult.dialogs.length) {
+          offset += startLimit;
+
+          maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
+          hasMore = offset < dialogsResult.count;
+
+          angular.forEach(dialogsResult.dialogs, function (dialog) {
+            $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
+          });
+        }
 
         $scope.$broadcast('ui_dialogs_change');
+
+        if (!$scope.search.query) {
+          AppMessagesManager.getDialogs('', maxID, limit);
+        }
+
       }, function (error) {
         if (error.code == 401) {
           $location.url('/login');
@@ -253,7 +265,7 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      AppMessagesManager.getDialogs(maxID, limit).then(function (dialogsResult) {
+      AppMessagesManager.getDialogs($scope.search.query, maxID, limit).then(function (dialogsResult) {
         offset += limit;
         maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
         hasMore = offset < dialogsResult.count;
@@ -280,7 +292,12 @@ angular.module('myApp.controllers', [])
     $scope.history = [];
     $scope.typing = {};
 
-    var peerID, offset, hasMore, maxID, limit = 20;
+    var peerID,
+        offset = 0,
+        hasMore = false,
+        maxID = 0,
+        startLimit = 20,
+        limit = 50;
 
     function applyDialogSelect (newPeer) {
       newPeer = newPeer || $scope.curDialog.peer || '';
@@ -351,8 +368,8 @@ angular.module('myApp.controllers', [])
       offset = 0;
       maxID = 0;
 
-      AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit).then(function (historyResult) {
-        offset += limit;
+      AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit).then(function (historyResult) {
+        offset += startLimit;
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
 
@@ -553,7 +570,6 @@ angular.module('myApp.controllers', [])
   .controller('UserModalController', function ($scope, $location, $rootScope, $modalStack, AppUsersManager) {
     $scope.user = AppUsersManager.wrapForFull($scope.userID);
     $scope.goToHistory = function () {
-      $modalStack.dismissAll();
       $rootScope.$broadcast('history_focus', {peerString: $scope.user.peerString});
     };
   })

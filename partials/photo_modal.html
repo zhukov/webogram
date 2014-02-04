@@ -4,7 +4,7 @@
 
     <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="$close()"> </div>
 
-    <p class="media_modal_info">From: <span class="media_modal_author">{{photo.fromUser | userName}}</span>, {{photo.date | dateOrTime}}</p>
+    <p class="media_modal_info">From: <span class="media_modal_author" ng-bind-html="photo.fromUser.rFullName" ></span>, {{photo.date | dateOrTime}}</p>
 
   </div>
 
