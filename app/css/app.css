@@ -224,15 +224,20 @@ fieldset[disabled] .btn-tg.active {
   line-height: 1.4;
 }
 
-.modal-close-link {
+.modal-close-link,
+.modal-save-link {
   font-size: 12px;
   line-height: 1.4;
   float: right;
   padding: 0 2px 0;
   margin: 6px 2px 0 0;
 }
-.modal-close-link:hover {
+.modal-close-link:hover,
+.modal-save-link:hover {
   text-decoration: none;
+}
+.modal-save-link {
+  margin-right: 15px;
 }
 
 
@@ -1426,4 +1431,39 @@ img.img_fullsize {
     margin: 30px auto 10px;
   }
 
+}
+
+.settings_modal_window .modal-dialog {
+  max-width: 502px;
+}
+.settings_profile_edit_form {
+  margin-bottom: 15px;
+}
+.settings_profile_first_name,
+.settings_profile_last_name {
+  width: 210px;
+  float: left;
+}
+.settings_profile_first_name {
+  margin-right: 22px;
+}
+
+.settings_profile_edit_form input {
+  font-size: 12px;
+  line-height: normal;
+  background: #F2F2F2;
+  border: 1px solid #F2F2F2;
+  border-radius: 0;
+  padding: 6px 6px 6px 6px;
+  margin-bottom: 0;
+  margin: 0;
+}
+.settings_profile_edit_form input:focus,
+.settings_profile_edit_form input:active {
+  background-color: #FFF;
+}
+
+.settings_user_phone,
+.settings_version {
+  color: #999;
 }

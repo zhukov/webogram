@@ -145,7 +145,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, MtpApiManager) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, MtpApiManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -159,10 +159,12 @@ angular.module('myApp.controllers', [])
 
 
     $scope.isLoggedIn = true;
-    $scope.logOut = function () {
-      MtpApiManager.logOut().then(function () {
-        location.hash = '/login';
-        location.reload();
+    $scope.openSettings = function () {
+      $modal.open({
+        templateUrl: 'partials/settings_modal.html?1',
+        controller: 'SettingsModalController',
+        scope: $rootScope.$new(),
+        windowClass: 'settings_modal_window'
       });
     }
 
@@ -567,6 +569,75 @@ angular.module('myApp.controllers', [])
 
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, result.full_chat);
     });
+  })
+
+  .controller('SettingsModalController', function ($scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager) {
+
+    $scope.profile = {};
+
+    MtpApiManager.getUserID().then(function (id) {
+      var user = AppUsersManager.getUser(id);
+      $scope.profile.first_name = user.first_name;
+      $scope.profile.last_name = user.last_name;
+
+      $scope.phone = user.phone;
+    });
+
+    $scope.notify = {};
+
+    AppConfigManager.get(['notify_nodesktop', 'notify_nosound']).then(function (settings) {
+      $scope.notify.sound = !settings.notify_nosound;
+      $scope.notify.desktop = !settings.notify_nodesktop;
+    });
+
+    $scope.$watch('notify.sound', function(newValue) {
+      if (newValue) {
+        AppConfigManager.remove('notify_nosound');
+      } else {
+        AppConfigManager.set({notify_nosound: true});
+        NotificationsManager.clear();
+      }
+    });
+
+    $scope.$watch('notify.desktop', function(newValue) {
+      if (newValue) {
+        AppConfigManager.remove('notify_nodesktop');
+      } else {
+        AppConfigManager.set({notify_nodesktop: true});
+      }
+    });
+
+    $scope.error = {};
+    $scope.save = function () {
+      MtpApiManager.invokeApi('account.updateProfile', {
+        first_name: $scope.profile.first_name || '',
+        last_name: $scope.profile.last_name || ''
+      }).then(function (user) {
+        $scope.error = {};
+        AppUsersManager.saveApiUser(user);
+      }, function (error) {
+        switch (error.type) {
+          case 'FIRSTNAME_INVALID':
+            $scope.error = {field: 'first_name'};
+            break;
+
+          case 'LASTNAME_INVALID':
+            $scope.error = {field: 'last_name'};
+            break;
+
+          case 'NAME_NOT_MODIFIED':
+            $scope.error = {};
+            break;
+        }
+      });
+    }
+
+    $scope.logOut = function () {
+      MtpApiManager.logOut().then(function () {
+        location.hash = '/login';
+        location.reload();
+      });
+    }
   })
 
 
