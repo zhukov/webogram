@@ -602,11 +602,10 @@ angular.module('myApp.controllers', [])
     $scope.notify = {};
     $scope.send = {};
 
-    AppConfigManager.get(['notify_nodesktop', 'notify_nosound', 'send_ctrlenter']).then(function (settings) {
-      $scope.notify.sound = !settings.notify_nosound;
-      $scope.notify.desktop = !settings.notify_nodesktop;
-      $scope.send.enter = settings.send_ctrlenter ? '' : '1';
-      console.log($scope.send.enter);
+    AppConfigManager.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter').then(function (settings) {
+      $scope.notify.desktop = !settings[0];
+      $scope.notify.sound = !settings[1];
+      $scope.send.enter = settings[2] ? '' : '1';
     });
 
     $scope.$watch('notify.sound', function(newValue) {

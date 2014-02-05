@@ -1824,6 +1824,10 @@ angular.module('myApp.services', [])
 
     seqStart = seqStart || seq;
 
+    if (!seqStart) {
+      return true;
+    }
+
     if (seqStart != curState.seq + 1) {
       // console.log('seq hole', seqStart, curState.seq);
       if (seqStart != curState.seq) {
