@@ -528,9 +528,8 @@ a.im_dialog:hover .im_dialog_message_text {
   float: right;
   width: 10px;
   height: 10px;
-  border-radius: 7px;
+  border-radius: 5px;
   overflow: hidden;
-  /*position: absolute;*/
   margin: 8px 0 0;
 }
 
