@@ -1011,7 +1011,7 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
   });
 
   function generateMessageID () {
-    var timeTicks = 1 * (new Date()),
+    var timeTicks = tsNow(),
         timeSec   = Math.floor(timeTicks / 1000) + timeOffset,
         timeMSec  = timeTicks % 1000,
         random    = nextRandomInt(0xFFFF);
@@ -1031,7 +1031,7 @@ factory('MtpMessageIdGenerator', function (AppConfigManager) {
   };
 
   function applyServerTime (serverTime, localTime) {
-    var newTimeOffset = serverTime - Math.floor((localTime || +new Date()) / 1000),
+    var newTimeOffset = serverTime - Math.floor((localTime || tsNow()) / 1000),
         changed = Math.abs(timeOffset - newTimeOffset) > 10;
     AppConfigManager.set({server_time_offset: newTimeOffset});
 
@@ -1224,7 +1224,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
   };
 
   function mtpDecryptServerDhDataAnswer (auth, encryptedAnswer) {
-    auth.localTime = +new Date();
+    auth.localTime = tsNow();
 
     auth.tmpAesKey = sha1Hash(auth.newNonce.concat(auth.serverNonce)).concat(sha1Hash(auth.serverNonce.concat(auth.newNonce)).slice(0, 12));
     auth.tmpAesIv = sha1Hash(auth.serverNonce.concat(auth.newNonce)).slice(12).concat(sha1Hash([].concat(auth.newNonce, auth.newNonce)), auth.newNonce.slice(0, 4));
@@ -1667,8 +1667,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
   MtpNetworker.prototype.checkLongPoll = function(force) {
     var isClean = this.cleanupSent();
-    // console.log('Check lp', this.longPollPending, (new Date().getTime()));
-    if (this.longPollPending && (new Date().getTime()) < this.longPollPending) {
+    // console.log('Check lp', this.longPollPending, tsNow());
+    if (this.longPollPending && tsNow() < this.longPollPending) {
       return false;
     }
     var self = this;
@@ -1683,8 +1683,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
   MtpNetworker.prototype.sendLongPoll = function() {
     var maxWait = 25000;
-    this.longPollPending = (new Date().getTime()) + maxWait;
-    // console.log('Set lp', this.longPollPending, (new Date().getTime()));
+    this.longPollPending = tsNow() + maxWait;
+    // console.log('Set lp', this.longPollPending, tsNow());
 
     this.wrapMtpCall('http_wait', {max_delay: 0, wait_after: 0, max_wait: maxWait}, {noResponse: true}).
       then((function () {
@@ -1707,7 +1707,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.pushResend = function(messageID, delay) {
-    var value = delay ? (new Date()).getTime() + delay : 0;
+    var value = delay ? tsNow() + delay : 0;
     var sentMessage = this.sentMessages[messageID];
     if (sentMessage.container) {
       for (var i = 0; i < sentMessage.inner.length; i++) {
@@ -1766,7 +1766,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     var messages = [],
         message,
         messagesByteLen = 0,
-        currentTime = (new Date()).getTime(),
+        currentTime = tsNow(),
         self = this;
 
     angular.forEach(this.pendingMessages, function (value, messageID) {
@@ -1970,7 +1970,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.sheduleRequest = function (delay) {
-    var nextReq = new Date() + delay;
+    var nextReq = tsNow() + delay;
 
     if (delay && this.nextReq && this.nextReq <= nextReq) {
       return false;
@@ -2465,6 +2465,9 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
       case 'inputDocumentFileLocation':
         return 'doc' + location.id;
+
+      case 'inputAudioFileLocation':
+        return 'audio' + location.id;
     }
     return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
   };

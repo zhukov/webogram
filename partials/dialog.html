@@ -9,6 +9,10 @@
       ng-show="dialogMessage.unreadCount > 0"
       ng-bind="dialogMessage.unreadCount"
     ></span>
+    <i
+      class="im_dialog_unread"
+      ng-show="dialogMessage.out &amp;&amp; dialogMessage.unread"
+    ></i>
   </div>
 
   <div class="im_dialog_photo pull-left">
@@ -41,36 +45,19 @@
       </span>
 
       <span class="im_dialog_message_media" ng-if="dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty'" ng-switch="dialogMessage.media._">
-        <span ng-switch-when="messageMediaPhoto">
-          <span class="glyphicon glyphicon-camera"></span> Photo
-        </span>
-        <span ng-switch-when="messageMediaVideo">
-          <span class="glyphicon glyphicon-facetime-video"></span> Video
-        </span>
-        <span ng-switch-when="messageMediaDocument">
-          <span class="glyphicon glyphicon-document"></span> Document
-        </span>
-        <span ng-switch-when="messageMediaGeo">
-          <span class="glyphicon glyphicon-map-marker"></span> Location
-        </span>
-        <span ng-switch-when="messageMediaContact">
-          <span class="glyphicon glyphicon-user"></span> Contact
-        </span>
+        <span ng-switch-when="messageMediaPhoto">Photo</span>
+        <span ng-switch-when="messageMediaVideo">Video</span>
+        <span ng-switch-when="messageMediaDocument">Document</span>
+        <span ng-switch-when="messageMediaAudio">Audio</span>
+        <span ng-switch-when="messageMediaGeo">Location</span>
+        <span ng-switch-when="messageMediaContact">Contact</span>
       </span>
 
       <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
-        <span ng-switch-when="messageActionChatCreate">
-          created the group
-        </span>
-        <span ng-switch-when="messageActionChatEditTitle">
-          changed group name
-        </span>
-        <span ng-switch-when="messageActionChatEditPhoto">
-          changed group photo
-        </span>
-        <span ng-switch-when="messageActionChatDeletePhoto">
-          removed group photo
-        </span>
+        <span ng-switch-when="messageActionChatCreate"> created the group </span>
+        <span ng-switch-when="messageActionChatEditTitle">changed group name</span>
+        <span ng-switch-when="messageActionChatEditPhoto">changed group photo</span>
+        <span ng-switch-when="messageActionChatDeletePhoto">removed group photo</span>
 
         <span ng-switch-when="messageActionChatAddUser">
           <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">

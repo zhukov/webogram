@@ -53,3 +53,7 @@ function onCtrlEnter (textarea, cb) {
 function onContentLoaded (cb) {
   setTimeout(cb, 0);
 };
+
+function tsNow () {
+  return +new Date();
+}
