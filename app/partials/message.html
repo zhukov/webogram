@@ -55,7 +55,10 @@
   </div>
 
   <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
-    <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}"></i>
+    <a ng-click="historyMessage.send()" ng-if="historyMessage.error">
+      <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>
+    </a>
+    <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-if="!historyMessage.error"></i>
 
     <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
       <img
@@ -137,6 +140,46 @@
           </div>
         </div>
 
+
+        <div ng-switch-when="messageMediaAudio" class="im_message_document">
+          <a href="" ng-click="openAudio(historyMessage.media.audio.id)" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
+            <i class="icon icon-audio"></i>
+          </a>
+          <i class="icon icon-audio" ng-if="historyMessage.media.audio.progress.enabled || historyMessage.media.audio.url"></i>
+
+          <div class="im_message_audio_info">
+            <div class="im_message_audio_name_wrap" ng-if="!historyMessage.media.audio.url">
+              <span class="im_message_audio_name">
+                Voice message
+              </span>
+              <span class="im_message_audio_duration" ng-if="!historyMessage.media.audio.progress.enabled">
+                {{historyMessage.media.audio.duration | duration}}
+              </span>
+              <span class="im_message_audio_size" ng-if="historyMessage.media.audio.progress.enabled">
+                {{historyMessage.media.audio.progress | formatSizeProgress}}
+              </span>
+            </div>
+            <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
+              <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
+            </div>
+            <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
+              <div class="progress tg_down_progress">
+                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.audio.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.audio.progress.percent}}%">
+                  <span class="sr-only">
+                    {{historyMessage.media.audio.progress.percent}}% Complete (success)
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
+              <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
+                <source ng-src="{{historyMessage.media.audio.url}}" type="audio/mpeg" />
+                <embed hidden="true" autostart="true" loop="false" src="{{historyMessage.media.audio.url}}" />
+              </audio>
+            </div>
+          </div>
+        </div>
+
         <a ng-switch-when="messageMediaGeo" my-map-point point="historyMessage.media.geo" class="im_message_geopoint">
           <i class="icon icon-geo-point"></i>
         </a>
@@ -158,7 +201,7 @@
         </div>
 
         <div ng-switch-when="messageMediaPending" class="im_message_upload_file im_message_upload_{{historyMessage.media.type}}">
-          <i class="icon icon-document"></i>
+          <i class="icon icon-{{historyMessage.media.type}}"></i>
           <div class="im_message_document_info">
             <div class="im_message_document_name_wrap">
               <span class="im_message_document_name">

@@ -16,7 +16,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/dialog.html?4'
+      templateUrl: 'partials/dialog.html?5'
     };
   })
 
@@ -25,7 +25,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       restrict: 'AE',
       scope: true,
       translude: false,
-      templateUrl: 'partials/message.html?6'
+      templateUrl: 'partials/message.html?7'
     };
   })
 
@@ -340,7 +340,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var lastTyping = 0;
       $(editorElement).on('keyup', function (e) {
-        var now = +new Date();
+        var now = tsNow();
         if (now - lastTyping < 5000) {
           return;
         }
@@ -690,7 +690,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link (scope, element, attrs) {
       var promise = $interval(function () {
-        var time = +new Date(),
+        var time = tsNow(),
             cnt = 3;
 
         if (time % 1000 <= 200) {
@@ -705,6 +705,27 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       scope.$on('$destroy', function cleanup() {
         $interval.cancel(promise);
+      });
+    }
+  })
+
+  .directive('myAudioAutoplay', function() {
+
+    return {
+      link: link,
+      scope: {
+        audio: '='
+      }
+    };
+
+    function link (scope, element, attrs) {
+      scope.$watch('audio.autoplay', function (autoplay) {
+        if (autoplay) {
+          element.autoplay = true;
+          element[0].play();
+        } else {
+          element.autoplay = false;
+        }
       });
     }
   })

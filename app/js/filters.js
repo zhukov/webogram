@@ -61,7 +61,7 @@ angular.module('myApp.filters', [])
       }
 
       var ticks = timestamp * 1000,
-          diff = Math.abs(+new Date() - ticks),
+          diff = Math.abs(tsNow() - ticks),
           format = 'HH:mm';
 
       if (diff > 518400000) { // 6 days
@@ -142,7 +142,7 @@ angular.module('myApp.filters', [])
   .filter('relativeTime', ['$filter', function($filter) {
     return function (timestamp) {
       var ticks = timestamp * 1000,
-          diff = Math.abs(+new Date() - ticks);
+          diff = Math.abs(tsNow() - ticks);
 
       if (diff < 60000) {
         return 'just now';

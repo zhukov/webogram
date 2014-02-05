@@ -497,7 +497,11 @@ angular.module('myApp.controllers', [])
           return all;
         });
 
-        AppMessagesManager.sendText($scope.curDialog.peerID, text);
+        do {
+          AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096));
+          text = text.substr(4096);
+        } while (text.length);
+
         resetDraft();
         $scope.$broadcast('ui_message_send');
       });
