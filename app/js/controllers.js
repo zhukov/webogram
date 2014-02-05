@@ -220,7 +220,7 @@ angular.module('myApp.controllers', [])
       var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count);
       if (pos !== false) {
         var prev = $scope.dialogs.splice(pos, 1);
-        wrappedDialog = angular.extend(prev[0], wrappedDialog);
+        // wrappedDialog = angular.extend(prev[0], wrappedDialog);
         offset++;
       }
       $scope.dialogs.unshift(wrappedDialog);

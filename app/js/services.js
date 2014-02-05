@@ -507,6 +507,7 @@ angular.module('myApp.services', [])
 
   var messagesStorage = {};
   var messagesForHistory = {};
+  var messagesForDialogs = {};
   var historiesStorage = {};
   var dialogsStorage = {count: null, dialogs: []};
   var pendingByRandomID = {};
@@ -756,6 +757,9 @@ angular.module('myApp.services', [])
         message.unread = false;
         if (messagesForHistory[messageID]) {
           messagesForHistory[messageID].unread = false;
+        }
+        if (messagesForDialogs[messageID]) {
+          messagesForDialogs[messageID].unread = false;
         }
       }
     }
@@ -1047,6 +1051,10 @@ angular.module('myApp.services', [])
   }
 
   function wrapForDialog (msgID, unreadCount) {
+    if (messagesForDialogs[msgID] !== undefined) {
+      return messagesForDialogs[msgID];
+    }
+
     var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
 
     message.fromUser = AppUsersManager.getUser(message.from_id);
@@ -1073,7 +1081,7 @@ angular.module('myApp.services', [])
     }
 
 
-    return message;
+    return messagesForDialogs[msgID] = message;
   }
 
   function wrapForHistory (msgID) {
@@ -1297,8 +1305,10 @@ angular.module('myApp.services', [])
           if (message) {
             message.unread = false;
             if (messagesForHistory[messageID]) {
-              // console.log(222, messagesForHistory[messageID]);
               messagesForHistory[messageID].unread = false;
+            }
+            if (messagesForDialogs[messageID]) {
+              messagesForDialogs[messageID].unread = false;
             }
             peerID = getMessagePeer(message);
             if (!message.out) {
@@ -1315,7 +1325,6 @@ angular.module('myApp.services', [])
         angular.forEach(dialogsUpdated, function(count, peerID) {
           $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: count});
         });
-        // $rootScope.$broadcast('history_update');
         break;
     }
   });
@@ -1437,8 +1446,7 @@ angular.module('myApp.services', [])
     var modalInstance = $modal.open({
       templateUrl: 'partials/photo_modal.html?1',
       controller: 'PhotoModalController',
-      scope: scope,
-      backdrop: 'static'
+      scope: scope
     });
   }
 
