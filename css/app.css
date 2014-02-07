@@ -41,6 +41,7 @@ a:hover {
   cursor: pointer;
 }
 .form-control {
+  color: #000;
   border: 1px solid #d9dbde;
   border-radius: 2px;
   -webkit-box-shadow: none;
@@ -405,7 +406,7 @@ fieldset[disabled] .btn-tg.active {
   background-size: 42px 430px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
-  padding: 6px 6px 6px 30px;
+  padding: 6px 20px 6px 30px;
   margin-bottom: 0;
   margin: 0;
 }
@@ -631,14 +632,14 @@ a.im_dialog:hover .im_dialog_date {
   margin-left: 5px;
 }
 .im_history_panel_info_link {
-  color: #999;
+  color: #3a6d99;
   font-size: 13px;
   font-weight: normal;
   padding-top: 5px;
   line-height: 1;
 }
 .im_history_panel_info_link:hover {
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 
@@ -1067,10 +1068,10 @@ span.emoji {
 .im_panel_fixed_bottom .im_send_form_wrap1 {
   position: relative;
 }
-.im_panel_fixed_bottom .im_send_form_wrap {
-  width: 514px;
+.im_panel_fixed_bottom .im_send_form {
   position: absolute;
   bottom: 0;
+  left: 62px;
 }
 .im_send_form {
   width: 389px;
@@ -1280,7 +1281,7 @@ img.img_fullsize {
   max-width: 506px;
 }
 .user_modal_wrap .modal-body {
-  padding: 23px 25px 70px;
+  padding: 23px 25px 30px;
 }
 .user_modal_image_wrap {
   width: 120px;
@@ -1291,16 +1292,32 @@ img.img_fullsize {
   height: 120px;
 }
 .user_modal_header {
+  font-weight: bold;
   margin: 0 0 5px;
 }
 .user_modal_status {
   color: #999;
 }
 .user_modal_send_btn {
-  padding-left: 0;
-  padding-right: 0;
+  border: 0;
+  background: #4E9CD8;
   font-size: 12px;
   margin-top: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.user_modal_send_btn:hover {
+  background: #539BD1;
+}
+
+.user_modal_settings_wrap {
+  margin-top: 25px;
+}
+.user_modal_notifications {
+  font-weight: bold;
+}
+.user_modal_clear {
+  margin-top: 20px;
 }
 
 
@@ -1324,6 +1341,20 @@ img.img_fullsize {
 .chat_modal_members_count {
   color: #999;
 }
+
+.chat_modal_settings_wrap {
+  margin-top: 10px;
+}
+.chat_modal_notifications {
+  font-weight: bold;
+}
+.chat_modal_clear {
+  margin-top: 10px;
+}
+.chat_modal_leave {
+  margin-top: 10px;
+}
+
 .chat_modal_invite_btn {
   padding-left: 0;
   padding-right: 0;
@@ -1357,6 +1388,9 @@ img.img_fullsize {
   margin-right: 10px;
   overflow: hidden;
 }
+.chat_modal_members_forbidden {
+  color: #999;
+}
 
 
 
@@ -1380,6 +1414,7 @@ img.img_fullsize {
   height: auto;
   max-height: 300px;
   overflow: auto;
+  line-height: 17px;
 
   border: 1px solid #d9dbde;
   border-radius: 2px;
@@ -1525,11 +1560,21 @@ img.img_fullsize {
 }
 .settings_profile_first_name,
 .settings_profile_last_name {
-  width: 210px;
+  width: 180px;
   float: left;
 }
 .settings_profile_first_name {
   margin-right: 22px;
+}
+.settings_profile_last_name {
+  margin-right: 10px;
+}
+.settings_profile_save {
+  padding-top: 23px;
+  float: left;
+}
+.settings_profile_save_btn {
+  width: 50px;
 }
 
 .settings_profile_edit_form input {

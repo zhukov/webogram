@@ -421,7 +421,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             if (e.type == 'drop') {
               scope.$apply(function () {
                 scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files);
-                scope.draftMessage.isMedia = false;
+                scope.draftMessage.isMedia = true;
               });
             }
             dragTimeout = setTimeout(function () {
@@ -631,7 +631,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       //   }
       // }
 
-      MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size).then(function (url) {
+      MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
         scope.progress.enabled = false;
         // scope.progress = {enabled: true, percent: 50};
         scope.player.quicktime = hasQt;
