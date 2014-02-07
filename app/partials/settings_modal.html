@@ -1,14 +1,12 @@
 <div class="settings_modal_wrap">
 
   <div class="modal-header">
-    <a class="modal-close-link" ng-click="$close()">Close</a>
-    <a class="modal-save-link" ng-click="save()">Save</a>
     <h4 class="modal-title">Settings</h4>
   </div>
 
   <div class="modal-body">
 
-    <form class="settings_profile_edit_form clearfix">
+    <form name="profileForm" class="settings_profile_edit_form clearfix">
       <div class="form-group settings_profile_first_name" ng-class="{'has-error': error.field == 'first_name'}">
         <label class="control-label" for="first_name">
           <span ng-if="error.field == 'first_name'">Invalid First Name</span>
@@ -23,6 +21,10 @@
           <span ng-if="error.field != 'last_name'">Last Name</span>
         </label>
         <input type="text" class="form-control" name="last_name" ng-model="profile.last_name" />
+      </div>
+
+      <div class="settings_profile_save">
+        <button class="btn btn-link settings_profile_save_btn" ng-click="save(profileForm)" ng-disabled="profileForm.$invalid || (!profileForm.last_name.$dirty &amp;&amp; !profileForm.first_name.$dirty)">Save</button>
       </div>
     </form>
 

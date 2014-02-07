@@ -22,7 +22,27 @@
         </ng-pluralize>
       </p>
 
-      <!--button class="btn btn-link chat_modal_invite_btn">Add member</button-->
+      <div class="chat_modal_settings_wrap">
+        <div class="chat_modal_notifications">
+          Notifications:
+          <a ng-click="settings.notifications = !settings.notifications">
+            {{settings.notifications ? 'ON' : 'OFF'}}
+          </a>
+        </div>
+
+        <div class="chat_modal_clear">
+          <a href="" ng-click="flushHistory()">Clear History</a>
+        </div>
+
+        <div class="chat_modal_leave_join" ng-if="chatFull.chat._ != 'chatForbidden'">
+          <div class="chat_modal_leave"  ng-if="!chatFull.chat.left">
+            <a href="" ng-click="leaveGroup()">Leave group</a>
+          </div>
+          <div class="chat_modal_leave" ng-if="chatFull.chat.left">
+            <a href="" ng-click="returnToGroup()">Return to group</a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <h5 class="chat_modal_members_header">Members</h5>
@@ -43,6 +63,10 @@
         <div class="chat_modal_participant_status">{{participant.user | userStatus}}</div>
       </div>
 
+    </div>
+
+    <div class="chat_modal_members_forbidden" ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.left">
+      Group members list is unavailable.
     </div>
 
   </div>

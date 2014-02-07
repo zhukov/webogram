@@ -2586,7 +2586,9 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     return cachedDownloadPromises[fileName] = deferred.promise;
   }
 
-  function downloadFile (dcID, location, size, fileEntry) {
+  function downloadFile (dcID, location, size, fileEntry, options) {
+    options = options || {};
+
     console.log('dload file', dcID, location, size);
     var fileName = getFileName(location),
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
@@ -2638,7 +2640,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                     }, errorHandler).then(function () {
 
                       if (isFinal) {
-                        deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL('image/jpeg'));
+                        deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL(options.mime || 'image/jpeg'));
                       } else {
                         // console.log('notify', {done: offset + limit, total: size});
                         deferred.notify({done: offset + limit, total: size});
@@ -2699,14 +2701,14 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
                   if (isFinal) {
                     try {
-                      var blob = new Blob(blobParts, {type: 'image/jpeg'});
+                      var blob = new Blob(blobParts, {type: options.mime || 'image/jpeg'});
                     } catch (e) {
                       window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
                       var bb = new BlobBuilder;
                       angular.forEach(blobParts, function(blobPart) {
                         bb.append(blobPart);
                       });
-                      var blob = bb.getBlob('image/jpeg');
+                      var blob = bb.getBlob(options.mime || 'image/jpeg');
                     }
 
 

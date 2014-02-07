@@ -162,7 +162,7 @@ angular.module('myApp.controllers', [])
     $scope.isLoggedIn = true;
     $scope.openSettings = function () {
       $modal.open({
-        templateUrl: 'partials/settings_modal.html?2',
+        templateUrl: 'partials/settings_modal.html?3',
         controller: 'SettingsModalController',
         scope: $rootScope.$new(),
         windowClass: 'settings_modal_window'
@@ -224,6 +224,15 @@ angular.module('myApp.controllers', [])
         offset++;
       }
       $scope.dialogs.unshift(wrappedDialog);
+    });
+
+    $scope.$on('dialog_flush', function (e, dialog) {
+      for (var i = 0; i < $scope.dialogs.length; i++) {
+        if ($scope.dialogs[i].peerID == dialog.peerID) {
+          $scope.dialogs.splice(i, 1);
+          break;
+        }
+      }
     });
 
     $scope.$watch('search.query', loadDialogs);
@@ -421,6 +430,12 @@ angular.module('myApp.controllers', [])
       }
     });
 
+    $scope.$on('dialog_flush', function (e, dialog) {
+      if (dialog.peerID == $scope.curDialog.peerID) {
+        $scope.history = [];
+      }
+    });
+
     $scope.$on('apiUpdate', function (e, update) {
       // console.log('on apiUpdate inline', update);
       switch (update._) {
@@ -571,14 +586,42 @@ angular.module('myApp.controllers', [])
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
   })
 
-  .controller('UserModalController', function ($scope, $location, $rootScope, $modalStack, AppUsersManager) {
+  .controller('UserModalController', function ($scope, $location, $rootScope, $modalStack, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager) {
     $scope.user = AppUsersManager.wrapForFull($scope.userID);
+
+    $scope.settings = {notifications: true};
+
+    NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
+      $scope.settings.notifications = !muted;
+    });
+
+    $scope.$watch('settings.notifications', function(newValue) {
+      NotificationsManager.getPeerSettings($scope.userID).then(function (settings) {
+        if (newValue) {
+          settings.mute_until = 0;
+        } else {
+          settings.mute_until = 2000000000;
+        }
+        NotificationsManager.savePeerSettings($scope.userID, settings);
+      });
+    });
+
     $scope.goToHistory = function () {
       $rootScope.$broadcast('history_focus', {peerString: $scope.user.peerString});
     };
+
+    $scope.flushHistory = function () {
+      if (confirm('Are you sure? This can not be undone!') !== true) {
+        return false;
+      }
+      AppMessagesManager.flushHistory(AppPeersManager.getInputPeerByID($scope.userID)).then(function () {
+        $scope.goToHistory();
+      });
+    };
   })
 
-  .controller('ChatModalController', function ($scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager) {
+  .controller('ChatModalController', function ($scope, $timeout, $rootScope, AppUsersManager, AppChatsManager, MtpApiManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager) {
+
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
 
     MtpApiManager.invokeApi('messages.getFullChat', {
@@ -589,6 +632,70 @@ angular.module('myApp.controllers', [])
 
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, result.full_chat);
     });
+
+    $scope.settings = {notifications: true};
+
+    NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
+      $scope.settings.notifications = !muted;
+    });
+
+    $scope.$watch('settings.notifications', function(newValue) {
+      NotificationsManager.getPeerSettings(-$scope.chatID).then(function (settings) {
+        if (newValue) {
+          settings.mute_until = 0;
+        } else {
+          settings.mute_until = 2000000000;
+        }
+        NotificationsManager.savePeerSettings(-$scope.chatID, settings);
+      });
+    });
+
+    $scope.leaveGroup = function () {
+      MtpApiManager.invokeApi('messages.deleteChatUser', {
+        chat_id: $scope.chatID,
+        user_id: {_: 'inputUserSelf'}
+      }).then(function (result) {
+        if (ApiUpdatesManager.saveSeq(result.seq)) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: result.message,
+            pts: result.pts
+          });
+        }
+
+        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+      });
+    };
+
+    $scope.returnToGroup = function () {
+      MtpApiManager.invokeApi('messages.addChatUser', {
+        chat_id: $scope.chatID,
+        user_id: {_: 'inputUserSelf'}
+      }).then(function (result) {
+        if (ApiUpdatesManager.saveSeq(result.seq)) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: result.message,
+            pts: result.pts
+          });
+        }
+
+        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+      });
+    };
+
+
+
+    $scope.flushHistory = function () {
+      if (confirm('Are you sure? This can not be undone!') !== true) {
+        return;
+      }
+      AppMessagesManager.flushHistory(AppPeersManager.getInputPeerByID(-$scope.chatID)).then(function () {
+        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+      });
+
+    };
+
   })
 
   .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager) {
@@ -639,12 +746,14 @@ angular.module('myApp.controllers', [])
     });
 
     $scope.error = {};
-    $scope.save = function () {
+    $scope.save = function (profileForm) {
       MtpApiManager.invokeApi('account.updateProfile', {
         first_name: $scope.profile.first_name || '',
         last_name: $scope.profile.last_name || ''
       }).then(function (user) {
         $scope.error = {};
+        // console.log($scope.profileForm);
+        profileForm.$setPristine();
         AppUsersManager.saveApiUser(user);
       }, function (error) {
         switch (error.type) {
