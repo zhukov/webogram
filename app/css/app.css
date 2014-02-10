@@ -1669,6 +1669,10 @@ img.img_fullsize {
   .im_page_peer_not_selected .im_dialog_message {
     display: block;
   }
+
+  .im_emoji_btn {
+    display: none;
+  }
 }
 
 
