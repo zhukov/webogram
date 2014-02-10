@@ -11,7 +11,7 @@ chrome.app.runtime.onLaunched.addListener(function(launchData) {
       width: 1100,
       height: 700
     },
-    minWidth: 1050,
+    minWidth: 320,
     minHeight: 400,
     frame: 'chrome'
   });

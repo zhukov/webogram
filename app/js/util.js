@@ -57,3 +57,16 @@ function onContentLoaded (cb) {
 function tsNow () {
   return +new Date();
 }
+
+function safeReplaceObject (wasObject, newObject) {
+  for (var key in wasObject) {
+    if (!newObject.hasOwnProperty(key) && key.charAt(0) != '$') {
+      delete wasObject[key];
+    }
+  }
+  for (var key in newObject) {
+    if (newObject.hasOwnProperty(key)) {
+      wasObject[key] = newObject[key];
+    }
+  }
+}

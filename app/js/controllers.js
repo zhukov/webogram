@@ -220,7 +220,7 @@ angular.module('myApp.controllers', [])
       var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count);
       if (pos !== false) {
         var prev = $scope.dialogs.splice(pos, 1);
-        // wrappedDialog = angular.extend(prev[0], wrappedDialog);
+        safeReplaceObject(prev, wrappedDialog);
         offset++;
       }
       $scope.dialogs.unshift(wrappedDialog);
@@ -300,6 +300,7 @@ angular.module('myApp.controllers', [])
 
     $scope.history = [];
     $scope.typing = {};
+    $scope.state = {};
 
     var peerID,
         offset = 0,
@@ -345,9 +346,9 @@ angular.module('myApp.controllers', [])
 
       if (preload) {
         $scope.typing = {};
-        $scope.state = {loaded: true};
         $scope.$broadcast('ui_peer_change');
         $scope.$broadcast('ui_history_change');
+        safeReplaceObject($scope.state, {loaded: true});
       }
     }
 
@@ -368,7 +369,7 @@ angular.module('myApp.controllers', [])
 
         $scope.$broadcast('ui_history_prepend');
       }, function () {
-        $scope.state = {error: true};
+        safeReplaceObject($scope.state, {error: true});
       });
     }
 
@@ -388,19 +389,19 @@ angular.module('myApp.controllers', [])
         });
         $scope.history.reverse();
 
-        $scope.state = {loaded: true};
+        safeReplaceObject($scope.state, {loaded: true});
 
         $scope.$broadcast('ui_history_change');
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
       }, function () {
-        $scope.state = {error: true};
+        safeReplaceObject($scope.state, {error: true});
       });
     }
 
     function showEmptyHistory () {
-      $scope.state = {notSelected: true};
+      safeReplaceObject($scope.state, {notSelected: true});
       $scope.history = [];
 
       $scope.$broadcast('ui_history_change');

@@ -9,6 +9,7 @@
     }
   },
   "permissions": [
+    "notifications",
     "webview",
     {"fileSystem": ["write"]},
     "storage"

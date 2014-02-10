@@ -41,6 +41,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
+          footer = $('.im_page_footer')[0],
           // dialogsSearch = $('im_dialogs_search', element)[0],
           moreNotified = false;
 
@@ -83,7 +84,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: $($window).height() - 162
+          height: $($window).height() - footer.offsetHeight - 122
         });
       }
 
@@ -107,8 +108,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollable = $('.im_history_scrollable', element)[0],
           panelWrap = $('.im_history_panel_wrap', element)[0],
           sendPanelWrap = $('.im_send_panel_wrap', element)[0],
-          sendFormWrap1 = $('.im_send_form_wrap1', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
+          headWrap = $('.tg_page_head')[0],
+          footer = $('.im_page_footer')[0],
+          sendForm = $('.im_send_form', element)[0],
           moreNotified = false;
 
       onContentLoaded(function () {
@@ -199,18 +202,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_editor_change', function (e, data) {
-        if (data.start) {
-          if (!$(sendPanelWrap).hasClass('im_panel_fixed_bottom')) {
-            sendFormWrap1.style.height = sendFormWrap.offsetHeight + 'px';
-            $(sendPanelWrap).addClass('im_panel_fixed_bottom');
-          }
-        } else {
-          sendFormWrap1.style.height = 'auto';
-          $(sendPanelWrap).removeClass('im_panel_fixed_bottom');
-        }
-      });
-
       scope.$on('ui_editor_resize', updateSizes);
 
       var atBottom = true;
@@ -230,11 +221,16 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       function updateSizes (heightOnly) {
+        $(sendFormWrap).css({
+          height: $(sendForm).height()
+        });
+
+        var historyH = $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - headWrap.offsetHeight - footer.offsetHeight;
         $(historyWrap).css({
-          height: $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - 90
+          height: historyH
         });
         $(historyEl).css({
-          minHeight: $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - 90 - 44
+          minHeight: historyH - 44
         });
 
         if (heightOnly == true) return;
@@ -242,7 +238,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           onContentLoaded(function () {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             updateScroller();
-            // $(historyWrap).nanoScroller({scroll: 'bottom'});
           });
         }
         updateScroller(100);
@@ -282,7 +277,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         var updatePromise;
         $(richTextarea).on('keyup', function (e) {
-          scope.$emit('ui_editor_change', {start: false});
           updateHeight();
 
           scope.draftMessage.text = richTextarea.innerText;
@@ -316,6 +310,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       updateSendSettings();
 
       $(editorElement).on('keydown', function (e) {
+        if (richTextarea) {
+          updateHeight();
+        }
+
         if (e.keyCode == 13) {
           var submit = false;
           if (sendOnEnter && !e.shiftKey) {
@@ -325,17 +323,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (submit) {
-            scope.$emit('ui_editor_change', {start: false});
-            updateHeight();
             $(element).trigger('submit');
             return cancelEvent(e);
           }
         }
 
-        if (richTextarea) {
-          scope.$emit('ui_editor_change', {start: true});
-          updateHeight();
-        }
       });
 
       var lastTyping = 0;
@@ -370,7 +362,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         var newHeight = richTextarea.offsetHeight;
         if (height != newHeight) {
           height = newHeight;
-          scope.$emit('ui_editor_change', {start: false});
           scope.$emit('ui_editor_resize');
         }
       };
