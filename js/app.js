@@ -18,6 +18,12 @@ if (!window._osX) {
 }
 $('body').addClass(window._retina ? 'is_2x' : 'is_1x');
 
+$(window).on('load', function () {
+  setTimeout(function () {
+    window.scrollTo(0,1);
+  }, 0);
+});
+
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
   'ngRoute',
