@@ -46,7 +46,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           moreNotified = false;
 
       onContentLoaded(function () {
-        $(dialogsWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1});
+        $(dialogsWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
       });
 
       var updateScroller = function () {
@@ -116,7 +116,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       onContentLoaded(function () {
         scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-        $(historyWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1});
+        $(historyWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
       });
 
       var updateScroller = function (delay) {
