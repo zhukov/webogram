@@ -1,10 +1,25 @@
 <div class="tg_page_head">
   <div class="navbar navbar-static-top  navbar-inverse" role="navigation">
-    <div class="container">
+    <div class="container" ng-init="navbarCollapsed = true">
       <div class="navbar-header">
+        <button type="button" class="navbar-toggle" ng-click="navbarCollapsed = !navbarCollapsed">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
         <a class="navbar-brand" href="http://zhukov.github.io/webogram"><img src="img/Logo_2x.png" class="tg_head_logo" alt="Telegram logo" width="110" height="31" /></a>
+        <ul class="nav navbar-nav navbar-quick-nav" ng-show="curDialog.peer">
+          <li>
+            <a href="#/im">
+              <span class="glyphicon glyphicon-chevron-left"></span> Back
+            </a>
+          </li>
+        </ul>
       </div>
-      <div class="navbar-collapse collapse">
+
+
+      <div class="navbar-collapse" collapse="navbarCollapsed">
         <ul class="nav navbar-nav navbar-right">
           <li><a  href="https://github.com/zhukov/webogram" target="_blank">About</a></li>
           <li ng-if="isLoggedIn"><a href="" ng-click="openSettings()">Settings</a></li>

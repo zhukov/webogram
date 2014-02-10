@@ -2393,7 +2393,11 @@ angular.module('myApp.services', [])
 
       notification.onclick = function () {
         notification.close();
-        window.focus();
+        if (window.chrome && chrome.app) {
+          chrome.app.window.current().focus();
+        } else {
+          window.focus();
+        }
         notificationsClear();
         if (data.onclick) {
           data.onclick();
