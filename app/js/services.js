@@ -118,8 +118,58 @@ angular.module('myApp.services', [])
   };
 })
 
-.service('AppUsersManager', function ($rootScope, $modal, MtpApiFileManager, MtpApiManager, RichTextProcessor) {
-  var users = {};
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager) {
+  var users = {},
+      contactsFillPromise,
+      contactsIndex = SearchIndexManager.createIndex();
+
+  function fillContacts () {
+    if (contactsFillPromise) {
+      return contactsFillPromise;
+    }
+    return contactsFillPromise = MtpApiManager.invokeApi('contacts.getContacts', {
+      hash: ''
+    }).then(function (result) {
+      var contactsList = [],
+          userID, searchText, i;
+      saveApiUsers(result.users);
+
+      for (var i = 0; i < result.contacts.length; i++) {
+        userID = result.contacts[i].user_id;
+        contactsList.push(userID);
+        SearchIndexManager.indexObject(userID, getUserSearchText(userID), contactsIndex);
+      }
+
+      return contactsList;
+    });
+  }
+
+  function getUserSearchText (id) {
+    var user = users[id];
+    if (!user) {
+      return false;
+    }
+
+    return (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '');
+  }
+
+  function getContacts (query) {
+    return fillContacts().then(function (contactsList) {
+      if (angular.isString(query) && query.length) {
+        var results = SearchIndexManager.search(query, contactsIndex),
+            filteredContactsList = [];
+
+        for (var i = 0; i < contactsList.length; i++) {
+          if (results[contactsList[i]]) {
+            filteredContactsList.push(contactsList[i])
+          }
+        }
+        contactsList = filteredContactsList;
+      }
+
+      return contactsList;
+    });
+  };
 
   function saveApiUsers (apiUsers) {
     angular.forEach(apiUsers, saveApiUser);
@@ -137,6 +187,9 @@ angular.module('myApp.services', [])
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || 'DELETED';
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || 'DELETED';
     }
+    apiUser.sortName = $.trim((apiUser.last_name || '') + ' ' + apiUser.first_name);
+    apiUser.sortStatus = apiUser.status && (apiUser.status.expires || apiUser.status.was_online) || 0;
+
 
     if (users[apiUser.id] === undefined) {
       users[apiUser.id] = apiUser;
@@ -229,9 +282,11 @@ angular.module('myApp.services', [])
     // console.log('on apiUpdate', update);
     switch (update._) {
       case 'updateUserStatus':
-        var userID = update.user_id;
-        if (users[userID]) {
-          users[userID].status = update.status;
+        var userID = update.user_id,
+            user = users[userID];
+        if (user) {
+          user.status = update.status;
+          user.sortStatus = update.status && (update.status.expires || update.status.was_online) || 0;
           $rootScope.$broadcast('user_update', userID);
         }
         break;
@@ -248,11 +303,13 @@ angular.module('myApp.services', [])
 
 
   return {
+    getContacts: getContacts,
     saveApiUsers: saveApiUsers,
     saveApiUser: saveApiUser,
     getUser: getUser,
     getUserPhoto: getUserPhoto,
     getUserString: getUserString,
+    getUserSearchText: getUserSearchText,
     hasUser: hasUser,
     wrapForFull: wrapForFull,
     openUser: openUser
@@ -379,8 +436,7 @@ angular.module('myApp.services', [])
     getPeerSearchText: function (peerID) {
       var text;
       if (peerID > 0) {
-        var user = AppUsersManager.getUser(peerID);
-        text = (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '');
+        text = AppUsersManager.getUserSearchText(peerID);
       } else if (peerID < 0) {
         var chat = AppChatsManager.getChat(-peerID);
         text = chat.title || '';
@@ -463,6 +519,7 @@ angular.module('myApp.services', [])
   }
 
   function search (query, searchIndex) {
+    console.time('search');
     var shortIndexes = searchIndex.shortIndexes,
         fullTexts = searchIndex.fullTexts;
 
@@ -499,11 +556,12 @@ angular.module('myApp.services', [])
       }
     }
 
+    console.timeEnd('search');
     return newFoundObjs;
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $filter, $sanitize, $location, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -706,7 +764,7 @@ angular.module('myApp.services', [])
   }
 
   function readHistory (inputPeer) {
-    // console.log('start read');
+    // console.trace('start read');
     var peerID = AppPeersManager.getPeerID(inputPeer),
         historyStorage = historiesStorage[peerID],
         foundDialog = getDialogByPeerID(peerID);
@@ -718,7 +776,8 @@ angular.module('myApp.services', [])
       return false;
     }
 
-    var wasUnread = false;
+    var messageID,
+        message;
     // console.log(historyStorage);
     for (i = 0; i < historyStorage.history.length; i++) {
       messageID = historyStorage.history[i];
@@ -727,11 +786,10 @@ angular.module('myApp.services', [])
       if (message && !message.out) {
         if (message.unread) {
           // console.log('unread');
-          wasUnread = true;
-        } else if (!wasUnread) {
-          // console.log('bad2');
-          return false;
+          break;
         }
+        // console.log('bad2', message);
+        return false;
       }
     }
 
@@ -743,6 +801,7 @@ angular.module('myApp.services', [])
       return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
     }).then(function () {
       if (foundDialog[0]) {
+        // console.log('done read history', peerID);
         foundDialog[0].unread_count = 0;
         $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0});
       }
@@ -768,7 +827,7 @@ angular.module('myApp.services', [])
   }
 
   function flushHistory (inputPeer) {
-    // console.log('start read');
+    // console.log('start flush');
     var peerID = AppPeersManager.getPeerID(inputPeer),
         historyStorage = historiesStorage[peerID];
 
@@ -1242,7 +1301,7 @@ angular.module('myApp.services', [])
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    console.log('on apiUpdate', update);
+    // console.log('on apiUpdate', update);
     switch (update._) {
       case 'updateMessageID':
         pendingByMessageID[update.id] = update.random_id;
@@ -1295,9 +1354,12 @@ angular.module('myApp.services', [])
           dialog = {peerID: peerID, unread_count: 0, top_message: false}
         }
         if (!message.out && message.unread) {
+          // console.log('inc unread count', dialog.unread_count);
           dialog.unread_count++;
         }
         dialog.top_message = message.id;
+
+        // console.log('new message', message, peerID, historyStorage, foundDialog, dialog);
 
         SearchIndexManager.indexObject(peerID, AppPeersManager.getPeerSearchText(peerID), dialogsIndex);
 
@@ -1321,8 +1383,8 @@ angular.module('myApp.services', [])
         for (i = 0; i < update.messages.length; i++) {
           messageID = update.messages[i];
           message = messagesStorage[messageID];
-          // console.log('read', messageID, message);
-          if (message) {
+          // console.log('read', messageID, message.unread, message);
+          if (message && message.unread) {
             message.unread = false;
             if (messagesForHistory[messageID]) {
               messagesForHistory[messageID].unread = false;
@@ -2015,8 +2077,8 @@ angular.module('myApp.services', [])
     }
 
     if (seqStart != curState.seq + 1) {
-      // console.log('seq hole', seqStart, curState.seq);
-      if (seqStart != curState.seq) {
+      if (seqStart > curState.seq) {
+        console.warn('Seq hole', seqStart, curState.seq);
         getDifference();
       }
       return false;

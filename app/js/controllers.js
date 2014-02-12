@@ -169,6 +169,15 @@ angular.module('myApp.controllers', [])
       });
     }
 
+    $scope.openContacts = function () {
+      $modal.open({
+        templateUrl: 'partials/contacts_modal.html?3',
+        controller: 'ContactsModalController',
+        scope: $rootScope.$new(),
+        windowClass: 'contacts_modal_window'
+      });
+    }
+
     updateCurDialog();
 
     function updateCurDialog() {
@@ -307,7 +316,8 @@ angular.module('myApp.controllers', [])
         hasMore = false,
         maxID = 0,
         startLimit = 20,
-        limit = 50;
+        limit = 50,
+        jump = 0;
 
     function applyDialogSelect (newPeer) {
       newPeer = newPeer || $scope.curDialog.peer || '';
@@ -356,7 +366,6 @@ angular.module('myApp.controllers', [])
       if (!hasMore || !offset) {
         return;
       }
-
       // console.trace('load history');
       AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit).then(function (historyResult) {
         offset += limit;
@@ -378,7 +387,11 @@ angular.module('myApp.controllers', [])
       offset = 0;
       maxID = 0;
 
+      var curJump = ++jump;
+
       AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit).then(function (historyResult) {
+        if (curJump != jump) return;
+
         offset += startLimit;
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
@@ -779,6 +792,26 @@ angular.module('myApp.controllers', [])
         location.reload();
       });
     }
+  })
+
+  .controller('ContactsModalController', function ($scope, AppUsersManager) {
+    $scope.contacts = [];
+    $scope.search = [];
+
+    $scope.$watch('search.query', function (newValue) {
+      AppUsersManager.getContacts(newValue).then(function (contactsList) {
+        $scope.contacts = [];
+        angular.forEach(contactsList, function(userID) {
+          var contact = {
+            userID: userID,
+            user: AppUsersManager.getUser(userID),
+            userPhoto: AppUsersManager.getUserPhoto(userID, 'User')
+          }
+          $scope.contacts.push(contact);
+        });
+      });
+    })
+
   })
 
 
