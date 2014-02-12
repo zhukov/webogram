@@ -37,12 +37,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
 
     function link (scope, element, attrs) {
-      // console.log('init directive', element);
-
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
+          headWrap = $('.tg_page_head')[0],
           footer = $('.im_page_footer')[0],
-          // dialogsSearch = $('im_dialogs_search', element)[0],
           moreNotified = false;
 
       onContentLoaded(function () {
@@ -84,8 +82,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: $($window).height() - footer.offsetHeight - 122
+          height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 50) - 72
         });
+        if (!headWrap) {
+          headWrap = $('.tg_page_head')[0];
+        }
       }
 
       $($window).on('resize', updateSizes);
@@ -720,3 +721,13 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
   })
+
+  .directive('myFocused', function(){
+    return {
+      link: function(scope, element, attrs) {
+        setTimeout(function () {
+          element[0].focus();
+        }, 100);
+      }
+    };
+  });

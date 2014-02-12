@@ -13,7 +13,7 @@
         <div class="im_dialogs_wrap nano">
           <div class="im_dialogs_scrollable_wrap content">
             <ul class="nav nav-pills nav-stacked">
-              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
             </ul>
           </div>
         </div>
