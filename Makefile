@@ -2,7 +2,8 @@ bump:
 	sed -i.bak 's/"version": ".*",/"version": "$(version)",/g' app/manifest.json
 	sed -i.bak 's/"version": ".*",/"version": "$(version)",/g' app/manifest.webapp
 	sed -i.bak 's/<span class="settings_version">alpha .*<\/span>/<span class="settings_version">alpha $(version)<\/span>/g' app/partials/settings_modal.html
-	rm app/manifest.json.bak app/manifest.webapp.bak app/partials/settings_modal.html.bak
+	grep -rl 'Webogram v' app | xargs -I {} sed -i.bak 's/Webogram v[0-9.]*/Webogram v$(version)/g' {}
+	find app -name *.bak | xargs rm
 
 package:
 	rm -rf package_dist
