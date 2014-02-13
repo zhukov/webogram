@@ -311,7 +311,8 @@ angular.module('myApp.controllers', [])
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
     $scope.selectActions = false;
-    // $scope.toggleMessage = toggleMessage;
+    $scope.toggleMessage = toggleMessage;
+    $scope.selectedCancel = selectedCancel;
     $scope.typing = {};
     $scope.state = {};
 
@@ -424,19 +425,32 @@ angular.module('myApp.controllers', [])
       $scope.$broadcast('ui_history_change');
     }
 
-    function toggleMessage (messageID) {
-      console.log('toggle', messageID);
+    function toggleMessage (messageID, target) {
+      if (!$scope.selectActions && !$(target).hasClass('im_message_date') && !$(target).hasClass('im_message_meta')) {
+        return false;
+      }
       if ($scope.selectedMsgs[messageID]) {
-        delete $scope.selectedMsgs;
+        delete $scope.selectedMsgs[messageID];
         $scope.selectedCount--;
         if (!$scope.selectedCount) {
           $scope.selectActions = false;
+          $scope.$broadcast('ui_panel_update');
         }
       } else {
         $scope.selectedMsgs[messageID] = true;
         $scope.selectedCount++;
-        $scope.selectActions = true;
+        if (!$scope.selectActions) {
+          $scope.selectActions = true;
+          $scope.$broadcast('ui_panel_update');
+        }
       }
+    }
+
+    function selectedCancel () {
+      $scope.selectedMsgs = {};
+      $scope.selectedCount = 0;
+      $scope.selectActions = false;
+      $scope.$broadcast('ui_panel_update');
     }
 
 

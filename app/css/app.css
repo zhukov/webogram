@@ -109,9 +109,9 @@ fieldset[disabled] .btn-tg.active {
   border-color: #999;
 }
 
-/*.tg_page_head .navbar {
-  min-height: 42px;
-}*/
+.tg_page_head .navbar {
+  min-height: 44px;
+}
 .tg_page_head .container {
   display: block;
   width: auto;
@@ -128,8 +128,7 @@ fieldset[disabled] .btn-tg.active {
   margin: 0;
 }
 .tg_page_head .navbar > .container .navbar-brand {
-  padding: 12px 15px;
-  /*padding: 8px 15px;*/
+  padding: 9px 15px;
   opacity: 0.9;
   margin-left: 0;
   margin-right: 20px;
@@ -195,8 +194,8 @@ fieldset[disabled] .btn-tg.active {
 }
 
 .tg_page_head .navbar-inverse .navbar-nav > li > a {
-  /*padding-top: 11px;
-  padding-bottom: 11px;*/
+  padding-top: 12px;
+  padding-bottom: 12px;
   color: #b9cfe3;
   font-size: 13px;
 }
@@ -648,16 +647,13 @@ a.im_dialog:hover .im_dialog_date {
 
 /* IM history */
 .im_history_col {
-  padding: 0 8px 0 15px;
 }
 
 .im_history_col .nano > .pane {
   background : rgba(3,36,64,0.08);
-  /*background: #E9EBED;*/
   width      : 9px;
   top: 10px;
-  /*margin-top: 10px;*/
-  /*bottom: */
+  right: 8px;
   -webkit-transition    : .2s;
   -moz-transition       : .2s;
   -o-transition         : .2s;
@@ -668,7 +664,6 @@ a.im_dialog:hover .im_dialog_date {
 }
 .im_history_col .nano > .pane > .slider {
   background : rgba(3,46,79,0.22);
-  /*background: #B3BFC7;*/
   margin: 0;
   -moz-border-radius    : 2px;
   -webkit-border-radius : 2px;
@@ -676,12 +671,12 @@ a.im_dialog:hover .im_dialog_date {
 }
 
 .im_history_panel_wrap {
+  margin: 0 23px 0 15px;
   cursor: pointer;
   position: relative;
   -webkit-box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.12);
   -moz-box-shadow:    0px 2px 0px rgba(0, 0, 0, 0.12);
   box-shadow:         0px 2px 0px rgba(0, 0, 0, 0.12);
-  margin-right: 15px;
 
   position: relative;
   z-index: 2;
@@ -728,9 +723,10 @@ a.im_dialog:hover .im_dialog_date {
   width: 100%;
 }
 .im_history {
-  padding: 20px 0 0 3px;
-  max-width: 500px;
-  margin: 0 auto;
+  /*padding: 20px 0 0 3px;*/
+  padding: 20px 0 0 0;
+  /*max-width: 500px;*/
+  /*margin: 0 auto;*/
   position: relative;
 }
 
@@ -1130,7 +1126,7 @@ span.emoji {
 .im_send_panel_wrap {
   max-width: 526px;
   margin: 0 auto;
-  padding: 10px 12px 22px 0;
+  padding: 10px 20px 22px 15px;
 }
 .im_send_form_wrap {
   position: relative;
@@ -1631,21 +1627,9 @@ img.img_fullsize {
 }
 
 @media (max-height: 480px) {
-  .navbar {
-    min-height: 40px;
-  }
-  .tg_page_head .navbar > .container .navbar-brand {
-    padding: 7px 15px;
-    display: block;
-  }
-  .navbar-nav > li > a,
-  .tg_page_head .navbar-quick-nav a  {
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
   .navbar-toggle {
-    margin-top: 2px;
-    margin-bottom: 2px;
+    margin-top: 4px;
+    margin-bottom: 4px;
   }
   .im_page_footer {
     display: none;
@@ -1869,4 +1853,109 @@ img.img_fullsize {
   height: 40px;
   margin-right: 10px;
   overflow: hidden;
+}
+
+
+/* Messages edit panel */
+.im_edit_panel_wrap {
+  border-top: 1px solid #EEE;
+  padding: 5px 5px;
+}
+.im_panel_to_top .im_edit_panel_wrap {
+  background: #FFF;
+  position: absolute;
+  /*width: 652px;*/
+  width: 100%;
+}
+.im_edit_delete_link,
+.im_edit_cancel_link {
+  display: block;
+  padding: 8px 17px;
+}
+.im_edit_cancel_link {
+  float: left;
+}
+.im_edit_delete_link {
+  float: right;
+}
+
+.im_edit_delete_link:hover,
+.im_edit_cancel_link:hover {
+  background: #f2f6fa;
+  text-decoration: none;
+}
+.im_edit_delete_link {
+  line-height: 0;
+}
+
+.im_edit_panel_title {
+  text-align: center;
+  margin: 0;
+  font-size: 14px;
+  line-height: 34px;
+}
+
+.icon-delete {
+  display: inline-block;
+  width: 12px;
+  height: 15px;
+
+  background: url(../img/icons/IconsetW.png?1) -15px -319px no-repeat;
+  background-size: 42px 460px;
+}
+.is_1x .icon-delete {
+  background-image: url(../img/icons/IconsetW_1x.png?2);
+}
+
+.im_message_date:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.im_message_selected {
+  background: #f2f6fa;
+}
+.im_history_selectable .im_message_outer_wrap {
+  cursor: pointer;
+}
+.im_history_selectable .im_message_outer_wrap:hover {
+  background: #f2f6fa;
+}
+.im_message_selected .im_message_date,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_date {
+  color: #91a6ba;
+}
+
+.im_history_selectable .im_message_date:hover {
+  text-decoration: none;
+}
+
+.im_message_wrap {
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.icon-select-tick {
+  display: none;
+  position: absolute;
+  width: 17px;
+  height: 15px;
+  margin: 10px 0 0 -75px;
+  background: url(../img/icons/IconsetW.png?1) -13px -344px no-repeat;
+  background-size: 42px 460px;
+}
+.is_1x .icon-select-tick {
+  background-image: url(../img/icons/IconsetW_1x.png?2);
+}
+.im_history_selectable .icon-select-tick {
+  display: inline-block;
+}
+
+.im_message_selected .icon-select-tick,
+.im_history_selectable .im_message_outer_wrap:hover .icon-select-tick {
+  background-position: -13px -367px;
+  opacity: 0.6;
+}
+.im_message_selected .icon-select-tick {
+  opacity: 1 !important;
 }
