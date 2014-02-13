@@ -3,11 +3,6 @@
 html {
   background: #dee4e9 url(../img/bg_tile.png?1) 0 0 repeat;
   /*background-size: 300px 468px;*/
-
-  /*background: #dee4e9 url(../img/bg_full.png) 0 0 no-repeat;*/
-  /*background-size: cover;*/
-  /*background-size: contain;*/
-  /*background-size: 248px 382px;*/
 }
 body {
   color: #000;
@@ -114,6 +109,9 @@ fieldset[disabled] .btn-tg.active {
   border-color: #999;
 }
 
+/*.tg_page_head .navbar {
+  min-height: 42px;
+}*/
 .tg_page_head .container {
   display: block;
   width: auto;
@@ -130,10 +128,15 @@ fieldset[disabled] .btn-tg.active {
   margin: 0;
 }
 .tg_page_head .navbar > .container .navbar-brand {
-  padding: 9px 15px;
+  padding: 12px 15px;
+  /*padding: 8px 15px;*/
   opacity: 0.9;
   margin-left: 0;
+  margin-right: 20px;
   -webkit-transition: opacity swing .9s;
+  display: block;
+  line-height: 0;
+  height: auto;
 }
 @media (max-width: 480px) {
   .tg_page_head .navbar > .container .navbar-brand {
@@ -141,19 +144,50 @@ fieldset[disabled] .btn-tg.active {
   }
 }
 
+.tg_head_logo {
+  background: url(../img/Tlogo_2x.png) 0 0 no-repeat;
+  background-size: 26px 26px;
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  vertical-align: text-top;
+}
+.is_1x .tg_head_logo {
+  background-image: url(../img/TLogo_1x.png);
+}
+.tg_head_logo_text {
+  background: url(../img/TLogo2_2x.png) 0 0 no-repeat;
+  background-size: 97px 15px;
+  display: inline-block;
+  width: 97px;
+  height: 15px;
+  vertical-align: text-top;
+  margin-top: 7px;
+  margin-left: 10px;
+}
+.is_1x .tg_head_logo_text {
+  background-image: url(../img/TLogo2_1x.png);
+}
+
+
+
 @media (min-width: 480px) {
   .tg_page_head .navbar-quick-nav {
     display: none;
   }
 }
 
-
-.tg_head_logo {
-  background: url(../img/Logo_2x.png) 0 0 no-repeat;
-  background-size: 110px 31px;
+.icon-back {
   display: inline-block;
-  width: 110px;
-  height: 31px;
+  width: 10px;
+  height: 18px;
+  vertical-align: text-top;
+
+  background: url(../img/icons/IconsetW.png?1) -15px -419px no-repeat;
+  background-size: 42px 460px;
+}
+.is_1x .icon-back {
+  background-image: url(../img/icons/IconsetW_1x.png?2);
 }
 
 .tg_page_head .navbar > .container .navbar-brand:hover {
@@ -161,6 +195,8 @@ fieldset[disabled] .btn-tg.active {
 }
 
 .tg_page_head .navbar-inverse .navbar-nav > li > a {
+  /*padding-top: 11px;
+  padding-bottom: 11px;*/
   color: #b9cfe3;
   font-size: 13px;
 }
@@ -434,7 +470,7 @@ fieldset[disabled] .btn-tg.active {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -458,7 +494,7 @@ fieldset[disabled] .btn-tg.active {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -843,7 +879,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png?1) -14px -389px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -871,7 +907,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -229px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -916,7 +952,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -277px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1152,7 +1188,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -12px -68px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1173,7 +1209,6 @@ textarea.im_message_field {
   width: 23px;
   height: 23px;
   margin-top: 4px;
-  margin-left: 15px;
 }
 .icon-emoji {
   display: inline-block;
@@ -1181,7 +1216,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -10px -4px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1221,7 +1256,9 @@ textarea.im_message_field {
   width: 24px;
   height: 22px;
   margin-top: 5px;
+  margin-left: 20px;
 }
+
 
 .icon-camera {
   display: inline-block;
@@ -1229,7 +1266,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -9px -132px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -1510,7 +1547,7 @@ img.img_fullsize {
 
 .emoji-menu-tail {
   background: url(../img/icons/IconsetW.png?1) -14px -268px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
@@ -1598,11 +1635,8 @@ img.img_fullsize {
     min-height: 40px;
   }
   .tg_page_head .navbar > .container .navbar-brand {
-    padding: 4.5px 15px;
+    padding: 7px 15px;
     display: block;
-    /*overflow: hidden;
-    width: 49px;
-    height: 36px;*/
   }
   .navbar-nav > li > a,
   .tg_page_head .navbar-quick-nav a  {
@@ -1777,7 +1811,7 @@ img.img_fullsize {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -1801,7 +1835,7 @@ img.img_fullsize {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
-  background-size: 42px 430px;
+  background-size: 42px 460px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {

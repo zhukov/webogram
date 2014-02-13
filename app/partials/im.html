@@ -55,6 +55,17 @@
 
             </div>
 
+            <div class="im_edit_panel_wrap" ng-if="selectActions">
+              <a ng-click="selectedDelete()"><i class="icon icon-delete"></i></a>
+              <a ng-click="selectedCancel()">Cancel</a>
+              <h4 class="im_edit_panel_title">
+                <ng-pluralize count="selectedCount"
+                                 when="{'0': 'No messages', 'one': '1 message', 'other': '{} messages'}">
+                </ng-pluralize>
+              </h4>
+            </div>
+
+
           </div>
 
           <div class="im_history_wrap nano">
@@ -110,8 +121,9 @@
                   <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
                   <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
 
-                  <div class="im_emoji_btn pull-right">
-                    <i class="icon icon-emoji"></i>
+                  <div class="im_media_attach pull-right">
+                    <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
+                    <i class="icon icon-camera"></i>
                   </div>
 
                   <div class="im_attach pull-right">
@@ -119,9 +131,9 @@
                     <i class="icon icon-paperclip"></i>
                   </div>
 
-                  <div class="im_media_attach pull-right">
-                    <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
-                    <i class="icon icon-camera"></i>
+
+                  <div class="im_emoji_btn pull-right">
+                    <i class="icon icon-emoji"></i>
                   </div>
 
                   <button type="submit" class="btn btn-tg im_submit">Send</button>

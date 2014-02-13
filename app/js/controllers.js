@@ -308,6 +308,10 @@ angular.module('myApp.controllers', [])
     StatusManager.start();
 
     $scope.history = [];
+    $scope.selectedMsgs = {};
+    $scope.selectedCount = 0;
+    $scope.selectActions = false;
+    // $scope.toggleMessage = toggleMessage;
     $scope.typing = {};
     $scope.state = {};
 
@@ -420,6 +424,20 @@ angular.module('myApp.controllers', [])
       $scope.$broadcast('ui_history_change');
     }
 
+    function toggleMessage (messageID) {
+      console.log('toggle', messageID);
+      if ($scope.selectedMsgs[messageID]) {
+        delete $scope.selectedMsgs;
+        $scope.selectedCount--;
+        if (!$scope.selectedCount) {
+          $scope.selectActions = false;
+        }
+      } else {
+        $scope.selectedMsgs[messageID] = true;
+        $scope.selectedCount++;
+        $scope.selectActions = true;
+      }
+    }
 
 
     var typingTimeouts = {};

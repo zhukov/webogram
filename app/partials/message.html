@@ -68,8 +68,7 @@
       />
     </a>
     <div class="im_message_meta pull-right text-right">
-      <i ng-if="historyMessage.out" class="icon icon-message-status-tick" ng-class="{'message-status-delivered-tick': true, 'message-status-unread-tick': historyMessage.unread}"></i>
-      <span class="im_message_date">{{historyMessage.date | dateOrTime}}</span>
+      <span ng-click="toggleMessage(historyMessage.id)" class="im_message_date">{{historyMessage.date | dateOrTime}}</span>
     </div>
 
     <div class="im_message_body">
