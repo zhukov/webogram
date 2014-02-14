@@ -1867,7 +1867,7 @@ img.img_fullsize {
   width: 17px;
   height: 15px;
   margin: 10px 0 0 -75px;
-  background: url(../img/icons/IconsetW.png?1) -13px -344px no-repeat;
+  background: url(../img/icons/IconsetW.png?1) -13px -343px no-repeat;
   background-size: 42px 460px;
 }
 .is_1x .icon-select-tick {
@@ -1880,7 +1880,7 @@ img.img_fullsize {
 .im_message_selected .icon-select-tick,
 .im_history_selectable .im_message_outer_wrap:hover .icon-select-tick {
   background-position: -13px -367px;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 .im_message_selected .icon-select-tick {
   opacity: 1 !important;
