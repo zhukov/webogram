@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.16 - messaging web application for MTProto
+ * Webogram v0.0.17 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -329,6 +329,11 @@ angular.module('myApp.controllers', [])
         maxID = 0,
         startLimit = 20,
         limit = 50,
+        inputMediaFilters = {
+          photos: 'inputMessagesFilterPhotoVideo',
+          video: 'inputMessagesFilterVideo',
+          documents: 'inputMessagesFilterDocument',
+        },
         jump = 0;
 
     function applyDialogSelect (newPeer) {
@@ -381,7 +386,7 @@ angular.module('myApp.controllers', [])
       }
       // console.trace('load history');
 
-      var inputMediaFilter = $scope.mediaType && {_: $scope.mediaType == 'photos' ? 'inputMessagesFilterPhotoVideo' : 'inputMessagesFilterDocument'},
+      var inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit);
@@ -409,13 +414,12 @@ angular.module('myApp.controllers', [])
       maxID = 0;
 
       var curJump = ++jump,
-          inputMediaFilter = $scope.mediaType && {_: $scope.mediaType == 'photos' ? 'inputMessagesFilterPhotoVideo' : 'inputMessagesFilterDocument'},
+          inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
-        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, $scope.mediaType, maxID, startLimit);
+        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit);
 
       getMessagesPromise.then(function (historyResult) {
-        console.log('got', historyResult);
         if (curJump != jump) return;
 
         offset += startLimit;
@@ -518,6 +522,10 @@ angular.module('myApp.controllers', [])
 
     $scope.$on('history_append', function (e, addedMessage) {
       if (addedMessage.peerID == $scope.curDialog.peerID) {
+        if ($scope.mediaType) {
+          $scope.missedCount++;
+          return;
+        }
         // console.log('append', addedMessage);
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
