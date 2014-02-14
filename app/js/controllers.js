@@ -308,15 +308,20 @@ angular.module('myApp.controllers', [])
     StatusManager.start();
 
     $scope.history = [];
+    $scope.mediaType = false;
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
     $scope.selectActions = false;
+    $scope.missedCount = 0;
+    $scope.typing = {};
+    $scope.state = {};
+
     $scope.toggleMessage = toggleMessage;
     $scope.selectedDelete = selectedDelete;
     $scope.selectedCancel = selectedCancel;
     $scope.toggleEdit = toggleEdit;
-    $scope.typing = {};
-    $scope.state = {};
+    $scope.toggleMedia = toggleMedia;
+    $scope.showPeerInfo = showPeerInfo;
 
     var peerID,
         offset = 0,
@@ -333,10 +338,11 @@ angular.module('myApp.controllers', [])
 
       $scope.curDialog.peerID = peerID;
       $scope.curDialog.inputPeer = AppPeersManager.getInputPeer(newPeer);
+      $scope.mediaType = false;
 
       if (peerID) {
         updateHistoryPeer(true);
-        loadHistory(peerID);
+        loadHistory();
       } else {
         showEmptyHistory();
       }
@@ -374,7 +380,15 @@ angular.module('myApp.controllers', [])
         return;
       }
       // console.trace('load history');
-      AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit).then(function (historyResult) {
+
+      var inputMediaFilter = $scope.mediaType && {_: $scope.mediaType == 'photos' ? 'inputMessagesFilterPhotoVideo' : 'inputMessagesFilterDocument'},
+          getMessagesPromise = inputMediaFilter
+        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
+        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit);
+
+      getMessagesPromise.then(function (historyResult) {
+        console.log('got', maxID, historyResult);
+
         offset += limit;
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
@@ -394,9 +408,14 @@ angular.module('myApp.controllers', [])
       offset = 0;
       maxID = 0;
 
-      var curJump = ++jump;
+      var curJump = ++jump,
+          inputMediaFilter = $scope.mediaType && {_: $scope.mediaType == 'photos' ? 'inputMessagesFilterPhotoVideo' : 'inputMessagesFilterDocument'},
+          getMessagesPromise = inputMediaFilter
+        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
+        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, $scope.mediaType, maxID, startLimit);
 
-      AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit).then(function (historyResult) {
+      getMessagesPromise.then(function (historyResult) {
+        console.log('got', historyResult);
         if (curJump != jump) return;
 
         offset += startLimit;
@@ -473,6 +492,22 @@ angular.module('myApp.controllers', [])
       } else {
         $scope.selectActions = true;
         $scope.$broadcast('ui_panel_update');
+      }
+    }
+
+    function toggleMedia (mediaType) {
+      if (mediaType) {
+        $scope.missedCount = 0;
+      }
+      $scope.mediaType = mediaType || false;
+      loadHistory();
+    }
+
+    function showPeerInfo () {
+      if ($scope.curDialog.peerID > 0) {
+        $rootScope.openUser($scope.curDialog.peerID)
+      } else if ($scope.curDialog.peerID < 0) {
+        $rootScope.openChat(-$scope.curDialog.peerID)
       }
     }
 

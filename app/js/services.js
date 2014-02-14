@@ -746,6 +746,36 @@ angular.module('myApp.services', [])
     return deferred.promise;
   }
 
+  function getSearch (inputPeer, query, inputFilter, maxID, limit) {
+    return MtpApiManager.invokeApi('messages.search', {
+      peer: inputPeer,
+      q: query || '',
+      filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
+      min_date: 0,
+      max_date: 0,
+      limit: limit,
+      max_id: maxID || 0
+    }).then(function (searchResult) {
+      AppUsersManager.saveApiUsers(searchResult.users);
+      AppChatsManager.saveApiChats(searchResult.chats);
+      saveMessages(searchResult.messages);
+
+      var foundCount = searchResult._ == 'messages.messagesSlice'
+        ? searchResult.count
+        : searchResult.messages.length;
+
+      var foundMsgs = [];
+      angular.forEach(searchResult.messages, function (message) {
+        foundMsgs.push(message.id);
+      });
+
+      return {
+        count: foundCount,
+        history: foundMsgs
+      };
+    });
+  }
+
   function deleteMessages (messageIDs) {
     return MtpApiManager.invokeApi('messages.deleteMessages', {
       id: messageIDs
@@ -1486,6 +1516,7 @@ angular.module('myApp.services', [])
   return {
     getDialogs: getDialogs,
     getHistory: getHistory,
+    getSearch: getSearch,
     readHistory: readHistory,
     flushHistory: flushHistory,
     deleteMessages: deleteMessages,
