@@ -693,15 +693,21 @@ a.im_dialog:hover .im_dialog_date {
   font-size: 13px;
   margin-left: 5px;
 }
-.im_history_panel_info_link {
+.im_history_panel_info_link,
+.im_history_panel_edit_link {
   color: #3a6d99;
   font-size: 13px;
   font-weight: normal;
   padding-top: 5px;
   line-height: 1;
 }
-.im_history_panel_info_link:hover {
+.im_history_panel_info_link:hover,
+.im_history_panel_edit_link:hover {
   text-decoration: underline;
+}
+
+.im_history_panel_edit_link {
+  margin-right: 10px;
 }
 
 
@@ -1340,9 +1346,14 @@ img.img_fullsize {
 }
 
 .user_modal_window .modal-dialog {
-  padding-top: 150px;
   max-width: 506px;
 }
+@media (min-height: 768px) {
+  .user_modal_window .modal-dialog {
+    padding-top: 150px;
+  }
+}
+
 .user_modal_wrap .modal-body {
   padding: 23px 25px 30px;
 }

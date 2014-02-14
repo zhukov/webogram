@@ -31,9 +31,10 @@
             <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
               <div class="im_history_panel_title">
 
-                <div ng-if="historyPeer.id < 0" ng-click="openChat(-historyPeer.id)">
+                <div ng-if="historyPeer.id < 0">
                   <span class="im_history_panel_info_link pull-right">Info</span>
-                  <h4>
+                  <span class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()">Edit</span>
+                  <h4 ng-click="openChat(-historyPeer.id)">
                     <span ng-bind-html="historyPeer.data.rTitle"></span>
                     <small class="im_chat_users">
                       <ng-pluralize count="historyPeer.data.participants_count"
@@ -43,9 +44,10 @@
                   </h4>
                 </div>
 
-                <div ng-if="historyPeer.id > 0" ng-click="openUser(historyPeer.id)">
+                <div ng-if="historyPeer.id > 0">
                   <span class="im_history_panel_info_link pull-right">Info</span>
-                  <h4>
+                  <span class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()">Edit</span>
+                  <h4 ng-click="openUser(historyPeer.id)">
                     <span ng-bind-html="historyPeer.data.rFullName"></span>
                     <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
                   </h4>

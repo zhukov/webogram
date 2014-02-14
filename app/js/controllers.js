@@ -209,7 +209,7 @@ angular.module('myApp.controllers', [])
     $scope.$on('dialog_unread', function (e, dialog) {
       angular.forEach($scope.dialogs, function(curDialog) {
         if (curDialog.peerID == dialog.peerID) {
-          curDialog.unreadCount = dialog.unread_count;
+          curDialog.unreadCount = dialog.count;
         }
       });
     });
@@ -312,7 +312,9 @@ angular.module('myApp.controllers', [])
     $scope.selectedCount = 0;
     $scope.selectActions = false;
     $scope.toggleMessage = toggleMessage;
+    $scope.selectedDelete = selectedDelete;
     $scope.selectedCancel = selectedCancel;
+    $scope.toggleEdit = toggleEdit;
     $scope.typing = {};
     $scope.state = {};
 
@@ -453,6 +455,27 @@ angular.module('myApp.controllers', [])
       $scope.$broadcast('ui_panel_update');
     }
 
+    function selectedDelete () {
+      if ($scope.selectedCount > 0) {
+        var selectedMessageIDs = [];
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          selectedMessageIDs.push(messageID);
+        });
+        AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
+          selectedCancel();
+        });
+      }
+    }
+
+    function toggleEdit () {
+      if ($scope.selectActions) {
+        selectedCancel();
+      } else {
+        $scope.selectActions = true;
+        $scope.$broadcast('ui_panel_update');
+      }
+    }
+
 
     var typingTimeouts = {};
 
@@ -475,6 +498,19 @@ angular.module('myApp.controllers', [])
         }
       }
     });
+
+    $scope.$on('history_delete', function (e, historyUpdate) {
+      if (historyUpdate.peerID == $scope.curDialog.peerID) {
+        var newHistory = [];
+
+        for (var i = 0; i < $scope.history.length; i++) {
+          if (!historyUpdate.msgs[$scope.history[i].id]) {
+            newHistory.push($scope.history[i]);
+          }
+        };
+        $scope.history = newHistory;
+      }
+    })
 
     $scope.$on('dialog_flush', function (e, dialog) {
       if (dialog.peerID == $scope.curDialog.peerID) {

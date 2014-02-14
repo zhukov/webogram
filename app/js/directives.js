@@ -204,13 +204,19 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       scope.$on('ui_panel_update', function () {
-        element.addClass('im_panel_to_top');
+        var h = $(historyWrap).height();
+        $(panelWrap).addClass('im_panel_to_top');
         onContentLoaded(function () {
-          element.removeClass('im_panel_to_top');
+          $(panelWrap).removeClass('im_panel_to_top');
           updateSizes(true);
+
+          var newH = $(historyWrap).height();
 
           if (atBottom) {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+            updateScroller();
+          } else {
+            scrollableWrap.scrollTop -= newH - h;
             updateScroller();
           }
         });

@@ -746,6 +746,22 @@ angular.module('myApp.services', [])
     return deferred.promise;
   }
 
+  function deleteMessages (messageIDs) {
+    return MtpApiManager.invokeApi('messages.deleteMessages', {
+      id: messageIDs
+    }).then(function (deletedMessageIDs) {
+
+      ApiUpdatesManager.saveUpdate({
+        _: 'updateDeleteMessages',
+        messages: deletedMessageIDs
+      });
+
+      return deletedMessageIDs;
+    });
+
+
+  }
+
   function processAffectedHistory (inputPeer, affectedHistory, method) {
     if (!ApiUpdatesManager.saveSeq(affectedHistory.seq)) {
       return false;
@@ -1419,7 +1435,7 @@ angular.module('myApp.services', [])
           message = messagesStorage[messageID];
           if (message) {
             peerID = getMessagePeer(message);
-            history = historiesUpdated[peer] || (historiesUpdated[peer] = {count: 0, unread: 0, msgs: {}});
+            history = historiesUpdated[peerID] || (historiesUpdated[peerID] = {count: 0, unread: 0, msgs: {}});
 
             if (!message.out && message.unread) {
               history.unread++;
@@ -1460,6 +1476,7 @@ angular.module('myApp.services', [])
               }
             }
             historyStorage.history = newHistory;
+            $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: updatedData.msgs});
           }
         });
         break;
@@ -1471,6 +1488,7 @@ angular.module('myApp.services', [])
     getHistory: getHistory,
     readHistory: readHistory,
     flushHistory: flushHistory,
+    deleteMessages: deleteMessages,
     saveMessages: saveMessages,
     sendText: sendText,
     sendFile: sendFile,
