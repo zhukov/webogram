@@ -18,4 +18,4 @@ package:
 publish:
 	rm -rf dist/*
 	cp -r app/* dist/
-	cd dist && git add . && git commit -am "merged with master" && git push origin gh-pages
+	cd dist && git add --all . && git commit -am "merged with master" && git push origin gh-pages

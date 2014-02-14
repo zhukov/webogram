@@ -337,6 +337,7 @@ angular.module('myApp.controllers', [])
         jump = 0;
 
     function applyDialogSelect (newPeer) {
+      selectedCancel();
       newPeer = newPeer || $scope.curDialog.peer || '';
 
       peerID = AppPeersManager.getPeerID(newPeer);
