@@ -330,7 +330,7 @@ angular.module('myApp.controllers', [])
         startLimit = 20,
         limit = 50,
         inputMediaFilters = {
-          photos: 'inputMessagesFilterPhotoVideo',
+          photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
           documents: 'inputMessagesFilterDocument',
         },
