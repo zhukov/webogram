@@ -1909,7 +1909,7 @@ img.img_fullsize {
 
 @media (min-height: 768px) {
   .user_modal_window .modal-dialog {
-    padding-top: 150px;
+    margin-top: 150px;
   }
 }
 
