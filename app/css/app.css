@@ -64,6 +64,11 @@ a:hover {
 .form-control::-webkit-input-placeholder {
   color: #9aa2ab;
 }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
 
 .btn-tg {
