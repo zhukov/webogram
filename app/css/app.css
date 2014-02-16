@@ -74,7 +74,6 @@ input[type="number"]::-webkit-inner-spin-button {
 .btn-tg {
   color: #ffffff;
   background-color: #6AC065;
-  /*58b152*/
   border-color: #6AC065;
 }
 
@@ -686,11 +685,12 @@ a.im_dialog:hover .im_dialog_date {
   padding: 10px 4px 0;
 }
 .im_history_panel_title h4 {
-  margin-bottom: 7px;
   font-size: 17px;
+  line-height: 20px;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  margin: 8px 0 6px;
 }
 .im_history_panel_title h4 small {
   color: #999;
@@ -703,11 +703,11 @@ a.im_dialog:hover .im_dialog_date {
 .im_history_panel_media_dropdown .dropdown-toggle {
   font-size: 13px;
   font-weight: normal;
-  padding-top: 4px;
+  padding-top: 5px;
   line-height: 1;
 }
 .im_history_panel_media_dropdown {
-  padding-top: 1px;
+  padding-top: 2px;
 }
 .im_history_panel_edit_link,
 .im_history_panel_return_link,

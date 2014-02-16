@@ -41,7 +41,7 @@
                       <a ng-click="toggleMedia('photos')">Photos</a>
                     </li>
                     <li>
-                      <a ng-click="toggleMedia('video')">Video</a>
+                      <a ng-click="toggleMedia('video')">Videos</a>
                     </li>
                     <li>
                       <a ng-click="toggleMedia('documents')">Documents</a>
@@ -55,7 +55,7 @@
 
                 <h4 ng-if="mediaType !== false" ng-switch="mediaType">
                   <span ng-switch-when="photos"> Photos </span>
-                  <span ng-switch-when="video"> Video </span>
+                  <span ng-switch-when="video"> Videos </span>
                   <span ng-switch-when="documents"> Documents </span>
                 </h4>
 
