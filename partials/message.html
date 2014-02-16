@@ -6,7 +6,7 @@
     <div class="im_service_message_wrap" ng-if="historyMessage._ == 'messageService'">
       <div class="im_service_message">
 
-        <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFirstName"></a>
+        <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFullName"></a>
 
         <span class="im_message_service" ng-switch="historyMessage.action['_']">
           <span ng-switch-when="messageActionChatCreate">
@@ -78,7 +78,8 @@
 
       <div class="im_message_body">
 
-        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName"></a>
+        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName" ng-if="historyMessage.to_id.chat_id > 0"></a>
+        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName" ng-if="!historyMessage.to_id.chat_id"></a>
 
 
         <div class="im_message_fwd_header" ng-if="historyMessage._ == 'messageForwarded'">
