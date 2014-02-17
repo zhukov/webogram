@@ -115,12 +115,6 @@
           <div ng-switch-when="messageMediaDocument" class="im_message_document">
             <a href="" ng-click="openDoc(historyMessage.media.document.id)" ng-if="!historyMessage.media.document.progress.enabled">
               <i class="icon icon-document"></i>
-              <!-- <img
-                class="im_message_document_thumb"
-                my-load-thumb
-                thumb="historyMessage.media.document.thumb"
-                ng-if="historyMessage.media.document.thumb"
-              /> -->
             </a>
             <i class="icon icon-document" ng-if="historyMessage.media.document.progress.enabled"></i>
 
