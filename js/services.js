@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1 - messaging web application for MTProto
+ * Webogram v0.0.17 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -746,6 +746,52 @@ angular.module('myApp.services', [])
     return deferred.promise;
   }
 
+  function getSearch (inputPeer, query, inputFilter, maxID, limit) {
+    return MtpApiManager.invokeApi('messages.search', {
+      peer: inputPeer,
+      q: query || '',
+      filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
+      min_date: 0,
+      max_date: 0,
+      limit: limit,
+      max_id: maxID || 0
+    }).then(function (searchResult) {
+      AppUsersManager.saveApiUsers(searchResult.users);
+      AppChatsManager.saveApiChats(searchResult.chats);
+      saveMessages(searchResult.messages);
+
+      var foundCount = searchResult._ == 'messages.messagesSlice'
+        ? searchResult.count
+        : searchResult.messages.length;
+
+      var foundMsgs = [];
+      angular.forEach(searchResult.messages, function (message) {
+        foundMsgs.push(message.id);
+      });
+
+      return {
+        count: foundCount,
+        history: foundMsgs
+      };
+    });
+  }
+
+  function deleteMessages (messageIDs) {
+    return MtpApiManager.invokeApi('messages.deleteMessages', {
+      id: messageIDs
+    }).then(function (deletedMessageIDs) {
+
+      ApiUpdatesManager.saveUpdate({
+        _: 'updateDeleteMessages',
+        messages: deletedMessageIDs
+      });
+
+      return deletedMessageIDs;
+    });
+
+
+  }
+
   function processAffectedHistory (inputPeer, affectedHistory, method) {
     if (!ApiUpdatesManager.saveSeq(affectedHistory.seq)) {
       return false;
@@ -1419,7 +1465,7 @@ angular.module('myApp.services', [])
           message = messagesStorage[messageID];
           if (message) {
             peerID = getMessagePeer(message);
-            history = historiesUpdated[peer] || (historiesUpdated[peer] = {count: 0, unread: 0, msgs: {}});
+            history = historiesUpdated[peerID] || (historiesUpdated[peerID] = {count: 0, unread: 0, msgs: {}});
 
             if (!message.out && message.unread) {
               history.unread++;
@@ -1460,6 +1506,7 @@ angular.module('myApp.services', [])
               }
             }
             historyStorage.history = newHistory;
+            $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: updatedData.msgs});
           }
         });
         break;
@@ -1469,8 +1516,10 @@ angular.module('myApp.services', [])
   return {
     getDialogs: getDialogs,
     getHistory: getHistory,
+    getSearch: getSearch,
     readHistory: readHistory,
     flushHistory: flushHistory,
+    deleteMessages: deleteMessages,
     saveMessages: saveMessages,
     sendText: sendText,
     sendFile: sendFile,
@@ -1618,8 +1667,8 @@ angular.module('myApp.services', [])
 
   function wrapForHistory (videoID) {
     var video = angular.copy(videos[videoID]),
-        width = 100,
-        height = 100,
+        width = 200,
+        height = 200,
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',

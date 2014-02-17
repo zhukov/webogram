@@ -1,233 +1,247 @@
-<div class="im_message_wrap clearfix" ng-class="{im_message_out: historyMessage.out}">
+<div class="im_message_outer_wrap" ng-class="{im_message_selected: selectedMsgs[historyMessage.id]}" ng-click="toggleMessage(historyMessage.id, $event.target)">
 
-  <div class="im_service_message_wrap" ng-if="historyMessage._ == 'messageService'">
-    <div class="im_service_message">
 
-      <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFirstName"></a>
+  <div class="im_message_wrap clearfix">
 
-      <span class="im_message_service" ng-switch="historyMessage.action['_']">
-        <span ng-switch-when="messageActionChatCreate">
-          created the group &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
-        </span>
-        <span ng-switch-when="messageActionChatEditTitle">
-          changed group name to  &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
-        </span>
-        <span ng-switch-when="messageActionChatEditPhoto">
-          changed group photo
-        </span>
-        <span ng-switch-when="messageActionChatDeletePhoto">
-          removed group photo
-        </span>
-        <span ng-switch-when="messageActionChatAddUser">
-          <span ng-if="historyMessage.from_id != historyMessage.action.user_id">
-            invited <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
+    <div class="im_service_message_wrap" ng-if="historyMessage._ == 'messageService'">
+      <div class="im_service_message">
+
+        <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFullName"></a>
+
+        <span class="im_message_service" ng-switch="historyMessage.action['_']">
+          <span ng-switch-when="messageActionChatCreate">
+            created the group &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
           </span>
-          <span ng-if="historyMessage.from_id == historyMessage.action.user_id">
-            returned to group
+          <span ng-switch-when="messageActionChatEditTitle">
+            changed group name to  &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
+          </span>
+          <span ng-switch-when="messageActionChatEditPhoto">
+            changed group photo
+          </span>
+          <span ng-switch-when="messageActionChatDeletePhoto">
+            removed group photo
+          </span>
+          <span ng-switch-when="messageActionChatAddUser">
+            <span ng-if="historyMessage.from_id != historyMessage.action.user_id">
+              invited <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
+            </span>
+            <span ng-if="historyMessage.from_id == historyMessage.action.user_id">
+              returned to group
+            </span>
+          </span>
+          <span ng-switch-when="messageActionChatDeleteUser">
+            <span ng-if="historyMessage.from_id != historyMessage.action.user_id">
+              kicked <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
+            </span>
+            <span ng-if="historyMessage.from_id == historyMessage.action.user_id">
+              left group
+            </span>
+          </span>
+
+          <span ng-switch-default>
+            unsupported action {{historyMessage.action}}
           </span>
         </span>
-        <span ng-switch-when="messageActionChatDeleteUser">
-          <span ng-if="historyMessage.from_id != historyMessage.action.user_id">
-            kicked <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
-          </span>
-          <span ng-if="historyMessage.from_id == historyMessage.action.user_id">
-            left group
-          </span>
-        </span>
 
-        <span ng-switch-default>
-          unsupported action {{historyMessage.action}}
-        </span>
-      </span>
-
-    </div>
-
-    <a ng-if="historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb"  href="" ng-click="openPhoto(historyMessage.action.photo.id)">
-      <img
-        class="im_service_message_photo_thumb"
-        my-load-thumb
-        thumb="historyMessage.action.photo.thumb"
-        width="{{historyMessage.action.photo.thumb.width}}"
-        height="{{historyMessage.action.photo.thumb.height}}"
-      />
-    </a>
-
-  </div>
-
-  <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
-    <a ng-click="historyMessage.send()" ng-if="historyMessage.error">
-      <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>
-    </a>
-    <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-if="!historyMessage.error"></i>
-
-    <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
-      <img
-        class="im_message_from_photo"
-        my-load-thumb
-        thumb="historyMessage.fromPhoto"
-      />
-    </a>
-    <div class="im_message_meta pull-right text-right">
-      <i ng-if="historyMessage.out" class="icon icon-message-status-tick" ng-class="{'message-status-delivered-tick': true, 'message-status-unread-tick': historyMessage.unread}"></i>
-      <span class="im_message_date">{{historyMessage.date | dateOrTime}}</span>
-    </div>
-
-    <div class="im_message_body">
-
-      <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName"></a>
-
-
-      <div class="im_message_fwd_header" ng-if="historyMessage._ == 'messageForwarded'">
-        Forwarded message from <a class="im_message_fwd_author" ng-click="openUser(historyMessage.fwd_from_id)" ng-bind-html="historyMessage.fwdUser.rFirstName"></a>, <span class="im_message_fwd_date">{{historyMessage.fwd_date | dateOrTime}}</span>
       </div>
 
-      <div class="im_message_media" ng-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" ng-switch="historyMessage.media._">
+      <a ng-if="historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb"  href="" ng-click="openPhoto(historyMessage.action.photo.id)">
+        <img
+          class="im_service_message_photo_thumb"
+          my-load-thumb
+          thumb="historyMessage.action.photo.thumb"
+          width="{{historyMessage.action.photo.thumb.width}}"
+          height="{{historyMessage.action.photo.thumb.height}}"
+        />
+      </a>
 
-        <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" style="width: {{historyMessage.media.photo.thumb.width}}px;">
-          <img
-            class="im_message_photo_thumb"
-            my-load-thumb
-            thumb="historyMessage.media.photo.thumb"
-            width="{{historyMessage.media.photo.thumb.width}}"
-            height="{{historyMessage.media.photo.thumb.height}}"
-          />
-        </a>
+    </div>
 
-        <a ng-switch-when="messageMediaVideo" class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)" style="width: {{historyMessage.media.video.thumb.width}}px;">
-          <img
-            class="im_message_video_thumb"
-            my-load-thumb
-            thumb="historyMessage.media.video.thumb"
-            width="{{historyMessage.media.video.thumb.width}}"
-            height="{{historyMessage.media.video.thumb.height}}"
-          />
-          <div class="im_message_video_duration_wrap" style="width: {{historyMessage.media.video.thumb.width}}px;">
-            <span class="im_message_video_duration pull-right">{{historyMessage.media.video.duration | duration}}</span>
-            <span class="glyphicon glyphicon-facetime-video"></span>
-          </div>
-        </a>
+    <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
+      <i class="icon icon-select-tick"></i>
 
-        <div ng-switch-when="messageMediaDocument" class="im_message_document">
-          <a href="" ng-click="openDoc(historyMessage.media.document.id)" ng-if="!historyMessage.media.document.progress.enabled">
-            <i class="icon icon-document"></i>
-          </a>
-          <i class="icon icon-document" ng-if="historyMessage.media.document.progress.enabled"></i>
+      <a ng-click="historyMessage.send()" ng-if="historyMessage.error">
+        <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>
+      </a>
+      <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-if="!historyMessage.error"></i>
 
-          <div class="im_message_document_info">
-            <div class="im_message_document_name_wrap">
-              <span class="im_message_document_name">
-                {{historyMessage.media.document.file_name}}
-              </span>
-              <span class="im_message_document_size" ng-if="!historyMessage.media.document.progress.enabled">
-                {{historyMessage.media.document.size | formatSize}}
-              </span>
-              <span class="im_message_document_size" ng-if="historyMessage.media.document.progress.enabled">
-                {{historyMessage.media.document.progress | formatSizeProgress}}
-              </span>
-            </div>
-            <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
-              <a href="" ng-click="openDoc(historyMessage.media.document.id)">Download</a>
-            </div>
-            <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
-              <div class="progress tg_down_progress">
-                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.document.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.document.progress.percent}}%">
-                  <span class="sr-only">
-                    {{historyMessage.media.document.progress.percent}}% Complete (success)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+      <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
+        <img
+          class="im_message_from_photo"
+          my-load-thumb
+          thumb="historyMessage.fromPhoto"
+        />
+      </a>
+      <div class="im_message_meta pull-right text-right">
+        <span class="im_message_date">{{historyMessage.date | dateOrTime}}</span>
+      </div>
+
+      <div class="im_message_body">
+
+        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName" ng-if="historyMessage.to_id.chat_id > 0"></a>
+        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName" ng-if="!historyMessage.to_id.chat_id"></a>
+
+
+        <div class="im_message_fwd_header" ng-if="historyMessage._ == 'messageForwarded'">
+          Forwarded message from <a class="im_message_fwd_author" ng-click="openUser(historyMessage.fwd_from_id)" ng-bind-html="historyMessage.fwdUser.rFirstName"></a>, <span class="im_message_fwd_date">{{historyMessage.fwd_date | dateOrTime}}</span>
         </div>
 
+        <div class="im_message_media" ng-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" ng-switch="historyMessage.media._">
 
-        <div ng-switch-when="messageMediaAudio" class="im_message_document">
-          <a href="" ng-click="openAudio(historyMessage.media.audio.id)" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
-            <i class="icon icon-audio"></i>
-          </a>
-          <i class="icon icon-audio" ng-if="historyMessage.media.audio.progress.enabled || historyMessage.media.audio.url"></i>
-
-          <div class="im_message_audio_info">
-            <div class="im_message_audio_name_wrap" ng-if="!historyMessage.media.audio.url">
-              <span class="im_message_audio_name">
-                Voice message
-              </span>
-              <span class="im_message_audio_duration" ng-if="!historyMessage.media.audio.progress.enabled">
-                {{historyMessage.media.audio.duration | duration}}
-              </span>
-              <span class="im_message_audio_size" ng-if="historyMessage.media.audio.progress.enabled">
-                {{historyMessage.media.audio.progress | formatSizeProgress}}
-              </span>
-            </div>
-            <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
-              <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
-            </div>
-            <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
-              <div class="progress tg_down_progress">
-                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.audio.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.audio.progress.percent}}%">
-                  <span class="sr-only">
-                    {{historyMessage.media.audio.progress.percent}}% Complete (success)
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
-              <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
-                <source ng-src="{{historyMessage.media.audio.url}}" type="audio/mpeg" />
-                <embed hidden="true" autostart="true" loop="false" src="{{historyMessage.media.audio.url}}" />
-              </audio>
-            </div>
-          </div>
-        </div>
-
-        <a ng-switch-when="messageMediaGeo" my-map-point point="historyMessage.media.geo" class="im_message_geopoint">
-          <i class="icon icon-geo-point"></i>
-        </a>
-
-        <div ng-switch-when="messageMediaContact">
-          <a ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left" ng-if="historyMessage.media.user">
+          <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" style="width: {{historyMessage.media.photo.thumb.width}}px;">
             <img
-              class="im_message_contact_photo"
+              class="im_message_photo_thumb"
               my-load-thumb
-              thumb="historyMessage.media.userPhoto"
+              thumb="historyMessage.media.photo.thumb"
+              width="{{historyMessage.media.photo.thumb.width}}"
+              height="{{historyMessage.media.photo.thumb.height}}"
             />
           </a>
-          <div class="im_message_contact_name"><span class="glyphicon glyphicon-user"></span>
-            {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}
-          </div>
-          <div class="im_message_contact_phone">
-            {{historyMessage.media.phone_number}}
-          </div>
-        </div>
 
-        <div ng-switch-when="messageMediaPending" class="im_message_upload_file im_message_upload_{{historyMessage.media.type}}">
-          <i class="icon icon-{{historyMessage.media.type}}"></i>
-          <div class="im_message_document_info">
-            <div class="im_message_document_name_wrap">
-              <span class="im_message_document_name">
-                {{historyMessage.media.file_name}}
-              </span>
-              <span class="im_message_document_size" ng-if="historyMessage.media.progress">
-                {{historyMessage.media.progress | formatSizeProgress}}
-              </span>
+          <a ng-switch-when="messageMediaVideo" class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)" style="width: {{historyMessage.media.video.thumb.width}}px;">
+            <img
+              class="im_message_video_thumb"
+              my-load-thumb
+              thumb="historyMessage.media.video.thumb"
+              width="{{historyMessage.media.video.thumb.width}}"
+              height="{{historyMessage.media.video.thumb.height}}"
+            />
+            <div class="im_message_video_duration_wrap" style="width: {{historyMessage.media.video.thumb.width}}px;">
+              <span class="im_message_video_duration pull-right">{{historyMessage.media.video.duration | duration}}</span>
+              <span class="glyphicon glyphicon-facetime-video"></span>
             </div>
-            <div class="im_message_download_progress_wrap">
-              <div class="progress tg_down_progress">
-                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.progress.percent}}%">
-                  <span class="sr-only">
-                    {{historyMessage.media.progress.percent}}% Complete (success)
-                  </span>
+          </a>
+
+          <div ng-switch-when="messageMediaDocument" class="im_message_document">
+            <a href="" ng-click="openDoc(historyMessage.media.document.id)" ng-if="!historyMessage.media.document.progress.enabled">
+              <i class="icon icon-document"></i>
+              <!-- <img
+                class="im_message_document_thumb"
+                my-load-thumb
+                thumb="historyMessage.media.document.thumb"
+                ng-if="historyMessage.media.document.thumb"
+              /> -->
+            </a>
+            <i class="icon icon-document" ng-if="historyMessage.media.document.progress.enabled"></i>
+
+            <div class="im_message_document_info">
+              <div class="im_message_document_name_wrap">
+                <span class="im_message_document_name">
+                  {{historyMessage.media.document.file_name}}
+                </span>
+                <span class="im_message_document_size" ng-if="!historyMessage.media.document.progress.enabled">
+                  {{historyMessage.media.document.size | formatSize}}
+                </span>
+                <span class="im_message_document_size" ng-if="historyMessage.media.document.progress.enabled">
+                  {{historyMessage.media.document.progress | formatSizeProgress}}
+                </span>
+              </div>
+              <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
+                <a href="" ng-click="openDoc(historyMessage.media.document.id)">Download</a>
+              </div>
+              <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
+                <div class="progress tg_down_progress">
+                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.document.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.document.progress.percent}}%">
+                    <span class="sr-only">
+                      {{historyMessage.media.document.progress.percent}}% Complete (success)
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+
+          <div ng-switch-when="messageMediaAudio" class="im_message_document">
+            <a href="" ng-click="openAudio(historyMessage.media.audio.id)" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
+              <i class="icon icon-audio"></i>
+            </a>
+            <i class="icon icon-audio" ng-if="historyMessage.media.audio.progress.enabled || historyMessage.media.audio.url"></i>
+
+            <div class="im_message_audio_info">
+              <div class="im_message_audio_name_wrap" ng-if="!historyMessage.media.audio.url">
+                <span class="im_message_audio_name">
+                  Voice message
+                </span>
+                <span class="im_message_audio_duration" ng-if="!historyMessage.media.audio.progress.enabled">
+                  {{historyMessage.media.audio.duration | duration}}
+                </span>
+                <span class="im_message_audio_size" ng-if="historyMessage.media.audio.progress.enabled">
+                  {{historyMessage.media.audio.progress | formatSizeProgress}}
+                </span>
+              </div>
+              <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
+                <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
+              </div>
+              <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
+                <div class="progress tg_down_progress">
+                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.audio.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.audio.progress.percent}}%">
+                    <span class="sr-only">
+                      {{historyMessage.media.audio.progress.percent}}% Complete (success)
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
+                <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
+                  <source ng-src="{{historyMessage.media.audio.url}}" type="audio/mpeg" />
+                  <embed hidden="true" autostart="true" loop="false" src="{{historyMessage.media.audio.url}}" />
+                </audio>
+              </div>
+            </div>
+          </div>
+
+          <a ng-switch-when="messageMediaGeo" my-map-point point="historyMessage.media.geo" class="im_message_geopoint">
+            <i class="icon icon-geo-point"></i>
+          </a>
+
+          <div ng-switch-when="messageMediaContact">
+            <a ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left" ng-if="historyMessage.media.user">
+              <img
+                class="im_message_contact_photo"
+                my-load-thumb
+                thumb="historyMessage.media.userPhoto"
+              />
+            </a>
+            <div class="im_message_contact_name"><span class="glyphicon glyphicon-user"></span>
+              {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}
+            </div>
+            <div class="im_message_contact_phone">
+              {{historyMessage.media.phone_number}}
+            </div>
+          </div>
+
+          <div ng-switch-when="messageMediaPending" class="im_message_upload_file im_message_upload_{{historyMessage.media.type}}">
+            <i class="icon icon-{{historyMessage.media.type}}"></i>
+            <div class="im_message_document_info">
+              <div class="im_message_document_name_wrap">
+                <span class="im_message_document_name">
+                  {{historyMessage.media.file_name}}
+                </span>
+                <span class="im_message_document_size" ng-if="historyMessage.media.progress">
+                  {{historyMessage.media.progress | formatSizeProgress}}
+                </span>
+              </div>
+              <div class="im_message_download_progress_wrap">
+                <div class="progress tg_down_progress">
+                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.progress.percent}}%">
+                    <span class="sr-only">
+                      {{historyMessage.media.progress.percent}}% Complete (success)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
         </div>
 
-
+        <div class="im_message_text" ng-if="historyMessage.message.length" ng-bind-html="historyMessage.richMessage"></div>
       </div>
 
-      <div class="im_message_text" ng-if="historyMessage.message.length" ng-bind-html="historyMessage.richMessage"></div>
     </div>
-
   </div>
+
 </div>
+

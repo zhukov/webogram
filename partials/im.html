@@ -31,29 +31,62 @@
             <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
               <div class="im_history_panel_title">
 
-                <div ng-if="historyPeer.id < 0" ng-click="openChat(-historyPeer.id)">
-                  <span class="im_history_panel_info_link pull-right">Info</span>
-                  <h4>
-                    <span ng-bind-html="historyPeer.data.rTitle"></span>
-                    <small class="im_chat_users">
-                      <ng-pluralize count="historyPeer.data.participants_count"
-                                       when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
-                      </ng-pluralize>
-                    </small>
-                  </h4>
-                </div>
+                <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()">Info</a>
+                <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()">Edit</a>
 
-                <div ng-if="historyPeer.id > 0" ng-click="openUser(historyPeer.id)">
-                  <span class="im_history_panel_info_link pull-right">Info</span>
-                  <h4>
-                    <span ng-bind-html="historyPeer.data.rFullName"></span>
-                    <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
-                  </h4>
+                <div class="dropdown im_history_panel_media_dropdown pull-right">
+                  <a class="dropdown-toggle">Media<i class="icon icon-caret"></i></a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a ng-click="toggleMedia('photos')">Photos</a>
+                    </li>
+                    <li>
+                      <a ng-click="toggleMedia('video')">Videos</a>
+                    </li>
+                    <li>
+                      <a ng-click="toggleMedia('documents')">Documents</a>
+                    </li>
+                  </ul>
                 </div>
+                <a ng-if="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
+                  Show all messages
+                  <strong class="im_history_panel_return_count" ng-show="missedCount > 0">+{{missedCount}}</strong>
+                </a>
+
+                <h4 ng-if="mediaType !== false" ng-switch="mediaType">
+                  <span ng-switch-when="photos"> Photos </span>
+                  <span ng-switch-when="video"> Videos </span>
+                  <span ng-switch-when="documents"> Documents </span>
+                </h4>
+
+                <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id < 0" ng-click="showPeerInfo()">
+                  <span ng-bind-html="historyPeer.data.rTitle"></span>
+                  <small class="im_chat_users">
+                    <ng-pluralize count="historyPeer.data.participants_count"
+                                     when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
+                    </ng-pluralize>
+                  </small>
+                </h4>
+
+                <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id > 0" ng-click="showPeerInfo()">
+                  <span ng-bind-html="historyPeer.data.rFullName"></span>
+                  <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
+                </h4>
 
               </div>
 
             </div>
+
+            <div class="im_edit_panel_wrap clearfix" ng-show="selectActions">
+              <a class="im_edit_delete_link" ng-click="selectedDelete()"><i class="icon icon-delete"></i></a>
+              <a class="im_edit_cancel_link" ng-click="selectedCancel()">Cancel</a>
+              <h4 class="im_edit_panel_title">
+                <ng-pluralize count="selectedCount"
+                                 when="{'0': 'Select messages', 'one': '1 message', 'other': '{} messages'}">
+                </ng-pluralize>
+              </h4>
+            </div>
+
 
           </div>
 
@@ -63,12 +96,12 @@
 
               <div class="im_history_scrollable">
 
-                  <div class="im_history">
+                  <div class="im_history" ng-class="{im_history_selectable: selectActions}">
                     <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
                   </div>
 
                   <div class="im_history_typing_wrap">
-                    <div class="im_history_typing" ng-animate="{enter:'animate-show', leave:'animate-hide'}" ng-if="typing.user">
+                    <div class="im_history_typing" ng-show="typing.user">
                       <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing<span my-typing-dots></span>
                     </div>
                   </div>
@@ -84,20 +117,13 @@
             <div class="im_send_form_wrap1">
 
               <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
-                <div class="pull-right im_panel_peer_photo" ng-click="openUser(historyPeer.id)" ng-if="historyPeer.id > 0">
+                <div class="pull-right im_panel_peer_photo" ng-click="showPeerInfo()">
                   <img
                     class="im_panel_peer_photo"
                     my-load-thumb
                     thumb="historyPeer.photo"
                   />
-                  <i class="icon im_panel_peer_online" ng-show="historyPeer.data.status._ == 'userStatusOnline'"></i>
-                </div>
-                <div class="pull-right im_panel_peer_photo" ng-click="openChat(-historyPeer.id)" ng-if="historyPeer.id < 0">
-                  <img
-                    class="im_panel_peer_photo"
-                    my-load-thumb
-                    thumb="historyPeer.photo"
-                  />
+                  <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
                 </div>
                 <div class="pull-left im_panel_own_photo">
                   <img
@@ -110,8 +136,9 @@
                   <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
                   <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
 
-                  <div class="im_emoji_btn pull-right">
-                    <i class="icon icon-emoji"></i>
+                  <div class="im_media_attach pull-right">
+                    <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
+                    <i class="icon icon-camera"></i>
                   </div>
 
                   <div class="im_attach pull-right">
@@ -119,9 +146,9 @@
                     <i class="icon icon-paperclip"></i>
                   </div>
 
-                  <div class="im_media_attach pull-right">
-                    <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
-                    <i class="icon icon-camera"></i>
+
+                  <div class="im_emoji_btn pull-right">
+                    <i class="icon icon-emoji"></i>
                   </div>
 
                   <button type="submit" class="btn btn-tg im_submit">Send</button>
