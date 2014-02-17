@@ -883,6 +883,15 @@ img.im_message_video_thumb {
   border-radius: 2px;
 }
 
+img.im_message_video_thumb {
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  -o-filter: blur(2px);
+  -ms-filter: blur(2px);
+  filter: blur(2px);
+  filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
+}
+
 div.im_message_video_thumb {
   position: relative;
 }
@@ -965,6 +974,13 @@ div.im_message_video_thumb {
   float: left;
 }
 
+
+.im_message_document_thumb {
+  border-radius: 2px;
+  overflow: hidden;
+  max-width: 100px;
+  max-height: 100px;
+}
 .im_message_document_name_wrap {
   overflow: hidden;
   white-space: nowrap;

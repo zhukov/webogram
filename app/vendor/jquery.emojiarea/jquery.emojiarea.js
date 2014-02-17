@@ -281,7 +281,8 @@
 
 		this.setup();
 
-		this.$button.on('mousedown', function() {
+		/* MODIFICATION: Following line was modified by Igor Zhukov, in order to improve emoji insert behaviour */
+		$(document.body).on('mousedown', function() {
 			if (self.hasFocus) {
 				self.selection = util.saveSelection();
 			}

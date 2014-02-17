@@ -1667,8 +1667,8 @@ angular.module('myApp.services', [])
 
   function wrapForHistory (videoID) {
     var video = angular.copy(videos[videoID]),
-        width = 100,
-        height = 100,
+        width = 200,
+        height = 200,
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',
