@@ -1074,7 +1074,7 @@ angular.module("template/modal/backdrop.html", []).run(["$templateCache", functi
 angular.module("template/modal/window.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/modal/window.html",
     "<div tabindex=\"-1\" class=\"modal fade {{ windowClass }}\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\n" +
-      "  <div class=\"modal_close_wrap visible-md visible-lg\" ng-click=\"close($event)\">\n" +
+      "  <div class=\"modal_close_wrap hidden-xs hidden-sm\" ng-click=\"close($event)\">\n" +
       "    <div class=\"modal_close\"></div>\n" +
       "  </div>\n" +
     "    <div class=\"modal-dialog\"><div class=\"modal-content\" ng-transclude></div></div>\n" +
