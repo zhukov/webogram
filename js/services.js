@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.17 - messaging web application for MTProto
+ * Webogram v0.0.18 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -570,6 +570,7 @@ angular.module('myApp.services', [])
   var dialogsStorage = {count: null, dialogs: []};
   var pendingByRandomID = {};
   var pendingByMessageID = {};
+  var pendingAfterMsgs = {};
   var tempID = -1;
 
 
@@ -958,11 +959,18 @@ angular.module('myApp.services', [])
 
       message.send = function () {
         toggleError(false);
+        var sentRequestOptions = {};
+        if (pendingAfterMsgs[peerID]) {
+          sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
+        }
         MtpApiManager.invokeApi('messages.sendMessage', {
           peer: inputPeer,
           message: text,
           random_id: randomID
-        }).then(function (result) {
+        }, sentRequestOptions).then(function (result) {
+          if (pendingAfterMsgs[peerID] === sentRequestOptions) {
+            delete pendingAfterMsgs[peerID];
+          }
           if (ApiUpdatesManager.saveSeq(result.seq)) {
             ApiUpdatesManager.saveUpdate({
               _: 'updateMessageID',
@@ -981,6 +989,8 @@ angular.module('myApp.services', [])
         }, function (error) {
           toggleError(true);
         });
+
+        pendingAfterMsgs[peerID] = sentRequestOptions;
       };
 
       saveMessages([message]);
@@ -1015,8 +1025,6 @@ angular.module('myApp.services', [])
     } else {
       attachType = 'doc';
     }
-
-    console.log(11, options.isMedia, file.type, attachType);
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1347,7 +1355,9 @@ angular.module('myApp.services', [])
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    // console.log('on apiUpdate', update);
+    // if (update._ != 'updateUserStatus') {
+    //   console.log('on apiUpdate', update);
+    // }
     switch (update._) {
       case 'updateMessageID':
         pendingByMessageID[update.id] = update.random_id;

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.17 - messaging web application for MTProto
+ * Webogram v0.0.18 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1502,28 +1502,27 @@ factory('MtpSha1Service', function ($q) {
 
 factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, MtpSha1Service, MtpAesService, AppConfigManager, $http, $q, $timeout, $interval) {
 
-  var updatesProcessor;
+  var updatesProcessor,
+      iii = 0,
+      offline = false;
 
-  function MtpNetworker(dcID, authKey, serverSalt) {
+  function MtpNetworker(dcID, authKey, serverSalt, options) {
+    options = options || {};
+
     this.dcID = dcID;
+    this.iii = iii++;
 
     this.authKey = authKey;
     this.authKeyID = sha1Hash(authKey).slice(-8);
 
     this.serverSalt = serverSalt;
 
-    // if (1 == dcID) {
-    //   var self = this;
-    //   (function () {
-    //     console.log('update server salt');
-    //     self.serverSalt = [0,0,0,0,0,0,0,0];
-    //     $timeout(arguments.callee, nextRandomInt(2000, 12345));
-    //   })();
-    // }
+    this.upload = options.upload || false;
 
     this.updateSession();
 
     this.currentRequests = 0;
+    this.checkConnectionPeriod = 0;
 
     this.sentMessages = {};
     this.serverMessages = [];
@@ -1540,7 +1539,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     this.checkLongPoll();
   };
 
-  MtpNetworker.prototype.updateSession = function (updateMessageID) {
+  MtpNetworker.prototype.updateSession = function () {
     console.log('Update session');
     this.seqNo = 0;
     this.sessionID = new Array(8);
@@ -1638,11 +1637,16 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     if (!this.connectionInited) {
       serializer.storeInt(962726977, 'InokeWithLayer10');
       serializer.storeInt(0x69796de9, 'initConnection');
-      serializer.storeInt(777, 'api_id');
+      serializer.storeInt(2496, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');
       serializer.storeString(navigator.platform  || 'Unknown Platform', 'system_version');
       serializer.storeString('0.1', 'app_version');
       serializer.storeString(navigator.language || 'en', 'lang_code');
+    }
+
+    if (options.afterMessageID) {
+      serializer.storeInt(0xcb9f372d, 'invokeAfterMsg');
+      serializer.storeLong(options.afterMessageID, 'msg_id');
     }
 
     serializer.storeMethod(method, params);
@@ -1657,7 +1661,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     };
 
     if (window._debugMode) {
-      console.log('Api call', method, params, messageID, seqNo)
+      console.log('Api call', method, params, messageID, seqNo, options);
     } else {
       console.log('Api call', method, messageID, seqNo);
     }
@@ -1668,12 +1672,12 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   MtpNetworker.prototype.checkLongPoll = function(force) {
     var isClean = this.cleanupSent();
     // console.log('Check lp', this.longPollPending, tsNow());
-    if (this.longPollPending && tsNow() < this.longPollPending) {
+    if (this.longPollPending && tsNow() < this.longPollPending || this.offline) {
       return false;
     }
     var self = this;
     AppConfigManager.get('dc').then(function (baseDcID) {
-      if (baseDcID != self.dcID && isClean) {
+      if (isClean && (baseDcID != self.dcID || self.upload)) {
         // console.warn('send long-poll for guest DC is delayed', self.dcID);
         return;
       }
@@ -1682,15 +1686,25 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.sendLongPoll = function() {
-    var maxWait = 25000;
+    var maxWait = 25000,
+        self = this;
+
     this.longPollPending = tsNow() + maxWait;
     // console.log('Set lp', this.longPollPending, tsNow());
 
-    this.wrapMtpCall('http_wait', {max_delay: 0, wait_after: 0, max_wait: maxWait}, {noResponse: true}).
-      then((function () {
-        delete this.longPollPending;
-        $timeout(this.checkLongPoll.bind(this), 0);
-      }).bind(this));
+    this.wrapMtpCall('http_wait', {
+      max_delay: 0,
+      wait_after: 0,
+      max_wait: maxWait
+    }, {
+      noResponse: true
+    }).then(function () {
+      delete self.longPollPending;
+      $timeout(self.checkLongPoll.bind(self), 0);
+    }, function () {
+      console.log('Long-poll failed');
+    });
+
   };
 
   MtpNetworker.prototype.pushMessage = function(message, options) {
@@ -1701,6 +1715,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     if (!options || !options.noShedule) {
       this.sheduleRequest();
+    }
+    if (angular.isObject(options)) {
+      options.messageID = message.msg_id;
     }
 
     return deferred.promise;
@@ -1741,9 +1758,74 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     });
   };
 
+  MtpNetworker.prototype.checkConnection = function(event) {
+    console.log('check connection', event);
+    $timeout.cancel(this.checkConnectionPromise);
+
+    var serializer = new TLSerialization({mtproto: true}),
+        pingID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)];
+
+    serializer.storeMethod('ping', {ping_id: pingID});
+
+    var pingMessage = {
+      msg_id: MtpMessageIdGenerator.generateID(),
+      seq_no: this.generateSeqNo(true),
+      body: serializer.getBytes()
+    };
+
+    var self = this;
+    this.sendEncryptedRequest(pingMessage).then(function (result) {
+      self.toggleOffline(false);
+    }, function () {
+      console.log('delay ', self.checkConnectionPeriod * 1000);
+      self.checkConnectionPromise = $timeout(self.checkConnection.bind(self), parseInt(self.checkConnectionPeriod * 1000));
+      self.checkConnectionPeriod = Math.min(60, self.checkConnectionPeriod * 1.5);
+    })
+  };
+
+  MtpNetworker.prototype.toggleOffline = function(enabled) {
+    console.log('toggle ', enabled, this.dcID, this.iii);
+    if (this.offline == enabled) {
+      return false;
+    }
+
+    this.offline = enabled;
+
+    if (this.offline) {
+      $timeout.cancel(this.nextReqPromise);
+      delete this.nextReq;
+
+      if (this.checkConnectionPeriod < 1.5) {
+        this.checkConnectionPeriod = 0;
+      }
+
+      this.checkConnectionPromise = $timeout(this.checkConnection.bind(this), parseInt(this.checkConnectionPeriod * 1000));
+      this.checkConnectionPeriod = Math.min(60, (1 + this.checkConnectionPeriod) * 1.5);
+
+      this.onOnlineCb = this.checkConnection.bind(this);
+
+      $(document.body).on('online', this.onOnlineCb);
+    } else {
+      delete this.longPollPending;
+      this.checkLongPoll();
+      this.sheduleRequest();
+
+      if (this.onOnlineCb) {
+        $(document.body).off('online', this.onOnlineCb);
+      }
+      $timeout.cancel(this.checkConnectionPromise);
+    }
+
+  };
+
+
 
   MtpNetworker.prototype.performSheduledRequest = function() {
-    // console.log('start sheduled');
+    // console.trace('sheduled', this.dcID, this.iii);
+    if (this.offline) {
+      console.log('cancel sheduled');
+      return false;
+    }
     delete this.nextReq;
     if (this.pendingAcks.length) {
       var ackMsgIDs = [];
@@ -1846,7 +1928,32 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         });
 
         self.checkLongPoll();
+
+        this.checkConnectionPeriod = Math.max(1.1, Math.sqrt(this.checkConnectionPeriod));
+
       });
+    }, function (error) {
+      console.log('Encrypted request failed', error);
+
+      if (message.container) {
+        angular.forEach(message.inner, function (msgID) {
+          self.pendingMessages[msgID] = 0;
+        });
+        delete self.sentMessages[message.msg_id];
+      } else {
+        self.pendingMessages[message.msg_id] = 0;
+      }
+
+      angular.forEach(noResponseMsgs, function (msgID) {
+        if (self.sentMessages[msgID]) {
+          var deferred = self.sentMessages[msgID].deferred;
+          delete self.sentMessages[msgID];
+          delete self.pendingMessages[msgID];
+          deferred.reject();
+        }
+      });
+
+      self.toggleOffline(true);
     });
   };
 
@@ -1970,6 +2077,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.sheduleRequest = function (delay) {
+    if (this.offline) {
+      this.checkConnection('forced shedule');
+    }
     var nextReq = tsNow() + delay;
 
     if (delay && this.nextReq && this.nextReq <= nextReq) {
@@ -1979,9 +2089,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     // console.log('shedule req', delay);
     // console.trace();
 
-    clearTimeout(this.nextReqTO);
+    $timeout.cancel(this.nextReqPromise);
 
-    this.nextReqTO = $timeout(this.performSheduledRequest.bind(this), delay || 0);
+    this.nextReqPromise = $timeout(this.performSheduledRequest.bind(this), delay || 0);
     this.nextReq = nextReq;
   };
 
@@ -2173,8 +2283,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   return {
-    getNetworker: function (dcID, authKey, serverSalt) {
-      return new MtpNetworker(dcID, authKey, serverSalt);
+    getNetworker: function (dcID, authKey, serverSalt, options) {
+      return new MtpNetworker(dcID, authKey, serverSalt, options);
     },
     setUpdatesProcessor: function (callback) {
       updatesProcessor = callback;
@@ -2185,6 +2295,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
 factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworkerFactory, $q) {
   var cachedNetworkers = {},
+      cachedUploadNetworkers = {},
       cachedExportPromise = {},
       baseDcID = false;
 
@@ -2211,13 +2322,14 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
     });
   }
 
-  function mtpGetNetworker (dcID) {
+  function mtpGetNetworker (dcID, upload) {
+    var cache = upload ? cachedUploadNetworkers : cachedNetworkers;
     if (!dcID) {
       throw new Exception('get Networker without dcID');
     }
 
-    if (cachedNetworkers[dcID] !== undefined) {
-      return $q.when(cachedNetworkers[dcID]);
+    if (cache[dcID] !== undefined) {
+      return $q.when(cache[dcID]);
     }
 
     var akk = 'dc' + dcID + '_auth_key',
@@ -2225,8 +2337,8 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
     return AppConfigManager.get(akk, ssk).then(function (result) {
 
-      if (cachedNetworkers[dcID] !== undefined) {
-        return cachedNetworkers[dcID];
+      if (cache[dcID] !== undefined) {
+        return cache[dcID];
       }
 
       var authKeyHex = result[0],
@@ -2236,7 +2348,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         var authKey    = bytesFromHex(authKeyHex);
         var serverSalt = bytesFromHex(serverSaltHex);
 
-        return cachedNetworkers[dcID] = MtpNetworkerFactory.getNetworker(dcID, authKey, serverSalt);
+        return cache[dcID] = MtpNetworkerFactory.getNetworker(dcID, authKey, serverSalt, {upload: upload});
       }
 
       return MtpAuthorizer.auth(dcID).then(function (auth) {
@@ -2245,7 +2357,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         storeObj[ssk] = bytesToHex(auth.serverSalt);
         AppConfigManager.set(storeObj);
 
-        return cachedNetworkers[dcID] = MtpNetworkerFactory.getNetworker(dcID, auth.authKey, auth.serverSalt);
+        return cache[dcID] = MtpNetworkerFactory.getNetworker(dcID, auth.authKey, auth.serverSalt, {upload: upload});
       }, function (error) {
         console.log('Get networker error', error, error.stack);
         return $q.reject(error);
@@ -2258,13 +2370,14 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
     var deferred = $q.defer(),
         dcID,
+        upload = options.fileDownload || options.fileUpload,
         networkerPromise;
 
     if (dcID = options.dcID) {
-      networkerPromise = mtpGetNetworker(dcID);
+      networkerPromise = mtpGetNetworker(dcID, upload);
     } else {
       networkerPromise = AppConfigManager.get('dc').then(function (baseDcID) {
-        return mtpGetNetworker(dcID = baseDcID || 1);
+        return mtpGetNetworker(dcID = baseDcID || 1, upload);
       });
     }
 
@@ -2543,7 +2656,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                 location: angular.extend({}, location, {_: 'inputFileLocation'}),
                 offset: 0,
                 limit: 0
-              }, {dcID: location.dc_id});
+              }, {
+                dcID: location.dc_id,
+                fileDownload: true
+              });
             });
 
             fileEntry.createWriter(function (fileWriter) {
@@ -2577,7 +2693,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           location: angular.extend({}, location, {_: 'inputFileLocation'}),
           offset: 0,
           limit: 0
-        }, {dcID: location.dc_id});
+        }, {
+          dcID: location.dc_id,
+          fileDownload: true
+        });
       }).then(function (result) {
         deferred.resolve(cachedDownloads[fileName] = 'data:image/jpeg;base64,' + bytesToBase64(result.bytes))
       }, errorHandler);
@@ -2624,7 +2743,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                     location: location,
                     offset: offset,
                     limit: limit
-                  }, {dcID: dcID});
+                  }, {
+                    dcID: dcID,
+                    fileDownload: true
+                  });
 
                 }, 6).then(function (result) {
 
@@ -2692,7 +2814,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                 location: location,
                 offset: offset,
                 limit: limit
-              }, {dcID: dcID});
+              }, {
+                dcID: dcID,
+                fileDownload: true
+              });
             }, 6).then(function (result) {
               writeBlobPromise.then(function () {
                 try {
@@ -2813,7 +2938,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                 file_id: fileID,
                 file_part: part,
                 bytes: bytesFromArrayBuffer(e.target.result)
-              }, {startMaxLength: partSize + 256});
+              }, {
+                startMaxLength: partSize + 256,
+                fileUpload: true
+              });
             }, errorHandler);
 
             apiCurPromise.then(function (result) {

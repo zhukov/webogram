@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.17 - messaging web application for MTProto
+ * Webogram v0.0.18 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -505,6 +505,7 @@ angular.module('myApp.controllers', [])
         $scope.missedCount = 0;
       }
       $scope.mediaType = mediaType || false;
+      $scope.history = [];
       loadHistory();
     }
 
@@ -719,18 +720,22 @@ angular.module('myApp.controllers', [])
 
     NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
       $scope.settings.notifications = !muted;
-    });
 
-    $scope.$watch('settings.notifications', function(newValue) {
-      NotificationsManager.getPeerSettings($scope.userID).then(function (settings) {
-        if (newValue) {
-          settings.mute_until = 0;
-        } else {
-          settings.mute_until = 2000000000;
+      $scope.$watch('settings.notifications', function(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return false;
         }
-        NotificationsManager.savePeerSettings($scope.userID, settings);
+        NotificationsManager.getPeerSettings($scope.userID).then(function (settings) {
+          if (newValue) {
+            settings.mute_until = 0;
+          } else {
+            settings.mute_until = 2000000000;
+          }
+          NotificationsManager.savePeerSettings($scope.userID, settings);
+        });
       });
     });
+
 
     $scope.goToHistory = function () {
       $rootScope.$broadcast('history_focus', {peerString: $scope.user.peerString});
@@ -763,18 +768,22 @@ angular.module('myApp.controllers', [])
 
     NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
       $scope.settings.notifications = !muted;
-    });
 
-    $scope.$watch('settings.notifications', function(newValue) {
-      NotificationsManager.getPeerSettings(-$scope.chatID).then(function (settings) {
-        if (newValue) {
-          settings.mute_until = 0;
-        } else {
-          settings.mute_until = 2000000000;
+      $scope.$watch('settings.notifications', function(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return false;
         }
-        NotificationsManager.savePeerSettings(-$scope.chatID, settings);
+        NotificationsManager.getPeerSettings(-$scope.chatID).then(function (settings) {
+          if (newValue) {
+            settings.mute_until = 0;
+          } else {
+            settings.mute_until = 2000000000;
+          }
+          NotificationsManager.savePeerSettings(-$scope.chatID, settings);
+        });
       });
     });
+
 
     $scope.leaveGroup = function () {
       MtpApiManager.invokeApi('messages.deleteChatUser', {
@@ -843,33 +852,43 @@ angular.module('myApp.controllers', [])
       $scope.notify.desktop = !settings[0];
       $scope.notify.sound = !settings[1];
       $scope.send.enter = settings[2] ? '' : '1';
+
+      $scope.$watch('notify.sound', function(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return false;
+        }
+        if (newValue) {
+          AppConfigManager.remove('notify_nosound');
+        } else {
+          AppConfigManager.set({notify_nosound: true});
+          NotificationsManager.clear();
+        }
+      });
+
+      $scope.$watch('notify.desktop', function(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return false;
+        }
+        if (newValue) {
+          AppConfigManager.remove('notify_nodesktop');
+        } else {
+          AppConfigManager.set({notify_nodesktop: true});
+        }
+      });
+
+      $scope.$watch('send.enter', function(newValue, oldValue) {
+        if (newValue === oldValue) {
+          return false;
+        }
+        if (newValue) {
+          AppConfigManager.remove('send_ctrlenter');
+        } else {
+          AppConfigManager.set({send_ctrlenter: true});
+        }
+        $rootScope.$broadcast('settings_changed');
+      });
     });
 
-    $scope.$watch('notify.sound', function(newValue) {
-      if (newValue) {
-        AppConfigManager.remove('notify_nosound');
-      } else {
-        AppConfigManager.set({notify_nosound: true});
-        NotificationsManager.clear();
-      }
-    });
-
-    $scope.$watch('notify.desktop', function(newValue) {
-      if (newValue) {
-        AppConfigManager.remove('notify_nodesktop');
-      } else {
-        AppConfigManager.set({notify_nodesktop: true});
-      }
-    });
-
-    $scope.$watch('send.enter', function(newValue) {
-      if (newValue) {
-        AppConfigManager.remove('send_ctrlenter');
-      } else {
-        AppConfigManager.set({send_ctrlenter: true});
-      }
-      $rootScope.$broadcast('settings_changed');
-    });
 
     $scope.error = {};
     $scope.save = function (profileForm) {
