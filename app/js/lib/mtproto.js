@@ -1637,11 +1637,16 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     if (!this.connectionInited) {
       serializer.storeInt(962726977, 'InokeWithLayer10');
       serializer.storeInt(0x69796de9, 'initConnection');
-      serializer.storeInt(777, 'api_id');
+      serializer.storeInt(2496, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');
       serializer.storeString(navigator.platform  || 'Unknown Platform', 'system_version');
       serializer.storeString('0.1', 'app_version');
       serializer.storeString(navigator.language || 'en', 'lang_code');
+    }
+
+    if (options.afterMessageID) {
+      serializer.storeInt(0xcb9f372d, 'invokeAfterMsg');
+      serializer.storeLong(options.afterMessageID, 'msg_id');
     }
 
     serializer.storeMethod(method, params);
@@ -1656,7 +1661,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     };
 
     if (window._debugMode) {
-      console.log('Api call', method, params, messageID, seqNo)
+      console.log('Api call', method, params, messageID, seqNo, options);
     } else {
       console.log('Api call', method, messageID, seqNo);
     }
@@ -1710,6 +1715,9 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     if (!options || !options.noShedule) {
       this.sheduleRequest();
+    }
+    if (angular.isObject(options)) {
+      options.messageID = message.msg_id;
     }
 
     return deferred.promise;
