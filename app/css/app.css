@@ -590,21 +590,24 @@ a.im_dialog:hover .im_dialog_message_text {
 }
 
 .im_dialog_unread {
-  background: #c1d6e5;
+  /*background: #c1d6e5;*/
   display: inline-block;
   float: right;
-  width: 8px;
-  height: 8px;
+  width: 20px;
+  height: 13px;
   border-radius: 5px;
   overflow: hidden;
   margin: 10px 0 0;
+  background: url(../img/icons/Checks1_1x.png) 0 0 no-repeat;
 }
 
 a.im_dialog:hover .im_dialog_unread {
-  background: #a3c0d4;
+  /*background: #a3c0d4;*/
+  background: url(../img/icons/Checks1_1x.png) 0 0 no-repeat;
 }
 .active .im_dialog_unread {
-  background-color: #a4c4dd;
+  /*background-color: #a4c4dd;*/
+  background: url(../img/icons/Checks1_1x.png) 0 0 no-repeat;
 }
 
 
@@ -1106,20 +1109,24 @@ div.im_message_video_thumb {
   margin: 10px 0px 5px 16px;
 }
 .icon-message-status {
-  background: #43A4DB;
+  /*background: #43A4DB;
+  background: url(../img/icons/Checks2_1x.png) 0 0 no-repeat;*/
   border: 1px solid #FFF;
   display: block;
-  width: 11px;
-  height: 11px;
+  /*width: 11px;
+  height: 11px;*/
+  width: 20px;
+  height: 15px;
   border-radius: 7px;
   overflow: hidden;
   position: absolute;
   margin-left: -27px;
   margin-top: 14px;
-  opacity: 0;
+  /*opacity: 0;*/
 }
 .icon-message-status-unread {
   opacity: 1.0;
+  background: url(../img/icons/Checks1_1x.png) 0 0 no-repeat;
 }
 .icon-message-status-pending {
   opacity: 0.5;
@@ -1134,13 +1141,13 @@ div.im_message_video_thumb {
 
 .icon-message-status-tick {
   /*display: inline-block;*/
-  display: none;
-  width: 16px;
-  height: 10px;
-  background: url(../img/icons/Checks2_2x.png?1) 0 0 no-repeat;
-  background-size: 16px 10px;
+ /* display: none;
+  width: 20px;
+  height: 15px;*/
+  background: url(../img/icons/Checks2_1x.png?1) 0 0 no-repeat;
+ /* background-size: 20px 15px;
   top: 2px;
-  position: relative;
+  position: relative;*/
 }
 .icon-message-status-tick.message-status-unread-tick {
   /*width: 13px;*/
