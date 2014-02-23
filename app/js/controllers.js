@@ -47,7 +47,7 @@ angular.module('myApp.controllers', [])
         MtpApiManager.invokeApi('auth.sendCall', {
           phone_number: $scope.credentials.phone_number,
           phone_code_hash: $scope.credentials.phone_code_hash
-        }).then(function () {
+        }, options).then(function () {
           $scope.callPending.success = true;
         });
       } else {
