@@ -7,7 +7,19 @@
 
   <div class="modal-body">
 
-    <form name="profileForm" class="settings_profile_edit_form clearfix">
+    <form my-settings-form name="profileForm" class="settings_profile_edit_form clearfix">
+      <div class="user_photo_update">
+        <input ng-model="userPhoto" type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+      </div>
+      <div class="form-group settings_profile_user_photo">
+        <img
+          class="user_modal_image"
+          my-load-thumb
+          thumb="profile.photo"
+        />
+        <span ng-if="updatingPhoto">Uploading<span my-typing-dots></span></span>
+      </div>
+
       <div class="form-group settings_profile_first_name" ng-class="{'has-error': error.field == 'first_name'}">
         <label class="control-label" for="first_name">
           <span ng-if="error.field == 'first_name'">Invalid First Name</span>

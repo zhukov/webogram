@@ -2068,3 +2068,18 @@ img.img_fullsize {
     display: none;
   }
 }
+
+.user_photo_update {
+  cursor: pointer;
+  display: block;
+  overflow: hidden;
+  padding: 0;
+
+  margin-top: 5px;
+  margin-left: 20px;
+  width: 120px;
+  height: 120px;
+  left: 0;
+  top: 15px;
+  position: absolute;
+}

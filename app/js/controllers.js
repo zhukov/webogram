@@ -833,7 +833,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager) {
 
     $scope.profile = {};
 
@@ -841,12 +841,39 @@ angular.module('myApp.controllers', [])
       var user = AppUsersManager.getUser(id);
       $scope.profile.first_name = user.first_name;
       $scope.profile.last_name = user.last_name;
+      $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
 
       $scope.phone = user.phone;
     });
 
     $scope.notify = {};
     $scope.send = {};
+    $scope.profile.userPhoto = {};
+    $scope.updatingPhoto = false;
+
+    $scope.$watch('profile.userPhoto', onPhotoSelected);
+
+    function onPhotoSelected (photo) {
+      if (!photo.hasOwnProperty('name')) {
+        return;
+      }
+      $scope.updatingPhoto = true;
+      MtpApiFileManager.uploadFile(photo).then(function (inputFile) {
+        MtpApiManager.invokeApi('photos.uploadProfilePhoto', {
+          file: inputFile,
+          caption: '',
+          geo_point: {_: 'inputGeoPointEmpty'},
+          crop: {_: 'inputPhotoCropAuto'}
+        }).then(function() {
+          MtpApiManager.getUserID().then(function (id) {
+            console.log($scope.profile.photo);
+            $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
+            console.log($scope.profile.photo);
+          });
+          $scope.updatingPhoto = false;
+        });
+      });
+    };
 
     AppConfigManager.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter').then(function (settings) {
       $scope.notify.desktop = !settings[0];

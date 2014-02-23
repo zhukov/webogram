@@ -749,4 +749,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         }, 100);
       }
     };
+  })
+
+  .directive('mySettingsForm', function(){
+    return {
+      link: link
+    };
+
+    function link(scope, element, attrs) {
+      var photoSelect = $('input.im_attach_input', element);
+      photoSelect.on('change', function () {
+        var self = this;
+        scope.$apply(function () {
+          scope.profile.userPhoto = self.files[0];
+          setTimeout(function () {
+            try {
+              self.value = '';
+            } catch (e) {};
+          }, 1000);
+        });
+      });
+    };
   });
