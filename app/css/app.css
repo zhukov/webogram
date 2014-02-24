@@ -589,8 +589,7 @@ a.im_dialog:hover .im_dialog_message_text {
   background-color: #fff;
 }
 
-.im_dialog_unread {
-  /*background: #c1d6e5;*/
+.im_dialog_unread {  
   display: inline-block;
   float: right;
   width: 20px;
@@ -1108,49 +1107,35 @@ div.im_message_video_thumb {
 .im_content_message_wrap {
   margin: 10px 0px 5px 16px;
 }
-.icon-message-status {
-  /*background: #43A4DB;
-  background: url(../img/icons/Checks2_1x.png) 0 0 no-repeat;*/
+.icon-message-status {  
   border: 1px solid #FFF;
-  display: block;
-  /*width: 11px;
-  height: 11px;*/
+  display: block;  
   width: 20px;
-  height: 15px;
-  border-radius: 7px;
+  height: 15px;  
   overflow: hidden;
   position: absolute;
   margin-left: -27px;
-  margin-top: 14px;
-  /*opacity: 0;*/
+  margin-top: 14px;  
 }
 .icon-message-status-unread {
   opacity: 1.0;
   background: url(../img/icons/Checks1_1x.png) 0 0 no-repeat;
 }
 .icon-message-status-pending {
-  opacity: 0.5;
+  background: url(../img/icons/msg_clock.png) 0 0 no-repeat;
 }
 .icon-message-status-error {
-  background: #da564d;
-  opacity: 0.85;
+  background: url(../img/icons/msg_warning.png) 0 0 no-repeat;
+  opacity: 0.85; 
 }
 .icon-message-status-error:hover {
   opacity: 1;
 }
 
-.icon-message-status-tick {
-  /*display: inline-block;*/
- /* display: none;
-  width: 20px;
-  height: 15px;*/
-  background: url(../img/icons/Checks2_1x.png?1) 0 0 no-repeat;
- /* background-size: 20px 15px;
-  top: 2px;
-  position: relative;*/
+.icon-message-status-tick {  
+  background: url(../img/icons/Checks2_1x.png?1) 0 0 no-repeat; 
 }
-.icon-message-status-tick.message-status-unread-tick {
-  /*width: 13px;*/
+.icon-message-status-tick.message-status-unread-tick {  
   background: url(../img/icons/Checks1_2x.png?1) 0 0 no-repeat;
   background-size: 16px 10px;
 }
