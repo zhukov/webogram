@@ -178,6 +178,13 @@ angular.module('myApp.controllers', [])
       });
     }
 
+    $scope.logOut = function () {
+      MtpApiManager.logOut().then(function () {
+        location.hash = '/login';
+        location.reload();
+      });
+    }
+
     updateCurDialog();
 
     function updateCurDialog() {
