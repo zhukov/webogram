@@ -178,6 +178,12 @@ angular.module('myApp.controllers', [])
       });
     }
 
+	$scope.logOut = function () {
+		MtpApiManager.logOut().then(function () {
+			$location.url('/login');
+		});
+	}
+
     updateCurDialog();
 
     function updateCurDialog() {
@@ -914,13 +920,6 @@ angular.module('myApp.controllers', [])
             $scope.error = {};
             break;
         }
-      });
-    }
-
-    $scope.logOut = function () {
-      MtpApiManager.logOut().then(function () {
-        location.hash = '/login';
-        location.reload();
       });
     }
   })
