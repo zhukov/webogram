@@ -22,6 +22,12 @@ angular.module('myApp.controllers', [])
   })
 
   .controller('AppLoginController', function ($scope, $location, $timeout, MtpApiManager, ErrorService) {
+    MtpApiManager.getUserID().then(function (id) {
+      if (id) {
+        $location.url('/im');
+        return;
+      }
+    });
     var options = {dcID: 1};
 
     $scope.credentials = {};
