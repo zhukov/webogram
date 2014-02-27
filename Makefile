@@ -9,7 +9,7 @@ package:
 	rm -rf package_dist
 	cp -r app package_dist
 	sed -i.bak 's/<html lang="en" ng-app="myApp">\(<\!--  ng-csp=""  -->\)/<html lang="en" ng-app="myApp" ng-csp="">/g' package_dist/index.html
-	sed -n -i.bak '1h;1!H;$${;g;s/<script>.*<\/script>/ /p;}' package_dist/index.html
+	# sed -n -i.bak '1h;1!H;$${;g;s/<script>.*<\/script>/ /p;}' package_dist/index.html
 	rm package_dist/index.html.bak
 	rm package_dist/img/screenshot*
 	find package_dist | grep DS_Store | xargs rm -rf
