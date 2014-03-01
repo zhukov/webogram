@@ -81,9 +81,18 @@ angular.module('myApp.directives', ['myApp.filters'])
 
 
       function updateSizes () {
+        if (attrs.modal) {
+          $(element).css({
+            height: $($window).height() - 200
+          });
+          updateScroller();
+          return;
+        }
+
         $(element).css({
           height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 50) - 72
         });
+        updateScroller();
         if (!headWrap) {
           headWrap = $('.tg_page_head')[0];
         }
@@ -92,6 +101,38 @@ angular.module('myApp.directives', ['myApp.filters'])
       $($window).on('resize', updateSizes);
 
       updateSizes();
+    };
+
+  })
+
+  .directive('myContactsList', function($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+
+    function link (scope, element, attrs) {
+      var searchWrap = $('.contacts_modal_search')[0],
+          panelWrap = $('.contacts_modal_panel')[0],
+          contactsWrap = $('.contacts_wrap', element)[0];
+
+      onContentLoaded(function () {
+        $(contactsWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
+        updateSizes();
+      });
+
+      function updateSizes () {
+        $(element).css({
+          height: $($window).height() - (panelWrap && panelWrap.offsetHeight || 0) - (searchWrap && searchWrap.offsetHeight || 0) - 200
+        });
+        $(contactsWrap).nanoScroller();
+      }
+
+      $($window).on('resize', updateSizes);
+      scope.$on('contacts_change', function () {
+        onContentLoaded(updateSizes)
+      });
     };
 
   })
@@ -711,7 +752,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         } else if (time % 1000 <= 600) {
           cnt = 2;
         }
-        element.html((new Array(cnt + 1)).join('.'));
+
+        var text = '...',
+            html = text.substr(0, cnt + 1) + (cnt < 2 ? ('<span class="text-invisible">' + text.substr(cnt + 1) + '</span>') : '');
+
+        element.html(html);
       }, 200);
 
       scope.$on('$destroy', function cleanup() {

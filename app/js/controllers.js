@@ -151,7 +151,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -176,13 +176,34 @@ angular.module('myApp.controllers', [])
     }
 
     $scope.openContacts = function () {
-      $modal.open({
-        templateUrl: 'partials/contacts_modal.html?3',
-        controller: 'ContactsModalController',
-        scope: $rootScope.$new(),
-        windowClass: 'contacts_modal_window'
+      ContactsSelectService.selectContact().then(function (userID) {
+        $scope.dialogSelect(AppUsersManager.getUserString(userID));
       });
     }
+
+    $scope.openGroup = function () {
+      ContactsSelectService.selectContacts().then(function (userIDs) {
+
+        if (userIDs.length == 1) {
+          $scope.dialogSelect(AppUsersManager.getUserString(userIDs[0]));
+        } else if (userIDs.length > 1) {
+          var scope = $rootScope.$new();
+          scope.userIDs = userIDs;
+
+          $modal.open({
+            templateUrl: 'partials/chat_create_modal.html?3',
+            controller: 'ChatCreateModalController',
+            scope: scope,
+            windowClass: 'contacts_modal_window'
+          });
+        }
+
+      });
+    }
+
+    $scope.dialogSelect = function (peerString) {
+      $rootScope.$broadcast('history_focus', {peerString: peerString});
+    };
 
     updateCurDialog();
 
@@ -300,11 +321,11 @@ angular.module('myApp.controllers', [])
 
         $scope.$broadcast('ui_dialogs_append');
       });
-    }
+    };
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, IdleManager, StatusManager) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager) {
 
     $scope.$watch('curDialog.peer', applyDialogSelect);
 
@@ -324,6 +345,7 @@ angular.module('myApp.controllers', [])
 
     $scope.toggleMessage = toggleMessage;
     $scope.selectedDelete = selectedDelete;
+    $scope.selectedForward = selectedForward;
     $scope.selectedCancel = selectedCancel;
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
@@ -391,16 +413,14 @@ angular.module('myApp.controllers', [])
       if (!hasMore || !offset) {
         return;
       }
-      // console.trace('load history');
+      console.trace('load history');
 
       var inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
-        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
-        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit);
+        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, limit)
+        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit);
 
       getMessagesPromise.then(function (historyResult) {
-        console.log('got', maxID, historyResult);
-
         offset += limit;
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
@@ -494,6 +514,24 @@ angular.module('myApp.controllers', [])
         AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
           selectedCancel();
         });
+      }
+    }
+
+
+    function selectedForward () {
+      if ($scope.selectedCount > 0) {
+        var selectedMessageIDs = [];
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          selectedMessageIDs.push(messageID);
+        });
+
+        PeersSelectService.selectPeer().then(function (peerString) {
+          var inputPeer = AppPeersManager.getInputPeer(peerString);
+          AppMessagesManager.forwardMessages(selectedMessageIDs, inputPeer).then(function () {
+            selectedCancel();
+          });
+        });
+
       }
     }
 
@@ -757,7 +795,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('ChatModalController', function ($scope, $timeout, $rootScope, AppUsersManager, AppChatsManager, MtpApiManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager) {
+  .controller('ChatModalController', function ($scope, $timeout, $rootScope, AppUsersManager, AppChatsManager, MtpApiManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
 
@@ -812,6 +850,73 @@ angular.module('myApp.controllers', [])
       MtpApiManager.invokeApi('messages.addChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
+      }).then(function (result) {
+        if (ApiUpdatesManager.saveSeq(result.seq)) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: result.message,
+            pts: result.pts
+          });
+        }
+
+        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+      });
+    };
+
+
+    $scope.inviteToGroup = function () {
+      var disabled = [];
+      angular.forEach($scope.chatFull.participants.participants, function(participant){
+        disabled.push(participant.user_id);
+      });
+
+      ContactsSelectService.selectContacts({disabled: disabled}).then(function (userIDs) {
+        angular.forEach(userIDs, function () {
+          MtpApiManager.invokeApi('messages.addChatUser', {
+            chat_id: $scope.chatID,
+            user_id: {_: 'inputUserContact', user_id: userIDs},
+            fwd_limit: 100
+          }).then(function (addResult) {
+            AppUsersManager.saveApiUsers(addResult.users);
+            AppChatsManager.saveApiChats(addResult.chats);
+
+            if (ApiUpdatesManager.saveSeq(addResult.seq)) {
+              ApiUpdatesManager.saveUpdate({
+                _: 'updateNewMessage',
+                message: addResult.message,
+                pts: addResult.pts
+              });
+            }
+          });
+        });
+
+        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+      });
+
+      MtpApiManager.invokeApi('messages.addChatUser', {
+        chat_id: $scope.chatID,
+        user_id: {_: 'inputUserSelf'}
+      }).then(function (result) {
+        if (ApiUpdatesManager.saveSeq(result.seq)) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: result.message,
+            pts: result.pts
+          });
+        }
+
+        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+      });
+    };
+
+    $scope.kickFromGroup = function (userID) {
+      var user = AppUsersManager.getUser(userID);
+
+      console.log({_: 'inputUserForeign', user_id: userID, access_hash: user.access_hash || '0'}, user);
+
+      MtpApiManager.invokeApi('messages.deleteChatUser', {
+        chat_id: $scope.chatID,
+        user_id: {_: 'inputUserForeign', user_id: userID, access_hash: user.access_hash || '0'}
       }).then(function (result) {
         if (ApiUpdatesManager.saveSeq(result.seq)) {
           ApiUpdatesManager.saveUpdate({
@@ -931,9 +1036,29 @@ angular.module('myApp.controllers', [])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, AppUsersManager) {
+  .controller('ContactsModalController', function ($scope, $modalInstance, AppUsersManager) {
     $scope.contacts = [];
-    $scope.search = [];
+    $scope.search = {};
+
+    $scope.selectedContacts = {};
+    $scope.disabledContacts = {};
+    $scope.selectedCount = 0;
+
+    if ($scope.disabled) {
+      for (var i = 0; i < $scope.disabled.length; i++) {
+        $scope.disabledContacts[$scope.disabled[i]] = true;
+      }
+    }
+    console.log($scope.disabled, $scope.disabledContacts);
+
+    if ($scope.selected) {
+      for (var i = 0; i < $scope.selected.length; i++) {
+        if (!$scope.selectedContacts[$scope.selected[i]]) {
+          $scope.selectedContacts[$scope.selected[i]] = true;
+          $scope.selectedCount++;
+        }
+      }
+    }
 
     $scope.$watch('search.query', function (newValue) {
       AppUsersManager.getContacts(newValue).then(function (contactsList) {
@@ -946,10 +1071,81 @@ angular.module('myApp.controllers', [])
           }
           $scope.contacts.push(contact);
         });
+        $scope.$broadcast('contacts_change');
       });
-    })
+    });
+
+    $scope.contactSelect = function (userID) {
+      if ($scope.disabledContacts[userID]) {
+        return false;
+      }
+      if (!$scope.multiSelect) {
+        return $modalInstance.close(userID);
+      }
+      if ($scope.selectedContacts[userID]) {
+        delete $scope.selectedContacts[userID];
+        $scope.selectedCount--;
+      } else {
+        $scope.selectedContacts[userID] = true;
+        $scope.selectedCount++;
+      }
+    };
+
+    $scope.submitSelected = function () {
+      if ($scope.selectedCount > 0) {
+        var selectedUserIDs = [];
+        angular.forEach($scope.selectedContacts, function (t, userID) {
+          selectedUserIDs.push(userID);
+        });
+        return $modalInstance.close(selectedUserIDs);
+      }
+    }
 
   })
 
+  .controller('PeerSelectController', function ($scope, $modalInstance) {
 
+    $scope.dialogSelect = function (peerString) {
+      $modalInstance.close(peerString);
+    };
 
+  })
+
+  .controller('ChatCreateModalController', function ($scope, $modalInstance, $rootScope, MtpApiManager, AppChatsManager) {
+    $scope.group = {name: ''};
+
+    $scope.createGroup = function () {
+      if (!$scope.group.name) {
+        return;
+      }
+      var inputUsers = [];
+      angular.forEach($scope.userIDs, function(userID) {
+        inputUsers.push({_: 'inputUserContact', user_id: userID});
+      });
+      return MtpApiManager.invokeApi('messages.createChat', {
+        title: $scope.group.name,
+        users: inputUsers
+      }).then(function (createdResult) {
+        $modalInstance.close();
+
+        AppUsersManager.saveApiUsers(createdResult.users);
+        AppChatsManager.saveApiChats(createdResult.chats);
+
+        if (ApiUpdatesManager.saveSeq(createdResult.seq)) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: createdResult.message,
+            pts: createdResult.pts
+          });
+        }
+
+        var peerString = AppChatsManager.getChatString(message.to_id.chat_id);
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
+      });
+    };
+
+    $scope.back = function () {
+      $modalInstance.dismiss();
+    };
+
+  })
