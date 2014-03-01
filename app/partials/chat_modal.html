@@ -53,7 +53,7 @@
     <div class="chat_modal_members_list">
 
       <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
-        <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.userID)"  class="chat_modal_participant_kick pull-right">Kick</a>
+        <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)"  class="chat_modal_participant_kick pull-right">Kick</a>
         <a ng-click="openUser(participant.user_id)" class="chat_modal_participant_photo pull-left">
           <img
             class="chat_modal_participant_photo"

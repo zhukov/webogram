@@ -1507,6 +1507,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       offline;
 
   $rootScope.offline = true;
+  $rootScope.offlineConnecting = true;
+
   $rootScope.retryOnline = function () {
     $(document.body).trigger('online');
   }
@@ -1802,6 +1804,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     this.offline = enabled;
     $rootScope.offline = enabled;
+    $rootScope.offlineConnecting = false;
 
     if (this.offline) {
       $timeout.cancel(this.nextReqPromise);

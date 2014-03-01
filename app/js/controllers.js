@@ -871,10 +871,10 @@ angular.module('myApp.controllers', [])
       });
 
       ContactsSelectService.selectContacts({disabled: disabled}).then(function (userIDs) {
-        angular.forEach(userIDs, function () {
+        angular.forEach(userIDs, function (userID) {
           MtpApiManager.invokeApi('messages.addChatUser', {
             chat_id: $scope.chatID,
-            user_id: {_: 'inputUserContact', user_id: userIDs},
+            user_id: {_: 'inputUserContact', user_id: userID},
             fwd_limit: 100
           }).then(function (addResult) {
             AppUsersManager.saveApiUsers(addResult.users);
@@ -1049,7 +1049,6 @@ angular.module('myApp.controllers', [])
         $scope.disabledContacts[$scope.disabled[i]] = true;
       }
     }
-    console.log($scope.disabled, $scope.disabledContacts);
 
     if ($scope.selected) {
       for (var i = 0; i < $scope.selected.length; i++) {
@@ -1111,7 +1110,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('ChatCreateModalController', function ($scope, $modalInstance, $rootScope, MtpApiManager, AppChatsManager) {
+  .controller('ChatCreateModalController', function ($scope, $modalInstance, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, ApiUpdatesManager) {
     $scope.group = {name: ''};
 
     $scope.createGroup = function () {
@@ -1126,8 +1125,6 @@ angular.module('myApp.controllers', [])
         title: $scope.group.name,
         users: inputUsers
       }).then(function (createdResult) {
-        $modalInstance.close();
-
         AppUsersManager.saveApiUsers(createdResult.users);
         AppChatsManager.saveApiChats(createdResult.chats);
 
@@ -1139,7 +1136,7 @@ angular.module('myApp.controllers', [])
           });
         }
 
-        var peerString = AppChatsManager.getChatString(message.to_id.chat_id);
+        var peerString = AppChatsManager.getChatString(createdResult.message.to_id.chat_id);
         $rootScope.$broadcast('history_focus', {peerString: peerString});
       });
     };

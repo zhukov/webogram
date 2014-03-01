@@ -372,7 +372,7 @@ angular.module('myApp.services', [])
           participant.user = AppUsersManager.getUser(participant.user_id);
           participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
           participant.inviter = AppUsersManager.getUser(participant.inviter_id);
-          participant.canKick = myID == chat.admin_id || myID == participant.inviter_id;
+          participant.canKick = myID != participant.user_id && (myID == chat.admin_id || myID == participant.inviter_id);
         });
       });
     }
@@ -2376,13 +2376,15 @@ angular.module('myApp.services', [])
     if (!started) {
       started = true;
       $rootScope.$watch('idle.isIDLE', checkIDLE);
+      $rootScope.$watch('offline', checkIDLE);
     }
   }
 
   function sendUpdateStatusReq(offline) {
     var date = tsNow();
     if (offline && !lastOnlineUpdated ||
-        !offline && (date - lastOnlineUpdated) < 50000) {
+        !offline && (date - lastOnlineUpdated) < 50000 ||
+        $rootScope.offline) {
       return;
     }
     lastOnlineUpdated = offline ? 0 : date;
