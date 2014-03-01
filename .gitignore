@@ -1,4 +1,5 @@
 .DS_Store
+.idea
 
 # Node.js package manager
 /node_modules
