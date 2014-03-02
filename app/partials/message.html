@@ -63,7 +63,7 @@
       <a ng-click="historyMessage.send()" ng-if="historyMessage.error">
         <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>
       </a>
-      <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-if="!historyMessage.error"></i>
+      <i class="icon-message-status" ng-class="{'icon-message-status-tick': (!historyMessage.unread && historyMessage.out), 'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-if="!historyMessage.error"></i>
 
       <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
         <img
