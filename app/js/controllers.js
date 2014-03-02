@@ -449,6 +449,8 @@ angular.module('myApp.controllers', [])
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
 
+        historyResult.count === 0 ?  $scope.mediaEmpty = true : $scope.mediaEmpty = false;
+
         offset += startLimit;
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
