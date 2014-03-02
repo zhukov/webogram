@@ -1629,6 +1629,7 @@ img.img_fullsize {
 }
 .emoji-menu .emoji-items {
   padding-right: 8px;
+  outline: 0 !important;
 }
 .emoji-menu img {
   width: 20px;
