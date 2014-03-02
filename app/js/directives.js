@@ -520,7 +520,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+        if (!element.attr('src')) {
+          element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+        }
 
         MtpApiFileManager.downloadSmallFile(scope.thumb.location, scope.thumb.size).then(function (url) {
           if (counterSaved == counter) {
@@ -793,5 +795,26 @@ angular.module('myApp.directives', ['myApp.filters'])
           element[0].focus();
         }, 100);
       }
+    };
+  })
+
+  .directive('myFileUpload', function(){
+
+    return {
+      link: link
+    };
+
+    function link(scope, element, attrs) {
+      element.on('change', function () {
+        var self = this;
+        scope.$apply(function () {
+          scope.photo.file = self.files[0];
+          setTimeout(function () {
+            try {
+              self.value = '';
+            } catch (e) {};
+          }, 1000);
+        });
+      });
     };
   });

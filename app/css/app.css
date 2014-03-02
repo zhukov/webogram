@@ -293,6 +293,10 @@ fieldset[disabled] .btn-tg.active {
   opacity: 1;
 }
 
+.text-invisible {
+  visibility: hidden;
+}
+
 .modal-header {
   padding: 12px 0 4px 3px;
   border-bottom: 2px solid #E1E1E1;
@@ -1438,6 +1442,49 @@ img.img_fullsize {
 .user_modal_wrap .modal-body {
   padding: 23px 25px 30px;
 }
+.settings_profile_photo_wrap {
+  width: 120px;
+  margin-right: 22px;
+}
+.settings_profile_photo {
+  position: relative;
+  overflow: hidden;
+}
+.settings_profile_photo_change_wrap {
+  background: rgba(0,0,0,0.6);
+  padding: 2px 5px;
+  position: absolute;
+  opacity: 0;
+  bottom: -30px;
+
+  -webkit-transition: all ease-in-out 0.2s;
+  transition: all ease-in-out 0.2s;
+  width: 120px;
+}
+.settings_profile_photo:hover .settings_profile_photo_change_wrap {
+  bottom: 0;
+  opacity: 1;
+}
+
+.settings_profile_photo_update_link,
+.settings_profile_photo_delete_link,
+.settings_profile_photo_loading {
+  display: block;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+  padding: 2px 0;
+}
+.settings_profile_photo_update_link:hover,
+.settings_profile_photo_delete_link:hover {
+  color: #FFF;
+  text-decoration: none;
+}
+.settings_profile_photo_update_link {
+  position: relative;
+  overflow: hidden;
+}
+
+
 .user_modal_image_wrap {
   width: 120px;
   margin-right: 22px;
@@ -1711,10 +1758,20 @@ img.img_fullsize {
 .settings_profile_edit_form {
   margin-bottom: 15px;
 }
+.settings_profile_image_wrap {
+  float: left;
+  width: 120px;
+  margin-right: 22px;
+}
 .settings_profile_first_name,
 .settings_profile_last_name {
   width: 180px;
+  margin-bottom: 10px;
   float: left;
+}
+.settings_profile_first_name label,
+.settings_profile_last_name label {
+  margin-bottom: 3px;
 }
 .settings_profile_first_name {
   margin-right: 22px;
@@ -2173,15 +2230,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 }
 
 
-
 /* Dialogs modal */
 .peer_select_window .modal-dialog {
   max-width: 506px;
 }
 .peer_select_modal_wrap .modal-body {
   padding: 10px 10px 15px;
-}
-
-.text-invisible {
-  visibility: hidden;
 }

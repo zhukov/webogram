@@ -54,8 +54,9 @@ function onContentLoaded (cb) {
   setTimeout(cb, 0);
 };
 
-function tsNow () {
-  return +new Date();
+function tsNow (seconds) {
+  var t = +new Date();
+  return seconds ? Math.floor(t / 1000) : t;
 }
 
 function safeReplaceObject (wasObject, newObject) {

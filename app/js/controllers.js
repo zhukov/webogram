@@ -944,7 +944,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager) {
 
     $scope.profile = {};
 
@@ -952,12 +952,65 @@ angular.module('myApp.controllers', [])
       var user = AppUsersManager.getUser(id);
       $scope.profile.first_name = user.first_name;
       $scope.profile.last_name = user.last_name;
+      $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
 
       $scope.phone = user.phone;
     });
 
     $scope.notify = {};
     $scope.send = {};
+
+    $scope.photo = {};
+
+    $scope.$watch('photo.file', onPhotoSelected);
+
+    function onPhotoSelected (photo) {
+      if (!photo || !photo.hasOwnProperty('name')) {
+        return;
+      }
+      $scope.photo.updating = true;
+      MtpApiFileManager.uploadFile(photo).then(function (inputFile) {
+        MtpApiManager.invokeApi('photos.uploadProfilePhoto', {
+          file: inputFile,
+          caption: '',
+          geo_point: {_: 'inputGeoPointEmpty'},
+          crop: {_: 'inputPhotoCropAuto'}
+        }).then(function (updateResult) {
+          AppUsersManager.saveApiUsers(updateResult.users);
+          MtpApiManager.getUserID().then(function (id) {
+            ApiUpdatesManager.saveUpdate({
+              _: 'updateUserPhoto',
+              user_id: id,
+              date: tsNow(true),
+              photo: AppUsersManager.getUser(id).photo,
+              previous: true
+            });
+            $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
+          });
+          $scope.photo.updating = false;
+        });
+      });
+    };
+
+    $scope.deletePhoto = function () {
+      $scope.photo.updating = true;
+      MtpApiManager.invokeApi('photos.updateProfilePhoto', {
+        id: {_: 'inputPhotoEmpty'},
+        crop: {_: 'inputPhotoCropAuto'}
+      }).then(function (updateResult) {
+        MtpApiManager.getUserID().then(function (id) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateUserPhoto',
+            user_id: id,
+            date: tsNow(true),
+            photo: updateResult,
+            previous: true
+          });
+          $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
+        });
+        $scope.photo.updating = false;
+      });
+    };
 
     AppConfigManager.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter').then(function (settings) {
       $scope.notify.desktop = !settings[0];
