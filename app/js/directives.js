@@ -479,7 +479,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+        if (!element.attr('src')) {
+          element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+        }
 
         MtpApiFileManager.downloadSmallFile(scope.thumb.location, scope.thumb.size).then(function (url) {
           if (counterSaved == counter) {
@@ -751,17 +753,17 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('mySettingsForm', function(){
+  .directive('myFileUpload', function(){
+
     return {
       link: link
     };
 
     function link(scope, element, attrs) {
-      var photoSelect = $('input.im_attach_input', element);
-      photoSelect.on('change', function () {
+      element.on('change', function () {
         var self = this;
         scope.$apply(function () {
-          scope.profile.userPhoto = self.files[0];
+          scope.photo.file = self.files[0];
           setTimeout(function () {
             try {
               self.value = '';
