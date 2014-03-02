@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.18 - messaging web application for MTProto
+ * Webogram v0.0.19 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -54,8 +54,9 @@ function onContentLoaded (cb) {
   setTimeout(cb, 0);
 };
 
-function tsNow () {
-  return +new Date();
+function tsNow (seconds) {
+  var t = +new Date();
+  return seconds ? Math.floor(t / 1000) : t;
 }
 
 function safeReplaceObject (wasObject, newObject) {

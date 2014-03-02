@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.18 - messaging web application for MTProto
+ * Webogram v0.0.19 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -118,7 +118,7 @@ angular.module('myApp.services', [])
   };
 })
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager) {
   var users = {},
       contactsFillPromise,
       contactsIndex = SearchIndexManager.createIndex();
@@ -180,12 +180,16 @@ angular.module('myApp.services', [])
       return;
     }
 
+    if (apiUser.phone) {
+      apiUser.rPhone = $filter('phoneNumber')(apiUser.phone);
+    }
+
     if (apiUser.first_name) {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true});
     } else {
-      apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || 'DELETED';
-      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+      apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || 'DELETED';
+      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || 'DELETED';
     }
     apiUser.sortName = $.trim((apiUser.last_name || '') + ' ' + apiUser.first_name);
     apiUser.sortStatus = apiUser.status && (apiUser.status.expires || apiUser.status.was_online) || 0;
@@ -361,11 +365,15 @@ angular.module('myApp.services', [])
     var chatFull = angular.copy(fullChat),
         chat = getChat(id);
 
+
     if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
-      angular.forEach(chatFull.participants.participants, function(participant){
-        participant.user = AppUsersManager.getUser(participant.user_id);
-        participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
-        participant.inviter = AppUsersManager.getUser(participant.inviter_id);
+      MtpApiManager.getUserID().then(function (myID) {
+        angular.forEach(chatFull.participants.participants, function(participant){
+          participant.user = AppUsersManager.getUser(participant.user_id);
+          participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
+          participant.inviter = AppUsersManager.getUser(participant.inviter_id);
+          participant.canKick = myID != participant.user_id && (myID == chat.admin_id || myID == participant.inviter_id);
+        });
       });
     }
 
@@ -1126,6 +1134,28 @@ angular.module('myApp.services', [])
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
+  function forwardMessages (msgIDs, inputPeer) {
+    return MtpApiManager.invokeApi('messages.forwardMessages', {
+      peer: inputPeer,
+      id: msgIDs
+    }).then(function (forwardResult) {
+      AppUsersManager.saveApiUsers(forwardResult.users);
+      AppChatsManager.saveApiChats(forwardResult.chats);
+
+      if (ApiUpdatesManager.saveSeq(forwardResult.seq)) {
+        angular.forEach(forwardResult.messages, function(apiMessage) {
+
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: apiMessage,
+            pts: forwardResult.pts
+          });
+
+        });
+      }
+
+    });
+  };
 
   function finalizePendingMessage(randomID, finalMessage) {
     var pendingData = pendingByRandomID[randomID];
@@ -1178,7 +1208,7 @@ angular.module('myApp.services', [])
     if (toID < 0) {
       return toID;
     } else if (message.out) {
-      return toID
+      return toID;
     }
     return message.from_id;
   }
@@ -1533,6 +1563,7 @@ angular.module('myApp.services', [])
     saveMessages: saveMessages,
     sendText: sendText,
     sendFile: sendFile,
+    forwardMessages: forwardMessages,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory
@@ -2231,7 +2262,7 @@ angular.module('myApp.services', [])
               '<a href="',
               encodeEntities(match[2] + '://' + match[4]),
               '" target="_blank">',
-              encodeEntities((match[2] != 'http' ? match[2] + '://' : '') + match[4]),
+              encodeEntities(match[2] + '://' + match[4]),
               '</a>'
             );
           }
@@ -2345,13 +2376,15 @@ angular.module('myApp.services', [])
     if (!started) {
       started = true;
       $rootScope.$watch('idle.isIDLE', checkIDLE);
+      $rootScope.$watch('offline', checkIDLE);
     }
   }
 
   function sendUpdateStatusReq(offline) {
     var date = tsNow();
     if (offline && !lastOnlineUpdated ||
-        !offline && (date - lastOnlineUpdated) < 50000) {
+        !offline && (date - lastOnlineUpdated) < 50000 ||
+        $rootScope.offline) {
       return;
     }
     lastOnlineUpdated = offline ? 0 : date;
@@ -2589,5 +2622,56 @@ angular.module('myApp.services', [])
   return {
     showError: showError,
     showSimpleError: showSimpleError
+  }
+})
+
+
+
+.service('PeersSelectService', function ($rootScope, $modal) {
+
+  function selectPeer () {
+    var scope = $rootScope.$new();
+    // angular.extend(scope, params);
+
+    return $modal.open({
+      templateUrl: 'partials/peer_select.html',
+      controller: 'PeerSelectController',
+      scope: scope,
+      windowClass: 'peer_select_window'
+    }).result;
+  }
+
+
+  return {
+    selectPeer: selectPeer
+  }
+})
+
+
+.service('ContactsSelectService', function ($rootScope, $modal) {
+
+  function select (multiSelect, options) {
+    options = options || {};
+
+    var scope = $rootScope.$new();
+    scope.multiSelect = multiSelect;
+    angular.extend(scope, options);
+
+    return $modal.open({
+      templateUrl: 'partials/contacts_modal.html',
+      controller: 'ContactsModalController',
+      scope: scope,
+      windowClass: 'contacts_modal_window'
+    }).result;
+  }
+
+
+  return {
+    selectContacts: function (options) {
+      return select (true, options);
+    },
+    selectContact: function (options) {
+      return select (false, options);
+    },
   }
 })

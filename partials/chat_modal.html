@@ -41,14 +41,19 @@
           <div class="chat_modal_leave" ng-if="chatFull.chat.left">
             <a href="" ng-click="returnToGroup()">Return to group</a>
           </div>
+
         </div>
       </div>
     </div>
 
-    <h5 class="chat_modal_members_header">Members</h5>
+    <h5 class="chat_modal_members_header">
+      <a href="" ng-click="inviteToGroup()" ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="pull-right">Add participant</a>
+      Members
+    </h5>
     <div class="chat_modal_members_list">
 
       <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
+        <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)"  class="chat_modal_participant_kick pull-right">Kick</a>
         <a ng-click="openUser(participant.user_id)" class="chat_modal_participant_photo pull-left">
           <img
             class="chat_modal_participant_photo"

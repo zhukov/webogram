@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.18 - messaging web application for MTProto
+ * Webogram v0.0.19 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -893,12 +893,12 @@ factory('MtpDcConfigurator', function () {
   var dcOptions = window._testMode
     ? [
       {id: 1, host: '173.240.5.253', port: 80},
-      {id: 2, host: '95.142.192.65', port: 80},
+      {id: 2, host: '109.239.131.195', port: 80},
       {id: 3, host: '174.140.142.5', port: 80}
     ]
     : [
       {id: 1, host: '173.240.5.1',   port: 80},
-      {id: 2, host: '95.142.192.66', port: 80},
+      {id: 2, host: '109.239.131.193', port: 80},
       {id: 3, host: '174.140.142.6', port: 80},
       {id: 4, host: '31.210.235.12', port: 80},
       {id: 5, host: '116.51.22.2',   port: 80},
@@ -1500,11 +1500,18 @@ factory('MtpSha1Service', function ($q) {
   }
 }).
 
-factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, MtpSha1Service, MtpAesService, AppConfigManager, $http, $q, $timeout, $interval) {
+factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, MtpSha1Service, MtpAesService, AppConfigManager, $http, $q, $timeout, $interval, $rootScope) {
 
   var updatesProcessor,
       iii = 0,
-      offline = false;
+      offline;
+
+  $rootScope.offline = true;
+  $rootScope.offlineConnecting = true;
+
+  $rootScope.retryOnline = function () {
+    $(document.body).trigger('online');
+  }
 
   function MtpNetworker(dcID, authKey, serverSalt, options) {
     options = options || {};
@@ -1759,6 +1766,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.checkConnection = function(event) {
+    $rootScope.offlineConnecting = true;
+
     console.log('check connection', event);
     $timeout.cancel(this.checkConnectionPromise);
 
@@ -1775,21 +1784,27 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     var self = this;
     this.sendEncryptedRequest(pingMessage).then(function (result) {
+      delete $rootScope.offlineConnecting;
       self.toggleOffline(false);
     }, function () {
       console.log('delay ', self.checkConnectionPeriod * 1000);
       self.checkConnectionPromise = $timeout(self.checkConnection.bind(self), parseInt(self.checkConnectionPeriod * 1000));
       self.checkConnectionPeriod = Math.min(60, self.checkConnectionPeriod * 1.5);
+      $timeout(function () {
+        delete $rootScope.offlineConnecting;
+      }, 1000);
     })
   };
 
   MtpNetworker.prototype.toggleOffline = function(enabled) {
     console.log('toggle ', enabled, this.dcID, this.iii);
-    if (this.offline == enabled) {
+    if (this.offline !== undefined && this.offline == enabled) {
       return false;
     }
 
     this.offline = enabled;
+    $rootScope.offline = enabled;
+    $rootScope.offlineConnecting = false;
 
     if (this.offline) {
       $timeout.cancel(this.nextReqPromise);
@@ -1912,6 +1927,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     var self = this;
     this.sendEncryptedRequest(message).then(function (result) {
+      self.toggleOffline(false);
       self.parseResponse(result.data).then(function (response) {
         if (window._debugMode) {
           console.log('Server response', self.dcID, response);

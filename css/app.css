@@ -109,6 +109,7 @@ fieldset[disabled] .btn-tg:active,
 .btn-tg.disabled.active,
 .btn-tg[disabled].active,
 fieldset[disabled] .btn-tg.active {
+  color: #DDD;
   background-color: #999;
   border-color: #999;
 }
@@ -144,6 +145,19 @@ fieldset[disabled] .btn-tg.active {
   display: block;
   line-height: 0;
   height: auto;
+}
+.navbar-offline {
+  max-width: 250px;
+  margin: 0 auto;
+  float: none;
+}
+.navbar-offline-text {
+  padding: 12px 15px;
+  /*color: #FFF;*/
+  color: #b9cfe3;
+  font-size: 13px;
+  display: block;
+  line-height: 20px;
 }
 
 
@@ -277,6 +291,10 @@ fieldset[disabled] .btn-tg.active {
 }
 .modal_close_wrap:hover .modal_close {
   opacity: 1;
+}
+
+.text-invisible {
+  visibility: hidden;
 }
 
 .modal-header {
@@ -438,7 +456,6 @@ fieldset[disabled] .btn-tg.active {
 
 /* Dialogs list */
 .im_dialogs_col {
-  /*min-width: 315px;*/
   margin-right: -7px;
 }
 .im_dialogs_col .nano > .pane {
@@ -588,6 +605,9 @@ a.im_dialog:hover .im_dialog_message_text {
   color: #428bca;
   background-color: #fff;
 }
+.im_dialogs_modal_col .im_dialog_badge {
+  display: none;
+}
 
 .im_dialog_unread {
   background: #c1d6e5;
@@ -649,11 +669,13 @@ a.im_dialog:hover .im_dialog_date {
 .im_history_col {
 }
 
-.im_history_col .nano > .pane {
+.im_history_col .nano > .pane,
+.contacts_modal_col .nano > .pane,
+.im_dialogs_modal_col .nano > .pane {
   background : rgba(3,36,64,0.08);
   width      : 9px;
-  top: 10px;
-  right: 8px;
+  right: 0;
+  top: 0;
   -webkit-transition    : .2s;
   -moz-transition       : .2s;
   -o-transition         : .2s;
@@ -662,7 +684,14 @@ a.im_dialog:hover .im_dialog_date {
   -webkit-border-radius : 2px;
   border-radius         : 2px;
 }
-.im_history_col .nano > .pane > .slider {
+
+.im_history_col .nano > .pane {
+  top: 10px;
+  right: 8px;
+}
+.im_history_col .nano > .pane > .slider,
+.contacts_modal_col .nano > .pane > .slider,
+.im_dialogs_modal_col .nano > .pane > .slider {
   background : rgba(3,46,79,0.22);
   margin: 0;
   -moz-border-radius    : 2px;
@@ -1103,7 +1132,8 @@ div.im_message_video_thumb {
 
 
 .im_content_message_wrap {
-  margin: 10px 0px 5px 16px;
+  /*margin: 10px 0px 5px 16px;*/
+  margin: 8px 0px 8px 16px
 }
 .icon-message-status {
   background: #43A4DB;
@@ -1150,6 +1180,7 @@ div.im_message_video_thumb {
 .im_message_date {
   color: #adadad;
   font-size: 0.85em;
+  padding-bottom: 20px;
 }
 div.im_message_author,
 div.im_message_body {
@@ -1411,6 +1442,49 @@ img.img_fullsize {
 .user_modal_wrap .modal-body {
   padding: 23px 25px 30px;
 }
+.settings_profile_photo_wrap {
+  width: 120px;
+  margin-right: 22px;
+}
+.settings_profile_photo {
+  position: relative;
+  overflow: hidden;
+}
+.settings_profile_photo_change_wrap {
+  background: rgba(0,0,0,0.6);
+  padding: 2px 5px;
+  position: absolute;
+  opacity: 0;
+  bottom: -30px;
+
+  -webkit-transition: all ease-in-out 0.2s;
+  transition: all ease-in-out 0.2s;
+  width: 120px;
+}
+.settings_profile_photo:hover .settings_profile_photo_change_wrap {
+  bottom: 0;
+  opacity: 1;
+}
+
+.settings_profile_photo_update_link,
+.settings_profile_photo_delete_link,
+.settings_profile_photo_loading {
+  display: block;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+  padding: 2px 0;
+}
+.settings_profile_photo_update_link:hover,
+.settings_profile_photo_delete_link:hover {
+  color: #FFF;
+  text-decoration: none;
+}
+.settings_profile_photo_update_link {
+  position: relative;
+  overflow: hidden;
+}
+
+
 .user_modal_image_wrap {
   width: 120px;
   margin-right: 22px;
@@ -1498,6 +1572,10 @@ img.img_fullsize {
   padding: 8px 7px;
   border-top: 1px solid #F0F0F0;
 }
+.chat_modal_participant_kick {
+  padding: 11px 0;
+  display: block;
+}
 .chat_modal_participant_name {
   display: block;
   color: #3C6E97;
@@ -1564,7 +1642,7 @@ img.img_fullsize {
   z-index: 999;
   width: 180px;
   margin-left: -91px;
-  margin-top: -232px;
+  margin-top: -260px;
   overflow: hidden;
 }
 .emoji-items-wrap1 {
@@ -1574,12 +1652,62 @@ img.img_fullsize {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
+.emoji-items-wrap1 .emoji-menu-tabs {
+    width: 100%;
+}
+.emoji-items-wrap1 .emoji-menu-tabs td {
+    text-align: center;
+    color: white;
+}
+.emoji-menu-tabs .emoji-menu-tab {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url(../img/icons/EmojiTabSheet.png) no-repeat;
+    background-size: 120px 48px;
+}
+.icon-smile {
+    background-position: 0 0 !important;
+}
+.icon-smile-selected {
+    background-position: 0 -24px !important;
+    border-bottom: 1px solid white;
+}
+.icon-flower {
+    background-position: -24px 0 !important;
+}
+.icon-flower-selected {
+    background-position: -24px -24px !important;
+    border-bottom: 1px solid white;
+}
+.icon-bell {
+    background-position: -48px 0 !important;
+}
+.icon-bell-selected {
+    background-position: -48px -24px !important;
+    border-bottom: 1px solid white;
+}
+.icon-car {
+    background-position: -72px 0 !important;
+}
+.icon-car-selected {
+    background-position: -72px -24px !important;
+    border-bottom: 1px solid white;
+}
+.icon-grid {
+    background-position: -96px 0 !important;
+}
+.icon-grid-selected {
+    background-position: -96px -24px !important;
+    border-bottom: 1px solid white;
+}
 .emoji-menu .emoji-items-wrap {
   position: relative;
   height: 190px;
 }
 .emoji-menu .emoji-items {
   padding-right: 8px;
+  outline: 0 !important;
 }
 .emoji-menu img {
   width: 20px;
@@ -1587,7 +1715,7 @@ img.img_fullsize {
   vertical-align: middle;
   border: 0 none;
 }
-.emoji-menu a {
+.emoji-menu .emoji-items a {
   margin: -1px 0 0 -1px;
   /*border: 1px solid #f2f2f2;*/
   padding: 4px;
@@ -1595,7 +1723,7 @@ img.img_fullsize {
   float: left;
   border-radius: 2px;
 }
-.emoji-menu a:hover {
+.emoji-menu .emoji-items a:hover {
   background-color: rgba(0,0,0, 0.5);
   /*background-color: #fffae7;*/
 }
@@ -1680,10 +1808,20 @@ img.img_fullsize {
 .settings_profile_edit_form {
   margin-bottom: 15px;
 }
+.settings_profile_image_wrap {
+  float: left;
+  width: 120px;
+  margin-right: 22px;
+}
 .settings_profile_first_name,
 .settings_profile_last_name {
   width: 180px;
+  margin-bottom: 10px;
   float: left;
+}
+.settings_profile_first_name label,
+.settings_profile_last_name label {
+  margin-bottom: 3px;
 }
 .settings_profile_first_name {
   margin-right: 22px;
@@ -1777,13 +1915,38 @@ img.img_fullsize {
   opacity: 1;
 }
 
-.contacts_modal_contact_wrap {
-  padding: 8px 7px;
-  border-top: 1px solid #F0F0F0;
+.contacts_modal_col {
+  margin-right: -17px;
 }
-.contacts_modal_contact_wrap:first-child {
-  border-top: 0;
+.contacts_scrollable_wrap {
+  padding: 0 17px 0 0;
+  outline: none ! important;
 }
+
+
+.contacts_modal_members_list .contacts_modal_contact_wrap {
+  /*margin-top: 0;*/
+}
+.contacts_modal_members_list a.contacts_modal_contact {
+  clear: both;
+  overflow: hidden;
+  color: #000;
+  padding: 8px 9px;
+  border-radius: 0;
+}
+.contacts_modal_members_list a.contacts_modal_contact:hover {
+  border-radius: 2px;
+  background: #f2f6fa;
+}
+.contacts_modal_members_list .active a.contacts_modal_contact {
+  border-radius: 2px;
+  background-color: #6490b1;
+}
+.contacts_modal_members_list .active a.contacts_modal_contact:hover {
+  background-color: #6490b1;
+}
+
+
 .contacts_modal_contact_name {
   display: block;
   color: #3C6E97;
@@ -1793,15 +1956,56 @@ img.img_fullsize {
 .non_osx .contacts_modal_contact_name {
   font-size: 12px;
 }
-.contacts_modal_contact_status {
-  color: #999;
-}
 .contacts_modal_contact_photo {
   width: 40px;
   height: 40px;
   margin-right: 10px;
   overflow: hidden;
 }
+
+.contacts_modal_contact_status {
+  color: #999;
+}
+a.contacts_modal_contact:hover .contacts_modal_contact_status {
+  color: #91a6ba;
+}
+
+.contacts_modal_members_list .active .contacts_modal_contact_name,
+.contacts_modal_members_list .active a.contacts_modal_contact .contacts_modal_contact_status {
+  color: #FFF;
+}
+
+.icon-contact-tick {
+  position: absolute;
+  right: 10px;
+  top: 22px;
+  width: 17px;
+  height: 15px;
+  /*margin: 10px 0 0 -75px;*/
+  background: url(../img/icons/IconsetW.png?1) -13px -343px no-repeat;
+  background-size: 42px 460px;
+}
+.is_1x .icon-contact-tick {
+  background-image: url(../img/icons/IconsetW_1x.png?2);
+}
+
+.contacts_modal_members_list .active .icon-contact-tick,
+.contacts_modal_members_list a.contacts_modal_contact:hover .icon-contact-tick {
+  background-position: -13px -367px;
+  opacity: 0.5;
+}
+.contacts_modal_members_list .active .icon-contact-tick {
+  opacity: 1 !important;
+}
+
+.contacts_modal_panel {
+  padding-top: 10px;
+}
+
+.contacts_modal_actions {
+  padding-top: 10px;
+}
+
 
 
 /* Messages edit panel */
@@ -1816,6 +2020,7 @@ img.img_fullsize {
   width: 100%;
 }
 .im_edit_delete_link,
+.im_edit_forward_link,
 .im_edit_cancel_link {
   display: block;
   padding: 8px 17px;
@@ -1823,11 +2028,13 @@ img.img_fullsize {
 .im_edit_cancel_link {
   float: left;
 }
-.im_edit_delete_link {
+.im_edit_delete_link,
+.im_edit_forward_link {
   float: right;
 }
 
 .im_edit_delete_link:hover,
+.im_edit_forward_link:hover,
 .im_edit_cancel_link:hover {
   background: #f2f6fa;
   text-decoration: none;
@@ -1898,8 +2105,11 @@ img.img_fullsize {
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png?2);
 }
-.im_history_selectable .icon-select-tick {
-  display: inline-block;
+
+@media (min-width: 1024px) {
+  .im_history_selectable .icon-select-tick {
+    display: inline-block;
+  }
 }
 
 .im_message_selected .icon-select-tick,
@@ -2067,4 +2277,13 @@ img.img_fullsize {
   .im_emoji_btn {
     display: none;
   }
+}
+
+
+/* Dialogs modal */
+.peer_select_window .modal-dialog {
+  max-width: 506px;
+}
+.peer_select_modal_wrap .modal-body {
+  padding: 10px 10px 15px;
 }

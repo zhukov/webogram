@@ -7,7 +7,30 @@
 
   <div class="modal-body">
 
-    <form name="profileForm" class="settings_profile_edit_form clearfix">
+    <div class="settings_profile_photo_wrap pull-left">
+
+      <div class="settings_profile_photo">
+        <img
+          class="user_modal_image"
+          my-load-thumb
+          thumb="profile.photo"
+        />
+        <div class="settings_profile_photo_change_wrap">
+          <div ng-if="photo.updating" class="settings_profile_photo_loading">Updating<span my-typing-dots></span></div>
+          <div ng-if="!photo.updating">
+            <div class="settings_profile_photo_update_link">
+              <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+              Update photo
+            </div>
+            <a ng-if="profile.photo.location" href="" ng-click="deletePhoto()" class="settings_profile_photo_delete_link">Delete photo</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <form my-settings-form name="profileForm" class="settings_profile_edit_form clearfix">
+
       <div class="form-group settings_profile_first_name" ng-class="{'has-error': error.field == 'first_name'}">
         <label class="control-label" for="first_name">
           <span ng-if="error.field == 'first_name'">Invalid First Name</span>
@@ -27,6 +50,7 @@
       <div class="settings_profile_save">
         <button class="btn btn-link settings_profile_save_btn" ng-click="save(profileForm)" ng-disabled="profileForm.$invalid || (!profileForm.last_name.$dirty &amp;&amp; !profileForm.first_name.$dirty)">Save</button>
       </div>
+
     </form>
 
     <form class="settings_send_choose_form">
@@ -61,7 +85,7 @@
 
     <p>
       <strong>Version: </strong>
-      <span class="settings_version">alpha 0.0.18</span>
+      <span class="settings_version">alpha 0.0.19</span>
     </p>
 
     <hr/>
