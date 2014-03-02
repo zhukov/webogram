@@ -372,7 +372,7 @@ angular.module('myApp.services', [])
           participant.user = AppUsersManager.getUser(participant.user_id);
           participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
           participant.inviter = AppUsersManager.getUser(participant.inviter_id);
-          participant.canKick = myID != participant.user_id && (myID == chat.admin_id || myID == participant.inviter_id);
+          participant.canKick = myID != participant.user_id && (myID == chatFull.participants.admin_id || myID == participant.inviter_id);
         });
       });
     }
