@@ -25,7 +25,8 @@ Here are some screenshots of the interface:
 * View list of existings chats (up-posting) with infinite scrolling
 * View messages history for each chat/group (bottom-posting) with infinite scrolling
 * View brief profile info
-* View group info, members list
+* View/edit group info
+* View/edit members list
 * View media in messages: photo, video
 * Download documents from messages
 * Emoji display in all browsers (Chrome, non-OSX ones)
@@ -46,7 +47,6 @@ Here are some screenshots of the interface:
 * Registration
 * Contacts add/edit
 * Secret chats
-* Edit group photo/title
 * Search messages
 * a lot more...
 
