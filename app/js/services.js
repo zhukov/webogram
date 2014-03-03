@@ -482,7 +482,16 @@ angular.module('myApp.services', [])
 
 .service('SearchIndexManager', function () {
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-      trimRe = /^\s+|\s$/g;
+      trimRe = /^\s+|\s$/g,
+      accentsReplace = {
+        a: /[áâäà]/g,
+        e: /[éêëè]/g,
+        i: /[íîïì]/g,
+        o: /[óôöò]/g,
+        u: /[úûüù]/g,
+        c: /ç/g,
+        ss: /ß/g
+      }
 
   return {
     createIndex: createIndex,
@@ -503,6 +512,12 @@ angular.module('myApp.services', [])
     }
 
     searchText = searchText.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    for (var key in accentsReplace) {
+      if (accentsReplace.hasOwnProperty(key)) {
+        searchText = searchText.replace(accentsReplace[key], key);
+      }
+    }
 
     if (!searchText.length) {
       return false;
@@ -532,6 +547,12 @@ angular.module('myApp.services', [])
         fullTexts = searchIndex.fullTexts;
 
     query = query.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    for (var key in accentsReplace) {
+      if (accentsReplace.hasOwnProperty(key)) {
+        query = query.replace(accentsReplace[key], key);
+      }
+    }
 
     var queryWords = query.split(' '),
         foundObjs = false,
