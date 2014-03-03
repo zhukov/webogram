@@ -21,7 +21,7 @@ Here are some screenshots of the interface:
 
 ### Implemented functionality list
 
-* Sign in by phone number + SMS code (no calls supported yet)
+* Sign in by phone number + SMS code, or phone call
 * View list of existings chats (up-posting) with infinite scrolling
 * View messages history for each chat/group (bottom-posting) with infinite scrolling
 * View brief profile info
@@ -33,17 +33,21 @@ Here are some screenshots of the interface:
 * Send plain-text messages to user or group
 * Send files (photos or documents) via attach icon or drag'n'drop
 * Desktop notifications
-
-
-### Unsupported at the moment
-
-* Secret chats
 * Create new group
-* Edit group photo/title/participants
+* Edit group participants
 * Settings
 * Edit profile/userpic
 * Contacts
 * Edit, delete, forward messsages
+
+
+### Unsupported at the moment
+
+* Registration
+* Contacts add/edit
+* Secret chats
+* Edit group photo/title
+* Search messages
 * a lot more...
 
 
@@ -120,7 +124,7 @@ $ git fetch upstream
 * Once the new feature is approved or the problem confirmed, go to your local copy and create a new branch to work on it. Use a descriptive name for it, include the issue number for reference.
 
 ``$ git checkout -b improve-contacts-99``
-    
+
 * Do your coding and push it to your fork. Include as few commits as possible (one should be enough) and a good description. Always include a reference to the issue with "Fix #number".
 
 ```
@@ -130,7 +134,7 @@ $ git push origin improve-contacts-99
 ```
 
 * Do a new pull request from your "improve-contacts-99" branch to webogram "master".
-    
+
 #### How do changes suggested on a pull request
 
 Some times when you do a PR, you will be asked to correct some code. You can do it on your work branch and commit normally, PR will be automatically updated.
