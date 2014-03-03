@@ -795,7 +795,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('ChatModalController', function ($scope, $timeout, $rootScope, AppUsersManager, AppChatsManager, MtpApiManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService) {
+  .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
 
@@ -828,39 +828,34 @@ angular.module('myApp.controllers', [])
       });
     });
 
+    function onStatedMessage (statedMessage) {
+      AppUsersManager.saveApiUsers(statedMessage.users);
+      AppChatsManager.saveApiChats(statedMessage.chats);
+
+      if (ApiUpdatesManager.saveSeq(statedMessage.seq)) {
+        ApiUpdatesManager.saveUpdate({
+          _: 'updateNewMessage',
+          message: statedMessage.message,
+          pts: statedMessage.pts
+        });
+      }
+
+      $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+    }
+
 
     $scope.leaveGroup = function () {
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
-      }).then(function (result) {
-        if (ApiUpdatesManager.saveSeq(result.seq)) {
-          ApiUpdatesManager.saveUpdate({
-            _: 'updateNewMessage',
-            message: result.message,
-            pts: result.pts
-          });
-        }
-
-        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
-      });
+      }).then(onStatedMessage);
     };
 
     $scope.returnToGroup = function () {
       MtpApiManager.invokeApi('messages.addChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
-      }).then(function (result) {
-        if (ApiUpdatesManager.saveSeq(result.seq)) {
-          ApiUpdatesManager.saveUpdate({
-            _: 'updateNewMessage',
-            message: result.message,
-            pts: result.pts
-          });
-        }
-
-        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
-      });
+      }).then(onStatedMessage);
     };
 
 
@@ -892,21 +887,6 @@ angular.module('myApp.controllers', [])
 
         $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
       });
-
-      MtpApiManager.invokeApi('messages.addChatUser', {
-        chat_id: $scope.chatID,
-        user_id: {_: 'inputUserSelf'}
-      }).then(function (result) {
-        if (ApiUpdatesManager.saveSeq(result.seq)) {
-          ApiUpdatesManager.saveUpdate({
-            _: 'updateNewMessage',
-            message: result.message,
-            pts: result.pts
-          });
-        }
-
-        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
-      });
     };
 
     $scope.kickFromGroup = function (userID) {
@@ -917,17 +897,7 @@ angular.module('myApp.controllers', [])
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserForeign', user_id: userID, access_hash: user.access_hash || '0'}
-      }).then(function (result) {
-        if (ApiUpdatesManager.saveSeq(result.seq)) {
-          ApiUpdatesManager.saveUpdate({
-            _: 'updateNewMessage',
-            message: result.message,
-            pts: result.pts
-          });
-        }
-
-        $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
-      });
+      }).then(onStatedMessage);
     };
 
 
@@ -941,6 +911,54 @@ angular.module('myApp.controllers', [])
       });
 
     };
+
+
+    $scope.photo = {};
+
+    $scope.$watch('photo.file', onPhotoSelected);
+
+    function onPhotoSelected (photo) {
+      if (!photo || !photo.hasOwnProperty('name')) {
+        return;
+      }
+      $scope.photo.updating = true;
+      MtpApiFileManager.uploadFile(photo).then(function (inputFile) {
+        MtpApiManager.invokeApi('messages.editChatPhoto', {
+          chat_id: $scope.chatID,
+          photo: {
+            _: 'inputChatUploadedPhoto',
+            file: inputFile,
+            crop: {_: 'inputPhotoCropAuto'}
+          }
+        }).then(function (updateResult) {
+          onStatedMessage(updateResult);
+          $scope.photo.updating = false;
+        });
+      });
+    };
+
+    $scope.deletePhoto = function () {
+      $scope.photo.updating = true;
+      MtpApiManager.invokeApi('messages.editChatPhoto', {
+        chat_id: $scope.chatID,
+        photo: {_: 'inputChatPhotoEmpty'}
+      }).then(function (updateResult) {
+        onStatedMessage(updateResult);
+        $scope.photo.updating = false;
+      });
+    };
+
+    $scope.editTitle = function () {
+      var scope = $rootScope.$new();
+      scope.chatID = $scope.chatID;
+
+      $modal.open({
+        templateUrl: 'partials/chat_edit_modal.html?3',
+        controller: 'ChatEditModalController',
+        scope: scope,
+        windowClass: 'contacts_modal_window'
+      });
+    }
 
   })
 
@@ -1198,4 +1216,38 @@ angular.module('myApp.controllers', [])
       $modalInstance.dismiss();
     };
 
+  })
+
+  .controller('ChatEditModalController', function ($scope, $modalInstance, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, ApiUpdatesManager) {
+
+    var chat = AppChatsManager.getChat($scope.chatID);
+    $scope.group = {name: chat.title};
+
+    $scope.updateGroup = function () {
+      if (!$scope.group.name) {
+        return;
+      }
+      if ($scope.group.name == chat.title) {
+        return $modalInstance.close();
+      }
+
+      return MtpApiManager.invokeApi('messages.editChatTitle', {
+        chat_id: $scope.chatID,
+        title: $scope.group.name
+      }).then(function (editResult) {
+        AppUsersManager.saveApiUsers(editResult.users);
+        AppChatsManager.saveApiChats(editResult.chats);
+
+        if (ApiUpdatesManager.saveSeq(editResult.seq)) {
+          ApiUpdatesManager.saveUpdate({
+            _: 'updateNewMessage',
+            message: editResult.message,
+            pts: editResult.pts
+          });
+        }
+
+        var peerString = AppChatsManager.getChatString($scope.chatID);
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
+      });
+    };
   })

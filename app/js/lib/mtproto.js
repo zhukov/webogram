@@ -1797,7 +1797,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
   };
 
   MtpNetworker.prototype.toggleOffline = function(enabled) {
-    console.log('toggle ', enabled, this.dcID, this.iii);
+    // console.log('toggle ', enabled, this.dcID, this.iii);
     if (this.offline !== undefined && this.offline == enabled) {
       return false;
     }

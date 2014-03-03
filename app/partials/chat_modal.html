@@ -7,15 +7,34 @@
 
   <div class="modal-body">
 
-    <div class="chat_modal_image_wrap pull-left">
-      <img
-        class="chat_modal_image"
-        my-load-thumb
-        thumb="chatFull.thumb"/>
+    <div class="chat_modal_photo_wrap pull-left">
+
+      <div class="chat_modal_photo">
+        <img
+          class="user_modal_image"
+          my-load-thumb
+          thumb="chatFull.thumb"
+        />
+        <div class="chat_modal_photo_change_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+          <div ng-if="photo.updating" class="chat_modal_photo_loading">Updating<span my-typing-dots></span></div>
+          <div ng-if="!photo.updating">
+            <div class="chat_modal_photo_update_link">
+              <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+              Update photo
+            </div>
+            <a ng-if="chatFull.thumb.location" href="" ng-click="deletePhoto()" class="chat_modal_photo_delete_link">Delete photo</a>
+          </div>
+        </div>
+      </div>
+
     </div>
 
+
     <div class="chat_modal_info_wrap clearfix">
-      <h4 class="chat_modal_header" ng-bind-html="chatFull.chat.rTitle"></h4>
+      <h4 class="chat_modal_header">
+        <a href="" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left" ng-click="editTitle()" ng-bind-html="chatFull.chat.rTitle"></a>
+        <span ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.left" ng-bind-html="chatFull.chat.rTitle"></span>
+      </h4>
       <p class="chat_modal_members_count" ng-if="chatFull.chat.participants_count > 0">
         <ng-pluralize count="chatFull.chat.participants_count"
                          when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">

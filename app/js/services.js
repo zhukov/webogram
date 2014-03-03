@@ -120,6 +120,7 @@ angular.module('myApp.services', [])
 
 .service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager) {
   var users = {},
+      cachedPhotoLocations = {},
       contactsFillPromise,
       contactsIndex = SearchIndexManager.createIndex();
 
@@ -198,7 +199,11 @@ angular.module('myApp.services', [])
     if (users[apiUser.id] === undefined) {
       users[apiUser.id] = apiUser;
     } else {
-      angular.extend(users[apiUser.id], apiUser);
+      safeReplaceObject(users[apiUser.id], apiUser);
+    }
+
+    if (cachedPhotoLocations[apiUser.id] !== undefined) {
+      safeReplaceObject(cachedPhotoLocations[apiUser.id], apiUser && apiUser.photo && apiUser.photo.photo_small || {empty: true});
     }
   };
 
@@ -222,9 +227,13 @@ angular.module('myApp.services', [])
       }
     };
 
+    if (cachedPhotoLocations[id] === undefined) {
+      cachedPhotoLocations[id] = user && user.photo && user.photo.photo_small || {empty: true};
+    }
+
     return {
       placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
-      location: user && user.photo && user.photo.photo_small
+      location: cachedPhotoLocations[id]
     };
   }
 
@@ -298,7 +307,12 @@ angular.module('myApp.services', [])
       case 'updateUserPhoto':
         var userID = update.user_id;
         if (users[userID]) {
-          users[userID].photo = update.photo;
+          safeReplaceObject(users[userID].photo, update.photo);
+
+          if (cachedPhotoLocations[userID] !== undefined) {
+            safeReplaceObject(cachedPhotoLocations[userID], update.photo && update.photo.photo_small || {empty: true});
+          }
+
           $rootScope.$broadcast('user_update', userID);
         }
         break;
@@ -321,7 +335,8 @@ angular.module('myApp.services', [])
 })
 
 .service('AppChatsManager', function ($rootScope, $modal, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
-  var chats = {};
+  var chats = {},
+      cachedPhotoLocations = {};
 
   function saveApiChats (apiChats) {
     angular.forEach(apiChats, saveApiChat);
@@ -335,7 +350,11 @@ angular.module('myApp.services', [])
     if (chats[apiChat.id] === undefined) {
       chats[apiChat.id] = apiChat;
     } else {
-      angular.extend(chats[apiChat.id], apiChat);
+      safeReplaceObject(chats[apiChat.id], apiChat);
+    }
+
+    if (cachedPhotoLocations[apiChat.id] !== undefined) {
+      safeReplaceObject(cachedPhotoLocations[apiChat.id], apiChat && apiChat.photo && apiChat.photo.photo_small || {empty: true});
     }
   };
 
@@ -350,9 +369,13 @@ angular.module('myApp.services', [])
   function getChatPhoto(id, placeholder) {
     var chat = getChat(id);
 
+    if (cachedPhotoLocations[id] === undefined) {
+      cachedPhotoLocations[id] = chat && chat.photo && chat.photo.photo_small || {empty: true};
+    }
+
     return {
       placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 4) + 1)+'@2x.png',
-      location: chat && chat.photo && chat.photo.photo_small
+      location: cachedPhotoLocations[id]
     };
   }
 

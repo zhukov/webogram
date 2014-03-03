@@ -502,14 +502,19 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link (scope, element, attrs) {
       var counter = 0;
 
-      var cachedSrc = MtpApiFileManager.getCachedFile(scope.thumb && scope.thumb.location);
+      var cachedSrc = MtpApiFileManager.getCachedFile(
+        scope.thumb &&
+        scope.thumb.location &&
+        !scope.thumb.location.empty
+      );
+
       if (cachedSrc) {
         element.attr('src', cachedSrc);
       }
 
-      scope.$watch('thumb.location', function (newLocation) {
+      scope.$watchCollection('thumb.location', function (newLocation) {
         var counterSaved = ++counter;
-        if (!newLocation) {
+        if (!newLocation || newLocation.empty) {
           element.attr('src', scope.thumb && scope.thumb.placeholder || 'img/blank.gif');
           return;
         }

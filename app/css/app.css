@@ -1529,13 +1529,46 @@ img.img_fullsize {
 .chat_modal_wrap .modal-body {
   padding: 23px 25px 15px;
 }
-.chat_modal_image_wrap {
+.chat_modal_photo_wrap {
   width: 120px;
   margin-right: 22px;
 }
-.chat_modal_image {
+.chat_modal_photo {
+  position: relative;
+  overflow: hidden;
+}
+.chat_modal_photo_change_wrap {
+  background: rgba(0,0,0,0.6);
+  padding: 2px 5px;
+  position: absolute;
+  opacity: 0;
+  bottom: -30px;
+
+  -webkit-transition: all ease-in-out 0.2s;
+  transition: all ease-in-out 0.2s;
   width: 120px;
-  height: 120px;
+}
+.chat_modal_photo:hover .chat_modal_photo_change_wrap {
+  bottom: 0;
+  opacity: 1;
+}
+
+.chat_modal_photo_update_link,
+.chat_modal_photo_delete_link,
+.chat_modal_photo_loading {
+  display: block;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+  padding: 2px 0;
+}
+.chat_modal_photo_update_link:hover,
+.chat_modal_photo_delete_link:hover {
+  color: #FFF;
+  text-decoration: none;
+}
+.chat_modal_photo_update_link {
+  position: relative;
+  overflow: hidden;
 }
 .chat_modal_header {
   margin: 0 0 5px;
