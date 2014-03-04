@@ -187,22 +187,6 @@ fieldset[disabled] .btn-tg.active {
 }
 
 
-
-
-
-.icon-back {
-  display: inline-block;
-  width: 10px;
-  height: 18px;
-  vertical-align: text-top;
-
-  background: url(../img/icons/IconsetW.png?1) -15px -419px no-repeat;
-  background-size: 42px 460px;
-}
-.is_1x .icon-back {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
-}
-
 .tg_page_head .navbar > .container .navbar-brand:hover {
   opacity: 1;
 }
@@ -241,6 +225,23 @@ fieldset[disabled] .btn-tg.active {
   padding-top: 15px;
   padding-bottom: 15px;
 }
+.icon-back {
+  display: inline-block;
+  width: 10px;
+  height: 18px;
+  vertical-align: text-top;
+
+  background: url(../img/icons/IconsetW.png?1) -15px -419px no-repeat;
+  background-size: 42px 560px;
+  opacity: 0.6;
+}
+.is_1x .icon-back {
+  background-image: url(../img/icons/IconsetW_1x.png?2);
+}
+.tg_page_head .navbar-quick-nav a:hover .icon-back {
+  opacity: 1;
+}
+
 
 .tg_progress {
   height: 12px;
@@ -486,7 +487,7 @@ fieldset[disabled] .btn-tg.active {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -510,7 +511,7 @@ fieldset[disabled] .btn-tg.active {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -709,6 +710,7 @@ a.im_dialog:hover .im_dialog_date {
 
   position: relative;
   z-index: 2;
+  min-height: 44px;
 }
 .im_history_panel {
   padding: 10px 4px 0;
@@ -762,7 +764,7 @@ a.im_dialog:hover .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png?1) -17px -444px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -961,7 +963,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png?1) -14px -389px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -989,7 +991,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -229px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1041,7 +1043,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -277px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1206,16 +1208,37 @@ span.emoji {
   *display: inline;
   height: 18px;
   width: 18px;
-  background-size: 18px;
   background-repeat: no-repeat;
   text-indent: -9999px;
+}
+
+/* widths and heights calculated according to spritesheet dimensions and icon size */
+.emoji-spritesheet-0 {
+  background-size: 486px 126px;
+  background-image: url('../img/emojisprite_0.png');
+}
+.emoji-spritesheet-1 {
+  background-size: 522px 72px;
+  background-image: url('../img/emojisprite_1.png');
+}
+.emoji-spritesheet-2 {
+  background-size: 594px 126px;
+  background-image: url('../img/emojisprite_2.png');
+}
+.emoji-spritesheet-3 {
+  background-size: 612px 54px;
+  background-image: url('../img/emojisprite_3.png');
+}
+.emoji-spritesheet-4 {
+  background-size: 612px 108px;
+  background-image: url('../img/emojisprite_4.png');
 }
 
 .im_history_not_selected {
   text-align: center;
   color: #999;
   font-size: 1.5em;
-  padding: 200px 50px 0;
+  padding: 200px 50px 200px;
 }
 
 .im_send_panel_wrap {
@@ -1279,7 +1302,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -12px -68px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1307,7 +1330,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -10px -4px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1357,7 +1380,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -9px -132px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -1445,6 +1468,7 @@ img.img_fullsize {
 .settings_profile_photo_wrap {
   width: 120px;
   margin-right: 22px;
+  margin-bottom: 15px;
 }
 .settings_profile_photo {
   position: relative;
@@ -1771,7 +1795,7 @@ img.img_fullsize {
 
 .emoji-menu-tail {
   background: url(../img/icons/IconsetW.png?1) -14px -268px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
@@ -1849,8 +1873,8 @@ img.img_fullsize {
 .settings_profile_first_name,
 .settings_profile_last_name {
   width: 180px;
-  margin-bottom: 10px;
   float: left;
+  margin-bottom: 0;
 }
 .settings_profile_first_name label,
 .settings_profile_last_name label {
@@ -1858,18 +1882,23 @@ img.img_fullsize {
 }
 .settings_profile_first_name {
   margin-right: 22px;
+  margin-bottom: 10px;
 }
 .settings_profile_last_name {
   margin-right: 10px;
+  margin-bottom: 15px;
 }
 .settings_profile_save {
-  padding-top: 23px;
+  padding-top: 21px;
   float: left;
 }
 .settings_profile_save_btn {
   width: 50px;
 }
 
+.settings_profile_edit_form {
+  margin-bottom: 0;
+}
 .settings_profile_edit_form input {
   font-size: 12px;
   line-height: normal;
@@ -1914,7 +1943,7 @@ img.img_fullsize {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -1938,7 +1967,7 @@ img.img_fullsize {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2014,22 +2043,28 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   top: 22px;
   width: 17px;
   height: 15px;
-  /*margin: 10px 0 0 -75px;*/
-  background: url(../img/icons/IconsetW.png?1) -13px -343px no-repeat;
-  background-size: 42px 460px;
+  background: url(../img/icons/IconsetW.png?1) -13px -366px no-repeat;
+  background-size: 42px 560px;
+  opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
   background-image: url(../img/icons/IconsetW_1x.png?2);
 }
-
-.contacts_modal_members_list .active .icon-contact-tick,
 .contacts_modal_members_list a.contacts_modal_contact:hover .icon-contact-tick {
-  background-position: -13px -367px;
-  opacity: 0.5;
+  background-position: -13px -366px;
+  opacity: 1;
 }
 .contacts_modal_members_list .active .icon-contact-tick {
-  opacity: 1 !important;
+  background-position: -13px -458px !important;
+  opacity: 1;
 }
+.contacts_modal_members_list .disabled {
+  pointer-events: none;
+}
+.contacts_modal_members_list .disabled .icon-contact-tick {
+  display: none;
+}
+
 
 .contacts_modal_panel {
   padding-top: 10px;
@@ -2043,6 +2078,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 
 /* Messages edit panel */
 .im_edit_panel_wrap {
+  display: none;
   border-top: 1px solid #EEE;
   padding: 5px 5px;
 }
@@ -2089,7 +2125,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 15px;
 
   background: url(../img/icons/IconsetW.png?1) -15px -319px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
 }
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -2133,7 +2169,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 15px;
   margin: 10px 0 0 -75px;
   background: url(../img/icons/IconsetW.png?1) -13px -343px no-repeat;
-  background-size: 42px 460px;
+  background-size: 42px 560px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png?2);

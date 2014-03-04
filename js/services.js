@@ -2238,6 +2238,7 @@ angular.module('myApp.services', [])
   var emojiUtf = [],
       emojiMap = {},
       emojiData = Config.Emoji,
+      emojiIconSize = 18,
       emojiCode;
 
   for (emojiCode in emojiData) {
@@ -2259,8 +2260,21 @@ angular.module('myApp.services', [])
       }).
       replace(/</g, '&lt;').
       replace(/>/g, '&gt;');
-  };
+  }
 
+  function getEmojiSpritesheetCoords(emojiCode) {
+    var i, row, column, totalColumns;
+    for (var cat = 0; cat < Config.EmojiCategories.length; cat++) {
+      totalColumns = Config.EmojiCategorySpritesheetDimens[cat][1];
+      i = Config.EmojiCategories[cat].indexOf(emojiCode);
+      if (i > -1) {
+        row = Math.floor(i / totalColumns);
+        column = (i % totalColumns);
+        return { category: cat, row: row, column: column };
+      }
+    }
+    return null;
+  }
 
   function wrapRichText(text, options) {
     if (!text || !text.length) {
@@ -2275,9 +2289,8 @@ angular.module('myApp.services', [])
         raw = text,
         html = [],
         url,
-        emojiTitle,
+        emojiStyle = '',
         emojiFound = false;
-
 
     while ((match = raw.match(regExp))) {
       // console.log(2, match);
@@ -2317,15 +2330,15 @@ angular.module('myApp.services', [])
 
         if (emojiCode = emojiMap[match[6]]) {
           emojiFound = true;
-          emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
+          var emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
+          var emojiCoords = getEmojiSpritesheetCoords(emojiCode);
+          var xoffset = -(emojiIconSize * emojiCoords.column);
+          var yoffset = -(emojiIconSize * emojiCoords.row);
+          emojiStyle = 'background-position:' + xoffset + 'px ' + yoffset + 'px;';
           html.push(
-            '<span class="emoji emoji-file-',
-            encodeEntities(emojiCode),
-            '" title="',
-            emojiTitle,
-            '">:',
-            emojiTitle,
-            ':</span>'
+            '<span class="emoji emoji-spritesheet-'+emojiCoords.category+'" ',
+            'title="', emojiTitle, '">',
+            ':', emojiTitle, ':</span>'
           );
         } else {
           html.push(encodeEntities(match[6]));
@@ -2341,8 +2354,8 @@ angular.module('myApp.services', [])
     // console.log(3, text, html);
 
     if (emojiFound) {
-      text = text.replace(/<span class="emoji emoji-file-([0-9a-f]+?)"(.+?)<\/span>/g,
-                          '<span class="emoji" style="background-image: url(\'vendor/gemoji/images/$1.png\')"$2</span>');
+      text = text.replace(/<span class="emoji emoji-spritesheet-([0-9]+?)"(.+?)<\/span>/g,
+                          '<span class="emoji emoji-spritesheet-$1" style="'+emojiStyle+'" $2</span>');
     }
 
     // console.log(4, text, html);

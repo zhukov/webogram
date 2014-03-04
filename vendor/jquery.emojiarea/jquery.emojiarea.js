@@ -526,6 +526,7 @@
 		});
 		this.currentCategory = category;
 		this.load(category);
+    this.$itemsWrap.nanoScroller({ scroll: 'top' });
 	};
 	/*! MODIFICATION END */
 
