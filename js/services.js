@@ -277,15 +277,7 @@ angular.module('myApp.services', [])
       templateUrl: 'partials/user_modal.html?2',
       controller: 'UserModalController',
       scope: scope,
-      windowClass: 'user_modal_window',
-      resolve: {
-        userFull: MtpApiManager.invokeApi('users.getFullUser', {
-          id: getUserInput(userID)
-        }).then(function (result) {
-          saveApiUser(result.user);
-          return result;
-        })
-      }
+      windowClass: 'user_modal_window'
     });
   }
 
