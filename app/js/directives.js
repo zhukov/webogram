@@ -513,6 +513,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       scope.$watchCollection('thumb.location', function (newLocation) {
+        // console.log('new loc', newLocation, arguments);
         var counterSaved = ++counter;
         if (!newLocation || newLocation.empty) {
           element.attr('src', scope.thumb && scope.thumb.placeholder || 'img/blank.gif');
