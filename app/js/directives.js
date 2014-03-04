@@ -89,18 +89,19 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        $(element).css({
-          height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 50) - 72
-        });
-        updateScroller();
         if (!headWrap) {
           headWrap = $('.tg_page_head')[0];
         }
+        $(element).css({
+          height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - 72
+        });
+        updateScroller();
       }
 
       $($window).on('resize', updateSizes);
 
       updateSizes();
+      setTimeout(updateSizes, 1000);
     };
 
   })
@@ -286,7 +287,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $(sendForm).height()
         });
 
-        var historyH = $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - headWrap.offsetHeight - footer.offsetHeight;
+        var historyH = $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - footer.offsetHeight;
         $(historyWrap).css({
           height: historyH
         });
@@ -306,6 +307,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $($window).on('resize', updateSizes);
 
+      updateSizes();
       onContentLoaded(updateSizes);
     }
 

@@ -22,6 +22,7 @@
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
       <div ng-if="state.notSelected" class="im_history_not_selected">No history to display</div>
+      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected">Loading history<span my-typing-dots></span></div>
 
       <div ng-if="state.loaded">
         <div my-history class="im_history_col">
