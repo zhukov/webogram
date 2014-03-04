@@ -1206,9 +1206,30 @@ span.emoji {
   *display: inline;
   height: 18px;
   width: 18px;
-  background-size: 18px;
   background-repeat: no-repeat;
   text-indent: -9999px;
+}
+
+/* widths and heights calculated according to spritesheet dimensions and icon size */
+.emoji-spritesheet-0 {
+  background-size: 486px 126px;
+  background-image: url('../img/emojisprite_0.png');
+}
+.emoji-spritesheet-1 {
+  background-size: 522px 72px;
+  background-image: url('../img/emojisprite_1.png');
+}
+.emoji-spritesheet-2 {
+  background-size: 594px 126px;
+  background-image: url('../img/emojisprite_2.png');
+}
+.emoji-spritesheet-3 {
+  background-size: 612px 54px;
+  background-image: url('../img/emojisprite_3.png');
+}
+.emoji-spritesheet-4 {
+  background-size: 612px 108px;
+  background-image: url('../img/emojisprite_4.png');
 }
 
 .im_history_not_selected {
