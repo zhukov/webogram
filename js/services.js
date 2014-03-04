@@ -192,7 +192,7 @@ angular.module('myApp.services', [])
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || 'DELETED';
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || 'DELETED';
     }
-    apiUser.sortName = $.trim((apiUser.last_name || '') + ' ' + apiUser.first_name);
+    apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
     apiUser.sortStatus = apiUser.status && (apiUser.status.expires || apiUser.status.was_online) || 0;
 
 
@@ -511,6 +511,7 @@ angular.module('myApp.services', [])
   return {
     createIndex: createIndex,
     indexObject: indexObject,
+    cleanSearchText: cleanSearchText,
     search: search
   };
 
@@ -521,18 +522,24 @@ angular.module('myApp.services', [])
     }
   }
 
+  function cleanSearchText (text) {
+    text = text.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    for (var key in accentsReplace) {
+      if (accentsReplace.hasOwnProperty(key)) {
+        text = text.replace(accentsReplace[key], key);
+      }
+    }
+
+    return text;
+  }
+
   function indexObject (id, searchText, searchIndex) {
     if (searchIndex.fullTexts[id] !== undefined) {
       return false;
     }
 
-    searchText = searchText.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
-
-    for (var key in accentsReplace) {
-      if (accentsReplace.hasOwnProperty(key)) {
-        searchText = searchText.replace(accentsReplace[key], key);
-      }
-    }
+    searchText = cleanSearchText(searchText);
 
     if (!searchText.length) {
       return false;
@@ -561,13 +568,7 @@ angular.module('myApp.services', [])
     var shortIndexes = searchIndex.shortIndexes,
         fullTexts = searchIndex.fullTexts;
 
-    query = query.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
-
-    for (var key in accentsReplace) {
-      if (accentsReplace.hasOwnProperty(key)) {
-        query = query.replace(accentsReplace[key], key);
-      }
-    }
+    query = cleanSearchText(query);
 
     var queryWords = query.split(' '),
         foundObjs = false,
