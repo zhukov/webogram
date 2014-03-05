@@ -794,6 +794,19 @@ a.im_dialog:hover .im_dialog_date {
   -webkit-user-select: text;
 }
 
+.im_history_messages_none.ng-hide {
+  display: none;
+}
+
+.im_history_messages_none {
+  display: block;
+  padding: 100px 50px 0;
+
+  text-align: center;
+  color: #999;
+  font-size: 1.5em;
+}
+
 .im_history_to_bottom {
   position: relative;
 }
