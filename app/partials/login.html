@@ -11,7 +11,7 @@
       <label class="control-label" for="phone_number" ng-if="error.field == 'phone'">Incorrect phone number</label>
       <input type="tel" class="form-control" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
     </div>
-    <button class="btn btn-tg btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit">
+    <button class="btn btn-success btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit">
       {{progress.enabled ? 'Generating keys...' : 'Next'}}
     </button>
   </form>
@@ -31,7 +31,7 @@
       <input type="number" maxlength="5" class="form-control" name="phone_code" ng-model="credentials.phone_code" placeholder="Enter your code" required>
     </div>
 
-    <button class="btn btn-tg btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled">
+    <button class="btn btn-success btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled">
       {{progress.enabled ? 'Checking code...' : 'Sign in'}}
     </button>
   </form>

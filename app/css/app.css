@@ -71,47 +71,71 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 
-.btn-tg {
+.btn-success {
   color: #ffffff;
   background-color: #6AC065;
   border-color: #6AC065;
 }
 
-.btn-tg:hover,
-.btn-tg:focus,
-.btn-tg:active,
-.btn-tg.active,
-.open .dropdown-toggle.btn-tg {
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active,
+.btn-success.active,
+.open .dropdown-toggle.btn-success {
   color: #ffffff;
   background-color: #61b75b;
   border-color: #61b75b;
 }
 
-.btn-tg:active,
-.btn-tg.active,
-.open .dropdown-toggle.btn-tg {
+.btn-success:active,
+.btn-success.active,
+.open .dropdown-toggle.btn-success {
   background: #5aaf54;
   background-image: none;
 }
 
-.btn-tg.disabled,
-.btn-tg[disabled],
-fieldset[disabled] .btn-tg,
-.btn-tg.disabled:hover,
-.btn-tg[disabled]:hover,
-fieldset[disabled] .btn-tg:hover,
-.btn-tg.disabled:focus,
-.btn-tg[disabled]:focus,
-fieldset[disabled] .btn-tg:focus,
-.btn-tg.disabled:active,
-.btn-tg[disabled]:active,
-fieldset[disabled] .btn-tg:active,
-.btn-tg.disabled.active,
-.btn-tg[disabled].active,
-fieldset[disabled] .btn-tg.active {
-  color: #DDD;
-  background-color: #999;
-  border-color: #999;
+
+.btn-danger {
+  color: #ffffff;
+  background-color: #c05f5a;
+  border-color: #c05f5a;
+}
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active,
+.btn-danger.active,
+.open .dropdown-toggle.btn-danger {
+  color: #ffffff;
+  background-color: #ab5450;
+  border-color: #ab5450;
+}
+.btn-danger:active,
+.btn-danger.active,
+.open .dropdown-toggle.btn-danger {
+  background: #a24f4b;
+  background-image: none;
+}
+
+
+.btn-primary {
+  color: #ffffff;
+  background-color: #598db5;
+  border-color: #598db5;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.open .dropdown-toggle.btn-primary {
+  color: #ffffff;
+  background-color: #4f84ac;
+  border-color: #4f84ac;
+}
+.btn-primary:active,
+.btn-primary.active,
+.open .dropdown-toggle.btn-primary {
+  background: #4c799c;
+  background-image: none;
 }
 
 .tg_page_head .navbar {
@@ -1139,15 +1163,15 @@ div.im_message_video_thumb {
 }
 .icon-message-status {
   background: #43A4DB;
-  border: 1px solid #FFF;
+  border: 0;
   display: block;
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   border-radius: 7px;
   overflow: hidden;
   position: absolute;
-  margin-left: -27px;
-  margin-top: 14px;
+  margin-left: -26px;
+  margin-top: 13px;
   opacity: 0;
 }
 .icon-message-status-unread {
@@ -2087,8 +2111,13 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 /* Messages edit panel */
 .im_edit_panel_wrap {
   display: none;
-  border-top: 1px solid #EEE;
-  padding: 5px 5px;
+  padding: 10px 0 34px;
+  margin: 0 24px 0 12px;
+}
+.im_edit_panel_border {
+  display: block;
+  margin: 0 0 34px 3px;
+  border-bottom: 1px solid #EEE;
 }
 .im_edit_panel_wrap_loaded {
   display: block;
@@ -2099,28 +2128,37 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   /*width: 652px;*/
   width: 100%;
 }
-.im_edit_delete_link,
-.im_edit_forward_link,
+.im_edit_flush_link,
 .im_edit_cancel_link {
   display: block;
-  padding: 8px 17px;
+  padding: 6px 17px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 6px 6px;
 }
 .im_edit_cancel_link {
   float: left;
 }
-.im_edit_delete_link,
-.im_edit_forward_link {
+.im_edit_flush_link {
   float: right;
 }
-
-.im_edit_delete_link:hover,
-.im_edit_forward_link:hover,
+.im_edit_flush_link:hover,
 .im_edit_cancel_link:hover {
   background: #f2f6fa;
   text-decoration: none;
 }
-.im_edit_delete_link {
-  line-height: 0;
+
+.im_edit_selected_actions {
+  text-align: center;
+}
+.im_edit_delete_btn,
+.im_edit_forward_btn {
+  border-radius: 2px;
+  padding: 5px 17px;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 18px;
+  margin: 6px 6px;
 }
 
 .im_edit_panel_title {
@@ -2141,11 +2179,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png?2);
 }
-
-.im_message_date:hover {
-  cursor: pointer;
-  text-decoration: underline;
-}
 .im_message_selected {
   background: #f2f6fa;
 }
@@ -2162,39 +2195,44 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   color: #91a6ba;
 }
 
-.im_history_selectable .im_message_date:hover {
-  text-decoration: none;
-}
-
 .im_message_wrap {
   max-width: 526px;
   padding: 0 15px;
   margin: 0 auto;
   position: relative;
 }
+.im_content_message_select_area {
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  width: 112px;
+  height: 50px;
+  margin: -8px 0 0 -112px;
+}
+@media (min-width: 1024px) {
+  .im_content_message_select_area {
+    display: block;
+  }
+}
 
 .icon-select-tick {
   display: none;
-  position: absolute;
-  width: 17px;
-  height: 15px;
-  margin: 10px 0 0 -75px;
-  background: url(../img/icons/IconsetW.png?1) -13px -343px no-repeat;
+  width: 25px;
+  height: 25px;
+  margin: 14px 0 0 40px;
+  background: url(../img/icons/IconsetW.png?1) -9px -516px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png?2);
 }
-
-@media (min-width: 1024px) {
-  .im_history_selectable .icon-select-tick {
-    display: inline-block;
-  }
+.im_history_selectable .icon-select-tick,
+.im_content_message_select_area:hover .icon-select-tick {
+  display: inline-block;
 }
-
 .im_message_selected .icon-select-tick,
 .im_history_selectable .im_message_outer_wrap:hover .icon-select-tick {
-  background-position: -13px -367px;
+  background-position: -9px -481px;
   opacity: 0.5;
 }
 .im_message_selected .icon-select-tick {
@@ -2261,6 +2299,21 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
     left: 0;
     right: 0;
     max-width: none;
+  }
+
+  .im_edit_panel_wrap {
+    margin: 0 5px;
+  }
+  .im_edit_flush_link,
+  .im_edit_cancel_link,
+  .im_edit_delete_btn,
+  .im_edit_forward_btn {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 6px 4px;
+  }
+  .im_edit_panel_wrap {
+    padding-bottom: 22px;
   }
 }
 

@@ -112,7 +112,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-
     function link (scope, element, attrs) {
       var searchWrap = $('.contacts_modal_search')[0],
           panelWrap = $('.contacts_modal_panel')[0],
@@ -150,7 +149,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
           panelWrap = $('.im_history_panel_wrap', element)[0],
-          sendPanelWrap = $('.im_send_panel_wrap', element)[0],
+          bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
           footer = $('.im_page_footer')[0],
@@ -246,21 +245,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       scope.$on('ui_panel_update', function () {
-        var h = $(historyWrap).height();
-        $(panelWrap).addClass('im_panel_to_top');
         onContentLoaded(function () {
-          $(panelWrap).removeClass('im_panel_to_top');
-          updateSizes(true);
-
-          var newH = $(historyWrap).height();
-
-          if (atBottom) {
-            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-            updateScroller();
-          } else {
-            scrollableWrap.scrollTop -= newH - h;
-            updateScroller();
-          }
+          updateSizes();
+          scope.$broadcast('ui_message_send');
         });
       });
 
@@ -283,11 +270,13 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       function updateSizes (heightOnly) {
-        $(sendFormWrap).css({
-          height: $(sendForm).height()
-        });
+        if ($(sendFormWrap).is(':visible')) {
+          $(sendFormWrap).css({
+            height: $(sendForm).height()
+          });
+        }
 
-        var historyH = $($window).height() - panelWrap.offsetHeight - sendPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - footer.offsetHeight;
+        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - footer.offsetHeight;
         $(historyWrap).css({
           height: historyH
         });

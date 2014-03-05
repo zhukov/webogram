@@ -7,3 +7,4 @@
 dist
 package_dist
 webogram*.zip
+*.sublime-workspace

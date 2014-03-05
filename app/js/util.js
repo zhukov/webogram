@@ -5,6 +5,11 @@
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
+var _logTimer = (new Date()).getTime();
+function dT () {
+  return '[' + (((new Date()).getTime() - _logTimer) / 1000).toFixed(3) + ']';
+}
+
 function checkClick (e, noprevent) {
   if (e.which == 1 && (e.ctrlKey || e.metaKey) || e.which == 2) {
     return true;
