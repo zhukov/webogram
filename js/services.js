@@ -2290,8 +2290,9 @@ angular.module('myApp.services', [])
         raw = text,
         html = [],
         url,
-        emojiStyle = '',
-        emojiFound = false;
+        emojiFound = false,
+        emojiTitle,
+        emojiCoords;
 
     while ((match = raw.match(regExp))) {
       // console.log(2, match);
@@ -2331,14 +2332,17 @@ angular.module('myApp.services', [])
 
         if (emojiCode = emojiMap[match[6]]) {
           emojiFound = true;
-          var emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
-          var emojiCoords = getEmojiSpritesheetCoords(emojiCode);
-          var xoffset = -(emojiIconSize * emojiCoords.column);
-          var yoffset = -(emojiIconSize * emojiCoords.row);
-          emojiStyle = 'background-position:' + xoffset + 'px ' + yoffset + 'px;';
+          emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
+          emojiCoords = getEmojiSpritesheetCoords(emojiCode);
           html.push(
-            '<span class="emoji emoji-spritesheet-'+emojiCoords.category+'" ',
-            'title="', emojiTitle, '">',
+            '<span class="emoji emoji-',
+            emojiCoords.category,
+            '-',
+            (emojiIconSize * emojiCoords.column),
+            '-',
+            (emojiIconSize * emojiCoords.row),
+            '" ',
+            'title="',emojiTitle, '">',
             ':', emojiTitle, ':</span>'
           );
         } else {
@@ -2355,8 +2359,8 @@ angular.module('myApp.services', [])
     // console.log(3, text, html);
 
     if (emojiFound) {
-      text = text.replace(/<span class="emoji emoji-spritesheet-([0-9]+?)"(.+?)<\/span>/g,
-                          '<span class="emoji emoji-spritesheet-$1" style="'+emojiStyle+'" $2</span>');
+      text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
+                          '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
     }
 
     // console.log(4, text, html);
