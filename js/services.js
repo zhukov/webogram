@@ -14,7 +14,8 @@ angular.module('myApp.services', [])
 .service('AppConfigManager', function ($q) {
   var testPrefix = window._testMode ? 't_' : '';
   var cache = {};
-  var useLs = !window.chrome || !chrome.storage || !chrome.storage.local;
+  var useCs = !!(window.chrome && chrome.storage && chrome.storage.local);
+  var useLs = !useCs && !!window.localStorage;
 
   function getValue() {
     var keys = Array.prototype.slice.call(arguments),
@@ -34,6 +35,9 @@ angular.module('myApp.services', [])
         var value = localStorage.getItem(key);
         value = (value === undefined || value === null) ? false : JSON.parse(value);
         result.push(cache[key] = value);
+      }
+      else if (!useCs) {
+        result.push(cache[key] = false);
       }
       else {
         allFound = false;
@@ -74,6 +78,10 @@ angular.module('myApp.services', [])
       return $q.when();
     }
 
+    if (!useCs) {
+      return $q.when();
+    }
+
     var deferred = $q.defer();
 
     chrome.storage.local.set(keyValues, function () {
@@ -99,6 +107,10 @@ angular.module('myApp.services', [])
         localStorage.removeItem(key);
       });
 
+      return $q.when();
+    }
+
+    if (!useCs) {
       return $q.when();
     }
 

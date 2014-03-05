@@ -58,7 +58,9 @@
     </div>
 
     <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
-      <i class="icon icon-select-tick"></i>
+      <div class="im_content_message_select_area">
+        <i class="icon icon-select-tick"></i>
+      </div>
 
       <a ng-click="historyMessage.send()" ng-if="historyMessage.error">
         <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>

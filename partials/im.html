@@ -78,18 +78,6 @@
 
             </div>
 
-            <div class="im_edit_panel_wrap clearfix" ng-show="selectActions" ng-class="{im_edit_panel_wrap_loaded: true}">
-              <a class="im_edit_delete_link" ng-click="selectedDelete()"><i class="icon icon-delete"></i></a>
-              <a class="im_edit_forward_link" ng-click="selectedForward()">Forward</a>
-              <a class="im_edit_cancel_link" ng-click="selectedCancel()">Cancel</a>
-              <h4 class="im_edit_panel_title">
-                <ng-pluralize count="selectedCount"
-                                 when="{'0': 'Select messages', 'one': '1 message', 'other': '{} messages'}">
-                </ng-pluralize>
-              </h4>
-            </div>
-
-
           </div>
 
           <div class="im_history_wrap nano">
@@ -114,51 +102,71 @@
 
           </div>
 
-          <div class="im_send_panel_wrap">
+          <div class="im_bottom_panel_wrap">
 
-            <div class="im_send_form_wrap1">
+            <div class="im_edit_panel_wrap clearfix" ng-show="selectActions" ng-class="{im_edit_panel_wrap_loaded: true}">
+              <div class="im_edit_panel_border"></div>
+              <a class="im_edit_flush_link" ng-click="selectedFlush()">
+                Clear History
+              </a>
+              <a class="im_edit_cancel_link" ng-click="selectedCancel()">
+                Cancel
+              </a>
+              <div class="im_edit_selected_actions">
+                <a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()">
+                  Delete <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
+                </a><a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()">
+                  Forward <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
+                </a>
+              </div>
+            </div>
 
-              <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
-                <div class="pull-right im_panel_peer_photo" ng-click="showPeerInfo()">
-                  <img
-                    class="im_panel_peer_photo"
-                    my-load-thumb
-                    thumb="historyPeer.photo"
-                  />
-                  <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
+            <div class="im_send_panel_wrap" ng-hide="selectActions">
+
+              <div class="im_send_form_wrap1">
+
+                <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
+                  <div class="pull-right im_panel_peer_photo" ng-click="showPeerInfo()">
+                    <img
+                      class="im_panel_peer_photo"
+                      my-load-thumb
+                      thumb="historyPeer.photo"
+                    />
+                    <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
+                  </div>
+                  <div class="pull-left im_panel_own_photo">
+                    <img
+                      class="im_panel_own_photo"
+                      my-load-thumb
+                      thumb="ownPhoto"
+                    />
+                  </div>
+                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
+                    <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
+                    <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
+
+                    <div class="im_media_attach pull-right">
+                      <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
+                      <i class="icon icon-camera"></i>
+                    </div>
+
+                    <div class="im_attach pull-right">
+                      <input type="file" class="im_attach_input" size="28" multiple="true" />
+                      <i class="icon icon-paperclip"></i>
+                    </div>
+
+
+                    <div class="im_emoji_btn pull-right">
+                      <i class="icon icon-emoji"></i>
+                    </div>
+
+                    <button type="submit" class="btn btn-success im_submit">Send</button>
+                  </form>
                 </div>
-                <div class="pull-left im_panel_own_photo">
-                  <img
-                    class="im_panel_own_photo"
-                    my-load-thumb
-                    thumb="ownPhoto"
-                  />
-                </div>
-                <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
-                  <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
-                  <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
 
-                  <div class="im_media_attach pull-right">
-                    <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
-                    <i class="icon icon-camera"></i>
-                  </div>
-
-                  <div class="im_attach pull-right">
-                    <input type="file" class="im_attach_input" size="28" multiple="true" />
-                    <i class="icon icon-paperclip"></i>
-                  </div>
-
-
-                  <div class="im_emoji_btn pull-right">
-                    <i class="icon icon-emoji"></i>
-                  </div>
-
-                  <button type="submit" class="btn btn-tg im_submit">Send</button>
-                </form>
               </div>
 
             </div>
-
 
           </div>
 

@@ -347,6 +347,7 @@ angular.module('myApp.controllers', [])
     $scope.selectedDelete = selectedDelete;
     $scope.selectedForward = selectedForward;
     $scope.selectedCancel = selectedCancel;
+    $scope.selectedFlush = selectedFlush;
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
     $scope.showPeerInfo = showPeerInfo;
@@ -478,7 +479,7 @@ angular.module('myApp.controllers', [])
     }
 
     function toggleMessage (messageID, target) {
-      if (!$scope.selectActions && !$(target).hasClass('im_message_date') && !$(target).hasClass('im_message_meta')) {
+      if (!$scope.selectActions && !$(target).hasClass('icon-select-tick') && !$(target).hasClass('im_content_message_select_area')) {
         return false;
       }
       if ($scope.selectedMsgs[messageID]) {
@@ -504,6 +505,15 @@ angular.module('myApp.controllers', [])
       $scope.selectActions = false;
       $scope.$broadcast('ui_panel_update');
     }
+
+    function selectedFlush () {
+      if (confirm('Are you sure? This can not be undone!') !== true) {
+        return false;
+      }
+      AppMessagesManager.flushHistory($scope.curDialog.inputPeer).then(function () {
+        selectedCancel();
+      });
+    };
 
     function selectedDelete () {
       if ($scope.selectedCount > 0) {
