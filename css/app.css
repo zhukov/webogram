@@ -2217,10 +2217,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 
 .icon-select-tick {
   display: none;
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
   margin: 14px 0 0 40px;
-  background: url(../img/icons/IconsetW.png?1) -9px -516px no-repeat;
+  background: url(../img/icons/IconsetW.png?1) -9px -515px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-select-tick {
@@ -2233,7 +2233,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .im_message_selected .icon-select-tick,
 .im_history_selectable .im_message_outer_wrap:hover .icon-select-tick,
 .im_content_message_select_area:hover .icon-select-tick {
-  background-position: -9px -481px;
+  background-position: -9px -480px;
   opacity: 0.5;
 }
 .im_message_selected .icon-select-tick {
