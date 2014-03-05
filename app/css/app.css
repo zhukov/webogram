@@ -1697,9 +1697,9 @@ img.img_fullsize {
 .emoji-menu {
   position: absolute;
   z-index: 999;
-  width: 206px;
-  margin-left: -100px;
-  margin-top: -233px;
+  width: 220px;
+  margin-left: -107px;
+  margin-top: -245px;
   overflow: hidden;
 
   border: 1px #dfdfdf solid;
@@ -1735,20 +1735,11 @@ img.img_fullsize {
 .emoji-menu-tabs .icon-smile {background-position: -9px -34px; }
 .emoji-menu-tabs .icon-smile-selected {background-position: -9px -5px; }
 
-.is_2x .emoji-menu-tabs .icon-smile {background-position: -9px -37px; }
-.is_2x .emoji-menu-tabs .icon-smile-selected {background-position: -9px -8px; }
-
 .emoji-menu-tabs .icon-flower {background-position: -9px -145px; }
 .emoji-menu-tabs .icon-flower-selected {background-position: -9px -118px; }
 
-.is_2x .emoji-menu-tabs .icon-flower {background-position: -9px -145px; }
-.is_2x .emoji-menu-tabs .icon-flower-selected {background-position: -9px -119px; }
-
 .emoji-menu-tabs .icon-bell {background-position: -9px -90px; }
 .emoji-menu-tabs .icon-bell-selected {background-position: -9px -62px; }
-
-.is_2x .emoji-menu-tabs .icon-bell {background-position: -9px -91px; }
-.is_2x .emoji-menu-tabs .icon-bell-selected {background-position: -9px -64px; }
 
 .emoji-menu-tabs .icon-car {background-position: -9px -196px; }
 .emoji-menu-tabs .icon-car-selected {background-position: -9px -170px; }
@@ -1774,7 +1765,7 @@ img.img_fullsize {
 
 .emoji-menu .emoji-items-wrap {
   position: relative;
-  height: 162px;
+  height: 174px;
 }
 .emoji-menu .emoji-items {
   padding-right: 8px;
@@ -1788,8 +1779,7 @@ img.img_fullsize {
 }
 .emoji-menu .emoji-items a {
   margin: -1px 0 0 -1px;
-  /*border: 1px solid #f2f2f2;*/
-  padding: 4px;
+  padding: 5px;
   display: block;
   float: left;
   border-radius: 2px;
