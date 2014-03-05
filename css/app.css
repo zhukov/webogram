@@ -2090,6 +2090,9 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   border-top: 1px solid #EEE;
   padding: 5px 5px;
 }
+.im_edit_panel_wrap_loaded {
+  display: block;
+}
 .im_panel_to_top .im_edit_panel_wrap {
   background: #FFF;
   position: absolute;
