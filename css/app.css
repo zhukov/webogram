@@ -2231,7 +2231,8 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   display: inline-block;
 }
 .im_message_selected .icon-select-tick,
-.im_history_selectable .im_message_outer_wrap:hover .icon-select-tick {
+.im_history_selectable .im_message_outer_wrap:hover .icon-select-tick,
+.im_content_message_select_area:hover .icon-select-tick {
   background-position: -9px -481px;
   opacity: 0.5;
 }
@@ -2301,9 +2302,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
     max-width: none;
   }
 
-  .im_edit_panel_wrap {
-    margin: 0 5px;
-  }
   .im_edit_flush_link,
   .im_edit_cancel_link,
   .im_edit_delete_btn,
@@ -2312,8 +2310,12 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
     padding-right: 5px;
     margin: 6px 4px;
   }
+  .im_edit_panel_border {
+    margin: 0 18px 22px 3px;
+  }
   .im_edit_panel_wrap {
-    padding-bottom: 22px;
+    margin: 0 5px;
+    padding-bottom: 34px;
   }
 }
 
@@ -2323,7 +2325,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   }
 
   .im_send_panel_wrap {
-    padding-bottom: 12px;
+    padding-bottom: 10px;
+  }
+  .im_edit_panel_wrap {
+    padding-bottom: 18px;
   }
 
   .emoji-wysiwyg-editor {
