@@ -1,0 +1,7 @@
+{
+  "name": "webogram-nw",
+  "main": "app/index.html",
+  "window" : {
+    "toolbar" : false
+  }
+}
