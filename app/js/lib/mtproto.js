@@ -378,9 +378,8 @@ TLSerialization.prototype.checkLength = function (needBytes) {
     return;
   }
 
-  console.log('Increase buffer', this.offset, needBytes, this.maxLength);
-  console.trace();
-  this.maxLength = Math.max(this.maxLength * 2, this.offset + needBytes + 16);
+  console.trace('Increase buffer', this.offset, needBytes, this.maxLength);
+  this.maxLength = Math.ceil(Math.max(this.maxLength * 2, this.offset + needBytes + 16) / 4) * 4;
   var previousBuffer = this.buffer,
       previousArray = new Int32Array(previousBuffer);
 
