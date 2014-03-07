@@ -658,7 +658,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             />\
           </div>\
           <div class="video_full_player" ng-if="player.src">\
-            <embed ng-src="{{player.src}}" width="{{video.full.width}}" height="{{video.full.height}}" autoplay="true" CONTROLLER="TRUE" loop="false" pluginspace="http://www.apple.com/quicktime/" ng-if="player.quicktime"/>\
+            <embed ng-src="{{player.src}}" width="{{video.full.width}}" height="{{video.full.height}}" autoplay="true" CONTROLLER="TRUE" SHOWCONTROLS="TRUE" controller="true" loop="false" pluginspace="http://www.apple.com/quicktime/" ng-if="player.quicktime"/>\
             <video width="{{video.full.width}}" height="{{video.full.height}}" controls autoplay  ng-if="!player.quicktime">\
               <source ng-src="{{player.src}}" type="video/mp4">\
             </video>\
@@ -685,13 +685,13 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       var hasQt = false, i;
-      // if (navigator.plugins) {
-      //   for (i = 0; i < navigator.plugins.length; i++) {
-      //     if (navigator.plugins[i].name.indexOf('QuickTime') >= 0) {
-      //       hasQt = true;
-      //     }
-      //   }
-      // }
+      if (navigator.plugins) {
+        for (i = 0; i < navigator.plugins.length; i++) {
+          if (navigator.plugins[i].name.indexOf('QuickTime') >= 0) {
+            hasQt = true;
+          }
+        }
+      }
 
       MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
         scope.progress.enabled = false;
