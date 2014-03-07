@@ -300,7 +300,9 @@ angular.module('myApp.controllers', [])
 
       }, function (error) {
         if (error.code == 401) {
-          $location.url('/login');
+          MtpApiManager.logOut()['finally'](function () {
+            $location.url('/login');
+          });
         }
       });
     }

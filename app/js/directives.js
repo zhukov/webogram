@@ -89,12 +89,16 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        if (!headWrap) {
+        if (!headWrap || !headWrap.offsetHeight) {
           headWrap = $('.tg_page_head')[0];
+        }
+        if (!footer || !footer.offsetHeight) {
+          footer = $('.im_page_footer')[0];
         }
         $(element).css({
           height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - 72
         });
+
         updateScroller();
       }
 
@@ -276,6 +280,12 @@ angular.module('myApp.directives', ['myApp.filters'])
           });
         }
 
+        if (!headWrap || !headWrap.offsetHeight) {
+          headWrap = $('.tg_page_head')[0];
+        }
+        if (!footer || !footer.offsetHeight) {
+          footer = $('.im_page_footer')[0];
+        }
         var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - footer.offsetHeight;
         $(historyWrap).css({
           height: historyH
@@ -496,7 +506,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       var cachedSrc = MtpApiFileManager.getCachedFile(
         scope.thumb &&
         scope.thumb.location &&
-        !scope.thumb.location.empty
+        !scope.thumb.location.empty &&
+        scope.thumb.location
       );
 
       if (cachedSrc) {
