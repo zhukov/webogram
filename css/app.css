@@ -2206,7 +2206,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   cursor: pointer;
   position: absolute;
   width: 112px;
-  height: 50px;
+  height: 52px;
   margin: -8px 0 0 -112px;
 }
 @media (min-width: 1024px) {

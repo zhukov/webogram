@@ -2334,6 +2334,12 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
       AppConfigManager.remove('dc', 'user_auth');
 
       baseDcID = false;
+    }, function (error) {
+      AppConfigManager.remove('dc', 'user_auth');
+      if (error && error.code != 401) {
+        AppConfigManager.remove('dc' + baseDcID + '_auth_key');
+      }
+      baseDcID = false;
     });
   }
 
@@ -2597,6 +2603,11 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       case 'inputAudioFileLocation':
         return 'audio' + location.id;
     }
+
+    if (!location.volume_id) {
+      console.trace('Empty location', location);
+    }
+
     return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
   };
 
