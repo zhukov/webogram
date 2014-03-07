@@ -509,7 +509,7 @@ angular.module('myApp.controllers', [])
     }
 
     function selectedFlush () {
-      if (confirm('Are you sure? This can not be undone!') !== true) {
+      if (safeConfirm('Are you sure? This can not be undone!') !== true) {
         return false;
       }
       AppMessagesManager.flushHistory($scope.curDialog.inputPeer).then(function () {
@@ -798,7 +798,7 @@ angular.module('myApp.controllers', [])
     };
 
     $scope.flushHistory = function () {
-      if (confirm('Are you sure? This can not be undone!') !== true) {
+      if (safeConfirm('Are you sure? This can not be undone!') !== true) {
         return false;
       }
       AppMessagesManager.flushHistory(AppPeersManager.getInputPeerByID($scope.userID)).then(function () {
@@ -915,7 +915,7 @@ angular.module('myApp.controllers', [])
 
 
     $scope.flushHistory = function () {
-      if (confirm('Are you sure? This can not be undone!') !== true) {
+      if (safeConfirm('Are you sure? This can not be undone!') !== true) {
         return;
       }
       AppMessagesManager.flushHistory(AppPeersManager.getInputPeerByID(-$scope.chatID)).then(function () {

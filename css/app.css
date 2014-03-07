@@ -1025,6 +1025,15 @@ div.im_message_video_thumb {
   background-image: url(../img/icons/IconsetW_1x.png?2);
 }
 
+.im_message_selected .icon-document,
+.im_message_selected .icon-photo,
+.im_message_selected .icon-video,
+.im_history_selectable .im_message_outer_wrap:hover .icon-document,
+.im_history_selectable .im_message_outer_wrap:hover .icon-photo,
+.im_history_selectable .im_message_outer_wrap:hover .icon-video {
+  background-color: #dae6f0;
+}
+
 .im_message_document_info {
   float: left;
 }
@@ -2219,8 +2228,8 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   display: none;
   width: 26px;
   height: 26px;
-  margin: 14px 0 0 40px;
-  background: url(../img/icons/IconsetW.png?1) -9px -515px no-repeat;
+  margin: 13px 0 0 40px;
+  background: url(../img/icons/IconsetW.png?1) -9px -516px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-select-tick {
@@ -2233,7 +2242,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .im_message_selected .icon-select-tick,
 .im_history_selectable .im_message_outer_wrap:hover .icon-select-tick,
 .im_content_message_select_area:hover .icon-select-tick {
-  background-position: -9px -480px;
+  background-position: -9px -481px;
   opacity: 0.5;
 }
 .im_message_selected .icon-select-tick {
@@ -2425,3 +2434,33 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .peer_select_modal_wrap .modal-body {
   padding: 10px 10px 15px;
 }
+
+
+/* Colorized user names
+
+c03d33 red
+4fad2d green
+d09306 yellow
+348cd4 blue
+8544d6 purple
+cd4073 pink
+2996ad sea
+ce671b orange
+ */
+.user_color_1,
+.user_color_1:hover {color: #c03d33;}
+.user_color_2,
+.user_color_2:hover {color: #4fad2d;}
+.user_color_3,
+.user_color_3:hover {color: #d09306;}
+.user_color_4,
+.user_color_4:hover {color: #348cd4;}
+.user_color_5,
+.user_color_5:hover {color: #8544d6;}
+.user_color_6,
+.user_color_6:hover {color: #cd4073;}
+.user_color_7,
+.user_color_7:hover {color: #2996ad;}
+.user_color_8,
+.user_color_8:hover {color: #ce671b;}
+

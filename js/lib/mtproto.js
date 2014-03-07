@@ -1503,10 +1503,8 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
   var updatesProcessor,
       iii = 0,
-      offline;
-
-  $rootScope.offline = true;
-  $rootScope.offlineConnecting = true;
+      offline,
+      offlineInited = false;
 
   $rootScope.retryOnline = function () {
     $(document.body).trigger('online');
@@ -1543,6 +1541,12 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     this.longPollInt = $interval(this.checkLongPoll.bind(this), 10000);
     this.checkLongPoll();
+
+    if (!offlineInited) {
+      offlineInited = true;
+      $rootScope.offline = true;
+      $rootScope.offlineConnecting = true;
+    }
   };
 
   MtpNetworker.prototype.updateSession = function () {

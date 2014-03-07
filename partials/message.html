@@ -80,7 +80,7 @@
 
       <div class="im_message_body">
 
-        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName" ng-if="historyMessage.to_id.chat_id > 0"></a>
+        <a class="im_message_author user_color_{{historyMessage.fromPhoto.num}}" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName" ng-if="historyMessage.to_id.chat_id > 0"></a>
         <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName" ng-if="!historyMessage.to_id.chat_id"></a>
 
 

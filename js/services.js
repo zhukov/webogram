@@ -243,8 +243,11 @@ angular.module('myApp.services', [])
       cachedPhotoLocations[id] = user && user.photo && user.photo.photo_small || {empty: true};
     }
 
+    var num = (Math.abs(id) % 8) + 1;
+
     return {
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
+      num: num,
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + num + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
