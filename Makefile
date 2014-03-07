@@ -12,7 +12,7 @@ package:
 	# sed -n -i.bak '1h;1!H;$${;g;s/<script>.*<\/script>/ /p;}' package_dist/index.html
 	rm package_dist/index.html.bak
 	rm package_dist/img/screenshot*
-	find package_dist | grep DS_Store | xargs rm -rf
+	find package_dist | grep "DS_Store\|LICENSE\|README" | xargs rm -rf
 	cd package_dist && zip -r ../webogram_v$(version).zip .
 
 publish:
