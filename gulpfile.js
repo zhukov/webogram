@@ -18,8 +18,10 @@ gulp.task('templates', function() {
 
 gulp.task('copy', function() {
   return es.concat(
-    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json', 'app/**/*worker.js', 'app/img/**/*', '!app/img/screenshot*'])
+    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json', 'app/**/*worker.js'])
       .pipe(gulp.dest('dist')),
+    gulp.src(['app/img/**/*', '!app/img/screenshot*'])
+      .pipe(gulp.dest('dist/img')),
     gulp.src('app/vendor/console-polyfill/console-polyfill.js')
       .pipe(gulp.dest('dist/vendor/console-polyfill')),
     gulp.src('app/js/lib/mtproto.js')
@@ -78,9 +80,9 @@ gulp.task('compress-dist', function() {
 });
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
-gulp.task('build', ['clean', 'templates', 'usemin', 'copy']);
+gulp.task('build', ['templates', 'usemin', 'copy']);
 gulp.task('package', ['build', 'compress-dist']);
 
-gulp.task('default', function() {
+gulp.task('default', ['clean'], function() {
   gulp.start('build');
 });

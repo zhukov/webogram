@@ -7,4 +7,5 @@
 dist
 package_dist
 webogram*.zip
+app/js/partials.js
 *.sublime-workspace
