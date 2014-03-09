@@ -429,6 +429,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
+      $(document).on('paste', onPasteEvent);
 
       scope.$on('ui_peer_change', focusField);
       scope.$on('ui_history_focus', focusField);
@@ -440,6 +441,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
+        $(document).off('paste', onPasteEvent);
       });
 
       focusField();
@@ -448,6 +450,26 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           editorElement.focus();
         });
+      }
+
+      function onPasteEvent (e) {
+        var cData = (e.originalEvent || e).clipboardData,
+            items = cData && cData.items || [],
+            files = [],
+            i;
+
+        for (i = 0; i < items.length; i++) {
+          if (items[i].kind == 'file') {
+            files.push(items[i].getAsFile());
+          }
+        }
+
+        if (files.length && safeConfirm('Are you sure to send file(s) from clipboard?')) {
+          scope.$apply(function () {
+            scope.draftMessage.files = files;
+            scope.draftMessage.isMedia = true;
+          });
+        }
       }
 
       function onDragDropEvent(e) {
@@ -696,7 +718,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
         scope.progress.enabled = false;
         // scope.progress = {enabled: true, percent: 50};
-        scope.player.quicktime = hasQt;
+        scope.player.hasQuicktime = hasQt;
+        scope.player.quicktime = false;
         scope.player.src = $sce.trustAsResourceUrl(url);
       }, function (e) {
         console.log('Download video failed', e, scope.video);

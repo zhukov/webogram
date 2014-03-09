@@ -728,7 +728,7 @@ angular.module('myApp.controllers', [])
       // console.trace('ctrl text changed', newVal);
       AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
-      if (newVal.length) {
+      if (newVal && newVal.length) {
         var backupDraftObj = {};
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         AppConfigManager.set(backupDraftObj);
