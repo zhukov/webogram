@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.19 - messaging web application for MTProto
+ * Webogram v0.0.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -168,7 +168,7 @@ angular.module('myApp.controllers', [])
     $scope.isLoggedIn = true;
     $scope.openSettings = function () {
       $modal.open({
-        templateUrl: 'partials/settings_modal.html?3',
+        templateUrl: 'partials/settings_modal.html',
         controller: 'SettingsModalController',
         scope: $rootScope.$new(),
         windowClass: 'settings_modal_window'
@@ -191,7 +191,7 @@ angular.module('myApp.controllers', [])
           scope.userIDs = userIDs;
 
           $modal.open({
-            templateUrl: 'partials/chat_create_modal.html?3',
+            templateUrl: 'partials/chat_create_modal.html',
             controller: 'ChatCreateModalController',
             scope: scope,
             windowClass: 'contacts_modal_window'
@@ -965,7 +965,7 @@ angular.module('myApp.controllers', [])
       scope.chatID = $scope.chatID;
 
       $modal.open({
-        templateUrl: 'partials/chat_edit_modal.html?3',
+        templateUrl: 'partials/chat_edit_modal.html',
         controller: 'ChatEditModalController',
         scope: scope,
         windowClass: 'contacts_modal_window'

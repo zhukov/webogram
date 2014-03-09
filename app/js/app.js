@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.19 - messaging web application for MTProto
+ * Webogram v0.0.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -30,6 +30,7 @@ angular.module('myApp', [
   'ngAnimate',
   'ngSanitize',
   'ui.bootstrap',
+  'partials',
   'myApp.filters',
   'myApp.services',
   'mtproto.services',
@@ -63,9 +64,9 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
 
 
   // $locationProvider.html5Mode(true);
-  $routeProvider.when('/', {templateUrl: 'partials/welcome.html?4', controller: 'AppWelcomeController'});
-  $routeProvider.when('/login', {templateUrl: 'partials/login.html?5', controller: 'AppLoginController'});
-  $routeProvider.when('/im', {templateUrl: 'partials/im.html?13', controller: 'AppIMController', reloadOnSearch: false});
+  $routeProvider.when('/', {templateUrl: 'partials/welcome.html', controller: 'AppWelcomeController'});
+  $routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'AppLoginController'});
+  $routeProvider.when('/im', {templateUrl: 'partials/im.html', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
 }]);

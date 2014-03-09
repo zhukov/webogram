@@ -1,7 +1,7 @@
 /* app css stylesheet */
 
 html {
-  background: #dee4e9 url(../img/bg_tile.png?1) 0 0 repeat;
+  background: #dee4e9 url(../img/bg_tile.png) 0 0 repeat;
   /*background-size: 300px 468px;*/
 }
 body {
@@ -255,12 +255,12 @@ input[type="number"]::-webkit-inner-spin-button {
   height: 18px;
   vertical-align: text-top;
 
-  background: url(../img/icons/IconsetW.png?1) -15px -419px no-repeat;
+  background: url(../img/icons/IconsetW.png) -15px -419px no-repeat;
   background-size: 42px 560px;
   opacity: 0.6;
 }
 .is_1x .icon-back {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .tg_page_head .navbar-quick-nav a:hover .icon-back {
   opacity: 1;
@@ -510,7 +510,7 @@ input[type="number"]::-webkit-inner-spin-button {
 .im_dialogs_search_field {
   font-size: 12px;
   line-height: normal;
-  background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
+  background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
   background-size: 42px 560px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
@@ -519,7 +519,7 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 .is_1x .im_dialogs_search_field {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_dialogs_search_field:focus,
 .im_dialogs_search_field:active {
@@ -534,12 +534,12 @@ input[type="number"]::-webkit-inner-spin-button {
   width: 13px;
   height: 13px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
+  background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
   background-size: 42px 560px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_dialogs_search_clear:hover {
   opacity: 1;
@@ -787,11 +787,11 @@ a.im_dialog:hover .im_dialog_date {
   margin-top: 7px;
   margin-left: 6px;
 
-  background: url(../img/icons/IconsetW.png?1) -17px -444px no-repeat;
+  background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-caret {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 
 .im_history_panel_media_dropdown .dropdown-menu {
@@ -986,11 +986,11 @@ div.im_message_video_thumb {
   width: 15px;
   height: 19px;
 
-  background: url(../img/icons/IconsetW.png?1) -14px -389px no-repeat;
+  background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-geo-point {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 
 
@@ -1014,7 +1014,7 @@ div.im_message_video_thumb {
   height: 38px;
   vertical-align: text-top;
 
-  background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -229px no-repeat;
+  background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
   background-size: 42px 560px;
   border-radius: 3px;
   margin-right: 10px;
@@ -1022,7 +1022,7 @@ div.im_message_video_thumb {
 .is_1x .icon-document,
 .is_1x .icon-photo,
 .is_1x .icon-video {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 
 .im_message_selected .icon-document,
@@ -1075,13 +1075,13 @@ div.im_message_video_thumb {
   height: 38px;
   vertical-align: text-top;
 
-  background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -277px no-repeat;
+  background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -277px no-repeat;
   background-size: 42px 560px;
   border-radius: 3px;
   margin-right: 10px;
 }
 .is_1x .icon-audio {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 
 .im_message_audio_info {
@@ -1202,14 +1202,14 @@ div.im_message_video_thumb {
   display: none;
   width: 16px;
   height: 10px;
-  background: url(../img/icons/Checks2_2x.png?1) 0 0 no-repeat;
+  background: url(../img/icons/Checks2_2x.png) 0 0 no-repeat;
   background-size: 16px 10px;
   top: 2px;
   position: relative;
 }
 .icon-message-status-tick.message-status-unread-tick {
   /*width: 13px;*/
-  background: url(../img/icons/Checks1_2x.png?1) 0 0 no-repeat;
+  background: url(../img/icons/Checks1_2x.png) 0 0 no-repeat;
   background-size: 16px 10px;
 }
 .im_message_date {
@@ -1334,12 +1334,12 @@ textarea.im_message_field {
   width: 19px;
   height: 23px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png?1) -12px -68px no-repeat;
+  background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
   background-size: 42px 560px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_attach:hover .icon-paperclip {
   opacity: 1;
@@ -1362,12 +1362,12 @@ textarea.im_message_field {
   width: 23px;
   height: 23px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png?1) -10px -4px no-repeat;
+  background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
   background-size: 42px 560px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_emoji_btn:hover .icon-emoji {
   opacity: 1;
@@ -1412,12 +1412,12 @@ textarea.im_message_field {
   width: 25px;
   height: 21px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png?1) -9px -132px no-repeat;
+  background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
   background-size: 42px 560px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_media_attach:hover .icon-camera {
   opacity: 1;
@@ -1832,14 +1832,14 @@ img.img_fullsize {
 
 .emoji-menu-tail {
   display: none;
-  background: url(../img/icons/IconsetW.png?1) -14px -268px no-repeat;
+  background: url(../img/icons/IconsetW.png) -14px -268px no-repeat;
   background-size: 42px 560px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
 }
 .is_1x .emoji-menu-tail {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 
 
@@ -1983,7 +1983,7 @@ img.img_fullsize {
 .contacts_modal_search_field {
   font-size: 12px;
   line-height: normal;
-  background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
+  background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
   background-size: 42px 560px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
@@ -1992,7 +1992,7 @@ img.img_fullsize {
   margin: 0;
 }
 .is_1x .contacts_modal_search_field {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .contacts_modal_search_field:focus,
 .contacts_modal_search_field:active {
@@ -2007,12 +2007,12 @@ img.img_fullsize {
   width: 13px;
   height: 13px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
+  background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
   background-size: 42px 560px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .contacts_modal_search_clear:hover {
   opacity: 1;
@@ -2084,12 +2084,12 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   top: 22px;
   width: 17px;
   height: 15px;
-  background: url(../img/icons/IconsetW.png?1) -13px -366px no-repeat;
+  background: url(../img/icons/IconsetW.png) -13px -366px no-repeat;
   background-size: 42px 560px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .contacts_modal_members_list a.contacts_modal_contact:hover .icon-contact-tick {
   background-position: -13px -366px;
@@ -2182,11 +2182,11 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   width: 12px;
   height: 15px;
 
-  background: url(../img/icons/IconsetW.png?1) -15px -319px no-repeat;
+  background: url(../img/icons/IconsetW.png) -15px -319px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-delete {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_message_selected {
   background: #f2f6fa;
@@ -2229,11 +2229,11 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   width: 26px;
   height: 26px;
   margin: 13px 0 0 40px;
-  background: url(../img/icons/IconsetW.png?1) -9px -516px no-repeat;
+  background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
   background-size: 42px 560px;
 }
 .is_1x .icon-select-tick {
-  background-image: url(../img/icons/IconsetW_1x.png?2);
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 .im_history_selectable .icon-select-tick,
 .im_content_message_select_area:hover .icon-select-tick {
