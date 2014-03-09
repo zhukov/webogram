@@ -1,8 +1,8 @@
 <div class="user_modal_wrap">
 
   <div class="modal-header">
-    <a class="modal-close-link" ng-click="$close()">Close</a>
-    <h4 class="modal-title">Info</h4>
+    <a class="modal-close-link" ng-click="$close()" data-l20n="mdl_close"></a>
+    <h4 class="modal-title" data-l20n="mdl_user_info"></h4>
   </div>
 
 
@@ -21,14 +21,14 @@
       <p class="user_modal_status" ng-if="user.status">{{user | userStatus}}</p>
 
       <p class="user_modal_phone" ng-if="user.phone">{{user.phone | phoneNumber}}</p>
-      <button class="btn btn-primary user_modal_send_btn" ng-click="goToHistory()">Send message</button>
+      <button class="btn btn-primary user_modal_send_btn" ng-click="goToHistory()" data-l20n="mdl_user_send_message"></button>
     </div>
 
     <div class="user_modal_settings_wrap">
-      <div class="user_modal_notifications">
-        Notifications:
-        <a ng-click="settings.notifications = !settings.notifications">
-          {{settings.notifications ? 'ON' : 'OFF'}}
+      <div class="user_modal_notifications" data-l20n="mdl_user_notifications">
+        <a ng-click="settings.notifications = !settings.notifications" ng-class="{checkbox_on: settings.notifications}">
+          <span class="checkbox_text_on"></span>
+          <span class="checkbox_text_off"></span>
         </a>
       </div>
     </div>

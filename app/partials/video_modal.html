@@ -4,7 +4,10 @@
 
     <div class="video_modal_image_wrap" my-load-video video="video"></div>
 
-    <p class="media_modal_info">From: <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName"></span>, {{video.date | dateOrTime}}</p>
+    <p class="media_modal_info" data-l20n="mdl_video_description">
+      <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName"></span>
+      <span ng-bind="video.date | dateOrTime"></span>
+    </p>
 
   </div>
 

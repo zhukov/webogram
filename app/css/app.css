@@ -138,6 +138,11 @@ input[type="number"]::-webkit-inner-spin-button {
   background-image: none;
 }
 
+.checkbox_text_on {display: inline;}
+.checkbox_text_off {display: none;}
+.checkbox_on .checkbox_text_on {display: none;}
+.checkbox_on .checkbox_text_off {display: inline;}
+
 .tg_page_head .navbar {
   min-height: 44px;
 }

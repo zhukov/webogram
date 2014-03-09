@@ -177,13 +177,20 @@ StaticServlet.prototype.sendFile_ = function(req, res, path) {
   if (req.method === 'HEAD') {
     res.end();
   } else {
-    file.on('data', res.write.bind(res));
-    file.on('close', function() {
-      res.end();
-    });
-    file.on('error', function(error) {
-      self.sendError_(req, res, error);
-    });
+    var a = function () {
+      file.on('data', res.write.bind(res));
+      file.on('close', function() {
+        res.end();
+      });
+      file.on('error', function(error) {
+        self.sendError_(req, res, error);
+      });
+    }
+    if (false) { // Insert delayed file condition here
+      setTimeout(a, 5000);
+    } else {
+      a();
+    }
   }
 };
 

@@ -29,16 +29,27 @@ angular.module('myApp.filters', [])
     }
   }])
 
-  .filter('userStatus', ['$filter', function($filter) {
+  .filter('userStatus', ['$filter', 'documentL10n', function($filter, documentL10n) {
+    var l10n, isReady = false;
+    documentL10n.ready(function () {
+      isReady = true;
+      l10n = {
+        online: documentL10n.getSync('online'),
+        offline: documentL10n.getSync('offline')
+      };
+    });
+
     return function (user) {
+      if (!isReady) return '';
       if (!user || !user.status || user.status._ == 'userStatusEmpty') {
-        return 'offline';
+        return l10n.offline;
       }
       if (user.status._ == 'userStatusOnline') {
-        return 'online';
+        return l10n.online;
       }
 
-      return 'last seen ' + $filter('relativeTime')(user.status.was_online);
+      documentL10n.updateData({date: $filter('relativeTime')(user.status.was_online)});
+      return documentL10n.getSync('last_seen');
     }
   }])
 
@@ -139,19 +150,31 @@ angular.module('myApp.filters', [])
     }
   }])
 
-  .filter('relativeTime', ['$filter', function($filter) {
+  .filter('relativeTime', ['$filter', 'documentL10n', function($filter, documentL10n) {
+    var l10n, isReady = false;
+    documentL10n.ready(function () {
+      isReady = true;
+      l10n = {
+        just_now: documentL10n.getSync('just_now')
+      };
+    });
+
     return function (timestamp) {
+      if (!isReady) return false;
+
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks);
 
       if (diff < 60000) {
-        return 'just now';
+        return l10n.just_now;
       }
       if (diff < 3000000) {
-        return Math.ceil(diff / 60000) + ' minutes ago';
+        documentL10n.updateData({count: Math.ceil(diff / 60000)});
+        return documentL10n.getSync('minutes_ago');
       }
       if (diff < 10000000) {
-        return Math.ceil(diff / 3600000) + ' hours ago';
+        documentL10n.updateData({count: Math.ceil(diff / 3600000)});
+        return documentL10n.getSync('hours_ago');
       }
       return $filter('dateOrTime')(timestamp);
     }

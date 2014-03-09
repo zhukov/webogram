@@ -4,35 +4,37 @@
 <div class="login_form_wrap">
   <div class="error" ng-if="error.message">{{ error.message }}</div>
   <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
-    <h3 class="login_form_head">Sign in</h3>
-    <p class="login_form_lead">Please enter your full phone number with country code.</p>
+    <h3 class="login_form_head" data-l20n="login_sign_in_title"></h3>
+    <p class="login_form_lead" data-l20n="login_phone_label"></p>
 
     <div class="form-group" ng-class="{'has-error': error.field == 'phone'}">
-      <label class="control-label" for="phone_number" ng-if="error.field == 'phone'">Incorrect phone number</label>
-      <input type="tel" class="form-control" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
+      <label class="control-label" for="phone_number" ng-show="error.field == 'phone'" data-l20n="login_phone_incorrect"></label>
+      <input type="tel" class="form-control" name="phone_number" ng-model="credentials.phone_number" required data-l20n="login_phone_input">
     </div>
-    <button class="btn btn-success btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit">
-      {{progress.enabled ? 'Generating keys...' : 'Next'}}
+    <button class="btn btn-success btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" data-l20n="{{progress.enabled ? 'login_btn_next_progress' : 'login_btn_next'}}">
+      <span my-typing-dots ng-show="progress.enabled"></span>
     </button>
   </form>
 
   <form name="myLoginForm" ng-if="credentials.phone_code_hash" ng-submit="logIn()">
     <h3 class="login_form_head">{{ credentials.phone_number | phoneNumber }} <small>(<a href="#/auth">edit</a>)</small></h3>
-    <p class="login_form_lead">We have sent you a code via SMS.<br/>Please enter it below.</p>
+    <p class="login_form_lead" data-l20n="login_code_label"></p>
 
     <p class="login_form_lead">
-      <span ng-show="callPending.remaining > 0">Telegram will call you in {{callPending.remaining | duration}}</span>
-      <span ng-show="!callPending.remaining &amp;&amp; !callPending.success">Telegram is calling you</span>
-      <span ng-show="!callPending.remaining &amp;&amp; callPending.success">Telegram dialed your number</span>
+      <span ng-show="callPending.remaining > 0" data-l20n="login_code_dial_timeout">
+        <span ng-bind="callPending.remaining | duration"></span>
+      </span>
+      <span ng-show="!callPending.remaining &amp;&amp; !callPending.success" data-l20n="login_code_calling_you"></span>
+      <span ng-show="!callPending.remaining &amp;&amp; callPending.success" data-l20n="login_code_called_you"></span>
     </p>
 
     <div class="form-group" ng-class="{'has-error': error.field == 'phone_code'}">
-      <label class="control-label" for="phone_code" ng-if="error.field == 'phone_code'">Incorrect SMS code</label>
-      <input type="number" maxlength="5" class="form-control" name="phone_code" ng-model="credentials.phone_code" placeholder="Enter your code" required>
+      <label class="control-label" for="phone_code" ng-if="error.field == 'phone_code'" data-l20n="login_code_incorrect"></label>
+      <input type="number" maxlength="5" class="form-control" name="phone_code" ng-model="credentials.phone_code" required data-l20n="login_code_input">
     </div>
 
-    <button class="btn btn-success btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled">
-      {{progress.enabled ? 'Checking code...' : 'Sign in'}}
+    <button class="btn btn-success btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" data-l20n="{{progress.enabled ? 'login_btn_sing_in_progress' : 'login_btn_sign_in'}}">
+      <span my-typing-dots ng-show="progress.enabled"></span>
     </button>
   </form>
 </div>

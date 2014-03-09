@@ -1,0 +1,221 @@
+
+<plural($n) {
+  $n == 0 ? 'zero' :
+    $n == 1 ? 'one' : 'many'
+}>
+
+<welcome_intro """
+<p>Welcome to an unofficial web-client of mobile <strong>Telegram</strong> messenger.</p>
+<p>It is an alpha, which means it is still not 200% secure and functional.</p>
+<p>Visit <a>telegram.org</a> to learn more.</p>
+""">
+<welcome_btn "Start Messaging">
+
+<head_network_waiting "Waiting for network<span></span>">
+<head_network_retry "Retry">
+<head_network_connecting "Connecting<span></span>">
+
+<head_nav_toggle "Toggle navigation">
+<head_nav_back "<span></span>Back">
+
+<head_new_group "New Group">
+<head_contacts "Contacts">
+<head_settings "Settings">
+<head_about "About">
+
+
+<login_sign_in_title "Sign in">
+<login_phone_label "Please enter your full phone number with country code.">
+<login_phone_incorrect "Incorrect phone number">
+<login_phone_input
+  placeholder: "Enter your phone"
+>
+<login_phone_edit "edit">
+<login_btn_next "Next<span></span>">
+<login_btn_next_progress "Generating keys<span></span>">
+
+<login_code_label "We have sent you a code via SMS.<br/>Please enter it below.">
+<login_code_dial_timeout "Telegram will call you in <span></span>">
+<login_code_calling_you "Telegram is calling you">
+<login_code_called_you "Telegram dialed your number">
+<login_code_incorrect "Incorrect SMS code">
+<login_code_input
+  placeholder: "Enter your code"
+>
+
+<login_btn_sign_in "Sign in<span></span>">
+<login_btn_sing_in_progress "Checking code<span></span>">
+
+<online "online">
+<offline "offline">
+<last_seen "last seen {{ $date }}">
+<just_now "just now">
+
+<minutes_ago[plural($count)] {
+  zero: 'just now',
+  one: 'minute ago',
+  many: '{{ $count }} minutes ago'
+}>
+
+<hours_ago[plural($count)] {
+  zero: 'just now',
+  one: '1 hour ago',
+  many: '{{ $count }} hours ago'
+}>
+
+
+<im_dialogs_search_input
+  placeholder: "Search"
+>
+
+<im_history_not_selected "No history to display">
+<im_history_loading "Loading history<span></span>">
+
+<im_peer_info "Info">
+
+<im_history_edit "Edit">
+<im_history_edit_flush "Clear History">
+<im_history_edit_cancel "Cancel">
+<im_history_forward "Forward <strong></strong>">
+<im_history_delete "Delete <strong></strong>">
+
+<im_history_media "Media<i></i>">
+<im_history_media_photos "Photos">
+<im_history_media_videos "Videos">
+<im_history_media_documents "Documents">
+<im_history_media_missed "Show all messages<strong></strong>">
+
+<im_user_typing "<strong></strong> is typing<span></span>">
+
+<im_send_drop_photos "Drop files here to send">
+<im_send_btn "Send">
+<im_send_input
+  placeholder: "Write a message..."
+>
+
+<im_footer "<a>Telegram alpha</a> by izhukov &amp; toberg">
+
+<im_chat_members_count[plural($count)] {
+  zero: 'No members',
+  one: '1 member',
+  many: '{{ $count }} members'
+}>
+
+
+<msg_created_group "created the group «<strong></strong>»">
+<msg_edited_group_title "changed group name to «<strong></strong>»">
+<msg_edited_group_photo "changed group photo">
+<msg_removed_group_photo "removed group photo">
+<msg_invited_user_to_group "invited <a></a>">
+<msg_returned_to_group "returned to group">
+<msg_kicked_user_from_group "kicked <a></a>">
+<msg_left_group "left group">
+
+<msg_send_error_try_again
+  tooltip: "Try again"
+>
+
+<msg_forwarded_header "Forwarded message from <a></a>, <span></span>">
+
+<msg_document_download "Download">
+
+<msg_voice_message "Voice message">
+<msg_voice_message_play "Play">
+
+<dlg_from_you "You">
+
+<dlg_attachment_photo "Photo">
+<dlg_attachment_video "Video">
+<dlg_attachment_document "Document">
+<dlg_attachment_audio "Audio">
+<dlg_attachment_location "Location">
+<dlg_attachment_contact "Contact">
+
+<dlg_created_group "created the group">
+<dlg_edited_group_title "changed group name">
+<dlg_edited_group_photo "changed group photo">
+<dlg_removed_group_photo "removed group photo">
+<dlg_invited_user_to_group "invited <span></span>">
+<dlg_returned_to_group "returned to group">
+<dlg_kicked_user_from_group "kicked <span></span>">
+<dlg_left_group "left group">
+
+
+
+
+<mdl_close "Close">
+<checkbox_on_off "<span>ON</span><span>OFF</span>">
+
+<mdl_group_info_title "Group Info">
+<mdl_group_photo_update "<input /> Update photo">
+<mdl_group_photo_updating "Updating<span></span>">
+<mdl_group_photo_delete "Delete photo">
+
+<mdl_group_notifications "Notifications: <a><span>ON</span><span>OFF</span></a>">
+<mdl_leave_group "Leave group">
+<mdl_return_to_group "Return to group">
+
+<mdl_group_members_count[plural($count)] {
+  zero: 'No members',
+  one: '1 member',
+  many: '{{ $count }} members'
+}>
+
+<mdl_group_create_title "Create Group">
+<mdl_group_create_btn "Create">
+<mdl_group_create_cancel "Cancel">
+
+<mdl_group_edit_title "Edit Group Title">
+<mdl_group_edit_btn "Save">
+<mdl_group_edit_cancel "Cancel">
+
+
+<mdl_participants_header "<a>Add participant</a> Members">
+<mdl_kick_participant "Kick">
+<mdl_participants_na "Group members list is unavailable.">
+
+<mdl_user_info "Info">
+<mdl_user_send_message "Send message">
+<mdl_user_notifications "Notifications: <a><span>ON</span><span>OFF</span></a>">
+
+<mdl_settings_title "Settings">
+<mdl_settings_photo_updating "<input /> Update photo">
+<mdl_settings_photo_update "Updating<span></span>">
+<mdl_settings_photo_delete "Delete photo">
+
+<mdl_settings_firstname_label "First Name">
+<mdl_settings_firstname_invalid "Invalid First Name">
+
+<mdl_settings_lastname_label "Last Name">
+<mdl_settings_lastname_invalid "Invalid Last Name">
+
+<mdl_settings_name_save "Save">
+
+<mdl_settings_send_enter """
+<input />
+<strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line
+""">
+
+<mdl_settings_send_cltrenter """
+<input />
+<strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line
+""">
+
+<mdl_settings_sound "Sound: <a><span>ON</span><span>OFF</span></a>">
+<mdl_settings_desktop "Desktop Notifications: <a><span>ON</span><span>OFF</span></a>">
+
+<mdl_settings_current_user "User: ">
+<mdl_settings_version "Version: ">
+<mdl_settings_logout "Log out">
+
+<mdl_contacts_title "Contacts">
+<mdl_contacts_search_input
+  placeholder: "Search"
+>
+<mdl_contacts_next_btn "Next »">
+
+<mdl_photo_description "From: <span></span>, <span></span>">
+
+<mdl_video_description "From: <span></span>, <span></span>">
+
+

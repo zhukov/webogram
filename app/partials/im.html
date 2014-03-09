@@ -6,7 +6,7 @@
 
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController">
       <div class="im_dialogs_search">
-        <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
+        <input class="form-control im_dialogs_search_field" type="search" ng-model="search.query" data-l20n="im_dialogs_search_input"/>
         <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
       </div>
       <div my-dialogs-list class="im_dialogs_col">
@@ -21,8 +21,8 @@
     </div>
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
-      <div ng-if="state.notSelected" class="im_history_not_selected">No history to display</div>
-      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected">Loading history<span my-typing-dots></span></div>
+      <div ng-if="state.notSelected" class="im_history_not_selected" data-l20n="im_history_not_selected"></div>
+      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" data-l20n="im_history_loading"><span my-typing-dots></span></div>
 
       <div ng-if="state.loaded">
         <div my-history class="im_history_col">
@@ -32,41 +32,36 @@
             <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
               <div class="im_history_panel_title">
 
-                <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()">Info</a>
-                <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()">Edit</a>
+                <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()" data-l20n="im_peer_info"></a>
+                <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()" data-l20n="im_history_edit"></a>
 
                 <div class="dropdown im_history_panel_media_dropdown pull-right">
-                  <a class="dropdown-toggle">Media<i class="icon icon-caret"></i></a>
+                  <a class="dropdown-toggle" data-l20n="im_history_media"><i class="icon icon-caret"></i></a>
                   <ul class="dropdown-menu">
                     <li>
-                      <a ng-click="toggleMedia('photos')">Photos</a>
+                      <a ng-click="toggleMedia('photos')" data-l20n="im_history_media_photos"></a>
                     </li>
                     <li>
-                      <a ng-click="toggleMedia('video')">Videos</a>
+                      <a ng-click="toggleMedia('video')" data-l20n="im_history_media_videos"></a>
                     </li>
                     <li>
-                      <a ng-click="toggleMedia('documents')">Documents</a>
+                      <a ng-click="toggleMedia('documents')" data-l20n="im_history_media_documents"></a>
                     </li>
                   </ul>
                 </div>
-                <a ng-if="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
-                  Show all messages
+                <a ng-if="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()" data-l20n="im_history_media_missed">
                   <strong class="im_history_panel_return_count" ng-show="missedCount > 0">+{{missedCount}}</strong>
                 </a>
 
                 <h4 ng-if="mediaType !== false" ng-switch="mediaType">
-                  <span ng-switch-when="photos"> Photos </span>
-                  <span ng-switch-when="video"> Videos </span>
-                  <span ng-switch-when="documents"> Documents </span>
+                  <span ng-switch-when="photos" data-l20n="im_history_media_photos"></span>
+                  <span ng-switch-when="video" data-l20n="im_history_media_videos"></span>
+                  <span ng-switch-when="documents" data-l20n="im_history_media_documents"></span>
                 </h4>
 
                 <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id < 0" ng-click="showPeerInfo()">
                   <span ng-bind-html="historyPeer.data.rTitle"></span>
-                  <small class="im_chat_users">
-                    <ng-pluralize count="historyPeer.data.participants_count"
-                                     when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
-                    </ng-pluralize>
-                  </small>
+                  <small class="im_chat_users" data-l20n-pluralize="im_chat_members_count" count="{{historyPeer.data.participants_count}}"></small>
                 </h4>
 
                 <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id > 0" ng-click="showPeerInfo()">
@@ -91,8 +86,8 @@
                   </div>
 
                   <div class="im_history_typing_wrap">
-                    <div class="im_history_typing" ng-show="typing.user">
-                      <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing<span my-typing-dots></span>
+                    <div class="im_history_typing" ng-show="typing.user" data-l20n="im_user_typing">
+                      <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong><span my-typing-dots></span>
                     </div>
                   </div>
 
@@ -106,17 +101,14 @@
 
             <div class="im_edit_panel_wrap clearfix" ng-show="selectActions" ng-class="{im_edit_panel_wrap_loaded: true}">
               <div class="im_edit_panel_border"></div>
-              <a class="im_edit_flush_link" ng-click="selectedFlush()">
-                Clear History
-              </a>
-              <a class="im_edit_cancel_link" ng-click="selectedCancel()">
-                Cancel
+              <a class="im_edit_flush_link" ng-click="selectedFlush()" data-l20n="im_history_edit_flush"></a>
+              <a class="im_edit_cancel_link" ng-click="selectedCancel()" data-l20n="im_history_edit_cancel">Cancel
               </a>
               <div class="im_edit_selected_actions">
-                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()">
-                  Forward <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
-                </a><a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()">
-                  Delete <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
+                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" data-l20n="im_history_forward">
+                  <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
+                </a><a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()" data-l20n="im_history_delete">
+                  <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
                 </a>
               </div>
             </div>
@@ -142,8 +134,8 @@
                     />
                   </div>
                   <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
-                    <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
-                    <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
+                    <div class="im_send_dropbox_wrap" data-l20n="im_send_drop_photos"></div>
+                    <textarea ng-model="draftMessage.text" class="form-control im_message_field" data-l20n="im_send_input"></textarea>
 
                     <div class="im_media_attach pull-right">
                       <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/x-png, image/png, image/gif, image/jpeg, video/*, audio/mpeg, audio/mp3" />
@@ -160,7 +152,7 @@
                       <i class="icon icon-emoji"></i>
                     </div>
 
-                    <button type="submit" class="btn btn-success im_submit">Send</button>
+                    <button type="submit" class="btn btn-success im_submit" data-l20n="im_send_btn"></button>
                   </form>
                 </div>
 
@@ -180,9 +172,8 @@
 
 </div>
 
-<div class="im_page_footer">
-  <a class="im_page_footer_brand" target="_blank" href="https://github.com/zhukov/webogram">Telegram alpha</a> by izhukov &amp; toberg
+<div class="im_page_footer" data-l20n="im_footer">
+  <a class="im_page_footer_brand" target="_blank" href="https://github.com/zhukov/webogram"></a>
 </div>
 
 <div id="notify_sound"></div>
-

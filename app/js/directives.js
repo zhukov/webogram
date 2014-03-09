@@ -335,7 +335,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (richTextarea) {
         editorElement = richTextarea;
         $(richTextarea).addClass('form-control');
-        $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+
+        $timeout(function () {
+          $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+        }, 1000);
 
         var updatePromise;
         $(richTextarea).on('keyup', function (e) {

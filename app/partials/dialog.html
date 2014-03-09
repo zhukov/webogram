@@ -41,40 +41,37 @@
         ></span><span
           class="im_dialog_chat_from"
           ng-if="dialogMessage.out"
-        >You</span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
+          data-l20n="dlg_from_you"
+        ></span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
       </span>
 
       <span class="im_dialog_message_media" ng-if="dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty'" ng-switch="dialogMessage.media._">
-        <span ng-switch-when="messageMediaPhoto">Photo</span>
-        <span ng-switch-when="messageMediaVideo">Video</span>
-        <span ng-switch-when="messageMediaDocument">Document</span>
-        <span ng-switch-when="messageMediaAudio">Audio</span>
-        <span ng-switch-when="messageMediaGeo">Location</span>
-        <span ng-switch-when="messageMediaContact">Contact</span>
+        <span ng-switch-when="messageMediaPhoto" data-l20n="dlg_attachment_photo"></span>
+        <span ng-switch-when="messageMediaVideo" data-l20n="dlg_attachment_video"></span>
+        <span ng-switch-when="messageMediaDocument" data-l20n="dlg_attachment_document"></span>
+        <span ng-switch-when="messageMediaAudio" data-l20n="dlg_attachment_audio"></span>
+        <span ng-switch-when="messageMediaGeo" data-l20n="dlg_attachment_location"></span>
+        <span ng-switch-when="messageMediaContact" data-l20n="dlg_attachment_contact"></span>
       </span>
 
       <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
-        <span ng-switch-when="messageActionChatCreate"> created the group </span>
-        <span ng-switch-when="messageActionChatEditTitle">changed group name</span>
-        <span ng-switch-when="messageActionChatEditPhoto">changed group photo</span>
-        <span ng-switch-when="messageActionChatDeletePhoto">removed group photo</span>
+        <span ng-switch-when="messageActionChatCreate" data-l20n="dlg_created_group"></span>
+        <span ng-switch-when="messageActionChatEditTitle" data-l20n="dlg_edited_group_title"></span>
+        <span ng-switch-when="messageActionChatEditPhoto" data-l20n="dlg_edited_group_photo"></span>
+        <span ng-switch-when="messageActionChatDeletePhoto" data-l20n="dlg_removed_group_photo"></span>
 
         <span ng-switch-when="messageActionChatAddUser">
-          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">
-            invited <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id" data-l20n="dlg_invited_user_to_group">
+            <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
           </span>
-          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id">
-            returned to group
-          </span>
+          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id" data-l20n="dlg_returned_to_group"></span>
         </span>
 
         <span ng-switch-when="messageActionChatDeleteUser">
-          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">
-            kicked <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
+          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id" data-l20n="dlg_kicked_user_from_group">
+            <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
           </span>
-          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id">
-            left group
-          </span>
+          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id"  data-l20n="dlg_left_group"></span>
         </span>
       </span>
 
