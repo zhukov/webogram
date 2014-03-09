@@ -215,8 +215,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
           $(scrollable).css({bottom: ''});
-          updateSizes();
-          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          updateSizes(true);
+
+          var unreadSplit = $('.im_message_unread_split', scrollableWrap);
+          if (unreadSplit[0]) {
+            scrollableWrap.scrollTop = unreadSplit[0].offsetTop;
+            atBottom = false;
+          } else {
+            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          }
+
           updateScroller();
           moreNotified = false;
         });
