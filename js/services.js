@@ -134,6 +134,7 @@ angular.module('myApp.services', [])
   var users = {},
       cachedPhotoLocations = {},
       contactsFillPromise,
+      contactsList,
       contactsIndex = SearchIndexManager.createIndex();
 
   function fillContacts () {
@@ -143,8 +144,8 @@ angular.module('myApp.services', [])
     return contactsFillPromise = MtpApiManager.invokeApi('contacts.getContacts', {
       hash: ''
     }).then(function (result) {
-      var contactsList = [],
-          userID, searchText, i;
+      var userID, searchText, i;
+      contactsList = [];
       saveApiUsers(result.users);
 
       for (var i = 0; i < result.contacts.length; i++) {
@@ -321,6 +322,24 @@ angular.module('myApp.services', [])
           }
 
           $rootScope.$broadcast('user_update', userID);
+        }
+        break;
+
+      case 'updateContactLink':
+        if (angular.isArray(contactsList)) {
+          var userID = update.user_id,
+              curPos = curIsContact = contactsList.indexOf(userID),
+              curIsContact = curPos != -1,
+              newIsContact = update.my_link._ == 'contacts.myLinkContact';
+
+          if (newIsContact != curIsContact) {
+            if (newIsContact) {
+              contactsList.push(userID);
+              SearchIndexManager.indexObject(userID, getUserSearchText(userID), contactsIndex);
+            } else {
+              contactsList.splice(curPos, 1);
+            }
+          }
         }
         break;
     }
@@ -729,6 +748,46 @@ angular.module('myApp.services', [])
     return deferred.promise;
   }
 
+  function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
+    return MtpApiManager.invokeApi('messages.getHistory', {
+      peer: inputPeer,
+      offset: 0,
+      limit: fullLimit,
+      max_id: maxID || 0
+    }).then(function (historyResult) {
+      AppUsersManager.saveApiUsers(historyResult.users);
+      AppChatsManager.saveApiChats(historyResult.chats);
+      saveMessages(historyResult.messages);
+
+      historyStorage.count = historyResult._ == 'messages.messagesSlice'
+        ? historyResult.count
+        : historyResult.messages.length;
+
+      var offset = 0;
+      if (maxID > 0) {
+        for (offset = 0; offset < historyStorage.history.length; offset++) {
+          if (maxID > historyStorage.history[offset]) {
+            break;
+          }
+        }
+      }
+
+      historyStorage.history.splice(offset, historyStorage.history.length - offset);
+      angular.forEach(historyResult.messages, function (message) {
+        historyStorage.history.push(message.id);
+      });
+
+      fullLimit -= historyResult.messages.length;
+
+      if (fullLimit > 0 && historyStorage.history.length < historyStorage.count) {
+        maxID = historyStorage.history[historyStorage.history.length - 1];
+        return fillHistoryStorage(inputPeer, maxID, fullLimit, historyStorage);
+      }
+
+      return true;
+    });
+  };
+
   function getHistory (inputPeer, maxID, limit) {
 
     var peerID = AppPeersManager.getPeerID(inputPeer),
@@ -743,6 +802,17 @@ angular.module('myApp.services', [])
       resultPending = historyStorage.pending.slice();
     }
 
+    var unreadLimit = false;
+    if (!limit && !maxID) {
+      var foundDialog = getDialogByPeerID(peerID);
+      if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 0) {
+        unreadLimit = foundDialog[0].unread_count;
+        limit = Math.max(20, unreadLimit + 2);
+      }
+    }
+    if (!limit) {
+      limit = 20;
+    }
 
     if (maxID > 0) {
       for (offset = 0; offset < historyStorage.history.length; offset++) {
@@ -751,7 +821,6 @@ angular.module('myApp.services', [])
         }
       }
     }
-    // console.log('history storage', angular.copy(historyStorage.history), maxID, offset);
 
     if (historyStorage.count !== null && (
       historyStorage.history.length >= offset + limit ||
@@ -759,26 +828,12 @@ angular.module('myApp.services', [])
     )) {
       return $q.when({
         count: historyStorage.count,
-        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit))
+        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
+        unreadLimit: unreadLimit
       });
     }
 
-    var deferred = $q.defer();
-
-    MtpApiManager.invokeApi('messages.getHistory', {
-      peer: inputPeer,
-      offset: offset,
-      limit: limit,
-      max_id: maxID || 0
-    }).then(function (historyResult) {
-      AppUsersManager.saveApiUsers(historyResult.users);
-      AppChatsManager.saveApiChats(historyResult.chats);
-      saveMessages(historyResult.messages);
-
-      historyStorage.count = historyResult._ == 'messages.messagesSlice'
-        ? historyResult.count
-        : historyResult.messages.length;
-
+    return fillHistoryStorage(inputPeer, maxID, limit, historyStorage).then(function () {
       offset = 0;
       if (maxID > 0) {
         for (offset = 0; offset < historyStorage.history.length; offset++) {
@@ -788,23 +843,12 @@ angular.module('myApp.services', [])
         }
       }
 
-      // console.log('history storage after', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
-
-      historyStorage.history.splice(offset, historyStorage.history.length - offset);
-      angular.forEach(historyResult.messages, function (message) {
-        historyStorage.history.push(message.id);
-      });
-      // console.log('history storage final', angular.copy(historyStorage.history), historyResult.messages, maxID, offset);
-
-      deferred.resolve({
+      return {
         count: historyStorage.count,
-        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit))
-      });
-    }, function (error) {
-      deferred.reject(error);
+        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
+        unreadLimit: unreadLimit
+      };
     });
-
-    return deferred.promise;
   }
 
   function getSearch (inputPeer, query, inputFilter, maxID, limit) {
@@ -1072,18 +1116,27 @@ angular.module('myApp.services', [])
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        attachType;
+        attachType, fileName, fileName;
 
     if (!options.isMedia) {
       attachType = 'doc';
+      fileName = 'doc.' + file.type.split('/')[1];
     } else if (['image/jpeg', 'image/gif', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
       attachType = 'photo';
+      fileName = 'photo.' + file.type.split('/')[1];
     } else if (file.type.substr(0, 6) == 'video/') {
       attachType = 'video';
+      fileName = 'video.mp4';
     } else if (file.type == 'audio/mpeg' || file.type == 'audio/mp3') {
       attachType = 'audio';
+      fileName = 'audio.mp3';
     } else {
       attachType = 'doc';
+      fileName = 'doc.' + file.type.split('/')[1];
+    }
+
+    if (!file.name) {
+      file.name = fileName;
     }
 
     if (historyStorage === undefined) {
@@ -1112,6 +1165,21 @@ angular.module('myApp.services', [])
         random_id: randomIDS,
         pending: true
       };
+
+      var toggleError = function (on) {
+        var historyMessage = messagesForHistory[messageID];
+        if (on) {
+          message.error = true;
+          if (historyMessage) {
+            historyMessage.error = true;
+          }
+        } else {
+          delete message.error;
+          if (historyMessage) {
+            delete historyMessage.error;
+          }
+        }
+      }
 
       message.send = function () {
         MtpApiFileManager.uploadFile(file).then(function (inputFile) {

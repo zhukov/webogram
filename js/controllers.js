@@ -447,12 +447,12 @@ angular.module('myApp.controllers', [])
           inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
-        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, startLimit);
+        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
 
-        offset += startLimit;
+        offset += historyResult.history.length;
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
 
@@ -461,6 +461,15 @@ angular.module('myApp.controllers', [])
           $scope.history.push(AppMessagesManager.wrapForHistory(id));
         });
         $scope.history.reverse();
+
+        if (historyResult.unreadLimit) {
+          $scope.historyUnread = {
+            beforeID: historyResult.history[historyResult.unreadLimit - 1],
+            count: historyResult.unreadLimit
+          };
+        } else {
+          $scope.historyUnread = {};
+        }
 
         safeReplaceObject($scope.state, {loaded: true});
 
@@ -589,6 +598,8 @@ angular.module('myApp.controllers', [])
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
         $scope.typing = {};
         $scope.$broadcast('ui_history_append', {my: addedMessage.my});
+        $scope.historyUnread = {};
+
         offset++;
 
         // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
@@ -728,7 +739,7 @@ angular.module('myApp.controllers', [])
       // console.trace('ctrl text changed', newVal);
       AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
-      if (newVal.length) {
+      if (newVal && newVal.length) {
         var backupDraftObj = {};
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         AppConfigManager.set(backupDraftObj);

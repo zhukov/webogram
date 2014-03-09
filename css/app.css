@@ -256,7 +256,7 @@ input[type="number"]::-webkit-inner-spin-button {
   vertical-align: text-top;
 
   background: url(../img/icons/IconsetW.png?1) -15px -419px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.6;
 }
 .is_1x .icon-back {
@@ -511,7 +511,7 @@ input[type="number"]::-webkit-inner-spin-button {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -535,7 +535,7 @@ input[type="number"]::-webkit-inner-spin-button {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -788,7 +788,7 @@ a.im_dialog:hover .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png?1) -17px -444px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -896,6 +896,13 @@ a.im_dialog:hover .im_dialog_date {
   opacity: 0;
 }*/
 
+.im_message_unread_split {
+  background: #E9EBED;
+  text-align: center;
+  padding: 4px 10px;
+  margin: 10px 0;
+}
+
 
 
 .im_message_author {
@@ -987,7 +994,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png?1) -14px -389px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -1015,7 +1022,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -229px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1032,6 +1039,7 @@ div.im_message_video_thumb {
 .im_history_selectable .im_message_outer_wrap:hover .icon-photo,
 .im_history_selectable .im_message_outer_wrap:hover .icon-video {
   background-color: #dae6f0;
+  background-position: -2px -542px;
 }
 
 .im_message_document_info {
@@ -1076,7 +1084,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -2px -277px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1335,7 +1343,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -12px -68px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1363,7 +1371,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -10px -4px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1413,7 +1421,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -9px -132px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -1833,7 +1841,7 @@ img.img_fullsize {
 .emoji-menu-tail {
   display: none;
   background: url(../img/icons/IconsetW.png?1) -14px -268px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
@@ -1984,7 +1992,7 @@ img.img_fullsize {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png?1) -6px -205px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -2008,7 +2016,7 @@ img.img_fullsize {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png?1) -15px -192px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2085,7 +2093,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   width: 17px;
   height: 15px;
   background: url(../img/icons/IconsetW.png?1) -13px -366px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -2183,7 +2191,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 15px;
 
   background: url(../img/icons/IconsetW.png?1) -15px -319px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
 }
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png?2);
@@ -2230,7 +2238,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png?1) -9px -516px no-repeat;
-  background-size: 42px 560px;
+  background-size: 42px 620px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png?2);

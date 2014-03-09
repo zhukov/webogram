@@ -315,6 +315,16 @@
 			Following code was modified by Igor Zhukov, in order to improve rich text paste
 		*/
 	EmojiArea_WYSIWYG.prototype.onPaste = function(e) {
+		var cData = (e.originalEvent || e).clipboardData,
+				items = cData && cData.items || [],
+				i;
+		for (i = 0; i < items.length; i++) {
+			if (items[i].kind == 'file') {
+				e.preventDefault();
+				return true;
+			}
+		}
+
 		var text = (e.originalEvent || e).clipboardData.getData('text/plain'),
 				self = this;
 		setTimeout(function () {
