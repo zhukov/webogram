@@ -4,6 +4,16 @@ var pj = require('./package.json');
 var $ = require('gulp-load-plugins')();
 var concat = require('gulp-concat');
 
+gulp.task('usemin', ['templates'], function() {
+  return gulp.src('app/index.html')
+    .pipe($.usemin({
+      html: [$.minifyHtml({empty: true})],
+      js: ['concat', $.rev()],
+      css: [$.minifyCss(), 'concat']
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
 // The generated file is being created at src 
 // so it can be fetched by usemin.
 gulp.task('templates', function() {
@@ -35,6 +45,23 @@ gulp.task('copy', function() {
   );
 });
 
+gulp.task('compress-dist', ['add-csp'], function() {
+  return es.concat( 
+    gulp.src('dist/*')
+      .pipe($.zip('webogram_v' + pj.version + '.zip'))
+      .pipe(gulp.dest('package')),
+    gulp.src('package/*.zip')
+      .pipe(gulp.dest('.')),
+    gulp.src('package/**/*').pipe($.clean())
+  );
+});
+
+gulp.task('add-csp', ['build'], function() {
+  return gulp.src('dist/index.html')
+    .pipe($.replace('<html lang=en ng-app=myApp>', '<html lang=en ng-app=myApp ng-csp="">'))
+    .pipe(gulp.dest('dist'));
+});
+
 gulp.task('update-version-manifests', function() {
  return gulp.src(['app/manifest.webapp', 'app/manifest.json'])
     .pipe($.replace(/"version": ".*",/, '"version": "' + pj.version + '",'))
@@ -54,34 +81,14 @@ gulp.task('update-version-comments', function() {
   .pipe(gulp.dest('app'));
 });
 
-gulp.task('usemin', ['templates'], function() {
-  return gulp.src('app/index.html')
-    .pipe($.usemin({
-      html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.rev()],
-      css: [$.minifyCss(), 'concat']
-    }))
-    .pipe(gulp.dest('dist'));
-});
 
 gulp.task('clean', function() {
   return gulp.src('dist').pipe($.clean());
 });
 
-gulp.task('compress-dist', function() {
-  return es.concat( 
-    gulp.src('dist/*')
-      .pipe($.zip('webogram_v' + pj.version + '.zip'))
-      .pipe(gulp.dest('package')),
-    gulp.src('package/*.zip')
-      .pipe(gulp.dest('.')),
-    gulp.src('package/**/*').pipe($.clean())
-  );
-});
-
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
 gulp.task('build', ['templates', 'usemin', 'copy']);
-gulp.task('package', ['build', 'compress-dist']);
+gulp.task('package', ['compress-dist']);
 
 gulp.task('default', ['clean'], function() {
   gulp.start('build');
