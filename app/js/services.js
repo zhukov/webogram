@@ -805,7 +805,7 @@ angular.module('myApp.services', [])
     var unreadLimit = false;
     if (!limit && !maxID) {
       var foundDialog = getDialogByPeerID(peerID);
-      if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 0) {
+      if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 1) {
         unreadLimit = foundDialog[0].unread_count;
         limit = Math.max(20, unreadLimit + 2);
       }
