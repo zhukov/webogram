@@ -438,7 +438,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
       $(document).on('paste', onPasteEvent);
-      $('.emoji-wysiwyg-editor.form-control').bind('DOMNodeInserted', onPastedImageEvent);
+      if (richTextarea) {
+        $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
+      }
 
       scope.$on('ui_peer_change', focusField);
       scope.$on('ui_history_focus', focusField);
@@ -451,7 +453,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
         $(document).off('paste', onPasteEvent);
-        $('.emoji-wysiwyg-editor.form-control').unbind('DOMNodeInserted', onPastedImageEvent);
+        if (richTextarea) {
+          $(richTextarea).off('DOMNodeInserted', onPastedImageEvent);
+        }
       });
 
       focusField();
