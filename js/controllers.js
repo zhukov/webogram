@@ -598,7 +598,9 @@ angular.module('myApp.controllers', [])
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
         $scope.typing = {};
         $scope.$broadcast('ui_history_append', {my: addedMessage.my});
-        $scope.historyUnread = {};
+        if (addedMessage.my) {
+          $scope.historyUnread = {};
+        }
 
         offset++;
 
