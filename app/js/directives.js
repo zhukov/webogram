@@ -438,6 +438,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
       $(document).on('paste', onPasteEvent);
+      if (richTextarea) {
+        $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
+      }
 
       scope.$on('ui_peer_change', focusField);
       scope.$on('ui_history_focus', focusField);
@@ -450,6 +453,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
         $(document).off('paste', onPasteEvent);
+        if (richTextarea) {
+          $(richTextarea).off('DOMNodeInserted', onPastedImageEvent);
+        }
       });
 
       focusField();
@@ -459,6 +465,31 @@ angular.module('myApp.directives', ['myApp.filters'])
           editorElement.focus();
         });
       }
+
+      function onPastedImageEvent (e) {
+        var element = e && e.target;
+        var src;
+        if (element && (src = element.src) && src.indexOf('data') === 0) {
+          element.parentNode.removeChild(element);
+          src = src.substr(5).split(';');
+          var contentType = src[0];
+          var base64 = atob(src[1].split(',')[1]);
+          var array = new Uint8Array(base64.length);
+
+          for (var i = 0; i < base64.length; i++) {
+            array[i] = base64.charCodeAt(i);
+          }
+
+          var blob = new Blob([array], {type: contentType});
+
+          if (safeConfirm('Are you sure to send file(s) from clipboard?')) {
+            scope.$apply(function () {
+              scope.draftMessage.files = [blob];
+              scope.draftMessage.isMedia = true;
+            });
+          }
+        }
+      };
 
       function onPasteEvent (e) {
         var cData = (e.originalEvent || e).clipboardData,
