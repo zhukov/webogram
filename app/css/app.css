@@ -1741,7 +1741,7 @@ img.img_fullsize {
   z-index: 999;
   width: 220px;
   margin-left: -107px;
-  margin-top: -245px;
+  margin-top: -252px;
   overflow: hidden;
 
   border: 1px #dfdfdf solid;
@@ -1755,19 +1755,22 @@ img.img_fullsize {
 }
 .emoji-items-wrap1 {
   background: #FFF;
-  padding: 8px 2px 5px 5px;
+  padding: 5px 2px 5px 5px;
 }
 .emoji-items-wrap1 .emoji-menu-tabs {
     width: 100%;
+    margin-bottom: 8px;
+    margin-top: 3px;
 }
 .emoji-items-wrap1 .emoji-menu-tabs td {
     text-align: center;
     color: white;
+    line-height: 0;
 }
 .emoji-menu-tabs .emoji-menu-tab {
   display: inline-block;
   width: 24px;
-  height: 24px;
+  height: 29px;
   background: url(../img/icons/IconsetSmiles.png) no-repeat;
   background-size: 42px 350px;
 }
@@ -1780,8 +1783,8 @@ img.img_fullsize {
 .emoji-menu-tabs .icon-flower {background-position: -9px -145px; }
 .emoji-menu-tabs .icon-flower-selected {background-position: -9px -118px; }
 
-.emoji-menu-tabs .icon-bell {background-position: -9px -90px; }
-.emoji-menu-tabs .icon-bell-selected {background-position: -9px -62px; }
+.emoji-menu-tabs .icon-bell {background-position: -9px -89px; }
+.emoji-menu-tabs .icon-bell-selected {background-position: -9px -61px; }
 
 .emoji-menu-tabs .icon-car {background-position: -9px -196px; }
 .emoji-menu-tabs .icon-car-selected {background-position: -9px -170px; }
