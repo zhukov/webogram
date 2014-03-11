@@ -121,7 +121,7 @@
           </a>
 
           <div ng-switch-when="messageMediaDocument" class="im_message_document" ng-class="{im_message_document_thumbed: !!historyMessage.media.document.thumb}">
-            <a href="" ng-click="openDoc(historyMessage.media.document.id, false, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
+            <a href=""  ng-click="openDoc(historyMessage.media.document.id, false, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
               <i class="icon icon-document" ng-if="!historyMessage.media.document.thumb"></i>
               <div class="im_message_document_thumb_wrap" ng-if="historyMessage.media.document.thumb">
                 <img
