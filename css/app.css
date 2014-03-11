@@ -1043,16 +1043,37 @@ div.im_message_video_thumb {
   background-position: -2px -542px;
 }
 
+.im_message_document_link_disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
 .im_message_document_info {
   float: left;
 }
 
-
-.im_message_document_thumb {
+.im_message_document_thumb_wrap {
   border-radius: 2px;
   overflow: hidden;
+  background: #f2f2f2;
+  width: 100px;
+  min-height: 38px;
+  max-height: 100px;
+  margin-right: 10px;
+  text-align: center;
+  float: left;
+  line-height: 0;
+}
+img.im_message_document_thumb {
   max-width: 100px;
   max-height: 100px;
+  vertical-align: middle;
+  /*-webkit-filter: blur(1px);
+  -moz-filter: blur(1px);
+  -o-filter: blur(1px);
+  -ms-filter: blur(1px);
+  filter: blur(1px);
+  filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='1');*/
 }
 .im_message_document_name_wrap {
   overflow: hidden;
@@ -1061,6 +1082,7 @@ div.im_message_video_thumb {
   width: 290px;
   padding: 0 0 1px;
 }
+
 
 .im_message_document_name {
   color: #222;
@@ -1075,6 +1097,9 @@ div.im_message_video_thumb {
 .im_message_document_size {
   color: #999;
   padding-left: 2px;
+}
+.im_message_document_actions a {
+  margin-right: 10px;
 }
 
 .icon-audio {
@@ -1128,6 +1153,16 @@ div.im_message_video_thumb {
 .im_message_download_progress_wrap {
   margin-top: 5px;
   width: 290px;
+}
+
+.im_message_document_thumbed .im_message_document_name_wrap,
+.im_message_document_thumbed .im_message_audio_name_wrap,
+.im_message_document_thumbed .im_message_upload_progress_wrap,
+.im_message_document_thumbed .im_message_download_progress_wrap {
+  width: 230px;
+}
+.im_message_document_thumbed .im_message_document_name {
+  max-width: 150px;
 }
 
 .tg_up_progress,
@@ -1741,7 +1776,7 @@ img.img_fullsize {
   z-index: 999;
   width: 220px;
   margin-left: -107px;
-  margin-top: -245px;
+  margin-top: -252px;
   overflow: hidden;
 
   border: 1px #dfdfdf solid;
@@ -1755,19 +1790,22 @@ img.img_fullsize {
 }
 .emoji-items-wrap1 {
   background: #FFF;
-  padding: 8px 2px 5px 5px;
+  padding: 5px 2px 5px 5px;
 }
 .emoji-items-wrap1 .emoji-menu-tabs {
     width: 100%;
+    margin-bottom: 8px;
+    margin-top: 3px;
 }
 .emoji-items-wrap1 .emoji-menu-tabs td {
     text-align: center;
     color: white;
+    line-height: 0;
 }
 .emoji-menu-tabs .emoji-menu-tab {
   display: inline-block;
   width: 24px;
-  height: 24px;
+  height: 29px;
   background: url(../img/icons/IconsetSmiles.png) no-repeat;
   background-size: 42px 350px;
 }
@@ -1780,8 +1818,8 @@ img.img_fullsize {
 .emoji-menu-tabs .icon-flower {background-position: -9px -145px; }
 .emoji-menu-tabs .icon-flower-selected {background-position: -9px -118px; }
 
-.emoji-menu-tabs .icon-bell {background-position: -9px -90px; }
-.emoji-menu-tabs .icon-bell-selected {background-position: -9px -62px; }
+.emoji-menu-tabs .icon-bell {background-position: -9px -89px; }
+.emoji-menu-tabs .icon-bell-selected {background-position: -9px -61px; }
 
 .emoji-menu-tabs .icon-car {background-position: -9px -196px; }
 .emoji-menu-tabs .icon-car-selected {background-position: -9px -170px; }

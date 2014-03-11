@@ -1119,8 +1119,8 @@ angular.module('myApp.services', [])
         attachType, fileName, fileName;
 
     if (!options.isMedia) {
-      attachType = 'doc';
-      fileName = 'doc.' + file.type.split('/')[1];
+      attachType = 'document';
+      fileName = 'document.' + file.type.split('/')[1];
     } else if (['image/jpeg', 'image/gif', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
       attachType = 'photo';
       fileName = 'photo.' + file.type.split('/')[1];
@@ -1131,8 +1131,8 @@ angular.module('myApp.services', [])
       attachType = 'audio';
       fileName = 'audio.mp3';
     } else {
-      attachType = 'doc';
-      fileName = 'doc.' + file.type.split('/')[1];
+      attachType = 'document';
+      fileName = 'document.' + file.type.split('/')[1];
     }
 
     if (!file.name) {
@@ -1197,7 +1197,7 @@ angular.module('myApp.services', [])
               inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0};
               break;
 
-            case 'doc':
+            case 'document':
             default:
               inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
           }
@@ -1935,7 +1935,7 @@ angular.module('myApp.services', [])
         height = 100,
         thumbPhotoSize = doc.thumb,
         thumb = {
-          placeholder: 'img/placeholders/DocThumbConversation.jpg',
+          // placeholder: 'img/placeholders/DocThumbConversation.jpg',
           width: width,
           height: height
         };
@@ -1952,13 +1952,15 @@ angular.module('myApp.services', [])
     } else {
       thumb = false;
     }
-
     doc.thumb = thumb;
+
+    doc.canDownload = !(window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry);
+    doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/|application\/pdf)/);
 
     return docsForHistory[docID] = doc;
   }
 
-  function openDoc (docID, accessHash) {
+  function openDoc (docID, accessHash, popup) {
     var doc = docs[docID],
         historyDoc = docsForHistory[docID] || doc || {},
         inputFileLocation = {
@@ -1999,6 +2001,11 @@ angular.module('myApp.services', [])
     } else {
       MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, null, {mime: doc.mime_type}).then(function (url) {
         delete historyDoc.progress;
+
+        if (popup) {
+          window.open(url, '_blank');
+          return
+        }
 
         var a = $('<a>Download</a>').css({position: 'absolute', top: 1, left: 1}).attr('href', url).attr('target', '_blank').attr('download', doc.file_name).appendTo('body');
         a[0].dataset.downloadurl = ['png', doc.file_name, url].join(':');
