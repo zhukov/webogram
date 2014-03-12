@@ -550,6 +550,7 @@ angular.module('myApp.controllers', [])
           var inputPeer = AppPeersManager.getInputPeer(peerString);
           AppMessagesManager.forwardMessages(selectedMessageIDs, inputPeer).then(function () {
             selectedCancel();
+            $rootScope.$broadcast('history_focus', {peerString: peerString});
           });
         });
 
