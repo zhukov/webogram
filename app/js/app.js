@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.1 - messaging web application for MTProto
+ * Webogram v0.0.19 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -30,10 +30,12 @@ angular.module('myApp', [
   'ngAnimate',
   'ngSanitize',
   'ui.bootstrap',
-  'partials',
+  'mtproto.services',
   'myApp.filters',
   'myApp.services',
-  'mtproto.services',
+  /*PRODUCTION_ONLY_BEGIN
+  'myApp.templates',
+  PRODUCTION_ONLY_END*/
   'myApp.directives',
   'myApp.controllers'
 ]).

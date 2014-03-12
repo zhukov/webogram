@@ -4,7 +4,20 @@ var pj = require('./package.json');
 var $ = require('gulp-load-plugins')();
 var concat = require('gulp-concat');
 
-gulp.task('usemin', ['templates'], function() {
+
+// The generated file is being created at src
+// so it can be fetched by usemin.
+gulp.task('templates', function() {
+  return gulp.src('app/partials/*.html')
+    .pipe($.angularTemplatecache('templates.js', {
+      root: 'partials',
+      module: 'myApp.templates',
+      standalone: true
+    }))
+    .pipe(gulp.dest('app/js'));
+});
+
+gulp.task('usemin', ['templates', 'enable-production'], function() {
   return gulp.src('app/index.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
@@ -12,18 +25,6 @@ gulp.task('usemin', ['templates'], function() {
       css: [$.minifyCss(), 'concat']
     }))
     .pipe(gulp.dest('dist'));
-});
-
-// The generated file is being created at src 
-// so it can be fetched by usemin.
-gulp.task('templates', function() {
-  return gulp.src('app/partials/*.html')
-    .pipe($.angularTemplatecache('partials.js', {
-      root: 'partials',
-      module: 'partials',
-      standalone: true
-    }))
-    .pipe(gulp.dest('app/js'));
 });
 
 gulp.task('copy', function() {
@@ -46,13 +47,13 @@ gulp.task('copy', function() {
 });
 
 gulp.task('compress-dist', ['add-csp'], function() {
-  return es.concat( 
-    gulp.src('dist/*')
-      .pipe($.zip('webogram_v' + pj.version + '.zip'))
-      .pipe(gulp.dest('package')),
-    gulp.src('package/*.zip')
-      .pipe(gulp.dest('.'))
-  );
+  return gulp.src('dist/**/*')
+    .pipe($.zip('webogram_v' + pj.version + '.zip'))
+    .pipe(gulp.dest('releases'));
+});
+
+gulp.task('cleanup-dist', ['compress-dist'], function() {
+  return gulp.src(['releases/**/*', '!releases/*.zip']).pipe($.clean());
 });
 
 gulp.task('add-csp', ['build'], function() {
@@ -74,22 +75,48 @@ gulp.task('update-version-settings', function() {
 });
 
 gulp.task('update-version-comments', function() {
- return gulp.src('app/**/*')
-  .pipe($.grepStream('Webogram v'))
+ return gulp.src('app/**/*.js')
   .pipe($.replace(/Webogram v[0-9.]*/, 'Webogram v' +  pj.version))
   .pipe(gulp.dest('app'));
 });
 
 
+gulp.task('enable-production', function() {
+ return es.concat(
+  gulp.src('app/**/*.html')
+    .pipe($.replace(/PRODUCTION_ONLY_BEGIN/g, 'PRODUCTION_ONLY_BEGIN-->'))
+    .pipe($.replace(/PRODUCTION_ONLY_END/, '<!--PRODUCTION_ONLY_END'))
+    .pipe(gulp.dest('app')),
+  gulp.src('app/**/*.js')
+    .pipe($.replace(/PRODUCTION_ONLY_BEGIN(\*\/)?/g, 'PRODUCTION_ONLY_BEGIN*/'))
+    .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, '/*PRODUCTION_ONLY_END'))
+    .pipe(gulp.dest('app'))
+  );
+});
+
+gulp.task('disable-production', function() {
+ return es.concat(
+  gulp.src('app/index.html')
+    .pipe($.replace(/PRODUCTION_ONLY_BEGIN-->/g, 'PRODUCTION_ONLY_BEGIN'))
+    .pipe($.replace(/<!--PRODUCTION_ONLY_END/g, 'PRODUCTION_ONLY_END'))
+    .pipe(gulp.dest('app')),
+  gulp.src('app/**/*.js')
+    .pipe($.replace(/PRODUCTION_ONLY_BEGIN(\*\/)?/g, 'PRODUCTION_ONLY_BEGIN'))
+    .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, 'PRODUCTION_ONLY_END'))
+    .pipe(gulp.dest('app'))
+  );
+});
+
+
 gulp.task('clean', function() {
-  return gulp.src('dist').pipe($.clean());
+  return gulp.src(['dist/*', '!dist/.git']).pipe($.clean());
 });
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
-gulp.task('build', ['templates', 'usemin', 'copy']);
-gulp.task('package', ['compress-dist'], function() {
-  gulp.src('package').pipe($.clean());
+gulp.task('build', ['templates', 'usemin', 'copy'], function () {
+  gulp.start('disable-production');
 });
+gulp.task('package', ['cleanup-dist']);
 
 gulp.task('default', ['clean'], function() {
   gulp.start('build');

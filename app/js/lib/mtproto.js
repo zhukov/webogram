@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.1 - messaging web application for MTProto
+ * Webogram v0.0.19 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1122,7 +1122,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
 
       console.log('PQ factorization start');
       if (!!window.Worker) {
-        var worker = new Worker('js/lib/pq_worker.js?1');
+        var worker = new Worker('js/lib/pq_worker.js');
 
         worker.onmessage = function (e) {
           auth.p = e.data[0];
@@ -1416,7 +1416,7 @@ factory('MtpAesService', function ($q) {
     };
   }
 
-  var worker = new Worker('js/lib/aes_worker.js?2'),
+  var worker = new Worker('js/lib/aes_worker.js'),
       taskID = 0,
       awaiting = {};
 
@@ -1468,7 +1468,7 @@ factory('MtpSha1Service', function ($q) {
     };
   }
 
-  var worker = new Worker('js/lib/sha1_worker.js?2'),
+  var worker = new Worker('js/lib/sha1_worker.js'),
       taskID = 0,
       awaiting = {};
 

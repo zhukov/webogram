@@ -1,6 +1,6 @@
 {
   "name": "webogram",
-  "version": "0.0.1",
+  "version": "0.0.19",
   "description": "UNOFFICIAL Telegram Web App.",
   "main": "server.js",
   "scripts": {
