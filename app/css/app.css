@@ -818,6 +818,14 @@ a.im_dialog:hover .im_dialog_date {
   -webkit-user-select: text;
 }
 
+.im_history_empty {
+  padding: 100px 50px 0;
+
+  text-align: center;
+  color: #999;
+  font-size: 1.5em;
+}
+
 .im_history_to_bottom {
   position: relative;
 }
@@ -2510,4 +2518,3 @@ ce671b orange
 .user_color_7:hover {color: #2996ad;}
 .user_color_8,
 .user_color_8:hover {color: #ce671b;}
-

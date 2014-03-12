@@ -337,6 +337,7 @@ angular.module('myApp.controllers', [])
     StatusManager.start();
 
     $scope.history = [];
+    $scope.historyEmpty = false;
     $scope.mediaType = false;
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
@@ -449,10 +450,14 @@ angular.module('myApp.controllers', [])
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
+      $scope.historyEmpty = false;
+
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
 
         offset += historyResult.history.length;
+        $scope.historyEmpty = !historyResult.count;
+
         hasMore = offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
 
