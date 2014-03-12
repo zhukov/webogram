@@ -290,7 +290,7 @@ angular.module('myApp.services', [])
     scope.userID = userID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/user_modal.html?2',
+      templateUrl: 'partials/user_modal.html',
       controller: 'UserModalController',
       scope: scope,
       windowClass: 'user_modal_window'
@@ -444,7 +444,7 @@ angular.module('myApp.services', [])
     scope.chatID = chatID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html?4',
+      templateUrl: 'partials/chat_modal.html',
       controller: 'ChatModalController',
       windowClass: 'chat_modal_window',
       scope: scope
@@ -1792,7 +1792,7 @@ angular.module('myApp.services', [])
     scope.photoID = photoID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/photo_modal.html?1',
+      templateUrl: 'partials/photo_modal.html',
       controller: 'PhotoModalController',
       scope: scope
     });
@@ -1892,7 +1892,7 @@ angular.module('myApp.services', [])
     scope.player = {};
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/video_modal.html?1',
+      templateUrl: 'partials/video_modal.html',
       controller: 'VideoModalController',
       scope: scope
     });

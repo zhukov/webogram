@@ -1,10 +1,11 @@
 .DS_Store
 .idea
+*.sublime-workspace
 
 # Node.js package manager
-/node_modules
-/npm-debug.log
+node_modules
+npm-debug.log
 dist
-package_dist
+releases
 webogram*.zip
-*.sublime-workspace
+app/js/templates.js

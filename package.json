@@ -1,0 +1,36 @@
+{
+  "name": "webogram",
+  "version": "0.0.19",
+  "description": "UNOFFICIAL Telegram Web App.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhukov/webogram.git"
+  },
+  "author": "zhukov",
+  "license": "GPL",
+  "bugs": {
+    "url": "https://github.com/zhukov/webogram/issues"
+  },
+  "homepage": "http://zhukov.github.io/webogram",
+  "devDependencies": {
+    "gulp": "~3.5.5",
+    "gulp-angular-templatecache": "^1.1.0",
+    "gulp-load-plugins": "^0.4.0",
+    "gulp-usemin": "^0.3.3",
+    "gulp-uglify": "^0.2.1",
+    "gulp-rev": "^0.3.0",
+    "gulp-minify-css": "^0.3.0",
+    "gulp-minify-html": "^0.1.1",
+    "gulp-imagemin": "^0.1.5",
+    "gulp-clean": "^0.2.4",
+    "gulp-replace": "^0.2.0",
+    "gulp-concat": "^2.1.7",
+    "gulp-grep-stream": "0.0.2",
+    "event-stream": "^3.1.0",
+    "gulp-zip": "^0.1.2"
+  }
+}

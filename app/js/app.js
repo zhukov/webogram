@@ -30,9 +30,12 @@ angular.module('myApp', [
   'ngAnimate',
   'ngSanitize',
   'ui.bootstrap',
+  'mtproto.services',
   'myApp.filters',
   'myApp.services',
-  'mtproto.services',
+  /*PRODUCTION_ONLY_BEGIN
+  'myApp.templates',
+  PRODUCTION_ONLY_END*/
   'myApp.directives',
   'myApp.controllers'
 ]).
@@ -63,9 +66,9 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
 
 
   // $locationProvider.html5Mode(true);
-  $routeProvider.when('/', {templateUrl: 'partials/welcome.html?4', controller: 'AppWelcomeController'});
-  $routeProvider.when('/login', {templateUrl: 'partials/login.html?5', controller: 'AppLoginController'});
-  $routeProvider.when('/im', {templateUrl: 'partials/im.html?13', controller: 'AppIMController', reloadOnSearch: false});
+  $routeProvider.when('/', {templateUrl: 'partials/welcome.html', controller: 'AppWelcomeController'});
+  $routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'AppLoginController'});
+  $routeProvider.when('/im', {templateUrl: 'partials/im.html', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
 }]);
