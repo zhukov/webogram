@@ -51,8 +51,7 @@ gulp.task('compress-dist', ['add-csp'], function() {
       .pipe($.zip('webogram_v' + pj.version + '.zip'))
       .pipe(gulp.dest('package')),
     gulp.src('package/*.zip')
-      .pipe(gulp.dest('.')),
-    gulp.src('package/**/*').pipe($.clean())
+      .pipe(gulp.dest('.'))
   );
 });
 
@@ -88,7 +87,9 @@ gulp.task('clean', function() {
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
 gulp.task('build', ['templates', 'usemin', 'copy']);
-gulp.task('package', ['compress-dist']);
+gulp.task('package', ['compress-dist'], function() {
+  gulp.src('package').pipe($.clean());
+});
 
 gulp.task('default', ['clean'], function() {
   gulp.start('build');
