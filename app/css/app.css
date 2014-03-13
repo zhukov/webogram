@@ -1899,18 +1899,12 @@ img.img_fullsize {
 
 
 .emoji-menu .nano > .pane {
-  background : rgba(255,255,255,.0);
+  background : rgba(255,255,255,0.0);
   right: -2px;
 }
 .emoji-menu .nano > .pane > .slider {
-  /*background: rgba(255,255,255,0.4);*/
   background: #d1d1d1;
   margin: 0 3px 0 4px;
-  /*background: #A5B1B9;*/
-  /*margin: 0 5px;*/
-  /*-moz-border-radius    : 0;
-  -webkit-border-radius : 0;
-  border-radius         : 0;*/
 }
 
 
