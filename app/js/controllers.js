@@ -949,7 +949,7 @@ angular.module('myApp.controllers', [])
     $scope.$watch('photo.file', onPhotoSelected);
 
     function onPhotoSelected (photo) {
-      if (!photo || !photo.hasOwnProperty('name')) {
+      if (!photo || !photo.type || photo.type.indexOf('image') !== 0) {
         return;
       }
       $scope.photo.updating = true;
@@ -1014,7 +1014,7 @@ angular.module('myApp.controllers', [])
     $scope.$watch('photo.file', onPhotoSelected);
 
     function onPhotoSelected (photo) {
-      if (!photo || !photo.hasOwnProperty('name')) {
+      if (!photo || !photo.type || photo.type.indexOf('image') !== 0) {
         return;
       }
       $scope.photo.updating = true;
