@@ -44,7 +44,9 @@ gulp.task('copy', function() {
     gulp.src('app/vendor/cryptoJS/crypto.js')
       .pipe(gulp.dest('dist/vendor/cryptoJS')),
     gulp.src('app/vendor/bootstrap/fonts/*')
-      .pipe(gulp.dest('dist/fonts'))
+      .pipe(gulp.dest('dist/fonts')),
+    gulp.src('app/js/background.js')
+      .pipe(gulp.dest('dist/js'))
   );
 });
 
