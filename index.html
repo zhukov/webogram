@@ -1,1 +1,63 @@
-<!doctype html><html lang=en ng-app=myApp><head><meta charset=utf-8><meta name=viewport content="width=device-width, user-scalable=no"><title>Webogram</title><link rel=stylesheet href=css/app.css><link rel=icon href=favicon.ico type=image/x-icon><meta property=og:title content=Webogram><meta property=og:url content="http://zhukov.github.io/webogram/"><meta property=og:image content=http://zhukov.github.io/webogram/img/logo_share.png><meta property=og:site_name content=Webogram><meta property=og:description content="Welcome to an experimental web-client of Telegram messenger. See https://github.com/zhukov/webogram for more info."></head><body><div ng-view=""></div><script src=js/app-682d6c23.js></script></body></html>
+<!doctype html>
+<html lang="en" ng-app="myApp"><!--  ng-csp=""  -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <title>Webogram</title>
+
+  <!-- build:css css/app.css -->
+  <link rel="stylesheet" href="vendor/angular/angular-csp.css"/>
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.css"/>
+  <link rel="stylesheet" href="vendor/jquery.nanoscroller/nanoscroller.css"/>
+  <link rel="stylesheet" href="css/app.css"/>
+  <!-- endbuild -->
+
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <meta property="og:title" content="Webogram">
+  <meta property="og:url" content="http://zhukov.github.io/webogram/">
+  <meta property="og:image" content="http://zhukov.github.io/webogram/img/logo_share.png">
+  <meta property="og:site_name" content="Webogram">
+  <meta property="og:description" content="Welcome to an experimental web-client of Telegram messenger. See https://github.com/zhukov/webogram for more info.">
+
+</head>
+<body>
+
+  <div ng-view></div>
+
+  <!-- build:js js/app.js -->
+  <script type="text/javascript" src="vendor/console-polyfill/console-polyfill.js"></script>
+  <script type="text/javascript" src="vendor/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="vendor/jquery.nanoscroller/nanoscroller.js"></script>
+  <script type="text/javascript" src="vendor/jquery.emojiarea/jquery.emojiarea.js"></script>
+
+  <script type="text/javascript" src="vendor/angular/angular.js"></script>
+  <script type="text/javascript" src="vendor/angular/angular-route.js"></script>
+  <script type="text/javascript" src="vendor/angular/angular-animate.js"></script>
+  <script type="text/javascript" src="vendor/angular/angular-sanitize.js"></script>
+  <script type="text/javascript" src="vendor/ui-bootstrap/ui-bootstrap-custom-tpls-0.10.0.js"></script>
+
+  <script type="text/javascript" src="vendor/jsbn/jsbn_combined.js"></script>
+  <script type="text/javascript" src="vendor/cryptoJS/crypto.js"></script>
+  <script type="text/javascript" src="vendor/zlib/gunzip.min.js"></script>
+
+
+  <script type="text/javascript" src="js/lib/config.js"></script>
+  <script type="text/javascript" src="js/lib/mtproto.js"></script>
+  <script type="text/javascript" src="js/util.js"></script>
+
+  <script type="text/javascript" src="js/app.js"></script>
+  <script type="text/javascript" src="js/services.js"></script>
+  <script type="text/javascript" src="js/controllers.js"></script>
+  <script type="text/javascript" src="js/filters.js"></script>
+
+  <!--PRODUCTION_ONLY_BEGIN
+    <script type="text/javascript" src="js/templates.js"></script>
+  PRODUCTION_ONLY_END-->
+
+  <script type="text/javascript" src="js/directives.js"></script>
+  <!-- endbuild -->
+
+
+</body>
+</html>

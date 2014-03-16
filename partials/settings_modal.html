@@ -1,0 +1,101 @@
+<div class="settings_modal_wrap">
+
+  <div class="modal-header">
+    <a class="modal-close-link" ng-click="$close()">Close</a>
+    <h4 class="modal-title">Settings</h4>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="clearfix">
+
+      <div class="settings_profile_photo_wrap pull-left">
+
+        <div class="settings_profile_photo">
+          <img
+            class="user_modal_image"
+            my-load-thumb
+            thumb="profile.photo"
+          />
+          <div class="settings_profile_photo_change_wrap">
+            <div ng-if="photo.updating" class="settings_profile_photo_loading">Updating<span my-typing-dots></span></div>
+            <div ng-if="!photo.updating">
+              <div class="settings_profile_photo_update_link">
+                <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+                Update photo
+              </div>
+              <a ng-if="profile.photo.location" href="" ng-click="deletePhoto()" class="settings_profile_photo_delete_link">Delete photo</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <form my-settings-form name="profileForm" class="settings_profile_edit_form">
+
+        <div class="form-group settings_profile_first_name" ng-class="{'has-error': error.field == 'first_name'}">
+          <label class="control-label" for="first_name">
+            <span ng-if="error.field == 'first_name'">Invalid First Name</span>
+            <span ng-if="error.field != 'first_name'">First Name</span>
+          </label>
+          <input type="text" class="form-control" name="first_name" ng-model="profile.first_name" required />
+        </div>
+
+        <div class="form-group settings_profile_last_name" ng-class="{'has-error': error.field == 'last_name'}">
+          <label class="control-label" for="last_name">
+            <span ng-if="error.field == 'last_name'">Invalid Last Name</span>
+            <span ng-if="error.field != 'last_name'">Last Name</span>
+          </label>
+          <input type="text" class="form-control" name="last_name" ng-model="profile.last_name" />
+        </div>
+
+        <div class="settings_profile_save">
+          <button class="btn btn-link settings_profile_save_btn" ng-click="save(profileForm)" ng-disabled="profileForm.$invalid || (!profileForm.last_name.$dirty &amp;&amp; !profileForm.first_name.$dirty)">Save</button>
+        </div>
+
+      </form>
+
+    </div>
+
+    <form class="settings_send_choose_form">
+      <div class="radio">
+        <label>
+          <input type="radio" value="1" ng-model="send.enter">
+          <strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" value="" ng-model="send.enter">
+          <strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line
+        </label>
+      </div>
+    </form>
+
+    <p>
+      <strong>Sound: </strong>
+      <a ng-click="notify.sound = !notify.sound">{{notify.sound ? 'ON' : 'OFF'}}</a>
+    </p>
+
+    <p>
+      <strong>Desktop Notifications: </strong>
+      <a ng-click="notify.desktop = !notify.desktop">{{notify.desktop ? 'ON' : 'OFF'}}</a>
+    </p>
+
+    <p>
+      <strong>User: </strong>
+      <span class="settings_user_phone">{{phone | phoneNumber}}</span>
+    </p>
+
+    <p>
+      <strong>Version: </strong>
+      <span class="settings_version">alpha 0.0.20</span>
+    </p>
+
+    <hr/>
+
+    <div class="settings_logout_wrap">
+      <a href="" ng-click="logOut()">Log out</a>
+    </div>
+  </div>
+</div>

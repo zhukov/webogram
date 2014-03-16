@@ -5,7 +5,7 @@
   "manifest_version": 2,
   "app": {
     "background": {
-      "scripts": ["vendor/angular/angular.js", "js/background.js"]
+      "scripts": ["js/background.js"]
     }
   },
   "permissions": [

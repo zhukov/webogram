@@ -1,0 +1,30 @@
+<div class="contacts_modal_wrap">
+
+  <div class="modal-header">
+    <a class="modal-close-link" ng-click="$close()">Close</a>
+    <h4 class="modal-title">Create Group</h4>
+  </div>
+
+  <div class="modal-body">
+
+    <form ng-submit="createGroup()">
+
+      <div class="contacts_modal_group_title">
+        <input class="form-control" my-focused type="text" placeholder="Group name" ng-model="group.name"/>
+      </div>
+
+      <div class="contacts_modal_panel clearfix">
+
+        <div class="contacts_modal_actions pull-right">
+          <button class="btn btn-default" ng-click="$dismiss()"> Cancel </button>
+
+          <button class="btn btn-success" type="submit"> Create </button>
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
