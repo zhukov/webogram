@@ -1,0 +1,221 @@
+
+<plural($n) {
+  $n == 0 ? 'zero' :
+    $n == 1 ? 'um' : 'muitos'
+}>
+
+<welcome_intro """
+<p>Bem-vindo ao web-cliente não oficial do <strong>Telegram</strong> messenger.</p>
+<p>É um alfa, o que significa que ainda não é 200% segura e funcional.</p>
+<p>Visite o <a>telegram.org</a> para saber mais.</p>
+""">
+<welcome_btn "Inicar conversa">
+
+<head_network_waiting "À espera da rede<span></span>">
+<head_network_retry "Tentar novamente">
+<head_network_connecting "Conectando<span></span>">
+
+<head_nav_toggle "Alternar navegação">
+<head_nav_back "<span></span>Voltar">
+
+<head_new_group "Novo Grupo">
+<head_contacts "Contatos">
+<head_settings "Configurações">
+<head_about "Sobre">
+
+
+<login_sign_in_title "Entrar">
+<login_phone_label "Digite seu número de telefone completo com código do país.">
+<login_phone_incorrect "Número de telefone incorreto">
+<login_phone_input
+  placeholder: "Digite seu telefone"
+>
+<login_phone_edit "editar">
+<login_btn_next "Próximo<span></span>">
+<login_btn_next_progress "Gerando chaves<span></span>">
+
+<login_code_label "Enviamos para você um código via SMS.<br/>Por favor, digite-o abaixo.">
+<login_code_dial_timeout "Telegram vai chamá-lo em <span></span>">
+<login_code_calling_you "Telegram está chamando você">
+<login_code_called_you "Telegram discou o seu número">
+<login_code_incorrect "Código SMS incorreto">
+<login_code_input
+  placeholder: "Digite o código"
+>
+
+<login_btn_sign_in "Entrar<span></span>">
+<login_btn_sing_in_progress "Verificando código<span></span>">
+
+<online "online">
+<offline "offline">
+<last_seen "Última vista {{ $date }}">
+<just_now "agora">
+
+<minutes_ago[plural($count)] {
+  zero: 'agora',
+  one: 'minuto atrás',
+  many: '{{ $count }} minutos atrás'
+}>
+
+<hours_ago[plural($count)] {
+  zero: 'agora',
+  one: '1 hora atrás',
+  many: '{{ $count }} horas atrás'
+}>
+
+
+<im_dialogs_search_input
+  placeholder: "Pesquisar"
+>
+
+<im_history_not_selected "Histórico vazio">
+<im_history_loading "Carregando histórico<span></span>">
+
+<im_peer_info "Informações">
+
+<im_history_edit "Editar">
+<im_history_edit_flush "Limpar Histórico">
+<im_history_edit_cancel "Cancelar">
+<im_history_forward "Encaminhar <strong></strong>">
+<im_history_delete "Apagar <strong></strong>">
+
+<im_history_media "Mídia<i></i>">
+<im_history_media_photos "Fotos">
+<im_history_media_videos "Vídeos">
+<im_history_media_documents "Documentos">
+<im_history_media_missed "Mostrar todas as mensagens<strong></strong>">
+
+<im_user_typing "<strong></strong> está digitando<span></span>">
+
+<im_send_drop_photos "Solte os arquivos aqui para enviar">
+<im_send_btn "Enviar">
+<im_send_input
+  placeholder: "Escreva uma mensagem..."
+>
+
+<im_footer "<a>Telegram alfa</a> por izhukov &amp; toberg">
+
+<im_chat_members_count[plural($count)] {
+  zero: 'Nenhum membro',
+  one: '1 membro',
+  many: '{{ $count }} membros'
+}>
+
+
+<msg_created_group "grupo criado «<strong></strong>»">
+<msg_edited_group_title "nome do grupo mudou para «<strong></strong>»">
+<msg_edited_group_photo "foto do grupo alterada">
+<msg_removed_group_photo "foto do grupo removida">
+<msg_invited_user_to_group "convidado <a></a>">
+<msg_returned_to_group "voltou ao grupo">
+<msg_kicked_user_from_group "removido <a></a>">
+<msg_left_group "deixou o grupo">
+
+<msg_send_error_try_again
+  tooltip: "Tentar novamente"
+>
+
+<msg_forwarded_header "Mensagem encaminhada de <a></a>, <span></span>">
+
+<msg_document_download "Baixar">
+
+<msg_voice_message "Mensagem de voz">
+<msg_voice_message_play "Reproduzir">
+
+<dlg_from_you "Você">
+
+<dlg_attachment_photo "Foto">
+<dlg_attachment_video "Vídeo">
+<dlg_attachment_document "Documento">
+<dlg_attachment_audio "Áudio">
+<dlg_attachment_location "Localização">
+<dlg_attachment_contact "Contato">
+
+<dlg_created_group "grupo criado «<strong></strong>»">
+<dlg_edited_group_title "nome do grupo mudou para «<strong></strong>»">
+<dlg_edited_group_photo "foto do grupo alterada">
+<dlg_removed_group_photo "foto do grupo removida">
+<dlg_invited_user_to_group "convidado <a></a>">
+<dlg_returned_to_group "voltou ao grupo">
+<dlg_kicked_user_from_group "removido <a></a>">
+<dlg_left_group "deixou o grupo">
+
+
+
+
+<mdl_close "Fechar">
+<checkbox_on_off "<span>LIGADO</span><span>DESLIGADO</span>">
+
+<mdl_group_info_title "Informações do Grupo">
+<mdl_group_photo_update "<input /> Atualizar foto">
+<mdl_group_photo_updating "Atualização<span></span>">
+<mdl_group_photo_delete "Apagar foto">
+
+<mdl_group_notifications "Notificações: <a><span>LIGADO</span><span>DESLIGADO</span></a>">
+<mdl_leave_group "Sair do grupo">
+<mdl_return_to_group "Retornar ao grupo">
+
+<mdl_group_members_count[plural($count)] {
+  zero: 'Nenhum membro',
+  one: '1 membro',
+  many: '{{ $count }} membros'
+}>
+
+<mdl_group_create_title "Criar Grupo">
+<mdl_group_create_btn "Criar">
+<mdl_group_create_cancel "Cancelar">
+
+<mdl_group_edit_title "Alterar titulo do Grupo">
+<mdl_group_edit_btn "Salvar">
+<mdl_group_edit_cancel "Cancelar">
+
+
+<mdl_participants_header "<a>Adicionar participante</a> Membros">
+<mdl_kick_participant "Expulsar">
+<mdl_participants_na "Lista de membros do grupo não está disponível.">
+
+<mdl_user_info "Informações">
+<mdl_user_send_message "Enviar mensagem">
+<mdl_user_notifications "Notificações: <a><span>LIGADO</span><span>DESLIGADO</span></a>">
+
+<mdl_settings_title "Configurações">
+<mdl_settings_photo_updating "<input /> Atualizar foto">
+<mdl_settings_photo_update "Atualização<span></span>">
+<mdl_settings_photo_delete "Apagar foto">
+
+<mdl_settings_firstname_label "Nome">
+<mdl_settings_firstname_invalid "Nome inválido">
+
+<mdl_settings_lastname_label "Sobrenome">
+<mdl_settings_lastname_invalid "Sobrenome inválido">
+
+<mdl_settings_name_save "Salvar">
+
+<mdl_settings_send_enter """
+<input />
+<strong>Enter</strong> - envia a mensagem, <strong>Shift + Enter</strong> - nova linha
+""">
+
+<mdl_settings_send_cltrenter """
+<input />
+<strong>Ctrl + Enter</strong> - envia a mensagem, <strong>Enter</strong> - nova linha
+""">
+
+<mdl_settings_sound "Som: <a><span>LIGADO</span><span>DESLIGADO</span></a>">
+<mdl_settings_desktop "Notificações na área de trabalho: <a><span>LIGADO</span><span>DESLIGADO</span></a>">
+
+<mdl_settings_current_user "Usuário: ">
+<mdl_settings_version "Versão: ">
+<mdl_settings_logout "Sair">
+
+<mdl_contacts_title "Contatos">
+<mdl_contacts_search_input
+  placeholder: "Pesquisar"
+>
+<mdl_contacts_next_btn "Próximo »">
+
+<mdl_photo_description "De: <span></span>, <span></span>">
+
+<mdl_video_description "De: <span></span>, <span></span>">
+
+
