@@ -219,7 +219,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           var unreadSplit = $('.im_message_unread_split', scrollableWrap);
           if (unreadSplit[0]) {
-            scrollableWrap.scrollTop = unreadSplit[0].offsetTop;
+            scrollableWrap.scrollTop = Math.max(0, unreadSplit[0].offsetTop - 52);
             atBottom = false;
           } else {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
