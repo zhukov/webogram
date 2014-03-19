@@ -18,5 +18,5 @@ package:
 publish:
 	rm -rf dist/*
 	cd dist && git pull origin gh-pages
-	cp -r app/* dist/
+	./node_modules/gulp/bin/gulp.js publish
 	cd dist && git add --all . && git commit -am "merged with master" && git push origin gh-pages
