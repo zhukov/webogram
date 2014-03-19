@@ -74,19 +74,19 @@ HttpServer.prototype.handleRequest_ = function(req, res) {
 function StaticServlet() {}
 
 StaticServlet.MimeMap = {
-  'txt': 'text/plain',
+  'txt':  'text/plain',
   'html': 'text/html',
-  'css': 'text/css',
-  'xml': 'application/xml',
+  'css':  'text/css',
+  'xml':  'application/xml',
   'json': 'application/json',
-  'js': 'application/javascript',
-  'jpg': 'image/jpeg',
+  'js':   'application/javascript',
+  'jpg':  'image/jpeg',
   'jpeg': 'image/jpeg',
-  'gif': 'image/gif',
-  'png': 'image/png',
-  'svg': 'image/svg+xml',
-  'wav': 'audio/wav',
-  'ico': 'image/vnd.microsoft.icon'
+  'gif':  'image/gif',
+  'png':  'image/png',
+  'svg':  'image/svg+xml',
+  'wav':  'audio/wav',
+  'ico':  'image/vnd.microsoft.icon'
 };
 
 StaticServlet.prototype.handleRequest = function(req, res) {
