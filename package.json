@@ -2,7 +2,7 @@
   "name": "webogram",
   "version": "0.0.20",
   "description": "Telegram UNOFFICIAL Web App",
-  "main": "server.js",
+  "main": "index.html",
   "scripts": {
     "start": "node server.js"
   },
