@@ -85,6 +85,7 @@ StaticServlet.MimeMap = {
   'gif': 'image/gif',
   'png': 'image/png',
   'svg': 'image/svg+xml',
+  'wav': 'audio/wav',
   'ico': 'image/vnd.microsoft.icon'
 };
 
