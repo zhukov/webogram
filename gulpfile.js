@@ -111,16 +111,32 @@ gulp.task('disable-production', function() {
   );
 });
 
+gulp.task('add-appcache-manifest', function() {
+  return gulp.src('./dist/**/*')
+    .pipe($.manifest({
+      timestamp: true,
+      network: ['http://*', 'https://*', '*'],
+      filename: 'app.manifest',
+      exclude: 'app.manifest'
+    }))
+    .pipe(gulp.dest('./dist'));
+});
+
 
 gulp.task('clean', function() {
   return gulp.src(['dist/*', '!dist/.git']).pipe($.clean());
 });
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
+
 gulp.task('build', ['templates', 'usemin', 'copy'], function () {
   gulp.start('disable-production');
 });
 gulp.task('package', ['cleanup-dist']);
+
+gulp.task('publish', ['build'], function() {
+  gulp.start('add-appcache-manifest');
+});
 
 gulp.task('default', ['clean'], function() {
   gulp.start('build');
