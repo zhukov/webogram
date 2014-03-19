@@ -1491,7 +1491,7 @@ angular.module('myApp.services', [])
     notification.image = notificationPhoto.placeholder;
     notification.key = 'msg' + message.id;
 
-    if (notificationPhoto.location) {
+    if (notificationPhoto.location && !notificationPhoto.location.empty) {
       MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
         notification.image = url;
 
