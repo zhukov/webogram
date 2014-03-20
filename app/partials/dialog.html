@@ -6,7 +6,7 @@
     </div>
     <span
       class="im_dialog_badge badge"
-      ng-show="dialogMessage.unreadCount > 0"
+      ng-show="dialogMessage.unreadCount > 0 &amp;&amp; !dialogMessage.out"
       ng-bind="dialogMessage.unreadCount"
     ></span>
     <i

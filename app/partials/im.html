@@ -107,8 +107,11 @@
 
             <div class="im_edit_panel_wrap clearfix" ng-show="selectActions" ng-class="{im_edit_panel_wrap_loaded: true}">
               <div class="im_edit_panel_border"></div>
-              <a class="im_edit_flush_link" ng-click="selectedFlush()">
+              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-show="historyPeer.id < 0">
                 Clear History
+              </a>
+              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-show="historyPeer.id > 0">
+                Delete Chat
               </a>
               <a class="im_edit_cancel_link" ng-click="selectedCancel()">
                 Cancel

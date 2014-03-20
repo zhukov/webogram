@@ -920,26 +920,25 @@ angular.module('myApp.services', [])
         historyStorage = historiesStorage[peerID],
         foundDialog = getDialogByPeerID(peerID);
 
-    if (!historyStorage ||
-        !historyStorage.history.length ||
-        foundDialog[0] && !foundDialog[0].unread_count) {
-      // console.log('bad1', historyStorage, foundDialog[0]);
-      return false;
-    }
+    if (!foundDialog[0] || !foundDialog[0].unread_count) {
 
-    var messageID,
-        message;
-    // console.log(historyStorage);
-    for (i = 0; i < historyStorage.history.length; i++) {
-      messageID = historyStorage.history[i];
-      message = messagesStorage[messageID];
-      // console.log('ms', message);
-      if (message && !message.out) {
-        if (message.unread) {
-          // console.log('unread');
+      if (!historyStorage  && !historyStorage.history.length) {
+        return false;
+      }
+
+      var messageID,
+          message,
+          foundUnread = false;
+      for (i = historyStorage.history.length; i >= 0; i--) {
+        messageID = historyStorage.history[i];
+        message = messagesStorage[messageID];
+        // console.log('ms', message);
+        if (message && !message.out && message.unread) {
+          foundUnread = true;
           break;
         }
-        // console.log('bad2', message);
+      }
+      if (!foundUnread) {
         return false;
       }
     }
@@ -959,17 +958,19 @@ angular.module('myApp.services', [])
     });
 
 
-    var messageID, message, i, peerID, foundDialog, dialog;
-    for (i = 0; i < historyStorage.history.length; i++) {
-      messageID = historyStorage.history[i];
-      message = messagesStorage[messageID];
-      if (message && !message.out) {
-        message.unread = false;
-        if (messagesForHistory[messageID]) {
-          messagesForHistory[messageID].unread = false;
-        }
-        if (messagesForDialogs[messageID]) {
-          messagesForDialogs[messageID].unread = false;
+    if (historyStorage && historyStorage.history.length) {
+      var messageID, message, i, peerID, foundDialog, dialog;
+      for (i = 0; i < historyStorage.history.length; i++) {
+        messageID = historyStorage.history[i];
+        message = messagesStorage[messageID];
+        if (message && !message.out) {
+          message.unread = false;
+          if (messagesForHistory[messageID]) {
+            messagesForHistory[messageID].unread = false;
+          }
+          if (messagesForDialogs[messageID]) {
+            messagesForDialogs[messageID].unread = false;
+          }
         }
       }
     }
@@ -2364,6 +2365,7 @@ angular.module('myApp.services', [])
         return { category: cat, row: row, column: column };
       }
     }
+    console.error('emoji not found in spritesheet', emojiCode);
     return null;
   }
 
@@ -2420,10 +2422,11 @@ angular.module('myApp.services', [])
       }
       else if (match[6]) {
 
-        if (emojiCode = emojiMap[match[6]]) {
-          emojiFound = true;
+        if ((emojiCode = emojiMap[match[6]]) &&
+            (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
+
           emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
-          emojiCoords = getEmojiSpritesheetCoords(emojiCode);
+          emojiFound = true;
           html.push(
             '<span class="emoji emoji-',
             emojiCoords.category,

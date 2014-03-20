@@ -2469,10 +2469,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   .im_page_peer_not_selected .im_dialog_message {
     display: block;
   }
-
-  .im_emoji_btn {
-    display: none;
-  }
 }
 
 
