@@ -129,7 +129,7 @@ gulp.task('clean', function() {
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
 
-gulp.task('build', ['templates', 'usemin', 'copy'], function () {
+gulp.task('build', ['usemin', 'copy'], function () {
   gulp.start('disable-production');
 });
 gulp.task('package', ['cleanup-dist']);

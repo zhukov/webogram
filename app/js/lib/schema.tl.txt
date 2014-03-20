@@ -59,6 +59,7 @@ storage.fileUnknown#aa963b05 = storage.FileType;
 storage.fileJpeg#7efe0e = storage.FileType;
 storage.fileGif#cae1aadf = storage.FileType;
 storage.filePng#a4f63c0 = storage.FileType;
+storage.filePdf#ae1e508d = storage.FileType;
 storage.fileMp3#528a0677 = storage.FileType;
 storage.fileMov#4b09ebbc = storage.FileType;
 storage.filePartial#40bc6f52 = storage.FileType;
@@ -133,7 +134,7 @@ geoPoint#2049d70c long:double lat:double = GeoPoint;
 
 auth.checkedPhone#e300cc3b phone_registered:Bool phone_invited:Bool = auth.CheckedPhone;
 
-auth.sentCode#2215bcbd phone_registered:Bool phone_code_hash:string = auth.SentCode;
+auth.sentCode#efed51d9 phone_registered:Bool phone_code_hash:string send_call_timeout:int is_password:Bool = auth.SentCode;
 
 auth.authorization#f6b673a4 expires:int user:User = auth.Authorization;
 
@@ -262,7 +263,7 @@ upload.file#96a18d5 type:storage.FileType mtime:int bytes:bytes = upload.File;
 
 dcOption#2ec2a43c id:int hostname:string ip_address:string port:int = DcOption;
 
-config#232d5905 date:int test_mode:Bool this_dc:int dc_options:Vector<DcOption> chat_size_max:int = Config;
+config#2e54dd74 date:int test_mode:Bool this_dc:int dc_options:Vector<DcOption> chat_size_max:int broadcast_size_max:int = Config;
 
 nearestDc#8e1a1775 country:string this_dc:int nearest_dc:int = NearestDc;
 
@@ -308,8 +309,8 @@ updateEncryptedMessagesRead#38fe25b7 chat_id:int max_date:int date:int = Update;
 
 encryptedChatEmpty#ab7ec0a0 id:int = EncryptedChat;
 encryptedChatWaiting#3bf703dc id:int access_hash:long date:int admin_id:int participant_id:int = EncryptedChat;
-encryptedChatRequested#fda9a7b7 id:int access_hash:long date:int admin_id:int participant_id:int g_a:bytes nonce:bytes = EncryptedChat;
-encryptedChat#6601d14f id:int access_hash:long date:int admin_id:int participant_id:int g_a_or_b:bytes nonce:bytes key_fingerprint:long = EncryptedChat;
+encryptedChatRequested#c878527e id:int access_hash:long date:int admin_id:int participant_id:int g_a:bytes = EncryptedChat;
+encryptedChat#fa56ce36 id:int access_hash:long date:int admin_id:int participant_id:int g_a_or_b:bytes key_fingerprint:long = EncryptedChat;
 encryptedChatDiscarded#13d6dd27 id:int = EncryptedChat;
 
 inputEncryptedChat#f141b5e1 chat_id:int access_hash:long = InputEncryptedChat;
@@ -380,13 +381,13 @@ audio#427425e7 id:long access_hash:long user_id:int date:int duration:int size:i
 documentEmpty#36f8c871 id:long = Document;
 document#9efc6326 id:long access_hash:long user_id:int date:int file_name:string mime_type:string size:int thumb:PhotoSize dc_id:int = Document;
 
+help.support#17c6b5f6 phone_number:string user:User = help.Support;
+
 ---functions---
 
 invokeAfterMsg#cb9f372d msg_id:long query:!X = X;
 
 invokeAfterMsgs#3dc4b4f0 msg_ids:Vector<long> query:!X = X;
-
-invokeWithLayer1#53835315 query:!X = X;
 
 auth.checkPhone#6fe51dfb phone_number:string = auth.CheckedPhone;
 auth.sendCode#768d5f4d phone_number:string sms_type:int api_id:int api_hash:string lang_code:string = auth.SentCode;
@@ -460,12 +461,8 @@ help.getInviteText#a4a95186 lang_code:string = help.InviteText;
 
 photos.getUserPhotos#b7ee553c user_id:InputUser offset:int max_id:int limit:int = photos.Photos;
 
-invokeWithLayer2#289dd1f6 query:!X = X;
-
 messages.forwardMessage#3f3f4f2 peer:InputPeer id:int random_id:long = messages.StatedMessage;
 messages.sendBroadcast#41bb0972 contacts:Vector<InputUser> message:string media:InputMedia = messages.StatedMessages;
-
-invokeWithLayer3#b7475268 query:!X = X;
 
 geochats.getLocated#7f192d8f geo_point:InputGeoPoint radius:int limit:int = geochats.Located;
 geochats.getRecents#e1427e6f offset:int limit:int = geochats.Messages;
@@ -480,14 +477,6 @@ geochats.sendMessage#61b0044 peer:InputGeoChat message:string random_id:long = g
 geochats.sendMedia#b8f0deff peer:InputGeoChat media:InputMedia random_id:long = geochats.StatedMessage;
 geochats.createGeoChat#e092e16 title:string geo_point:InputGeoPoint address:string venue:string = geochats.StatedMessage;
 
-invokeWithLayer4#dea0d430 query:!X = X;
-
-invokeWithLayer5#417a57ae query:!X = X;
-
-invokeWithLayer6#3a64d54d query:!X = X;
-
-invokeWithLayer7#a5be56d3 query:!X = X;
-
 messages.getDhConfig#26cf8950 version:int random_length:int = messages.DhConfig;
 messages.requestEncryption#f64daf43 user_id:InputUser random_id:int g_a:bytes = EncryptedChat;
 messages.acceptEncryption#3dbc0415 peer:InputEncryptedChat g_b:bytes key_fingerprint:long = EncryptedChat;
@@ -499,12 +488,10 @@ messages.sendEncryptedFile#9a901b66 peer:InputEncryptedChat random_id:long data:
 messages.sendEncryptedService#32d439a4 peer:InputEncryptedChat random_id:long data:bytes = messages.SentEncryptedMessage;
 messages.receivedQueue#55a5bb66 max_qts:int = Vector<long>;
 
-invokeWithLayer8#e9abd9fd query:!X = X;
-
 upload.saveBigFilePart#de7b673d file_id:long file_part:int file_total_parts:int bytes:bytes = Bool;
 
 initConnection#69796de9 api_id:int device_model:string system_version:string app_version:string lang_code:string query:!X = X;
 
-invokeWithLayer9#76715a63 query:!X = X;
+help.getSupport#9cdf08cd = help.Support;
 
-invokeWithLayer10#39620c41 query:!X = X;
+invokeWithLayer12#dda60d3c query:!X = X;
