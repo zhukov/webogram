@@ -27,7 +27,7 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('imagemin', ['build', 'copy'], function() {
+gulp.task('imagemin', function() {
   return gulp.src(['app/img/**/*', '!app/img/screenshot*', '!app/img/*.wav'])
     .pipe($.imagemin())
     .pipe(gulp.dest('dist/img'));
@@ -56,7 +56,7 @@ gulp.task('copy', function() {
   );
 });
 
-gulp.task('compress-dist', ['add-csp', 'imagemin'], function() {
+gulp.task('compress-dist', ['add-csp'], function() {
   return gulp.src('dist/**/*')
     .pipe($.zip('webogram_v' + pj.version + '.zip'))
     .pipe(gulp.dest('releases'));
@@ -135,10 +135,10 @@ gulp.task('clean', function() {
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
 
-gulp.task('build', ['usemin', 'copy'], function () {
+gulp.task('build', ['usemin', 'copy', 'imagemin'], function () {
   gulp.start('disable-production');
 });
-gulp.task('package', ['cleanup-dist', 'imagemin']);
+gulp.task('package', ['cleanup-dist']);
 
 gulp.task('publish', ['build'], function() {
   gulp.start('add-appcache-manifest');

@@ -826,7 +826,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService) {
+  .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
 
@@ -954,7 +954,7 @@ angular.module('myApp.controllers', [])
       }
       $scope.photo.updating = true;
       MtpApiFileManager.uploadFile(photo).then(function (inputFile) {
-        MtpApiManager.invokeApi('messages.editChatPhoto', {
+        return MtpApiManager.invokeApi('messages.editChatPhoto', {
           chat_id: $scope.chatID,
           photo: {
             _: 'inputChatUploadedPhoto',
@@ -963,8 +963,15 @@ angular.module('myApp.controllers', [])
           }
         }).then(function (updateResult) {
           onStatedMessage(updateResult);
-          $scope.photo.updating = false;
+        }, function (error) {
+          switch (error.code) {
+            case 400:
+              ErrorService.showSimpleError('Bad photo', 'The photo is invalid, please select another file.');
+              break;
+          }
         });
+      })['finally'](function () {
+        $scope.photo.updating = false;
       });
     };
 
@@ -975,6 +982,7 @@ angular.module('myApp.controllers', [])
         photo: {_: 'inputChatPhotoEmpty'}
       }).then(function (updateResult) {
         onStatedMessage(updateResult);
+      }).['finally'](function () {
         $scope.photo.updating = false;
       });
     };
@@ -993,7 +1001,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ErrorService) {
 
     $scope.profile = {};
 
@@ -1036,8 +1044,15 @@ angular.module('myApp.controllers', [])
             });
             $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
           });
-          $scope.photo.updating = false;
+        }, function (error) {
+          switch (error.code) {
+            case 400:
+              ErrorService.showSimpleError('Bad photo', 'The photo is invalid, please select another file.');
+              break;
+          }
         });
+      })['finally'](function () {
+        $scope.photo.updating = false;
       });
     };
 
@@ -1057,6 +1072,7 @@ angular.module('myApp.controllers', [])
           });
           $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
         });
+      })['finally'](function () {
         $scope.photo.updating = false;
       });
     };
