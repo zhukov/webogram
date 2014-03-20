@@ -961,6 +961,9 @@ angular.module('myApp.controllers', [])
             file: inputFile,
             crop: {_: 'inputPhotoCropAuto'}
           }
+        }, function(error){
+          alert('Error: ' + error.type[0] + error.type.replace(/_/g, ' ').toLowerCase().substr(1)); //For user readability
+          $scope.photo.updating = false;
         }).then(function (updateResult) {
           onStatedMessage(updateResult);
           $scope.photo.updating = false;
@@ -1036,6 +1039,9 @@ angular.module('myApp.controllers', [])
             });
             $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
           });
+          $scope.photo.updating = false;
+        }, function(error){
+          alert('Error: ' + error.type[0] + error.type.replace(/_/g, ' ').toLowerCase().substr(1)); //For user readability
           $scope.photo.updating = false;
         });
       });
