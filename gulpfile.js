@@ -136,12 +136,12 @@ gulp.task('add-appcache-manifest', function() {
 
 
 gulp.task('clean', function() {
-  return gulp.src(['dist/*', '!dist/.git']).pipe($.clean());
+  return gulp.src(['dist/*', 'app/js/templates.js', '!dist/.git']).pipe($.clean());
 });
 
 gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
 
-gulp.task('build', ['usemin', 'copy', 'imagemin'], function () {
+gulp.task('build', ['usemin', 'copy', 'copy-images'], function () {
   gulp.start('disable-production');
 });
 gulp.task('package', ['cleanup-dist']);
