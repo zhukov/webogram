@@ -271,7 +271,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           $timeout(function () {
             $(scrollableWrap).trigger('scroll');
-          })
+          });
         });
       });
 
@@ -279,6 +279,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           updateSizes();
           scope.$broadcast('ui_message_send');
+
+          $timeout(function () {
+            $(scrollableWrap).trigger('scroll');
+          });
         });
       });
 
