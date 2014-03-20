@@ -690,19 +690,18 @@ angular.module('myApp.services', [])
       }
     }
 
-    if (curDialogStorage.count !== null && (
-          curDialogStorage.dialogs.length >= offset + limit ||
-          curDialogStorage.dialogs.length == curDialogStorage.count
-        )) {
+    if (curDialogStorage.count !== null && curDialogStorage.dialogs.length == curDialogStorage.count ||
+        curDialogStorage.dialogs.length >= offset + (limit || 1)
+    ) {
       return $q.when({
         count: curDialogStorage.count,
-        dialogs: curDialogStorage.dialogs.slice(offset, offset + limit)
+        dialogs: curDialogStorage.dialogs.slice(offset, offset + (limit || 20))
       });
     }
 
-    var deferred = $q.defer();
+    limit = limit || 20;
 
-    MtpApiManager.invokeApi('messages.getDialogs', {
+    return MtpApiManager.invokeApi('messages.getDialogs', {
       offset: offset,
       limit: limit,
       max_id: maxID || 0
@@ -735,17 +734,17 @@ angular.module('myApp.services', [])
           top_message: dialog.top_message,
           unread_count: dialog.unread_count
         });
+
+        if (historiesStorage[peerID] === undefined) {
+          historiesStorage[peerID] = {count: null, history: [dialog.top_message], pending: []}
+        }
       });
 
-      deferred.resolve({
+      return {
         count: curDialogStorage.count,
         dialogs: curDialogStorage.dialogs.slice(offset, offset + limit)
-      });
-    }, function (error) {
-      deferred.reject(error);
+      };
     });
-
-    return deferred.promise;
   }
 
   function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
@@ -807,11 +806,8 @@ angular.module('myApp.services', [])
       var foundDialog = getDialogByPeerID(peerID);
       if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 1) {
         unreadLimit = Math.min(1000, foundDialog[0].unread_count);
-        limit = Math.max(20, unreadLimit + 2);
+        limit = unreadLimit;
       }
-    }
-    if (!limit) {
-      limit = 20;
     }
 
     if (maxID > 0) {
@@ -822,16 +818,21 @@ angular.module('myApp.services', [])
       }
     }
 
-    if (historyStorage.count !== null && (
-      historyStorage.history.length >= offset + limit ||
-      historyStorage.history.length == historyStorage.count
-    )) {
+    if (historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
+      historyStorage.history.length >= offset + (limit || 1)
+    ) {
       return $q.when({
         count: historyStorage.count,
-        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
+        history: resultPending.concat(historyStorage.history.slice(offset, offset + (limit || 20))),
         unreadLimit: unreadLimit
       });
     }
+
+    if (unreadLimit) {
+      limit = Math.max(20, unreadLimit + 2);
+    }
+
+    limit = limit || 20;
 
     return fillHistoryStorage(inputPeer, maxID, limit, historyStorage).then(function () {
       offset = 0;
@@ -858,7 +859,7 @@ angular.module('myApp.services', [])
       filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
       min_date: 0,
       max_date: 0,
-      limit: limit,
+      limit: limit || 20,
       max_id: maxID || 0
     }).then(function (searchResult) {
       AppUsersManager.saveApiUsers(searchResult.users);
@@ -922,7 +923,7 @@ angular.module('myApp.services', [])
 
     if (!foundDialog[0] || !foundDialog[0].unread_count) {
 
-      if (!historyStorage  && !historyStorage.history.length) {
+      if (!historyStorage || !historyStorage.history.length) {
         return false;
       }
 
@@ -2098,18 +2099,10 @@ angular.module('myApp.services', [])
       return urlPromises[url];
     }
 
-    var deferred = $q.defer();
-
-    $http.get(url, {responseType: 'blob', transformRequest: null})
-      .then(
-        function (response) {
-          deferred.resolve(window.webkitURL.createObjectURL(response.data));
-        }, function (error) {
-          deferred.reject(error);
-        }
-      );
-
-    return urlPromises[url] = deferred.promise;
+    return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
+      .then(function (response) {
+        return window.webkitURL.createObjectURL(response.data);
+      });
   }
 
   return {

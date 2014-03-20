@@ -149,6 +149,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link (scope, element, attrs) {
       var historyWrap = $('.im_history_wrap', element)[0],
+          historyMessagesEl = $('.im_history_messages', element)[0],
           historyEl = $('.im_history', element)[0],
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
@@ -173,8 +174,19 @@ angular.module('myApp.directives', ['myApp.filters'])
         }, delay || 0);
       }
 
-      var animated = true,
+      var transform = false,
+          trs = ['transform', 'webkitTransform', 'MozTransform', 'msTransform', 'OTransform'],
+          i = 0;
+      for (i = 0; i < trs.length; i++) {
+        if (trs[i] in historyMessagesEl.style) {
+          transform = trs[i];
+          break;
+        }
+      }
+
+      var animated = transform ? true : false,
           curAnimation = false;
+
       scope.$on('ui_history_append', function (e, options) {
         if (!atBottom && !options.my) {
           return;
@@ -186,26 +198,29 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(scrollableWrap).addClass('im_history_to_bottom');
         }
 
+        var wasH = scrollableWrap.scrollHeight;
         onContentLoaded(function () {
           if (animated) {
             curAnimation = true;
-            $(scrollableWrap).stop().animate({
-              scrollTop: scrollableWrap.scrollHeight - scrollableWrap.clientHeight
-            }, {
-              duration: 200,
-              always: function () {
-                updateScroller();
+            $(historyMessagesEl).removeClass('im_history_appending');
+            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+            $(historyMessagesEl).css(transform, 'translate(0px, ' + (scrollableWrap.scrollHeight - wasH) + 'px)');
+            setTimeout(function () {
+              $(historyMessagesEl).addClass('im_history_appending');
+              $(historyMessagesEl).css(transform, 'translate(0px, 0px)');
+              setTimeout(function () {
                 curAnimation = false;
-              }
-            });
-            updateScroller();
+                $(historyMessagesEl).removeClass('im_history_appending');
+                updateBottomizer();
+              }, 300);
+            }, 0);
           } else {
             $(scrollableWrap).removeClass('im_history_to_bottom');
             $(scrollable).css({bottom: ''});
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-            $(historyWrap).nanoScroller();
+            updateBottomizer();
           }
-
+          $(historyWrap).nanoScroller();
         });
       });
 
@@ -253,6 +268,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           updateScroller();
           moreNotified = false;
+
+          $timeout(function () {
+            $(scrollableWrap).trigger('scroll');
+          })
         });
       });
 
@@ -302,6 +321,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           minHeight: historyH - 44
         });
 
+        updateBottomizer();
+
+
         if (heightOnly == true) return;
         if (atBottom) {
           onContentLoaded(function () {
@@ -310,6 +332,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           });
         }
         updateScroller(100);
+      }
+
+      function updateBottomizer () {
+        $(historyMessagesEl).css({marginTop: 0});
+        if (historyMessagesEl.offsetHeight <= scrollableWrap.offsetHeight) {
+          $(historyMessagesEl).css({marginTop: (scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 44) + 'px'});
+        }
+        $(historyWrap).nanoScroller();
       }
 
       $($window).on('resize', updateSizes);

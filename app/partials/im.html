@@ -88,7 +88,9 @@
 
                   <div class="im_history" ng-class="{im_history_selectable: selectActions}">
                     <div class="im_history_empty" ng-show="historyEmpty &amp;&amp; !history.length">No messages to display</div>
-                    <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
+                    <div class="im_history_messages">
+                      <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
+                    </div>
                   </div>
 
                   <div class="im_history_typing_wrap">

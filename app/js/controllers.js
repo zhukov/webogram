@@ -223,9 +223,7 @@ angular.module('myApp.controllers', [])
 
     var offset = 0,
         maxID = 0,
-        hasMore = false,
-        startLimit = 20,
-        limit = 100;
+        hasMore = false;
 
     MtpApiManager.invokeApi('account.updateStatus', {offline: false});
     $scope.$on('dialogs_need_more', function () {
@@ -278,14 +276,14 @@ angular.module('myApp.controllers', [])
       maxID = 0;
       hasMore = false;
 
-      AppMessagesManager.getDialogs($scope.search.query, maxID, startLimit).then(function (dialogsResult) {
+      AppMessagesManager.getDialogs($scope.search.query, maxID).then(function (dialogsResult) {
         $scope.dialogs = [];
 
         if (dialogsResult.dialogs.length) {
-          offset += startLimit;
+          offset += dialogsResult.dialogs.length;
 
           maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
-          hasMore = offset < dialogsResult.count;
+          hasMore = dialogsResult.count === null || offset < dialogsResult.count;
 
           angular.forEach(dialogsResult.dialogs, function (dialog) {
             $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
@@ -295,7 +293,7 @@ angular.module('myApp.controllers', [])
         $scope.$broadcast('ui_dialogs_change');
 
         if (!$scope.search.query) {
-          AppMessagesManager.getDialogs('', maxID, limit);
+          AppMessagesManager.getDialogs('', maxID);
         }
 
       }, function (error) {
@@ -312,10 +310,10 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      AppMessagesManager.getDialogs($scope.search.query, maxID, limit).then(function (dialogsResult) {
-        offset += limit;
+      AppMessagesManager.getDialogs($scope.search.query, maxID).then(function (dialogsResult) {
+        offset += dialogsResult.dialogs.length;
         maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
-        hasMore = offset < dialogsResult.count;
+        hasMore = dialogsResult.count === null || offset < dialogsResult.count;
 
         angular.forEach(dialogsResult.dialogs, function (dialog) {
           $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
@@ -359,8 +357,6 @@ angular.module('myApp.controllers', [])
         offset = 0,
         hasMore = false,
         maxID = 0,
-        startLimit = 20,
-        limit = 50,
         inputMediaFilters = {
           photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
@@ -421,12 +417,12 @@ angular.module('myApp.controllers', [])
 
       var inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
-        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, limit)
-        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit);
+        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID)
+        : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
       getMessagesPromise.then(function (historyResult) {
-        offset += limit;
-        hasMore = offset < historyResult.count;
+        offset += historyResult.history.length;
+        hasMore = historyResult.count === null || offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
 
         angular.forEach(historyResult.history, function (id) {
@@ -447,7 +443,7 @@ angular.module('myApp.controllers', [])
       var curJump = ++jump,
           inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
-        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, startLimit)
+        ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
       $scope.historyEmpty = false;
@@ -458,7 +454,7 @@ angular.module('myApp.controllers', [])
         offset += historyResult.history.length;
         $scope.historyEmpty = !historyResult.count;
 
-        hasMore = offset < historyResult.count;
+        hasMore = historyResult.count === null || offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
 
         updateHistoryPeer();
@@ -702,7 +698,7 @@ angular.module('myApp.controllers', [])
       $timeout(function () {
         var text = $scope.draftMessage.text;
 
-        if (!text.length) {
+        if (!angular.isString(text) || !text.length) {
           return false;
         }
 
@@ -982,7 +978,7 @@ angular.module('myApp.controllers', [])
         photo: {_: 'inputChatPhotoEmpty'}
       }).then(function (updateResult) {
         onStatedMessage(updateResult);
-      }).['finally'](function () {
+      })['finally'](function () {
         $scope.photo.updating = false;
       });
     };

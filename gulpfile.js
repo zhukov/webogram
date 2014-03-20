@@ -27,9 +27,15 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
     .pipe(gulp.dest('dist'));
 });
 
+// ulimit -n 10240 on OS X
 gulp.task('imagemin', function() {
   return gulp.src(['app/img/**/*', '!app/img/screenshot*', '!app/img/*.wav'])
     .pipe($.imagemin())
+    .pipe(gulp.dest('dist/img'));
+});
+
+gulp.task('copy-images', function() {
+  return gulp.src(['app/img/**/*', '!app/img/screenshot*', '!app/img/*.wav'])
     .pipe(gulp.dest('dist/img'));
 });
 
