@@ -106,7 +106,7 @@ angular.module('myApp.controllers', [])
             break;
 
           default:
-            ErrorService.showSimpleError('Unknown error occured', 'Please check your internet connection or install the latest version of Google Chrome browser.');
+            ErrorService.showSimpleError('Unknown error occured', 'Please check your internet connection or update your Software.');
         }
       });
     }
