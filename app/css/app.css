@@ -283,6 +283,11 @@ input[type="number"]::-webkit-inner-spin-button {
   overflow: hidden;
 }
 
+.dropdown-menu > li > a {
+  padding: 3px 14px;
+  font-size: 13px;
+}
+
 .modal-backdrop {
   background: #111111;
 }
@@ -510,8 +515,12 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius         : 0;
 }
 
-.im_dialogs_search {
+.im_dialogs_panel {
   padding: 14px 12px;
+  position: relative;
+}
+.im_dialogs_search {
+  margin-right: 48px;
   position: relative;
 }
 .im_dialogs_search_field {
@@ -535,7 +544,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .im_dialogs_search_clear {
   position: absolute;
-  right: 19px;
+  right: 9px;
   margin-top: -23px;
   color: #999;
   width: 13px;
@@ -551,6 +560,22 @@ input[type="number"]::-webkit-inner-spin-button {
 .im_dialogs_search_clear:hover {
   opacity: 1;
 }
+
+.im_dialogs_panel_dropdown {
+  position: absolute;
+  right: 12px;
+}
+
+.im_dialogs_panel_dropdown .dropdown-menu {
+  border-radius: 2px;
+  right: auto;
+  left: 0;
+  margin-top: 8px;
+  padding: 0;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
+}
+
 
 
 
@@ -781,10 +806,6 @@ a.im_dialog:hover .im_dialog_date {
   margin-left: 5px;
 }
 
-.im_history_panel_media_dropdown .dropdown-menu > li > a {
-  font-size: 13px;
-}
-
 .icon-caret {
   width: 8px;
   height: 4px;
@@ -810,9 +831,6 @@ a.im_dialog:hover .im_dialog_date {
 
   -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
-}
-.dropdown-menu > li > a {
-  padding: 3px 14px;
 }
 
 
@@ -2569,4 +2587,37 @@ ce671b orange
 }
 .tooltip-arrow {
   opacity: 0.8;
+}
+
+
+.im_dialogs_panel_dropdown {
+  margin-left: 8px;
+}
+
+.im_dialogs_panel_dropdown .dropdown-toggle {
+  background: #F2F2F2;
+  display: block;
+  border-radius: 2px;
+  overflow: hidden;
+  padding: 11px 12px;
+  width: 38px;
+  height: 34px;
+}
+.im_dialogs_panel_dropdown .dropdown-toggle .icon-bar {
+  background: #b3b3b3;
+  display: block;
+  height: 2px;
+  margin-bottom: 3px;
+}
+.im_dialogs_panel_dropdown .dropdown-toggle .icon-bar:last-child {
+  margin-bottom: 0;
+}
+
+
+
+.im_dialogs_panel_dropdown.open .dropdown-toggle {
+  background: #6690b0;
+}
+.im_dialogs_panel_dropdown.open .dropdown-toggle .icon-bar {
+  background: #fff;
 }

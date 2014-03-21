@@ -5,9 +5,23 @@
   <div class="im_page_split clearfix">
 
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController">
-      <div class="im_dialogs_search">
-        <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
-        <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+      <div class="im_dialogs_panel">
+        <div class="dropdown im_dialogs_panel_dropdown pull-right">
+          <a class="dropdown-toggle">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="" ng-click="openGroup()">New Group</a></li>
+            <li><a href="" ng-click="openContacts()">Contacts</a></li>
+            <li><a href="" ng-click="openSettings()">Settings</a></li>
+          </ul>
+        </div>
+        <div class="im_dialogs_search">
+          <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
+          <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+        </div>
       </div>
       <div my-dialogs-list class="im_dialogs_col">
         <div class="im_dialogs_wrap nano">
