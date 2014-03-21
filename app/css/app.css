@@ -282,14 +282,21 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: 2px;
   overflow: hidden;
 }
+
+.modal-backdrop {
+  background: #111111;
+}
+.modal-backdrop.in {
+  opacity: 0.25;
+}
 .modal {
   overflow-y: auto;
 }
 .modal-content {
   border: 0;
   border-radius: 4px;
-  -webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
 }
 .modal_close_wrap {
   cursor: pointer;

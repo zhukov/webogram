@@ -804,7 +804,6 @@ angular.module('myApp.controllers', [])
         $scope.$broadcast('ui_message_send');
       }
     }
-
   })
 
   .controller('PhotoModalController', function ($scope, AppPhotosManager) {

@@ -250,6 +250,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           updateScroller();
           moreNotified = false;
+
+          $timeout(function () {
+            $(scrollableWrap).trigger('scroll');
+          });
         });
       });
 
@@ -929,4 +933,19 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
     };
+  })
+
+
+  .directive('myModalWidth', function () {
+
+    return {
+      link: link
+    };
+
+    function link(scope, element, attrs) {
+      attrs.$observe('myModalWidth', function (newW) {
+        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + 36});
+      });
+    };
+
   });

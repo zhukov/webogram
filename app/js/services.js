@@ -1411,6 +1411,9 @@ angular.module('myApp.services', [])
       if (message.action._ == 'messageActionChatEditPhoto') {
         message.action.photo = AppPhotosManager.wrapForHistory(message.action.photo.id);
       }
+      if (message.action._ == 'messageActionChatEditTitle') {
+        message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+      }
 
       if (message.action.user_id) {
         message.action.user = AppUsersManager.getUser(message.action.user_id);
@@ -1759,24 +1762,35 @@ angular.module('myApp.services', [])
 
   function wrapForFull (photoID) {
     var photo = wrapForHistory(photoID),
-        fullWidth = Math.min($(window).width() - 60, 542),
+        fullWidth = $(window).width() - 36,
         fullHeight = $($window).height() - 150,
         fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
         full = {
-          placeholder: 'img/placeholders/PhotoThumbModal.gif',
-          width: fullWidth,
-          height: fullHeight
+          placeholder: 'img/placeholders/PhotoThumbModal.gif'
         };
 
+    if (fullWidth > 800) {
+      fullWidth -= 200;
+    }
+
+    full.width = fullWidth;
+    full.height = fullHeight;
+
     if (fullPhotoSize && fullPhotoSize._ != 'photoSizeEmpty') {
-      if (fullPhotoSize.w > fullPhotoSize.h) {
+      if ((fullPhotoSize.w / fullPhotoSize.h) > (fullWidth / fullHeight)) {
         full.height = parseInt(fullPhotoSize.h * fullWidth / fullPhotoSize.w);
-      } else {
+      }
+      else {
         full.width = parseInt(fullPhotoSize.w * fullHeight / fullPhotoSize.h);
         if (full.width > fullWidth) {
           full.height = parseInt(full.height * fullWidth / full.width);
           full.width = fullWidth;
         }
+      }
+
+      if (full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
+        full.width = fullPhotoSize.w;
+        full.height = fullPhotoSize.h;
       }
 
       full.location = fullPhotoSize.location;
@@ -1796,7 +1810,8 @@ angular.module('myApp.services', [])
     var modalInstance = $modal.open({
       templateUrl: 'partials/photo_modal.html',
       controller: 'PhotoModalController',
-      scope: scope
+      scope: scope,
+      windowClass: 'photo_modal_window'
     });
   }
 

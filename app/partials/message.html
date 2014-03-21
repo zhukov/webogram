@@ -19,7 +19,7 @@
             created the group &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
           </span>
           <span ng-switch-when="messageActionChatEditTitle">
-            changed group name to  &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
+            changed group name to  &laquo;<strong ng-bind-html="historyMessage.action.rTitle"></strong>&raquo;
           </span>
           <span ng-switch-when="messageActionChatEditPhoto">
             changed group photo
