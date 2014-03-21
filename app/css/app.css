@@ -256,7 +256,7 @@ input[type="number"]::-webkit-inner-spin-button {
   vertical-align: text-top;
 
   background: url(../img/icons/IconsetW.png) -15px -419px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.6;
 }
 .is_1x .icon-back {
@@ -518,7 +518,7 @@ input[type="number"]::-webkit-inner-spin-button {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -542,7 +542,7 @@ input[type="number"]::-webkit-inner-spin-button {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -795,7 +795,7 @@ a.im_dialog:hover .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -961,7 +961,6 @@ a.im_message_contact_photo {
 a.im_message_photo_thumb,
 a.im_message_video_thumb {
   display: block;
-  margin-top: 5px;
   overflow: hidden;
   border-radius: 2px;
 }
@@ -969,6 +968,15 @@ img.im_message_photo_thumb,
 img.im_message_video_thumb {
   overflow: hidden;
   border-radius: 2px;
+}
+.im_message_video,
+a.im_message_photo_thumb {
+  margin-top: 5px;
+}
+a.im_message_video_thumb {
+  float: left;
+  margin-right: 15px;
+  position: relative;
 }
 
 img.im_message_video_thumb {
@@ -983,21 +991,36 @@ img.im_message_video_thumb {
 div.im_message_video_thumb {
   position: relative;
 }
-.im_message_video_duration_wrap {
-  background: rgba(0, 0, 0, 0.5);
+.im_message_video_duration {
+  background: rgba(0, 0, 0, 0.4);
   color: #FFF;
   position: absolute;
-  margin-top: -15px;
-  height: 15px;
-  padding: 0 3px;
+  bottom: 4px;
+  right: 4px;
+  padding: 2px 6px;
   font-size: 11px;
   line-height: 15px;
-
-  border-radius: 0 0 2px 2px;
+  border-radius: 2px;
   overflow: hidden;
+  z-index: 1;
 }
-.im_message_video_duration {
 
+.icon-videoplay {
+  position: absolute;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  margin-left: -21px;
+  margin-top: -21px;
+  width: 42px;
+  height: 42px;
+
+  background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
+  background-size: 42px 680px;
+  z-index: 1;
+}
+.is_1x .icon-videoplay {
+  background-image: url(../img/icons/IconsetW_1x.png);
 }
 
 .im_message_geopoint {
@@ -1020,7 +1043,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1048,7 +1071,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1135,7 +1158,7 @@ img.im_message_document_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -277px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1188,6 +1211,13 @@ img.im_message_document_thumb {
 }
 .im_message_document_thumbed .im_message_document_name {
   max-width: 150px;
+}
+.im_message_video .im_message_document_name_wrap,
+.im_message_video .im_message_download_progress_wrap {
+  width: 150px;
+}
+.im_message_video .im_message_document_name_wrap {
+  margin-top: 5px;
 }
 
 .tg_up_progress,
@@ -1404,7 +1434,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1432,7 +1462,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1482,7 +1512,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -1905,7 +1935,7 @@ img.img_fullsize {
 .emoji-menu-tail {
   display: none;
   background: url(../img/icons/IconsetW.png) -14px -268px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
@@ -2050,7 +2080,7 @@ img.img_fullsize {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -2074,7 +2104,7 @@ img.img_fullsize {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2151,7 +2181,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   width: 17px;
   height: 15px;
   background: url(../img/icons/IconsetW.png) -13px -366px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -2249,7 +2279,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 15px;
 
   background: url(../img/icons/IconsetW.png) -15px -319px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
 }
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -2296,7 +2326,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 620px;
+  background-size: 42px 680px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png);

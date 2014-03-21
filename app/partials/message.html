@@ -106,22 +106,47 @@
             />
           </a>
 
-          <a ng-switch-when="messageMediaVideo" class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)" style="width: {{historyMessage.media.video.thumb.width}}px;">
-            <img
-              class="im_message_video_thumb"
-              my-load-thumb
-              thumb="historyMessage.media.video.thumb"
-              width="{{historyMessage.media.video.thumb.width}}"
-              height="{{historyMessage.media.video.thumb.height}}"
-            />
-            <div class="im_message_video_duration_wrap" style="width: {{historyMessage.media.video.thumb.width}}px;">
-              <span class="im_message_video_duration pull-right">{{historyMessage.media.video.duration | duration}}</span>
-              <span class="glyphicon glyphicon-facetime-video"></span>
+          <div ng-switch-when="messageMediaVideo" class="im_message_video im_message_document_thumbed">
+            <a class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)" style="width: {{historyMessage.media.video.thumb.width}}px;">
+              <span class="im_message_video_duration">{{historyMessage.media.video.duration | duration}}</span>
+              <i class="icon icon-videoplay"></i>
+              <img
+                class="im_message_video_thumb"
+                my-load-thumb
+                thumb="historyMessage.media.video.thumb"
+                width="{{historyMessage.media.video.thumb.width}}"
+                height="{{historyMessage.media.video.thumb.height}}"
+              />
+            </a>
+
+            <div class="im_message_document_info">
+              <div class="im_message_document_name_wrap">
+                <span class="im_message_document_name">Video</span>
+                <span class="im_message_document_size" ng-if="!historyMessage.media.video.progress.enabled">
+                  {{historyMessage.media.video.size | formatSize}}
+                </span>
+                <span class="im_message_document_size" ng-if="historyMessage.media.video.progress.enabled">
+                  {{historyMessage.media.video.progress | formatSizeProgress}}
+                </span>
+              </div>
+              <div class="im_message_document_actions" ng-if="!historyMessage.media.video.progress.enabled">
+                <a href="" ng-click="downloadVideo(historyMessage.media.video.id)">Download</a>
+                <a href="" ng-click="openVideo(historyMessage.media.video.id)">Play video</a>
+              </div>
+              <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
+                <div class="progress tg_down_progress">
+                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.video.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.video.progress.percent}}%">
+                    <span class="sr-only">
+                      {{historyMessage.media.video.progress.percent}}% Complete (success)
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </a>
+          </div>
 
           <div ng-switch-when="messageMediaDocument" class="im_message_document" ng-class="{im_message_document_thumbed: !!historyMessage.media.document.thumb}">
-            <a href="" ng-click="openDoc(historyMessage.media.document.id, false, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
+            <a href="" ng-click="downloadDoc(historyMessage.media.document.id, false, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
               <i class="icon icon-document" ng-if="!historyMessage.media.document.thumb"></i>
               <div class="im_message_document_thumb_wrap" ng-if="historyMessage.media.document.thumb">
                 <img
@@ -147,8 +172,8 @@
                 </span>
               </div>
               <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
-                <a href="" ng-click="openDoc(historyMessage.media.document.id)">Download</a>
-                <a href="" ng-click="openDoc(historyMessage.media.document.id, false, true)" ng-if="historyMessage.media.document.withPreview">Open</a>
+                <a href="" ng-click="downloadDoc(historyMessage.media.document.id)">Download</a>
+                <a href="" ng-click="downloadDoc(historyMessage.media.document.id, false, true)" ng-if="historyMessage.media.document.withPreview">Open</a>
               </div>
               <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
                 <div class="progress tg_down_progress">

@@ -118,7 +118,7 @@
                   </div>
 
                   <div class="im_history_typing_wrap">
-                    <div class="im_history_typing" ng-show="typing.user">
+                    <div class="im_history_typing" ng-show="typing.user &amp;&amp; !mediaType">
                       <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing<span my-typing-dots></span>
                     </div>
                   </div>
@@ -175,22 +175,24 @@
                     <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
                     <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
 
-                    <div class="im_media_attach pull-right">
-                      <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" />
-                      <i class="icon icon-camera"></i>
+                    <div class="" style="position: relative;">
+                      <div class="im_media_attach pull-right" tooltip="Send media" tooltip-append-to-body="true">
+                        <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" />
+                        <i class="icon icon-camera"></i>
+                      </div>
+
+                      <div class="im_attach pull-right" tooltip="Send file" tooltip-append-to-body="true">
+                        <input type="file" class="im_attach_input" size="28" multiple="true" />
+                        <i class="icon icon-paperclip"></i>
+                      </div>
+
+
+                      <div class="im_emoji_btn pull-right">
+                        <i class="icon icon-emoji"></i>
+                      </div>
+
+                      <button type="submit" class="btn btn-success im_submit">Send</button>
                     </div>
-
-                    <div class="im_attach pull-right">
-                      <input type="file" class="im_attach_input" size="28" multiple="true" />
-                      <i class="icon icon-paperclip"></i>
-                    </div>
-
-
-                    <div class="im_emoji_btn pull-right">
-                      <i class="icon icon-emoji"></i>
-                    </div>
-
-                    <button type="submit" class="btn btn-success im_submit">Send</button>
                   </form>
                 </div>
 

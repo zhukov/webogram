@@ -623,7 +623,11 @@ angular.module('myApp.controllers', [])
     $scope.$on('history_append', function (e, addedMessage) {
       if (addedMessage.peerID == $scope.curDialog.peerID) {
         if ($scope.mediaType) {
-          $scope.missedCount++;
+          if (addedMessage.my) {
+            toggleMedia();
+          } else {
+            $scope.missedCount++;
+          }
           return;
         }
         // console.log('append', addedMessage);
@@ -662,6 +666,12 @@ angular.module('myApp.controllers', [])
     $scope.$on('dialog_flush', function (e, dialog) {
       if (dialog.peerID == $scope.curDialog.peerID) {
         $scope.history = [];
+      }
+    });
+
+    $scope.$on('history_focus', function (e, peerData) {
+      if ($scope.mediaType) {
+        toggleMedia();
       }
     });
 
