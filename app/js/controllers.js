@@ -444,7 +444,7 @@ angular.module('myApp.controllers', [])
       if (!hasMore || !offset) {
         return;
       }
-      console.trace('load history');
+      // console.trace('load history');
 
       var inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter

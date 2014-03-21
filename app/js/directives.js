@@ -278,7 +278,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(scrollable).css({bottom: ''});
           scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
 
-          updateScroller();
+          updateBottomizer();
           moreNotified = false;
 
           $timeout(function () {

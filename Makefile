@@ -16,7 +16,7 @@ package:
 	cd package_dist && zip -r ../webogram_v$(version).zip .
 
 publish:
-	rm -rf dist/*
+	./node_modules/gulp/bin/gulp.js clean
 	cd dist && git pull origin gh-pages
 	./node_modules/gulp/bin/gulp.js publish
 	cd dist && git add --all . && git commit -am "merged with master" && git push origin gh-pages
