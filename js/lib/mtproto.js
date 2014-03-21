@@ -1071,7 +1071,11 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
     delete $http.defaults.headers.post['Content-Type'];
     delete $http.defaults.headers.common['Accept'];
 
-    return $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray.buffer, {
+    if (!('ArrayBufferView' in window)) {
+      resultArray = resultArray.buffer;
+    }
+
+    return $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray, {
       responseType: 'arraybuffer',
       transformRequest: null,
       transformResponse: function (responseBuffer) {
@@ -2028,7 +2032,12 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       delete $http.defaults.headers.post['Content-Type'];
       delete $http.defaults.headers.common['Accept'];
 
-      return $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', request.getBuffer(), {
+      var resultArray = request.getArray();
+      if (!('ArrayBufferView' in window)) {
+        resultArray = resultArray.buffer;
+      }
+
+      return $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
