@@ -60,6 +60,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           updateScroller();
           moreNotified = false;
+
+          $timeout(function () {
+            $(scrollableWrap).trigger('scroll');
+          });
         });
       });
 
@@ -67,6 +71,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           updateScroller();
           moreNotified = false;
+
+          $timeout(function () {
+            $(scrollableWrap).trigger('scroll');
+          });
         });
       });
 
@@ -176,7 +184,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var transform = false,
           trs = ['transform', 'webkitTransform', 'MozTransform', 'msTransform', 'OTransform'],
-          i = 0;
+          i;
       for (i = 0; i < trs.length; i++) {
         if (trs[i] in historyMessagesEl.style) {
           transform = trs[i];

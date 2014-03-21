@@ -2518,3 +2518,10 @@ ce671b orange
 .user_color_7:hover {color: #2996ad;}
 .user_color_8,
 .user_color_8:hover {color: #ce671b;}
+
+
+.im_dialogs_contacts_wrap h5 {
+  color: #999;
+  font-size: 13px;
+  margin-left: 8px;
+}
