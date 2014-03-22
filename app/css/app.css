@@ -1067,7 +1067,19 @@ div.im_message_video_thumb {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
 
-
+.im_message_iframe_video {
+    position: relative;
+    padding-bottom: 56.25%; // 16/9 ratio
+    height: 0;
+    overflow: hidden;
+}
+.im_message_iframe_video iframe, object, embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
 
 .im_message_document,
 .im_message_audio,

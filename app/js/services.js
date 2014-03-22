@@ -2545,6 +2545,13 @@ angular.module('myApp.services', [])
     }
 
     // console.log(4, text, html);
+    var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
+    if (!options.noLinks && youtubeRegex.test(text)) {
+        var videoID = youtubeRegex.exec(text)[1];
+        text = text + '<div class="im_message_iframe_video"><iframe type="text/html" frameborder="0" ' +
+            'src="http://www.youtube.com/embed/' + videoID +
+            '?autoplay=0&amp;"></iframe></div>';
+    }
 
     return $sce.trustAs('html', text);
   }
