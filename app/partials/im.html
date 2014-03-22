@@ -190,13 +190,13 @@
                     <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
 
                     <div class="" style="position: relative;">
-                      <div class="im_media_attach pull-right" tooltip="Send media" tooltip-append-to-body="true" tooltip-popup-delay="1000">
-                        <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" />
+                      <div class="im_media_attach pull-right">
+                        <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="Send media"/>
                         <i class="icon icon-camera"></i>
                       </div>
 
-                      <div class="im_attach pull-right" tooltip="Send file" tooltip-append-to-body="true" tooltip-popup-delay="1000">
-                        <input type="file" class="im_attach_input" size="28" multiple="true" />
+                      <div class="im_attach pull-right">
+                        <input type="file" class="im_attach_input" size="28" multiple="true" title="Send file" />
                         <i class="icon icon-paperclip"></i>
                       </div>
 
