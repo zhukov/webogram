@@ -303,7 +303,7 @@ angular.module('myApp.controllers', [])
         $scope.$broadcast('ui_dialogs_change');
 
         if (!$scope.search.query) {
-          AppMessagesManager.getDialogs('', maxID);
+          AppMessagesManager.getDialogs('', maxID, 100);
         }
 
       }, function (error) {
@@ -316,7 +316,7 @@ angular.module('myApp.controllers', [])
     }
 
     function showMoreDialogs () {
-      if (!hasMore && contactsShown || !offset) {
+      if (contactsShown && (!hasMore || !offset)) {
         return;
       }
 
