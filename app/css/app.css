@@ -2380,6 +2380,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   .im_history_panel_edit_link {
     margin-right: 0;
   }
+  .im_dialogs_panel_dropdown .dropdown-menu {
+    right: 0;
+    left: auto;
+  }
 }
 
 @media (min-height: 768px) {
