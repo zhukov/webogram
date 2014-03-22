@@ -63,7 +63,7 @@ gulp.task('copy', function() {
 });
 
 gulp.task('compress-dist', ['add-csp'], function() {
-  return gulp.src('dist/**/*')
+  return gulp.src('./**/*' , {cwd: process.cwd() + '/dist'})
     .pipe($.zip('webogram_v' + pj.version + '.zip'))
     .pipe(gulp.dest('releases'));
 });
@@ -74,7 +74,7 @@ gulp.task('cleanup-dist', ['compress-dist'], function() {
 
 gulp.task('add-csp', ['build'], function() {
   return gulp.src('dist/index.html')
-    .pipe($.replace('<html lang=en ng-app=myApp>', '<html lang=en ng-app=myApp ng-csp="">'))
+    .pipe($.replace(/<html(.*?)>/, '<html$1 ng-csp="">'))
     .pipe(gulp.dest('dist'));
 });
 
