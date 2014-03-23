@@ -1072,8 +1072,9 @@ div.im_message_video_thumb {
     padding-bottom: 56.25%; // 16/9 ratio
     height: 0;
     overflow: hidden;
+    margin-top: 5px;
 }
-.im_message_iframe_video iframe, object, embed {
+.im_message_iframe_video iframe {
     position: absolute;
     top: 0;
     left: 0;

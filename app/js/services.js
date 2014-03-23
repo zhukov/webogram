@@ -2427,6 +2427,7 @@ angular.module('myApp.services', [])
   }
 
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')', 'i');
+  var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
 
   return {
     wrapRichText: wrapRichText
@@ -2545,12 +2546,15 @@ angular.module('myApp.services', [])
     }
 
     // console.log(4, text, html);
-    var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
-    if (!options.noLinks && youtubeRegex.test(text)) {
-        var videoID = youtubeRegex.exec(text)[1];
+    if (!options.noLinks) {
+      var youtubeMatches = text.match(youtubeRegex),
+          videoID = youtubeMatches && youtubeMatches[1];
+
+      if (videoID) {
         text = text + '<div class="im_message_iframe_video"><iframe type="text/html" frameborder="0" ' +
-            'src="http://www.youtube.com/embed/' + videoID +
-            '?autoplay=0&amp;"></iframe></div>';
+              'src="http://www.youtube.com/embed/' + videoID +
+              '?autoplay=0&amp;controls=2"></iframe></div>'
+      }
     }
 
     return $sce.trustAs('html', text);
