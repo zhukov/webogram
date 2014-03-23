@@ -156,7 +156,7 @@ Once rebased you can force a push to your fork branch and the PR will be automat
 
 ``$ git push origin improve-contacts-99 --force``
 
-#### How to keep your local branches updated
+#### How to keep your local branches updated ?
 
 To keep your local master branch updated with upstream master, regularly do:
 
