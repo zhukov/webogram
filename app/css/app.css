@@ -300,6 +300,21 @@ input[type="number"]::-webkit-inner-spin-button {
 .modal-backdrop.in {
   opacity: 0.25;
 }
+
+.modal.fade .modal-dialog {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+.modal.fade {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+
+
 .modal {
   overflow-y: auto;
 }
