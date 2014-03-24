@@ -283,10 +283,7 @@ angular.module('myApp.controllers', [])
 
       AppMessagesManager.getDialogs($scope.search.query, maxID).then(function (dialogsResult) {
         $scope.dialogs = [];
-
-        if (!$scope.search.query) {
-          $scope.contacts = [];
-        }
+        $scope.contacts = [];
 
         if (dialogsResult.dialogs.length) {
           offset += dialogsResult.dialogs.length;
@@ -304,6 +301,8 @@ angular.module('myApp.controllers', [])
 
         if (!$scope.search.query) {
           AppMessagesManager.getDialogs('', maxID, 100);
+        } else {
+          showMoreDialogs();
         }
 
       }, function (error) {
