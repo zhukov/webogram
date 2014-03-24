@@ -283,6 +283,12 @@ input[type="number"]::-webkit-inner-spin-button {
   overflow: hidden;
 }
 
+.dropdown-menu {
+  border-radius: 2px;
+  padding: 0;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
+}
 .dropdown-menu > li > a {
   padding: 5px 14px;
   font-size: 13px;
@@ -347,7 +353,7 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .modal-close-link,
-.modal-save-link {
+.modal-head-link {
   font-size: 12px;
   line-height: 1.4;
   float: right;
@@ -355,10 +361,10 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 6px 2px 0 0;
 }
 .modal-close-link:hover,
-.modal-save-link:hover {
+.modal-head-link:hover {
   text-decoration: none;
 }
-.modal-save-link {
+.modal-head-link {
   margin-right: 15px;
 }
 
@@ -519,7 +525,7 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 14px 12px;
   position: relative;
 }
-.im_dialogs_search {
+.im_page_split .im_dialogs_search {
   margin-right: 48px;
   position: relative;
 }
@@ -567,13 +573,9 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .im_dialogs_panel_dropdown .dropdown-menu {
-  border-radius: 2px;
   right: auto;
   left: 0;
   margin-top: 8px;
-  padding: 0;
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
 }
 
 
@@ -1687,16 +1689,28 @@ img.img_fullsize {
 .user_modal_status {
   color: #999;
 }
+
+.user_modal_actions_wrap {
+  margin-top: 8px;
+}
 .user_modal_send_btn {
   border: 0;
   background: #4E9CD8;
   font-size: 12px;
-  margin-top: 8px;
   padding-left: 16px;
   padding-right: 16px;
+  float: left;
 }
 .user_modal_send_btn:hover {
   background: #539BD1;
+}
+.user_modal_other_btn {
+  margin-left: 10px;
+  float: left;
+}
+.user_modal_other_btn .dropdown-toggle {
+  border: 0;
+  font-size: 12px;
 }
 
 .user_modal_settings_wrap {
@@ -2637,4 +2651,17 @@ ce671b orange
 }
 .im_dialogs_panel_dropdown.open .dropdown-toggle .icon-bar {
   background: #fff;
+}
+
+/* Import contact modal */
+.import_contact_modal_window .modal-dialog {
+  max-width: 380px;
+}
+.import_modal_field_wrap {
+  margin-bottom: 10px;
+}
+
+.modal-content-animated {
+  -webkit-transition: margin-top linear 0.2s;
+  transition: margin-top linear 0.2s;
 }

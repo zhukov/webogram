@@ -1,0 +1,38 @@
+<div class="import_modal_wrap" my-modal-position>
+
+  <div class="modal-header">
+    <a class="modal-close-link" ng-click="$close()">Close</a>
+    <h4 class="modal-title">Add new contact</h4>
+  </div>
+
+  <div class="modal-body">
+
+    <form ng-submit="doImport()">
+
+      <div class="form-group import_modal_field_wrap">
+        <input class="form-control" my-focused type="text" placeholder="Phone number" ng-model="importContact.phone"/>
+      </div>
+      <div class="form-group import_modal_field_wrap">
+        <input class="form-control" type="text" placeholder="First name" ng-model="importContact.first_name"/>
+      </div>
+      <div class="form-group import_modal_field_wrap">
+        <input class="form-control" type="text" placeholder="Last name" ng-model="importContact.last_name"/>
+      </div>
+
+      <div class="import_modal_panel clearfix">
+
+        <div class="import_modal_actions pull-right">
+          <a class="btn btn-default" ng-click="$dismiss()"> Cancel </a>
+
+          <button class="btn btn-success" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled">
+            {{progress.enabled ? 'Importing...' : 'Save'}}
+          </button>
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

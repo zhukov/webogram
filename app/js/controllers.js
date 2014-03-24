@@ -579,8 +579,8 @@ angular.module('myApp.controllers', [])
         });
 
         PeersSelectService.selectPeer().then(function (peerString) {
-          var inputPeer = AppPeersManager.getInputPeer(peerString);
-          AppMessagesManager.forwardMessages(selectedMessageIDs, inputPeer).then(function () {
+          var peerID = AppPeersManager.getPeerID(peerString);
+          AppMessagesManager.forwardMessages(peerID, selectedMessageIDs).then(function () {
             selectedCancel();
             $rootScope.$broadcast('history_focus', {peerString: peerString});
           });
@@ -824,8 +824,12 @@ angular.module('myApp.controllers', [])
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
   })
 
-  .controller('UserModalController', function ($scope, $location, $rootScope, $modalStack, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager) {
-    $scope.user = AppUsersManager.wrapForFull($scope.userID);
+  .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager, PeersSelectService) {
+
+    var peerString = AppUsersManager.getUserString($scope.userID);
+
+    $scope.user = AppUsersManager.getUser($scope.userID);
+    $scope.userPhoto = AppUsersManager.getUserPhoto($scope.userID, 'User');
 
     $scope.settings = {notifications: true};
 
@@ -849,7 +853,7 @@ angular.module('myApp.controllers', [])
 
 
     $scope.goToHistory = function () {
-      $rootScope.$broadcast('history_focus', {peerString: $scope.user.peerString});
+      $rootScope.$broadcast('history_focus', {peerString: peerString});
     };
 
     $scope.flushHistory = function () {
@@ -860,6 +864,49 @@ angular.module('myApp.controllers', [])
         $scope.goToHistory();
       });
     };
+
+    $scope.importContact = function (edit) {
+      var scope = $rootScope.$new();
+      scope.importContact = {
+        phone: $scope.user.phone,
+        first_name: $scope.user.first_name,
+        last_name: $scope.user.last_name,
+      };
+
+      $modal.open({
+        templateUrl: edit ? 'partials/edit_contact_modal.html' : 'partials/import_contact_modal.html',
+        controller: 'ImportContactModalController',
+        windowClass: 'import_contact_modal_window',
+        scope: scope
+      }).result.then(function (foundUserID) {
+        if ($scope.userID == foundUserID) {
+          $scope.user = AppUsersManager.getUser($scope.userID);
+          console.log($scope.user);
+        }
+      });
+    };
+
+    $scope.deleteContact = function () {
+      AppUsersManager.deleteContacts([$scope.userID]).then(function () {
+        $scope.user = AppUsersManager.getUser($scope.userID);
+        console.log($scope.user);
+      });
+    };
+
+    $scope.shareContact = function () {
+      PeersSelectService.selectPeer().then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+
+        AppMessagesManager.sendOther(peerID, {
+          _: 'inputMediaContact',
+          phone_number: $scope.user.phone,
+          first_name: $scope.user.first_name,
+          last_name: $scope.user.last_name
+        });
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
+      })
+    }
+
   })
 
   .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
@@ -873,6 +920,7 @@ angular.module('myApp.controllers', [])
       AppUsersManager.saveApiUsers(result.users);
 
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, result.full_chat);
+      $scope.$broadcast('ui_height');
     });
 
     $scope.settings = {notifications: true};
@@ -1190,7 +1238,7 @@ angular.module('myApp.controllers', [])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, $modalInstance, AppUsersManager) {
+  .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager) {
     $scope.contacts = [];
     $scope.search = {};
 
@@ -1213,8 +1261,8 @@ angular.module('myApp.controllers', [])
       }
     }
 
-    $scope.$watch('search.query', function (newValue) {
-      AppUsersManager.getContacts(newValue).then(function (contactsList) {
+    function updateContacts (query) {
+      AppUsersManager.getContacts(query).then(function (contactsList) {
         $scope.contacts = [];
         angular.forEach(contactsList, function(userID) {
           var contact = {
@@ -1226,7 +1274,9 @@ angular.module('myApp.controllers', [])
         });
         $scope.$broadcast('contacts_change');
       });
-    });
+    };
+
+    $scope.$watch('search.query', updateContacts);
 
     $scope.contactSelect = function (userID) {
       if ($scope.disabledContacts[userID]) {
@@ -1253,6 +1303,18 @@ angular.module('myApp.controllers', [])
         return $modalInstance.close(selectedUserIDs);
       }
     }
+
+    $scope.importContact = function () {
+      $modal.open({
+        templateUrl: 'partials/import_contact_modal.html',
+        controller: 'ImportContactModalController',
+        windowClass: 'import_contact_modal_window'
+      }).result.then(function (foundUserID) {
+        if (foundUserID) {
+          updateContacts($scope.search && $scope.search.query || '');
+        }
+      });
+    };
 
   })
 
@@ -1333,4 +1395,26 @@ angular.module('myApp.controllers', [])
         $rootScope.$broadcast('history_focus', {peerString: peerString});
       });
     };
+  })
+
+  .controller('ImportContactModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager) {
+    if ($scope.importContact === undefined) {
+      $scope.importContact = {};
+    }
+
+    $scope.doImport = function () {
+      if ($scope.importContact && $scope.importContact.phone) {
+        $scope.progress = {enabled: true};
+        AppUsersManager.importContact(
+          $scope.importContact.phone,
+          $scope.importContact.first_name,
+          $scope.importContact.last_name
+        ).then(function (foundUserID) {
+          $modalInstance.close(foundUserID);
+        })['finally'](function () {
+          delete $scope.progress.enabled;
+        });
+      }
+    };
+
   })

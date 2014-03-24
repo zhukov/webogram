@@ -1,4 +1,4 @@
-<div class="user_modal_wrap">
+<div class="user_modal_wrap" my-modal-position>
 
   <div class="modal-header">
     <a class="modal-close-link" ng-click="$close()">Close</a>
@@ -12,7 +12,7 @@
       <img
         class="user_modal_image"
         my-load-thumb
-        thumb="user.thumb"
+        thumb="userPhoto"
       />
     </div>
 
@@ -21,7 +21,32 @@
       <p class="user_modal_status" ng-if="user.status">{{user | userStatus}}</p>
 
       <p class="user_modal_phone" ng-if="user.phone">{{user.phone | phoneNumber}}</p>
-      <button class="btn btn-primary user_modal_send_btn" ng-click="goToHistory()">Send message</button>
+
+      <div class="user_modal_actions_wrap clearfix">
+        <button class="btn btn-primary user_modal_send_btn" ng-click="goToHistory()">Send message</button>
+
+        <div class="dropdown user_modal_other_btn">
+          <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
+          <ul class="dropdown-menu">
+            <li ng-if="user._ == 'userContact'">
+              <a ng-click="importContact(true)">Edit</a>
+            </li>
+            <li ng-if="user._ == 'userContact'">
+              <a ng-click="deleteContact()">Delete Contact</a>
+            </li>
+            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
+              <a ng-click="importContact()">Add to contacts</a>
+            </li>
+            <li ng-if="user.phone.length > 0">
+              <a ng-click="shareContact()">Share contact</a>
+            </li>
+            <li>
+              <a ng-click="flushHistory()">Delete chat</a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
     </div>
 
     <div class="user_modal_settings_wrap">

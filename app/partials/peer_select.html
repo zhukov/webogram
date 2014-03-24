@@ -8,9 +8,11 @@
   <div class="modal-body">
 
     <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController">
-      <div class="im_dialogs_search">
-        <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
-        <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+      <div class="im_dialogs_panel">
+        <div class="im_dialogs_search">
+          <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
+          <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+        </div>
       </div>
       <div my-dialogs-list modal="true" class="im_dialogs_modal_col">
         <div class="im_dialogs_wrap nano">

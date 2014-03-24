@@ -36,7 +36,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
@@ -53,10 +53,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      scope.$on('ui_dialogs_prepend', updateScroller);
+      $scope.$on('ui_dialogs_prepend', updateScroller);
 
 
-      scope.$on('ui_dialogs_append', function () {
+      $scope.$on('ui_dialogs_append', function () {
         onContentLoaded(function () {
           updateScroller();
           moreNotified = false;
@@ -67,7 +67,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_dialogs_change', function () {
+      $scope.$on('ui_dialogs_change', function () {
         onContentLoaded(function () {
           updateScroller();
           moreNotified = false;
@@ -82,7 +82,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         // console.log('scroll', moreNotified);
         if (!moreNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           // console.log('emit need more');
-          scope.$emit('dialogs_need_more');
+          $scope.$emit('dialogs_need_more');
           moreNotified = true;
         }
       });
@@ -124,7 +124,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var searchWrap = $('.contacts_modal_search')[0],
           panelWrap = $('.contacts_modal_panel')[0],
           contactsWrap = $('.contacts_wrap', element)[0];
@@ -142,7 +142,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $($window).on('resize', updateSizes);
-      scope.$on('contacts_change', function () {
+      $scope.$on('contacts_change', function () {
         onContentLoaded(updateSizes)
       });
     };
@@ -155,7 +155,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var historyWrap = $('.im_history_wrap', element)[0],
           historyMessagesEl = $('.im_history_messages', element)[0],
           historyEl = $('.im_history', element)[0],
@@ -195,7 +195,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var animated = transform ? true : false,
           curAnimation = false;
 
-      scope.$on('ui_history_append', function (e, options) {
+      $scope.$on('ui_history_append', function (e, options) {
         if (!atBottom && !options.my) {
           return;
         }
@@ -232,7 +232,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_history_change', function () {
+      $scope.$on('ui_history_change', function () {
         $(scrollableWrap).addClass('im_history_to_bottom');
         $(scrollable).css({bottom: 0});
         onContentLoaded(function () {
@@ -257,7 +257,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_history_focus', function () {
+      $scope.$on('ui_history_focus', function () {
         if (!atBottom) {
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
           updateScroller();
@@ -265,7 +265,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      scope.$on('ui_history_prepend', function () {
+      $scope.$on('ui_history_prepend', function () {
         var sh = scrollableWrap.scrollHeight,
             st = scrollableWrap.scrollTop,
             ch = scrollableWrap.clientHeight;
@@ -287,10 +287,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_panel_update', function () {
+      $scope.$on('ui_panel_update', function () {
         onContentLoaded(function () {
           updateSizes();
-          scope.$broadcast('ui_message_send');
+          $scope.$broadcast('ui_message_send');
 
           $timeout(function () {
             $(scrollableWrap).trigger('scroll');
@@ -298,7 +298,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_editor_resize', updateSizes);
+      $scope.$on('ui_editor_resize', updateSizes);
 
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
@@ -312,7 +312,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (!moreNotified && scrollableWrap.scrollTop <= 300) {
           moreNotified = true;
-          scope.$emit('history_need_more');
+          $scope.$emit('history_need_more');
         }
       });
 
@@ -375,7 +375,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var messageField = $('textarea', element)[0],
           fileSelects = $('input', element),
           dropbox = $('.im_send_dropbox_wrap', element)[0],
@@ -395,7 +395,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('keyup', function (e) {
           updateHeight();
 
-          scope.draftMessage.text = richTextarea.innerText;
+          $scope.draftMessage.text = richTextarea.innerText;
 
           $timeout.cancel(updatePromise);
           updatePromise = $timeout(updateValue, 1000);
@@ -404,9 +404,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       fileSelects.on('change', function () {
         var self = this;
-        scope.$apply(function () {
-          scope.draftMessage.files = Array.prototype.slice.call(self.files);
-          scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
+        $scope.$apply(function () {
+          $scope.draftMessage.files = Array.prototype.slice.call(self.files);
+          $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
           setTimeout(function () {
             try {
               self.value = '';
@@ -422,7 +422,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             });
           };
 
-      scope.$on('settings_changed', updateSendSettings);
+      $scope.$on('settings_changed', updateSendSettings);
       updateSendSettings();
 
       $(editorElement).on('keydown', function (e) {
@@ -453,13 +453,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         lastTyping = now;
-        scope.$emit('ui_typing');
+        $scope.$emit('ui_typing');
       });
 
       function updateField () {
         if (richTextarea) {
           $timeout.cancel(updatePromise);
-          var html = $('<div>').text(scope.draftMessage.text || '').html();
+          var html = $('<div>').text($scope.draftMessage.text || '').html();
           html = html.replace(/\n/g, '<br/>');
           $(richTextarea).html(html);
           updateHeight();
@@ -478,7 +478,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var newHeight = richTextarea.offsetHeight;
         if (height != newHeight) {
           height = newHeight;
-          scope.$emit('ui_editor_resize');
+          $scope.$emit('ui_editor_resize');
         }
       };
 
@@ -488,15 +488,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
       }
 
-      scope.$on('ui_peer_change', focusField);
-      scope.$on('ui_history_focus', focusField);
-      scope.$on('ui_history_change', focusField);
-      scope.$on('ui_message_send', focusField);
-      scope.$on('ui_peer_draft', updateField);
-      scope.$on('ui_message_before_send', updateValue);
+      $scope.$on('ui_peer_change', focusField);
+      $scope.$on('ui_history_focus', focusField);
+      $scope.$on('ui_history_change', focusField);
+      $scope.$on('ui_message_send', focusField);
+      $scope.$on('ui_peer_draft', updateField);
+      $scope.$on('ui_message_before_send', updateValue);
 
 
-      scope.$on('$destroy', function cleanup() {
+      $scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
         $(document).off('paste', onPasteEvent);
         if (richTextarea) {
@@ -529,9 +529,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           var blob = new Blob([array], {type: contentType});
 
           if (safeConfirm('Are you sure to send file(s) from clipboard?')) {
-            scope.$apply(function () {
-              scope.draftMessage.files = [blob];
-              scope.draftMessage.isMedia = true;
+            $scope.$apply(function () {
+              $scope.draftMessage.files = [blob];
+              $scope.draftMessage.isMedia = true;
             });
           }
         }
@@ -550,9 +550,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (files.length && safeConfirm('Are you sure to send file(s) from clipboard?')) {
-          scope.$apply(function () {
-            scope.draftMessage.files = files;
-            scope.draftMessage.isMedia = true;
+          $scope.$apply(function () {
+            $scope.draftMessage.files = files;
+            $scope.draftMessage.isMedia = true;
           });
         }
       }
@@ -579,9 +579,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             }
           } else {
             if (e.type == 'drop') {
-              scope.$apply(function () {
-                scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files);
-                scope.draftMessage.isMedia = true;
+              $scope.$apply(function () {
+                $scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files);
+                $scope.draftMessage.isMedia = true;
               });
             }
             dragTimeout = setTimeout(function () {
@@ -607,25 +607,25 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var counter = 0;
 
       var cachedSrc = MtpApiFileManager.getCachedFile(
-        scope.thumb &&
-        scope.thumb.location &&
-        !scope.thumb.location.empty &&
-        scope.thumb.location
+        $scope.thumb &&
+        $scope.thumb.location &&
+        !$scope.thumb.location.empty &&
+        $scope.thumb.location
       );
 
       if (cachedSrc) {
         element.attr('src', cachedSrc);
       }
 
-      scope.$watchCollection('thumb.location', function (newLocation) {
+      $scope.$watchCollection('thumb.location', function (newLocation) {
         // console.log('new loc', newLocation, arguments);
         var counterSaved = ++counter;
         if (!newLocation || newLocation.empty) {
-          element.attr('src', scope.thumb && scope.thumb.placeholder || 'img/blank.gif');
+          element.attr('src', $scope.thumb && $scope.thumb.placeholder || 'img/blank.gif');
           return;
         }
 
@@ -636,17 +636,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (!element.attr('src')) {
-          element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+          element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
         }
 
-        MtpApiFileManager.downloadSmallFile(scope.thumb.location, scope.thumb.size).then(function (url) {
+        MtpApiFileManager.downloadSmallFile($scope.thumb.location, $scope.thumb.size).then(function (url) {
           if (counterSaved == counter) {
             element.attr('src', url);
           }
         }, function (e) {
-          console.log('Download image failed', e, scope.thumb.location);
+          console.log('Download image failed', e, $scope.thumb.location);
           if (counterSaved == counter) {
-            element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+            element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
           }
         });
       })
@@ -687,52 +687,52 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
 
       var imgElement = $('img', element);
 
       imgElement
-          .attr('src', MtpApiFileManager.getCachedFile(scope.thumbLocation) || 'img/blank.gif')
+          .attr('src', MtpApiFileManager.getCachedFile($scope.thumbLocation) || 'img/blank.gif')
           .addClass('thumb_blurred')
           .addClass('thumb_blur_animation');
 
-      if (!scope.fullPhoto.location) {
+      if (!$scope.fullPhoto.location) {
         return;
       }
 
 
       var apiPromise;
-      if (scope.fullPhoto.size) {
+      if ($scope.fullPhoto.size) {
         var inputLocation = {
           _: 'inputFileLocation',
-          volume_id: scope.fullPhoto.location.volume_id,
-          local_id: scope.fullPhoto.location.local_id,
-          secret: scope.fullPhoto.location.secret
+          volume_id: $scope.fullPhoto.location.volume_id,
+          local_id: $scope.fullPhoto.location.local_id,
+          secret: $scope.fullPhoto.location.secret
         };
-        apiPromise = MtpApiFileManager.downloadFile(scope.fullPhoto.location.dc_id, inputLocation, scope.fullPhoto.size);
+        apiPromise = MtpApiFileManager.downloadFile($scope.fullPhoto.location.dc_id, inputLocation, $scope.fullPhoto.size);
       } else {
-        apiPromise = MtpApiFileManager.downloadSmallFile(scope.fullPhoto.location);
+        apiPromise = MtpApiFileManager.downloadSmallFile($scope.fullPhoto.location);
       }
 
-      scope.progress = {enabled: true, percent: 1};
+      $scope.progress = {enabled: true, percent: 1};
 
       apiPromise.then(function (url) {
-        scope.progress.enabled = false;
+        $scope.progress.enabled = false;
         imgElement
           .attr('src', url)
           .removeClass('thumb_blurred');
 
       }, function (e) {
-        console.log('Download image failed', e, scope.fullPhoto.location);
-        scope.progress.enabled = false;
+        console.log('Download image failed', e, $scope.fullPhoto.location);
+        $scope.progress.enabled = false;
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+          $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
         } else {
-          scope.error = {text: 'Download failed', error: e};
+          $scope.error = {text: 'Download failed', error: e};
         }
       }, function (progress) {
-        scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+        $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
     }
 
@@ -780,15 +780,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
 
-      scope.progress = {enabled: true, percent: 1};
-      scope.player = {};
+      $scope.progress = {enabled: true, percent: 1};
+      $scope.player = {};
 
       var inputLocation = {
         _: 'inputVideoFileLocation',
-        id: scope.video.id,
-        access_hash: scope.video.access_hash
+        id: $scope.video.id,
+        access_hash: $scope.video.access_hash
       };
 
       var hasQt = false, i;
@@ -800,25 +800,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
-        scope.progress.enabled = false;
-        // scope.progress = {enabled: true, percent: 50};
-        scope.player.hasQuicktime = hasQt;
-        scope.player.quicktime = false;
-        scope.player.src = $sce.trustAsResourceUrl(url);
+      MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
+        $scope.progress.enabled = false;
+        // $scope.progress = {enabled: true, percent: 50};
+        $scope.player.hasQuicktime = hasQt;
+        $scope.player.quicktime = false;
+        $scope.player.src = $sce.trustAsResourceUrl(url);
       }, function (e) {
-        console.log('Download video failed', e, scope.video);
-        scope.progress.enabled = false;
-        scope.player.src = '';
+        console.log('Download video failed', e, $scope.video);
+        $scope.progress.enabled = false;
+        $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+          $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
         } else {
-          scope.error = {text: 'Video download failed', error: e};
+          $scope.error = {text: 'Video download failed', error: e};
         }
 
       }, function (progress) {
-        scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+        $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
     }
 
@@ -833,17 +833,17 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
 
       var apiKey = 'AIzaSyC32ij28dCa0YzEV_HqbWfIwTZQql-RNS0';
 
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + scope.point['lat'] + ',' + scope.point['long'] + '&zoom=13&size=200x100&scale=2&key=' + apiKey;
+      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=13&size=200x100&scale=2&key=' + apiKey;
 
       ExternalResourcesManager.downloadImage(src).then(function (url) {
         element.append('<img src="' + url + '" width="200" height="100"/>');
       });
 
-      element.attr('href','https://maps.google.com/?q=' + scope.point['lat'] + ',' + scope.point['long']);
+      element.attr('href','https://maps.google.com/?q=' + $scope.point['lat'] + ',' + $scope.point['long']);
       element.attr('target','_blank');
     }
 
@@ -858,7 +858,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var interval;
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var promise = $interval(function () {
         var time = tsNow(),
             cnt = 3;
@@ -877,7 +877,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         element.html(html);
       }, 200);
 
-      scope.$on('$destroy', function cleanup() {
+      $scope.$on('$destroy', function cleanup() {
         $interval.cancel(promise);
       });
     }
@@ -892,8 +892,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
-      scope.$watch('audio.autoplay', function (autoplay) {
+    function link ($scope, element, attrs) {
+      $scope.$watch('audio.autoplay', function (autoplay) {
         if (autoplay) {
           element.autoplay = true;
           element[0].play();
@@ -906,7 +906,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   .directive('myFocused', function(){
     return {
-      link: function(scope, element, attrs) {
+      link: function($scope, element, attrs) {
         setTimeout(function () {
           element[0].focus();
         }, 100);
@@ -920,11 +920,11 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link(scope, element, attrs) {
+    function link($scope, element, attrs) {
       element.on('change', function () {
         var self = this;
-        scope.$apply(function () {
-          scope.photo.file = self.files[0];
+        $scope.$apply(function () {
+          $scope.photo.file = self.files[0];
           setTimeout(function () {
             try {
               self.value = '';
@@ -942,10 +942,45 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link(scope, element, attrs) {
+    function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
         $(element[0].parentNode.parentNode).css({width: parseInt(newW) + 36});
       });
+    };
+
+  })
+
+
+  .directive('myModalPosition', function ($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+
+      var updateMargin = function () {
+        var height = element[0].parentNode.offsetHeight,
+            contHeight = element[0].parentNode.parentNode.parentNode.offsetHeight;
+
+        if (height < contHeight) {
+          $(element[0].parentNode).css('marginTop', (contHeight - height) / 2);
+        } else {
+          $(element[0].parentNode).css('marginTop', '');
+        }
+        $timeout(function () {
+          $(element[0].parentNode).addClass('modal-content-animated');
+        }, 300);
+      };
+
+      onContentLoaded(updateMargin);
+
+      $($window).on('resize', updateMargin);
+
+      $scope.$on('ui_height', function () {
+        onContentLoaded(updateMargin);
+      });
+
     };
 
   });
