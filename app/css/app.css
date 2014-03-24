@@ -1792,24 +1792,42 @@ img.img_fullsize {
   color: #999;
 }
 
+.chat_modal_actions_wrap {
+  margin-top: 8px;
+}
+.chat_modal_send_btn {
+  border: 0;
+  background: #4E9CD8;
+  font-size: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  float: left;
+}
+.chat_modal_send_btn:hover {
+  background: #539BD1;
+}
+.chat_modal_delete_btn {
+  border: 0;
+  font-size: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  float: left;
+}
+.chat_modal_other_btn {
+  margin-left: 10px;
+  float: left;
+}
+.chat_modal_other_btn .dropdown-toggle {
+  border: 0;
+  font-size: 12px;
+}
+
 .chat_modal_settings_wrap {
   margin-top: 10px;
 }
 .chat_modal_notifications {
+  margin-top: 25px;
   font-weight: bold;
-}
-.chat_modal_clear {
-  margin-top: 10px;
-}
-.chat_modal_leave {
-  margin-top: 10px;
-}
-
-.chat_modal_invite_btn {
-  padding-left: 0;
-  padding-right: 0;
-  font-size: 12px;
-  margin-top: 8px;
 }
 
 .chat_modal_members_header {
