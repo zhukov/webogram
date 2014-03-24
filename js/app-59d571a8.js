@@ -33132,15 +33132,6 @@ angular.module('myApp.services', [])
   function wrapForFull (id) {
     var user = getUser(id);
 
-    user.thumb = {
-      placeholder: 'img/placeholders/UserAvatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
-      location: user && user.photo && user.photo.photo_small,
-      width: 120,
-      height: 120,
-      size: 0
-    };
-    user.peerString = getUserString(id);
-
     return user;
   }
 
@@ -33154,9 +33145,61 @@ angular.module('myApp.services', [])
       scope: scope,
       windowClass: 'user_modal_window'
     });
+  };
+  $rootScope.openUser = openUser;
+
+  function importContact (phone, firstName, lastName) {
+    return MtpApiManager.invokeApi('contacts.importContacts', {
+      contacts: [{
+        _: 'inputPhoneContact',
+        client_id: '1',
+        phone: phone,
+        first_name: firstName,
+        last_name: lastName
+      }],
+      replace: false
+    }).then(function (importedContactsResult) {
+      saveApiUsers(importedContactsResult.users);
+
+      var foundUserID = false;
+      angular.forEach(importedContactsResult.imported, function (importedContact) {
+        onContactUpdated(foundUserID = importedContact.user_id, true);
+      });
+
+      return foundUserID;
+    });
+  };
+
+  function deleteContacts (userIDs) {
+    var ids = []
+    angular.forEach(userIDs, function (userID) {
+      ids.push({_: 'inputUserContact', user_id: userID})
+    });
+    return MtpApiManager.invokeApi('contacts.deleteContacts', {
+      id: ids
+    }, function () {
+      angular.forEach(userIDs, function (userID) {
+        onContactUpdated(userID, false);
+      });
+    })
   }
 
-  $rootScope.openUser = openUser;
+  function onContactUpdated (userID, isContact) {
+    if (angular.isArray(contactsList)) {
+      var curPos = curIsContact = contactsList.indexOf(userID),
+          curIsContact = curPos != -1;
+
+      if (isContact != curIsContact) {
+        if (isContact) {
+          contactsList.push(userID);
+          SearchIndexManager.indexObject(userID, getUserSearchText(userID), contactsIndex);
+        } else {
+          contactsList.splice(curPos, 1);
+        }
+      }
+    }
+  }
+
 
   $rootScope.$on('apiUpdate', function (e, update) {
     // console.log('on apiUpdate', update);
@@ -33185,21 +33228,7 @@ angular.module('myApp.services', [])
         break;
 
       case 'updateContactLink':
-        if (angular.isArray(contactsList)) {
-          var userID = update.user_id,
-              curPos = curIsContact = contactsList.indexOf(userID),
-              curIsContact = curPos != -1,
-              newIsContact = update.my_link._ == 'contacts.myLinkContact';
-
-          if (newIsContact != curIsContact) {
-            if (newIsContact) {
-              contactsList.push(userID);
-              SearchIndexManager.indexObject(userID, getUserSearchText(userID), contactsIndex);
-            } else {
-              contactsList.splice(curPos, 1);
-            }
-          }
-        }
+        onContactUpdated(update.user_id, update.my_link._ == 'contacts.myLinkContact');
         break;
     }
   });
@@ -33214,6 +33243,8 @@ angular.module('myApp.services', [])
     getUserString: getUserString,
     getUserSearchText: getUserSearchText,
     hasUser: hasUser,
+    importContact: importContact,
+    deleteContacts: deleteContacts,
     wrapForFull: wrapForFull,
     openUser: openUser
   }
@@ -33977,7 +34008,7 @@ angular.module('myApp.services', [])
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        attachType, fileName, fileName;
+        attachType, fileName;
 
     if (!options.isMedia) {
       attachType = 'document';
@@ -34115,9 +34146,95 @@ angular.module('myApp.services', [])
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
-  function forwardMessages (msgIDs, inputPeer) {
+  function sendOther(peerID, inputMedia) {
+    var messageID = tempID--,
+        randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
+        randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
+        historyStorage = historiesStorage[peerID],
+        inputPeer = AppPeersManager.getInputPeerByID(peerID);
+
+    if (historyStorage === undefined) {
+      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+    }
+
+    MtpApiManager.getUserID().then(function (fromID) {
+      var media;
+      switch (inputMedia._) {
+        case 'inputMediaContact':
+          media = angular.extend({}, inputMedia, {_: 'messageMediaContact', user_id: 0});
+          break;
+      }
+
+      var message = {
+        _: 'message',
+        id: messageID,
+        from_id: fromID,
+        to_id: AppPeersManager.getOutputPeer(peerID),
+        out: true,
+        unread: true,
+        date: tsNow() / 1000,
+        message: '',
+        media: media,
+        random_id: randomIDS,
+        pending: true
+      };
+
+      var toggleError = function (on) {
+        var historyMessage = messagesForHistory[messageID];
+        if (on) {
+          message.error = true;
+          if (historyMessage) {
+            historyMessage.error = true;
+          }
+        } else {
+          delete message.error;
+          if (historyMessage) {
+            delete historyMessage.error;
+          }
+        }
+      }
+
+      message.send = function () {
+        MtpApiManager.invokeApi('messages.sendMedia', {
+          peer: inputPeer,
+          media: inputMedia,
+          random_id: randomID
+        }).then(function (result) {
+          if (ApiUpdatesManager.saveSeq(result.seq)) {
+            ApiUpdatesManager.saveUpdate({
+              _: 'updateMessageID',
+              random_id: randomIDS,
+              id: result.message.id
+            });
+
+            message.date = result.message.date;
+            message.id = result.message.id;
+            message.media = result.message.media;
+
+            ApiUpdatesManager.saveUpdate({
+              _: 'updateNewMessage',
+              message: message,
+              pts: result.pts
+            });
+          }
+        }, function (error) {
+          toggleError(true);
+        });
+      };
+
+      saveMessages([message]);
+      historyStorage.pending.unshift(messageID);
+      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
+
+      message.send();
+    });
+
+    pendingByRandomID[randomIDS] = [peerID, messageID];
+  }
+
+  function forwardMessages (peerID, msgIDs) {
     return MtpApiManager.invokeApi('messages.forwardMessages', {
-      peer: inputPeer,
+      peer: AppPeersManager.getInputPeerByID(peerID),
       id: msgIDs
     }).then(function (forwardResult) {
       AppUsersManager.saveApiUsers(forwardResult.users);
@@ -34547,6 +34664,7 @@ angular.module('myApp.services', [])
     saveMessages: saveMessages,
     sendText: sendText,
     sendFile: sendFile,
+    sendOther: sendOther,
     forwardMessages: forwardMessages,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
@@ -36066,10 +36184,7 @@ angular.module('myApp.controllers', [])
 
       AppMessagesManager.getDialogs($scope.search.query, maxID).then(function (dialogsResult) {
         $scope.dialogs = [];
-
-        if (!$scope.search.query) {
-          $scope.contacts = [];
-        }
+        $scope.contacts = [];
 
         if (dialogsResult.dialogs.length) {
           offset += dialogsResult.dialogs.length;
@@ -36087,6 +36202,8 @@ angular.module('myApp.controllers', [])
 
         if (!$scope.search.query) {
           AppMessagesManager.getDialogs('', maxID, 100);
+        } else {
+          showMoreDialogs();
         }
 
       }, function (error) {
@@ -36179,7 +36296,7 @@ angular.module('myApp.controllers', [])
         jump = 0;
 
     function applyDialogSelect (newPeer) {
-      selectedCancel();
+      selectedCancel(true);
       newPeer = newPeer || $scope.curDialog.peer || '';
 
       peerID = AppPeersManager.getPeerID(newPeer);
@@ -36325,11 +36442,13 @@ angular.module('myApp.controllers', [])
       }
     }
 
-    function selectedCancel () {
+    function selectedCancel (noBroadcast) {
       $scope.selectedMsgs = {};
       $scope.selectedCount = 0;
       $scope.selectActions = false;
-      $scope.$broadcast('ui_panel_update');
+      if (!noBroadcast) {
+        $scope.$broadcast('ui_panel_update');
+      }
     }
 
     function selectedFlush () {
@@ -36362,8 +36481,8 @@ angular.module('myApp.controllers', [])
         });
 
         PeersSelectService.selectPeer().then(function (peerString) {
-          var inputPeer = AppPeersManager.getInputPeer(peerString);
-          AppMessagesManager.forwardMessages(selectedMessageIDs, inputPeer).then(function () {
+          var peerID = AppPeersManager.getPeerID(peerString);
+          AppMessagesManager.forwardMessages(peerID, selectedMessageIDs).then(function () {
             selectedCancel();
             $rootScope.$broadcast('history_focus', {peerString: peerString});
           });
@@ -36607,8 +36726,12 @@ angular.module('myApp.controllers', [])
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
   })
 
-  .controller('UserModalController', function ($scope, $location, $rootScope, $modalStack, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager) {
-    $scope.user = AppUsersManager.wrapForFull($scope.userID);
+  .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager, PeersSelectService) {
+
+    var peerString = AppUsersManager.getUserString($scope.userID);
+
+    $scope.user = AppUsersManager.getUser($scope.userID);
+    $scope.userPhoto = AppUsersManager.getUserPhoto($scope.userID, 'User');
 
     $scope.settings = {notifications: true};
 
@@ -36632,7 +36755,7 @@ angular.module('myApp.controllers', [])
 
 
     $scope.goToHistory = function () {
-      $rootScope.$broadcast('history_focus', {peerString: $scope.user.peerString});
+      $rootScope.$broadcast('history_focus', {peerString: peerString});
     };
 
     $scope.flushHistory = function () {
@@ -36643,6 +36766,49 @@ angular.module('myApp.controllers', [])
         $scope.goToHistory();
       });
     };
+
+    $scope.importContact = function (edit) {
+      var scope = $rootScope.$new();
+      scope.importContact = {
+        phone: $scope.user.phone,
+        first_name: $scope.user.first_name,
+        last_name: $scope.user.last_name,
+      };
+
+      $modal.open({
+        templateUrl: edit ? 'partials/edit_contact_modal.html' : 'partials/import_contact_modal.html',
+        controller: 'ImportContactModalController',
+        windowClass: 'import_contact_modal_window',
+        scope: scope
+      }).result.then(function (foundUserID) {
+        if ($scope.userID == foundUserID) {
+          $scope.user = AppUsersManager.getUser($scope.userID);
+          console.log($scope.user);
+        }
+      });
+    };
+
+    $scope.deleteContact = function () {
+      AppUsersManager.deleteContacts([$scope.userID]).then(function () {
+        $scope.user = AppUsersManager.getUser($scope.userID);
+        console.log($scope.user);
+      });
+    };
+
+    $scope.shareContact = function () {
+      PeersSelectService.selectPeer().then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+
+        AppMessagesManager.sendOther(peerID, {
+          _: 'inputMediaContact',
+          phone_number: $scope.user.phone,
+          first_name: $scope.user.first_name,
+          last_name: $scope.user.last_name
+        });
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
+      })
+    }
+
   })
 
   .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
@@ -36656,6 +36822,7 @@ angular.module('myApp.controllers', [])
       AppUsersManager.saveApiUsers(result.users);
 
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, result.full_chat);
+      $scope.$broadcast('ui_height');
     });
 
     $scope.settings = {notifications: true};
@@ -36973,7 +37140,7 @@ angular.module('myApp.controllers', [])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, $modalInstance, AppUsersManager) {
+  .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager) {
     $scope.contacts = [];
     $scope.search = {};
 
@@ -36996,8 +37163,8 @@ angular.module('myApp.controllers', [])
       }
     }
 
-    $scope.$watch('search.query', function (newValue) {
-      AppUsersManager.getContacts(newValue).then(function (contactsList) {
+    function updateContacts (query) {
+      AppUsersManager.getContacts(query).then(function (contactsList) {
         $scope.contacts = [];
         angular.forEach(contactsList, function(userID) {
           var contact = {
@@ -37009,7 +37176,9 @@ angular.module('myApp.controllers', [])
         });
         $scope.$broadcast('contacts_change');
       });
-    });
+    };
+
+    $scope.$watch('search.query', updateContacts);
 
     $scope.contactSelect = function (userID) {
       if ($scope.disabledContacts[userID]) {
@@ -37036,6 +37205,18 @@ angular.module('myApp.controllers', [])
         return $modalInstance.close(selectedUserIDs);
       }
     }
+
+    $scope.importContact = function () {
+      $modal.open({
+        templateUrl: 'partials/import_contact_modal.html',
+        controller: 'ImportContactModalController',
+        windowClass: 'import_contact_modal_window'
+      }).result.then(function (foundUserID) {
+        if (foundUserID) {
+          updateContacts($scope.search && $scope.search.query || '');
+        }
+      });
+    };
 
   })
 
@@ -37116,6 +37297,28 @@ angular.module('myApp.controllers', [])
         $rootScope.$broadcast('history_focus', {peerString: peerString});
       });
     };
+  })
+
+  .controller('ImportContactModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager) {
+    if ($scope.importContact === undefined) {
+      $scope.importContact = {};
+    }
+
+    $scope.doImport = function () {
+      if ($scope.importContact && $scope.importContact.phone) {
+        $scope.progress = {enabled: true};
+        AppUsersManager.importContact(
+          $scope.importContact.phone,
+          $scope.importContact.first_name,
+          $scope.importContact.last_name
+        ).then(function (foundUserID) {
+          $modalInstance.close(foundUserID);
+        })['finally'](function () {
+          delete $scope.progress.enabled;
+        });
+      }
+    };
+
   })
 
 /*!
@@ -37277,21 +37480,23 @@ angular.module('myApp.filters', [])
     }
   }])
 
-angular.module("myApp.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("partials/chat_create_modal.html","<div class=\"contacts_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Create Group</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <form ng-submit=\"createGroup()\">\n\n      <div class=\"contacts_modal_group_title\">\n        <input class=\"form-control\" my-focused type=\"text\" placeholder=\"Group name\" ng-model=\"group.name\"/>\n      </div>\n\n      <div class=\"contacts_modal_panel clearfix\">\n\n        <div class=\"contacts_modal_actions pull-right\">\n          <button class=\"btn btn-default\" ng-click=\"$dismiss()\"> Cancel </button>\n\n          <button class=\"btn btn-success\" type=\"submit\"> Create </button>\n        </div>\n\n      </div>\n\n    </form>\n\n  </div>\n\n</div>");
-$templateCache.put("partials/chat_edit_modal.html","<div class=\"contacts_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Edit Group Title</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <form ng-submit=\"updateGroup()\">\n\n      <div class=\"contacts_modal_group_title\">\n        <input class=\"form-control\" my-focused type=\"text\" placeholder=\"Group name\" ng-model=\"group.name\"/>\n      </div>\n\n      <div class=\"contacts_modal_panel clearfix\">\n\n        <div class=\"contacts_modal_actions pull-right\">\n          <button class=\"btn btn-default\" ng-click=\"$dismiss()\"> Cancel </button>\n\n          <button class=\"btn btn-success\" type=\"submit\"> Save </button>\n        </div>\n\n      </div>\n\n    </form>\n\n  </div>\n\n</div>");
-$templateCache.put("partials/chat_modal.html","<div class=\"chat_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Group Info</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"chat_modal_photo_wrap pull-left\">\n\n      <div class=\"chat_modal_photo\">\n        <img\n          class=\"user_modal_image\"\n          my-load-thumb\n          thumb=\"chatFull.thumb\"\n        />\n        <div class=\"chat_modal_photo_change_wrap\" ng-if=\"chatFull.chat._ != \'chatForbidden\' &amp;&amp; !chatFull.chat.left\">\n          <div ng-if=\"photo.updating\" class=\"chat_modal_photo_loading\">Updating<span my-typing-dots></span></div>\n          <div ng-if=\"!photo.updating\">\n            <div class=\"chat_modal_photo_update_link\">\n              <input my-file-upload  type=\"file\" multiple=\"false\" class=\"im_attach_input\" size=\"120\" multiple=\"false\" accept=\"image/x-png, image/png, image/gif, image/jpeg\" />\n              Update photo\n            </div>\n            <a ng-if=\"chatFull.thumb.location\" href=\"\" ng-click=\"deletePhoto()\" class=\"chat_modal_photo_delete_link\">Delete photo</a>\n          </div>\n        </div>\n      </div>\n\n    </div>\n\n\n    <div class=\"chat_modal_info_wrap clearfix\">\n      <h4 class=\"chat_modal_header\">\n        <a href=\"\" ng-if=\"chatFull.chat._ != \'chatForbidden\' &amp;&amp; !chatFull.chat.left\" ng-click=\"editTitle()\" ng-bind-html=\"chatFull.chat.rTitle\"></a>\n        <span ng-if=\"chatFull.chat._ == \'chatForbidden\' || chatFull.chat.left\" ng-bind-html=\"chatFull.chat.rTitle\"></span>\n      </h4>\n      <p class=\"chat_modal_members_count\" ng-if=\"chatFull.chat.participants_count > 0\">\n        <ng-pluralize count=\"chatFull.chat.participants_count\"\n                         when=\"{\'0\': \'No members\', \'one\': \'1 member\', \'other\': \'{} members\'}\">\n        </ng-pluralize>\n      </p>\n\n      <div class=\"chat_modal_settings_wrap\">\n        <div class=\"chat_modal_notifications\">\n          Notifications:\n          <a ng-click=\"settings.notifications = !settings.notifications\">\n            {{settings.notifications ? \'ON\' : \'OFF\'}}\n          </a>\n        </div>\n\n        <div class=\"chat_modal_leave_join\" ng-if=\"chatFull.chat._ != \'chatForbidden\'\">\n          <div class=\"chat_modal_leave\"  ng-if=\"!chatFull.chat.left\">\n            <a href=\"\" ng-click=\"leaveGroup()\">Leave group</a>\n          </div>\n          <div class=\"chat_modal_leave\" ng-if=\"chatFull.chat.left\">\n            <a href=\"\" ng-click=\"returnToGroup()\">Return to group</a>\n          </div>\n\n        </div>\n      </div>\n    </div>\n\n    <h5 class=\"chat_modal_members_header\">\n      <a href=\"\" ng-click=\"inviteToGroup()\" ng-if=\"!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length\" class=\"pull-right\">Add participant</a>\n      Members\n    </h5>\n    <div class=\"chat_modal_members_list\">\n\n      <div class=\"chat_modal_participant_wrap clearfix\" ng-repeat=\"participant in chatFull.participants.participants | orderBy:\'-user.sortStatus\'\">\n        <a ng-if=\"participant.canKick\" ng-click=\"kickFromGroup(participant.user_id)\"  class=\"chat_modal_participant_kick pull-right\">Kick</a>\n        <a ng-click=\"openUser(participant.user_id)\" class=\"chat_modal_participant_photo pull-left\">\n          <img\n            class=\"chat_modal_participant_photo\"\n            my-load-thumb\n            thumb=\"participant.userPhoto\"\n          />\n          <i class=\"icon status_online\" ng-show=\"participant.user.status._ == \'userStatusOnline\'\"></i>\n        </a>\n        <div class=\"chat_modal_participant_name\">\n          <a ng-click=\"openUser(participant.user.id)\" ng-bind-html=\"participant.user.rFullName\"></a>\n        </div>\n        <div class=\"chat_modal_participant_status\">{{participant.user | userStatus}}</div>\n      </div>\n\n    </div>\n\n    <div class=\"chat_modal_members_forbidden\" ng-if=\"chatFull.chat._ == \'chatForbidden\' || chatFull.chat.left\">\n      Group members list is unavailable.\n    </div>\n\n  </div>\n\n</div>");
-$templateCache.put("partials/contacts_modal.html","<div class=\"contacts_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$dismiss()\">Close</a>\n    <h4 class=\"modal-title\">Contacts</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"contacts_modal_search\">\n      <input class=\"form-control contacts_modal_search_field\" my-focused type=\"search\" placeholder=\"Search\" ng-model=\"search.query\"/>\n      <a class=\"contacts_modal_search_clear\" ng-click=\"search.query = \'\'\" ng-show=\"search.query.length\"></a>\n    </div>\n\n\n    <div my-contacts-list class=\"contacts_modal_col\">\n\n      <div class=\"contacts_wrap nano\">\n        <div class=\"contacts_scrollable_wrap content\">\n\n          <ul class=\"contacts_modal_members_list nav nav-pills nav-stacked\">\n\n            <li class=\"contacts_modal_contact_wrap clearfix\" ng-repeat=\"contact in contacts | orderBy:\'user.sortName\' track by contact.userID\" ng-class=\"{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}\">\n              <a class=\"contacts_modal_contact\" ng-click=\"contactSelect(contact.userID)\">\n\n                <i ng-if=\"multiSelect\" class=\"icon icon-contact-tick\"></i>\n\n                <div class=\"contacts_modal_contact_photo pull-left\">\n                  <img\n                    class=\"contacts_modal_contact_photo\"\n                    my-load-thumb\n                    thumb=\"contact.userPhoto\"\n                  />\n                  <i class=\"icon status_online\" ng-show=\"contact.user.status._ == \'userStatusOnline\'\"></i>\n                </div>\n\n                <div class=\"contacts_modal_contact_name\" ng-bind-html=\"contact.user.rFullName\"></div>\n                <div class=\"contacts_modal_contact_status\">{{contact.user | userStatus}}</div>\n\n              </a>\n            </li>\n\n          </ul>\n\n        </div>\n      </div>\n\n    </div>\n\n\n    <div ng-if=\"multiSelect\" class=\"contacts_modal_panel\">\n\n      <button class=\"btn btn-success btn-block\" ng-class=\"{disabled: !selectedCount}\" ng-disabled=\"!selectedCount\" ng-click=\"submitSelected()\" type=\"submit\">\n        Next »\n      </button>\n\n    </div>\n\n  </div>\n\n</div>");
+angular.module("myApp.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("partials/chat_create_modal.html","<div class=\"contacts_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Create Group</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <form ng-submit=\"createGroup()\">\n\n      <div class=\"contacts_modal_group_title\">\n        <input class=\"form-control\" my-focused type=\"text\" placeholder=\"Group name\" ng-model=\"group.name\"/>\n      </div>\n\n      <div class=\"contacts_modal_panel clearfix\">\n\n        <div class=\"contacts_modal_actions pull-right\">\n          <button class=\"btn btn-default\" ng-click=\"$dismiss()\"> Cancel </button>\n\n          <button class=\"btn btn-success\" type=\"submit\"> Create </button>\n        </div>\n\n      </div>\n\n    </form>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/chat_edit_modal.html","<div class=\"contacts_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Edit Group Title</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <form ng-submit=\"updateGroup()\">\n\n      <div class=\"contacts_modal_group_title\">\n        <input class=\"form-control\" my-focused type=\"text\" placeholder=\"Group name\" ng-model=\"group.name\"/>\n      </div>\n\n      <div class=\"contacts_modal_panel clearfix\">\n\n        <div class=\"contacts_modal_actions pull-right\">\n          <button class=\"btn btn-default\" ng-click=\"$dismiss()\"> Cancel </button>\n\n          <button class=\"btn btn-success\" type=\"submit\"> Save </button>\n        </div>\n\n      </div>\n\n    </form>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/chat_modal.html","<div class=\"chat_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Group Info</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"chat_modal_photo_wrap pull-left\">\n\n      <div class=\"chat_modal_photo\">\n        <img\n          class=\"user_modal_image\"\n          my-load-thumb\n          thumb=\"chatFull.thumb\"\n        />\n        <div class=\"chat_modal_photo_change_wrap\" ng-if=\"chatFull.chat._ != \'chatForbidden\' &amp;&amp; !chatFull.chat.left\">\n          <div ng-if=\"photo.updating\" class=\"chat_modal_photo_loading\">Updating<span my-typing-dots></span></div>\n          <div ng-if=\"!photo.updating\">\n            <div class=\"chat_modal_photo_update_link\">\n              <input my-file-upload  type=\"file\" multiple=\"false\" class=\"im_attach_input\" size=\"120\" multiple=\"false\" accept=\"image/x-png, image/png, image/gif, image/jpeg\" />\n              Update photo\n            </div>\n            <a ng-if=\"chatFull.thumb.location\" href=\"\" ng-click=\"deletePhoto()\" class=\"chat_modal_photo_delete_link\">Delete photo</a>\n          </div>\n        </div>\n      </div>\n\n    </div>\n\n\n    <div class=\"chat_modal_info_wrap clearfix\">\n      <h4 class=\"chat_modal_header\">\n        <a href=\"\" ng-if=\"chatFull.chat._ != \'chatForbidden\' &amp;&amp; !chatFull.chat.left\" ng-click=\"editTitle()\" ng-bind-html=\"chatFull.chat.rTitle\"></a>\n        <span ng-if=\"chatFull.chat._ == \'chatForbidden\' || chatFull.chat.left\" ng-bind-html=\"chatFull.chat.rTitle\"></span>\n      </h4>\n      <p class=\"chat_modal_members_count\" ng-if=\"chatFull.chat.participants_count > 0\">\n        <ng-pluralize count=\"chatFull.chat.participants_count\"\n                         when=\"{\'0\': \'No members\', \'one\': \'1 member\', \'other\': \'{} members\'}\">\n        </ng-pluralize>\n      </p>\n\n      <div class=\"chat_modal_settings_wrap\">\n        <div class=\"chat_modal_notifications\">\n          Notifications:\n          <a ng-click=\"settings.notifications = !settings.notifications\">\n            {{settings.notifications ? \'ON\' : \'OFF\'}}\n          </a>\n        </div>\n\n        <div class=\"chat_modal_leave_join\" ng-if=\"chatFull.chat._ != \'chatForbidden\'\">\n          <div class=\"chat_modal_leave\"  ng-if=\"!chatFull.chat.left\">\n            <a href=\"\" ng-click=\"leaveGroup()\">Leave group</a>\n          </div>\n          <div class=\"chat_modal_leave\" ng-if=\"chatFull.chat.left\">\n            <a href=\"\" ng-click=\"returnToGroup()\">Return to group</a>\n          </div>\n\n        </div>\n      </div>\n    </div>\n\n    <h5 class=\"chat_modal_members_header\">\n      <a href=\"\" ng-click=\"inviteToGroup()\" ng-if=\"!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length\" class=\"pull-right\">Add participant</a>\n      Members\n    </h5>\n    <div class=\"chat_modal_members_list\">\n\n      <div class=\"chat_modal_participant_wrap clearfix\" ng-repeat=\"participant in chatFull.participants.participants | orderBy:\'-user.sortStatus\'\">\n        <a ng-if=\"participant.canKick\" ng-click=\"kickFromGroup(participant.user_id)\"  class=\"chat_modal_participant_kick pull-right\">Kick</a>\n        <a ng-click=\"openUser(participant.user_id)\" class=\"chat_modal_participant_photo pull-left\">\n          <img\n            class=\"chat_modal_participant_photo\"\n            my-load-thumb\n            thumb=\"participant.userPhoto\"\n          />\n          <i class=\"icon status_online\" ng-show=\"participant.user.status._ == \'userStatusOnline\'\"></i>\n        </a>\n        <div class=\"chat_modal_participant_name\">\n          <a ng-click=\"openUser(participant.user.id)\" ng-bind-html=\"participant.user.rFullName\"></a>\n        </div>\n        <div class=\"chat_modal_participant_status\">{{participant.user | userStatus}}</div>\n      </div>\n\n    </div>\n\n    <div class=\"chat_modal_members_forbidden\" ng-if=\"chatFull.chat._ == \'chatForbidden\' || chatFull.chat.left\">\n      Group members list is unavailable.\n    </div>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/contacts_modal.html","<div class=\"contacts_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$dismiss()\">Close</a>\n    <a ng-if=\"!multiSelect\" class=\"pull-right modal-head-link\" ng-click=\"importContact()\">Add new contact</a>\n    <h4 class=\"modal-title\">Contacts</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"contacts_modal_search\">\n      <input class=\"form-control contacts_modal_search_field\" my-focused type=\"search\" placeholder=\"Search\" ng-model=\"search.query\"/>\n      <a class=\"contacts_modal_search_clear\" ng-click=\"search.query = \'\'\" ng-show=\"search.query.length\"></a>\n    </div>\n\n\n    <div my-contacts-list class=\"contacts_modal_col\">\n\n      <div class=\"contacts_wrap nano\">\n        <div class=\"contacts_scrollable_wrap content\">\n\n          <ul class=\"contacts_modal_members_list nav nav-pills nav-stacked\">\n\n            <li class=\"contacts_modal_contact_wrap clearfix\" ng-repeat=\"contact in contacts | orderBy:\'user.sortName\' track by contact.userID\" ng-class=\"{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}\">\n              <a class=\"contacts_modal_contact\" ng-click=\"contactSelect(contact.userID)\">\n\n                <i ng-if=\"multiSelect\" class=\"icon icon-contact-tick\"></i>\n\n                <div class=\"contacts_modal_contact_photo pull-left\">\n                  <img\n                    class=\"contacts_modal_contact_photo\"\n                    my-load-thumb\n                    thumb=\"contact.userPhoto\"\n                  />\n                  <i class=\"icon status_online\" ng-show=\"contact.user.status._ == \'userStatusOnline\'\"></i>\n                </div>\n\n                <div class=\"contacts_modal_contact_name\" ng-bind-html=\"contact.user.rFullName\"></div>\n                <div class=\"contacts_modal_contact_status\">{{contact.user | userStatus}}</div>\n\n              </a>\n            </li>\n\n          </ul>\n\n        </div>\n      </div>\n\n    </div>\n\n\n    <div ng-if=\"multiSelect\" class=\"contacts_modal_panel\">\n\n      <button class=\"btn btn-success btn-block\" ng-class=\"{disabled: !selectedCount}\" ng-disabled=\"!selectedCount\" ng-click=\"submitSelected()\" type=\"submit\">\n        Next »\n      </button>\n\n    </div>\n\n  </div>\n\n</div>");
 $templateCache.put("partials/dialog.html","<a class=\"im_dialog\" ng-click=\"dialogSelect(dialogMessage.peerString)\">\n\n  <div class=\"im_dialog_meta pull-right text-right\">\n    <div class=\"im_dialog_date\">\n      {{dialogMessage.date | dateOrTime}}\n    </div>\n    <span\n      class=\"im_dialog_badge badge\"\n      ng-show=\"dialogMessage.unreadCount > 0 &amp;&amp; !dialogMessage.out\"\n      ng-bind=\"dialogMessage.unreadCount\"\n    ></span>\n    <i\n      class=\"im_dialog_unread\"\n      ng-show=\"dialogMessage.out &amp;&amp; dialogMessage.unread\"\n    ></i>\n  </div>\n\n  <div class=\"im_dialog_photo pull-left\">\n    <img\n      class=\"im_dialog_photo\"\n      my-load-thumb\n      thumb=\"dialogMessage.peerPhoto\"\n    />\n  </div>\n\n  <div class=\"im_dialog_message_wrap\">\n\n    <div class=\"im_dialog_peer\">\n      <span class=\"im_dialog_chat\" ng-if=\"dialogMessage.chatID\">\n        <i class=\"icon icon-group\"></i> <span ng-bind-html=\"dialogMessage.peerData.rTitle\"></span>\n      </span>\n      <span class=\"im_dialog_user\" ng-if=\"dialogMessage.peerID > 0\" ng-bind-html=\"dialogMessage.peerData.rFullName\"></span>\n    </div>\n\n    <div class=\"im_dialog_message\">\n      <span class=\"im_dialog_chat_from_wrap\">\n        <span\n          class=\"im_dialog_chat_from\"\n          ng-if=\"!dialogMessage.out &amp;&amp; dialogMessage.chatID\"\n          ng-bind-html=\"dialogMessage.fromUser.rFirstName\"\n        ></span><span\n          class=\"im_dialog_chat_from\"\n          ng-if=\"dialogMessage.out\"\n        >You</span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != \'messageMediaEmpty\')) ? \':\' : \'\'}}\n      </span>\n\n      <span class=\"im_dialog_message_media\" ng-if=\"dialogMessage.media &amp;&amp; dialogMessage.media._ != \'messageMediaEmpty\'\" ng-switch=\"dialogMessage.media._\">\n        <span ng-switch-when=\"messageMediaPhoto\">Photo</span>\n        <span ng-switch-when=\"messageMediaVideo\">Video</span>\n        <span ng-switch-when=\"messageMediaDocument\">Document</span>\n        <span ng-switch-when=\"messageMediaAudio\">Audio</span>\n        <span ng-switch-when=\"messageMediaGeo\">Location</span>\n        <span ng-switch-when=\"messageMediaContact\">Contact</span>\n      </span>\n\n      <span class=\"im_dialog_message_service\" ng-if=\"dialogMessage._ == \'messageService\'\" ng-switch=\"dialogMessage.action._\">\n        <span ng-switch-when=\"messageActionChatCreate\"> created the group </span>\n        <span ng-switch-when=\"messageActionChatEditTitle\">changed group name</span>\n        <span ng-switch-when=\"messageActionChatEditPhoto\">changed group photo</span>\n        <span ng-switch-when=\"messageActionChatDeletePhoto\">removed group photo</span>\n\n        <span ng-switch-when=\"messageActionChatAddUser\">\n          <span ng-if=\"dialogMessage.from_id != dialogMessage.action.user_id\">\n            invited <span ng-bind-html=\"dialogMessage.action.user.rFullName\"></span>\n          </span>\n          <span ng-if=\"dialogMessage.from_id == dialogMessage.action.user_id\">\n            returned to group\n          </span>\n        </span>\n\n        <span ng-switch-when=\"messageActionChatDeleteUser\">\n          <span ng-if=\"dialogMessage.from_id != dialogMessage.action.user_id\">\n            kicked <span ng-bind-html=\"dialogMessage.action.user.rFullName\"></span>\n          </span>\n          <span ng-if=\"dialogMessage.from_id == dialogMessage.action.user_id\">\n            left group\n          </span>\n        </span>\n      </span>\n\n      <span class=\"im_dialog_message_text\" ng-if=\"dialogMessage.message.length\" ng-bind-html=\"dialogMessage.richMessage\"></span>\n    </div>\n\n  </div>\n</a>\n");
-$templateCache.put("partials/error_modal.html","<div class=\"error_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">{{title}}</h4>\n  </div>\n\n\n  <div class=\"modal-body\">\n\n    <div class=\"error_modal_description\">\n      {{description}}\n    </div>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/edit_contact_modal.html","<div class=\"import_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Edit contact</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <form ng-submit=\"doImport()\">\n\n      <div class=\"form-group import_modal_field_wrap\">\n        <span class=\"form-control uneditable-input disabled\" disabled>{{importContact.phone | phoneNumber}}</span>\n      </div>\n      <div class=\"form-group import_modal_field_wrap\">\n        <input class=\"form-control\" type=\"text\" my-focused placeholder=\"First name\" ng-model=\"importContact.first_name\"/>\n      </div>\n      <div class=\"form-group import_modal_field_wrap\">\n        <input class=\"form-control\" type=\"text\" placeholder=\"Last name\" ng-model=\"importContact.last_name\"/>\n      </div>\n\n      <div class=\"import_modal_panel clearfix\">\n\n        <div class=\"import_modal_actions pull-right\">\n          <a class=\"btn btn-default\" ng-click=\"$dismiss()\"> Cancel </a>\n\n          <button class=\"btn btn-success\" type=\"submit\" ng-class=\"{disabled: progress.enabled}\" ng-disabled=\"progress.enabled\">\n            {{progress.enabled ? \'Saving...\' : \'Save\'}}\n          </button>\n\n\n        </div>\n\n      </div>\n\n    </form>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/error_modal.html","<div class=\"error_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">{{title}}</h4>\n  </div>\n\n\n  <div class=\"modal-body\">\n\n    <div class=\"error_modal_description\">\n      {{description}}\n    </div>\n\n  </div>\n\n</div>");
 $templateCache.put("partials/head.html","<div class=\"tg_page_head\">\n  <div class=\"navbar navbar-static-top  navbar-inverse\" role=\"navigation\">\n    <div class=\"container\" ng-init=\"navbarCollapsed = true\">\n      <div class=\"navbar-header\">\n        <button type=\"button\" class=\"navbar-toggle\" ng-click=\"navbarCollapsed = !navbarCollapsed\">\n          <span class=\"sr-only\">Toggle navigation</span>\n          <span class=\"icon-bar\"></span>\n          <span class=\"icon-bar\"></span>\n          <span class=\"icon-bar\"></span>\n        </button>\n        <a class=\"navbar-brand\" href=\"{{isLoggedIn ? \'#/im\' : \'#/\'}}\"><span class=\"tg_head_logo\"></span><span class=\"tg_head_logo_text\"></span></a>\n        <ul class=\"nav navbar-nav navbar-quick-nav\" ng-show=\"curDialog.peer\">\n          <li>\n            <a href=\"#/im\">\n              <i class=\"icon icon-back\"></i> Back\n            </a>\n          </li>\n        </ul>\n      </div>\n\n\n      <div class=\"navbar-collapse\" collapse=\"navbarCollapsed\">\n\n        <ul ng-if=\"offline\" class=\"nav navbar-nav navbar-offline\">\n          <li ng-show=\"!offlineConnecting\"><span class=\"navbar-offline-text\">Waiting for network<span my-typing-dots></span></span></li>\n          <li ng-show=\"!offlineConnecting\"><a href=\"\" ng-click=\"retryOnline()\">Retry</a></li>\n          <li ng-show=\"offlineConnecting\"><span class=\"navbar-offline-text\">Connecting<span my-typing-dots></span></span></li>\n        </ul>\n\n        <ul ng-if=\"!offline\" class=\"nav navbar-nav navbar-right\">\n          <li ng-if=\"isLoggedIn\"><a href=\"\" ng-click=\"openContacts()\">Contacts</a></li>\n          <li ng-if=\"isLoggedIn\"><a href=\"\" ng-click=\"openSettings()\">Settings</a></li>\n          <li><a  href=\"https://github.com/zhukov/webogram\" target=\"_blank\">About</a></li>\n        </ul>\n\n      </div>\n    </div>\n  </div>\n</div>");
 $templateCache.put("partials/im.html","<div ng-include=\"\'partials/head.html\'\"></div>\n\n<div class=\"im_page_wrap\" ng-class=\"{im_page_peer_not_selected: !curDialog.peer}\">\n\n  <div class=\"im_page_split clearfix\">\n\n    <div class=\"im_dialogs_col_wrap\" ng-controller=\"AppImDialogsController\">\n      <div class=\"im_dialogs_panel\">\n        <div class=\"dropdown im_dialogs_panel_dropdown pull-right\">\n          <a class=\"dropdown-toggle\">\n            <span class=\"icon-bar\"></span>\n            <span class=\"icon-bar\"></span>\n            <span class=\"icon-bar\"></span>\n          </a>\n          <ul class=\"dropdown-menu\">\n            <li><a href=\"\" ng-click=\"openGroup()\">New Group</a></li>\n            <li><a href=\"\" ng-click=\"openContacts()\">Contacts</a></li>\n            <li><a href=\"\" ng-click=\"openSettings()\">Settings</a></li>\n          </ul>\n        </div>\n        <div class=\"im_dialogs_search\">\n          <input class=\"form-control im_dialogs_search_field\" type=\"search\" placeholder=\"Search\" ng-model=\"search.query\"/>\n          <a class=\"im_dialogs_search_clear\" ng-click=\"search.query = \'\'\" ng-show=\"search.query.length\"></a>\n        </div>\n      </div>\n      <div my-dialogs-list class=\"im_dialogs_col\">\n        <div class=\"im_dialogs_wrap nano\">\n          <div class=\"im_dialogs_scrollable_wrap content\">\n            <ul class=\"nav nav-pills nav-stacked\">\n              <li class=\"im_dialog_wrap\" my-dialog dialog-message=\"dialogMessage\" ng-repeat=\"dialogMessage in dialogs track by dialogMessage.peerID\" ng-class=\"{active: curDialog.peerID == dialogMessage.peerID}\"></li>\n            </ul>\n            <div class=\"im_dialogs_contacts_wrap\" ng-show=\"contacts.length > 0\">\n              <h5>Contacts</h5>\n              <ul class=\"nav nav-pills nav-stacked\">\n                <li class=\"im_dialog_wrap\" ng-repeat=\"contact in contacts | orderBy:\'user.sortName\' track by contact.userID\" ng-class=\"{active: curDialog.peerID == contact.userID}\">\n                  <a class=\"im_dialog\" ng-click=\"dialogSelect(contact.peerString)\">\n                    <div class=\"im_dialog_photo pull-left\">\n                      <img\n                        class=\"im_dialog_photo\"\n                        my-load-thumb\n                        thumb=\"contact.userPhoto\"\n                      />\n                    </div>\n                    <div class=\"im_dialog_message_wrap\">\n                      <div class=\"im_dialog_peer\">\n                        <span class=\"im_dialog_user\" ng-bind-html=\"contact.user.rFullName\"></span>\n                      </div>\n                      <div class=\"im_dialog_message\">\n                        <span class=\"im_dialog_message_text\">{{contact.user | userStatus}}</span>\n                      </div>\n                    </div>\n                  </a>\n                </li>\n              </ul>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"im_history_col_wrap\" ng-controller=\"AppImHistoryController\">\n      <div ng-if=\"state.notSelected\" class=\"im_history_not_selected\">No history to display</div>\n      <div ng-show=\"!state.notSelected &amp;&amp; !state.loaded\" class=\"im_history_not_selected\">Loading history<span my-typing-dots></span></div>\n\n      <div ng-if=\"state.loaded\">\n        <div my-history class=\"im_history_col\">\n\n          <div class=\"im_history_panel_wrap\">\n\n            <div class=\"im_history_panel clearfix\" ng-controller=\"AppImPanelController\">\n              <div class=\"im_history_panel_title\">\n\n                <a class=\"im_history_panel_info_link pull-right\" ng-click=\"showPeerInfo()\">Info</a>\n                <a class=\"im_history_panel_edit_link pull-right\" ng-click=\"toggleEdit()\">Edit</a>\n\n                <div class=\"dropdown im_history_panel_media_dropdown pull-right\">\n                  <a class=\"dropdown-toggle\">Media<i class=\"icon icon-caret\"></i></a>\n                  <ul class=\"dropdown-menu\">\n                    <li>\n                      <a ng-click=\"toggleMedia(\'photos\')\">Photos</a>\n                    </li>\n                    <li>\n                      <a ng-click=\"toggleMedia(\'video\')\">Videos</a>\n                    </li>\n                    <li>\n                      <a ng-click=\"toggleMedia(\'documents\')\">Documents</a>\n                    </li>\n                  </ul>\n                </div>\n                <a ng-if=\"mediaType !== false\" class=\"im_history_panel_return_link pull-right\" ng-click=\"toggleMedia()\">\n                  Show all messages\n                  <strong class=\"im_history_panel_return_count\" ng-show=\"missedCount > 0\">+{{missedCount}}</strong>\n                </a>\n\n                <h4 ng-if=\"mediaType !== false\" ng-switch=\"mediaType\">\n                  <span ng-switch-when=\"photos\"> Photos </span>\n                  <span ng-switch-when=\"video\"> Videos </span>\n                  <span ng-switch-when=\"documents\"> Documents </span>\n                </h4>\n\n                <h4 ng-if=\"mediaType === false &amp;&amp; historyPeer.id < 0\" ng-click=\"showPeerInfo()\">\n                  <span ng-bind-html=\"historyPeer.data.rTitle\"></span>\n                  <small class=\"im_chat_users\">\n                    <ng-pluralize count=\"historyPeer.data.participants_count\"\n                                     when=\"{\'0\': \'No members\', \'one\': \'1 member\', \'other\': \'{} members\'}\">\n                    </ng-pluralize>\n                  </small>\n                </h4>\n\n                <h4 ng-if=\"mediaType === false &amp;&amp; historyPeer.id > 0\" ng-click=\"showPeerInfo()\">\n                  <span ng-bind-html=\"historyPeer.data.rFullName\"></span>\n                  <small class=\"im_peer_online\">{{historyPeer.data | userStatus}}</small>\n                </h4>\n\n              </div>\n\n            </div>\n\n          </div>\n\n          <div class=\"im_history_wrap nano\">\n\n            <div class=\"im_history_scrollable_wrap content\">\n\n              <div class=\"im_history_scrollable\">\n\n                  <div class=\"im_history\" ng-class=\"{im_history_selectable: selectActions}\">\n                    <div class=\"im_history_empty\" ng-show=\"historyEmpty &amp;&amp; !history.length\">No messages to display</div>\n                    <div class=\"im_history_messages\">\n                      <div class=\"im_history_message_wrap\" my-message ng-repeat=\"historyMessage in history\"></div>\n                    </div>\n                  </div>\n\n                  <div class=\"im_history_typing_wrap\">\n                    <div class=\"im_history_typing\" ng-show=\"typing.user &amp;&amp; !mediaType\">\n                      <strong class=\"im_history_typing_author\" ng-bind-html=\"typing.user.rFullName\"></strong> is typing<span my-typing-dots></span>\n                    </div>\n                  </div>\n\n              </div>\n\n            </div>\n\n          </div>\n\n          <div class=\"im_bottom_panel_wrap\">\n\n            <div class=\"im_edit_panel_wrap clearfix\" ng-show=\"selectActions\" ng-class=\"{im_edit_panel_wrap_loaded: true}\">\n              <div class=\"im_edit_panel_border\"></div>\n              <a class=\"im_edit_flush_link\" ng-click=\"selectedFlush()\" ng-show=\"historyPeer.id < 0\">\n                Clear History\n              </a>\n              <a class=\"im_edit_flush_link\" ng-click=\"selectedFlush()\" ng-show=\"historyPeer.id > 0\">\n                Delete Chat\n              </a>\n              <a class=\"im_edit_cancel_link\" ng-click=\"selectedCancel()\">\n                Cancel\n              </a>\n              <div class=\"im_edit_selected_actions\">\n                <a class=\"btn btn-primary im_edit_forward_btn\" ng-click=\"selectedForward()\">\n                  Forward <strong class=\"im_selected_count\" ng-show=\"selectedCount > 0\" ng-bind=\"selectedCount\"></strong>\n                </a><a class=\"btn btn-danger im_edit_delete_btn\" ng-click=\"selectedDelete()\">\n                  Delete <strong class=\"im_selected_count\" ng-show=\"selectedCount > 0\" ng-bind=\"selectedCount\"></strong>\n                </a>\n              </div>\n            </div>\n\n            <div class=\"im_send_panel_wrap\" ng-hide=\"selectActions\">\n\n              <div class=\"im_send_form_wrap1\">\n\n                <div class=\"im_send_form_wrap clearfix\" ng-controller=\"AppImSendController\">\n                  <div class=\"pull-right im_panel_peer_photo\" ng-click=\"showPeerInfo()\">\n                    <img\n                      class=\"im_panel_peer_photo\"\n                      my-load-thumb\n                      thumb=\"historyPeer.photo\"\n                    />\n                    <i class=\"icon im_panel_peer_online\" ng-show=\"historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == \'userStatusOnline\'\"></i>\n                  </div>\n                  <div class=\"pull-left im_panel_own_photo\">\n                    <img\n                      class=\"im_panel_own_photo\"\n                      my-load-thumb\n                      thumb=\"ownPhoto\"\n                    />\n                  </div>\n                  <form my-send-form draft-message=\"draftMessage\" class=\"im_send_form\" ng-submit=\"sendMessage($event)\">\n                    <div class=\"im_send_dropbox_wrap\"> Drop photos here to send </div>\n                    <textarea ng-model=\"draftMessage.text\" placeholder=\"Write a message...\" class=\"form-control im_message_field\"></textarea>\n\n                    <div class=\"\" style=\"position: relative;\">\n                      <div class=\"im_media_attach pull-right\">\n                        <input type=\"file\" class=\"im_media_attach_input\" size=\"28\" multiple=\"true\" accept=\"image/*, video/*, audio/*\" title=\"Send media\"/>\n                        <i class=\"icon icon-camera\"></i>\n                      </div>\n\n                      <div class=\"im_attach pull-right\">\n                        <input type=\"file\" class=\"im_attach_input\" size=\"28\" multiple=\"true\" title=\"Send file\" />\n                        <i class=\"icon icon-paperclip\"></i>\n                      </div>\n\n\n                      <div class=\"im_emoji_btn pull-right\">\n                        <i class=\"icon icon-emoji\"></i>\n                      </div>\n\n                      <button type=\"submit\" class=\"btn btn-success im_submit\">Send</button>\n                    </div>\n                  </form>\n                </div>\n\n              </div>\n\n            </div>\n\n          </div>\n\n        </div>\n      </div>\n\n    </div>\n\n  </div>\n\n\n</div>\n\n<div class=\"im_page_footer\">\n  <a class=\"im_page_footer_brand\" target=\"_blank\" href=\"https://github.com/zhukov/webogram\">Telegram alpha</a> by izhukov &amp; toberg\n</div>\n\n<div id=\"notify_sound\"></div>\n\n");
+$templateCache.put("partials/import_contact_modal.html","<div class=\"import_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Add new contact</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <form ng-submit=\"doImport()\">\n\n      <div class=\"form-group import_modal_field_wrap\">\n        <input class=\"form-control\" my-focused type=\"text\" placeholder=\"Phone number\" ng-model=\"importContact.phone\"/>\n      </div>\n      <div class=\"form-group import_modal_field_wrap\">\n        <input class=\"form-control\" type=\"text\" placeholder=\"First name\" ng-model=\"importContact.first_name\"/>\n      </div>\n      <div class=\"form-group import_modal_field_wrap\">\n        <input class=\"form-control\" type=\"text\" placeholder=\"Last name\" ng-model=\"importContact.last_name\"/>\n      </div>\n\n      <div class=\"import_modal_panel clearfix\">\n\n        <div class=\"import_modal_actions pull-right\">\n          <a class=\"btn btn-default\" ng-click=\"$dismiss()\"> Cancel </a>\n\n          <button class=\"btn btn-success\" type=\"submit\" ng-class=\"{disabled: progress.enabled}\" ng-disabled=\"progress.enabled\">\n            {{progress.enabled ? \'Importing...\' : \'Save\'}}\n          </button>\n        </div>\n\n      </div>\n\n    </form>\n\n  </div>\n\n</div>");
 $templateCache.put("partials/login.html","<div ng-include=\"\'partials/head.html\'\"></div>\n\n\n<div class=\"login_form_wrap\">\n  <div class=\"error\" ng-if=\"error.message\">{{ error.message }}</div>\n  <form name=\"mySendCodeForm\" ng-if=\"!credentials.phone_code_hash\" ng-submit=\"sendCode()\">\n    <h3 class=\"login_form_head\">Sign in</h3>\n    <p class=\"login_form_lead\">Please enter your full phone number with country code.</p>\n\n    <div class=\"form-group\" ng-class=\"{\'has-error\': error.field == \'phone\'}\">\n      <label class=\"control-label\" for=\"phone_number\" ng-if=\"error.field == \'phone\'\">Incorrect phone number</label>\n      <input type=\"tel\" class=\"form-control\" name=\"phone_number\" ng-model=\"credentials.phone_number\" placeholder=\"Enter your phone\" required>\n    </div>\n    <button class=\"btn btn-success btn-block\" ng-class=\"{disabled: progress.enabled}\" ng-disabled=\"progress.enabled\" type=\"submit\">\n      {{progress.enabled ? \'Generating keys...\' : \'Next\'}}\n    </button>\n  </form>\n\n  <form name=\"myLoginForm\" ng-if=\"credentials.phone_code_hash\" ng-submit=\"logIn()\">\n    <h3 class=\"login_form_head\">{{ credentials.phone_number | phoneNumber }} <small>(<a href=\"#/auth\">edit</a>)</small></h3>\n    <p class=\"login_form_lead\">We have sent you a code via SMS.<br/>Please enter it below.</p>\n\n    <p class=\"login_form_lead\">\n      <span ng-show=\"callPending.remaining > 0\">Telegram will call you in {{callPending.remaining | duration}}</span>\n      <span ng-show=\"!callPending.remaining &amp;&amp; !callPending.success\">Telegram is calling you</span>\n      <span ng-show=\"!callPending.remaining &amp;&amp; callPending.success\">Telegram dialed your number</span>\n    </p>\n\n    <div class=\"form-group\" ng-class=\"{\'has-error\': error.field == \'phone_code\'}\">\n      <label class=\"control-label\" for=\"phone_code\" ng-if=\"error.field == \'phone_code\'\">Incorrect SMS code</label>\n      <input type=\"number\" maxlength=\"5\" class=\"form-control\" name=\"phone_code\" ng-model=\"credentials.phone_code\" placeholder=\"Enter your code\" required>\n    </div>\n\n    <button class=\"btn btn-success btn-block\" type=\"submit\" ng-class=\"{disabled: progress.enabled}\" ng-disabled=\"progress.enabled\">\n      {{progress.enabled ? \'Checking code...\' : \'Sign in\'}}\n    </button>\n  </form>\n</div>\n");
 $templateCache.put("partials/message.html","<div class=\"im_message_unread_split\" ng-if=\"historyUnread &amp;&amp; historyUnread.beforeID == historyMessage.id\">\n  <ng-pluralize count=\"historyUnread.count\"\n                   when=\"{\'one\': \'1 unread message\', \'other\': \'{} unread messages\'}\">\n  </ng-pluralize>\n</div>\n\n<div class=\"im_message_outer_wrap\" ng-class=\"{im_message_selected: selectedMsgs[historyMessage.id]}\" ng-click=\"toggleMessage(historyMessage.id, $event.target)\">\n\n\n  <div class=\"im_message_wrap clearfix\">\n\n    <div class=\"im_service_message_wrap\" ng-if=\"historyMessage._ == \'messageService\'\">\n      <div class=\"im_service_message\">\n\n        <a ng-click=\"openUser(historyMessage.from_id)\" class=\"im_message_author\" ng-bind-html=\"historyMessage.fromUser.rFullName\"></a>\n\n        <span class=\"im_message_service\" ng-switch=\"historyMessage.action[\'_\']\">\n          <span ng-switch-when=\"messageActionChatCreate\">\n            created the group &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;\n          </span>\n          <span ng-switch-when=\"messageActionChatEditTitle\">\n            changed group name to  &laquo;<strong ng-bind-html=\"historyMessage.action.rTitle\"></strong>&raquo;\n          </span>\n          <span ng-switch-when=\"messageActionChatEditPhoto\">\n            changed group photo\n          </span>\n          <span ng-switch-when=\"messageActionChatDeletePhoto\">\n            removed group photo\n          </span>\n          <span ng-switch-when=\"messageActionChatAddUser\">\n            <span ng-if=\"historyMessage.from_id != historyMessage.action.user_id\">\n              invited <a ng-click=\"openUser(historyMessage.action.user_id)\" ng-bind-html=\"historyMessage.action.user.rFullName\"></a>\n            </span>\n            <span ng-if=\"historyMessage.from_id == historyMessage.action.user_id\">\n              returned to group\n            </span>\n          </span>\n          <span ng-switch-when=\"messageActionChatDeleteUser\">\n            <span ng-if=\"historyMessage.from_id != historyMessage.action.user_id\">\n              kicked <a ng-click=\"openUser(historyMessage.action.user_id)\" ng-bind-html=\"historyMessage.action.user.rFullName\"></a>\n            </span>\n            <span ng-if=\"historyMessage.from_id == historyMessage.action.user_id\">\n              left group\n            </span>\n          </span>\n\n          <span ng-switch-default>\n            unsupported action {{historyMessage.action}}\n          </span>\n        </span>\n\n      </div>\n\n      <a ng-if=\"historyMessage.action._ == \'messageActionChatEditPhoto\'\" class=\"im_service_message_photo_thumb\"  href=\"\" ng-click=\"openPhoto(historyMessage.action.photo.id)\">\n        <img\n          class=\"im_service_message_photo_thumb\"\n          my-load-thumb\n          thumb=\"historyMessage.action.photo.thumb\"\n          width=\"{{historyMessage.action.photo.thumb.width}}\"\n          height=\"{{historyMessage.action.photo.thumb.height}}\"\n        />\n      </a>\n\n    </div>\n\n    <div class=\"im_content_message_wrap\" ng-if=\"historyMessage._ != \'messageService\'\">\n      <div class=\"im_content_message_select_area\">\n        <i class=\"icon icon-select-tick\"></i>\n      </div>\n\n      <a ng-click=\"historyMessage.send()\" ng-if=\"historyMessage.error\">\n        <i class=\"icon-message-status icon-message-status-error\" tooltip=\"Try again\"></i>\n      </a>\n      <i class=\"icon-message-status\" ng-class=\"{\'icon-message-status-unread\': historyMessage.unread, \'icon-message-status-pending\': historyMessage.pending}\" ng-if=\"!historyMessage.error\"></i>\n\n      <a ng-click=\"openUser(historyMessage.from_id)\" class=\"im_message_from_photo pull-left\">\n        <img\n          class=\"im_message_from_photo\"\n          my-load-thumb\n          thumb=\"historyMessage.fromPhoto\"\n        />\n      </a>\n      <div class=\"im_message_meta pull-right text-right\">\n        <span class=\"im_message_date\">{{historyMessage.date | dateOrTime}}</span>\n      </div>\n\n      <div class=\"im_message_body\">\n\n        <a class=\"im_message_author user_color_{{historyMessage.fromPhoto.num}}\" ng-click=\"openUser(historyMessage.from_id)\" ng-bind-html=\"historyMessage.fromUser.rFullName\" ng-if=\"historyMessage.to_id.chat_id > 0\"></a>\n        <a class=\"im_message_author\" ng-click=\"openUser(historyMessage.from_id)\" ng-bind-html=\"historyMessage.fromUser.rFirstName\" ng-if=\"!historyMessage.to_id.chat_id\"></a>\n\n\n        <div class=\"im_message_fwd_header\" ng-if=\"historyMessage._ == \'messageForwarded\'\">\n          Forwarded message from <a class=\"im_message_fwd_author\" ng-click=\"openUser(historyMessage.fwd_from_id)\" ng-bind-html=\"historyMessage.fwdUser.rFirstName\"></a>, <span class=\"im_message_fwd_date\">{{historyMessage.fwd_date | dateOrTime}}</span>\n        </div>\n\n        <div class=\"im_message_media\" ng-if=\"historyMessage.media &amp;&amp; historyMessage.media._ != \'messageMediaEmpty\'\" ng-switch=\"historyMessage.media._\">\n\n          <a ng-switch-when=\"messageMediaPhoto\" class=\"im_message_photo_thumb\" href=\"\" ng-click=\"openPhoto(historyMessage.media.photo.id)\" style=\"width: {{historyMessage.media.photo.thumb.width}}px;\">\n            <img\n              class=\"im_message_photo_thumb\"\n              my-load-thumb\n              thumb=\"historyMessage.media.photo.thumb\"\n              width=\"{{historyMessage.media.photo.thumb.width}}\"\n              height=\"{{historyMessage.media.photo.thumb.height}}\"\n            />\n          </a>\n\n          <div ng-switch-when=\"messageMediaVideo\" class=\"im_message_video im_message_document_thumbed\">\n            <a class=\"im_message_video_thumb\" href=\"\" ng-click=\"openVideo(historyMessage.media.video.id)\" style=\"width: {{historyMessage.media.video.thumb.width}}px;\">\n              <span class=\"im_message_video_duration\">{{historyMessage.media.video.duration | duration}}</span>\n              <i class=\"icon icon-videoplay\"></i>\n              <img\n                class=\"im_message_video_thumb\"\n                my-load-thumb\n                thumb=\"historyMessage.media.video.thumb\"\n                width=\"{{historyMessage.media.video.thumb.width}}\"\n                height=\"{{historyMessage.media.video.thumb.height}}\"\n              />\n            </a>\n\n            <div class=\"im_message_document_info\">\n              <div class=\"im_message_document_name_wrap\">\n                <span class=\"im_message_document_name\">Video</span>\n                <span class=\"im_message_document_size\" ng-if=\"!historyMessage.media.video.progress.enabled\">\n                  {{historyMessage.media.video.size | formatSize}}\n                </span>\n                <span class=\"im_message_document_size\" ng-if=\"historyMessage.media.video.progress.enabled\">\n                  {{historyMessage.media.video.progress | formatSizeProgress}}\n                </span>\n              </div>\n              <div class=\"im_message_document_actions\" ng-if=\"!historyMessage.media.video.progress.enabled\">\n                <a href=\"\" ng-click=\"downloadVideo(historyMessage.media.video.id)\">Download</a>\n                <a href=\"\" ng-click=\"openVideo(historyMessage.media.video.id)\">Play video</a>\n              </div>\n              <div class=\"im_message_download_progress_wrap\" ng-if=\"historyMessage.media.video.progress.enabled\">\n                <div class=\"progress tg_down_progress\">\n                  <div class=\"progress-bar progress-bar-success\" role=\"progressbar\" aria-valuenow=\"{{historyMessage.media.video.progress.percent}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{historyMessage.media.video.progress.percent}}%\">\n                    <span class=\"sr-only\">\n                      {{historyMessage.media.video.progress.percent}}% Complete (success)\n                    </span>\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div>\n\n          <div ng-switch-when=\"messageMediaDocument\" class=\"im_message_document\" ng-class=\"{im_message_document_thumbed: !!historyMessage.media.document.thumb}\">\n            <a href=\"\" ng-click=\"downloadDoc(historyMessage.media.document.id, false, historyMessage.media.document.withPreview)\" ng-class=\"{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}\">\n              <i class=\"icon icon-document\" ng-if=\"!historyMessage.media.document.thumb\"></i>\n              <div class=\"im_message_document_thumb_wrap\" ng-if=\"historyMessage.media.document.thumb\">\n                <img\n                  class=\"im_message_document_thumb\"\n                  my-load-thumb\n                  thumb=\"historyMessage.media.document.thumb\"\n                  width=\"{{historyMessage.media.document.thumb.width}}\"\n                  height=\"{{historyMessage.media.document.thumb.height}}\"\n                />\n              </div>\n            </a>\n\n            <div class=\"im_message_document_info\">\n              <div class=\"im_message_document_name_wrap\">\n                <span class=\"im_message_document_name\">\n                  {{historyMessage.media.document.file_name}}\n                </span>\n                <span class=\"im_message_document_size\" ng-if=\"!historyMessage.media.document.progress.enabled\">\n                  {{historyMessage.media.document.size | formatSize}}\n                </span>\n                <span class=\"im_message_document_size\" ng-if=\"historyMessage.media.document.progress.enabled\">\n                  {{historyMessage.media.document.progress | formatSizeProgress}}\n                </span>\n              </div>\n              <div class=\"im_message_document_actions\" ng-if=\"!historyMessage.media.document.progress.enabled\">\n                <a href=\"\" ng-click=\"downloadDoc(historyMessage.media.document.id)\">Download</a>\n                <a href=\"\" ng-click=\"downloadDoc(historyMessage.media.document.id, false, true)\" ng-if=\"historyMessage.media.document.withPreview\">Open</a>\n              </div>\n              <div class=\"im_message_download_progress_wrap\" ng-if=\"historyMessage.media.document.progress.enabled\">\n                <div class=\"progress tg_down_progress\">\n                  <div class=\"progress-bar progress-bar-success\" role=\"progressbar\" aria-valuenow=\"{{historyMessage.media.document.progress.percent}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{historyMessage.media.document.progress.percent}}%\">\n                    <span class=\"sr-only\">\n                      {{historyMessage.media.document.progress.percent}}% Complete (success)\n                    </span>\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div>\n\n\n          <div ng-switch-when=\"messageMediaAudio\" class=\"im_message_document\">\n            <a href=\"\" ng-click=\"openAudio(historyMessage.media.audio.id)\" ng-if=\"!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url\">\n              <i class=\"icon icon-audio\"></i>\n            </a>\n            <i class=\"icon icon-audio\" ng-if=\"historyMessage.media.audio.progress.enabled || historyMessage.media.audio.url\"></i>\n\n            <div class=\"im_message_audio_info\">\n              <div class=\"im_message_audio_name_wrap\" ng-if=\"!historyMessage.media.audio.url\">\n                <span class=\"im_message_audio_name\">\n                  Voice message\n                </span>\n                <span class=\"im_message_audio_duration\" ng-if=\"!historyMessage.media.audio.progress.enabled\">\n                  {{historyMessage.media.audio.duration | duration}}\n                </span>\n                <span class=\"im_message_audio_size\" ng-if=\"historyMessage.media.audio.progress.enabled\">\n                  {{historyMessage.media.audio.progress | formatSizeProgress}}\n                </span>\n              </div>\n              <div class=\"im_message_audio_actions\" ng-if=\"!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url\">\n                <a href=\"\" ng-click=\"openAudio(historyMessage.media.audio.id)\">Play</a>\n              </div>\n              <div class=\"im_message_download_progress_wrap\" ng-if=\"historyMessage.media.audio.progress.enabled\">\n                <div class=\"progress tg_down_progress\">\n                  <div class=\"progress-bar progress-bar-success\" role=\"progressbar\" aria-valuenow=\"{{historyMessage.media.audio.progress.percent}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{historyMessage.media.audio.progress.percent}}%\">\n                    <span class=\"sr-only\">\n                      {{historyMessage.media.audio.progress.percent}}% Complete (success)\n                    </span>\n                  </div>\n                </div>\n              </div>\n              <div class=\"im_message_audio_player_wrap\" ng-if=\"historyMessage.media.audio.url\">\n                <audio my-audio-autoplay audio=\"historyMessage.media.audio\" controls=\"controls\">\n                  <source ng-src=\"{{historyMessage.media.audio.url}}\" type=\"audio/mpeg\" />\n                  <embed hidden=\"true\" autostart=\"true\" loop=\"false\" src=\"{{historyMessage.media.audio.url}}\" />\n                </audio>\n              </div>\n            </div>\n          </div>\n\n          <a ng-switch-when=\"messageMediaGeo\" my-map-point point=\"historyMessage.media.geo\" class=\"im_message_geopoint\">\n            <i class=\"icon icon-geo-point\"></i>\n          </a>\n\n          <div ng-switch-when=\"messageMediaContact\">\n            <a ng-click=\"openUser(historyMessage.media.user.id)\" class=\"im_message_contact_photo pull-left\" ng-if=\"historyMessage.media.user\">\n              <img\n                class=\"im_message_contact_photo\"\n                my-load-thumb\n                thumb=\"historyMessage.media.userPhoto\"\n              />\n            </a>\n            <div class=\"im_message_contact_name\"><span class=\"glyphicon glyphicon-user\"></span>\n              {{historyMessage.media.first_name}} {{historyMessage.media.last_name}}\n            </div>\n            <div class=\"im_message_contact_phone\">\n              {{historyMessage.media.phone_number}}\n            </div>\n          </div>\n\n          <div ng-switch-when=\"messageMediaPending\" class=\"im_message_upload_file im_message_upload_{{historyMessage.media.type}}\">\n            <i class=\"icon icon-{{historyMessage.media.type}}\"></i>\n            <div class=\"im_message_document_info\">\n              <div class=\"im_message_document_name_wrap\">\n                <span class=\"im_message_document_name\">\n                  {{historyMessage.media.file_name}}\n                </span>\n                <span class=\"im_message_document_size\" ng-if=\"historyMessage.media.progress\">\n                  {{historyMessage.media.progress | formatSizeProgress}}\n                </span>\n              </div>\n              <div class=\"im_message_download_progress_wrap\">\n                <div class=\"progress tg_down_progress\">\n                  <div class=\"progress-bar progress-bar-success\" role=\"progressbar\" aria-valuenow=\"{{historyMessage.media.progress.percent}}\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: {{historyMessage.media.progress.percent}}%\">\n                    <span class=\"sr-only\">\n                      {{historyMessage.media.progress.percent}}% Complete (success)\n                    </span>\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div>\n\n\n        </div>\n\n        <div class=\"im_message_text\" ng-if=\"historyMessage.message.length\" ng-bind-html=\"historyMessage.richMessage\"></div>\n      </div>\n\n    </div>\n  </div>\n\n</div>\n\n");
-$templateCache.put("partials/peer_select.html","<div class=\"peer_select_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Select conversation</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"im_dialogs_modal_col_wrap\" ng-controller=\"AppImDialogsController\">\n      <div class=\"im_dialogs_search\">\n        <input class=\"form-control im_dialogs_search_field\" type=\"search\" placeholder=\"Search\" ng-model=\"search.query\"/>\n        <a class=\"im_dialogs_search_clear\" ng-click=\"search.query = \'\'\" ng-show=\"search.query.length\"></a>\n      </div>\n      <div my-dialogs-list modal=\"true\" class=\"im_dialogs_modal_col\">\n        <div class=\"im_dialogs_wrap nano\">\n          <div class=\"im_dialogs_scrollable_wrap content\">\n            <ul class=\"nav nav-pills nav-stacked\">\n              <li class=\"im_dialog_wrap\" my-dialog dialog-message=\"dialogMessage\" ng-repeat=\"dialogMessage in dialogs track by dialogMessage.peerID\"></li>\n            </ul>\n          </div>\n        </div>\n      </div>\n    </div>\n\n  </div>\n\n</div>");
-$templateCache.put("partials/photo_modal.html","<div my-modal-width=\"{{photo.full.width}}\" class=\"media_modal_wrap photo_modal_wrap\">\n\n  <div class=\"modal-body\">\n\n    <div class=\"photo_modal_image_wrap\" my-load-full-photo full-photo=\"photo.full\" thumb-location=\"photo.thumb.location\" ng-click=\"$close()\"> </div>\n\n    <p class=\"media_modal_info\">From: <span class=\"media_modal_author\" ng-bind-html=\"photo.fromUser.rFullName\" ></span>, {{photo.date | dateOrTime}}</p>\n\n  </div>\n\n</div>");
-$templateCache.put("partials/settings_modal.html","<div class=\"settings_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Settings</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"clearfix\">\n\n      <div class=\"settings_profile_photo_wrap pull-left\">\n\n        <div class=\"settings_profile_photo\">\n          <img\n            class=\"user_modal_image\"\n            my-load-thumb\n            thumb=\"profile.photo\"\n          />\n          <div class=\"settings_profile_photo_change_wrap\">\n            <div ng-if=\"photo.updating\" class=\"settings_profile_photo_loading\">Updating<span my-typing-dots></span></div>\n            <div ng-if=\"!photo.updating\">\n              <div class=\"settings_profile_photo_update_link\">\n                <input my-file-upload  type=\"file\" multiple=\"false\" class=\"im_attach_input\" size=\"120\" multiple=\"false\" accept=\"image/x-png, image/png, image/gif, image/jpeg\" />\n                Update photo\n              </div>\n              <a ng-if=\"profile.photo.location\" href=\"\" ng-click=\"deletePhoto()\" class=\"settings_profile_photo_delete_link\">Delete photo</a>\n            </div>\n          </div>\n        </div>\n\n      </div>\n\n      <form my-settings-form name=\"profileForm\" class=\"settings_profile_edit_form\">\n\n        <div class=\"form-group settings_profile_first_name\" ng-class=\"{\'has-error\': error.field == \'first_name\'}\">\n          <label class=\"control-label\" for=\"first_name\">\n            <span ng-if=\"error.field == \'first_name\'\">Invalid First Name</span>\n            <span ng-if=\"error.field != \'first_name\'\">First Name</span>\n          </label>\n          <input type=\"text\" class=\"form-control\" name=\"first_name\" ng-model=\"profile.first_name\" required />\n        </div>\n\n        <div class=\"form-group settings_profile_last_name\" ng-class=\"{\'has-error\': error.field == \'last_name\'}\">\n          <label class=\"control-label\" for=\"last_name\">\n            <span ng-if=\"error.field == \'last_name\'\">Invalid Last Name</span>\n            <span ng-if=\"error.field != \'last_name\'\">Last Name</span>\n          </label>\n          <input type=\"text\" class=\"form-control\" name=\"last_name\" ng-model=\"profile.last_name\" />\n        </div>\n\n        <div class=\"settings_profile_save\">\n          <button class=\"btn btn-link settings_profile_save_btn\" ng-click=\"save(profileForm)\" ng-disabled=\"profileForm.$invalid || (!profileForm.last_name.$dirty &amp;&amp; !profileForm.first_name.$dirty)\">Save</button>\n        </div>\n\n      </form>\n\n    </div>\n\n    <form class=\"settings_send_choose_form\">\n      <div class=\"radio\">\n        <label>\n          <input type=\"radio\" value=\"1\" ng-model=\"send.enter\">\n          <strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line\n        </label>\n      </div>\n      <div class=\"radio\">\n        <label>\n          <input type=\"radio\" value=\"\" ng-model=\"send.enter\">\n          <strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line\n        </label>\n      </div>\n    </form>\n\n    <p>\n      <strong>Sound: </strong>\n      <a ng-click=\"notify.sound = !notify.sound\">{{notify.sound ? \'ON\' : \'OFF\'}}</a>\n    </p>\n\n    <p>\n      <strong>Desktop Notifications: </strong>\n      <a ng-click=\"notify.desktop = !notify.desktop\">{{notify.desktop ? \'ON\' : \'OFF\'}}</a>\n    </p>\n\n    <p>\n      <strong>User: </strong>\n      <span class=\"settings_user_phone\">{{phone | phoneNumber}}</span>\n    </p>\n\n    <p>\n      <strong>Version: </strong>\n      <span class=\"settings_version\">alpha 0.0.21</span>\n    </p>\n\n    <hr/>\n\n    <div class=\"settings_logout_wrap\">\n      <a href=\"\" ng-click=\"logOut()\">Log out</a>\n    </div>\n  </div>\n</div>\n");
-$templateCache.put("partials/user_modal.html","<div class=\"user_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Info</h4>\n  </div>\n\n\n  <div class=\"modal-body\">\n\n    <div class=\"user_modal_image_wrap pull-left\">\n      <img\n        class=\"user_modal_image\"\n        my-load-thumb\n        thumb=\"user.thumb\"\n      />\n    </div>\n\n    <div class=\"user_modal_info_wrap clearfix\">\n      <h4 class=\"user_modal_header\">{{user | userName}}</h4>\n      <p class=\"user_modal_status\" ng-if=\"user.status\">{{user | userStatus}}</p>\n\n      <p class=\"user_modal_phone\" ng-if=\"user.phone\">{{user.phone | phoneNumber}}</p>\n      <button class=\"btn btn-primary user_modal_send_btn\" ng-click=\"goToHistory()\">Send message</button>\n    </div>\n\n    <div class=\"user_modal_settings_wrap\">\n      <div class=\"user_modal_notifications\">\n        Notifications:\n        <a ng-click=\"settings.notifications = !settings.notifications\">\n          {{settings.notifications ? \'ON\' : \'OFF\'}}\n        </a>\n      </div>\n    </div>\n\n  </div>\n\n</div>");
-$templateCache.put("partials/video_modal.html","<div class=\"media_modal_wrap video_modal_wrap\">\n\n  <div class=\"modal-body\">\n\n    <div class=\"video_modal_image_wrap\" my-load-video video=\"video\"></div>\n\n    <p class=\"media_modal_info\">From: <span class=\"media_modal_author\" ng-bind-html=\"video.fromUser.rFullName\"></span>, {{video.date | dateOrTime}}</p>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/peer_select.html","<div class=\"peer_select_modal_wrap\">\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Select conversation</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"im_dialogs_modal_col_wrap\" ng-controller=\"AppImDialogsController\">\n      <div class=\"im_dialogs_panel\">\n        <div class=\"im_dialogs_search\">\n          <input class=\"form-control im_dialogs_search_field\" type=\"search\" placeholder=\"Search\" ng-model=\"search.query\"/>\n          <a class=\"im_dialogs_search_clear\" ng-click=\"search.query = \'\'\" ng-show=\"search.query.length\"></a>\n        </div>\n      </div>\n      <div my-dialogs-list modal=\"true\" class=\"im_dialogs_modal_col\">\n        <div class=\"im_dialogs_wrap nano\">\n          <div class=\"im_dialogs_scrollable_wrap content\">\n            <ul class=\"nav nav-pills nav-stacked\">\n              <li class=\"im_dialog_wrap\" my-dialog dialog-message=\"dialogMessage\" ng-repeat=\"dialogMessage in dialogs track by dialogMessage.peerID\"></li>\n            </ul>\n            <div class=\"im_dialogs_contacts_wrap\" ng-show=\"contacts.length > 0\">\n              <h5>Contacts</h5>\n              <ul class=\"nav nav-pills nav-stacked\">\n                <li class=\"im_dialog_wrap\" ng-repeat=\"contact in contacts | orderBy:\'user.sortName\' track by contact.userID\" ng-class=\"{active: curDialog.peerID == contact.userID}\">\n                  <a class=\"im_dialog\" ng-click=\"dialogSelect(contact.peerString)\">\n                    <div class=\"im_dialog_photo pull-left\">\n                      <img\n                        class=\"im_dialog_photo\"\n                        my-load-thumb\n                        thumb=\"contact.userPhoto\"\n                      />\n                    </div>\n                    <div class=\"im_dialog_message_wrap\">\n                      <div class=\"im_dialog_peer\">\n                        <span class=\"im_dialog_user\" ng-bind-html=\"contact.user.rFullName\"></span>\n                      </div>\n                      <div class=\"im_dialog_message\">\n                        <span class=\"im_dialog_message_text\">{{contact.user | userStatus}}</span>\n                      </div>\n                    </div>\n                  </a>\n                </li>\n              </ul>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/photo_modal.html","<div my-modal-width=\"{{photo.full.width}}\" class=\"media_modal_wrap photo_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-body\">\n\n    <div class=\"photo_modal_image_wrap\" my-load-full-photo full-photo=\"photo.full\" thumb-location=\"photo.thumb.location\" ng-click=\"$close()\"> </div>\n\n    <p class=\"media_modal_info\">From: <span class=\"media_modal_author\" ng-bind-html=\"photo.fromUser.rFullName\" ></span>, {{photo.date | dateOrTime}}</p>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/settings_modal.html","<div class=\"settings_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Settings</h4>\n  </div>\n\n  <div class=\"modal-body\">\n\n    <div class=\"clearfix\">\n\n      <div class=\"settings_profile_photo_wrap pull-left\">\n\n        <div class=\"settings_profile_photo\">\n          <img\n            class=\"user_modal_image\"\n            my-load-thumb\n            thumb=\"profile.photo\"\n          />\n          <div class=\"settings_profile_photo_change_wrap\">\n            <div ng-if=\"photo.updating\" class=\"settings_profile_photo_loading\">Updating<span my-typing-dots></span></div>\n            <div ng-if=\"!photo.updating\">\n              <div class=\"settings_profile_photo_update_link\">\n                <input my-file-upload  type=\"file\" multiple=\"false\" class=\"im_attach_input\" size=\"120\" multiple=\"false\" accept=\"image/x-png, image/png, image/gif, image/jpeg\" />\n                Update photo\n              </div>\n              <a ng-if=\"profile.photo.location\" href=\"\" ng-click=\"deletePhoto()\" class=\"settings_profile_photo_delete_link\">Delete photo</a>\n            </div>\n          </div>\n        </div>\n\n      </div>\n\n      <form my-settings-form name=\"profileForm\" class=\"settings_profile_edit_form\">\n\n        <div class=\"form-group settings_profile_first_name\" ng-class=\"{\'has-error\': error.field == \'first_name\'}\">\n          <label class=\"control-label\" for=\"first_name\">\n            <span ng-if=\"error.field == \'first_name\'\">Invalid First Name</span>\n            <span ng-if=\"error.field != \'first_name\'\">First Name</span>\n          </label>\n          <input type=\"text\" class=\"form-control\" name=\"first_name\" ng-model=\"profile.first_name\" required />\n        </div>\n\n        <div class=\"form-group settings_profile_last_name\" ng-class=\"{\'has-error\': error.field == \'last_name\'}\">\n          <label class=\"control-label\" for=\"last_name\">\n            <span ng-if=\"error.field == \'last_name\'\">Invalid Last Name</span>\n            <span ng-if=\"error.field != \'last_name\'\">Last Name</span>\n          </label>\n          <input type=\"text\" class=\"form-control\" name=\"last_name\" ng-model=\"profile.last_name\" />\n        </div>\n\n        <div class=\"settings_profile_save\">\n          <button class=\"btn btn-link settings_profile_save_btn\" ng-click=\"save(profileForm)\" ng-disabled=\"profileForm.$invalid || (!profileForm.last_name.$dirty &amp;&amp; !profileForm.first_name.$dirty)\">Save</button>\n        </div>\n\n      </form>\n\n    </div>\n\n    <form class=\"settings_send_choose_form\">\n      <div class=\"radio\">\n        <label>\n          <input type=\"radio\" value=\"1\" ng-model=\"send.enter\">\n          <strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line\n        </label>\n      </div>\n      <div class=\"radio\">\n        <label>\n          <input type=\"radio\" value=\"\" ng-model=\"send.enter\">\n          <strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line\n        </label>\n      </div>\n    </form>\n\n    <p>\n      <strong>Sound: </strong>\n      <a ng-click=\"notify.sound = !notify.sound\">{{notify.sound ? \'ON\' : \'OFF\'}}</a>\n    </p>\n\n    <p>\n      <strong>Desktop Notifications: </strong>\n      <a ng-click=\"notify.desktop = !notify.desktop\">{{notify.desktop ? \'ON\' : \'OFF\'}}</a>\n    </p>\n\n    <p>\n      <strong>User: </strong>\n      <span class=\"settings_user_phone\">{{phone | phoneNumber}}</span>\n    </p>\n\n    <p>\n      <strong>Version: </strong>\n      <span class=\"settings_version\">alpha 0.0.21</span>\n    </p>\n\n    <hr/>\n\n    <div class=\"settings_logout_wrap\">\n      <a href=\"\" ng-click=\"logOut()\">Log out</a>\n    </div>\n  </div>\n</div>\n");
+$templateCache.put("partials/user_modal.html","<div class=\"user_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-header\">\n    <a class=\"modal-close-link\" ng-click=\"$close()\">Close</a>\n    <h4 class=\"modal-title\">Info</h4>\n  </div>\n\n\n  <div class=\"modal-body\">\n\n    <div class=\"user_modal_image_wrap pull-left\">\n      <img\n        class=\"user_modal_image\"\n        my-load-thumb\n        thumb=\"userPhoto\"\n      />\n    </div>\n\n    <div class=\"user_modal_info_wrap clearfix\">\n      <h4 class=\"user_modal_header\">{{user | userName}}</h4>\n      <p class=\"user_modal_status\" ng-if=\"user.status\">{{user | userStatus}}</p>\n\n      <p class=\"user_modal_phone\" ng-if=\"user.phone\">{{user.phone | phoneNumber}}</p>\n\n      <div class=\"user_modal_actions_wrap clearfix\">\n        <button class=\"btn btn-primary user_modal_send_btn\" ng-click=\"goToHistory()\">Send message</button>\n\n        <div class=\"dropdown user_modal_other_btn\">\n          <button class=\"btn btn-link dropdown-toggle\">More<i class=\"icon icon-caret\"></i></button>\n          <ul class=\"dropdown-menu\">\n            <li ng-if=\"user._ == \'userContact\'\">\n              <a ng-click=\"importContact(true)\">Edit</a>\n            </li>\n            <li ng-if=\"user._ == \'userContact\'\">\n              <a ng-click=\"deleteContact()\">Delete Contact</a>\n            </li>\n            <li ng-if=\"user.phone.length > 0 &amp;&amp; user._ != \'userContact\'\">\n              <a ng-click=\"importContact()\">Add to contacts</a>\n            </li>\n            <li ng-if=\"user.phone.length > 0\">\n              <a ng-click=\"shareContact()\">Share contact</a>\n            </li>\n            <li>\n              <a ng-click=\"flushHistory()\">Delete chat</a>\n            </li>\n          </ul>\n        </div>\n\n      </div>\n    </div>\n\n    <div class=\"user_modal_settings_wrap\">\n      <div class=\"user_modal_notifications\">\n        Notifications:\n        <a ng-click=\"settings.notifications = !settings.notifications\">\n          {{settings.notifications ? \'ON\' : \'OFF\'}}\n        </a>\n      </div>\n    </div>\n\n  </div>\n\n</div>");
+$templateCache.put("partials/video_modal.html","<div class=\"media_modal_wrap video_modal_wrap\" my-modal-position>\n\n  <div class=\"modal-body\">\n\n    <div class=\"video_modal_image_wrap\" my-load-video video=\"video\"></div>\n\n    <p class=\"media_modal_info\">From: <span class=\"media_modal_author\" ng-bind-html=\"video.fromUser.rFullName\"></span>, {{video.date | dateOrTime}}</p>\n\n  </div>\n\n</div>");
 $templateCache.put("partials/welcome.html","<div ng-include=\"\'partials/head.html\'\"></div>\n\n\n<div ng-show=\"showWelcome\">\n\n  <div class=\"welcome_logo\"></div>\n\n  <div class=\"welcome_box_wrap\">\n    <div class=\"welcome_text\">\n      <p>Welcome to an unofficial web-client of mobile <strong>Telegram</strong> messenger.</p>\n      <p>It is an alpha, which means it is still not 200% secure and functional.</p>\n      <p>Visit <a target=\"_blank\" href=\"https://telegram.org/\">telegram.org</a> to learn more.</p>\n    </div>\n    <a href=\"#/login\" class=\"btn btn-success btn-block\">Start Messaging</a>\n  </div>\n\n</div>\n");}]);
 /*!
  * Webogram v0.0.21 - messaging web application for MTProto
@@ -37331,7 +37536,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
@@ -37348,10 +37553,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      scope.$on('ui_dialogs_prepend', updateScroller);
+      $scope.$on('ui_dialogs_prepend', updateScroller);
 
 
-      scope.$on('ui_dialogs_append', function () {
+      $scope.$on('ui_dialogs_append', function () {
         onContentLoaded(function () {
           updateScroller();
           moreNotified = false;
@@ -37362,7 +37567,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_dialogs_change', function () {
+      $scope.$on('ui_dialogs_change', function () {
         onContentLoaded(function () {
           updateScroller();
           moreNotified = false;
@@ -37377,7 +37582,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         // console.log('scroll', moreNotified);
         if (!moreNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           // console.log('emit need more');
-          scope.$emit('dialogs_need_more');
+          $scope.$emit('dialogs_need_more');
           moreNotified = true;
         }
       });
@@ -37419,7 +37624,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var searchWrap = $('.contacts_modal_search')[0],
           panelWrap = $('.contacts_modal_panel')[0],
           contactsWrap = $('.contacts_wrap', element)[0];
@@ -37437,7 +37642,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $($window).on('resize', updateSizes);
-      scope.$on('contacts_change', function () {
+      $scope.$on('contacts_change', function () {
         onContentLoaded(updateSizes)
       });
     };
@@ -37450,7 +37655,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var historyWrap = $('.im_history_wrap', element)[0],
           historyMessagesEl = $('.im_history_messages', element)[0],
           historyEl = $('.im_history', element)[0],
@@ -37490,7 +37695,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var animated = transform ? true : false,
           curAnimation = false;
 
-      scope.$on('ui_history_append', function (e, options) {
+      $scope.$on('ui_history_append', function (e, options) {
         if (!atBottom && !options.my) {
           return;
         }
@@ -37527,7 +37732,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_history_change', function () {
+      $scope.$on('ui_history_change', function () {
         $(scrollableWrap).addClass('im_history_to_bottom');
         $(scrollable).css({bottom: 0});
         onContentLoaded(function () {
@@ -37552,7 +37757,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_history_focus', function () {
+      $scope.$on('ui_history_focus', function () {
         if (!atBottom) {
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
           updateScroller();
@@ -37560,12 +37765,13 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      scope.$on('ui_history_prepend', function () {
+      $scope.$on('ui_history_prepend', function () {
         var sh = scrollableWrap.scrollHeight,
             st = scrollableWrap.scrollTop,
             ch = scrollableWrap.clientHeight;
 
         $(scrollableWrap).addClass('im_history_to_bottom');
+        scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
         $(scrollable).css({bottom: -(sh - st - ch)});
 
         onContentLoaded(function () {
@@ -37582,10 +37788,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_panel_update', function () {
+      $scope.$on('ui_panel_update', function () {
         onContentLoaded(function () {
           updateSizes();
-          scope.$broadcast('ui_message_send');
+          $scope.$broadcast('ui_message_send');
 
           $timeout(function () {
             $(scrollableWrap).trigger('scroll');
@@ -37593,7 +37799,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      scope.$on('ui_editor_resize', updateSizes);
+      $scope.$on('ui_editor_resize', updateSizes);
 
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
@@ -37607,7 +37813,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (!moreNotified && scrollableWrap.scrollTop <= 300) {
           moreNotified = true;
-          scope.$emit('history_need_more');
+          $scope.$emit('history_need_more');
         }
       });
 
@@ -37635,7 +37841,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateBottomizer();
 
 
-        if (heightOnly == true) return;
+        if (heightOnly === true) return;
         if (atBottom) {
           onContentLoaded(function () {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
@@ -37670,7 +37876,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var messageField = $('textarea', element)[0],
           fileSelects = $('input', element),
           dropbox = $('.im_send_dropbox_wrap', element)[0],
@@ -37690,7 +37896,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('keyup', function (e) {
           updateHeight();
 
-          scope.draftMessage.text = richTextarea.innerText;
+          $scope.draftMessage.text = richTextarea.innerText;
 
           $timeout.cancel(updatePromise);
           updatePromise = $timeout(updateValue, 1000);
@@ -37699,9 +37905,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       fileSelects.on('change', function () {
         var self = this;
-        scope.$apply(function () {
-          scope.draftMessage.files = Array.prototype.slice.call(self.files);
-          scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
+        $scope.$apply(function () {
+          $scope.draftMessage.files = Array.prototype.slice.call(self.files);
+          $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
           setTimeout(function () {
             try {
               self.value = '';
@@ -37717,7 +37923,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             });
           };
 
-      scope.$on('settings_changed', updateSendSettings);
+      $scope.$on('settings_changed', updateSendSettings);
       updateSendSettings();
 
       $(editorElement).on('keydown', function (e) {
@@ -37748,13 +37954,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         lastTyping = now;
-        scope.$emit('ui_typing');
+        $scope.$emit('ui_typing');
       });
 
       function updateField () {
         if (richTextarea) {
           $timeout.cancel(updatePromise);
-          var html = $('<div>').text(scope.draftMessage.text || '').html();
+          var html = $('<div>').text($scope.draftMessage.text || '').html();
           html = html.replace(/\n/g, '<br/>');
           $(richTextarea).html(html);
           updateHeight();
@@ -37773,7 +37979,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var newHeight = richTextarea.offsetHeight;
         if (height != newHeight) {
           height = newHeight;
-          scope.$emit('ui_editor_resize');
+          $scope.$emit('ui_editor_resize');
         }
       };
 
@@ -37783,15 +37989,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
       }
 
-      scope.$on('ui_peer_change', focusField);
-      scope.$on('ui_history_focus', focusField);
-      scope.$on('ui_history_change', focusField);
-      scope.$on('ui_message_send', focusField);
-      scope.$on('ui_peer_draft', updateField);
-      scope.$on('ui_message_before_send', updateValue);
+      $scope.$on('ui_peer_change', focusField);
+      $scope.$on('ui_history_focus', focusField);
+      $scope.$on('ui_history_change', focusField);
+      $scope.$on('ui_message_send', focusField);
+      $scope.$on('ui_peer_draft', updateField);
+      $scope.$on('ui_message_before_send', updateValue);
 
 
-      scope.$on('$destroy', function cleanup() {
+      $scope.$on('$destroy', function cleanup() {
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
         $(document).off('paste', onPasteEvent);
         if (richTextarea) {
@@ -37824,9 +38030,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           var blob = new Blob([array], {type: contentType});
 
           if (safeConfirm('Are you sure to send file(s) from clipboard?')) {
-            scope.$apply(function () {
-              scope.draftMessage.files = [blob];
-              scope.draftMessage.isMedia = true;
+            $scope.$apply(function () {
+              $scope.draftMessage.files = [blob];
+              $scope.draftMessage.isMedia = true;
             });
           }
         }
@@ -37845,9 +38051,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (files.length && safeConfirm('Are you sure to send file(s) from clipboard?')) {
-          scope.$apply(function () {
-            scope.draftMessage.files = files;
-            scope.draftMessage.isMedia = true;
+          $scope.$apply(function () {
+            $scope.draftMessage.files = files;
+            $scope.draftMessage.isMedia = true;
           });
         }
       }
@@ -37874,9 +38080,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             }
           } else {
             if (e.type == 'drop') {
-              scope.$apply(function () {
-                scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files);
-                scope.draftMessage.isMedia = true;
+              $scope.$apply(function () {
+                $scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files);
+                $scope.draftMessage.isMedia = true;
               });
             }
             dragTimeout = setTimeout(function () {
@@ -37902,25 +38108,25 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var counter = 0;
 
       var cachedSrc = MtpApiFileManager.getCachedFile(
-        scope.thumb &&
-        scope.thumb.location &&
-        !scope.thumb.location.empty &&
-        scope.thumb.location
+        $scope.thumb &&
+        $scope.thumb.location &&
+        !$scope.thumb.location.empty &&
+        $scope.thumb.location
       );
 
       if (cachedSrc) {
         element.attr('src', cachedSrc);
       }
 
-      scope.$watchCollection('thumb.location', function (newLocation) {
+      $scope.$watchCollection('thumb.location', function (newLocation) {
         // console.log('new loc', newLocation, arguments);
         var counterSaved = ++counter;
         if (!newLocation || newLocation.empty) {
-          element.attr('src', scope.thumb && scope.thumb.placeholder || 'img/blank.gif');
+          element.attr('src', $scope.thumb && $scope.thumb.placeholder || 'img/blank.gif');
           return;
         }
 
@@ -37931,17 +38137,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (!element.attr('src')) {
-          element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+          element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
         }
 
-        MtpApiFileManager.downloadSmallFile(scope.thumb.location, scope.thumb.size).then(function (url) {
+        MtpApiFileManager.downloadSmallFile($scope.thumb.location, $scope.thumb.size).then(function (url) {
           if (counterSaved == counter) {
             element.attr('src', url);
           }
         }, function (e) {
-          console.log('Download image failed', e, scope.thumb.location);
+          console.log('Download image failed', e, $scope.thumb.location);
           if (counterSaved == counter) {
-            element.attr('src', scope.thumb.placeholder || 'img/blank.gif');
+            element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
           }
         });
       })
@@ -37982,52 +38188,52 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
 
       var imgElement = $('img', element);
 
       imgElement
-          .attr('src', MtpApiFileManager.getCachedFile(scope.thumbLocation) || 'img/blank.gif')
+          .attr('src', MtpApiFileManager.getCachedFile($scope.thumbLocation) || 'img/blank.gif')
           .addClass('thumb_blurred')
           .addClass('thumb_blur_animation');
 
-      if (!scope.fullPhoto.location) {
+      if (!$scope.fullPhoto.location) {
         return;
       }
 
 
       var apiPromise;
-      if (scope.fullPhoto.size) {
+      if ($scope.fullPhoto.size) {
         var inputLocation = {
           _: 'inputFileLocation',
-          volume_id: scope.fullPhoto.location.volume_id,
-          local_id: scope.fullPhoto.location.local_id,
-          secret: scope.fullPhoto.location.secret
+          volume_id: $scope.fullPhoto.location.volume_id,
+          local_id: $scope.fullPhoto.location.local_id,
+          secret: $scope.fullPhoto.location.secret
         };
-        apiPromise = MtpApiFileManager.downloadFile(scope.fullPhoto.location.dc_id, inputLocation, scope.fullPhoto.size);
+        apiPromise = MtpApiFileManager.downloadFile($scope.fullPhoto.location.dc_id, inputLocation, $scope.fullPhoto.size);
       } else {
-        apiPromise = MtpApiFileManager.downloadSmallFile(scope.fullPhoto.location);
+        apiPromise = MtpApiFileManager.downloadSmallFile($scope.fullPhoto.location);
       }
 
-      scope.progress = {enabled: true, percent: 1};
+      $scope.progress = {enabled: true, percent: 1};
 
       apiPromise.then(function (url) {
-        scope.progress.enabled = false;
+        $scope.progress.enabled = false;
         imgElement
           .attr('src', url)
           .removeClass('thumb_blurred');
 
       }, function (e) {
-        console.log('Download image failed', e, scope.fullPhoto.location);
-        scope.progress.enabled = false;
+        console.log('Download image failed', e, $scope.fullPhoto.location);
+        $scope.progress.enabled = false;
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+          $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
         } else {
-          scope.error = {text: 'Download failed', error: e};
+          $scope.error = {text: 'Download failed', error: e};
         }
       }, function (progress) {
-        scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+        $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
     }
 
@@ -38075,15 +38281,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
 
-      scope.progress = {enabled: true, percent: 1};
-      scope.player = {};
+      $scope.progress = {enabled: true, percent: 1};
+      $scope.player = {};
 
       var inputLocation = {
         _: 'inputVideoFileLocation',
-        id: scope.video.id,
-        access_hash: scope.video.access_hash
+        id: $scope.video.id,
+        access_hash: $scope.video.access_hash
       };
 
       var hasQt = false, i;
@@ -38095,25 +38301,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      MtpApiFileManager.downloadFile(scope.video.dc_id, inputLocation, scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
-        scope.progress.enabled = false;
-        // scope.progress = {enabled: true, percent: 50};
-        scope.player.hasQuicktime = hasQt;
-        scope.player.quicktime = false;
-        scope.player.src = $sce.trustAsResourceUrl(url);
+      MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
+        $scope.progress.enabled = false;
+        // $scope.progress = {enabled: true, percent: 50};
+        $scope.player.hasQuicktime = hasQt;
+        $scope.player.quicktime = false;
+        $scope.player.src = $sce.trustAsResourceUrl(url);
       }, function (e) {
-        console.log('Download video failed', e, scope.video);
-        scope.progress.enabled = false;
-        scope.player.src = '';
+        console.log('Download video failed', e, $scope.video);
+        $scope.progress.enabled = false;
+        $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+          $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
         } else {
-          scope.error = {text: 'Video download failed', error: e};
+          $scope.error = {text: 'Video download failed', error: e};
         }
 
       }, function (progress) {
-        scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+        $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
     }
 
@@ -38128,17 +38334,17 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
 
       var apiKey = 'AIzaSyC32ij28dCa0YzEV_HqbWfIwTZQql-RNS0';
 
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + scope.point['lat'] + ',' + scope.point['long'] + '&zoom=13&size=200x100&scale=2&key=' + apiKey;
+      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=13&size=200x100&scale=2&key=' + apiKey;
 
       ExternalResourcesManager.downloadImage(src).then(function (url) {
         element.append('<img src="' + url + '" width="200" height="100"/>');
       });
 
-      element.attr('href','https://maps.google.com/?q=' + scope.point['lat'] + ',' + scope.point['long']);
+      element.attr('href','https://maps.google.com/?q=' + $scope.point['lat'] + ',' + $scope.point['long']);
       element.attr('target','_blank');
     }
 
@@ -38153,7 +38359,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var interval;
 
-    function link (scope, element, attrs) {
+    function link ($scope, element, attrs) {
       var promise = $interval(function () {
         var time = tsNow(),
             cnt = 3;
@@ -38172,7 +38378,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         element.html(html);
       }, 200);
 
-      scope.$on('$destroy', function cleanup() {
+      $scope.$on('$destroy', function cleanup() {
         $interval.cancel(promise);
       });
     }
@@ -38187,8 +38393,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function link (scope, element, attrs) {
-      scope.$watch('audio.autoplay', function (autoplay) {
+    function link ($scope, element, attrs) {
+      $scope.$watch('audio.autoplay', function (autoplay) {
         if (autoplay) {
           element.autoplay = true;
           element[0].play();
@@ -38201,7 +38407,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   .directive('myFocused', function(){
     return {
-      link: function(scope, element, attrs) {
+      link: function($scope, element, attrs) {
         setTimeout(function () {
           element[0].focus();
         }, 100);
@@ -38215,11 +38421,11 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link(scope, element, attrs) {
+    function link($scope, element, attrs) {
       element.on('change', function () {
         var self = this;
-        scope.$apply(function () {
-          scope.photo.file = self.files[0];
+        $scope.$apply(function () {
+          $scope.photo.file = self.files[0];
           setTimeout(function () {
             try {
               self.value = '';
@@ -38237,10 +38443,45 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link
     };
 
-    function link(scope, element, attrs) {
+    function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
         $(element[0].parentNode.parentNode).css({width: parseInt(newW) + 36});
       });
+    };
+
+  })
+
+
+  .directive('myModalPosition', function ($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+
+      var updateMargin = function () {
+        var height = element[0].parentNode.offsetHeight,
+            contHeight = element[0].parentNode.parentNode.parentNode.offsetHeight;
+
+        if (height < contHeight) {
+          $(element[0].parentNode).css('marginTop', (contHeight - height) / 2);
+        } else {
+          $(element[0].parentNode).css('marginTop', '');
+        }
+        $timeout(function () {
+          $(element[0].parentNode).addClass('modal-content-animated');
+        }, 300);
+      };
+
+      onContentLoaded(updateMargin);
+
+      $($window).on('resize', updateMargin);
+
+      $scope.$on('ui_height', function () {
+        onContentLoaded(updateMargin);
+      });
+
     };
 
   });
