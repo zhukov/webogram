@@ -273,15 +273,6 @@ angular.module('myApp.services', [])
   function wrapForFull (id) {
     var user = getUser(id);
 
-    user.thumb = {
-      placeholder: 'img/placeholders/UserAvatar'+((Math.abs(id) % 8) + 1)+'@2x.png',
-      location: user && user.photo && user.photo.photo_small,
-      width: 120,
-      height: 120,
-      size: 0
-    };
-    user.peerString = getUserString(id);
-
     return user;
   }
 
