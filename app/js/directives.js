@@ -271,6 +271,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             ch = scrollableWrap.clientHeight;
 
         $(scrollableWrap).addClass('im_history_to_bottom');
+        scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
         $(scrollable).css({bottom: -(sh - st - ch)});
 
         onContentLoaded(function () {
@@ -340,7 +341,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateBottomizer();
 
 
-        if (heightOnly == true) return;
+        if (heightOnly === true) return;
         if (atBottom) {
           onContentLoaded(function () {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;

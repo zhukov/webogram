@@ -525,9 +525,11 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 14px 12px;
   position: relative;
 }
+ .im_dialogs_search {
+  position: relative;
+}
 .im_page_split .im_dialogs_search {
   margin-right: 48px;
-  position: relative;
 }
 .im_dialogs_search_field {
   font-size: 12px;
@@ -853,9 +855,6 @@ a.im_dialog:hover .im_dialog_date {
   font-size: 1.5em;
 }
 
-.im_history_to_bottom {
-  position: relative;
-}
 .im_history_to_bottom .im_history_scrollable {
   position: absolute;
   bottom: 0;

@@ -396,7 +396,7 @@ angular.module('myApp.controllers', [])
         jump = 0;
 
     function applyDialogSelect (newPeer) {
-      selectedCancel();
+      selectedCancel(true);
       newPeer = newPeer || $scope.curDialog.peer || '';
 
       peerID = AppPeersManager.getPeerID(newPeer);
@@ -542,11 +542,13 @@ angular.module('myApp.controllers', [])
       }
     }
 
-    function selectedCancel () {
+    function selectedCancel (noBroadcast) {
       $scope.selectedMsgs = {};
       $scope.selectedCount = 0;
       $scope.selectActions = false;
-      $scope.$broadcast('ui_panel_update');
+      if (!noBroadcast) {
+        $scope.$broadcast('ui_panel_update');
+      }
     }
 
     function selectedFlush () {
