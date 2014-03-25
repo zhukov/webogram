@@ -86,7 +86,7 @@ angular.module('myApp.controllers', [])
           $scope.credentials.phone_occupied = sentCode.phone_registered;
           $scope.error = {};
 
-          $scope.callPending.remaining = 60;
+          $scope.callPending.remaining = sentCode.send_call_timeout;
           callCheck();
 
         }, function (error) {

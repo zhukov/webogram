@@ -1001,13 +1001,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       var updateMargin = function () {
         var height = element[0].offsetHeight,
             contHeight = $($window).height(),
-            ratio = attrs.myVerticalPosition && parseFloat(attrs.myVerticalPosition) || 0.5;
+            ratio = attrs.myVerticalPosition && parseFloat(attrs.myVerticalPosition) || 0.5,
+            margin = height < contHeight ? parseInt((contHeight - height) * ratio) : '';
 
-        if (height < contHeight) {
-          element.css('marginTop', parseInt((contHeight - height) * ratio));
-        } else {
-          element.css('marginTop', '');
-        }
+        element.css({marginTop: margin, marginBottom: margin});
       };
 
       onContentLoaded(updateMargin);

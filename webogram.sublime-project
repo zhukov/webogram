@@ -4,7 +4,7 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-      "folder_exclude_patterns": ["*dist", "node_modules"],
+      "folder_exclude_patterns": ["*dist", "node_modules", "releases"],
       "file_exclude_patterns": ["*.zip"]
 		}
 	]
