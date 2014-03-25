@@ -2290,7 +2290,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 
 /* Messages edit panel */
 .im_edit_panel_wrap {
-  display: none;
   padding: 10px 0 34px;
   margin: 0 24px 0 12px;
 }
@@ -2298,9 +2297,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   display: block;
   margin: 0 0 34px 3px;
   border-bottom: 1px solid #EEE;
-}
-.im_edit_panel_wrap_loaded {
-  display: block;
 }
 .im_panel_to_top .im_edit_panel_wrap {
   background: #FFF;
