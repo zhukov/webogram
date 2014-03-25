@@ -59,10 +59,14 @@
     </div>
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
-      <div ng-if="state.notSelected" class="im_history_not_selected">No history to display</div>
-      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected">Loading history<span my-typing-dots></span></div>
+      <div ng-show="state.notSelected" class="im_history_not_selected" my-vertical-position="0.3">
+        Please select a chat to start messaging
+      </div>
+      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.3">
+        Loading history <span my-typing-dots></span>
+      </div>
 
-      <div ng-if="state.loaded">
+      <div ng-show="state.loaded">
         <div my-history class="im_history_col">
 
           <div class="im_history_panel_wrap">
@@ -76,29 +80,23 @@
                 <div class="dropdown im_history_panel_media_dropdown pull-right">
                   <a class="dropdown-toggle">Media<i class="icon icon-caret"></i></a>
                   <ul class="dropdown-menu">
-                    <li>
-                      <a ng-click="toggleMedia('photos')">Photos</a>
-                    </li>
-                    <li>
-                      <a ng-click="toggleMedia('video')">Videos</a>
-                    </li>
-                    <li>
-                      <a ng-click="toggleMedia('documents')">Documents</a>
-                    </li>
+                    <li><a ng-click="toggleMedia('photos')">Photos</a></li>
+                    <li><a ng-click="toggleMedia('video')">Videos</a></li>
+                    <li><a ng-click="toggleMedia('documents')">Documents</a></li>
                   </ul>
                 </div>
-                <a ng-if="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
+                <a ng-show="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
                   Show all messages
                   <strong class="im_history_panel_return_count" ng-show="missedCount > 0">+{{missedCount}}</strong>
                 </a>
 
-                <h4 ng-if="mediaType !== false" ng-switch="mediaType">
-                  <span ng-switch-when="photos"> Photos </span>
-                  <span ng-switch-when="video"> Videos </span>
-                  <span ng-switch-when="documents"> Documents </span>
+                <h4 ng-show="mediaType !== false" ng-switch="mediaType">
+                  <span ng-switch-when="photos">Photos</span>
+                  <span ng-switch-when="video">Videos</span>
+                  <span ng-switch-when="documents">Documents</span>
                 </h4>
 
-                <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id < 0" ng-click="showPeerInfo()">
+                <h4 ng-show="mediaType === false &amp;&amp; historyPeer.id < 0" ng-click="showPeerInfo()">
                   <span ng-bind-html="historyPeer.data.rTitle"></span>
                   <small class="im_chat_users">
                     <ng-pluralize count="historyPeer.data.participants_count"
@@ -107,7 +105,7 @@
                   </small>
                 </h4>
 
-                <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id > 0" ng-click="showPeerInfo()">
+                <h4 ng-show="mediaType === false &amp;&amp; historyPeer.id > 0" ng-click="showPeerInfo()">
                   <span ng-bind-html="historyPeer.data.rFullName"></span>
                   <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
                 </h4>
@@ -125,7 +123,9 @@
               <div class="im_history_scrollable">
 
                   <div class="im_history" ng-class="{im_history_selectable: selectActions}">
-                    <div class="im_history_empty" ng-show="historyEmpty &amp;&amp; !history.length">No messages to display</div>
+                    <div class="im_history_empty" ng-show="!history.length" my-vertical-position="0.3">
+                      No messages here yet...
+                    </div>
                     <div class="im_history_messages">
                       <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
                     </div>
@@ -189,24 +189,21 @@
                     <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
                     <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field"></textarea>
 
-                    <div class="" style="position: relative;">
-                      <div class="im_media_attach pull-right">
-                        <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="Send media"/>
-                        <i class="icon icon-camera"></i>
-                      </div>
-
-                      <div class="im_attach pull-right">
-                        <input type="file" class="im_attach_input" size="28" multiple="true" title="Send file" />
-                        <i class="icon icon-paperclip"></i>
-                      </div>
-
-
-                      <div class="im_emoji_btn pull-right">
-                        <i class="icon icon-emoji"></i>
-                      </div>
-
-                      <button type="submit" class="btn btn-success im_submit">Send</button>
+                    <div class="im_media_attach pull-right">
+                      <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="Send media"/>
+                      <i class="icon icon-camera"></i>
                     </div>
+
+                    <div class="im_attach pull-right">
+                      <input type="file" class="im_attach_input" size="28" multiple="true" title="Send file" />
+                      <i class="icon icon-paperclip"></i>
+                    </div>
+
+                    <div class="im_emoji_btn pull-right">
+                      <i class="icon icon-emoji"></i>
+                    </div>
+
+                    <button type="submit" class="btn btn-success im_submit">Send</button>
                   </form>
                 </div>
 

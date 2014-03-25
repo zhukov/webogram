@@ -365,7 +365,6 @@ angular.module('myApp.controllers', [])
     StatusManager.start();
 
     $scope.history = [];
-    $scope.historyEmpty = false;
     $scope.mediaType = false;
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
@@ -445,12 +444,15 @@ angular.module('myApp.controllers', [])
       }
       // console.trace('load history');
 
-      var inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
+      var curJump = jump,
+          inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
       getMessagesPromise.then(function (historyResult) {
+        if (curJump != jump) return;
+
         offset += historyResult.history.length;
         hasMore = historyResult.count === null || offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
@@ -460,8 +462,6 @@ angular.module('myApp.controllers', [])
         });
 
         $scope.$broadcast('ui_history_prepend');
-      }, function () {
-        safeReplaceObject($scope.state, {error: true});
       });
     }
 
@@ -476,13 +476,14 @@ angular.module('myApp.controllers', [])
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
-      $scope.historyEmpty = false;
 
+      safeReplaceObject($scope.state, {loaded: false});
       getMessagesPromise.then(function (historyResult) {
+        safeReplaceObject($scope.state, {loaded: true});
+
         if (curJump != jump) return;
 
         offset += historyResult.history.length;
-        $scope.historyEmpty = !historyResult.count;
 
         hasMore = historyResult.count === null || offset < historyResult.count;
         maxID = historyResult.history[historyResult.history.length - 1];
@@ -501,8 +502,6 @@ angular.module('myApp.controllers', [])
         } else {
           $scope.historyUnread = {};
         }
-
-        safeReplaceObject($scope.state, {loaded: true});
 
         $scope.$broadcast('ui_history_change');
 

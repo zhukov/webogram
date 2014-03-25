@@ -353,7 +353,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateBottomizer () {
         $(historyMessagesEl).css({marginTop: 0});
-        if (historyMessagesEl.offsetHeight <= scrollableWrap.offsetHeight) {
+        if (historyMessagesEl.offsetHeight > 0 && historyMessagesEl.offsetHeight <= scrollableWrap.offsetHeight) {
           $(historyMessagesEl).css({marginTop: (scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 44) + 'px'});
         }
         $(historyWrap).nanoScroller();
@@ -984,4 +984,37 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     };
 
-  });
+  })
+
+
+  .directive('myVerticalPosition', function ($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+
+      var updateMargin = function () {
+        var height = element[0].offsetHeight,
+            contHeight = $($window).height(),
+            ratio = attrs.myVerticalPosition && parseFloat(attrs.myVerticalPosition) || 0.5;
+
+        if (height < contHeight) {
+          element.css('marginTop', parseInt((contHeight - height) * ratio));
+        } else {
+          element.css('marginTop', '');
+        }
+      };
+
+      onContentLoaded(updateMargin);
+
+      $($window).on('resize', updateMargin);
+
+      $scope.$on('ui_height', function () {
+        onContentLoaded(updateMargin);
+      });
+
+    };
+
+  })

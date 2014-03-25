@@ -307,7 +307,8 @@ input[type="number"]::-webkit-inner-spin-button {
   -o-transition: none;
   transition: none;
 }
-.modal.fade {
+.modal.fade,
+.modal-backdrop.fade {
   -webkit-transition: none;
   -moz-transition: none;
   -o-transition: none;
@@ -862,14 +863,6 @@ a.im_dialog:hover .im_dialog_date {
   -webkit-user-select: text;
 }
 
-.im_history_empty {
-  padding: 100px 50px 0;
-
-  text-align: center;
-  color: #999;
-  font-size: 1.5em;
-}
-
 .im_history_to_bottom .im_history_scrollable {
   position: absolute;
   bottom: 0;
@@ -1413,11 +1406,12 @@ span.emoji {
   background-image: url('../img/emojisprite_4.png');
 }
 
-.im_history_not_selected {
+.im_history_not_selected,
+.im_history_empty {
   text-align: center;
   color: #999;
   font-size: 1.5em;
-  padding: 200px 50px 200px;
+  padding: 0 50px;
 }
 
 .im_send_panel_wrap {
@@ -2621,21 +2615,21 @@ cd4073 pink
 ce671b orange
  */
 .user_color_1,
-.user_color_1:hover {color: #c03d33;}
+.user_color_1:hover {color: #b3577a;}
 .user_color_2,
-.user_color_2:hover {color: #4fad2d;}
+.user_color_2:hover {color: #539e4f;}
 .user_color_3,
-.user_color_3:hover {color: #d09306;}
+.user_color_3:hover {color: #ae9661;}
 .user_color_4,
-.user_color_4:hover {color: #348cd4;}
+.user_color_4:hover {color: #4979a3;}
 .user_color_5,
-.user_color_5:hover {color: #8544d6;}
+.user_color_5:hover {color: #8365ab;}
 .user_color_6,
-.user_color_6:hover {color: #cd4073;}
+.user_color_6:hover {color: #b7635d;}
 .user_color_7,
-.user_color_7:hover {color: #2996ad;}
+.user_color_7:hover {color: #5397b4;}
 .user_color_8,
-.user_color_8:hover {color: #ce671b;}
+.user_color_8:hover {color: #c07844;}
 
 
 .im_dialogs_contacts_wrap h5 {
