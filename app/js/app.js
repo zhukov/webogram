@@ -30,6 +30,7 @@ angular.module('myApp', [
   'ngAnimate',
   'ngSanitize',
   'ui.bootstrap',
+  'pasvaz.bindonce',
   'mtproto.services',
   'myApp.filters',
   'myApp.services',

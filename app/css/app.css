@@ -1413,6 +1413,10 @@ span.emoji {
   font-size: 1.5em;
   padding: 0 50px;
 }
+.im_history_to_bottom .im_history_not_selected,
+.im_history_to_bottom .im_history_empty {
+  display: none;
+}
 
 .im_send_panel_wrap {
   max-width: 526px;

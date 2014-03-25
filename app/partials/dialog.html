@@ -1,9 +1,7 @@
 <a class="im_dialog" ng-click="dialogSelect(dialogMessage.peerString)">
 
   <div class="im_dialog_meta pull-right text-right">
-    <div class="im_dialog_date">
-      {{dialogMessage.date | dateOrTime}}
-    </div>
+    <div class="im_dialog_date" ng-bind="dialogMessage.dateText"></div>
     <span
       class="im_dialog_badge badge"
       ng-show="dialogMessage.unreadCount > 0 &amp;&amp; !dialogMessage.out"
@@ -25,11 +23,11 @@
 
   <div class="im_dialog_message_wrap">
 
-    <div class="im_dialog_peer">
-      <span class="im_dialog_chat" ng-if="dialogMessage.chatID">
-        <i class="icon icon-group"></i> <span ng-bind-html="dialogMessage.peerData.rTitle"></span>
+    <div class="im_dialog_peer" ng-switch="dialogMessage.peerID > 0">
+      <span class="im_dialog_user" ng-switch-when="true" ng-bind-html="dialogMessage.peerData.rFullName"></span>
+      <span class="im_dialog_chat" ng-switch-default>
+        <span ng-bind-html="dialogMessage.peerData.rTitle"></span>
       </span>
-      <span class="im_dialog_user" ng-if="dialogMessage.peerID > 0" ng-bind-html="dialogMessage.peerData.rFullName"></span>
     </div>
 
     <div class="im_dialog_message">
@@ -59,21 +57,21 @@
         <span ng-switch-when="messageActionChatEditPhoto">changed group photo</span>
         <span ng-switch-when="messageActionChatDeletePhoto">removed group photo</span>
 
-        <span ng-switch-when="messageActionChatAddUser">
-          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">
-            invited <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
-          </span>
-          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id">
+        <span ng-switch-when="messageActionChatAddUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
+          <span ng-switch-when="true">
             returned to group
+          </span>
+          <span ng-switch-default>
+            invited <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
           </span>
         </span>
 
-        <span ng-switch-when="messageActionChatDeleteUser">
-          <span ng-if="dialogMessage.from_id != dialogMessage.action.user_id">
-            kicked <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
-          </span>
-          <span ng-if="dialogMessage.from_id == dialogMessage.action.user_id">
+        <span ng-switch-when="messageActionChatDeleteUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
+          <span ng-switch-when="true">
             left group
+          </span>
+          <span ng-switch-default>
+            kicked <span ng-bind-html="dialogMessage.action.user.rFullName"></span>
           </span>
         </span>
       </span>

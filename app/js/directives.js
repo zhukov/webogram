@@ -318,6 +318,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       function updateSizes (heightOnly) {
+        if (!element.is(':visible') || !$(element[0].parentNode).is(':visible')) {
+          return;
+        }
         if ($(sendFormWrap).is(':visible')) {
           $(sendFormWrap).css({
             height: $(sendForm).height()
@@ -851,7 +854,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myTypingDots', function($interval) {
+  .directive('myLoadingDots', function($interval) {
 
     return {
       link: link,

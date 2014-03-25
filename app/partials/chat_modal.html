@@ -16,7 +16,7 @@
           thumb="chatFull.thumb"
         />
         <div class="chat_modal_photo_change_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
-          <div ng-if="photo.updating" class="chat_modal_photo_loading">Updating<span my-typing-dots></span></div>
+          <div ng-if="photo.updating" class="chat_modal_photo_loading">Updating<span my-loading-dots></span></div>
           <div ng-if="!photo.updating">
             <div class="chat_modal_photo_update_link">
               <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />

@@ -63,7 +63,7 @@
         Please select a chat to start messaging
       </div>
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.3">
-        Loading history <span my-typing-dots></span>
+        Loading history<span my-loading-dots></span>
       </div>
 
       <div ng-show="state.loaded">
@@ -90,25 +90,26 @@
                   <strong class="im_history_panel_return_count" ng-show="missedCount > 0">+{{missedCount}}</strong>
                 </a>
 
-                <h4 ng-show="mediaType !== false" ng-switch="mediaType">
-                  <span ng-switch-when="photos">Photos</span>
-                  <span ng-switch-when="video">Videos</span>
-                  <span ng-switch-when="documents">Documents</span>
-                </h4>
+                <div ng-switch="mediaType">
+                  <h4 ng-switch-when="photos">Photos</h4>
+                  <h4 ng-switch-when="video">Videos</h4>
+                  <h4 ng-switch-when="documents">Documents</h4>
 
-                <h4 ng-show="mediaType === false &amp;&amp; historyPeer.id < 0" ng-click="showPeerInfo()">
-                  <span ng-bind-html="historyPeer.data.rTitle"></span>
-                  <small class="im_chat_users">
-                    <ng-pluralize count="historyPeer.data.participants_count"
-                                     when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
-                    </ng-pluralize>
-                  </small>
-                </h4>
-
-                <h4 ng-show="mediaType === false &amp;&amp; historyPeer.id > 0" ng-click="showPeerInfo()">
-                  <span ng-bind-html="historyPeer.data.rFullName"></span>
-                  <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
-                </h4>
+                  <h4 ng-switch-default ng-switch="historyPeer.id > 0">
+                    <div ng-switch-when="true">
+                      <span ng-bind-html="historyPeer.data.rFullName"></span>
+                      <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
+                    </div>
+                    <div ng-switch-default>
+                      <span ng-bind-html="historyPeer.data.rTitle"></span>
+                      <small class="im_chat_users">
+                        <ng-pluralize count="historyPeer.data.participants_count"
+                                         when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
+                        </ng-pluralize>
+                      </small>
+                    </div>
+                  </h4>
+                </div>
 
               </div>
 
@@ -127,13 +128,13 @@
                       No messages here yet...
                     </div>
                     <div class="im_history_messages">
-                      <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
+                      <div class="im_history_message_wrap" my-message bindonce ng-repeat="historyMessage in history"></div>
                     </div>
                   </div>
 
                   <div class="im_history_typing_wrap">
                     <div class="im_history_typing" ng-show="typing.user &amp;&amp; !mediaType">
-                      <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing<span my-typing-dots></span>
+                      <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing<span my-loading-dots></span>
                     </div>
                   </div>
 
@@ -145,17 +146,13 @@
 
           <div class="im_bottom_panel_wrap">
 
-            <div class="im_edit_panel_wrap clearfix" ng-show="selectActions" ng-class="{im_edit_panel_wrap_loaded: true}">
+            <div class="im_edit_panel_wrap clearfix" ng-show="selectActions">
               <div class="im_edit_panel_border"></div>
-              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-show="historyPeer.id < 0">
-                Clear History
+              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-switch="historyPeer.id > 0">
+                <span ng-switch-when="true">Delete Chat</span>
+                <span ng-switch-default>Clear History</span>
               </a>
-              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-show="historyPeer.id > 0">
-                Delete Chat
-              </a>
-              <a class="im_edit_cancel_link" ng-click="selectedCancel()">
-                Cancel
-              </a>
+              <a class="im_edit_cancel_link" ng-click="selectedCancel()">Cancel</a>
               <div class="im_edit_selected_actions">
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()">
                   Forward <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>

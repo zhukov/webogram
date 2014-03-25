@@ -1,4 +1,4 @@
-<div class="im_message_unread_split" ng-if="historyUnread &amp;&amp; historyUnread.beforeID == historyMessage.id">
+<div class="im_message_unread_split" bo-if="historyUnread.beforeID == historyMessage.id" ng-show="historyUnread.beforeID == historyMessage.id">
   <ng-pluralize count="historyUnread.count"
                    when="{'one': '1 unread message', 'other': '{} unread messages'}">
   </ng-pluralize>
@@ -7,51 +7,51 @@
 <div class="im_message_outer_wrap" ng-class="{im_message_selected: selectedMsgs[historyMessage.id]}" ng-click="toggleMessage(historyMessage.id, $event.target)">
 
 
-  <div class="im_message_wrap clearfix">
+  <div class="im_message_wrap clearfix" bindonce>
 
-    <div class="im_service_message_wrap" ng-if="historyMessage._ == 'messageService'">
+    <div class="im_service_message_wrap" bo-if="historyMessage._ == 'messageService'">
       <div class="im_service_message">
 
         <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFullName"></a>
 
-        <span class="im_message_service" ng-switch="historyMessage.action['_']">
-          <span ng-switch-when="messageActionChatCreate">
+        <span class="im_message_service" bo-switch="historyMessage.action['_']">
+          <span bo-switch-when="messageActionChatCreate">
             created the group &laquo;<strong>{{historyMessage.action.title}}</strong>&raquo;
           </span>
-          <span ng-switch-when="messageActionChatEditTitle">
+          <span bo-switch-when="messageActionChatEditTitle">
             changed group name to  &laquo;<strong ng-bind-html="historyMessage.action.rTitle"></strong>&raquo;
           </span>
-          <span ng-switch-when="messageActionChatEditPhoto">
+          <span bo-switch-when="messageActionChatEditPhoto">
             changed group photo
           </span>
-          <span ng-switch-when="messageActionChatDeletePhoto">
+          <span bo-switch-when="messageActionChatDeletePhoto">
             removed group photo
           </span>
-          <span ng-switch-when="messageActionChatAddUser">
-            <span ng-if="historyMessage.from_id != historyMessage.action.user_id">
+          <span bo-switch-when="messageActionChatAddUser">
+            <span bo-if="historyMessage.from_id != historyMessage.action.user_id">
               invited <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
             </span>
-            <span ng-if="historyMessage.from_id == historyMessage.action.user_id">
+            <span bo-if="historyMessage.from_id == historyMessage.action.user_id">
               returned to group
             </span>
           </span>
-          <span ng-switch-when="messageActionChatDeleteUser">
-            <span ng-if="historyMessage.from_id != historyMessage.action.user_id">
+          <span bo-switch-when="messageActionChatDeleteUser">
+            <span bo-if="historyMessage.from_id != historyMessage.action.user_id">
               kicked <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
             </span>
-            <span ng-if="historyMessage.from_id == historyMessage.action.user_id">
+            <span bo-if="historyMessage.from_id == historyMessage.action.user_id">
               left group
             </span>
           </span>
 
-          <span ng-switch-default>
+          <span bo-switch-default>
             unsupported action {{historyMessage.action}}
           </span>
         </span>
 
       </div>
 
-      <a ng-if="historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb"  href="" ng-click="openPhoto(historyMessage.action.photo.id)">
+      <a bo-if="historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.action.photo.id)">
         <img
           class="im_service_message_photo_thumb"
           my-load-thumb
@@ -63,15 +63,16 @@
 
     </div>
 
-    <div class="im_content_message_wrap" ng-if="historyMessage._ != 'messageService'">
+    <div bindonce bo-if="historyMessage._ != 'messageService'" class="im_content_message_wrap">
       <div class="im_content_message_select_area">
         <i class="icon icon-select-tick"></i>
       </div>
 
-      <a ng-click="historyMessage.send()" ng-if="historyMessage.error">
+      <a bo-if="historyMessage.pending || historyMessage.error" ng-click="historyMessage.send()" ng-show="historyMessage.error">
         <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>
       </a>
-      <i class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-if="!historyMessage.error"></i>
+
+      <i bo-if="historyMessage.unread || historyMessage.pending" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
 
       <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
         <img
@@ -81,20 +82,19 @@
         />
       </a>
       <div class="im_message_meta pull-right text-right">
-        <span class="im_message_date">{{historyMessage.date | dateOrTime}}</span>
+        <span class="im_message_date" bo-bind="historyMessage.date | dateOrTime"></span>
       </div>
 
       <div class="im_message_body">
 
-        <a class="im_message_author user_color_{{historyMessage.fromPhoto.num}}" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName" ng-if="historyMessage.to_id.chat_id > 0"></a>
-        <a class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName" ng-if="!historyMessage.to_id.chat_id"></a>
+        <a bo-if="historyMessage.to_id.chat_id > 0" class="im_message_author user_color_{{historyMessage.fromPhoto.num}}" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName"></a>
+        <a bo-if="!historyMessage.to_id.chat_id" class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName" ></a>
 
-
-        <div class="im_message_fwd_header" ng-if="historyMessage._ == 'messageForwarded'">
+        <div bo-if="historyMessage._ == 'messageForwarded'" class="im_message_fwd_header">
           Forwarded message from <a class="im_message_fwd_author" ng-click="openUser(historyMessage.fwd_from_id)" ng-bind-html="historyMessage.fwdUser.rFirstName"></a>, <span class="im_message_fwd_date">{{historyMessage.fwd_date | dateOrTime}}</span>
         </div>
 
-        <div class="im_message_media" ng-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" ng-switch="historyMessage.media._">
+        <div bo-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" class="im_message_media" ng-switch="historyMessage.media._">
 
           <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" style="width: {{historyMessage.media.photo.thumb.width}}px;">
             <img
@@ -147,8 +147,8 @@
 
           <div ng-switch-when="messageMediaDocument" class="im_message_document" ng-class="{im_message_document_thumbed: !!historyMessage.media.document.thumb}">
             <a href="" ng-click="downloadDoc(historyMessage.media.document.id, false, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
-              <i class="icon icon-document" ng-if="!historyMessage.media.document.thumb"></i>
-              <div class="im_message_document_thumb_wrap" ng-if="historyMessage.media.document.thumb">
+              <i class="icon icon-document" bo-if="!historyMessage.media.document.thumb"></i>
+              <div class="im_message_document_thumb_wrap" bo-if="historyMessage.media.document.thumb">
                 <img
                   class="im_message_document_thumb"
                   my-load-thumb
@@ -173,7 +173,7 @@
               </div>
               <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
                 <a href="" ng-click="downloadDoc(historyMessage.media.document.id)">Download</a>
-                <a href="" ng-click="downloadDoc(historyMessage.media.document.id, false, true)" ng-if="historyMessage.media.document.withPreview">Open</a>
+                <a href="" ng-click="downloadDoc(historyMessage.media.document.id, false, true)" bo-if="historyMessage.media.document.withPreview">Open</a>
               </div>
               <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
                 <div class="progress tg_down_progress">
@@ -220,7 +220,7 @@
               </div>
               <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
                 <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
-                  <source ng-src="{{historyMessage.media.audio.url}}" type="audio/mpeg" />
+                  <source bo-src="{{historyMessage.media.audio.url}}" type="audio/mpeg" />
                   <embed hidden="true" autostart="true" loop="false" src="{{historyMessage.media.audio.url}}" />
                 </audio>
               </div>
@@ -232,7 +232,7 @@
           </a>
 
           <div ng-switch-when="messageMediaContact">
-            <a ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left" ng-if="historyMessage.media.user">
+            <a bo-if="historyMessage.media.user" ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left">
               <img
                 class="im_message_contact_photo"
                 my-load-thumb
@@ -273,7 +273,7 @@
 
         </div>
 
-        <div class="im_message_text" ng-if="historyMessage.message.length" ng-bind-html="historyMessage.richMessage"></div>
+        <div class="im_message_text" bo-if="historyMessage.message.length" ng-bind-html="historyMessage.richMessage"></div>
       </div>
 
     </div>
