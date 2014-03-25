@@ -1,13 +1,7 @@
 <div class="tg_page_head">
   <div class="navbar navbar-static-top  navbar-inverse" role="navigation">
-    <div class="container" ng-init="navbarCollapsed = true">
+    <div class="container">
       <div class="navbar-header">
-        <button type="button" class="navbar-toggle" ng-click="navbarCollapsed = !navbarCollapsed">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
         <a class="navbar-brand" href="{{isLoggedIn ? '#/im' : '#/'}}"><span class="tg_head_logo"></span><span class="tg_head_logo_text"></span></a>
         <ul class="nav navbar-nav navbar-quick-nav" ng-show="curDialog.peer">
           <li>
@@ -19,7 +13,7 @@
       </div>
 
 
-      <div class="navbar-collapse" collapse="navbarCollapsed">
+      <div class="navbar-collapsed collapse">
 
         <ul ng-if="offline" class="nav navbar-nav navbar-offline">
           <li ng-show="!offlineConnecting"><span class="navbar-offline-text">Waiting for network<span my-loading-dots></span></span></li>
