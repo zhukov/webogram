@@ -89,9 +89,10 @@ angular.module('myApp.filters', [])
 
   .filter('phoneNumber', [function() {
     return function (phoneRaw) {
+      var nbsp = ' ';
       phoneRaw = (phoneRaw || '').replace(/\D/g, '');
       if (phoneRaw.charAt(0) == '7' && phoneRaw.length == 11) {
-        return '+' + phoneRaw.charAt(0) + ' (' + phoneRaw.substr(1, 3) + ') ' + phoneRaw.substr(4, 3) + '-' + phoneRaw.substr(7, 2) + '-' + phoneRaw.substr(9, 2);
+        return '+' + phoneRaw.charAt(0) + nbsp + '(' + phoneRaw.substr(1, 3) + ')' + nbsp + phoneRaw.substr(4, 3) + '-' + phoneRaw.substr(7, 2) + '-' + phoneRaw.substr(9, 2);
       }
       return '+' + phoneRaw;
     }

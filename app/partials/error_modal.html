@@ -2,15 +2,61 @@
 
   <div class="modal-header">
     <a class="modal-close-link" ng-click="$close()">Close</a>
-    <h4 class="modal-title">{{title}}</h4>
+    <h4 ng-if="error" class="modal-title" ng-switch="error.type">
+      <span ng-switch-when="ACCOUNT_REQUIRED">No account</span>
+      <span ng-switch-default ng-switch="error.code">
+        <span ng-switch-when="400">Error</span>
+        <span ng-switch-when="401">Unauthorized</span>
+        <span ng-switch-when="403">Access denied</span>
+        <span ng-switch-when="404">Not found</span>
+        <span ng-switch-when="420">Too fast</span>
+        <span ng-switch-default>Server error</span>
+      </span>
+    </h4>
+    <h4 ng-if="!error" class="modal-title" ng-bind="title || 'Alert'"></h4>
   </div>
-
 
   <div class="modal-body">
 
-    <div class="error_modal_description">
-      {{description}}
+    <div ng-if="error" class="error_modal_description" ng-switch="error.type">
+      <span ng-switch-when="FIRSTNAME_INVALID">
+        The first name you entered is invalid.
+      </span>
+      <span ng-switch-when="LASTNAME_INVALID">
+        The last name you entered is invalid.
+      </span>
+      <span ng-switch-when="PHONE_NUMBER_INVALID">
+        The phone number you entered is invalid.
+      </span>
+      <span ng-switch-when="USERS_TOO_MUCH">
+        You have selected too much users.
+      </span>
+      <span ng-switch-when="PHOTO_INVALID_DIMENSIONS">
+        The photo dimensions are invalid, please select another file.
+      </span>
+      <span ng-switch-when="ACCOUNT_REQUIRED">
+        Sorry, there is no <strong>Telegram</strong> account for {{phone | phoneNumber}}<br/><br/>
+        Please <strong>sign up</strong> using our mobile apps for <a href="https://telegram.org/" target="_blank">iOS</a> or <a href="https://telegram.org/" target="_blank">Android</a>.
+      </span>
+
+
+      <div ng-switch-default ng-switch="error.code">
+        <span ng-switch-when="400">One of the params is missing or invalid.</span>
+        <span ng-switch-when="401">This action requires authorization access. Please <a href="#/auth">log in</a>.</span>
+        <span ng-switch-when="403">You are not allowed for this action.</span>
+        <span ng-switch-when="404">The page was not found.</span>
+        <span ng-switch-when="420">You are performing too many actions. Please try again later.</span>
+        <span ng-switch-default>Internal server error occured. Please try again later.</span>
+
+        <div ng-if="error.originalError" ng-switch="showErrorDetails">
+          <pre ng-switch-when="true"><code>{{error.originalError}}</code></pre>
+          <a ng-switch-default href="" ng-click="showErrorDetails = true">Click here</a> for technical details.
+        </div>
+
+      </div>
     </div>
+
+    <div ng-if="!error" class="error_modal_description" ng-bind="description"></div>
 
   </div>
 

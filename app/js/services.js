@@ -2964,30 +2964,28 @@ angular.module('myApp.services', [])
 
 .service('ErrorService', function ($rootScope, $modal) {
 
-  function showError (templateUrl, params, options) {
+  function show (params, options) {
+    options = options || {};
     var scope = $rootScope.$new();
     angular.extend(scope, params);
 
     return $modal.open({
-      templateUrl: templateUrl,
-      // controller: 'ErrorModalController',
+      templateUrl: 'partials/error_modal.html',
       scope: scope,
-      windowClass: options.windowClass || ''
+      windowClass: options.windowClass || 'error_modal_window'
     });
   }
 
-  function showSimpleError (title, description) {
-    return showError ('partials/error_modal.html', {
+  function alert (title, description) {
+    return show ({
       title: title,
       description: description
-    }, {
-      windowClass: 'error_modal_window'
     });
   };
 
   return {
-    showError: showError,
-    showSimpleError: showSimpleError
+    show: show,
+    alert: alert
   }
 })
 

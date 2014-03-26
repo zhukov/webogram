@@ -28,7 +28,7 @@ angular.module('myApp.controllers', [])
         return;
       }
     });
-    var options = {dcID: 1};
+    var options = {dcID: 1, createNetworker: true};
 
     $scope.credentials = {};
     $scope.progress = {};
@@ -69,7 +69,10 @@ angular.module('myApp.controllers', [])
       }, options).then(function (result) {
         $scope.progress.enabled = false;
         if (!result.phone_registered) {
-          ErrorService.showSimpleError('No account', 'Sorry, there is no Telegram account for ' + $scope.credentials.phone_number + '. Please sign up using our mobile apps.');
+          ErrorService.show({
+            error: {code: 400, type: 'ACCOUNT_REQUIRED'},
+            phone: $scope.credentials.phone_number
+          });
           return false;
         }
 
@@ -106,7 +109,7 @@ angular.module('myApp.controllers', [])
             break;
 
           default:
-            ErrorService.showSimpleError('Unknown error occured', 'Please check your internet connection or install the latest version of Google Chrome browser.');
+            ErrorService.alert('Unknown error occured', 'Please check your internet connection or install the latest version of Google Chrome browser.');
         }
       });
     }
@@ -1050,7 +1053,7 @@ angular.module('myApp.controllers', [])
         }, function (error) {
           switch (error.code) {
             case 400:
-              ErrorService.showSimpleError('Bad photo', 'The photo is invalid, please select another file.');
+              ErrorService.alert('Bad photo', 'The photo is invalid, please select another file.');
               break;
           }
         });
@@ -1128,12 +1131,6 @@ angular.module('myApp.controllers', [])
             });
             $scope.profile.photo = AppUsersManager.getUserPhoto(id, 'User');
           });
-        }, function (error) {
-          switch (error.code) {
-            case 400:
-              ErrorService.showSimpleError('Bad photo', 'The photo is invalid, please select another file.');
-              break;
-          }
         });
       })['finally'](function () {
         $scope.photo.updating = false;
