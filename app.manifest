@@ -1,23 +1,17 @@
 CACHE MANIFEST
-# Time: Wed Mar 26 2014 17:53:30 GMT+0400 (MSK)
+# Time: Wed Mar 26 2014 19:38:03 GMT+0400 (MSK)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
-manifest.webapp
 css/app.css
-fonts/glyphicons-halflings-regular.eot
-fonts/glyphicons-halflings-regular.svg
-fonts/glyphicons-halflings-regular.ttf
-fonts/glyphicons-halflings-regular.woff
 img/TLogo2_1x.png
 img/TLogo2_2x.png
 img/TLogo_1x.png
 img/Tlogo_2x.png
 img/bg_tile.png
 img/blank.gif
-img/card_share.png
 img/emojisprite_0.png
 img/emojisprite_1.png
 img/emojisprite_2.png
@@ -26,14 +20,7 @@ img/emojisprite_4.png
 img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
-js/app-ee353437.js
-js/background.js
-js/lib/aes_worker.js
-js/lib/config.js
-js/lib/mtproto.js
-js/lib/pq_worker.js
-js/lib/sha1_worker.js
-vendor/console-polyfill/console-polyfill.js
+js/app.js
 img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
@@ -42,19 +29,10 @@ img/icons/CloseHover_1x.png
 img/icons/CloseHover_2x.png
 img/icons/Close_1x.png
 img/icons/Close_2x.png
-img/icons/DialogListGroupChatIcon@2x.png
-img/icons/DialogListGroupChatIcon_Highlighted@2x.png
 img/icons/IconsetSmiles.png
 img/icons/IconsetSmiles_1x.png
 img/icons/IconsetW.png
 img/icons/IconsetW_1x.png
-img/icons/icon120.png
-img/icons/icon128.png
-img/icons/icon16.png
-img/icons/icon32.png
-img/icons/icon60.png
-img/icons/icon64.png
-img/icons/icon90.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
@@ -72,6 +50,11 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
+js/lib/aes_worker.js
+js/lib/mtproto.js
+js/lib/pq_worker.js
+js/lib/sha1_worker.js
+vendor/console-polyfill/console-polyfill.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 
