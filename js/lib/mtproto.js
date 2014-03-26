@@ -997,7 +997,9 @@ factory('MtpRsaKeysManager', function () {
   };
 }).
 
-service('MtpSecureRandom', SecureRandom).
+service('MtpSecureRandom', function () {
+  return new SecureRandom();
+}).
 
 factory('MtpMessageIdGenerator', function (AppConfigManager) {
   var lastMessageID = [0, 0],
@@ -1525,7 +1527,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     this.serverSalt = serverSalt;
 
-    this.upload = options.upload || false;
+    this.upload = options.fileUpload || options.fileDownload || false;
 
     this.updateSession();
 
@@ -2356,8 +2358,12 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
     });
   }
 
-  function mtpGetNetworker (dcID, upload) {
-    var cache = upload ? cachedUploadNetworkers : cachedNetworkers;
+  function mtpGetNetworker (dcID, options) {
+    options = options || {};
+
+    var cache = (options.fileUpload || options.fileDownload)
+                  ? cachedUploadNetworkers
+                  : cachedNetworkers;
     if (!dcID) {
       throw new Exception('get Networker without dcID');
     }
@@ -2382,7 +2388,11 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         var authKey    = bytesFromHex(authKeyHex);
         var serverSalt = bytesFromHex(serverSaltHex);
 
-        return cache[dcID] = MtpNetworkerFactory.getNetworker(dcID, authKey, serverSalt, {upload: upload});
+        return cache[dcID] = MtpNetworkerFactory.getNetworker(dcID, authKey, serverSalt, options);
+      }
+
+      if (!options.createNetworker) {
+        return $q.reject({type: 'AUTH_KEY_EMPTY', code: 500});
       }
 
       return MtpAuthorizer.auth(dcID).then(function (auth) {
@@ -2391,7 +2401,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         storeObj[ssk] = bytesToHex(auth.serverSalt);
         AppConfigManager.set(storeObj);
 
-        return cache[dcID] = MtpNetworkerFactory.getNetworker(dcID, auth.authKey, auth.serverSalt, {upload: upload});
+        return cache[dcID] = MtpNetworkerFactory.getNetworker(dcID, auth.authKey, auth.serverSalt, options);
       }, function (error) {
         console.log('Get networker error', error, error.stack);
         return $q.reject(error);
@@ -2404,14 +2414,13 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
     var deferred = $q.defer(),
         dcID,
-        upload = options.fileDownload || options.fileUpload,
         networkerPromise;
 
     if (dcID = options.dcID) {
-      networkerPromise = mtpGetNetworker(dcID, upload);
+      networkerPromise = mtpGetNetworker(dcID, options);
     } else {
       networkerPromise = AppConfigManager.get('dc').then(function (baseDcID) {
-        return mtpGetNetworker(dcID = baseDcID || 1, upload);
+        return mtpGetNetworker(dcID = baseDcID || 1, options);
       });
     }
 
@@ -2468,7 +2477,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
                 AppConfigManager.set({dc: baseDcID = newDcID});
               }
 
-              mtpGetNetworker(newDcID).then(function (networker) {
+              mtpGetNetworker(newDcID, options).then(function (networker) {
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
                 }, function (error) {
@@ -2697,7 +2706,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                 limit: 0
               }, {
                 dcID: location.dc_id,
-                fileDownload: true
+                fileDownload: true,
+                createNetworker: true
               });
             });
 
@@ -2734,7 +2744,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           limit: 0
         }, {
           dcID: location.dc_id,
-          fileDownload: true
+          fileDownload: true,
+          createNetworker: true
         });
       }).then(function (result) {
         deferred.resolve(cachedDownloads[fileName] = 'data:image/jpeg;base64,' + bytesToBase64(result.bytes))
@@ -2784,7 +2795,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                     limit: limit
                   }, {
                     dcID: dcID,
-                    fileDownload: true
+                    fileDownload: true,
+                    createNetworker: true
                   });
 
                 }, 6).then(function (result) {
@@ -2855,7 +2867,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                 limit: limit
               }, {
                 dcID: dcID,
-                fileDownload: true
+                fileDownload: true,
+                createNetworker: true
               });
             }, 6).then(function (result) {
               writeBlobPromise.then(function () {
