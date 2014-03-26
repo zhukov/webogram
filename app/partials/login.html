@@ -17,7 +17,7 @@
   </form>
 
   <form name="myLoginForm" ng-if="credentials.phone_code_hash" ng-submit="logIn()">
-    <h3 class="login_form_head">{{ credentials.phone_number | phoneNumber }} <small>(<a href="#/login">edit</a>)</small></h3>
+    <h3 class="login_form_head">{{ credentials.phone_number | phoneNumber }} <small>(<a ng-click="credentials.phone_code_hash = ''">edit</a>)</small></h3>
     <p class="login_form_lead">We have sent you a code via SMS.<br/>Please enter it below.</p>
 
     <p class="login_form_lead">

@@ -80,6 +80,7 @@ StaticServlet.MimeMap = {
   'xml':  'application/xml',
   'json': 'application/json',
   'js':   'application/javascript',
+  'manifest': 'text/cache-manifest',
   'jpg':  'image/jpeg',
   'jpeg': 'image/jpeg',
   'gif':  'image/gif',
@@ -175,6 +176,9 @@ StaticServlet.prototype.sendFile_ = function(req, res, path) {
     'Content-Type': StaticServlet.
       MimeMap[path.split('.').pop()] || 'text/plain'
   });
+
+  // console.log(path.split('.').pop(), StaticServlet.MimeMap[path.split('.').pop()] || 'text/plain');
+
   if (req.method === 'HEAD') {
     res.end();
   } else {

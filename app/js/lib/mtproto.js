@@ -2392,7 +2392,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
       }
 
       if (!options.createNetworker) {
-        return $q.reject({type: 'AUTH_KEY_EMPTY', code: 500});
+        return $q.reject({type: 'AUTH_KEY_EMPTY', code: 401});
       }
 
       return MtpAuthorizer.auth(dcID).then(function (auth) {
@@ -2456,9 +2456,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
               cachedExportPromise[dcID] = exportDeferred.promise;
             }
 
-            // console.log('promise', cachedExportPromise[dcID]);
-
-            cachedExportPromise[dcID] = cachedExportPromise[dcID].then(function () {
+            cachedExportPromise[dcID].then(function () {
               (cachedNetworker = networker).wrapApiCall(method, params, options).then(function (result) {
                 deferred.resolve(result);
               }, function (error) {

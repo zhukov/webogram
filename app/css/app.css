@@ -728,20 +728,6 @@ a.im_dialog:hover .im_dialog_date {
   text-overflow: ellipsis;
 }
 
-.icon-group {
-  display: inline-block;
-  width: 18px;
-  height: 12px;
-  margin-top: 3px;
-  line-height: 14px;
-  vertical-align: text-top;
-  background: url(../img/icons/DialogListGroupChatIcon@2x.png) 0 0 no-repeat;
-  background-size: 18px 12px;
-}
-.active .icon-group {
-  background-image: url(../img/icons/DialogListGroupChatIcon_Highlighted@2x.png);
-}
-
 /* IM history */
 .im_history_col {
 }

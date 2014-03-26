@@ -21,7 +21,7 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
   return gulp.src('app/index.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      js: [$.ngmin(), $.uglify(), 'concat', $.rev()],
+      js: [$.ngmin(), $.uglify(), 'concat'],
       css: [$.minifyCss(), 'concat']
     }))
     .pipe(gulp.dest('dist'));
@@ -48,8 +48,6 @@ gulp.task('copy', function() {
     gulp.src('app/vendor/console-polyfill/console-polyfill.js')
       .pipe(gulp.dest('dist/vendor/console-polyfill')),
     gulp.src('app/js/lib/mtproto.js')
-      .pipe(gulp.dest('dist/js/lib')),
-    gulp.src('app/js/lib/config.js')
       .pipe(gulp.dest('dist/js/lib')),
     gulp.src('app/vendor/jsbn/jsbn_combined.js')
       .pipe(gulp.dest('dist/vendor/jsbn')),
@@ -124,7 +122,7 @@ gulp.task('disable-production', function() {
 });
 
 gulp.task('add-appcache-manifest', function() {
-  return gulp.src(['./dist/**/*', '!dist/manifest.json', '!dist/manifest.json', '!dist/index.html'])
+  return gulp.src(['./dist/**/*', '!dist/manifest.*', '!dist/index.html', '!dist/fonts/*', '!dist/img/icons/icon*.png', '!dist/js/background.js'])
     .pipe($.manifest({
       timestamp: true,
       network: ['http://*', 'https://*', '*'],
