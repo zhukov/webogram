@@ -124,7 +124,7 @@ gulp.task('disable-production', function() {
 });
 
 gulp.task('add-appcache-manifest', function() {
-  return gulp.src('./dist/**/*')
+  return gulp.src(['./dist/**/*', '!dist/manifest.json', '!dist/manifest.json', '!dist/index.html'])
     .pipe($.manifest({
       timestamp: true,
       network: ['http://*', 'https://*', '*'],
