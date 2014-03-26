@@ -1,12 +1,10 @@
 CACHE MANIFEST
-# Time: Wed Mar 26 2014 15:02:35 GMT+0400 (MSK)
+# Time: Wed Mar 26 2014 17:53:30 GMT+0400 (MSK)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
-index.html
-manifest.json
 manifest.webapp
 css/app.css
 fonts/glyphicons-halflings-regular.eot
@@ -28,8 +26,14 @@ img/emojisprite_4.png
 img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
-js/app-29e2169d.js
+js/app-ee353437.js
 js/background.js
+js/lib/aes_worker.js
+js/lib/config.js
+js/lib/mtproto.js
+js/lib/pq_worker.js
+js/lib/sha1_worker.js
+vendor/console-polyfill/console-polyfill.js
 img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
@@ -68,12 +72,6 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-js/lib/aes_worker.js
-js/lib/config.js
-js/lib/mtproto.js
-js/lib/pq_worker.js
-js/lib/sha1_worker.js
-vendor/console-polyfill/console-polyfill.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 
