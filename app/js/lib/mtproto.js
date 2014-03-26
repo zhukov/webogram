@@ -997,7 +997,9 @@ factory('MtpRsaKeysManager', function () {
   };
 }).
 
-service('MtpSecureRandom', SecureRandom).
+service('MtpSecureRandom', function () {
+  return new SecureRandom();
+}).
 
 factory('MtpMessageIdGenerator', function (AppConfigManager) {
   var lastMessageID = [0, 0],
@@ -2475,7 +2477,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
                 AppConfigManager.set({dc: baseDcID = newDcID});
               }
 
-              mtpGetNetworker(newDcID).then(function (networker) {
+              mtpGetNetworker(newDcID, options).then(function (networker) {
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
                 }, function (error) {

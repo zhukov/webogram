@@ -21,7 +21,7 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
   return gulp.src('app/index.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.rev()],
+      js: [$.ngmin(), $.uglify(), 'concat', $.rev()],
       css: [$.minifyCss(), 'concat']
     }))
     .pipe(gulp.dest('dist'));
