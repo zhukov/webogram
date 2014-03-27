@@ -2316,7 +2316,8 @@ angular.module('myApp.services', [])
 
     return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
       .then(function (response) {
-        return window.webkitURL.createObjectURL(response.data);
+        window.URL = window.URL || window.webkitURL;
+        return window.URL.createObjectURL(response.data);
       });
   }
 
