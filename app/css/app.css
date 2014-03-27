@@ -951,6 +951,24 @@ a.im_dialog:hover .im_dialog_date {
 .non_osx .im_message_author {
   font-size: 12px;
 }
+.im_message_grouped .im_message_from_photo,
+.im_message_grouped .im_message_author {
+  display: none;
+}
+.im_message_grouped .im_message_body {
+  margin-left: 46px;
+}
+.im_message_grouped .im_content_message_select_area {
+  height: 34px;
+}
+.im_message_grouped .icon-select-tick {
+  margin-top: 4px;
+}
+.im_message_grouped .icon-message-status {
+  display: none;
+  margin-top: 5px;
+  margin-left: 24px;
+}
 
 .im_message_from_photo,
 .im_message_contact_photo {

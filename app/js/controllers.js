@@ -441,6 +441,32 @@ angular.module('myApp.controllers', [])
       }
     }
 
+    function updateHistoryGroups (limit) {
+      var start = 0,
+          end = $scope.history.length,
+          i, curMessage, prevMessage;
+
+      if (limit > 0) {
+        end = limit;
+      } else if (limit < 0) {
+        start = end + limit;
+      }
+
+      for (i = start; i < end; i++) {
+        curMessage = $scope.history[i];
+        if (prevMessage) console.log(dT(), curMessage.from_id == prevMessage.from_id, curMessage.date - prevMessage.date);
+        if (prevMessage &&
+            curMessage.from_id == prevMessage.from_id &&
+            curMessage.date < prevMessage.date + 30 &&
+            curMessage.message && curMessage.message.length < 30) {
+          curMessage.grouped = true;
+        } else if (!start) {
+          delete curMessage.grouped;
+        }
+        prevMessage = curMessage;
+      }
+    }
+
     function showMoreHistory () {
       if (!hasMore || !offset) {
         return;
@@ -463,6 +489,8 @@ angular.module('myApp.controllers', [])
         angular.forEach(historyResult.history, function (id) {
           $scope.history.unshift(AppMessagesManager.wrapForHistory(id));
         });
+
+        updateHistoryGroups(historyResult.history.length);
 
         $scope.$broadcast('ui_history_prepend');
       });
@@ -496,6 +524,8 @@ angular.module('myApp.controllers', [])
           $scope.history.push(AppMessagesManager.wrapForHistory(id));
         });
         $scope.history.reverse();
+
+        updateHistoryGroups();
 
         if (historyResult.unreadLimit) {
           $scope.historyUnread = {
@@ -636,6 +666,7 @@ angular.module('myApp.controllers', [])
         // console.log('append', addedMessage);
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
+        updateHistoryGroups(-3);
         $scope.typing = {};
         $scope.$broadcast('ui_history_append', {my: addedMessage.my});
         if (addedMessage.my) {
