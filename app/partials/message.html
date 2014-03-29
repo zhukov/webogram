@@ -96,7 +96,7 @@
 
         <div bo-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" class="im_message_media" ng-switch="historyMessage.media._">
 
-          <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" style="width: {{historyMessage.media.photo.thumb.width}}px;">
+          <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id)" style="width: {{historyMessage.media.photo.thumb.width}}px;" ng-mouseover="preloadPhoto(historyMessage.media.photo.id)">
             <img
               class="im_message_photo_thumb"
               my-load-thumb

@@ -2810,9 +2810,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
             cacheFileWriter = fileWriter;
             // console.time(fileName + ' ' + (size / 1024));
 
-            // var limit = size > 102400 ? 65536 : 4096;
-            var limit = size > 30400 ? 524288 : 4096;
-            // var limit = size > 30400 ? 50480 : 4096;
+            var limit = 524288;
+            // var limit = size > 16384 ? 524288 : 51200;
             var writeFilePromise = $q.when(),
                 writeFileDeferred;
             for (var offset = 0; offset < size; offset += limit) {

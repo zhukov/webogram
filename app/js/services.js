@@ -1880,6 +1880,31 @@ angular.module('myApp.services', [])
     return photo;
   }
 
+  function preloadPhoto (photoID) {
+    if (!photos[photoID]) {
+      return;
+    }
+    var photo = photos[photoID],
+        fullWidth = $(window).width() - 36,
+        fullHeight = $($window).height() - 150,
+        fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight);
+
+    if (fullPhotoSize && !fullPhotoSize.preloaded) {
+      fullPhotoSize.preloaded = true;
+      if (fullPhotoSize.size) {
+        MtpApiFileManager.downloadFile(fullPhotoSize.location.dc_id, {
+          _: 'inputFileLocation',
+          volume_id: fullPhotoSize.location.volume_id,
+          local_id: fullPhotoSize.location.local_id,
+          secret: fullPhotoSize.location.secret
+        }, fullPhotoSize.size);
+      } else {
+        MtpApiFileManager.downloadSmallFile(fullPhotoSize.location);
+      }
+    }
+  };
+  $rootScope.preloadPhoto = preloadPhoto;
+
   function wrapForFull (photoID) {
     var photo = wrapForHistory(photoID),
         fullWidth = $(window).width() - 36,
@@ -1940,6 +1965,7 @@ angular.module('myApp.services', [])
 
   return {
     savePhoto: savePhoto,
+    preloadPhoto: preloadPhoto,
     wrapForHistory: wrapForHistory,
     wrapForFull: wrapForFull,
     openPhoto: openPhoto
