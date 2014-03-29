@@ -99,7 +99,7 @@
                 </h4>
 
                 <h4 ng-if="mediaType === false &amp;&amp; historyPeer.id < 0" ng-click="showPeerInfo()">
-                  <span ng-bind-html="historyPeer.data.rTitle"></span>
+                  <span ng-bind-html="historyPeer.data.rTitle" dir="auto"></span>
                   <small class="im_chat_users">
                     <ng-pluralize count="historyPeer.data.participants_count"
                                      when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
