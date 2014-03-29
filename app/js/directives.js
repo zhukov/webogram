@@ -149,7 +149,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myHistory', function ($window, $timeout) {
+  .directive('myHistory', function ($window, $timeout, $transition) {
 
     return {
       link: link
@@ -199,9 +199,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!atBottom && !options.my) {
           return;
         }
-        if (animated) {
-          $(scrollableWrap).stop();
-        } else {
+        if (!animated) {
           $(scrollable).css({bottom: 0});
           $(scrollableWrap).addClass('im_history_to_bottom');
         }
@@ -213,22 +211,22 @@ angular.module('myApp.directives', ['myApp.filters'])
             $(historyMessagesEl).removeClass('im_history_appending');
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             $(historyMessagesEl).css(transform, 'translate(0px, ' + (scrollableWrap.scrollHeight - wasH) + 'px)');
-            setTimeout(function () {
-              $(historyMessagesEl).addClass('im_history_appending');
-              $(historyMessagesEl).css(transform, 'translate(0px, 0px)');
-              setTimeout(function () {
-                curAnimation = false;
-                $(historyMessagesEl).removeClass('im_history_appending');
-                updateBottomizer();
-              }, 300);
-            }, 0);
+            $(historyWrap).nanoScroller();
+            var styles = {};
+            styles[transform] = 'translate(0px, 0px)';
+            $(historyMessagesEl).addClass('im_history_appending');
+            $transition($(historyMessagesEl), styles).then(function () {
+              curAnimation = false;
+              $(historyMessagesEl).removeClass('im_history_appending');
+              updateBottomizer();
+            });
           } else {
             $(scrollableWrap).removeClass('im_history_to_bottom');
             $(scrollable).css({bottom: ''});
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             updateBottomizer();
+            $(historyWrap).nanoScroller();
           }
-          $(historyWrap).nanoScroller();
         });
       });
 

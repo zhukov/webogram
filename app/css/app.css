@@ -967,6 +967,9 @@ a.im_dialog:hover .im_dialog_date {
 .im_message_grouped .im_content_message_select_area {
   height: 34px;
 }
+.im_history_appending .im_content_message_select_area {
+  height: 52px;
+}
 .im_message_grouped .icon-select-tick {
   margin-top: 4px;
 }
