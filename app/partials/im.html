@@ -2,9 +2,10 @@
 
 <div class="im_page_wrap" ng-class="{im_page_peer_not_selected: !curDialog.peer}">
 
-  <div class="im_page_split clearfix">
-
+  <div class="im_page_split clearfix" ng-class="{im_page_split_min_dialogs: isDialogsMinimized()}">
+      
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController">
+      <button class="im_dialogs_col_resize_btn btn" ng-click="isDialogsMinimized=!isDialogsMinimized">{{isDialogsMinimized && "&raquo;" || "&laquo;"}}</button>
       <div class="im_dialogs_panel">
         <div class="dropdown im_dialogs_panel_dropdown pull-right">
           <a class="dropdown-toggle">

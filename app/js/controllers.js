@@ -156,6 +156,10 @@ angular.module('myApp.controllers', [])
 
   .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService) {
 
+    $scope.isDialogsMinimized = function(){
+        return angular.element('.im_dialogs_col_wrap').scope().isDialogsMinimized;
+    };
+    
     $scope.$on('$routeUpdate', updateCurDialog);
 
     $scope.$on('history_focus', function (e, peerData) {
@@ -224,6 +228,7 @@ angular.module('myApp.controllers', [])
     $scope.dialogs = [];
     $scope.contacts = [];
     $scope.search = {};
+    $scope.isDialogsMinimized = false;
 
     var offset = 0,
         maxID = 0,
