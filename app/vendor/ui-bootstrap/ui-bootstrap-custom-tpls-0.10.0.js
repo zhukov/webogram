@@ -362,7 +362,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
         openedWindows.remove(modalInstance);
 
         //remove window DOM element
-        removeAfterAnimate(modalWindow.modalDomEl, modalWindow.modalScope, 300, checkRemoveBackdrop);
+        removeAfterAnimate(modalWindow.modalDomEl, modalWindow.modalScope, 0, checkRemoveBackdrop);
         body.toggleClass(OPENED_MODAL_CLASS, openedWindows.length() > 0);
       }
 
@@ -370,7 +370,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
           //remove backdrop if no longer needed
           if (backdropDomEl && backdropIndex() == -1) {
             var backdropScopeRef = backdropScope;
-            removeAfterAnimate(backdropDomEl, backdropScope, 150, function () {
+            removeAfterAnimate(backdropDomEl, backdropScope, 0, function () {
               backdropScopeRef.$destroy();
               backdropScopeRef = null;
             });

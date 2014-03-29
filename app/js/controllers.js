@@ -458,6 +458,7 @@ angular.module('myApp.controllers', [])
         if (prevMessage &&
             curMessage.from_id == prevMessage.from_id &&
             curMessage.date < prevMessage.date + 30 &&
+            !curMessage.fwd_from_id &&
             curMessage.message && curMessage.message.length < 30) {
           curMessage.grouped = true;
         } else if (!start) {

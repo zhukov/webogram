@@ -276,10 +276,10 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: 3px;
 }
 .tg_progress .progress-bar {
-  height: 2px;
+  height: 5px;
   line-height: 2px;
   background: rgba(255,255,255, 0.9);
-  border-radius: 2px;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -402,10 +402,16 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 .img_fullsize_progress {
   position: absolute;
-  bottom: 15px;
-  left: 50%;
-  width: 190px;
-  margin-left: -95px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 25px;
+  margin: 0;
+  padding: 0;
+  background: rgba(0,0,0, 0.5);
+  border: 0;
+  border-radius: 0;
+  padding: 10px;
 }
 
 
@@ -2390,6 +2396,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   width: 112px;
   height: 52px;
   margin: -8px 0 0 -112px;
+  -webkit-user-select: text;
 }
 @media (min-width: 1024px) {
   .im_content_message_select_area {
