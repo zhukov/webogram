@@ -8,7 +8,11 @@
         scheduleUpdate = function (delay) {
           clearTimeout(updateTimeout);
           updateTimeout = setTimeout(function () {
-            appCache.update();
+            try {
+              appCache.update();
+            } catch (ex) {
+              console.log('appCache.update: ' + ex);
+            }
           }, delay || 300000);
         },
         attach = function () {
