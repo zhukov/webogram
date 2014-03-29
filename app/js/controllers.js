@@ -936,7 +936,8 @@ angular.module('myApp.controllers', [])
           _: 'inputMediaContact',
           phone_number: $scope.user.phone,
           first_name: $scope.user.first_name,
-          last_name: $scope.user.last_name
+          last_name: $scope.user.last_name,
+          user_id: $scope.user.id
         });
         $rootScope.$broadcast('history_focus', {peerString: peerString});
       })

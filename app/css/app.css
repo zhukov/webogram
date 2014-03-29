@@ -991,12 +991,12 @@ a.im_message_from_photo,
 a.im_message_contact_photo {
   margin: 1px 12px 0 0;
 }
-.im_message_contact_name {
-  color: #3C6E97;
-  font-weight: bold;
-}
 .non_osx .im_message_contact_name {
   font-size: 12px;
+}
+.im_message_contact_name {
+  font-weight: bold;
+  /*color: #3C6E97;*/
 }
 a.im_message_photo_thumb,
 a.im_message_video_thumb {
