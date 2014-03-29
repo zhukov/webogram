@@ -42,7 +42,7 @@
 
         <div class="chat_modal_actions_wrap clearfix">
 
-          <button ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="btn btn-primary chat_modal_send_btn" ng-click="goToHistory()">Add member</button>
+          <button ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="btn btn-primary chat_modal_send_btn" ng-click="inviteToGroup()">Add member</button>
           <button ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left" class="btn btn-primary chat_modal_send_btn" ng-click="returnToGroup()">Return to group</button>
           <button ng-if="chatFull.chat._ == 'chatForbidden'" class="btn btn-danger chat_modal_delete_btn" ng-click="flushHistory()">Delete chat</button>
 
