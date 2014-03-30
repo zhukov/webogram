@@ -271,12 +271,36 @@ function nextRandomInt (maxValue) {
 };
 
 function pqPrimeFactorization (pqBytes) {
-  console.log('PQ start');
-
   var what = new BigInteger(pqBytes),
-      g;
+      result = false;
 
-  var it = 0;
+  console.log('PQ start', pqBytes, what.bitLength());
+
+  if (what.bitLength() <= 64) {
+    // console.time('PQ long');
+    try {
+      result = pqPrimeLong(goog.math.Long.fromString(what.toString(16), 16));
+    } catch (e) {
+      console.error(e);
+    };
+    // console.timeEnd('PQ long');
+  }
+  console.log(result);
+
+  if (result === false) {
+    // console.time('pq BigInt');
+    result = pqPrimeBigInteger(what);
+    // console.timeEnd('pq BigInt');
+  }
+
+  console.log('PQ finish');
+
+  return result;
+}
+
+function pqPrimeBigInteger (what) {
+  var it = 0,
+      g;
   for (var i = 0; i < 3; i++) {
     var q = (nextRandomInt(128) & 15) + 17,
         x = bigint(nextRandomInt(1000000000) + 1),
@@ -328,9 +352,84 @@ function pqPrimeFactorization (pqBytes) {
     Q = f;
   }
 
-  console.log('PQ finish', it + ' iterations');
-
   return [bytesFromBigInt(P), bytesFromBigInt(Q)];
+}
+
+function gcdLong(a, b) {
+  while (a.notEquals(goog.math.Long.ZERO) && b.notEquals(goog.math.Long.ZERO)) {
+    while (b.and(goog.math.Long.ONE).equals(goog.math.Long.ZERO)) {
+      b = b.shiftRight(1);
+    }
+    while (a.and(goog.math.Long.ONE).equals(goog.math.Long.ZERO)) {
+      a = a.shiftRight(1);
+    }
+    if (a.compare(b) > 0) {
+      a = a.subtract(b);
+    } else {
+      b = b.subtract(a);
+    }
+  }
+  return b.equals(goog.math.Long.ZERO) ? a : b;
+}
+
+function pqPrimeLong(what) {
+  var it = 0,
+      g;
+  for (var i = 0; i < 3; i++) {
+    var q = (nextRandomInt(128) & 15) + 17,
+        x = goog.math.Long.fromInt(nextRandomInt(1000000000) + 1),
+        y = new goog.math.Long(x.getLowBits(), x.getHighBits()),
+        lim = 1 << (i + 18);
+    // console.log(x);
+
+    for (var j = 1; j < lim; j++) {
+      ++it;
+      var a = new goog.math.Long(x.getLowBits(), x.getHighBits()),
+          b = new goog.math.Long(x.getLowBits(), x.getHighBits()),
+          c = goog.math.Long.fromInt(q);
+
+      // console.log(a, b, c);
+
+      while (b.notEquals(goog.math.Long.ZERO)) {
+        if (b.and(goog.math.Long.ONE).notEquals(goog.math.Long.ZERO)) {
+          c = c.add(a);
+          if (c.compare(what) > 0) {
+            c = c.subtract(what);
+          }
+        }
+        a = a.add(a);
+        if (a.compare(what) > 0) {
+          a = a.subtract(what);
+        }
+        b = b.shiftRight(1);
+      }
+
+      x = new goog.math.Long(c.getLowBits(), c.getHighBits());
+      var z = x.compare(y) < 0 ? y.subtract(x) : x.subtract(y);
+      g = gcdLong(z, what);
+      if (g.notEquals(goog.math.Long.ONE)) {
+        break;
+      }
+      if ((j & (j - 1)) == 0) {
+        y = new goog.math.Long(x.getLowBits(), x.getHighBits());
+      }
+    }
+    if (g.compare(goog.math.Long.ONE) > 0) {
+      break;
+    }
+  }
+
+  var f = what.div(g), P, Q;
+
+  if (g.compare(f) > 0) {
+    P = f;
+    Q = g;
+  } else {
+    P = g;
+    Q = f;
+  }
+
+  return [bytesFromHex(P.toString(16)), bytesFromHex(Q.toString(16))];
 }
 
 
@@ -1127,12 +1226,13 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       }
 
       console.log(dT(), 'PQ factorization start');
-      if (!!window.Worker && false) {
+      if (!!window.Worker) {
         var worker = new Worker('js/lib/pq_worker.js');
 
         worker.onmessage = function (e) {
           auth.p = e.data[0];
           auth.q = e.data[1];
+          console.log(dT(), 'PQ factorization done');
           mtpSendReqDhParams(auth);
         };
         worker.onerror = function(error) {
@@ -1145,6 +1245,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
         auth.p = pAndQ[0];
         auth.q = pAndQ[1];
 
+        console.log(dT(), 'PQ factorization done');
         mtpSendReqDhParams(auth);
       }
     }, function (error) {
