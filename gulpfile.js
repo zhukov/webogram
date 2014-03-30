@@ -49,6 +49,8 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist/vendor/console-polyfill')),
     gulp.src('app/js/lib/mtproto.js')
       .pipe(gulp.dest('dist/js/lib')),
+    gulp.src('app/vendor/closure/long.js')
+      .pipe(gulp.dest('dist/vendor/closure')),
     gulp.src('app/vendor/jsbn/jsbn_combined.js')
       .pipe(gulp.dest('dist/vendor/jsbn')),
     gulp.src('app/vendor/cryptoJS/crypto.js')
