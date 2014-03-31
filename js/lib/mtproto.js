@@ -285,7 +285,7 @@ function pqPrimeFactorization (pqBytes) {
     };
     // console.timeEnd('PQ long');
   }
-  console.log(result);
+  // console.log(result);
 
   if (result === false) {
     // console.time('pq BigInt');
@@ -373,22 +373,23 @@ function gcdLong(a, b) {
 }
 
 function pqPrimeLong(what) {
+  // console.log('start long');
   var it = 0,
       g;
   for (var i = 0; i < 3; i++) {
-    var q = (nextRandomInt(128) & 15) + 17,
+    var q = goog.math.Long.fromInt((nextRandomInt(128) & 15) + 17),
         x = goog.math.Long.fromInt(nextRandomInt(1000000000) + 1),
-        y = new goog.math.Long(x.getLowBits(), x.getHighBits()),
+        y = x,
         lim = 1 << (i + 18);
-    // console.log(x);
 
     for (var j = 1; j < lim; j++) {
       ++it;
-      var a = new goog.math.Long(x.getLowBits(), x.getHighBits()),
-          b = new goog.math.Long(x.getLowBits(), x.getHighBits()),
-          c = goog.math.Long.fromInt(q);
-
-      // console.log(a, b, c);
+      // if (!(it % 100)) {
+      //   console.log(dT(), 'it', it, i, j, x.toString());
+      // }
+      var a = x,
+          b = x,
+          c = q;
 
       while (b.notEquals(goog.math.Long.ZERO)) {
         if (b.and(goog.math.Long.ONE).notEquals(goog.math.Long.ZERO)) {
@@ -404,14 +405,14 @@ function pqPrimeLong(what) {
         b = b.shiftRight(1);
       }
 
-      x = new goog.math.Long(c.getLowBits(), c.getHighBits());
+      x = c;
       var z = x.compare(y) < 0 ? y.subtract(x) : x.subtract(y);
       g = gcdLong(z, what);
       if (g.notEquals(goog.math.Long.ONE)) {
         break;
       }
       if ((j & (j - 1)) == 0) {
-        y = new goog.math.Long(x.getLowBits(), x.getHighBits());
+        y = x;
       }
     }
     if (g.compare(goog.math.Long.ONE) > 0) {
@@ -1226,7 +1227,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
       }
 
       console.log(dT(), 'PQ factorization start');
-      if (!!window.Worker) {
+      if (!!window.Worker/* && false*/) {
         var worker = new Worker('js/lib/pq_worker.js');
 
         worker.onmessage = function (e) {
@@ -2005,7 +2006,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
     if (hasApiCall && !hasHttpWait) {
       var serializer = new TLSerialization({mtproto: true});
-      serializer.storeMethod('http_wait', {max_delay: 0, wait_after: 0, max_wait: 25000});
+      serializer.storeMethod('http_wait', {max_delay: 0, wait_after: 0, max_wait: 1000});
       messages.push({
         msg_id: MtpMessageIdGenerator.generateID(),
         seq_no: this.generateSeqNo(),
@@ -2650,7 +2651,8 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
 factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
-  var cachedFS = false;
+  var cachedFs = false;
+  var cachedFsPromise = false;
   var apiUploadPromise = $q.when();
   var cachedSavePromises = {};
   var cachedDownloadPromises = {};
@@ -2703,27 +2705,27 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       })
   };
 
-  function requestFS (argument) {
-    if (cachedFS) {
-      return $q.when(cachedFS);
+  function requestFS () {
+    if (cachedFsPromise) {
+      return cachedFsPromise;
     }
 
     $window.requestFileSystem = $window.requestFileSystem || $window.webkitRequestFileSystem;
 
-    if (!$window.requestFileSystem/* || true*/) {
-      return $q.reject({type: 'FS_BROWSER_UNSUPPORTED', description: 'requestFileSystem not present'});
+    if (!$window.requestFileSystem || true) {
+      return cachedFsPromise = $q.reject({type: 'FS_BROWSER_UNSUPPORTED', description: 'requestFileSystem not present'});
     }
 
     var deferred = $q.defer();
 
     $window.requestFileSystem($window.TEMPORARY, 5*1024*1024, function (fs) {
-      cachedFS = fs;
+      cachedFs = fs;
       deferred.resolve();
     }, function (e) {
       deferred.reject(e);
     });
 
-    return deferred.promise;
+    return cachedFsPromise = deferred.promise;
   };
 
   function fileWriteBytes(fileWriter, bytes) {
@@ -2794,10 +2796,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         };
 
     requestFS().then(function () {
-      cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
+      cachedFs.root.getFile(fileName, {create: false}, function(fileEntry) {
         deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
       }, function () {
-        cachedFS.root.getFile(fileName, {create: true}, function(fileEntry) {
+        cachedFs.root.getFile(fileName, {create: true}, function(fileEntry) {
           fileEntry.createWriter(function (fileWriter) {
             cacheFileWriter = fileWriter;
             fileWriteBytes(fileWriter, bytes).then(function () {
@@ -2806,7 +2808,9 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           }, errorHandler);
         }, errorHandler);
       });
-    }, errorHandler);
+    }, function () {
+      deferred.resolve('data:image/jpeg;base64,' + bytesToBase64(bytes))
+    });
 
     return cachedSavePromises[fileName] = deferred.promise;
   }
@@ -2828,7 +2832,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           errorHandler = angular.noop;
         },
         doDownload = function () {
-          cachedFS.root.getFile(fileName, {create: true}, function(fileEntry) {
+          cachedFs.root.getFile(fileName, {create: true}, function(fileEntry) {
             var downloadPromise = downloadRequest(location.dc_id, function () {
               // console.log('next small promise');
               return MtpApiManager.invokeApi('upload.getFile', {
@@ -2855,7 +2859,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         };
 
     requestFS().then(function () {
-      cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
+      cachedFs.root.getFile(fileName, {create: false}, function(fileEntry) {
         fileEntry.file(function(file) {
           if (file.size) {
             deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
@@ -2866,9 +2870,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         }, errorHandler);
       }, doDownload);
     }, function (error) {
-
       downloadRequest(location.dc_id, function () {
-        // console.log('next small promise');
         return MtpApiManager.invokeApi('upload.getFile', {
           location: angular.extend({}, location, {_: 'inputFileLocation'}),
           offset: 0,
@@ -2970,18 +2972,18 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       saveToFileEntry(fileEntry);
     } else {
       requestFS().then(function () {
-        cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
+        cachedFs.root.getFile(fileName, {create: false}, function(fileEntry) {
           fileEntry.file(function(file) {
             // console.log(dT(), 'Check size', file.size, size);
             if (file.size >= size/* && false*/) {
               deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
             } else {
               console.log('File bad size', file, size);
-              cachedFS.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
+              cachedFs.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
             }
           }, errorHandler);
         }, function () {
-          cachedFS.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
+          cachedFs.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
         });
       }, function () {
 
@@ -3059,10 +3061,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         };
 
     requestFS().then(function () {
-      cachedFS.root.getFile(fileName, {create: false}, function(fileEntry) {
+      cachedFs.root.getFile(fileName, {create: false}, function(fileEntry) {
         deferred.resolve(fileEntry);
       }, function () {
-        cachedFS.root.getFile(fileName, {create: true}, function(fileEntry) {
+        cachedFs.root.getFile(fileName, {create: true}, function(fileEntry) {
           fileEntry.createWriter(function (fileWriter) {
             cacheFileWriter = fileWriter;
             fileWriteBytes(fileWriter, file).then(function () {
