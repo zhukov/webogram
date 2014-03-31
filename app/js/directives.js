@@ -651,13 +651,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
         }
 
-        MtpApiFileManager.downloadSmallFile($scope.thumb.location, $scope.thumb.size).then(function (url) {
+        MtpApiFileManager.downloadSmallFile($scope.thumb.location).then(function (url) {
           if (counterSaved == counter) {
             element.attr('src', url);
             cleanup();
           }
         }, function (e) {
-          console.log('Download image failed', e, $scope.thumb.location);
+          console.log('Download image failed', e, $scope.thumb.location, element[0]);
           if (counterSaved == counter) {
             element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
             cleanup();
