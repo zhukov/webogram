@@ -2052,6 +2052,32 @@ img.img_fullsize {
   font-size: 14px;
   line-height: 160%;
 }
+.error_modal_details textarea {
+  display: block;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  padding: 0;
+  font-size: 10px;
+  line-height: 100%;
+  white-space: pre-wrap;
+  padding: 4px;
+  margin: 10px 0 10px;
+  word-break: break-all;
+  word-wrap: break-word;
+  color: #333333;
+  background-color: #f5f5f5;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  width: 100%;
+  text-align: left;
+}
+.error_modal_details div {
+  padding: 0 20px;
+  font-size: 13px;
+  text-align: center;
+}
+.error_modal_details div a {
+  color: #999;
+}
 
 
 

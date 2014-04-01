@@ -318,7 +318,7 @@ angular.module('myApp.services', [])
     });
     return MtpApiManager.invokeApi('contacts.deleteContacts', {
       id: ids
-    }, function () {
+    }).then(function () {
       angular.forEach(userIDs, function (userID) {
         onContactUpdated(userID, false);
       });
@@ -779,7 +779,7 @@ angular.module('myApp.services', [])
   }
 
   function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
-    // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
+    console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
     return MtpApiManager.invokeApi('messages.getHistory', {
       peer: inputPeer,
       offset: 0,
@@ -926,8 +926,6 @@ angular.module('myApp.services', [])
 
       return deletedMessageIDs;
     });
-
-
   }
 
   function processAffectedHistory (inputPeer, affectedHistory, method) {
@@ -2798,7 +2796,7 @@ angular.module('myApp.services', [])
     lastOnlineUpdated = offline ? 0 : date;
     return MtpApiManager.invokeApi('account.updateStatus', {
       offline: offline
-    });
+    }, {noErrorBox: true});
   }
 
   function checkIDLE() {
@@ -3006,16 +3004,30 @@ angular.module('myApp.services', [])
 
 .service('ErrorService', function ($rootScope, $modal) {
 
+  var shownBoxes = 0;
+
   function show (params, options) {
+    if (shownBoxes >= 2) {
+      console.log('Skip error box, too many open', shownBoxes, params, options);
+      return false;
+    }
+
     options = options || {};
     var scope = $rootScope.$new();
     angular.extend(scope, params);
 
-    return $modal.open({
+    shownBoxes++;
+    var modal = $modal.open({
       templateUrl: 'partials/error_modal.html',
       scope: scope,
       windowClass: options.windowClass || 'error_modal_window'
     });
+
+    modal.result['finally'](function () {
+      shownBoxes--;
+    });
+
+    return modal;
   }
 
   function alert (title, description) {

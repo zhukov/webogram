@@ -34,6 +34,9 @@
       <span ng-switch-when="PHOTO_INVALID_DIMENSIONS">
         The photo dimensions are invalid, please select another file.
       </span>
+      <span ng-switch-when="PHOTO_CROP_SIZE_SMALL">
+        The photo you provided is too small.
+      </span>
       <span ng-switch-when="ACCOUNT_REQUIRED">
         Sorry, there is no <strong>Telegram</strong> account for {{phone | phoneNumber}}<br/><br/>
         Please <strong>sign up</strong> using our mobile apps for <a href="https://telegram.org/" target="_blank">iOS</a> or <a href="https://telegram.org/" target="_blank">Android</a>.
@@ -47,12 +50,16 @@
         <span ng-switch-when="404">The page was not found.</span>
         <span ng-switch-when="420">You are performing too many actions. Please try again later.</span>
         <span ng-switch-default>Internal server error occured. Please try again later.</span>
+      </div>
 
-        <div ng-if="error.originalError" ng-switch="showErrorDetails">
-          <pre ng-switch-when="true"><code>{{error.originalError}}</code></pre>
-          <a ng-switch-default href="" ng-click="showErrorDetails = true">Click here</a> for technical details.
-        </div>
+    </div>
 
+    <div ng-if="error" class="error_modal_details" ng-switch="error.detailsShown">
+      <textarea ng-switch-when="true" rows="3" onclick="this.select()">Method: {{error.input || 'N/A'}}
+Result: {{error.originalError || error}}
+Stack: {{error.stack}}</textarea>
+      <div ng-switch-default>
+        <a href="" ng-click="error.detailsShown = true">Technical details here</a>
       </div>
     </div>
 

@@ -2457,7 +2457,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
 }).
 
-factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworkerFactory, $q) {
+factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworkerFactory, ErrorService, $q) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
@@ -2489,6 +2489,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
         AppConfigManager.remove('dc' + baseDcID + '_auth_key');
       }
       baseDcID = false;
+      error.handled = true;
     });
   }
 
@@ -2547,6 +2548,25 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
     options = options || {};
 
     var deferred = $q.defer(),
+        rejectPromise = function (error) {
+          if (!error) {
+            error = {type: 'ERROR_EMPTY'};
+          } else if (!angular.isObject(error)) {
+            error = {message: error};
+          }
+          deferred.reject(error);
+
+          if (!options.noErrorBox) {
+            error.input = method;
+            error.stack = error.stack || stack;
+            setTimeout(function () {
+              if (!error.handled) {
+                ErrorService.show({error: error});
+                error.handled = true;
+              }
+            }, 100);
+          }
+        },
         dcID,
         networkerPromise;
 
@@ -2558,7 +2578,8 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
       });
     }
 
-    var cachedNetworker;
+    var cachedNetworker,
+        stack = false;
 
     networkerPromise.then(function (networker) {
       return (cachedNetworker = networker).wrapApiCall(method, params, options).then(
@@ -2574,11 +2595,11 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
             if (cachedExportPromise[dcID] === undefined) {
               var exportDeferred = $q.defer();
 
-              mtpInvokeApi('auth.exportAuthorization', {dc_id: dcID}).then(function (exportedAuth) {
+              mtpInvokeApi('auth.exportAuthorization', {dc_id: dcID}, {noErrorBox: true}).then(function (exportedAuth) {
                 mtpInvokeApi('auth.importAuthorization', {
                   id: exportedAuth.id,
                   bytes: exportedAuth.bytes
-                }, {dcID: dcID}).then(function () {
+                }, {dcID: dcID, noErrorBox: true}).then(function () {
                   exportDeferred.resolve();
                 }, function (e) {
                   exportDeferred.reject(e);
@@ -2594,10 +2615,10 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
               (cachedNetworker = networker).wrapApiCall(method, params, options).then(function (result) {
                 deferred.resolve(result);
               }, function (error) {
-                deferred.reject(error);
+                rejectPromise(error);
               });
             }, function (error) {
-              deferred.reject(error);
+              rejectPromise(error);
             });
           }
           else if (error.code == 303) {
@@ -2613,18 +2634,24 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
                 }, function (error) {
-                  deferred.reject(error);
+                  rejectPromise(error);
                 });
               });
             }
           }
           else {
-            deferred.reject(error);
+            rejectPromise(error);
           }
         });
     }, function (error) {
-      deferred.reject(error);
+      rejectPromise(error);
     });
+
+    if (!(stack = (stack || (new Error()).stack))) {
+      try {1 = 0;} catch (e) {
+        stack = e.stack || '';
+      }
+    }
 
     return deferred.promise;
   };
