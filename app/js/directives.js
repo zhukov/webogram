@@ -875,30 +875,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link,
     };
 
-    var interval;
-
     function link ($scope, element, attrs) {
-      var promise = $interval(function () {
-        var time = tsNow(),
-            cnt = 3;
-
-        if (time % 1000 <= 200) {
-          cnt = 0;
-        } else if (time % 1000 <= 400) {
-          cnt = 1;
-        } else if (time % 1000 <= 600) {
-          cnt = 2;
-        }
-
-        var text = '...',
-            html = text.substr(0, cnt + 1) + (cnt < 2 ? ('<span class="text-invisible">' + text.substr(cnt + 1) + '</span>') : '');
-
-        element.html(html);
-      }, 200);
-
-      $scope.$on('$destroy', function cleanup() {
-        $interval.cancel(promise);
-      });
+      element.html('<div class="loading_dots"><span></span>' +
+                   '<span></span><span></span></div>');
     }
   })
 

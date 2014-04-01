@@ -2707,3 +2707,90 @@ ce671b orange
   -webkit-transition: margin-top linear 0.2s;
   transition: margin-top linear 0.2s;
 }
+
+.loading_dots
+{
+  display: inline-block;
+  font-size: 1em; /* set size here */
+  line-height: 1;
+  padding: 0.125em 0 0.175em 0.55em;
+  width: 2.75em;
+}
+
+.loading_dots span
+{
+  border-radius: 50%;
+  display: inline-block;
+  height: 0.2rem;
+  width:  0.2rem;
+  margin-left: 0.2rem;
+
+  -webkit-animation:  loading_dots 0.8s linear infinite;
+  -moz-animation:     loading_dots 0.8s linear infinite;
+  -ms-animation:      loading_dots 0.8s linear infinite;
+  animation:          loading_dots 0.8s linear infinite;
+}
+.loading_dots span:nth-child(2)
+{
+  -webkit-animation-delay:  0.2s;
+  -moz-animation-delay:     0.2s;
+  -ms-animation-delay:      0.2s;
+  animation-delay:          0.2s;
+}
+.loading_dots span:nth-child(1)
+{
+  -webkit-animation-delay:  0.4s;
+  -moz-animation-delay:     0.4s;
+  -ms-animation-delay:      0.4s;
+  animation-delay:          0.4s;
+}
+
+@-webkit-keyframes loading_dots
+{
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: #000;
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@-moz-keyframes loading_dots
+{
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: #000;
+  }
+  100% {
+    background: transparent;
+  }
+}
+@-ms-keyframes loading_dots
+{
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: #000;
+  }
+  100% {
+    background: transparent;
+  }
+}
+@keyframes loading_dots
+{
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: #000;
+  }
+  100% {
+    background: transparent;
+  }
+}
