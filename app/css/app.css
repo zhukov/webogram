@@ -2713,12 +2713,12 @@ ce671b orange
   display: inline-block;
   font-size: 1em; /* set size here */
   line-height: 1;
-  padding: 0.125em 0 0.175em 0.55em;
-  width: 2.75em;
+  padding: 0.125em 0 0.175em 0.15em;
 }
 
 .loading_dots span
 {
+  border: 0.15rem solid;
   border-radius: 50%;
   display: inline-block;
   height: 0.2rem;
@@ -2737,7 +2737,7 @@ ce671b orange
   -ms-animation-delay:      0.2s;
   animation-delay:          0.2s;
 }
-.loading_dots span:nth-child(1)
+.loading_dots span:nth-child(3)
 {
   -webkit-animation-delay:  0.4s;
   -moz-animation-delay:     0.4s;
@@ -2748,49 +2748,49 @@ ce671b orange
 @-webkit-keyframes loading_dots
 {
   0% {
-    background: transparent;
+    opacity: 0;
   }
   50% {
-    background: #000;
+    opacity: 1;
   }
   100% {
-    background: transparent;
+    opacity: 0;
   }
 }
 
 @-moz-keyframes loading_dots
 {
   0% {
-    background: transparent;
+    opacity: 0;
   }
   50% {
-    background: #000;
+    opacity: 1;
   }
   100% {
-    background: transparent;
+    opacity: 0;
   }
 }
 @-ms-keyframes loading_dots
 {
   0% {
-    background: transparent;
+    opacity: 0;
   }
   50% {
-    background: #000;
+    opacity: 1;
   }
   100% {
-    background: transparent;
+    opacity: 0;
   }
 }
 @keyframes loading_dots
 {
   0% {
-    background: transparent;
+    opacity: 0;
   }
   50% {
-    background: #000;
+    opacity: 1;
   }
   100% {
-    background: transparent;
+    opacity: 0;
   }
 }
