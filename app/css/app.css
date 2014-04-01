@@ -2718,7 +2718,7 @@ ce671b orange
 
 .loading_dots span
 {
-  border: 0.15rem solid;
+  border: 0.125rem solid;
   border-radius: 50%;
   display: inline-block;
   height: 0.2rem;

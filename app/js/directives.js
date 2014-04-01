@@ -876,8 +876,28 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
-      element.html('<div class="loading_dots"><span></span>' +
-                   '<span></span><span></span></div>');
+      element.html(isAnimationSupported(element[0])
+        ? '<div class="loading_dots"><span></span><span></span><span></span></div>'
+        : '...'
+      );
+    }
+
+    var animationSupported;
+    function isAnimationSupported (el) {
+      if (animationSupported === undefined) {
+        animationSupported = el.style.animationName !== undefined;
+        if (animationSupported === false) {
+          var domPrefixes = 'Webkit Moz O ms Khtml'.split(' '), i;
+          for (i = 0; i < domPrefixes.length; i++) {
+            if (el.style[domPrefixes[i] + 'AnimationName'] !== undefined) {
+              animationSupported = true;
+              break;
+            }
+          }
+        }
+      }
+
+      return animationSupported;
     }
   })
 
