@@ -779,6 +779,7 @@ angular.module('myApp.services', [])
   }
 
   function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
+    // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
     return MtpApiManager.invokeApi('messages.getHistory', {
       peer: inputPeer,
       offset: 0,

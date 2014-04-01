@@ -95,7 +95,7 @@
                   <h4 ng-switch-when="video">Videos</h4>
                   <h4 ng-switch-when="documents">Documents</h4>
 
-                  <h4 ng-switch-default ng-switch="historyPeer.id > 0">
+                  <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
                     <div ng-switch-when="true">
                       <span ng-bind-html="historyPeer.data.rFullName"></span>
                       <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>

@@ -29,10 +29,10 @@
           <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
           <ul class="dropdown-menu">
             <li ng-if="user._ == 'userContact'">
-              <a ng-click="importContact(true)">Edit</a>
+              <a ng-click="importContact(true)">Edit contact</a>
             </li>
             <li ng-if="user._ == 'userContact'">
-              <a ng-click="deleteContact()">Delete Contact</a>
+              <a ng-click="deleteContact()">Delete contact</a>
             </li>
             <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
               <a ng-click="importContact()">Add to contacts</a>
