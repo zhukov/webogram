@@ -221,6 +221,7 @@
                 <span class="im_message_document_name" bo-bind="historyMessage.media.file_name"></span>
                 <span class="im_message_document_size" ng-if="historyMessage.media.progress" ng-bind="historyMessage.media.progress | formatSizeProgress"></span>
               </div>
+              <!-- <a href="" class="pull-right" ng-click="historyMessage.media.progress.cancel()">Cancel</a> -->
               <div class="im_message_download_progress_wrap">
                 <div class="progress tg_down_progress">
                   <div class="progress-bar progress-bar-success" role="progressbar" ng-style="{width: historyMessage.media.progress.percent + '%'}"></div>

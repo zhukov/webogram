@@ -1214,7 +1214,9 @@ angular.module('myApp.services', [])
       }
 
       message.send = function () {
-        MtpApiFileManager.uploadFile(file).then(function (inputFile) {
+        var uploaded = false;
+        var promise = MtpApiFileManager.uploadFile(file).then(function (inputFile) {
+          uploaded = true;
           var inputMedia;
           switch (attachType) {
             case 'photo':
@@ -1274,6 +1276,13 @@ angular.module('myApp.services', [])
             $rootScope.$broadcast('history_update', {peerID: peerID});
           }
         });
+
+        media.progress.cancel = function () {
+          if (!uploaded) {
+            promise.cancel();
+            cancelPendingMessage(randomID);
+          }
+        }
       };
 
       saveMessages([message]);
@@ -1395,6 +1404,36 @@ angular.module('myApp.services', [])
     });
   };
 
+  function cancelPendingMessage (randomID) {
+    var pendingData = pendingByRandomID[randomID];
+
+    if (pendingData) {
+      var peerID = pendingData[0],
+          tempID = pendingData[1],
+          historyStorage = historiesStorage[peerID],
+          i;
+
+      for (i = 0; i < historyStorage.pending.length; i++) {
+        if (historyStorage.pending[i] == tempID) {
+          historyStorage.pending.splice(i, 1);
+          break;
+        }
+      }
+
+      delete messagesForHistory[tempID];
+      delete messagesStorage[tempID];
+
+      ApiUpdatesManager.saveUpdate({
+        _: 'updateDeleteMessages',
+        messages: [tempID]
+      });
+
+      return true;
+    }
+
+    return false;
+  }
+
   function finalizePendingMessage(randomID, finalMessage) {
     var pendingData = pendingByRandomID[randomID];
     // console.log('pdata', randomID, pendingData);
@@ -1493,6 +1532,10 @@ angular.module('myApp.services', [])
     }
 
     var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
+
+    if (message.progress) {
+      message.progress = messagesStorage[msgID].progress;
+    }
 
     message.fromUser = AppUsersManager.getUser(message.from_id);
     message.fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');

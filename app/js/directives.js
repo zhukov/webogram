@@ -791,7 +791,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           </div>\
           <div class="video_full_error_wrap" ng-if="error">\
             <div class="video_full_error" ng-if="error.html" ng-bind-html="error.html"></div>\
-            <div class="video_full_error" ng-if="error.text">{{error.text}}</div>\
+            <div class="video_full_error" ng-if="error.text" ng-bind="error.text"></div>\
           </div>\
         </div>',
       scope: {
@@ -819,7 +819,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
+      var promise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
         $scope.progress.enabled = false;
         // $scope.progress = {enabled: true, percent: 50};
         $scope.player.hasQuicktime = hasQt;
@@ -838,6 +838,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       }, function (progress) {
         $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+      });
+
+      $scope.$on('$destroy', function () {
+        promise.cancel();
       });
     }
 

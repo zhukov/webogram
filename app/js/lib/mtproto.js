@@ -2927,6 +2927,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     }
 
     var deferred = $q.defer(),
+        canceled = false,
+        resolved = false,
         cacheFileWriter,
         errorHandler = function (error) {
           console.error(error);
@@ -2948,7 +2950,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               writeFileDeferred = $q.defer();
               (function (isFinal, offset, writeFileDeferred, writeFilePromise) {
                 return downloadRequest(dcID, function () {
-                // console.log('next big promise');
+                  // console.log('next big promise');
+                  if (canceled) {
+                    return $q.when();
+                  }
                   return MtpApiManager.invokeApi('upload.getFile', {
                     location: location,
                     offset: offset,
@@ -2964,6 +2969,9 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                   // console.log('waiting for file promise', offset);
                   writeFilePromise.then(function () {
                     // console.log('resolved file promise', offset);
+                    if (canceled) {
+                      return $q.when();
+                    }
 
                     return fileWriteBytes(fileWriter, result.bytes).then(function () {
 
@@ -2974,6 +2982,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
                       if (isFinal) {
                         // console.timeEnd(fileName + ' ' + (size / 1024));
+                        resolved = true;
                         deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL(options.mime || 'image/jpeg'));
                       } else {
                         // console.log('notify', {done: offset + limit, total: size});
@@ -3003,6 +3012,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           fileEntry.file(function(file) {
             // console.log(dT(), 'Check size', file.size, size);
             if (file.size >= size/* && false*/) {
+              resolved = true;
               deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
             } else {
               console.log('File bad size', file, size);
@@ -3022,6 +3032,9 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           writeBlobDeferred = $q.defer();
           (function (isFinal, offset, writeBlobDeferred, writeBlobPromise) {
             return downloadRequest(dcID, function () {
+              if (canceled) {
+                return $q.when();
+              }
               return MtpApiManager.invokeApi('upload.getFile', {
                 location: location,
                 offset: offset,
@@ -3033,6 +3046,9 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               });
             }, 6).then(function (result) {
               writeBlobPromise.then(function () {
+                if (canceled) {
+                  return $q.when();
+                }
                 try {
                   blobParts.push(bytesToArrayBuffer(result.bytes));
                   writeBlobDeferred.resolve();
@@ -3049,8 +3065,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
                       var blob = bb.getBlob(options.mime || 'image/jpeg');
                     }
 
-
                     window.URL = window.URL || window.webkitURL;
+                    resolved = true;
                     deferred.resolve(cachedDownloads[fileName] = URL.createObjectURL(blob));
                   } else {
                     deferred.notify({done: offset + limit, total: size});
@@ -3069,6 +3085,14 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         }
 
       });
+    }
+
+    deferred.promise.cancel = function () {
+      if (!canceled && !resolved) {
+        canceled = true;
+        delete cachedDownloadPromises[fileName];
+        errorHandler({type: 'DOWNLOAD_CANCELED'});
+      }
     }
 
     return cachedDownloadPromises[fileName] = deferred.promise;
@@ -3106,8 +3130,11 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
   function uploadFile (file) {
     var fileSize = file.size,
         // partSize = fileSize > 102400 ? 65536 : 4096,
-        partSize = fileSize > 102400 ? 524288 : 4096,
+        // partSize = fileSize > 102400 ? 524288 : 4096,
+        partSize = fileSize > 102400 ? 524288 : 30720,
         totalParts = Math.ceil(fileSize / partSize),
+        canceled = false,
+        resolved = false,
         doneParts = 0;
 
     if (totalParts > 1500) {
@@ -3143,7 +3170,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           var blob = file.slice(offset, offset + partSize);
 
           reader.onloadend = function (e) {
-            if (e.target.readyState != FileReader.DONE) {
+            if (canceled || e.target.readyState != FileReader.DONE) {
               return;
             }
             var apiCurPromise = apiUploadPromise = apiUploadPromise.then(function () {
@@ -3162,6 +3189,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               fileReadDeferred.resolve();
               if (doneParts >= totalParts) {
                 deferred.resolve(resultInputFile);
+                resolved = true;
               } else {
                 console.log(dT(), 'Progress', doneParts * partSize / fileSize);
                 deferred.notify({done: doneParts * partSize, total: fileSize});
@@ -3174,6 +3202,13 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
           return fileReadDeferred.promise;
         });
       })(offset, part++);
+    }
+
+    deferred.promise.cancel = function () {
+      if (!canceled && !resolved) {
+        canceled = true;
+        errorHandler({type: 'UPLOAD_CANCELED'});
+      }
     }
 
     return deferred.promise;
