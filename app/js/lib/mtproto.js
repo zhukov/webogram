@@ -2712,7 +2712,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
 
     $window.requestFileSystem = $window.requestFileSystem || $window.webkitRequestFileSystem;
 
-    if (!$window.requestFileSystem || true) {
+    if (!$window.requestFileSystem) {
       return cachedFsPromise = $q.reject({type: 'FS_BROWSER_UNSUPPORTED', description: 'requestFileSystem not present'});
     }
 
