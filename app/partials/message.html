@@ -121,12 +121,11 @@
                 <a href="" ng-click="downloadVideo(historyMessage.media.video.id)">Download</a>
                 <a href="" ng-click="openVideo(historyMessage.media.video.id)">Play video</a>
               </div>
-              <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
-                <div class="progress tg_down_progress">
-                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{historyMessage.media.video.progress.percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{historyMessage.media.video.progress.percent}}%">
-                    <span class="sr-only">
-                      {{historyMessage.media.video.progress.percent}}% Complete (success)
-                    </span>
+              <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
+                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.video.progress.cancel()">Cancel</a>
+                <div class="im_message_download_progress_wrap">
+                  <div class="progress tg_down_progress">
+                    <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.video.progress.percent + '%'}"></div>
                   </div>
                 </div>
               </div>
@@ -155,9 +154,12 @@
                 <a href="" ng-click="downloadDoc(historyMessage.media.document.id)">Download</a>
                 <a href="" ng-click="downloadDoc(historyMessage.media.document.id, false, true)" bo-if="historyMessage.media.document.withPreview">Open</a>
               </div>
-              <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
-                <div class="progress tg_down_progress">
-                  <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.document.progress.percent + '%'}"></div>
+              <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
+                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.document.progress.cancel()">Cancel</a>
+                <div class="im_message_download_progress_wrap">
+                  <div class="progress tg_down_progress">
+                    <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.document.progress.percent + '%'}"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -181,9 +183,12 @@
               <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
                 <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
               </div>
-              <div class="im_message_download_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
-                <div class="progress tg_down_progress">
-                  <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.audio.progress.percent + '%'}"></div>
+              <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
+                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.audio.progress.cancel()">Cancel</a>
+                <div class="im_message_download_progress_wrap">
+                  <div class="progress tg_down_progress">
+                    <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.audio.progress.percent + '%'}"></div>
+                  </div>
                 </div>
               </div>
               <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
@@ -221,10 +226,12 @@
                 <span class="im_message_document_name" bo-bind="historyMessage.media.file_name"></span>
                 <span class="im_message_document_size" ng-if="historyMessage.media.progress" ng-bind="historyMessage.media.progress | formatSizeProgress"></span>
               </div>
-              <!-- <a href="" class="pull-right" ng-click="historyMessage.media.progress.cancel()">Cancel</a> -->
-              <div class="im_message_download_progress_wrap">
-                <div class="progress tg_down_progress">
-                  <div class="progress-bar progress-bar-success" role="progressbar" ng-style="{width: historyMessage.media.progress.percent + '%'}"></div>
+              <div class="clearfix cancelable_progress_wrap">
+                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.progress.cancel()">Cancel</a>
+                <div class="im_message_download_progress_wrap">
+                  <div class="progress tg_down_progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" ng-style="{width: historyMessage.media.progress.percent + '%'}"></div>
+                  </div>
                 </div>
               </div>
             </div>

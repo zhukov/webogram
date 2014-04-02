@@ -281,7 +281,7 @@ function pqPrimeFactorization (pqBytes) {
     try {
       result = pqPrimeLong(goog.math.Long.fromString(what.toString(16), 16));
     } catch (e) {
-      console.error(e);
+      console.error('Pq long Exception', e);
     };
     // console.timeEnd('PQ long');
   }
@@ -2931,8 +2931,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         resolved = false,
         cacheFileWriter,
         errorHandler = function (error) {
-          console.error(error);
-          // console.log('fail');
+          // console.error('Dl Error', error);
           deferred.reject(error);
           if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
@@ -3015,8 +3014,10 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
               resolved = true;
               deferred.resolve(cachedDownloads[fileName] = fileEntry.toURL());
             } else {
+              // setTimeout(function () {
               console.log('File bad size', file, size);
               cachedFs.root.getFile(fileName, {create: true}, saveToFileEntry, errorHandler)
+              // }, 10000);
             }
           }, errorHandler);
         }, function () {
@@ -3144,7 +3145,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     var fileID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         deferred = $q.defer(),
         errorHandler = function (error) {
-          console.error('Error', error);
+          // console.error('Up Error', error);
           deferred.reject(error);
           errorHandler = angular.noop;
         },
@@ -3205,6 +3206,7 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
     }
 
     deferred.promise.cancel = function () {
+      console.log('cancel upload', canceled, resolved);
       if (!canceled && !resolved) {
         canceled = true;
         errorHandler({type: 'UPLOAD_CANCELED'});

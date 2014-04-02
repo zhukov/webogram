@@ -1273,6 +1273,12 @@ img.im_message_document_thumb {
   margin-top: 5px;
 }
 
+.im_message_media_progress_cancel {
+  font-size: 11px;
+  margin-left: 10px;
+  line-height: 100%;
+}
+
 .tg_up_progress,
 .tg_down_progress {
   height: 5px;

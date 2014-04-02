@@ -819,7 +819,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var promise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'}).then(function (url) {
+      var downloadPromise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'});
+
+      downloadPromise.then(function (url) {
         $scope.progress.enabled = false;
         // $scope.progress = {enabled: true, percent: 50};
         $scope.player.hasQuicktime = hasQt;
@@ -841,7 +843,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $scope.$on('$destroy', function () {
-        promise.cancel();
+        downloadPromise.cancel();
       });
     }
 

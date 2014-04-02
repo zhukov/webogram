@@ -1214,8 +1214,10 @@ angular.module('myApp.services', [])
       }
 
       message.send = function () {
-        var uploaded = false;
-        var promise = MtpApiFileManager.uploadFile(file).then(function (inputFile) {
+        var uploaded = false,
+            uploadPromise = MtpApiFileManager.uploadFile(file);
+
+        uploadPromise.then(function (inputFile) {
           uploaded = true;
           var inputMedia;
           switch (attachType) {
@@ -1265,22 +1267,15 @@ angular.module('myApp.services', [])
           toggleError(true);
         }, function (progress) {
           // console.log('upload progress', progress);
-          var historyMessage = messagesForHistory[messageID],
-              percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-
           media.progress.done = progress.done;
-          media.progress.percent = percent;
-          if (historyMessage) {
-            historyMessage.media.progress.done = progress.done;
-            historyMessage.media.progress.percent = percent;
-            $rootScope.$broadcast('history_update', {peerID: peerID});
-          }
+          media.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+          $rootScope.$broadcast('history_update', {peerID: peerID});
         });
 
         media.progress.cancel = function () {
           if (!uploaded) {
-            promise.cancel();
-            cancelPendingMessage(randomID);
+            uploadPromise.cancel();
+            cancelPendingMessage(randomIDS);
           }
         }
       };
@@ -1407,11 +1402,18 @@ angular.module('myApp.services', [])
   function cancelPendingMessage (randomID) {
     var pendingData = pendingByRandomID[randomID];
 
+    console.log('pending', randomID, pendingData);
+
     if (pendingData) {
       var peerID = pendingData[0],
           tempID = pendingData[1],
           historyStorage = historiesStorage[peerID],
           i;
+
+      ApiUpdatesManager.saveUpdate({
+        _: 'updateDeleteMessages',
+        messages: [tempID]
+      });
 
       for (i = 0; i < historyStorage.pending.length; i++) {
         if (historyStorage.pending[i] == tempID) {
@@ -1423,10 +1425,6 @@ angular.module('myApp.services', [])
       delete messagesForHistory[tempID];
       delete messagesStorage[tempID];
 
-      ApiUpdatesManager.saveUpdate({
-        _: 'updateDeleteMessages',
-        messages: [tempID]
-      });
 
       return true;
     }
@@ -1533,8 +1531,8 @@ angular.module('myApp.services', [])
 
     var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
 
-    if (message.progress) {
-      message.progress = messagesStorage[msgID].progress;
+    if (message.media && message.media.progress !== undefined) {
+      message.media.progress = messagesStorage[msgID].media.progress;
     }
 
     message.fromUser = AppUsersManager.getUser(message.from_id);
@@ -1836,13 +1834,22 @@ angular.module('myApp.services', [])
 
           var historyStorage = historiesStorage[peerID];
           if (historyStorage !== undefined) {
-            var newHistory = [];
+            var newHistory = [],
+                newPending = [];
             for (var i = 0; i < historyStorage.history.length; i++) {
               if (!updatedData.msgs[historyStorage.history[i]]) {
                 newHistory.push(historyStorage.history[i]);
               }
             }
             historyStorage.history = newHistory;
+
+            for (var i = 0; i < historyStorage.pending.length; i++) {
+              if (!updatedData.msgs[historyStorage.pending[i]]) {
+                newPending.push(historyStorage.pending[i]);
+              }
+            }
+            historyStorage.pending = newPending;
+
             $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: updatedData.msgs});
           }
         });
@@ -2154,16 +2161,21 @@ angular.module('myApp.services', [])
           extensions: [ext]
         }]
       }, function (writableFileEntry) {
-        MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, writableFileEntry, {mime: mimeType}).then(function (url) {
+        var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, writableFileEntry, {mime: mimeType});
+        downloadPromise.then(function (url) {
           delete historyVideo.progress;
           console.log('file save done');
         }, function (e) {
           console.log('video download failed', e);
           historyVideo.progress.enabled = false;
         }, updateDownloadProgress);
+
+        historyVideo.progress.cancel = downloadPromise.cancel;
       });
     } else {
-      MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, null, {mime: mimeType}).then(function (url) {
+      var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, null, {mime: mimeType});
+
+      downloadPromise.then(function (url) {
         delete historyVideo.progress;
 
         if (popup) {
@@ -2187,6 +2199,8 @@ angular.module('myApp.services', [])
         console.log('video download failed', e);
         historyVideo.progress.enabled = false;
       }, updateDownloadProgress);
+
+      historyVideo.progress.cancel = downloadPromise.cancel;
     }
   };
 
@@ -2283,16 +2297,22 @@ angular.module('myApp.services', [])
           extensions: [ext]
         }]
       }, function (writableFileEntry) {
-        MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, writableFileEntry, {mime: doc.mime_type}).then(function (url) {
+        var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, writableFileEntry, {mime: doc.mime_type});
+
+        downloadPromise.then(function (url) {
           delete historyDoc.progress;
           console.log('file save done');
         }, function (e) {
           console.log('document download failed', e);
           historyDoc.progress.enabled = false;
         }, updateDownloadProgress);
+
+        historyDoc.progress.cancel = downloadPromise.cancel;
       });
     } else {
-      MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, null, {mime: doc.mime_type}).then(function (url) {
+      var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, null, {mime: doc.mime_type});
+
+      downloadPromise.then(function (url) {
         delete historyDoc.progress;
 
         if (popup) {
@@ -2316,6 +2336,8 @@ angular.module('myApp.services', [])
         console.log('document download failed', e);
         historyDoc.progress.enabled = false;
       }, updateDownloadProgress);
+
+      historyDoc.progress.cancel = downloadPromise.cancel;
     }
   }
 
@@ -2364,7 +2386,9 @@ angular.module('myApp.services', [])
       $rootScope.$broadcast('history_update');
     }
 
-    MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, null, {mime: 'audio/mpeg'}).then(function (url) {
+    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, null, {mime: 'audio/mpeg'});
+
+    downloadPromise.then(function (url) {
       delete historyAudio.progress;
       historyAudio.url = $sce.trustAsResourceUrl(url);
       historyAudio.autoplay = true;
@@ -2374,9 +2398,11 @@ angular.module('myApp.services', [])
         $rootScope.$broadcast('history_update');
       }, 1000);
     }, function (e) {
-      console.log('document download failed', e);
-      historyDoc.progress.enabled = false;
+      console.log('audio download failed', e);
+      historyAudio.progress.enabled = false;
     }, updateDownloadProgress);
+
+    historyAudio.progress.cancel = downloadPromise.cancel;
   }
 
   $rootScope.openAudio = openAudio;
