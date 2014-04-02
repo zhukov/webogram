@@ -2648,7 +2648,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
     });
 
     if (!(stack = (stack || (new Error()).stack))) {
-      try {1 = 0;} catch (e) {
+      try {window.unexistingFunction();} catch (e) {
         stack = e.stack || '';
       }
     }
