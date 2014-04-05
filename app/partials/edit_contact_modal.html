@@ -1,40 +1,30 @@
 <div class="import_modal_wrap" my-modal-position>
 
-  <div class="modal-header">
-    <a class="modal-close-link" ng-click="$close()">Close</a>
-    <h4 class="modal-title">Edit contact</h4>
-  </div>
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
 
   <div class="modal-body">
 
-    <form ng-submit="doImport()">
+    <form class="modal_simple_form" ng-submit="doImport()">
 
-      <div class="form-group import_modal_field_wrap">
-        <span class="form-control uneditable-input disabled" disabled>{{importContact.phone | phoneNumber}}</span>
+      <h4>Edit contact</h4>
+
+      <div class="form-group">
+        <span class="form-control uneditable-input disabled" disabled ng-bind="importContact.phone | phoneNumber"></span>
       </div>
-      <div class="form-group import_modal_field_wrap">
-        <input class="form-control" type="text" my-focused placeholder="First name" ng-model="importContact.first_name"/>
+      <div class="form-group">
+        <input class="form-control input-sm" my-focused type="text" placeholder="First name" ng-model="importContact.first_name"/>
       </div>
-      <div class="form-group import_modal_field_wrap">
-        <input class="form-control" type="text" placeholder="Last name" ng-model="importContact.last_name"/>
-      </div>
-
-      <div class="import_modal_panel clearfix">
-
-        <div class="import_modal_actions pull-right">
-          <a class="btn btn-default" ng-click="$dismiss()"> Cancel </a>
-
-          <button class="btn btn-success" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled">
-            {{progress.enabled ? 'Saving...' : 'Save'}}
-          </button>
-
-
-        </div>
-
+      <div class="form-group">
+        <input class="form-control input-sm" type="text" placeholder="Last name" ng-model="importContact.last_name"/>
       </div>
 
     </form>
 
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
+    <button class="btn btn-primary" ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'Saving...' : 'Save'" ng-disabled="progress.enabled"></button>
   </div>
 
 </div>

@@ -1,30 +1,24 @@
 <div class="contacts_modal_wrap" my-modal-position>
 
-  <div class="modal-header">
-    <a class="modal-close-link" ng-click="$close()">Close</a>
-    <h4 class="modal-title">Edit Group Title</h4>
-  </div>
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
 
   <div class="modal-body">
 
-    <form ng-submit="updateGroup()">
+    <form class="modal_simple_form" ng-submit="updateGroup()">
 
-      <div class="contacts_modal_group_title">
-        <input class="form-control" my-focused type="text" placeholder="Group name" ng-model="group.name"/>
-      </div>
+      <h4>Edit Group</h4>
 
-      <div class="contacts_modal_panel clearfix">
-
-        <div class="contacts_modal_actions pull-right">
-          <button class="btn btn-default" ng-click="$dismiss()"> Cancel </button>
-
-          <button class="btn btn-success" type="submit"> Save </button>
-        </div>
-
+      <div class="form-group">
+        <input class="form-control input-sm" my-focused type="text" placeholder="Group name" ng-model="group.name"/>
       </div>
 
     </form>
 
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
+    <button class="btn btn-primary" ng-class="{disabled: group.updating}" ng-click="updateGroup()" ng-bind="group.updating ? 'Saving...' : 'Save'" ng-disabled="group.updating"></button>
   </div>
 
 </div>

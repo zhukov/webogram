@@ -1,60 +1,69 @@
 <div class="user_modal_wrap" my-modal-position>
 
-  <div class="modal-header">
-    <a class="modal-close-link" ng-click="$close()">Close</a>
-    <h4 class="modal-title">Info</h4>
-  </div>
-
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
 
   <div class="modal-body">
 
-    <div class="user_modal_image_wrap pull-left">
-      <img
-        class="user_modal_image"
-        my-load-thumb
-        thumb="userPhoto"
-      />
+    <div class="user_modal_photo_profile_wrap">
+
+      <div class="user_modal_image_wrap pull-left">
+        <img
+          class="user_modal_image"
+          my-load-thumb
+          thumb="userPhoto"
+        />
+      </div>
+
+      <div class="user_modal_info_wrap clearfix">
+        <h4 class="user_modal_header" ng-bind="user | userName"></h4>
+        <p class="user_modal_status" ng-if="user.status" ng-bind="user | userStatus"></p>
+
+        <div class="user_modal_actions_wrap clearfix">
+          <button class="btn btn-primary user_modal_main_btn" ng-click="goToHistory()">Send message</button>
+
+          <div class="dropdown user_modal_other_btn">
+            <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
+            <ul class="dropdown-menu">
+              <li ng-if="user._ == 'userContact'">
+                <a ng-click="importContact(true)">Edit contact</a>
+              </li>
+              <li ng-if="user._ == 'userContact'">
+                <a ng-click="deleteContact()">Delete contact</a>
+              </li>
+              <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
+                <a ng-click="importContact()">Add to contacts</a>
+              </li>
+              <li ng-if="user.phone.length > 0">
+                <a ng-click="shareContact()">Share contact</a>
+              </li>
+              <li>
+                <a ng-click="flushHistory()">Delete chat</a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
-    <div class="user_modal_info_wrap clearfix">
-      <h4 class="user_modal_header">{{user | userName}}</h4>
-      <p class="user_modal_status" ng-if="user.status">{{user | userStatus}}</p>
-
-      <p class="user_modal_phone" ng-if="user.phone">{{user.phone | phoneNumber}}</p>
-
-      <div class="user_modal_actions_wrap clearfix">
-        <button class="btn btn-primary user_modal_send_btn" ng-click="goToHistory()">Send message</button>
-
-        <div class="dropdown user_modal_other_btn">
-          <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
-          <ul class="dropdown-menu">
-            <li ng-if="user._ == 'userContact'">
-              <a ng-click="importContact(true)">Edit contact</a>
-            </li>
-            <li ng-if="user._ == 'userContact'">
-              <a ng-click="deleteContact()">Delete contact</a>
-            </li>
-            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
-              <a ng-click="importContact()">Add to contacts</a>
-            </li>
-            <li ng-if="user.phone.length > 0">
-              <a ng-click="shareContact()">Share contact</a>
-            </li>
-            <li>
-              <a ng-click="flushHistory()">Delete chat</a>
-            </li>
-          </ul>
-        </div>
-
+    <div class="modal_section" ng-if="user.phone">
+      <h3 class="modal_section_header">Phone</h3>
+      <div class="modal_section_body">
+        <p><span ng-bind="user.phone | phoneNumber"></span></p>
       </div>
     </div>
 
-    <div class="user_modal_settings_wrap">
-      <div class="user_modal_notifications">
-        Notifications:
-        <a ng-click="settings.notifications = !settings.notifications">
-          {{settings.notifications ? 'ON' : 'OFF'}}
-        </a>
+    <div class="modal_section">
+      <h3 class="modal_section_header">Settings</h3>
+      <div class="modal_section_body">
+
+        <div class="tg_form_group">
+          <a class="tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+            <span class="tg_checkbox_label">Notifications</span>
+          </a>
+        </div>
       </div>
     </div>
 

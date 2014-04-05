@@ -1,11 +1,5 @@
 <div class="contacts_modal_wrap" my-modal-position>
 
-  <div class="modal-header">
-    <a class="modal-close-link" ng-click="$dismiss()">Close</a>
-    <a ng-if="!multiSelect" class="pull-right modal-head-link" ng-click="importContact()">Add new contact</a>
-    <h4 class="modal-title">Contacts</h4>
-  </div>
-
   <div class="modal-body">
 
     <div class="contacts_modal_search">
@@ -48,15 +42,16 @@
 
     </div>
 
+  </div>
 
-    <div ng-if="multiSelect" class="contacts_modal_panel">
-
-      <button class="btn btn-success btn-block" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
-        Next »
-      </button>
-
+  <div class="modal-footer" ng-switch="multiSelect">
+    <button ng-switch-when="true" class="btn btn-success btn-block" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
+      Next »
+    </button>
+    <div ng-switch-default>
+      <a class="btn btn-link pull-left" ng-click="importContact()">Add contact</a>
+      <button type="button" class="btn btn-primary" ng-click="$dismiss()">Done</button>
     </div>
-
   </div>
 
 </div>

@@ -1759,7 +1759,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     var serializer = new TLSerialization(options);
 
     if (!this.connectionInited) {
-      serializer.storeInt(0xdda60d3c, 'invokeWithLayer12');
+      serializer.storeInt(0x2b9b08fa, 'invokeWithLayer14');
       serializer.storeInt(0x69796de9, 'initConnection');
       serializer.storeInt(2496, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');

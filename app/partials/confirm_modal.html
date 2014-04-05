@@ -1,0 +1,28 @@
+<div class="confirm_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="confirm_modal_description" ng-switch="type">
+      <span ng-switch-when="LOGOUT">Are you sure you want to log out?</span>
+      <span ng-switch-when="WEBOGRAM_UPDATED_RELOAD">A new version of Webogram is available. Load it?</span>
+      <span ng-switch-when="HISTORY_FLUSH">Are you sure? This can not be undone!</span>
+      <span ng-switch-when="TERMINATE_SESSIONS">Are you sure you want to log out all devices except for the current one?</span>
+      <span ng-switch-default ng-bind="message || 'Are you sure?'"></span>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()" ng-switch="type">
+      <span ng-switch-default>Cancel</span>
+    </a>
+    <button type="button" class="btn btn-primary" ng-switch="type" ng-click="$close()">
+      <span ng-switch-when="LOGOUT">Log Out</span>
+      <span ng-switch-when="HISTORY_FLUSH">Delete Chat</span>
+      <span ng-switch-default>OK</span>
+    </button>
+  </div>
+
+</div>

@@ -1153,7 +1153,7 @@ angular.module('myApp.services', [])
     if (!options.isMedia) {
       attachType = 'document';
       fileName = 'document.' + file.type.split('/')[1];
-    } else if (['image/jpeg', 'image/gif', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
+    } else if (['image/jpeg', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
       attachType = 'photo';
       fileName = 'photo.' + file.type.split('/')[1];
     } else if (file.type.substr(0, 6) == 'video/') {
@@ -3071,7 +3071,7 @@ angular.module('myApp.services', [])
 })
 
 
-.service('ErrorService', function ($rootScope, $modal) {
+.service('ErrorService', function ($rootScope, $modal, $window) {
 
   var shownBoxes = 0;
 
@@ -3106,9 +3106,35 @@ angular.module('myApp.services', [])
     });
   };
 
+  function confirm (params, options) {
+    options = options || {};
+    var scope = $rootScope.$new();
+    angular.extend(scope, params);
+
+    var modal = $modal.open({
+      templateUrl: 'partials/confirm_modal.html',
+      scope: scope,
+      windowClass: options.windowClass || 'confirm_modal_window'
+    });
+
+    return modal.result;
+  };
+
+  $window.safeConfirm = function (params, callback) {
+    if (typeof params === 'string') {
+      params = {message: params};
+    }
+    confirm(params).then(function (result) {
+      callback(result || true)
+    }, function () {
+      callback(false)
+    });
+  };
+
   return {
     show: show,
-    alert: alert
+    alert: alert,
+    confirm: confirm
   }
 })
 

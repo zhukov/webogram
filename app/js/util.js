@@ -77,11 +77,3 @@ function safeReplaceObject (wasObject, newObject) {
   }
 }
 
-function safeConfirm (message) {
-  try {
-    return confirm(message);
-  } catch (e) {
-    // Sorry, temp solution until UI boxes are done
-    return true;
-  }
-}

@@ -22,9 +22,24 @@
 
   <script type="text/javascript">
   (function () {
+
+    window.safeConfirm = function (params, callback) {
+      if (typeof params === 'string') {
+        params = {message: params};
+      }
+      var result = false
+      try {
+        result = confirm(params.message);
+      } catch (e) {
+        result = true;
+      }
+      setTimeout(function () {callback(result)}, 10);
+    };
+
     if (!window.applicationCache || !window.addEventListener) {
       return;
     }
+
     var appCache = window.applicationCache,
         declined = false,
         updateTimeout = false,
@@ -41,10 +56,14 @@
         attach = function () {
           appCache.addEventListener('updateready', function(e) {
             if (appCache.status == appCache.UPDATEREADY) {
-              if (!declined && confirm('A new version of Webogram is available. Load it?')) {
-                window.location.reload();
-              } else {
-                declined = true;
+              if (!declined) {
+                safeConfirm({type: 'WEBOGRAM_UPDATED_RELOAD', message: 'A new version of Webogram is available. Load it?'}, function (result) {
+                  if (result) {
+                    window.location.reload();
+                  } else {
+                    declined = true;
+                  }
+                });
                 scheduleUpdate();
               }
             }

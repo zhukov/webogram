@@ -1,7 +1,8 @@
 <div class="error_modal_wrap" my-modal-position>
 
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+
   <div class="modal-header">
-    <a class="modal-close-link" ng-click="$close()">Close</a>
     <h4 ng-if="error" class="modal-title" ng-switch="error.type">
       <span ng-switch-when="ACCOUNT_REQUIRED">No account</span>
       <span ng-switch-default ng-switch="error.code">
