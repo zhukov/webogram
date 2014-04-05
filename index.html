@@ -1,7 +1,22 @@
 <!doctype html><html lang=en ng-app=myApp manifest=app.manifest><head><meta charset=utf-8><meta name=viewport content="width=device-width, user-scalable=no"><title>Webogram</title><link rel=stylesheet href=css/app.css><link rel=icon href=favicon.ico type=image/x-icon><meta property=og:title content=Webogram><meta property=og:url content="http://zhukov.github.io/webogram/"><meta property=og:image content=http://zhukov.github.io/webogram/img/logo_share.png><meta property=og:site_name content=Webogram><meta property=og:description content="Welcome to an experimental web-client of Telegram messenger. See https://github.com/zhukov/webogram for more info."><script type=text/javascript>(function () {
+
+    window.safeConfirm = function (params, callback) {
+      if (typeof params === 'string') {
+        params = {message: params};
+      }
+      var result = false
+      try {
+        result = confirm(params.message);
+      } catch (e) {
+        result = true;
+      }
+      setTimeout(function () {callback(result)}, 10);
+    };
+
     if (!window.applicationCache || !window.addEventListener) {
       return;
     }
+
     var appCache = window.applicationCache,
         declined = false,
         updateTimeout = false,
@@ -18,10 +33,14 @@
         attach = function () {
           appCache.addEventListener('updateready', function(e) {
             if (appCache.status == appCache.UPDATEREADY) {
-              if (!declined && confirm('A new version of Webogram is available. Load it?')) {
-                window.location.reload();
-              } else {
-                declined = true;
+              if (!declined) {
+                safeConfirm({type: 'WEBOGRAM_UPDATED_RELOAD', message: 'A new version of Webogram is available. Load it?'}, function (result) {
+                  if (result) {
+                    window.location.reload();
+                  } else {
+                    declined = true;
+                  }
+                });
                 scheduleUpdate();
               }
             }
