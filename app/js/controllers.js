@@ -563,6 +563,7 @@ angular.module('myApp.controllers', [])
     function showEmptyHistory () {
       safeReplaceObject($scope.state, {notSelected: true});
       $scope.history = [];
+      hasMore = false;
 
       $scope.$broadcast('ui_history_change');
     }
