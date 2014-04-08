@@ -1630,8 +1630,9 @@ span.emoji {
 .im_history_empty {
   text-align: center;
   color: #999;
-  font-size: 1.5em;
-  padding: 0 50px;
+  font-size: 18px;
+  line-height: 18px;
+  padding: 1px 50px;
 }
 .im_history_to_bottom .im_history_not_selected,
 .im_history_to_bottom .im_history_empty {

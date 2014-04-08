@@ -298,6 +298,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $scope.$on('ui_editor_resize', updateSizes);
+      $scope.$on('ui_height', function () {
+        updateSizes();
+      });
 
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
@@ -1016,6 +1019,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
+      var prevMargin = false;
+
       var updateMargin = function () {
         var height = element[0].offsetHeight,
             contHeight = $($window).height(),
@@ -1023,6 +1028,12 @@ angular.module('myApp.directives', ['myApp.filters'])
             margin = height < contHeight ? parseInt((contHeight - height) * ratio) : '';
 
         element.css({marginTop: margin, marginBottom: margin});
+
+        if (prevMargin !== margin) {
+          $scope.$emit('ui_height');
+        }
+
+        prevMargin = margin;
       };
 
       onContentLoaded(updateMargin);
@@ -1032,6 +1043,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_height', function () {
         onContentLoaded(updateMargin);
       });
+
+
 
     };
 

@@ -431,6 +431,7 @@ angular.module('myApp.controllers', [])
       var peerData = AppPeersManager.getPeer(peerID);
       // console.log('update', preload, peerData);
       if (!peerData || peerData.deleted) {
+        safeReplaceObject($scope.state, {loaded: false});
         return false;
       }
 
@@ -523,10 +524,8 @@ angular.module('myApp.controllers', [])
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID);
 
 
-      safeReplaceObject($scope.state, {loaded: false});
+      $scope.state.mayBeHasMore = true;
       getMessagesPromise.then(function (historyResult) {
-        safeReplaceObject($scope.state, {loaded: true});
-
         if (curJump != jump) return;
 
         offset += historyResult.history.length;
@@ -535,6 +534,8 @@ angular.module('myApp.controllers', [])
         maxID = historyResult.history[historyResult.history.length - 1];
 
         updateHistoryPeer();
+        safeReplaceObject($scope.state, {loaded: true});
+
         angular.forEach(historyResult.history, function (id) {
           $scope.history.push(AppMessagesManager.wrapForHistory(id));
         });
