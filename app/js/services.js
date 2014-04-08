@@ -1677,6 +1677,7 @@ angular.module('myApp.services', [])
     notification.message = notificationMessage;
     notification.image = notificationPhoto.placeholder;
     notification.key = 'msg' + message.id;
+    notification.tag = peerString;
 
     if (notificationPhoto.location && !notificationPhoto.location.empty) {
       MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
@@ -2020,9 +2021,10 @@ angular.module('myApp.services', [])
     return photo;
   }
 
-  function openPhoto (photoID, accessHash) {
+  function openPhoto (photoID, messageID) {
     var scope = $rootScope.$new(true);
     scope.photoID = photoID;
+    scope.messageID = messageID;
 
     var modalInstance = $modal.open({
       templateUrl: 'partials/photo_modal.html',
@@ -3029,7 +3031,8 @@ angular.module('myApp.services', [])
 
       var notification = new Notification(data.title, {
         icon: data.image || '',
-        body: data.message || ''
+        body: data.message || '',
+        tag: data.tag || ''
       });
 
       notification.onclick = function () {
