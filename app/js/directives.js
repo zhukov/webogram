@@ -368,7 +368,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, AppConfigManager) {
+  .directive('mySendForm', function ($timeout, AppConfigManager, ErrorService) {
 
     return {
       link: link,
@@ -530,12 +530,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           var blob = new Blob([array], {type: contentType});
 
-          if (safeConfirm('Are you sure to send file(s) from clipboard?')) {
-            $scope.$apply(function () {
-              $scope.draftMessage.files = [blob];
-              $scope.draftMessage.isMedia = true;
-            });
-          }
+          ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
+            $scope.draftMessage.files = [blob];
+            $scope.draftMessage.isMedia = true;
+          });
         }
       };
 
@@ -551,8 +549,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
         }
 
-        if (files.length && safeConfirm('Are you sure to send file(s) from clipboard?')) {
-          $scope.$apply(function () {
+        if (files.length > 0) {
+          ErrorService.confirm({type: 'FILES_CLIPBOARD_PASTE', files: files}).then(function () {
             $scope.draftMessage.files = files;
             $scope.draftMessage.isMedia = true;
           });
