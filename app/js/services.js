@@ -681,6 +681,7 @@ angular.module('myApp.services', [])
   var pendingByRandomID = {};
   var pendingByMessageID = {};
   var pendingAfterMsgs = {};
+  var sendFilePromise = $q.when();
   var tempID = -1;
 
 
@@ -1214,70 +1215,81 @@ angular.module('myApp.services', [])
       }
 
       message.send = function () {
-        var uploaded = false,
-            uploadPromise = MtpApiFileManager.uploadFile(file);
+        var sendFileDeferred = $q.defer();
 
-        uploadPromise.then(function (inputFile) {
-          uploaded = true;
-          var inputMedia;
-          switch (attachType) {
-            case 'photo':
-              inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
-              break;
+        sendFilePromise.then(function () {
+          var uploaded = false,
+              uploadPromise = MtpApiFileManager.uploadFile(file);
 
-            case 'video':
-              inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0};
-              break;
+          uploadPromise.then(function (inputFile) {
+            uploaded = true;
+            var inputMedia;
+            switch (attachType) {
+              case 'photo':
+                inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
+                break;
 
-            case 'audio':
-              inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0};
-              break;
+              case 'video':
+                inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0};
+                break;
 
-            case 'document':
-            default:
-              inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
-          }
-          MtpApiManager.invokeApi('messages.sendMedia', {
-            peer: inputPeer,
-            media: inputMedia,
-            random_id: randomID
-          }).then(function (result) {
-            if (ApiUpdatesManager.saveSeq(result.seq)) {
-              ApiUpdatesManager.saveUpdate({
-                _: 'updateMessageID',
-                random_id: randomIDS,
-                id: result.message.id
-              });
+              case 'audio':
+                inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0};
+                break;
 
-              message.date = result.message.date;
-              message.id = result.message.id;
-              message.media = result.message.media;
-
-              ApiUpdatesManager.saveUpdate({
-                _: 'updateNewMessage',
-                message: message,
-                pts: result.pts
-              });
+              case 'document':
+              default:
+                inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
             }
+            MtpApiManager.invokeApi('messages.sendMedia', {
+              peer: inputPeer,
+              media: inputMedia,
+              random_id: randomID
+            }).then(function (result) {
+              if (ApiUpdatesManager.saveSeq(result.seq)) {
+                ApiUpdatesManager.saveUpdate({
+                  _: 'updateMessageID',
+                  random_id: randomIDS,
+                  id: result.message.id
+                });
 
+                message.date = result.message.date;
+                message.id = result.message.id;
+                message.media = result.message.media;
+
+                ApiUpdatesManager.saveUpdate({
+                  _: 'updateNewMessage',
+                  message: message,
+                  pts: result.pts
+                });
+              }
+
+            }, function (error) {
+              toggleError(true);
+            });
           }, function (error) {
             toggleError(true);
+          }, function (progress) {
+            // console.log('upload progress', progress);
+            media.progress.done = progress.done;
+            media.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+            $rootScope.$broadcast('history_update', {peerID: peerID});
           });
-        }, function (error) {
-          toggleError(true);
-        }, function (progress) {
-          // console.log('upload progress', progress);
-          media.progress.done = progress.done;
-          media.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-          $rootScope.$broadcast('history_update', {peerID: peerID});
+
+          media.progress.cancel = function () {
+            if (!uploaded) {
+              sendFileDeferred.resolve();
+              uploadPromise.cancel();
+              cancelPendingMessage(randomIDS);
+            }
+          }
+
+          uploadPromise['finally'](function () {
+            sendFileDeferred.resolve();
+          });
         });
 
-        media.progress.cancel = function () {
-          if (!uploaded) {
-            uploadPromise.cancel();
-            cancelPendingMessage(randomIDS);
-          }
-        }
+        sendFilePromise = sendFileDeferred.promise;
       };
 
       saveMessages([message]);
