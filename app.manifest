@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sat Apr 05 2014 20:11:22 GMT+0400 (MSK)
+# Time: Tue Apr 08 2014 13:29:27 GMT+0200 (CEST)
 
 
 CACHE:
@@ -21,6 +21,7 @@ img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
 js/app.js
+js/app.js.map
 img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
