@@ -2185,11 +2185,10 @@ angular.module('myApp.services', [])
     return video;
   }
 
-  function openVideo (videoID, accessHash) {
+  function openVideo (videoID, messageID) {
     var scope = $rootScope.$new(true);
     scope.videoID = videoID;
-    scope.progress = {enabled: false};
-    scope.player = {};
+    scope.messageID = messageID;
 
     var modalInstance = $modal.open({
       templateUrl: 'partials/video_modal.html',

@@ -990,8 +990,34 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('VideoModalController', function ($scope, AppVideoManager) {
+  .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppVideoManager, AppPeersManager, ErrorService) {
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
+
+    $scope.progress = {enabled: false};
+    $scope.player = {};
+
+    $scope.forward = function () {
+      var messageID = $scope.messageID;
+      PeersSelectService.selectPeer().then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        });
+      });
+    };
+
+    $scope.delete = function () {
+      var messageID = $scope.messageID;
+      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
+        AppMessagesManager.deleteMessages([messageID]);
+      });
+    };
+
+    $scope.$on('history_delete', function (e, historyUpdate) {
+      if (historyUpdate.msgs[$scope.messageID]) {
+        $modalInstance.dismiss();
+      }
+    });
   })
 
   .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {

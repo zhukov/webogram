@@ -101,7 +101,7 @@
           </a>
 
           <div ng-switch-when="messageMediaVideo" class="im_message_video im_message_document_thumbed">
-            <a class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id)" bo-style="{width: historyMessage.media.video.thumb.width + 'px'}">
+            <a class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)" bo-style="{width: historyMessage.media.video.thumb.width + 'px'}">
               <span class="im_message_video_duration" bo-bind="historyMessage.media.video.duration | duration"></span>
               <i class="icon icon-videoplay"></i>
               <img
@@ -119,7 +119,7 @@
               </div>
               <div class="im_message_document_actions" ng-if="!historyMessage.media.video.progress.enabled">
                 <a href="" ng-click="downloadVideo(historyMessage.media.video.id)">Download</a>
-                <a href="" ng-click="openVideo(historyMessage.media.video.id)">Play video</a>
+                <a href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)">Play video</a>
               </div>
               <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
                 <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.video.progress.cancel()">Cancel</a>
