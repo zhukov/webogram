@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Tue Apr 08 2014 13:29:27 GMT+0200 (CEST)
+# Time: Wed Apr 09 2014 23:06:59 GMT+0200 (CEST)
 
 
 CACHE:
@@ -26,14 +26,12 @@ img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
 img/icons/Checks2_2x.png
-img/icons/CloseHover_1x.png
-img/icons/CloseHover_2x.png
-img/icons/Close_1x.png
-img/icons/Close_2x.png
 img/icons/IconsetSmiles.png
 img/icons/IconsetSmiles_1x.png
 img/icons/IconsetW.png
 img/icons/IconsetW_1x.png
+img/icons/PhotoControls.png
+img/icons/PhotoControls_1x.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
