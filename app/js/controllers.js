@@ -871,6 +871,13 @@ angular.module('myApp.controllers', [])
     $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
     $scope.nav = {};
 
+    if (!$scope.messageID) {
+      $scope.nav.next = function () {
+        $modalInstance.close();
+      }
+      return;
+    }
+
     var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID)),
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
         inputQuery = '',
@@ -995,6 +1002,7 @@ angular.module('myApp.controllers', [])
 
     $scope.progress = {enabled: false};
     $scope.player = {};
+
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
