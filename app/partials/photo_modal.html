@@ -1,10 +1,17 @@
-<div my-modal-width="{{photo.full.width}}" class="media_modal_wrap photo_modal_wrap" my-modal-position>
+<div my-modal-width="{{photo.full.modalWidth}}" class="media_modal_wrap photo_modal_wrap" my-modal-position animation="no" my-modal-nav next="nav.next()" prev="nav.prev()">
 
   <div class="modal-body">
 
-    <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="$close()"> </div>
+    <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="nav.next()"> </div>
 
-    <p class="media_modal_info">From: <span class="media_modal_author" ng-bind-html="photo.fromUser.rFullName" ></span>, {{photo.date | dateOrTime}}</p>
+    <div class="media_modal_actions pull-right">
+      <a href="" class="media_modal_action_link" ng-click="forward()">Forward</a>
+      <a href="" class="media_modal_action_link" ng-click="delete()">Delete</a>
+    </div>
+
+    <p class="media_modal_info">
+      <span class="media_modal_author" ng-bind-html="photo.fromUser.rFullName"></span>, {{photo.date | dateOrTime}}
+    </p>
 
   </div>
 

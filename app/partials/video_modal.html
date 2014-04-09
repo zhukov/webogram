@@ -4,7 +4,14 @@
 
     <div class="video_modal_image_wrap" my-load-video video="video"></div>
 
-    <p class="media_modal_info">From: <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName"></span>, {{video.date | dateOrTime}}</p>
+    <div class="media_modal_actions pull-right">
+      <a href="" class="media_modal_action_link" ng-click="forward()">Forward</a>
+      <a href="" class="media_modal_action_link" ng-click="delete()">Delete</a>
+    </div>
+
+    <p class="media_modal_info">
+      <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName" ></span>, {{video.date | dateOrTime}}
+    </p>
 
   </div>
 

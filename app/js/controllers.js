@@ -866,8 +866,128 @@ angular.module('myApp.controllers', [])
     }
   })
 
-  .controller('PhotoModalController', function ($scope, AppPhotosManager) {
+  .controller('PhotoModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
+
     $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
+    $scope.nav = {};
+
+    var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID)),
+        inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        inputQuery = '',
+        inputFilter = {_: 'inputMessagesFilterPhotos'},
+        list = [$scope.messageID],
+        maxID = $scope.messageID,
+        hasMore = true;
+
+    updatePrevNext();
+
+    AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, 0, 1000).then(function (searchCachedResult) {
+      // console.log(dT(), 'search cache', searchCachedResult);
+      if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
+        list = searchCachedResult.history;
+        maxID = list[list.length - 1];
+
+        updatePrevNext();
+      }
+      // console.log(dT(), list, maxID);
+    });
+
+
+    var jump = 0;
+    function movePosition (sign) {
+      var curIndex = list.indexOf($scope.messageID),
+          index = curIndex >= 0 ? curIndex + sign : 0,
+          curJump = ++jump;
+
+      var promise = index >= list.length ? loadMore() : $q.when();
+      promise.then(function () {
+        if (curJump != jump) {
+          return;
+        }
+
+        $scope.messageID = list[index];
+        $scope.photoID = AppMessagesManager.getMessage($scope.messageID).media.photo.id;
+        $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
+
+        updatePrevNext();
+      });
+    };
+
+    var loadingPromise = false;
+    function loadMore () {
+      if (loadingPromise) return loadingPromise;
+
+      return loadingPromise = AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, maxID).then(function (searchResult) {
+        maxID = searchResult.history[searchResult.history.length - 1];
+        list = list.concat(searchResult.history);
+
+        hasMore = searchResult.history.length || list.length < searchResult.count;
+        updatePrevNext();
+        loadingPromise = false;
+      });
+    };
+
+    function updatePrevNext () {
+      var index = list.indexOf($scope.messageID);
+      $scope.nav.hasNext = hasMore || index < list.length - 1;
+      $scope.nav.hasPrev = index > 0;
+    };
+
+    $scope.nav.next = function () {
+      if (!$scope.nav.hasNext) {
+        return false;
+      }
+
+      movePosition(+1);
+    };
+
+    $scope.nav.prev = function () {
+      if (!$scope.nav.hasPrev) {
+        return false;
+      }
+      movePosition(-1);
+    };
+
+    $scope.forward = function () {
+      var messageID = $scope.messageID;
+      PeersSelectService.selectPeer().then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        });
+      });
+    };
+
+    $scope.delete = function () {
+      var messageID = $scope.messageID;
+      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
+        AppMessagesManager.deleteMessages([messageID]);
+      });
+    };
+
+
+    $scope.$on('history_delete', function (e, historyUpdate) {
+      console.log(dT(), 'delete', historyUpdate);
+      if (historyUpdate.peerID == peerID) {
+        if (historyUpdate.msgs[$scope.messageID]) {
+          if ($scope.nav.hasNext) {
+            $scope.nav.next();
+          } else if ($scope.nav.hasPrev) {
+            $scope.nav.prev();
+          } else {
+            return $modalInstance.dismiss();
+          }
+        }
+        var newList = [];
+        for (var i = 0; i < list.length; i++) {
+          if (!historyUpdate.msgs[list[i]]) {
+            newList.push(list[i]);
+          }
+        };
+        list = newList;
+      }
+    });
+
   })
 
   .controller('VideoModalController', function ($scope, AppVideoManager) {

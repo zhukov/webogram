@@ -886,6 +886,54 @@ angular.module('myApp.services', [])
   }
 
   function getSearch (inputPeer, query, inputFilter, maxID, limit) {
+    var foundMsgs = [];
+
+    if (!maxID && !query) {
+      var peerID = AppPeersManager.getPeerID(inputPeer),
+          historyStorage = historiesStorage[peerID];
+
+      if (historyStorage !== undefined && historyStorage.history.length) {
+        var neededContents = {},
+            neededLimit = limit || 20,
+            i, message;
+
+        switch (inputFilter._) {
+          case 'inputMessagesFilterPhotos':
+            neededContents['messageMediaPhoto'] = true;
+            break;
+
+          case 'inputMessagesFilterVideo':
+            neededContents['messageMediaVideo'] = true;
+            break;
+
+          case 'inputMessagesFilterPhotoVideo':
+            neededContents['messageMediaPhoto'] = true;
+            neededContents['messageMediaVideo'] = true;
+            break;
+
+          case 'inputMessagesFilterDocument':
+            neededContents['messageMediaDocument'] = true;
+            break;
+        }
+        for (i = 0; i < historyStorage.history.length; i++) {
+          message = messagesStorage[historyStorage.history[i]];
+          if (message.media && neededContents[message.media._]) {
+            foundMsgs.push(message.id);
+            if (foundMsgs.length >= neededLimit) {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (foundMsgs.length || limit == 1000) {
+      return $q.when({
+        count: null,
+        history: foundMsgs
+      });
+    }
+
     return MtpApiManager.invokeApi('messages.search', {
       peer: inputPeer,
       q: query || '',
@@ -903,7 +951,7 @@ angular.module('myApp.services', [])
         ? searchResult.count
         : searchResult.messages.length;
 
-      var foundMsgs = [];
+      foundMsgs = [];
       angular.forEach(searchResult.messages, function (message) {
         foundMsgs.push(message.id);
       });
@@ -913,6 +961,10 @@ angular.module('myApp.services', [])
         history: foundMsgs
       };
     });
+  }
+
+  function getMessage (messageID) {
+    return messagesStorage[messageID] || {deleted: true};
   }
 
   function deleteMessages (messageIDs) {
@@ -1874,6 +1926,7 @@ angular.module('myApp.services', [])
     getDialogs: getDialogs,
     getHistory: getHistory,
     getSearch: getSearch,
+    getMessage: getMessage,
     readHistory: readHistory,
     flushHistory: flushHistory,
     deleteMessages: deleteMessages,
@@ -2010,6 +2063,8 @@ angular.module('myApp.services', [])
         full.width = fullPhotoSize.w;
         full.height = fullPhotoSize.h;
       }
+
+      full.modalWidth = Math.max(full.width, Math.min(400, fullWidth));
 
       full.location = fullPhotoSize.location;
       full.size = fullPhotoSize.size;

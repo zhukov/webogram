@@ -638,6 +638,8 @@ TLSerialization.prototype.storeMethod = function (methodName, params) {
   angular.forEach(methodData.params, function (param) {
     self.storeObject(params[param.name], param.type, methodName + '[' + param.name + ']');
   });
+
+  return methodData.type;
 };
 
 TLSerialization.prototype.storeObject = function (obj, type, field) {
@@ -707,6 +709,8 @@ TLSerialization.prototype.storeObject = function (obj, type, field) {
   angular.forEach(constructorData.params, function (param) {
     self.storeObject(obj[param.name], param.type, field + '[' + predicate + '][' + param.name + ']');
   });
+
+  return constructorData.type;
 };
 
 
@@ -715,6 +719,7 @@ function TLDeserialization (buffer, options) {
   options = options || {};
 
   this.offset = 0; // in bytes
+  this.override = options.override || {};
 
   this.buffer = buffer;
   this.intView  = new Uint32Array(this.buffer);
@@ -961,12 +966,16 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
 
   predicate = constructorData.predicate;
 
-  var result = {'_': predicate};
+  var result = {'_': predicate},
+      self = this;
 
-  var self = this;
-  angular.forEach(constructorData.params, function (param) {
-    result[param.name] = self.fetchObject(param.type, field + '[' + predicate + '][' + param.name + ']');
-  });
+  if (this.override[predicate]) {
+    this.override[predicate].apply(this, [result, field + '[' + predicate + ']']);
+  } else {
+    angular.forEach(constructorData.params, function (param) {
+      result[param.name] = self.fetchObject(param.type, field + '[' + predicate + '][' + param.name + ']');
+    });
+  }
 
   if (fallback) {
     this.mtproto = true;
@@ -1773,7 +1782,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       serializer.storeLong(options.afterMessageID, 'msg_id');
     }
 
-    serializer.storeMethod(method, params);
+    options.resultType = serializer.storeMethod(method, params);
 
     var messageID = MtpMessageIdGenerator.generateID(),
         seqNo = this.generateSeqNo(),
@@ -2215,7 +2224,36 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         }
 
         var buffer = bytesToArrayBuffer(messageBody);
-        var deserializer = new TLDeserialization(buffer, {mtproto: true});
+        var deserializerOptions = {
+          mtproto: true,
+          override: {
+            message: function (result, field) {
+              result.msg_id = this.fetchLong(field + '[msg_id]');
+              result.seqno = this.fetchInt(field + '[seqno]');
+              result.bytes = this.fetchInt(field + '[bytes]');
+
+              var offset = this.getOffset();
+
+              try {
+                result.body = this.fetchObject('Object', field + '[body]');
+              } catch (e) {
+                result.body = {_: 'parse_error', error: e};
+              }
+              this.offset = offset + result.bytes;
+              // console.log(dT(), 'override message', result);
+            },
+            rpc_result: function (result, field) {
+              result.req_msg_id = this.fetchLong(field + '[req_msg_id]');
+
+              var sentMessage = self.sentMessages[result.req_msg_id],
+                  type = sentMessage && sentMessage.resultType || 'Object';
+
+              result.result = this.fetchObject(type, field + '[result]');
+              // console.log(dT(), 'override rpc_result', type, result);
+            }
+          }
+        };
+        var deserializer = new TLDeserialization(buffer, deserializerOptions);
 
         var response = deserializer.fetchObject('', 'INPUT');
 

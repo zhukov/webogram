@@ -339,13 +339,13 @@ input[type="number"]::-webkit-inner-spin-button {
   height: 100%;
 }
 .modal_close {
-  background: url(../img/icons/CloseHover_2x.png) 0 0 no-repeat;
-  background-size: 33px 33px;
+  background: url(../img/icons/PhotoControls.png) 0 -53px no-repeat;
+  background-size: 33px 86px;
   width: 33px;
   height: 33px;
   float: right;
   margin: 60px 30px 0 0;
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
 
   -webkit-transition    : .2s;
@@ -354,7 +354,40 @@ input[type="number"]::-webkit-inner-spin-button {
   transition            : .2s;
 }
 .modal_close_wrap:hover .modal_close {
-  opacity: 1;
+  opacity: 0.85;
+}
+
+
+.modal_prev_wrap {
+  cursor: pointer;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+}
+.modal_prev {
+  background: url(../img/icons/PhotoControls.png) 0 0 no-repeat;
+  background-size: 33px 86px;
+  width: 33px;
+  height: 33px;
+  float: left;
+  margin: 60px 0 0 30px;
+  opacity: 0.6;
+  pointer-events: none;
+
+  -webkit-transition    : .2s;
+  -moz-transition       : .2s;
+  -o-transition         : .2s;
+  transition            : .2s;
+}
+.modal_prev_wrap:hover .modal_prev {
+  opacity: 0.85;
+}
+
+.is_1x .modal_close,
+.is_1x .modal_prev {
+  background-image: url(../img/icons/PhotoControls_1x.png);
 }
 
 .text-invisible {
@@ -1848,6 +1881,12 @@ img.img_fullsize {
 .media_modal_info {
   color: #777;
   margin: 20px 0 0;
+}
+.media_modal_actions {
+  margin-top: 20px;
+}
+.media_modal_action_link {
+  margin-left: 15px;
 }
 .media_modal_author {
   font-weight: bold;
