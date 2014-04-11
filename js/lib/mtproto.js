@@ -732,7 +732,7 @@ function TLDeserialization (buffer, options) {
 
 TLDeserialization.prototype.readInt = function (field) {
   if (this.offset >= this.intView.length * 4) {
-    throw new Error('Nothing to fetch');
+    throw new Error('Nothing to fetch: ' + field);
   }
 
   var i = this.intView[this.offset / 4];
@@ -967,10 +967,12 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
   predicate = constructorData.predicate;
 
   var result = {'_': predicate},
+      overrideKey = (this.mtproto ? 'mt_' : '') + predicate,
       self = this;
 
-  if (this.override[predicate]) {
-    this.override[predicate].apply(this, [result, field + '[' + predicate + ']']);
+
+  if (this.override[overrideKey]) {
+    this.override[overrideKey].apply(this, [result, field + '[' + predicate + ']']);
   } else {
     angular.forEach(constructorData.params, function (param) {
       result[param.name] = self.fetchObject(param.type, field + '[' + predicate + '][' + param.name + ']');
@@ -2227,7 +2229,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
         var deserializerOptions = {
           mtproto: true,
           override: {
-            message: function (result, field) {
+            mt_message: function (result, field) {
               result.msg_id = this.fetchLong(field + '[msg_id]');
               result.seqno = this.fetchInt(field + '[seqno]');
               result.bytes = this.fetchInt(field + '[bytes]');
@@ -2237,12 +2239,17 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
               try {
                 result.body = this.fetchObject('Object', field + '[body]');
               } catch (e) {
+                console.error(dT(), 'parse error', e.message, e.stack);
                 result.body = {_: 'parse_error', error: e};
               }
-              this.offset = offset + result.bytes;
+              if (this.offset != offset + result.bytes) {
+                console.warn(dT(), 'set offset', this.offset, offset, result.bytes);
+                console.log(dT(), result);
+                this.offset = offset + result.bytes;
+              }
               // console.log(dT(), 'override message', result);
             },
-            rpc_result: function (result, field) {
+            mt_rpc_result: function (result, field) {
               result.req_msg_id = this.fetchLong(field + '[req_msg_id]');
 
               var sentMessage = self.sentMessages[result.req_msg_id],
