@@ -732,7 +732,7 @@ function TLDeserialization (buffer, options) {
 
 TLDeserialization.prototype.readInt = function (field) {
   if (this.offset >= this.intView.length * 4) {
-    throw new Error('Nothing to fetch');
+    throw new Error('Nothing to fetch: ' + field);
   }
 
   var i = this.intView[this.offset / 4];

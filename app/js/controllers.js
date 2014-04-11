@@ -1050,7 +1050,7 @@ angular.module('myApp.controllers', [])
           } else {
             settings.mute_until = 2000000000;
           }
-          NotificationsManager.savePeerSettings($scope.userID, settings);
+          NotificationsManager.updatePeerSettings($scope.userID, settings);
         });
       });
     });
@@ -1142,7 +1142,7 @@ angular.module('myApp.controllers', [])
           } else {
             settings.mute_until = 2000000000;
           }
-          NotificationsManager.savePeerSettings(-$scope.chatID, settings);
+          NotificationsManager.updatePeerSettings(-$scope.chatID, settings);
         });
       });
     });

@@ -770,6 +770,8 @@ angular.module('myApp.services', [])
         if (historiesStorage[peerID] === undefined) {
           historiesStorage[peerID] = {count: null, history: [dialog.top_message], pending: []}
         }
+
+        NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
       });
 
       return {
@@ -2992,6 +2994,18 @@ angular.module('myApp.services', [])
     }
   });
 
+  $rootScope.$on('apiUpdate', function (e, update) {
+    // console.log('on apiUpdate', update);
+    switch (update._) {
+      case 'updateNotifySettings':
+        if (update.peer._ == 'notifyPeer') {
+          var peerID = AppPeersManager.getPeerID(update.peer.peer);
+          savePeerSettings(peerID, update.notify_settings);
+        }
+        break;
+    }
+  });
+
   return {
     start: start,
     notify: notify,
@@ -2999,7 +3013,8 @@ angular.module('myApp.services', [])
     clear: notificationsClear,
     getPeerSettings: getPeerSettings,
     getPeerMuted: getPeerMuted,
-    savePeerSettings: savePeerSettings
+    savePeerSettings: savePeerSettings,
+    updatePeerSettings: updatePeerSettings
   };
 
   function getPeerSettings (peerID) {
@@ -3016,10 +3031,15 @@ angular.module('myApp.services', [])
   }
 
   function savePeerSettings (peerID, settings) {
+    // console.trace(dT(), 'peer settings', peerID, settings);
+    peerSettings[peerID] = $q.when(settings);
+  }
+
+  function updatePeerSettings (peerID, settings) {
+    savePeerSettings(peerID, settings);
+
     var inputSettings = angular.copy(settings);
     inputSettings._ = 'inputPeerNotifySettings';
-
-    peerSettings[peerID] = $q.when(settings);
 
     return MtpApiManager.invokeApi('account.updateNotifySettings', {
       peer: {

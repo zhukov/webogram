@@ -27,8 +27,8 @@ inputMediaUploadedPhoto#2dc53a7d file:InputFile = InputMedia;
 inputMediaPhoto#8f2ab2ec id:InputPhoto = InputMedia;
 inputMediaGeoPoint#f9c44144 geo_point:InputGeoPoint = InputMedia;
 inputMediaContact#a6e45987 phone_number:string first_name:string last_name:string = InputMedia;
-inputMediaUploadedVideo#4847d92a file:InputFile duration:int w:int h:int = InputMedia;
-inputMediaUploadedThumbVideo#e628a145 file:InputFile thumb:InputFile duration:int w:int h:int = InputMedia;
+inputMediaUploadedVideo#133ad6f6 file:InputFile duration:int w:int h:int mime_type:string = InputMedia;
+inputMediaUploadedThumbVideo#9912dabf file:InputFile thumb:InputFile duration:int w:int h:int mime_type:string = InputMedia;
 inputMediaVideo#7f023ae6 id:InputVideo = InputMedia;
 
 inputChatPhotoEmpty#1ca48f57 = InputChatPhoto;
@@ -117,7 +117,7 @@ messageActionChatDeletePhoto#95e3fbef = MessageAction;
 messageActionChatAddUser#5e3cfc4b user_id:int = MessageAction;
 messageActionChatDeleteUser#b2ae9b0c user_id:int = MessageAction;
 
-dialog#214a8cdf peer:Peer top_message:int unread_count:int = Dialog;
+dialog#ab3a99ac peer:Peer top_message:int unread_count:int notify_settings:PeerNotifySettings = Dialog;
 
 photoEmpty#2331b22d id:long = Photo;
 photo#22b56751 id:long access_hash:long user_id:int date:int caption:string geo:GeoPoint sizes:Vector<PhotoSize> = Photo;
@@ -127,7 +127,7 @@ photoSize#77bfb61b type:string location:FileLocation w:int h:int size:int = Phot
 photoCachedSize#e9a734fa type:string location:FileLocation w:int h:int bytes:bytes = PhotoSize;
 
 videoEmpty#c10658a8 id:long = Video;
-video#5a04a49f id:long access_hash:long user_id:int date:int caption:string duration:int size:int thumb:PhotoSize dc_id:int w:int h:int = Video;
+video#388fa391 id:long access_hash:long user_id:int date:int caption:string duration:int mime_type:string size:int thumb:PhotoSize dc_id:int w:int h:int = Video;
 
 geoPointEmpty#1117dd5f = GeoPoint;
 geoPoint#2049d70c long:double lat:double = GeoPoint;
@@ -187,7 +187,7 @@ contacts.link#eccea3f5 my_link:contacts.MyLink foreign_link:contacts.ForeignLink
 contacts.contacts#6f8b8cb2 contacts:Vector<Contact> users:Vector<User> = contacts.Contacts;
 contacts.contactsNotModified#b74ba9d2 = contacts.Contacts;
 
-contacts.importedContacts#d1cd0a4c imported:Vector<ImportedContact> users:Vector<User> = contacts.ImportedContacts;
+contacts.importedContacts#ad524315 imported:Vector<ImportedContact> retry_contacts:Vector<long> users:Vector<User> = contacts.ImportedContacts;
 
 contacts.blocked#1c138d15 blocked:Vector<ContactBlocked> users:Vector<User> = contacts.Blocked;
 contacts.blockedSlice#900802a1 count:int blocked:Vector<ContactBlocked> users:Vector<User> = contacts.Blocked;
@@ -334,7 +334,7 @@ decryptedMessageService#aa48327d random_id:long random_bytes:bytes action:Decryp
 
 decryptedMessageMediaEmpty#89f5c4a = DecryptedMessageMedia;
 decryptedMessageMediaPhoto#32798a8c thumb:bytes thumb_w:int thumb_h:int w:int h:int size:int key:bytes iv:bytes = DecryptedMessageMedia;
-decryptedMessageMediaVideo#4cee6ef3 thumb:bytes thumb_w:int thumb_h:int duration:int w:int h:int size:int key:bytes iv:bytes = DecryptedMessageMedia;
+decryptedMessageMediaVideo#524a415d thumb:bytes thumb_w:int thumb_h:int duration:int mime_type:string w:int h:int size:int key:bytes iv:bytes = DecryptedMessageMedia;
 decryptedMessageMediaGeoPoint#35480a59 lat:double long:double = DecryptedMessageMedia;
 decryptedMessageMediaContact#588a0a97 phone_number:string first_name:string last_name:string user_id:int = DecryptedMessageMedia;
 
@@ -354,7 +354,7 @@ updateChatParticipantAdd#3a0eeb22 chat_id:int user_id:int inviter_id:int version
 updateChatParticipantDelete#6e5f8c22 chat_id:int user_id:int version:int = Update;
 updateDcOptions#8e5e9873 dc_options:Vector<DcOption> = Update;
 
-inputMediaUploadedAudio#61a6d436 file:InputFile duration:int = InputMedia;
+inputMediaUploadedAudio#4e498cab file:InputFile duration:int mime_type:string = InputMedia;
 inputMediaAudio#89938781 id:InputAudio = InputMedia;
 inputMediaUploadedDocument#34e794bd file:InputFile file_name:string mime_type:string = InputMedia;
 inputMediaUploadedThumbDocument#3e46de5d file:InputFile thumb:InputFile file_name:string mime_type:string = InputMedia;
@@ -373,15 +373,29 @@ inputAudioFileLocation#74dc404d id:long access_hash:long = InputFileLocation;
 inputDocumentFileLocation#4e45abe9 id:long access_hash:long = InputFileLocation;
 
 decryptedMessageMediaDocument#b095434b thumb:bytes thumb_w:int thumb_h:int file_name:string mime_type:string size:int key:bytes iv:bytes = DecryptedMessageMedia;
-decryptedMessageMediaAudio#6080758f duration:int size:int key:bytes iv:bytes = DecryptedMessageMedia;
+decryptedMessageMediaAudio#57e0a9cb duration:int mime_type:string size:int key:bytes iv:bytes = DecryptedMessageMedia;
 
 audioEmpty#586988d8 id:long = Audio;
-audio#427425e7 id:long access_hash:long user_id:int date:int duration:int size:int dc_id:int = Audio;
+audio#c7ac6496 id:long access_hash:long user_id:int date:int duration:int mime_type:string size:int dc_id:int = Audio;
 
 documentEmpty#36f8c871 id:long = Document;
 document#9efc6326 id:long access_hash:long user_id:int date:int file_name:string mime_type:string size:int thumb:PhotoSize dc_id:int = Document;
 
 help.support#17c6b5f6 phone_number:string user:User = help.Support;
+
+decryptedMessageActionReadMessages#c4f40be random_ids:Vector<long> = DecryptedMessageAction;
+decryptedMessageActionDeleteMessages#65614304 random_ids:Vector<long> = DecryptedMessageAction;
+decryptedMessageActionScreenshotMessages#8ac1f475 random_ids:Vector<long> = DecryptedMessageAction;
+decryptedMessageActionFlushHistory#6719e45c = DecryptedMessageAction;
+decryptedMessageActionNotifyLayer#f3048883 layer:int = DecryptedMessageAction;
+
+notifyPeer#9fd40bd8 peer:Peer = NotifyPeer;
+notifyUsers#b4c83b4c = NotifyPeer;
+notifyChats#c007cec3 = NotifyPeer;
+notifyAll#74d07c60 = NotifyPeer;
+
+updateUserBlocked#80ece81a user_id:int blocked:Bool = Update;
+updateNotifySettings#bec268ef peer:NotifyPeer notify_settings:PeerNotifySettings = Update;
 
 ---functions---
 
@@ -494,4 +508,4 @@ initConnection#69796de9 api_id:int device_model:string system_version:string app
 
 help.getSupport#9cdf08cd = help.Support;
 
-invokeWithLayer12#dda60d3c query:!X = X;
+invokeWithLayer14#2b9b08fa query:!X = X;

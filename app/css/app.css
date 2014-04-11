@@ -618,7 +618,7 @@ a.tg_radio_on:hover i.icon-radio {
   height: 100%;
 }
 .img_fullsize_progress_wrap {
-  background: rgba(0,0,0, .1);
+  /*background: rgba(0,0,0, .1);*/
   position: relative;
 }
 .img_fullsize_progress {
@@ -1879,7 +1879,7 @@ img.img_fullsize {
   margin: 0 auto;
 }
 .media_modal_info {
-  color: #777;
+  color: #999;
   margin: 20px 0 0;
 }
 .media_modal_actions {
