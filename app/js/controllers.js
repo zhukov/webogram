@@ -335,7 +335,7 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      if (!hasMore) {
+      if (!hasMore && !$scope.search.query) {
         contactsShown = true;
 
         AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
