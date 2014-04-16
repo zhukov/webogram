@@ -1775,7 +1775,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       serializer.storeInt(2496, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');
       serializer.storeString(navigator.platform  || 'Unknown Platform', 'system_version');
-      serializer.storeString('0.1', 'app_version');
+      serializer.storeString('0.0.21', 'app_version');
       serializer.storeString(navigator.language || 'en', 'lang_code');
     }
 
