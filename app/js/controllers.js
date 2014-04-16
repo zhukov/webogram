@@ -471,6 +471,8 @@ angular.module('myApp.controllers', [])
         if (prevMessage &&
             curMessage.from_id == prevMessage.from_id &&
             curMessage.date < prevMessage.date + 30 &&
+            !prevMessage.action &&
+            !curMessage.action &&
             !prevMessage.fwd_from_id &&
             !curMessage.fwd_from_id &&
             curMessage.message && curMessage.message.length < 60) {

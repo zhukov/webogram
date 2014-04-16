@@ -90,6 +90,12 @@ gulp.task('update-version-settings', function() {
     .pipe(gulp.dest('app/partials'));
 });
 
+gulp.task('update-version-mtproto', function() {
+ return gulp.src('app/js/lib/mtproto.js')
+    .pipe($.replace(/'.+?', 'app_version'/, '\'' + pj.version  + '\', \'app_version\''))
+    .pipe(gulp.dest('app/js/lib'));
+});
+
 gulp.task('update-version-comments', function() {
  return gulp.src('app/**/*.js')
   .pipe($.replace(/Webogram v[0-9.]*/, 'Webogram v' +  pj.version))
@@ -139,7 +145,9 @@ gulp.task('clean', function() {
   return gulp.src(['dist/*', 'app/js/templates.js', '!dist/.git']).pipe($.clean());
 });
 
-gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-comments']);
+gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-mtproto'], function () {
+  gulp.start('update-version-comments');
+});
 
 gulp.task('build', ['usemin', 'copy', 'copy-images'], function () {
   gulp.start('disable-production');
