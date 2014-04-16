@@ -684,9 +684,11 @@ angular.module('myApp.services', [])
   var sendFilePromise = $q.when();
   var tempID = -1;
 
-
   var dialogsIndex = SearchIndexManager.createIndex(),
       cachedResults = {query: false};
+
+  var lastSearchFilter = {},
+      lastSearchResults = [];
 
   NotificationsManager.start();
 
@@ -888,7 +890,14 @@ angular.module('myApp.services', [])
   }
 
   function getSearch (inputPeer, query, inputFilter, maxID, limit) {
-    var foundMsgs = [];
+    var foundMsgs = [],
+        useSearchCache = !query,
+        sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, inputFilter);
+
+    if (useSearchCache && !sameSearchCache) {
+      lastSearchFilter = inputFilter;
+      lastSearchResults = [];
+    }
 
     if (!maxID && !query) {
       var peerID = AppPeersManager.getPeerID(inputPeer),
@@ -927,9 +936,27 @@ angular.module('myApp.services', [])
           }
         }
       }
+
+      // console.log(dT(), sameSearchCache, foundMsgs, lastSearchResults);
+      if (foundMsgs.length < neededLimit && lastSearchResults.length && sameSearchCache) {
+        var minID = foundMsgs.length ? foundMsgs[foundMsgs.length - 1] : 0xFFFFFFFF;
+        for (var i = 0; i < lastSearchResults.length; i++) {
+          if (lastSearchResults[i] < minID) {
+            foundMsgs.push(lastSearchResults[i]);
+            if (foundMsgs.length >= neededLimit) {
+              break;
+            }
+          }
+        }
+      }
+      // console.log(dT(), foundMsgs);
     }
 
     if (foundMsgs.length || limit == 1000) {
+      if (useSearchCache) {
+        lastSearchResults = listMergeSorted(lastSearchResults, foundMsgs);
+      }
+
       return $q.when({
         count: null,
         history: foundMsgs
@@ -957,6 +984,10 @@ angular.module('myApp.services', [])
       angular.forEach(searchResult.messages, function (message) {
         foundMsgs.push(message.id);
       });
+
+      if (useSearchCache) {
+        lastSearchResults = listMergeSorted(lastSearchResults, foundMsgs);
+      }
 
       return {
         count: foundCount,
