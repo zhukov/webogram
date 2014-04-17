@@ -299,7 +299,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_editor_resize', updateSizes);
       $scope.$on('ui_height', function () {
-        updateSizes();
+        onContentLoaded(updateSizes);
+        // updateSizes();
       });
 
       var atBottom = true;
@@ -682,26 +683,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       transclude: true,
-      template:
-        '<div class="img_fullsize_with_progress_wrap"">\
-          <div class="img_fullsize_progress_overlay" ng-show="progress.enabled">\
-            <div class="img_fullsize_progress_wrap"">\
-              <div class="img_fullsize_progress progress tg_progress" ng-show="progress.percent > 0">\
-                <div class="progress-bar progress-bar-success" ng-style="{width: progress.percent + \'%\'}">\
-                </div>\
-              </div>\
-            </div>\
-          </div>\
-          <div class="photo_full_wrap">\
-            <a class="photo_modal_image">\
-              <img class="photo_modal_image"/>\
-            </a>\
-          </div>\
-          <div class="photo_modal_error_wrap" ng-if="error">\
-            <div class="photo_modal_error" ng-if="error.html" ng-bind-html="error.html"></div>\
-            <div class="photo_modal_error" ng-if="error.text">{{error.text}}</div>\
-          </div>\
-        </div>',
+      templateUrl: 'partials/full_photo.html',
       scope: {
         fullPhoto: '=',
         thumbLocation: '='
@@ -780,33 +762,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       transclude: true,
-      template:
-        '<div class="img_fullsize_with_progress_wrap" ng-style="{width: video.full.width + \'px\', height: video.full.height + \'px\'}">\
-          <div class="img_fullsize_progress_overlay" ng-show="progress.enabled">\
-            <div class="img_fullsize_progress_wrap" ng-style="{width: video.full.width + \'px\', height: video.full.height + \'px\'}">\
-              <div class="img_fullsize_progress progress tg_progress">\
-                <div class="progress-bar progress-bar-success" style="width: {{progress.percent}}%"></div>\
-              </div>\
-            </div>\
-          </div>\
-          <div class="img_fullsize_wrap" ng-if="!player.src">\
-            <img\
-              class="img_fullsize"\
-              my-load-thumb\
-              thumb="video.fullThumb"\
-            />\
-          </div>\
-          <div class="video_full_player" ng-if="player.src">\
-            <embed ng-src="{{player.src}}" width="{{video.full.width}}" height="{{video.full.height}}" autoplay="true" CONTROLLER="TRUE" SHOWCONTROLS="TRUE" controller="true" loop="false" pluginspace="http://www.apple.com/quicktime/" ng-if="player.quicktime"/>\
-            <video width="{{video.full.width}}" height="{{video.full.height}}" controls autoplay  ng-if="!player.quicktime">\
-              <source ng-src="{{player.src}}" type="video/mp4">\
-            </video>\
-          </div>\
-          <div class="video_full_error_wrap" ng-if="error">\
-            <div class="video_full_error" ng-if="error.html" ng-bind-html="error.html"></div>\
-            <div class="video_full_error" ng-if="error.text" ng-bind="error.text"></div>\
-          </div>\
-        </div>',
+      templateUrl: 'partials/full_video.html',
       scope: {
         video: '='
       }
@@ -860,6 +816,71 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
 
+  })
+
+  .directive('myLoadGif', function(MtpApiFileManager) {
+
+    return {
+      link: link,
+      templateUrl: 'partials/full_gif.html',
+      scope: {
+        document: '='
+      }
+    };
+
+    function link ($scope, element, attrs) {
+
+      var downloadPromise = false,
+          inputFileLocation = {
+            _: 'inputDocumentFileLocation',
+            id: $scope.document.id,
+            access_hash: $scope.document.access_hash
+          };
+
+      $scope.isActive = false;
+      $scope.document.url = MtpApiFileManager.getCachedFile(inputFileLocation);
+
+      /*return $scope.document.progress = {enabled: true, percent: 30, total: $scope.document.size};*/
+
+      $scope.toggle = function () {
+        if ($scope.document.url) {
+          $scope.isActive = !$scope.isActive;
+          $scope.$emit('ui_height');
+          return;
+        }
+
+        if (downloadPromise) {
+          downloadPromise.cancel();
+          downloadPromise = false;
+          return;
+        }
+
+        $scope.document.progress = {enabled: true, percent: 1, total: $scope.document.size};
+
+        downloadPromise = MtpApiFileManager.downloadFile(
+          $scope.document.dc_id,
+          inputFileLocation,
+          $scope.document.size,
+          null,
+          {mime: $scope.document.mime_type}
+        );
+
+        downloadPromise.then(function (url) {
+          $scope.document.url = url;
+          $scope.isActive = true;
+          delete $scope.document.progress;
+          console.log('file save done');
+          $scope.$emit('ui_height');
+        }, function () {
+          $scope.document.progress.enabled = false;
+        }, function (progress) {
+          console.log('dl progress', progress);
+          $scope.document.progress.done = progress.done;
+          $scope.document.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+          $rootScope.$broadcast('history_update');
+        })
+      }
+    }
   })
 
   .directive('myMapPoint', function(ExternalResourcesManager) {

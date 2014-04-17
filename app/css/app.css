@@ -1338,6 +1338,25 @@ div.im_message_video_thumb {
     height: 100%;
 }
 
+.im_message_gif_wrap {
+  position: relative;
+}
+.im_message_gif_btn {
+  color: #FFF;
+  font-style: normal;
+  font-weight: bold;
+  position: absolute;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  margin-left: -22px;
+  margin-top: -21px;
+  border: 2px solid #FFF;
+  border-radius: 20px;
+  padding: 10px;
+  z-index: 1;
+}
+
 .im_message_document,
 .im_message_audio,
 .im_message_upload_file {
@@ -2941,6 +2960,69 @@ ce671b orange
   transition: margin-top linear 0.2s;
 }
 
+
+/* Gif documents */
+.img_gif_with_progress_wrap {
+  position: relative;
+  overflow: hidden;
+  float: left;
+  margin-top: 3px;
+}
+
+.img_gif_thumb {
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  -o-filter: blur(2px);
+  -ms-filter: blur(2px);
+  filter: blur(2px);
+  filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
+}
+
+.img_gif_image {
+  max-width: 100%;
+}
+/*.img_gif_image_wrap img {
+  overflow: hidden;
+  border-radius: 2px;
+}*/
+
+.img_gif_info_wrap {
+  color: #FFF;
+  font-size: 10px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px;
+}
+.img_gif_label,
+.img_gif_size {
+  padding: 1px 8px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.img_gif_progress_wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.img_gif_progress_wrap .tg_progress {
+  border-color: rgba(0,0,0, 0.6);
+  border-width: 8px;
+  height: 18px;
+  border-radius: 0;
+}
+.img_gif_progress_wrap .progress-bar {
+  background: #FFF;
+  height: 2px;
+}
+
+
+
+/* Loading dots animation */
 .loading_dots
 {
   display: inline-block;
@@ -3027,3 +3109,4 @@ ce671b orange
     opacity: 0;
   }
 }
+
