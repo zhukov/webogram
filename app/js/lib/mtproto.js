@@ -1261,6 +1261,7 @@ factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecu
         mtpSendReqDhParams(auth);
       }
     }, function (error) {
+      console.log(dT(), 'req_pq error', error.message);
       deferred.reject(error);
     });
 

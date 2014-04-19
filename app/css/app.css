@@ -2976,6 +2976,8 @@ ce671b orange
   -ms-filter: blur(2px);
   filter: blur(2px);
   filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
+  margin: -1px;
+  padding: 1px;
 }
 
 .img_gif_image {
@@ -3010,6 +3012,7 @@ ce671b orange
   right: 0;
 }
 .img_gif_progress_wrap .tg_progress {
+  background: rgba(0,0,0, 0.6);
   border-color: rgba(0,0,0, 0.6);
   border-width: 8px;
   height: 18px;
