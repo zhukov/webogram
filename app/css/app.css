@@ -3113,3 +3113,11 @@ ce671b orange
   }
 }
 
+/*
+ https://github.com/zhukov/webogram/issues/35
+ */
+@media (max-height: 400px) {
+  .navbar {
+    display: none;
+  }
+}
