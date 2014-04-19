@@ -2495,7 +2495,7 @@ angular.module('myApp.services', [])
       $rootScope.$broadcast('history_update');
     }
 
-    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, null, {mime: 'audio/mpeg'});
+    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, null, {mime: 'audio/ogg'});
 
     downloadPromise.then(function (url) {
       delete historyAudio.progress;
