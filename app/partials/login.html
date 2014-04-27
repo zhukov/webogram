@@ -5,14 +5,21 @@
   <div class="error" ng-if="error.message">{{ error.message }}</div>
   <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
     <h3 class="login_form_head">Sign in</h3>
-    <p class="login_form_lead">Please enter your full phone number with country code.</p>
+    <p class="login_form_lead">Please choose your country and enter your full phone number.</p>
 
-    <div class="form-group" ng-class="{'has-error': error.field == 'phone'}">
-      <label class="control-label" for="phone_number" ng-if="error.field == 'phone'">Incorrect phone number</label>
-      <input type="tel" class="form-control" my-focused name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
+    <div class="login_country_selector" ng-click="selectCountry()">
+      <span ng-bind="credentials.phone_country_name"></span>
+      <i class="icon icon-caret pull-right"></i>
     </div>
-    <button class="btn btn-success btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit">
-      {{progress.enabled ? 'Generating keys...' : 'Next'}}
+
+    <div class="form-group clearfix" ng-class="{'has-error': error.field == 'phone'}">
+      <label class="control-label" for="phone_number" ng-if="error.field == 'phone'">Incorrect phone number</label>
+      <input type="tel" class="form-control pull-left login_phone_country" my-focused name="phone_country" ng-model="credentials.phone_country">
+      <input type="tel" class="form-control pull-left login_phone_number" my-focus-on="country_selected" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
+    </div>
+    <button class="btn btn-primary btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" ng-switch="progress.enabled">
+      <span ng-switch-when="true">Generating keys<span my-loading-dots></span></span>
+      <span ng-switch-default>Next</span>
     </button>
   </form>
 
@@ -31,8 +38,9 @@
       <input type="number" my-focused maxlength="5" class="form-control" name="phone_code" ng-model="credentials.phone_code" placeholder="Enter your code" required>
     </div>
 
-    <button class="btn btn-success btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled">
-      {{progress.enabled ? 'Checking code...' : 'Sign in'}}
+    <button class="btn btn-primary btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" ng-switch="progress.enabled">
+      <span ng-switch-when="true">Checking code<span my-loading-dots></span></span>
+      <span ng-switch-default>Next</span>
     </button>
   </form>
 </div>

@@ -149,6 +149,37 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('myCountriesList', function($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var searchWrap = $('.countries_modal_search')[0],
+          panelWrap = $('.countries_modal_panel')[0],
+          countriesWrap = $('.countries_wrap', element)[0];
+
+      onContentLoaded(function () {
+        $(countriesWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
+        updateSizes();
+      });
+
+      function updateSizes () {
+        $(element).css({
+          height: $($window).height() - (panelWrap && panelWrap.offsetHeight || 0) - (searchWrap && searchWrap.offsetHeight || 0) - 200
+        });
+        $(countriesWrap).nanoScroller();
+      }
+
+      $($window).on('resize', updateSizes);
+      $scope.$on('contacts_change', function () {
+        onContentLoaded(updateSizes)
+      });
+    };
+
+  })
+
   .directive('myHistory', function ($window, $timeout, $transition) {
 
     return {
@@ -968,6 +999,18 @@ angular.module('myApp.directives', ['myApp.filters'])
         setTimeout(function () {
           element[0].focus();
         }, 100);
+      }
+    };
+  })
+
+  .directive('myFocusOn', function(){
+    return {
+      link: function($scope, element, attrs) {
+        $scope.$on(attrs.myFocusOn, function () {
+          onContentLoaded(function () {
+            element[0].focus();
+          });
+        });
       }
     };
   })

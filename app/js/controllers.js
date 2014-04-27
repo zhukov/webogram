@@ -21,7 +21,7 @@ angular.module('myApp.controllers', [])
     });
   })
 
-  .controller('AppLoginController', function ($scope, $location, $timeout, MtpApiManager, ErrorService) {
+  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, MtpApiManager, ErrorService) {
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
@@ -30,9 +30,50 @@ angular.module('myApp.controllers', [])
     });
     var options = {dcID: 1, createNetworker: true};
 
-    $scope.credentials = {};
+    $scope.credentials = {phone_country: '+1', phone_country_name: 'USA', phone_number: '', phone_full: ''};
     $scope.progress = {};
     $scope.callPending = {};
+
+    $scope.selectCountry = function () {
+      var modal = $modal.open({
+        templateUrl: 'partials/country_select_modal.html',
+        controller: 'CountrySelectModalController',
+        windowClass: 'countries_modal_window'
+      });
+
+      modal.result.then(function (code) {
+        $scope.credentials.phone_country = code;
+        $scope.$broadcast('country_selected');
+      });
+    };
+
+    $scope.$watch('credentials.phone_country', updateCountry);
+    $scope.$watch('credentials.phone_number', updateCountry);
+
+    function updateCountry () {
+      var phoneNumber = (
+            ($scope.credentials.phone_country || '') +
+            ($scope.credentials.phone_number || '')
+          ).replace(/\D+/g, ''),
+          i, j, code,
+          maxLength = 0,
+          maxName = false;
+
+      if (phoneNumber.length) {
+        for (i = 0; i < Config.CountryCodes.length; i++) {
+          for (j = 1; j < Config.CountryCodes[i].length; j++) {
+            code = Config.CountryCodes[i][j].replace(/\D+/g, '');
+            if (code.length >= maxLength && !phoneNumber.indexOf(code)) {
+              maxLength = code.length;
+              maxName = Config.CountryCodes[i][0];
+            }
+          }
+        }
+      }
+
+      $scope.credentials.phone_full = phoneNumber;
+      $scope.credentials.phone_country_name = maxName || 'Unknown';
+    };
 
     var callTimeout;
 
@@ -51,7 +92,7 @@ angular.module('myApp.controllers', [])
       if (!(--$scope.callPending.remaining)) {
         $scope.callPending.success = false;
         MtpApiManager.invokeApi('auth.sendCall', {
-          phone_number: $scope.credentials.phone_number,
+          phone_number: $scope.credentials.phone_full,
           phone_code_hash: $scope.credentials.phone_code_hash
         }, options).then(function () {
           $scope.callPending.success = true;
@@ -63,38 +104,53 @@ angular.module('myApp.controllers', [])
 
     $scope.sendCode = function () {
       $timeout.cancel(callTimeout);
-      $scope.progress.enabled = true;
-      MtpApiManager.invokeApi('auth.checkPhone', {
+
+      ErrorService.confirm({
+        type: 'LOGIN_PHONE_CORRECT',
+        country_code: $scope.credentials.phone_country,
         phone_number: $scope.credentials.phone_number
-      }, options).then(function (result) {
-        $scope.progress.enabled = false;
-        if (!result.phone_registered) {
-          ErrorService.show({
-            error: {code: 400, type: 'ACCOUNT_REQUIRED'},
-            phone: $scope.credentials.phone_number
-          });
-          return false;
-        }
-
+      }).then(function () {
         $scope.progress.enabled = true;
-        MtpApiManager.invokeApi('auth.sendCode', {
-          phone_number: $scope.credentials.phone_number,
-          sms_type: 0,
-          api_id: 2496,
-          api_hash: '8da85b0d5bfe62527e5b244c209159c3'
-        }, options).then(function (sentCode) {
+        MtpApiManager.invokeApi('auth.checkPhone', {
+          phone_number: $scope.credentials.phone_full
+        }, options).then(function (result) {
           $scope.progress.enabled = false;
+          if (!result.phone_registered) {
+            ErrorService.show({
+              error: {code: 400, type: 'ACCOUNT_REQUIRED'},
+              phone: $scope.credentials.phone_full
+            });
+            return false;
+          }
 
-          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
-          $scope.credentials.phone_occupied = sentCode.phone_registered;
-          $scope.error = {};
+          $scope.progress.enabled = true;
+          MtpApiManager.invokeApi('auth.sendCode', {
+            phone_number: $scope.credentials.phone_full,
+            sms_type: 0,
+            api_id: 2496,
+            api_hash: '8da85b0d5bfe62527e5b244c209159c3'
+          }, options).then(function (sentCode) {
+            $scope.progress.enabled = false;
 
-          $scope.callPending.remaining = sentCode.send_call_timeout;
-          callCheck();
+            $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
+            $scope.credentials.phone_occupied = sentCode.phone_registered;
+            $scope.error = {};
 
+            $scope.callPending.remaining = sentCode.send_call_timeout;
+            callCheck();
+
+          }, function (error) {
+            $scope.progress.enabled = false;
+            console.log('sendCode error', error);
+            switch (error.type) {
+              case 'PHONE_NUMBER_INVALID':
+                $scope.error = {field: 'phone'};
+                error.handled = true;
+                break;
+            }
+          });
         }, function (error) {
           $scope.progress.enabled = false;
-          console.log('sendCode error', error);
           switch (error.type) {
             case 'PHONE_NUMBER_INVALID':
               $scope.error = {field: 'phone'};
@@ -102,20 +158,14 @@ angular.module('myApp.controllers', [])
               break;
           }
         });
-      }, function (error) {
-        $scope.progress.enabled = false;
-        switch (error.type) {
-          case 'PHONE_NUMBER_INVALID':
-            $scope.error = {field: 'phone'};
-            error.handled = true;
-            break;
-        }
       });
+
+
     }
 
     $scope.logIn = function (forceSignUp) {
       var method = 'auth.signIn', params = {
-        phone_number: $scope.credentials.phone_number,
+        phone_number: $scope.credentials.phone_full,
         phone_code_hash: $scope.credentials.phone_code_hash,
         phone_code: $scope.credentials.phone_code
       };
@@ -1628,4 +1678,38 @@ angular.module('myApp.controllers', [])
       }
     };
 
+  })
+
+  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, SearchIndexManager) {
+
+    $scope.search = {};
+
+    var searchIndex = SearchIndexManager.createIndex();
+
+    for (var i = 0; i < Config.CountryCodes.length; i++) {
+      SearchIndexManager.indexObject(i, Config.CountryCodes[i].join(' '), searchIndex);
+    }
+
+    $scope.$watch('search.query', function (newValue) {
+      var filtered = false,
+          results = {};
+
+      if (angular.isString(newValue) && newValue.length) {
+        filtered = true;
+        results = SearchIndexManager.search(newValue, searchIndex);
+      }
+
+      console.log(dT(), newValue, results);
+
+      $scope.countries = [];
+      var j;
+      for (var i = 0; i < Config.CountryCodes.length; i++) {
+        if (!filtered || results[i]) {
+          for (j = 1; j < Config.CountryCodes[i].length; j++) {
+            $scope.countries.push({name: Config.CountryCodes[i][0], code: Config.CountryCodes[i][j]});
+          }
+        }
+      }
+
+    });
   })

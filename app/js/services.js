@@ -564,7 +564,7 @@ angular.module('myApp.services', [])
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
       trimRe = /^\s+|\s$/g,
       accentsReplace = {
-        a: /[áâäà]/g,
+        a: /[åáâäà]/g,
         e: /[éêëè]/g,
         i: /[íîïì]/g,
         o: /[óôöò]/g,
@@ -3252,7 +3252,7 @@ angular.module('myApp.services', [])
     if (typeof params === 'string') {
       params = {message: params};
     }
-    confirm(params).then(function (result) {
+    confirm(params.message).then(function (result) {
       callback(result || true)
     }, function () {
       callback(false)
