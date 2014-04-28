@@ -312,7 +312,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           moreNotified = false;
 
           $timeout(function () {
-            $(scrollableWrap).trigger('scroll');
+            if (scrollableWrap.scrollHeight != sh) {
+              $(scrollableWrap).trigger('scroll');
+            }
           });
         });
       });
