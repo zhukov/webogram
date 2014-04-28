@@ -21,7 +21,10 @@ angular.module('myApp.controllers', [])
     });
   })
 
-  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, MtpApiManager, ErrorService) {
+  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService) {
+
+    $modalStack.dismissAll();
+
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
@@ -1711,8 +1714,6 @@ angular.module('myApp.controllers', [])
         filtered = true;
         results = SearchIndexManager.search(newValue, searchIndex);
       }
-
-      console.log(dT(), newValue, results);
 
       $scope.countries = [];
       var j;
