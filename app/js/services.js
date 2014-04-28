@@ -3270,9 +3270,11 @@ angular.module('myApp.services', [])
 
 .service('PeersSelectService', function ($rootScope, $modal) {
 
-  function selectPeer () {
+  function selectPeer (options) {
     var scope = $rootScope.$new();
-    // angular.extend(scope, params);
+    if (options) {
+      angular.extend(scope, options);
+    }
 
     return $modal.open({
       templateUrl: 'partials/peer_select.html',

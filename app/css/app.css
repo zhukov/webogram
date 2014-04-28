@@ -642,32 +642,85 @@ a.tg_radio_on:hover i.icon-radio {
 
 
 /* Welcome */
-
+.welcome_form {
+  background: #FFF;
+  padding: 45px 0 63px;
+  border-bottom: 1px solid #e9e9e9;
+}
 .welcome_logo {
-  background: url(../img/logo_dogogram.png) 0 0 no-repeat;
-  background-size: 111px 112px;
+  background: url(../img/decentralization.png) 0 0 no-repeat;
+  background-size: 160px 160px;
   display: block;
-  width: 112px;
-  height: 112px;
+  width: 160px;
+  height: 160px;
   margin: 0 auto;
 }
-.welcome_box_wrap {
-  max-width: 310px;
-  padding: 25px;
-  background: #FFF;
-  margin: 30px auto 0;
-  border-radius: 1px;
-  overflow: hidden;
-
-  -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow:    0px 1px 2px rgba(0, 0, 0, 0.1);
-  box-shadow:         0px 1px 2px rgba(0, 0, 0, 0.1);
+.welcome_header {
+  text-align: center;
+  font-size: 24px;
+  font-weight: normal;
+  margin: 20px 0 25px;
 }
 .welcome_text {
-  color: #999;
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   font-size: 13px;
+  line-height: 16px;
+}
+.welcome_btn_wrap {
+  max-width: 206px;
+  margin: 0 auto;
+}
+
+.welcome_footer {
+  background: #f8f8f8;
+  padding: 20px 0 65px;
+}
+.welcome_cards_wrap {
+  max-width: 870px;
+  margin: 0 auto;
+}
+
+.welcome_footer_card_wrap {
+  width: 260px;
+  margin: 45px auto 0;
+  text-align: center;
+}
+.welcome_footer_card {
+  background: url(../img/WebIntro2_1x.png) 0 0 no-repeat;
+  background-size: 217px 178px;
+  width: 219px;
+  height: 180px;
+  border: 1px solid #e0e4e9;
+  margin: 0 auto 24px;
+}
+
+.welcome_footer_card_messaging {
+  background-image: url(../img/WebIntro1.png);
+}
+.is_1x .welcome_footer_card_messaging {
+  background-image: url(../img/WebIntro1_1x.png);
+}
+
+.welcome_footer_card_filesharing {
+  background-image: url(../img/WebIntro2.png);
+}
+.is_1x .welcome_footer_card_filesharing {
+  background-image: url(../img/WebIntro2_1x.png);
+}
+
+.welcome_footer_card_powerful {
+  background-image: url(../img/WebIntro3.png);
+}
+.is_1x .welcome_footer_card_powerful {
+  background-image: url(../img/WebIntro3_1x.png);
+}
+
+.welcome_footer_card_wrap h4 {
+  font-size: 16px;
+}
+.welcome_footer_card_wrap .welcome_footer_card_lead {
+
 }
 
 
@@ -2341,6 +2394,11 @@ img.chat_modal_participant_photo {
 }
 
 .confirm_phone_number {
+  font-weight: bold;
+  padding: 15px 10px 0;
+  text-align: center;
+}
+.confirm_peer {
   font-weight: bold;
   padding: 15px 10px 0;
   text-align: center;

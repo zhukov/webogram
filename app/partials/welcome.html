@@ -3,17 +3,55 @@
 
 <div ng-if="showWelcome">
 
-  <div my-vertical-position="0.4">
+  <div class="welcome_form">
     <div class="welcome_logo"></div>
 
-    <div class="welcome_box_wrap">
-      <div class="welcome_text">
-        <p>Welcome to an unofficial web-client of mobile <strong>Telegram</strong> messenger.</p>
-        <p>It is an alpha, which means it is still not 200% secure and functional.</p>
-        <p>Visit <a target="_blank" href="https://telegram.org/">telegram.org</a> to learn more.</p>
-      </div>
-      <a href="#/login" class="btn btn-success btn-block">Start Messaging</a>
+    <h3 class="welcome_header"><strong>Telegram</strong> Web</h3>
+
+    <div class="welcome_text">
+      <p>Welcome to an unofficial web-prototype of <strong>Telegram</strong>.</p>
+      <p>It is an <strong>alpha</strong>, so it still may not be 200% reliable.</p>
+    </div>
+    <div class="welcome_btn_wrap">
+      <a href="#/login" class="btn btn-primary btn-block">Start Messaging</a>
     </div>
   </div>
+
+  <div class="welcome_footer">
+    <div class="welcome_cards_wrap clearfix">
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="welcome_footer_card_wrap row">
+              <div class="welcome_footer_card welcome_footer_card_messaging"></div>
+              <h4>Fast messaging</h4>
+              <div class="welcome_footer_card_lead">Send messages with rich emoji support to your contacts</div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="welcome_footer_card_wrap">
+              <div class="welcome_footer_card welcome_footer_card_filesharing"></div>
+              <h4>Easy file sharing</h4>
+              <div class="welcome_footer_card_lead">Share and forward any files you want by using attach icon or drag-and-drop</div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="welcome_footer_card_wrap">
+              <div class="welcome_footer_card welcome_footer_card_powerful"></div>
+              <h4>Powerful tools</h4>
+              <div class="welcome_footer_card_lead">Browse photos in chats, use edit mode and set custom notifications</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
 
 </div>

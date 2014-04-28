@@ -679,7 +679,7 @@ angular.module('myApp.controllers', [])
           selectedMessageIDs.push(messageID);
         });
 
-        PeersSelectService.selectPeer().then(function (peerString) {
+        PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
           var peerID = AppPeersManager.getPeerID(peerString);
           AppMessagesManager.forwardMessages(peerID, selectedMessageIDs).then(function () {
             selectedCancel();
@@ -1009,7 +1009,7 @@ angular.module('myApp.controllers', [])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'PHOTO_SHARE_PEER'}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
           $rootScope.$broadcast('history_focus', {peerString: peerString});
@@ -1058,7 +1058,7 @@ angular.module('myApp.controllers', [])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'VIDEO_SHARE_PEER'}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
           $rootScope.$broadcast('history_focus', {peerString: peerString});
@@ -1149,7 +1149,7 @@ angular.module('myApp.controllers', [])
     };
 
     $scope.shareContact = function () {
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'SHARE_CONTACT_PEER'}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
 
         AppMessagesManager.sendOther(peerID, {
@@ -1576,12 +1576,25 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('PeerSelectController', function ($scope, $modalInstance) {
+  .controller('PeerSelectController', function ($scope, $modalInstance, $q, AppPeersManager, ErrorService) {
 
     $scope.dialogSelect = function (peerString) {
-      $modalInstance.close(peerString);
+      var promise;
+      if ($scope.confirm_type) {
+        var peerID = AppPeersManager.getPeerID(peerString),
+            peerData = AppPeersManager.getPeer(peerID);
+        promise = ErrorService.confirm({
+          type: $scope.confirm_type,
+          peer_id: peerID,
+          peer_data: peerData
+        });
+      } else {
+        promise = $q.when();
+      }
+      promise.then(function () {
+        $modalInstance.close(peerString);
+      });
     };
-
   })
 
   .controller('ChatCreateModalController', function ($scope, $modalInstance, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, ApiUpdatesManager) {
