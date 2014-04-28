@@ -39,9 +39,10 @@ function checkDragEvent(e) {
 
 function cancelEvent (event) {
   event = event || window.event;
+  if (event) event = event.originalEvent || event;
 
-  event.stopPropagation && event.stopPropagation();
-  event.preventDefault && event.preventDefault();
+  if (event.stopPropagation) event.stopPropagation();
+  if (event.preventDefault) event.preventDefault();
 
   return false;
 }

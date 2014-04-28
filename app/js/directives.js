@@ -328,6 +328,18 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
+      $scope.$on('ui_selection_clear', function () {
+        if (window.getSelection) {
+          if (window.getSelection().empty) {  // Chrome
+            window.getSelection().empty();
+          } else if (window.getSelection().removeAllRanges) {  // Firefox
+            window.getSelection().removeAllRanges();
+          }
+        } else if (document.selection) {  // IE?
+          document.selection.empty();
+        }
+      });
+
       $scope.$on('ui_editor_resize', updateSizes);
       $scope.$on('ui_height', function () {
         onContentLoaded(updateSizes);

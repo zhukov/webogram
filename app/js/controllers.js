@@ -455,6 +455,7 @@ angular.module('myApp.controllers', [])
         offset = 0,
         hasMore = false,
         maxID = 0,
+        lastSelectID = false,
         inputMediaFilters = {
           photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
@@ -624,11 +625,20 @@ angular.module('myApp.controllers', [])
       $scope.$broadcast('ui_history_change');
     }
 
-    function toggleMessage (messageID, target) {
+    function toggleMessage (messageID, $event) {
+      var target = $event.target,
+          shiftClick = $event.shiftKey;
+
+      if (shiftClick) {
+        $scope.$broadcast('ui_selection_clear');
+      }
+
       if (!$scope.selectActions && !$(target).hasClass('icon-select-tick') && !$(target).hasClass('im_content_message_select_area')) {
         return false;
       }
+
       if ($scope.selectedMsgs[messageID]) {
+        lastSelectID = false;
         delete $scope.selectedMsgs[messageID];
         $scope.selectedCount--;
         if (!$scope.selectedCount) {
@@ -636,6 +646,31 @@ angular.module('myApp.controllers', [])
           $scope.$broadcast('ui_panel_update');
         }
       } else {
+
+        if (!shiftClick) {
+          lastSelectID = messageID;
+        } else if (lastSelectID != messageID) {
+          var dir = lastSelectID > messageID,
+              i, startPos, curMessageID;
+
+          for (i = 0; i < $scope.history.length; i++) {
+            if ($scope.history[i].id == lastSelectID) {
+              startPos = i;
+              break;
+            }
+          }
+
+          i = startPos;
+          while ($scope.history[i] &&
+                 (curMessageID = $scope.history[i].id) != messageID) {
+            if (!$scope.selectedMsgs[curMessageID]) {
+              $scope.selectedMsgs[curMessageID] = true;
+              $scope.selectedCount++;
+            }
+            i += dir ? -1 : +1;
+          }
+        }
+
         $scope.selectedMsgs[messageID] = true;
         $scope.selectedCount++;
         if (!$scope.selectActions) {
@@ -649,6 +684,7 @@ angular.module('myApp.controllers', [])
       $scope.selectedMsgs = {};
       $scope.selectedCount = 0;
       $scope.selectActions = false;
+      lastSelectID = false;
       if (!noBroadcast) {
         $scope.$broadcast('ui_panel_update');
       }
