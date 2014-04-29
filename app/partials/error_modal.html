@@ -10,6 +10,7 @@
         <span ng-switch-when="401">Unauthorized</span>
         <span ng-switch-when="403">Access denied</span>
         <span ng-switch-when="404">Not found</span>
+        <span ng-switch-when="406">Network error</span>
         <span ng-switch-when="420">Too fast</span>
         <span ng-switch-default>Server error</span>
       </span>
@@ -20,6 +21,12 @@
   <div class="modal-body">
 
     <div ng-if="error" class="error_modal_description" ng-switch="error.type">
+      <span ng-switch-when="NETWORK_BAD_REQUEST">
+        Please check your internet connection.
+      </span>
+      <span ng-switch-when="NETWORK_BAD_RESPONSE">
+        Please check your internet connection.
+      </span>
       <span ng-switch-when="FIRSTNAME_INVALID">
         The first name you entered is invalid.
       </span>

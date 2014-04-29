@@ -155,6 +155,15 @@ angular.module('myApp.controllers', [])
         }, function (error) {
           $scope.progress.enabled = false;
           switch (error.type) {
+            case 'NETWORK_BAD_REQUEST':
+              if (location.protocol == 'https:') {
+                ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
+                  location = location.toString().replace('/^https:/', 'http:');
+                });
+                error.handled = true;
+              }
+              break;
+
             case 'PHONE_NUMBER_INVALID':
               $scope.error = {field: 'phone'};
               error.handled = true;
@@ -282,7 +291,7 @@ angular.module('myApp.controllers', [])
     }
   })
 
-  .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager) {
+  .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ErrorService) {
 
     // console.log('init controller');
 
@@ -374,6 +383,15 @@ angular.module('myApp.controllers', [])
         }
 
       }, function (error) {
+        if (error.type == 'NETWORK_BAD_REQUEST') {
+          if (location.protocol == 'https:') {
+            ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
+              location = location.toString().replace('/^https:/', 'http:');
+            });
+            error.handled = true;
+          }
+        }
+
         if (error.code == 401) {
           MtpApiManager.logOut()['finally'](function () {
             $location.url('/login');
