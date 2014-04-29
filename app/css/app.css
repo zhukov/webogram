@@ -835,11 +835,32 @@ a.tg_radio_on:hover i.icon-radio {
   width: 31%;
   border-right: 2px solid #E9EBED;
   padding-bottom: 10px;
+  position: relative;
 }
 
 .im_history_col_wrap {
   float: left;
   width: 69%;
+}
+
+.im_dialogs_col_wrap,
+.im_history_col_wrap {
+  -webkit-transition: .7s all cubic-bezier(.3,.53,.26,.82);
+     -moz-transition: .7s all cubic-bezier(.3,.53,.26,.82);
+      -ms-transition: .7s all cubic-bezier(.3,.53,.26,.82);
+       -o-transition: .7s all cubic-bezier(.3,.53,.26,.82);
+          transition: .7s all cubic-bezier(.3,.53,.26,.82);
+}
+
+.im_page_split_min_dialogs .im_history_col_wrap {
+  width: 92%; /* if `calc` isnt supported 8*/
+  width: calc( 100% - 80px );
+}
+
+.im_page_split_min_dialogs .im_dialogs_col_wrap {
+  width: 8%;
+  width: calc( 80px );
+    
 }
 
 
@@ -865,6 +886,19 @@ a.tg_radio_on:hover i.icon-radio {
   -moz-border-radius    : 0;
   -webkit-border-radius : 0;
   border-radius         : 0;
+}
+
+.im_dialogs_col_resize_btn {
+  height: 34px;
+  width: 14px;
+  padding: 0;
+  
+  position: absolute;
+  top: 50%;
+  margin-top: -17px; /* 34/2 */
+  right: -7px; /* 14/2 */
+  
+  z-index: 10;
 }
 
 .im_dialogs_panel {
@@ -1058,6 +1092,49 @@ a.im_dialog:hover .im_dialog_date {
   text-overflow: ellipsis;
 }
 
+.im_page_split_min_dialogs a.im_dialog {
+    padding: 4px 7px;
+}
+
+.im_page_split_min_dialogs .im_dialogs_search,
+.im_page_split_min_dialogs .im_dialog_message_wrap {
+    display: none;
+}
+.im_page_split_min_dialogs .im_dialogs_panel_dropdown {
+    float: none !important; /* Override pull-right */
+    position: relative;
+    right: auto;
+    margin-left: 8px;
+}
+
+.im_page_split_min_dialogs .im_dialog_meta {
+    position: absolute;
+    width: 40px;
+}
+
+.im_page_split_min_dialogs a.im_dialog .im_dialog_date {
+    background-color: rgba(0,0,0,0.3);
+    width: 40px;
+    color: #cce;
+    text-align: center;
+}
+
+.im_page_split_min_dialogs a.im_dialog:hover .im_dialog_date {
+    color: #fff;
+}
+
+.im_page_split_min_dialogs .im_dialog_unread,
+.im_page_split_min_dialogs .im_dialog_badge {
+    margin-top: 10px;
+    margin-right: -3px;
+}
+.im_page_split_min_dialogs .im_dialog_unread {
+    margin-top: 15px;
+    width: 10px;
+    height: 10px;
+}
+
+
 /* IM history */
 .im_history_col {
 }
@@ -1230,6 +1307,10 @@ a.im_dialog:hover .im_dialog_date {
   max-width: 526px;
   margin: 0 auto;
   padding: 0 77px 0 77px;
+}
+
+.im_page_split_min_dialogs .im_history_typing {
+  max-width: 756px;
 }
 
 /*.im_history_typing {
@@ -1799,6 +1880,9 @@ span.emoji {
   margin: 0 auto;
   padding: 10px 15px 22px 15px;
 }
+.im_page_split_min_dialogs .im_send_panel_wrap {
+  max-width: 756px;
+}
 .im_send_form_wrap {
   position: relative;
 }
@@ -1809,6 +1893,9 @@ span.emoji {
   bottom: 0;
   left: 62px;
   right: 62px;
+}
+.im_page_split_min_dialogs .im_send_form {
+  max-width: 619px;
 }
 .im_submit {
   padding: 5px 12px;
@@ -2756,6 +2843,9 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   margin: 0 auto;
   position: relative;
 }
+.im_page_split_min_dialogs .im_message_wrap {
+  max-width: 756px;
+}
 .im_content_message_select_area {
   display: none;
   cursor: pointer;
@@ -2816,6 +2906,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   .im_dialogs_panel_dropdown .dropdown-menu {
     right: 0;
     left: auto;
+  }
+  
+  .im_dialogs_col_resize_btn {
+      display: none;
   }
 }
 
