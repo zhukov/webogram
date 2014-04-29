@@ -3253,7 +3253,7 @@ angular.module('myApp.services', [])
     if (typeof params === 'string') {
       params = {message: params};
     }
-    confirm(params.message).then(function (result) {
+    confirm(params).then(function (result) {
       callback(result || true)
     }, function () {
       callback(false)
