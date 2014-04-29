@@ -20,22 +20,14 @@
         Is this phone number correct?
         <div class="confirm_phone_number"> <span ng-bind="country_code"></span> <span ng-bind="phone_number"></span> </div>
       </div>
-      <span ng-switch-when="FORWARD_PEER">Are you sure to forward message(s) to <span ng-switch="peer_id > 0">
-        <span ng-switch-when="true">user <div class="confirm_peer" ng-bind-html="peer_data.rFullName"></div></span>
-        <span ng-switch-default>group <div class="confirm_peer" ng-bind-html="peer_data.rTitle"></div></span>
-      </span></span>
-      <span ng-switch-when="PHOTO_SHARE_PEER">Are you sure to forward photo to <span ng-switch="peer_id > 0">
-        <span ng-switch-when="true">user <div class="confirm_peer" ng-bind-html="peer_data.rFullName"></div></span>
-        <span ng-switch-default>group <div class="confirm_peer" ng-bind-html="peer_data.rTitle"></div></span>
-      </span></span>
-      <span ng-switch-when="VIDEO_SHARE_PEER">Are you sure to forward video to <span ng-switch="peer_id > 0">
-        <span ng-switch-when="true">user <div class="confirm_peer" ng-bind-html="peer_data.rFullName"></div></span>
-        <span ng-switch-default>group <div class="confirm_peer" ng-bind-html="peer_data.rTitle"></div></span>
-      </span></span>
-      <span ng-switch-when="SHARE_CONTACT_PEER">Are you sure to send contact to <span ng-switch="peer_id > 0">
-        <span ng-switch-when="true">user <div class="confirm_peer" ng-bind-html="peer_data.rFullName"></div></span>
-        <span ng-switch-default>group <div class="confirm_peer" ng-bind-html="peer_data.rTitle"></div></span>
-      </span></span>
+      <span ng-switch-when="FORWARD_PEER">Forward to <strong ng-switch="peer_id > 0">
+        <span ng-switch-when="true" ng-bind-html="peer_data.rFullName"></span>
+        <span ng-switch-default ng-bind-html="peer_data.rTitle"></span>
+      </strong>?</span>
+      <span ng-switch-when="SHARE_CONTACT_PEER">Send to <strong ng-switch="peer_id > 0">
+        <span ng-switch-when="true" ng-bind-html="peer_data.rFullName"></span>
+        <span ng-switch-default ng-bind-html="peer_data.rTitle"></span>
+      </strong>?</span>
       <span ng-switch-default ng-bind="message || 'Are you sure?'"></span>
     </div>
 

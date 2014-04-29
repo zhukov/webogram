@@ -138,9 +138,19 @@ input[type="number"]::-webkit-inner-spin-button {
   background: #41769e;
   background-image: none;
 }
+.btn-primary[disabled],
+.btn-primary.disabled {
+  background: #7999b3;
+  border-color: #7999b3;
+}
+
+
 
 .btn-link {
   color: #3a6d99;
+}
+.btn-link:hover {
+  text-decoration: none;
 }
 
 .tg_page_head .navbar {
@@ -261,7 +271,7 @@ input[type="number"]::-webkit-inner-spin-button {
   vertical-align: text-top;
 
   background: url(../img/icons/IconsetW.png) -15px -419px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.6;
 }
 .is_1x .icon-back {
@@ -433,7 +443,7 @@ input[type="number"]::-webkit-inner-spin-button {
 .modal-close-button i {
   display: inline-block;
   background: url(../img/icons/IconsetW.png) -15px -320px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   width: 12px;
   height: 12px;
   margin: 17px;
@@ -757,8 +767,14 @@ a.tg_radio_on:hover i.icon-radio {
   line-height: 14px;
   margin-bottom: 12px;
 }
+.login_country_selector:hover {
+  background: #ededed;
+}
 .login_country_selector .icon-caret {
   margin-top: 4px;
+  height: 5px;
+  width: 10px;
+  background-position: -16px -653px;
 }
 
 .login_phone_country,
@@ -865,7 +881,7 @@ a.tg_radio_on:hover i.icon-radio {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -889,7 +905,7 @@ a.tg_radio_on:hover i.icon-radio {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -1149,7 +1165,7 @@ a.im_dialog:hover .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1377,7 +1393,7 @@ div.im_message_video_thumb {
   height: 42px;
 
   background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   z-index: 1;
 }
 .is_1x .icon-videoplay {
@@ -1404,7 +1420,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1464,7 +1480,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1551,7 +1567,7 @@ img.im_message_document_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -277px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1713,7 +1729,7 @@ img.im_message_document_thumb {
 .im_message_date {
   color: #adadad;
   font-size: 0.85em;
-  padding-bottom: 20px;
+  padding: 0 0 20px 10px;
 }
 div.im_message_author,
 div.im_message_body {
@@ -1839,7 +1855,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1867,7 +1883,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1918,7 +1934,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -2325,7 +2341,7 @@ img.chat_modal_participant_photo {
 .emoji-menu-tail {
   display: none;
   background: url(../img/icons/IconsetW.png) -14px -268px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
@@ -2394,11 +2410,6 @@ img.chat_modal_participant_photo {
 }
 
 .confirm_phone_number {
-  font-weight: bold;
-  padding: 15px 10px 0;
-  text-align: center;
-}
-.confirm_peer {
   font-weight: bold;
   padding: 15px 10px 0;
   text-align: center;
@@ -2532,7 +2543,7 @@ img.chat_modal_participant_photo {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -2556,7 +2567,7 @@ img.chat_modal_participant_photo {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2633,7 +2644,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   width: 17px;
   height: 15px;
   background: url(../img/icons/IconsetW.png) -13px -366px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -2718,7 +2729,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 15px;
 
   background: url(../img/icons/IconsetW.png) -15px -319px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
 }
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -2766,7 +2777,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 680px;
+  background-size: 42px 710px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -3124,6 +3135,9 @@ ce671b orange
 
 .countries_modal_window .modal-dialog {
   max-width: 392px;
+}
+.countries_modal_col {
+  max-height: 350px;
 }
 
 .countries_modal_search {

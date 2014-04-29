@@ -1027,8 +1027,8 @@ angular.module('myApp.controllers', [])
 
     function updatePrevNext () {
       var index = list.indexOf($scope.messageID);
-      $scope.nav.hasNext = hasMore || index < list.length - 1;
-      $scope.nav.hasPrev = index > 0;
+      $scope.nav.hasNext = index > 0;
+      $scope.nav.hasPrev = hasMore || index < list.length - 1;
     };
 
     $scope.nav.next = function () {
@@ -1036,19 +1036,19 @@ angular.module('myApp.controllers', [])
         return false;
       }
 
-      movePosition(+1);
+      movePosition(-1);
     };
 
     $scope.nav.prev = function () {
       if (!$scope.nav.hasPrev) {
         return false;
       }
-      movePosition(-1);
+      movePosition(+1);
     };
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer({confirm_type: 'PHOTO_SHARE_PEER'}).then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
           $rootScope.$broadcast('history_focus', {peerString: peerString});
@@ -1097,7 +1097,7 @@ angular.module('myApp.controllers', [])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer({confirm_type: 'VIDEO_SHARE_PEER'}).then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
           $rootScope.$broadcast('history_focus', {peerString: peerString});

@@ -892,16 +892,17 @@ angular.module('myApp.services', [])
   function getSearch (inputPeer, query, inputFilter, maxID, limit) {
     var foundMsgs = [],
         useSearchCache = !query,
-        sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, inputFilter);
+        peerID = AppPeersManager.getPeerID(inputPeer),
+        newSearchFilter = {peer: peerID, filter: inputFilter},
+        sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, newSearchFilter);
 
     if (useSearchCache && !sameSearchCache) {
-      lastSearchFilter = inputFilter;
+      lastSearchFilter = newSearchFilter;
       lastSearchResults = [];
     }
 
     if (!maxID && !query) {
-      var peerID = AppPeersManager.getPeerID(inputPeer),
-          historyStorage = historiesStorage[peerID];
+      var historyStorage = historiesStorage[peerID];
 
       if (historyStorage !== undefined && historyStorage.history.length) {
         var neededContents = {},
