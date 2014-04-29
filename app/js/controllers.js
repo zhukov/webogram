@@ -158,7 +158,7 @@ angular.module('myApp.controllers', [])
             case 'NETWORK_BAD_REQUEST':
               if (location.protocol == 'https:') {
                 ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
-                  location = location.toString().replace('/^https:/', 'http:');
+                  location = location.toString().replace(/^https:/, 'http:');
                 });
                 error.handled = true;
               }
@@ -386,7 +386,7 @@ angular.module('myApp.controllers', [])
         if (error.type == 'NETWORK_BAD_REQUEST') {
           if (location.protocol == 'https:') {
             ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
-              location = location.toString().replace('/^https:/', 'http:');
+              location = location.toString().replace(/^https:/, 'http:');
             });
             error.handled = true;
           }
