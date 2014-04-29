@@ -1103,6 +1103,23 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myCustomBackground', function () {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+
+      console.log(dT(), 'bg', attrs.myCustomBackground);
+      $('html').css({background: attrs.myCustomBackground});
+
+      $scope.$on('$destroy', function () {
+        $('html').css({background: ''});
+      });
+    };
+  })
+
 
   .directive('myModalPosition', function ($window, $timeout) {
 
