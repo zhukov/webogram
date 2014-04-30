@@ -461,8 +461,9 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 .modal_simple_header {
   font-size: 14px;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   text-align: center;
+  font-weight: bold;
 }
 
 .modal_simple_form {
@@ -3136,6 +3137,12 @@ ce671b orange
 .countries_modal_window .modal-dialog {
   max-width: 392px;
 }
+
+.countries_modal_window .modal_simple_header {
+  margin-bottom: 12px;
+  font-weight: normal;
+}
+
 .countries_modal_col {
   max-height: 350px;
 }

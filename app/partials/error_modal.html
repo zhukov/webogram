@@ -2,8 +2,9 @@
 
   <a class="modal-close-button" ng-click="$close()"><i></i></a>
 
-  <div class="modal-header">
-    <h4 ng-if="error" class="modal-title" ng-switch="error.type">
+  <div class="modal-body">
+
+    <h4 ng-if="error" class="modal_simple_header" ng-switch="error.type">
       <span ng-switch-when="ACCOUNT_REQUIRED">No account</span>
       <span ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400">Error</span>
@@ -15,10 +16,7 @@
         <span ng-switch-default>Server error</span>
       </span>
     </h4>
-    <h4 ng-if="!error" class="modal-title" ng-bind="title || 'Alert'"></h4>
-  </div>
-
-  <div class="modal-body">
+    <h4 ng-if="!error" class="modal_simple_header" ng-bind="title || 'Alert'"></h4>
 
     <div ng-if="error" class="error_modal_description" ng-switch="error.type">
       <span ng-switch-when="NETWORK_BAD_REQUEST">
