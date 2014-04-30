@@ -1,6 +1,7 @@
 /* app css stylesheet */
 
 html {
+  display: none;
   background: #dee4e9 url(../img/bg_tile.png) 0 0 repeat;
   /*background-size: 300px 468px;*/
 }
