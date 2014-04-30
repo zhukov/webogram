@@ -11,12 +11,12 @@
 
     <div class="countries_modal_col" my-countries-list>
 
-      <div class="countries_wrap nano">
+      <div class="countries_wrap nano" my-infinite-scroller>
         <div class="countries_scrollable_wrap content">
 
           <ul class="countries_modal_members_list nav nav-pills nav-stacked">
 
-            <li class="countries_modal_country_wrap clearfix" ng-repeat="country in countries track by $index">
+            <li class="countries_modal_country_wrap clearfix" ng-repeat="country in countries | limitTo : slice.limit track by $index">
               <a class="countries_modal_country" ng-click="$close(country.code)">
                 <span class="countries_modal_country_code pull-right" ng-bind="country.code"></span>
                 <span class="countries_modal_country_name" ng-bind="country.name"></span>

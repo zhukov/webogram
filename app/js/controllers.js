@@ -1554,8 +1554,11 @@ angular.module('myApp.controllers', [])
   })
 
   .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager) {
+
     $scope.contacts = [];
     $scope.search = {};
+    $scope.slice = {limit: 20, limitDelta: 20}
+
 
     $scope.selectedContacts = {};
     $scope.disabledContacts = {};
@@ -1579,6 +1582,8 @@ angular.module('myApp.controllers', [])
     function updateContacts (query) {
       AppUsersManager.getContacts(query).then(function (contactsList) {
         $scope.contacts = [];
+        $scope.slice.limit = 20;
+
         angular.forEach(contactsList, function(userID) {
           var contact = {
             userID: userID,
@@ -1753,6 +1758,7 @@ angular.module('myApp.controllers', [])
   .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, SearchIndexManager) {
 
     $scope.search = {};
+    $scope.slice = {limit: 20, limitDelta: 20}
 
     var searchIndex = SearchIndexManager.createIndex();
 
@@ -1770,6 +1776,8 @@ angular.module('myApp.controllers', [])
       }
 
       $scope.countries = [];
+      $scope.slice.limit = 20;
+
       var j;
       for (var i = 0; i < Config.CountryCodes.length; i++) {
         if (!filtered || results[i]) {

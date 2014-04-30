@@ -1120,6 +1120,38 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myInfiniteScroller', function () {
+
+    return {
+      link: link,
+      scope: true
+    };
+
+    function link($scope, element, attrs) {
+
+      var scrollableWrap = $('.content', element)[0],
+          moreNotified = false;
+
+      $(scrollableWrap).on('scroll', function (e) {
+        if (!moreNotified &&
+            scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+          moreNotified = true;
+          $scope.$apply(function () {
+            $scope.slice.limit += ($scope.slice.limitDelta || 20);
+          });
+
+          onContentLoaded(function () {
+            moreNotified = false;
+            $(element).nanoScroller();
+          });
+        }
+      });
+
+    };
+  })
+
+
+
 
   .directive('myModalPosition', function ($window, $timeout) {
 
