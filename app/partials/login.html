@@ -12,10 +12,12 @@
       <i class="icon icon-caret pull-right"></i>
     </div>
 
-    <div class="form-group clearfix" ng-class="{'has-error': error.field == 'phone'}">
-      <label class="control-label" for="phone_number" ng-if="error.field == 'phone'">Incorrect phone number</label>
-      <input type="tel" autocomplete="off" class="form-control pull-left login_phone_country" my-focused name="phone_country" ng-model="credentials.phone_country">
-      <input type="tel" autocomplete="off" class="form-control pull-left login_phone_number" my-focus-on="country_selected" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
+    <div class="form-group" ng-class="{'has-error': error.field == 'phone'}">
+      <label class="control-label" ng-if="error.field == 'phone'">Incorrect phone number</label>
+      <div class="clearfix">
+        <input type="tel" autocomplete="off" class="form-control pull-left login_phone_country" my-focused name="phone_country" ng-model="credentials.phone_country">
+        <input type="tel" autocomplete="off" class="form-control pull-left login_phone_number" my-focus-on="country_selected" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
+      </div>
     </div>
     <button class="btn btn-primary btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" ng-switch="progress.enabled">
       <span ng-switch-when="true">Generating keys<span my-loading-dots></span></span>
@@ -35,7 +37,7 @@
 
     <div class="form-group" ng-class="{'has-error': error.field == 'phone_code'}">
       <label class="control-label" for="phone_code" ng-if="error.field == 'phone_code'">Incorrect SMS code</label>
-      <input type="number" my-focused maxlength="5" class="form-control" name="phone_code" ng-model="credentials.phone_code" placeholder="Enter your code" required>
+      <input type="number" my-focused maxlength="5" class="form-control" name="phone_code" ng-model="credentials.phone_code" placeholder="Enter your code" autocomplete="off" required>
     </div>
 
     <button class="btn btn-primary btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" ng-switch="progress.enabled">
