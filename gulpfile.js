@@ -86,7 +86,7 @@ gulp.task('update-version-manifests', function() {
 
 gulp.task('update-version-settings', function() {
  return gulp.src('app/partials/settings_modal.html')
-    .pipe($.replace(/<span class="settings_version">alpha .*<\/span>/, '<span class="settings_version">alpha ' + pj.version  + '<\/span>'))
+    .pipe($.replace(/\bv[\d\.]+\b/, 'v' + pj.version))
     .pipe(gulp.dest('app/partials'));
 });
 
