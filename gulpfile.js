@@ -3,7 +3,7 @@ var es = require('event-stream');
 var pj = require('./package.json');
 var $ = require('gulp-load-plugins')();
 var concat = require('gulp-concat');
-
+var path = require('path');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -63,7 +63,7 @@ gulp.task('copy', function() {
 });
 
 gulp.task('compress-dist', ['add-csp'], function() {
-  return gulp.src('./**/*' , {cwd: process.cwd() + '/dist'})
+  return gulp.src('**/*', {cwd:  path.join(process.cwd(), '/dist')})
     .pipe($.zip('webogram_v' + pj.version + '.zip'))
     .pipe(gulp.dest('releases'));
 });

@@ -2231,6 +2231,7 @@ img.chat_modal_participant_photo {
   transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 
   -webkit-user-select: text;
+  word-wrap: break-word;
 }
 .emoji-wysiwyg-editor img {
   width: 20px;
