@@ -427,16 +427,18 @@ angular.module('myApp.controllers', [])
       }
 
       AppMessagesManager.getDialogs($scope.search.query, maxID).then(function (dialogsResult) {
-        offset += dialogsResult.dialogs.length;
-        maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
-        hasMore = dialogsResult.count === null || offset < dialogsResult.count;
+        if (dialogsResult.dialogs.length) {
+          offset += dialogsResult.dialogs.length;
+          maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
+          hasMore = dialogsResult.count === null || offset < dialogsResult.count;
 
-        angular.forEach(dialogsResult.dialogs, function (dialog) {
-          peersInDialogs[dialog.peerID] = true;
-          $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
-        });
+          angular.forEach(dialogsResult.dialogs, function (dialog) {
+            peersInDialogs[dialog.peerID] = true;
+            $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
+          });
 
-        $scope.$broadcast('ui_dialogs_append');
+          $scope.$broadcast('ui_dialogs_append');
+        }
       });
     };
 
@@ -1079,6 +1081,10 @@ angular.module('myApp.controllers', [])
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
         AppMessagesManager.deleteMessages([messageID]);
       });
+    };
+
+    $scope.download = function () {
+      AppPhotosManager.downloadPhoto($scope.photoID);
     };
 
 

@@ -3,12 +3,14 @@
 html {
   display: none;
   background: #dee4e9 url(../img/bg_tile.png) 0 0 repeat;
+  overflow: visible;
   /*background-size: 300px 468px;*/
 }
 body {
   color: #000;
   background: none;
   font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+  overflow: visible;
   /*-webkit-font-smoothing: antialiased;*/
 }
 .font-light {
@@ -69,6 +71,10 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance:textfield;
 }
 
 
@@ -312,9 +318,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .modal-backdrop {
   background: #111111;
-}
-.modal-backdrop.in {
-  opacity: 0.25;
+  opacity: 0.25 !important;
 }
 
 .modal.fade .modal-dialog {

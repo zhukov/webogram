@@ -833,7 +833,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var downloadPromise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, null, {mime: 'video/mp4'});
+      var downloadPromise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, {mime: 'video/mp4'});
 
       downloadPromise.then(function (url) {
         $scope.progress.enabled = false;

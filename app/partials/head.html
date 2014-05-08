@@ -13,15 +13,15 @@
       </div>
 
 
-      <div class="navbar-collapse collapse">
+      <div class="navbar-collapse collapse" ng-switch="offline">
 
-        <ul ng-if="offline" class="nav navbar-nav navbar-offline">
+        <ul ng-switch-when="true" class="nav navbar-nav navbar-offline">
           <li ng-show="!offlineConnecting"><span class="navbar-offline-text">Waiting for network<span my-loading-dots></span></span></li>
           <li ng-show="!offlineConnecting"><a href="" ng-click="retryOnline()">Retry</a></li>
           <li ng-show="offlineConnecting"><span class="navbar-offline-text">Connecting<span my-loading-dots></span></span></li>
         </ul>
 
-        <ul ng-if="!offline" class="nav navbar-nav navbar-right">
+        <ul ng-switch-default class="nav navbar-nav navbar-right">
           <li ng-if="isLoggedIn"><a href="" ng-click="openContacts()">Contacts</a></li>
           <li ng-if="isLoggedIn"><a href="" ng-click="openSettings()">Settings</a></li>
           <li ng-if="isLoggedIn"><a href="" ng-click="logOut()">Log Out</a></li>

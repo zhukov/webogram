@@ -12,7 +12,8 @@
     "notifications",
     "webview",
     {"fileSystem": ["write"]},
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ],
   "icons": {
     "16": "img/icons/icon16.png",
