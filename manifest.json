@@ -1,6 +1,6 @@
 {
   "name": "Telegram UNOFFICIAL",
-  "version": "0.0.21",
+  "version": "0.1.0",
   "short_name": "Webogram",
   "manifest_version": 2,
   "app": {
@@ -12,7 +12,8 @@
     "notifications",
     "webview",
     {"fileSystem": ["write"]},
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ],
   "icons": {
     "16": "img/icons/icon16.png",

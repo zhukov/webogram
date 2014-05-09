@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.0.21 - messaging web application for MTProto
+ * Webogram v0.1.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -8,7 +8,7 @@
 chrome.app.runtime.onLaunched.addListener(function(launchData) {
   chrome.app.window.create('../index.html', {
     bounds: {
-      width: 900,
+      width: 1000,
       height: 700
     },
     minWidth: 320,
