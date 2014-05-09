@@ -1010,7 +1010,7 @@ factory('MtpDcConfigurator', function () {
     ]
     : [
       {id: 1, host: '173.240.5.1',   port: 80},
-      {id: 2, host: '149.154.167.5', port: 80},
+      {id: 2, host: '149.154.167.50', port: 80},
       {id: 3, host: '174.140.142.6', port: 80},
       {id: 4, host: '31.210.235.12', port: 80},
       {id: 5, host: '116.51.22.2',   port: 80},
