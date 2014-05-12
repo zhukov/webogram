@@ -32,9 +32,10 @@ function dHexDump (bytes) {
 }
 
 function bytesToHex (bytes) {
+  bytes = bytes || [];
   var arr = [];
   for (var i = 0; i < bytes.length; i++) {
-    arr.push((bytes[i] < 16 ? '0' : '') + bytes[i].toString(16));
+    arr.push((bytes[i] < 16 ? '0' : '') + (bytes[i] || 0).toString(16));
   }
   return arr.join('');
 }

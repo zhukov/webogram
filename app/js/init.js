@@ -1,8 +1,8 @@
-(function () {
+;(function () {
 
   // Prevent click-jacking
   try {
-    if (window.chrome && chrome.app && chrome.app.window || self == top) {
+    if (window == window.top || window.chrome && chrome.app && chrome.app.window) {
       document.documentElement.style.display = 'block';
     } else {
       top.location = self.location;
@@ -40,7 +40,7 @@
         }, delay || 300000);
       },
       attach = function () {
-        appCache.addEventListener('updateready', function(e) {
+        appCache.addEventListener('updateready', function (e) {
           if (appCache.status == appCache.UPDATEREADY) {
             if (!declined) {
               safeConfirm({type: 'WEBOGRAM_UPDATED_RELOAD', message: 'A new version of Webogram is available. Load it?'}, function (result) {
