@@ -544,7 +544,7 @@ angular.module('myApp.controllers', [])
         curMessage = $scope.history[i];
         if (prevMessage &&
             curMessage.from_id == prevMessage.from_id &&
-            curMessage.date < prevMessage.date + 30 &&
+            curMessage.date < prevMessage.date + 300 &&
             !prevMessage.action &&
             !curMessage.action &&
             !prevMessage.fwd_from_id &&
