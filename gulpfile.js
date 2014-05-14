@@ -130,14 +130,37 @@ gulp.task('disable-production', function() {
 });
 
 gulp.task('add-appcache-manifest', function() {
-  return gulp.src(['./dist/**/*', '!dist/manifest.*', '!dist/index.html', '!dist/fonts/*', '!dist/img/icons/icon*.png', '!dist/js/background.js'])
-    .pipe($.manifest({
-      timestamp: true,
-      network: ['http://*', 'https://*', '*'],
-      filename: 'webogram.appcache',
-      exclude: 'webogram.appcache'
-    }))
-    .pipe(gulp.dest('./dist'));
+
+  var sources = [
+    './dist/**/*',
+    '!dist/manifest.*',
+    '!dist/index.html',
+    '!dist/fonts/*',
+    '!dist/img/icons/icon*.png',
+    '!dist/js/background.js'
+  ];
+
+  return es.concat(
+    gulp.src(sources)
+      .pipe($.manifest({
+          timestamp: true,
+          network: ['http://*', 'https://*', '*'],
+          filename: 'webogram.appcache',
+          exclude: ['webogram.appcache', 'app.manifest']
+        })
+      )
+      .pipe(gulp.dest('./dist')),
+
+    gulp.src(sources)
+      .pipe($.manifest({
+          timestamp: true,
+          network: ['http://*', 'https://*', '*'],
+          filename: 'app.manifest',
+          exclude: ['webogram.appcache', 'app.manifest']
+        })
+      )
+      .pipe(gulp.dest('./dist'))
+  );
 });
 
 
