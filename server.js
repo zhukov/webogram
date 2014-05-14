@@ -81,6 +81,7 @@ StaticServlet.MimeMap = {
   'json': 'application/json',
   'js':   'application/javascript',
   'manifest': 'text/cache-manifest',
+  'appcache': 'text/cache-manifest',
   'jpg':  'image/jpeg',
   'jpeg': 'image/jpeg',
   'gif':  'image/gif',

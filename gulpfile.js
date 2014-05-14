@@ -134,8 +134,8 @@ gulp.task('add-appcache-manifest', function() {
     .pipe($.manifest({
       timestamp: true,
       network: ['http://*', 'https://*', '*'],
-      filename: 'app.manifest',
-      exclude: 'app.manifest'
+      filename: 'webogram.appcache',
+      exclude: 'webogram.appcache'
     }))
     .pipe(gulp.dest('./dist'));
 });
