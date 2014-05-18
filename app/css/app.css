@@ -613,7 +613,38 @@ a.tg_radio_on:hover i.icon-radio {
   border-color: #5785aa;
 }
 
+a.tg_range {
+  padding-left: 45px;
+  color: #000;
+  display: block;
+  line-height: 18px;
+  margin: 8px 0;
+}
 
+a.tg_range:hover {
+  text-decoration: none;
+}
+
+a.tg_range input {
+  float: right;
+  display: inline-block;
+  background: #c7c7c7;
+  width: 150px;
+  height: 18px;
+  line-height: 18px;
+  vertical-align: middle;
+  padding: 4px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 9px 0 0;
+
+}
+
+.tg_range_label {
+  display: inline-block;
+  line-height: 18px;
+  vertical-align: middle;
+}
 
 
 .tg_form_group {

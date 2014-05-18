@@ -3196,9 +3196,9 @@ angular.module('myApp.services', [])
       return false;
     }
 
-    AppConfigManager.get('notify_nosound').then(function (noSound) {
-      if (!noSound) {
-        playSound();
+    AppConfigManager.get('notify_volume').then(function (volume) {
+      if (volume != 0) {
+        playSound(volume);
       }
     })
 
@@ -3237,9 +3237,13 @@ angular.module('myApp.services', [])
     });
   };
 
-  function playSound () {
+  function playSound (volume) {
     var filename = 'img/sound_a.wav';
-    $('#notify_sound').html('<audio autoplay="autoplay"><source src="' + filename + '" type="audio/mpeg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'" /></audio>');
+    var obj = $('#notify_sound').html('<audio autoplay="autoplay">' +
+        '<source src="' + filename + '" type="audio/mpeg" />' +
+        '<embed hidden="true" autostart="true" loop="false" volume="' + (volume*100) +'" src="' + filename +'" />' +
+        '</audio>');
+    obj.find('audio')[0].volume = volume;
   }
 
   function notificationCancel (key) {

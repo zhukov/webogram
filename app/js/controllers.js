@@ -1475,21 +1475,17 @@ angular.module('myApp.controllers', [])
       });
     };
 
-    AppConfigManager.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter').then(function (settings) {
+    AppConfigManager.get('notify_nodesktop', 'notify_volume', 'send_ctrlenter').then(function (settings) {
       $scope.notify.desktop = !settings[0];
-      $scope.notify.sound = !settings[1];
+      $scope.notify.volume = (settings[1] * 10).toFixed() || 0;
       $scope.send.enter = settings[2] ? '' : '1';
 
-      $scope.$watch('notify.sound', function(newValue, oldValue) {
+      $scope.$watch('notify.volume', function(newValue, oldValue) {
         if (newValue === oldValue) {
           return false;
         }
-        if (newValue) {
-          AppConfigManager.remove('notify_nosound');
-        } else {
-          AppConfigManager.set({notify_nosound: true});
-          NotificationsManager.clear();
-        }
+        AppConfigManager.set({notify_volume: newValue / 10});
+        NotificationsManager.clear();
       });
 
       $scope.$watch('notify.desktop', function(newValue, oldValue) {

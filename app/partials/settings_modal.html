@@ -64,9 +64,9 @@
             <span class="tg_checkbox_label">Desktop notifications</span>
           </a>
 
-          <a class="tg_checkbox" ng-click="notify.sound = !notify.sound" ng-class="notify.sound ? 'tg_checkbox_on' : ''">
-            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-            <span class="tg_checkbox_label">Sound</span>
+          <a class="tg_range">
+            <input class="tg_range" type="range" ng-model="notify.volume" min="0" max="10">
+            <span class="tg_range_label">Notification Volume</span>
           </a>
         </div>
 
