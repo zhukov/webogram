@@ -406,7 +406,7 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      if (!hasMore && !$scope.search.query) {
+      if (!hasMore && $scope.search.query) {
         contactsShown = true;
 
         AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
@@ -612,6 +612,7 @@ angular.module('myApp.controllers', [])
         updateHistoryPeer();
         safeReplaceObject($scope.state, {loaded: true});
 
+        $scope.history = [];
         angular.forEach(historyResult.history, function (id) {
           $scope.history.push(AppMessagesManager.wrapForHistory(id));
         });

@@ -1318,7 +1318,6 @@ a.im_dialog:hover .im_dialog_date {
 }
 .im_message_grouped .icon-message-status {
   margin-top: 5px;
-  margin-left: 24px;
 }
 
 .im_message_from_photo,
@@ -1717,7 +1716,6 @@ img.im_message_document_thumb {
 }
 
 .icon-message-status-tick {
-  /*display: inline-block;*/
   display: none;
   width: 16px;
   height: 10px;
@@ -2926,7 +2924,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   }
   .im_message_grouped .icon-message-status {
     margin-top: -8px;
-    margin-left: 32px;
   }
 }
 
