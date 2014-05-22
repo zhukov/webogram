@@ -913,9 +913,18 @@ angular.module('myApp.controllers', [])
           return all;
         });
 
+        var timeout = 0;
         do {
-          AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096));
+
+          (function (peerID, curText, curTimeout) {
+            setTimeout(function () {
+              AppMessagesManager.sendText(peerID, curText);
+            }, curTimeout)
+          })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
+
           text = text.substr(4096);
+          timeout += 100;
+
         } while (text.length);
 
         resetDraft();

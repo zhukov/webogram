@@ -1191,9 +1191,6 @@ angular.module('myApp.services', [])
           message: text,
           random_id: randomID
         }, sentRequestOptions).then(function (result) {
-          if (pendingAfterMsgs[peerID] === sentRequestOptions) {
-            delete pendingAfterMsgs[peerID];
-          }
           if (ApiUpdatesManager.saveSeq(result.seq)) {
             ApiUpdatesManager.saveUpdate({
               _: 'updateMessageID',
@@ -1211,6 +1208,10 @@ angular.module('myApp.services', [])
           }
         }, function (error) {
           toggleError(true);
+        })['finally'](function () {
+          if (pendingAfterMsgs[peerID] === sentRequestOptions) {
+            delete pendingAfterMsgs[peerID];
+          }
         });
 
         pendingAfterMsgs[peerID] = sentRequestOptions;
@@ -1475,6 +1476,8 @@ angular.module('myApp.services', [])
   }
 
   function forwardMessages (peerID, msgIDs) {
+    msgIDs = $filter('orderBy')(msgIDs);
+
     return MtpApiManager.invokeApi('messages.forwardMessages', {
       peer: AppPeersManager.getInputPeerByID(peerID),
       id: msgIDs
