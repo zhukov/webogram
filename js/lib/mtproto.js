@@ -2623,7 +2623,7 @@ factory('MtpApiManager', function (AppConfigManager, MtpAuthorizer, MtpNetworker
 
           if (!options.noErrorBox) {
             error.input = method;
-            error.stack = error.stack || stack;
+            error.stack = error.stack || (new Error()).stack;
             setTimeout(function () {
               if (!error.handled) {
                 ErrorService.show({error: error});
