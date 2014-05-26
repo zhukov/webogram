@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Mon May 26 2014 20:01:42 GMT+0400 (MSK)
+# Time: Mon May 26 2014 20:04:36 GMT+0400 (MSK)
 
 
 CACHE:
@@ -29,6 +29,16 @@ img/logo_share.png
 img/sound_a.wav
 js/app.js
 js/app.js.map
+img/icons/Checks1_1x.png
+img/icons/Checks1_2x.png
+img/icons/Checks2_1x.png
+img/icons/Checks2_2x.png
+img/icons/IconsetSmiles.png
+img/icons/IconsetSmiles_1x.png
+img/icons/IconsetW.png
+img/icons/IconsetW_1x.png
+img/icons/PhotoControls.png
+img/icons/PhotoControls_1x.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
@@ -46,16 +56,6 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-img/icons/Checks1_1x.png
-img/icons/Checks1_2x.png
-img/icons/Checks2_1x.png
-img/icons/Checks2_2x.png
-img/icons/IconsetSmiles.png
-img/icons/IconsetSmiles_1x.png
-img/icons/IconsetW.png
-img/icons/IconsetW_1x.png
-img/icons/PhotoControls.png
-img/icons/PhotoControls_1x.png
 js/lib/aes_worker.js
 js/lib/mtproto.js
 js/lib/pq_worker.js
