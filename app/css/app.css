@@ -2535,7 +2535,20 @@ img.chat_modal_participant_photo {
 .tg_range_wrap {
   line-height: 18px;
 }
-input.tg_range,
+input.tg_range {
+  cursor: pointer;
+  outline: none !important;
+  -webkit-appearance: none;
+  width: 100%;
+  max-width: 362px;
+  display: inline-block;
+  background: #c7c7c7;
+  height: 3px;
+  line-height: 18px;
+  vertical-align: top;
+  margin: 8px 0;
+  border-radius: 2px;
+}
 input.tg_range::-moz-range-track {
   cursor: pointer;
   outline: none !important;
