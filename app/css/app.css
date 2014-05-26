@@ -2535,7 +2535,8 @@ img.chat_modal_participant_photo {
 .tg_range_wrap {
   line-height: 18px;
 }
-input.tg_range {
+input.tg_range,
+input.tg_range::-moz-range-track {
   cursor: pointer;
   outline: none !important;
   -webkit-appearance: none;
@@ -2543,16 +2544,24 @@ input.tg_range {
   max-width: 362px;
   display: inline-block;
   background: #c7c7c7;
-  margin: 0;
   height: 3px;
   line-height: 18px;
   vertical-align: top;
   margin: 8px 0;
   border-radius: 2px;
 }
-
 input.tg_range::-webkit-slider-thumb {
+  border: 0;
   -webkit-appearance: none;
+  background: #568cb5;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+input.tg_range::-moz-range-thumb {
+  border: 0;
   background: #568cb5;
   width: 12px;
   height: 12px;

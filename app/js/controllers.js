@@ -1491,8 +1491,10 @@ angular.module('myApp.controllers', [])
 
       if (settings[1]) {
         $scope.notify.volume = 0;
-      } else {
+      } else if (settings[3] !== false) {
         $scope.notify.volume = settings[3] > 0 && Math.ceil(settings[3] * 10) || 0;
+      } else {
+        $scope.notify.volume = 5;
       }
 
       $scope.notify.volumeOf4 = function () {
