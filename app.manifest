@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Thu May 22 2014 16:01:26 GMT+0400 (MSK)
+# Time: Mon May 26 2014 20:01:42 GMT+0400 (MSK)
 
 
 CACHE:
@@ -29,6 +29,10 @@ img/logo_share.png
 img/sound_a.wav
 js/app.js
 js/app.js.map
+vendor/closure/long.js
+vendor/console-polyfill/console-polyfill.js
+vendor/cryptoJS/crypto.js
+vendor/jsbn/jsbn_combined.js
 img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
@@ -60,10 +64,6 @@ js/lib/aes_worker.js
 js/lib/mtproto.js
 js/lib/pq_worker.js
 js/lib/sha1_worker.js
-vendor/closure/long.js
-vendor/console-polyfill/console-polyfill.js
-vendor/cryptoJS/crypto.js
-vendor/jsbn/jsbn_combined.js
 
 
 NETWORK:
