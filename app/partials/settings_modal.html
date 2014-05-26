@@ -59,26 +59,36 @@
       <div class="modal_section_body">
 
         <div class="tg_form_group">
-          <a class="tg_checkbox" ng-click="notify.desktop = !notify.desktop" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
+          <a class="tg_checkbox" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
             <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
             <span class="tg_checkbox_label">Desktop notifications</span>
           </a>
 
-          <a class="tg_checkbox" ng-click="notify.sound = !notify.sound" ng-class="notify.sound ? 'tg_checkbox_on' : ''">
+          <a class="tg_checkbox" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
             <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
             <span class="tg_checkbox_label">Sound</span>
           </a>
+
+          <div class="tg_range_wrap" ng-show="notify.volume > 0">
+            <span class="icon icon-volume-outer" ng-class="'icon-volume-outer' + notify.volumeOf4()">
+              <i class="icon-volume-inner icon-volume-inner1"></i>
+              <i class="icon-volume-inner icon-volume-inner2"></i>
+              <i class="icon-volume-inner icon-volume-inner3"></i>
+              <i class="icon-volume-inner icon-volume-inner4"></i>
+            </span>
+            <input type="range" class="tg_range" ng-model="notify.volume" min="1" max="10">
+          </div>
         </div>
 
         <div class="tg_form_group">
-          <a class="tg_radio" ng-click="send.enter = 1" ng-class="send.enter == 1 ? 'tg_radio_on' : ''">
+          <a class="tg_radio" ng-click="toggleCtrlEnter(1)" ng-class="send.enter == 1 ? 'tg_radio_on' : ''">
             <i class="icon icon-radio"></i>
             <span>
               <strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line
             </span>
           </a>
 
-          <a class="tg_radio" ng-click="send.enter = 0" ng-class="send.enter == 0 ? 'tg_radio_on' : ''">
+          <a class="tg_radio" ng-click="toggleCtrlEnter(0)" ng-class="send.enter == 0 ? 'tg_radio_on' : ''">
             <i class="icon icon-radio"></i>
             <span>
               <strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line

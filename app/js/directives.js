@@ -922,7 +922,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           console.log('dl progress', progress);
           $scope.document.progress.done = progress.done;
           $scope.document.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-          $rootScope.$broadcast('history_update');
         })
       }
     }

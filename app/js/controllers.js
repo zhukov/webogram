@@ -1485,45 +1485,65 @@ angular.module('myApp.controllers', [])
       });
     };
 
-    AppConfigManager.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter').then(function (settings) {
+    AppConfigManager.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume').then(function (settings) {
       $scope.notify.desktop = !settings[0];
-      $scope.notify.sound = !settings[1];
       $scope.send.enter = settings[2] ? '' : '1';
 
-      $scope.$watch('notify.sound', function(newValue, oldValue) {
-        if (newValue === oldValue) {
-          return false;
-        }
-        if (newValue) {
-          AppConfigManager.remove('notify_nosound');
+      if (settings[1]) {
+        $scope.notify.volume = 0;
+      } else {
+        $scope.notify.volume = settings[3] > 0 && Math.ceil(settings[3] * 10) || 0;
+      }
+
+      $scope.notify.volumeOf4 = function () {
+        return 1 + Math.ceil(($scope.notify.volume - 1) / 3.3);
+      };
+
+      $scope.toggleSound = function () {
+        if ($scope.notify.volume) {
+          $scope.notify.volume = 0;
         } else {
-          AppConfigManager.set({notify_nosound: true});
+          $scope.notify.volume = 5;
+        }
+      }
+
+      var testSoundPromise;
+      $scope.$watch('notify.volume', function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+          var storeVolume = newValue / 10;
+          AppConfigManager.set({notify_volume: storeVolume});
+          AppConfigManager.remove('notify_nosound');
           NotificationsManager.clear();
+
+          if (testSoundPromise) {
+            $timeout.cancel(testSoundPromise);
+          }
+          testSoundPromise = $timeout(function () {
+            NotificationsManager.testSound(storeVolume);
+          }, 500);
         }
       });
 
-      $scope.$watch('notify.desktop', function(newValue, oldValue) {
-        if (newValue === oldValue) {
-          return false;
-        }
-        if (newValue) {
+      $scope.toggleDesktop = function () {
+        $scope.notify.desktop = !$scope.notify.desktop;
+
+        if ($scope.notify.desktop) {
           AppConfigManager.remove('notify_nodesktop');
         } else {
           AppConfigManager.set({notify_nodesktop: true});
         }
-      });
+      }
 
-      $scope.$watch('send.enter', function(newValue, oldValue) {
-        if (newValue === oldValue) {
-          return false;
-        }
-        if (newValue) {
+      $scope.toggleCtrlEnter = function (newValue) {
+        $scope.send.enter = newValue;
+
+        if ($scope.send.enter) {
           AppConfigManager.remove('send_ctrlenter');
         } else {
           AppConfigManager.set({send_ctrlenter: true});
         }
         $rootScope.$broadcast('settings_changed');
-      });
+      }
     });
   })
 
