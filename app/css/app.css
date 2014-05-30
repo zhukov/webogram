@@ -673,16 +673,16 @@ a.tg_radio_on:hover i.icon-radio {
   text-align: center;
   font-size: 24px;
   font-weight: normal;
-  margin: 20px 0 25px;
+  margin: 15px 0 20px;
 }
 .welcome_text {
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 13px;
-  line-height: 16px;
+  margin-bottom: 26px;
+  font-size: 14px;
+  line-height: 14px;
 }
 .welcome_btn_wrap {
-  max-width: 206px;
+  max-width: 219px;
   margin: 0 auto;
 }
 
@@ -697,7 +697,7 @@ a.tg_radio_on:hover i.icon-radio {
 
 .welcome_footer_card_wrap {
   width: 260px;
-  margin: 45px auto 0;
+  margin: 41px auto 0;
   text-align: center;
 }
 .welcome_footer_card {
@@ -731,7 +731,7 @@ a.tg_radio_on:hover i.icon-radio {
 }
 
 .welcome_footer_card_wrap h4 {
-  font-size: 16px;
+  font-size: 18px;
 }
 .welcome_footer_card_wrap .welcome_footer_card_lead {
 

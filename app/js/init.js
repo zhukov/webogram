@@ -43,7 +43,7 @@
         appCache.addEventListener('updateready', function (e) {
           if (appCache.status == appCache.UPDATEREADY) {
             if (!declined) {
-              safeConfirm({type: 'WEBOGRAM_UPDATED_RELOAD', message: 'A new version of Webogram is available. Load it?'}, function (result) {
+              safeConfirm({type: 'WEBOGRAM_UPDATED_RELOAD', message: 'A new version of Webogram is downloaded. Launch it?'}, function (result) {
                 if (result) {
                   window.location.reload();
                 } else {
