@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.1 - messaging web application for MTProto
+ * Webogram v0.1.2 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE

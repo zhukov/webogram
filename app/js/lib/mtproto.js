@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.1 - messaging web application for MTProto
+ * Webogram v0.1.2 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1790,7 +1790,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       serializer.storeInt(2496, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');
       serializer.storeString(navigator.platform  || 'Unknown Platform', 'system_version');
-      serializer.storeString('0.1.1', 'app_version');
+      serializer.storeString('0.1.2', 'app_version');
       serializer.storeString(navigator.language || 'en', 'lang_code');
     }
 
