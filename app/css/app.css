@@ -2275,6 +2275,10 @@ img.chat_modal_participant_photo {
 .is_1x .emoji-menu-tabs .emoji-menu-tab {
   background-image: url(../img/icons/IconsetSmiles_1x.png);
 }
+
+.emoji-menu-tabs .icon-recent {background-position: -9px -306px; }
+.emoji-menu-tabs .icon-recent-selected {background-position: -9px -277px; }
+
 .emoji-menu-tabs .icon-smile {background-position: -9px -34px; }
 .emoji-menu-tabs .icon-smile-selected {background-position: -9px -5px; }
 
