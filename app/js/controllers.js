@@ -480,6 +480,7 @@ angular.module('myApp.controllers', [])
           photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
           documents: 'inputMessagesFilterDocument',
+          audio: 'inputMessagesFilterAudio'
         },
         jump = 0;
 

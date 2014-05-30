@@ -224,6 +224,7 @@ inputMessagesFilterPhotos#9609a51c = MessagesFilter;
 inputMessagesFilterVideo#9fc00e65 = MessagesFilter;
 inputMessagesFilterPhotoVideo#56e9f0e4 = MessagesFilter;
 inputMessagesFilterDocument#9eddf188 = MessagesFilter;
+inputMessagesFilterAudio#cfc87522 = MessagesFilter;
 
 updateNewMessage#13abdb3 message:Message pts:int = Update;
 updateMessageID#4e90bfd6 id:int random_id:long = Update;

@@ -83,6 +83,7 @@
                     <li><a ng-click="toggleMedia('photos')">Photos</a></li>
                     <li><a ng-click="toggleMedia('video')">Videos</a></li>
                     <li><a ng-click="toggleMedia('documents')">Documents</a></li>
+                    <li><a ng-click="toggleMedia('audio')">Voice messages</a></li>
                   </ul>
                 </div>
                 <a ng-show="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
@@ -94,6 +95,7 @@
                   <h4 ng-switch-when="photos">Photos</h4>
                   <h4 ng-switch-when="video">Videos</h4>
                   <h4 ng-switch-when="documents">Documents</h4>
+                  <h4 ng-switch-when="audio">Voice messages</h4>
 
                   <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
                     <div ng-switch-when="true">
