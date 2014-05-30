@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Mon May 26 2014 20:04:36 GMT+0400 (MSK)
+# Time: Fri May 30 2014 18:56:26 GMT+0400 (MSK)
 
 
 CACHE:
@@ -60,8 +60,8 @@ js/lib/aes_worker.js
 js/lib/mtproto.js
 js/lib/pq_worker.js
 js/lib/sha1_worker.js
-vendor/console-polyfill/console-polyfill.js
 vendor/closure/long.js
+vendor/console-polyfill/console-polyfill.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 
