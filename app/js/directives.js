@@ -491,6 +491,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (submit) {
             $(element).trigger('submit');
+            $(element).trigger('message_send');
             return cancelEvent(e);
           }
         }

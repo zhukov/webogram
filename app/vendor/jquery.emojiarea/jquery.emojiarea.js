@@ -498,6 +498,11 @@
 			}
 		});
 
+		/*! MODIFICATION: Following 3 lines were added by Igor Zhukov, in order to hide menu on message submit with keyboard */
+		$body.on('message_send', function(e) {
+			self.hide();
+		});
+
 		$body.on('mouseup', function(e) {
 			/*! MODIFICATION START
 				Following code was added by Igor Zhukov, in order to prevent close on click on EmojiMenu scrollbar
