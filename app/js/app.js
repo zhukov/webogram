@@ -12,6 +12,7 @@ window._debugMode = location.search.indexOf('debug=1') > 0;
 window._osX = (navigator.platform || '').toLowerCase().indexOf('mac') != -1 ||
               (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1;
 window._retina = window.devicePixelRatio > 1;
+window._mobile = $(window).height() < 600;
 
 if (!window._osX) {
   $('body').addClass('non_osx');

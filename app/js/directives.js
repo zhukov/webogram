@@ -540,10 +540,14 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
       }
 
-      $scope.$on('ui_peer_change', focusField);
-      $scope.$on('ui_history_focus', focusField);
-      $scope.$on('ui_history_change', focusField);
+      if (!window._mobile) {
+        $scope.$on('ui_peer_change', focusField);
+        $scope.$on('ui_history_focus', focusField);
+        $scope.$on('ui_history_change', focusField);
+      }
+
       $scope.$on('ui_message_send', focusField);
+
       $scope.$on('ui_peer_draft', updateField);
       $scope.$on('ui_message_before_send', updateValue);
 
@@ -556,7 +560,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      focusField();
+      if (!window._mobile) {
+        focusField();
+      }
 
       function focusField () {
         onContentLoaded(function () {
@@ -679,6 +685,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if ($scope.thumb && $scope.thumb.width && $scope.thumb.height) {
           element.attr('width', $scope.thumb.width);
           element.attr('height', $scope.thumb.height);
+          $scope.$emit('ui_height');
         }
         // console.log('new loc', newLocation, arguments);
         var counterSaved = ++counter;
@@ -842,6 +849,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.player.hasQuicktime = hasQt;
         $scope.player.quicktime = false;
         $scope.player.src = $sce.trustAsResourceUrl(url);
+        $scope.$emit('ui_height');
       }, function (e) {
         console.log('Download video failed', e, $scope.video);
         $scope.progress.enabled = false;
@@ -856,6 +864,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       }, function (progress) {
         $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
+
+      $scope.$emit('ui_height');
 
       $scope.$on('$destroy', function () {
         downloadPromise.cancel();
@@ -1010,6 +1020,9 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myFocused', function(){
     return {
       link: function($scope, element, attrs) {
+        if (window._mobile) {
+          return false;
+        }
         setTimeout(function () {
           element[0].focus();
         }, 100);
@@ -1021,6 +1034,9 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: function($scope, element, attrs) {
         $scope.$on(attrs.myFocusOn, function () {
+          if (window._mobile) {
+            return false;
+          }
           onContentLoaded(function () {
             element[0].focus();
           });

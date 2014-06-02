@@ -2849,8 +2849,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       fileWriteBytes(fileWriter, fromFileEntry).then(function () {
         deferred.resolve(fileWriter);
       }, function (e) {
-        fileWriter.truncate(0);
         deferred.reject(e);
+        fileWriter.truncate(0);
       });
     }, function (e) {
       deferred.reject(e);
@@ -2903,8 +2903,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
         };
 
     requestFS().then(function () {
@@ -2940,8 +2940,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
         },
         doDownload = function () {
           cachedFs.root.getFile(fileName, {create: true}, function(fileEntry) {
@@ -3019,8 +3019,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         errorHandler = function (error) {
           // console.error('Dl Error', error);
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
         },
         saveToFileEntry = function (fileEntry) {
           fileEntry.createWriter(function (fileWriter) {

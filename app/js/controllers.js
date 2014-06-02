@@ -545,14 +545,14 @@ angular.module('myApp.controllers', [])
         curMessage = $scope.history[i];
         if (prevMessage &&
             curMessage.from_id == prevMessage.from_id &&
-            curMessage.date < prevMessage.date + 300 &&
+            !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
             !prevMessage.action &&
             !curMessage.action &&
-            !prevMessage.fwd_from_id &&
-            !curMessage.fwd_from_id &&
-            curMessage.message && curMessage.message.length < 60) {
+            curMessage.date < prevMessage.date + 900) {
 
-          curMessage.grouped = true;
+
+          var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
+          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
         } else if (prevMessage || !i) {
           delete curMessage.grouped;
         }
@@ -583,7 +583,7 @@ angular.module('myApp.controllers', [])
           $scope.history.unshift(AppMessagesManager.wrapForHistory(id));
         });
 
-        updateHistoryGroups(historyResult.history.length);
+        updateHistoryGroups(historyResult.history.length + 1);
 
         $scope.$broadcast('ui_history_prepend');
       });

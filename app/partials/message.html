@@ -4,7 +4,7 @@
   </ng-pluralize>
 </div>
 
-<div class="im_message_outer_wrap" ng-class="{im_message_selected: selectedMsgs[historyMessage.id], im_message_grouped: historyMessage.grouped}" ng-click="toggleMessage(historyMessage.id, $event)">
+<div class="im_message_outer_wrap" ng-class="[ selectedMsgs[historyMessage.id] &amp;&amp; 'im_message_selected', historyMessage.grouped &amp;&amp; ('im_message_grouped' + historyMessage.grouped) ]" ng-click="toggleMessage(historyMessage.id, $event)">
 
 
   <div class="im_message_wrap clearfix" bindonce>
