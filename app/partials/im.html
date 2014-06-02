@@ -46,7 +46,7 @@
                         <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
                       </div>
                       <div class="im_dialog_message">
-                        <span class="im_dialog_message_text">{{contact.user | userStatus}}</span>
+                        <span class="im_dialog_message_text" ng-bind="contact.user | userStatus"></span>
                       </div>
                     </div>
                   </a>
@@ -88,7 +88,7 @@
                 </div>
                 <a ng-show="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
                   Show all messages
-                  <strong class="im_history_panel_return_count" ng-show="missedCount > 0">+{{missedCount}}</strong>
+                  <strong class="im_history_panel_return_count" ng-show="missedCount > 0" ng-bind="'+' + missedCount"></strong>
                 </a>
 
                 <div ng-switch="mediaType">
@@ -100,7 +100,7 @@
                   <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
                     <div ng-switch-when="true">
                       <span ng-bind-html="historyPeer.data.rFullName"></span>
-                      <small class="im_peer_online">{{historyPeer.data | userStatus}}</small>
+                      <small class="im_peer_online" ng-bind="historyPeer.data | userStatus"></small>
                     </div>
                     <div ng-switch-default>
                       <span ng-bind-html="historyPeer.data.rTitle"></span>

@@ -550,7 +550,6 @@ angular.module('myApp.controllers', [])
             !curMessage.action &&
             curMessage.date < prevMessage.date + 900) {
 
-
           var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
           curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
         } else if (prevMessage || !i) {
@@ -823,6 +822,7 @@ angular.module('myApp.controllers', [])
           }
         };
         $scope.history = newHistory;
+        updateHistoryGroups();
       }
     })
 
