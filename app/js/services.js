@@ -3397,3 +3397,76 @@ angular.module('myApp.services', [])
     },
   }
 })
+
+
+.service('ChangelogNotifyService', function (AppConfigManager, $rootScope, $http, $modal) {
+
+  function versionCompare (ver1, ver2) {
+    if (typeof ver1 !== 'string') {
+      ver1 = '';
+    }
+    if (typeof ver2 !== 'string') {
+      ver2 = '';
+    }
+    // console.log('ss', ver1, ver2);
+    ver1 = ver1.replace(/^\s+|\s+$/g, '').split('.');
+    ver2 = ver2.replace(/^\s+|\s+$/g, '').split('.');
+
+    var a = Math.max(ver1.length, ver2.length), i;
+
+    for (i = 0; i < a; i++) {
+      if (ver1[i] == ver2[i]) {
+        continue;
+      }
+      if (ver1[i] > ver2[i]) {
+        return 1;
+      } else {
+        return -1;
+      }
+    }
+
+    return 0;
+  }
+
+  function checkUpdate () {
+    AppConfigManager.get('last_version').then(function (lastVersion) {
+      if (lastVersion != Config.App.version) {
+        $http.get('CHANGELOG.md').then(function (response) {
+          var changeLogText = response.data;
+          var matchesStart = changeLogText.match(/^([\s\S]+?\n)(?=version)/i),
+              changelog = [];
+
+          changeLogText.replace(/(version ([\d\.]+)[\s\S]+?)(?=\nversion|$)/gi, function (whole, versionP, version) {
+            if (versionCompare(version, lastVersion) > 0) {
+              var contents = versionP.split(/\n\s*-{3,}\s*\n/);
+
+              changelog.push({
+                title: contents[0],
+                changes: contents[1].split(/\n?\s*\*\s*/g)
+              });
+            }
+          });
+
+          if (changelog.length) {
+            var $scope = $rootScope.$new();
+
+            $scope.version = Config.App.version;
+            $scope.changelog = changelog;
+
+            $modal.open({
+              templateUrl: 'partials/changelog_modal.html',
+              scope: $scope,
+              windowClass: 'error_modal_window'
+            });
+          }
+
+          AppConfigManager.set({last_version: Config.App.version});
+        })
+      }
+    })
+  }
+
+  return {
+    checkUpdate: checkUpdate
+  }
+})

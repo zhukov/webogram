@@ -1,0 +1,29 @@
+<div class="error_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+
+  <div class="modal-body">
+
+    <h4 class="modal_simple_header">
+      Telegram Web was updated
+    </h4>
+
+    <div ng-repeat="versionChanges in changelog">
+      <h4 ng-bind="versionChanges.title"></h4>
+      <ul ng-repeat="feature in versionChanges.changes">
+        <li ng-bind="feature" ng-if="feature.length"></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <div>
+      <div class="pull-left">
+        New version is <span class="changelog_new_version" ng-bind="version"></span>.
+      </div>
+      <button type="button" class="btn btn-primary" ng-click="$dismiss()">Done</button>
+    </div>
+  </div>
+
+</div>

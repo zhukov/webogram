@@ -220,7 +220,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ErrorService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ChangelogNotifyService, ErrorService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -289,6 +289,8 @@ angular.module('myApp.controllers', [])
         peer: $routeParams.p || false
       };
     }
+
+    ChangelogNotifyService.checkUpdate();
   })
 
   .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ErrorService) {
