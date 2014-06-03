@@ -949,7 +949,8 @@ a.tg_radio_on:hover i.icon-radio {
   padding: 8px 9px;
   border-radius: 0;
 }
-.im_dialogs_scrollable_wrap a.im_dialog:hover {
+.im_dialogs_scrollable_wrap a.im_dialog:hover,
+.im_dialogs_scrollable_wrap a.im_dialog_selected {
   border-radius: 2px;
   background: #f2f6fa;
 }
@@ -957,7 +958,8 @@ a.tg_radio_on:hover i.icon-radio {
   border-radius: 2px;
   background-color: #6490b1;
 }
-.im_dialogs_scrollable_wrap .active a.im_dialog:hover {
+.im_dialogs_scrollable_wrap .active a.im_dialog:hover,
+.im_dialogs_scrollable_wrap .active a.im_dialog_selected {
   background-color: #6490b1;
 }
 
@@ -978,7 +980,8 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialog_message_text {
   color: #808080;
 }
-a.im_dialog:hover .im_dialog_message_text {
+a.im_dialog:hover .im_dialog_message_text,
+a.im_dialog_selected .im_dialog_message_text {
   color: #698192;
 }
 .active a.im_dialog .im_dialog_chat_from_wrap,
@@ -1031,7 +1034,8 @@ a.im_dialog:hover .im_dialog_message_text {
   margin: 10px 0 0;
 }
 
-a.im_dialog:hover .im_dialog_unread {
+a.im_dialog:hover .im_dialog_unread,
+a.im_dialog_selected .im_dialog_unread {
   background: #a3c0d4;
 }
 .active .im_dialog_unread {
@@ -1043,11 +1047,13 @@ a.im_dialog:hover .im_dialog_unread {
   color: #b3b3b3;
   font-size: 0.85em;
 }
-a.im_dialog:hover .im_dialog_date {
+a.im_dialog:hover .im_dialog_date,
+a.im_dialog_selected .im_dialog_date {
   color: #91a6ba;
 }
 .active .im_dialog_date,
-.active a.im_dialog:hover .im_dialog_date {
+.active a.im_dialog:hover .im_dialog_date,
+.active a.im_dialog_selected .im_dialog_date {
   color: #b8d1e4;
 }
 

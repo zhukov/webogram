@@ -565,7 +565,7 @@ angular.module('myApp.controllers', [])
       }
       // console.trace('load history');
 
-      var curJump = jump,
+      var curJump = ++jump,
           inputMediaFilter = $scope.mediaType && {_: inputMediaFilters[$scope.mediaType]},
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID)
