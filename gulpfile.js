@@ -84,15 +84,9 @@ gulp.task('update-version-manifests', function() {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('update-version-settings', function() {
- return gulp.src('app/partials/settings_modal.html')
-    .pipe($.replace(/\bv[\d\.]+\b/, 'v' + pj.version))
-    .pipe(gulp.dest('app/partials'));
-});
-
-gulp.task('update-version-mtproto', function() {
- return gulp.src('app/js/lib/mtproto.js')
-    .pipe($.replace(/'.+?', 'app_version'/, '\'' + pj.version  + '\', \'app_version\''))
+gulp.task('update-version-config', function() {
+ return gulp.src('app/js/lib/config.js')
+    .pipe($.replace(/version: '.*?'/, 'version: \'' + pj.version  + '\''))
     .pipe(gulp.dest('app/js/lib'));
 });
 
@@ -168,7 +162,7 @@ gulp.task('clean', function() {
   return gulp.src(['dist/*', 'app/js/templates.js', '!dist/.git']).pipe($.clean());
 });
 
-gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-mtproto'], function () {
+gulp.task('bump', ['update-version-manifests', 'update-version-config'], function () {
   gulp.start('update-version-comments');
 });
 

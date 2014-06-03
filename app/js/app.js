@@ -7,17 +7,9 @@
 
 'use strict';
 
-window._testMode = location.search.indexOf('test=1') > 0;
-window._debugMode = location.search.indexOf('debug=1') > 0;
-window._osX = (navigator.platform || '').toLowerCase().indexOf('mac') != -1 ||
-              (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1;
-window._retina = window.devicePixelRatio > 1;
-window._mobile = $(window).height() < 600;
-
-if (!window._osX) {
-  $('body').addClass('non_osx');
-}
-$('body').addClass(window._retina ? 'is_2x' : 'is_1x');
+$(document.body)
+  .addClass(Config.Navigator.osX ? 'osx' : 'non_osx')
+  .addClass(Config.Navigator.retina ? 'is_2x' : 'is_1x');
 
 $(window).on('load', function () {
   setTimeout(function () {

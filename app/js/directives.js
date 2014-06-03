@@ -540,7 +540,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
       }
 
-      if (!window._mobile) {
+      if (!Config.Navigator.mobile) {
         $scope.$on('ui_peer_change', focusField);
         $scope.$on('ui_history_focus', focusField);
         $scope.$on('ui_history_change', focusField);
@@ -560,7 +560,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      if (!window._mobile) {
+      if (!Config.Navigator.mobile) {
         focusField();
       }
 
@@ -1020,7 +1020,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myFocused', function(){
     return {
       link: function($scope, element, attrs) {
-        if (window._mobile) {
+        if (Config.Navigator.mobile) {
           return false;
         }
         setTimeout(function () {
@@ -1034,7 +1034,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: function($scope, element, attrs) {
         $scope.$on(attrs.myFocusOn, function () {
-          if (window._mobile) {
+          if (Config.Navigator.mobile) {
             return false;
           }
           onContentLoaded(function () {

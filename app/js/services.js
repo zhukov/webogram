@@ -12,7 +12,7 @@
 angular.module('myApp.services', [])
 
 .service('AppConfigManager', function ($q) {
-  var testPrefix = window._testMode ? 't_' : '';
+  var testPrefix = Config.Modes.test ? 't_' : '';
   var cache = {};
   var useCs = !!(window.chrome && chrome.storage && chrome.storage.local);
   var useLs = !useCs && !!window.localStorage;

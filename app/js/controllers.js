@@ -130,8 +130,8 @@ angular.module('myApp.controllers', [])
           MtpApiManager.invokeApi('auth.sendCode', {
             phone_number: $scope.credentials.phone_full,
             sms_type: 0,
-            api_id: 2496,
-            api_hash: '8da85b0d5bfe62527e5b244c209159c3'
+            api_id: Config.App.id,
+            api_hash: Config.App.hash
           }, options).then(function (sentCode) {
             $scope.progress.enabled = false;
 
@@ -1411,6 +1411,7 @@ angular.module('myApp.controllers', [])
 
     $scope.profile = {};
     $scope.photo = {};
+    $scope.version = Config.App.version;
 
     MtpApiManager.getUserID().then(function (id) {
       $scope.profile = AppUsersManager.getUser(id);
