@@ -47,7 +47,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         searchFocused = e.type == 'focus';
 
         if (!searchFocused) {
-          $(scrollableWrap).find('.im_dialog_selected').removeClass('.im_dialog_selected');
+          $(scrollableWrap).find('.im_dialog_selected').removeClass('im_dialog_selected');
         }
       });
 
