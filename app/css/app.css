@@ -3374,7 +3374,30 @@ ce671b orange
 }
 
 
+.changelog_modal_window .modal-dialog {
+  max-width: 506px;
+}
+.changelog_card_wrap {
+  text-align: center;
+  padding: 12px 0 18px;
+}
+.changelog_header {
+  margin-top: 15px;
+  font-size: 16px;
+}
+.changelog_card {
+  width: 160px;
+  height: 160px;
+  display: block;
+  background: url(../img/changelog/card_wecandoit.png) no-repeat 0 0;
+  background-size: 160px 160px;
+  margin: 0 auto;
+}
 
-.changelog_new_version {
-  font-weight: bold;
+.changelog_version_title {
+  color: #9d9479;
+  background: #efede3;
+}
+.changelog_version_changes_list li {
+  line-height: 20px;
 }

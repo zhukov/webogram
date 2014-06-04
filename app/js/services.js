@@ -3431,42 +3431,33 @@ angular.module('myApp.services', [])
   function checkUpdate () {
     AppConfigManager.get('last_version').then(function (lastVersion) {
       if (lastVersion != Config.App.version) {
-        $http.get('CHANGELOG.md').then(function (response) {
-          var changeLogText = response.data;
-          var matchesStart = changeLogText.match(/^([\s\S]+?\n)(?=version)/i),
-              changelog = [];
-
-          changeLogText.replace(/(version ([\d\.]+)[\s\S]+?)(?=\nversion|$)/gi, function (whole, versionP, version) {
-            if (versionCompare(version, lastVersion) > 0) {
-              var contents = versionP.split(/\n\s*-{3,}\s*\n/);
-
-              changelog.push({
-                title: contents[0],
-                changes: contents[1].split(/\n?\s*\*\s*/g)
-              });
-            }
-          });
-
-          if (changelog.length) {
-            var $scope = $rootScope.$new();
-
-            $scope.version = Config.App.version;
-            $scope.changelog = changelog;
-
-            $modal.open({
-              templateUrl: 'partials/changelog_modal.html',
-              scope: $scope,
-              windowClass: 'error_modal_window'
-            });
-          }
-
-          AppConfigManager.set({last_version: Config.App.version});
-        })
+        showChangelog(lastVersion || '0');
+        AppConfigManager.set({last_version: Config.App.version});
       }
     })
   }
 
+  function showChangelog (lastVersion) {
+    var $scope = $rootScope.$new();
+
+    $scope.lastVersion = lastVersion;
+    $scope.canShowVersion = function (curVersion) {
+      if ($scope.lastVersion === false || $scope.lastVersion === undefined) {
+        return true;
+      }
+
+      return versionCompare(curVersion, lastVersion) > 0;
+    };
+
+    $modal.open({
+      templateUrl: 'partials/changelog_modal.html',
+      scope: $scope,
+      windowClass: 'changelog_modal_window'
+    });
+  }
+
   return {
-    checkUpdate: checkUpdate
+    checkUpdate: checkUpdate,
+    showChangelog: showChangelog
   }
 })

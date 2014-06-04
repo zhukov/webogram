@@ -1409,7 +1409,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ErrorService) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, ErrorService) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -1549,6 +1549,10 @@ angular.module('myApp.controllers', [])
           AppConfigManager.set({send_ctrlenter: true});
         }
         $rootScope.$broadcast('settings_changed');
+      }
+
+      $scope.openChangelog = function () {
+        ChangelogNotifyService.showChangelog(false);
       }
     });
   })
