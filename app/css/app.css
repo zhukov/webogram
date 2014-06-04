@@ -619,7 +619,7 @@ a.tg_radio_on:hover i.icon-radio {
 
 
 .tg_form_group {
-  padding: 8px 0;
+  padding: 6px 0;
 }
 .tg_form_group:first-child {
   padding-top: 0;
@@ -2055,7 +2055,7 @@ img.img_fullsize {
 }
 .user_modal_header {
   font-weight: bold;
-  margin: 0 0 10px;
+  margin: 2px 0 7px;
 }
 .user_modal_status {
   color: #999;
@@ -2639,6 +2639,46 @@ input.tg_range::-moz-range-thumb {
 .icon-volume-outer2 .icon-volume-inner4,
 .icon-volume-outer3 .icon-volume-inner4 {
   display: none;
+}
+
+.settings_about_section_body {
+  padding-right: 0;
+}
+.settings_about_section_body p {
+  margin-top: 7px;
+  margin-bottom: 3px;
+}
+.settings_external_service {
+  line-height: 0;
+  display: inline-block;
+  padding: 7px 9px;
+}
+.icon-github {
+  display: inline-block;
+  width: 59px;
+  height: 18px;
+  background: url(../img/icons/AboutLogos_2x.png) no-repeat 0 -5px;
+  background-size: 60px 136px;
+}
+a:hover .icon-github {
+  background-position: 0 -43px;
+}
+
+.icon-twitter {
+  display: inline-block;
+  width: 20px;
+  height: 15px;
+  margin-top: 1px;
+  background: url(../img/icons/AboutLogos_2x.png) no-repeat 0 -81px;
+  background-size: 60px 136px;
+}
+a:hover .icon-twitter {
+  background-position: 0 -116px;
+}
+
+.is_1x .icon-github,
+.is_1x .icon-twitter {
+  background-image: url(../img/icons/AboutLogos_1x.png);
 }
 
 /* Contacts modal */
@@ -3401,3 +3441,4 @@ ce671b orange
 .changelog_version_changes_list li {
   line-height: 20px;
 }
+

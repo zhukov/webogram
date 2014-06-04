@@ -56,6 +56,16 @@ angular.module('myApp.directives', ['myApp.filters'])
           return true;
         }
 
+        if (e.keyCode == 36 &&  !e.shiftKey && !e.ctrlKey && e.altKey) { // Alt + Home
+          var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a')[0];
+          if (currentSelected) {
+            currentSelected.click();
+            scrollableWrap.scrollTop = 0;
+            $(dialogsWrap).nanoScroller({flash: true});
+          }
+          return cancelEvent(e);
+        }
+
         if (e.keyCode == 27 || e.keyCode == 9 && e.shiftKey) { // ESC or Shift + Tab
           if (!searchFocused) {
             searchField.focus();
