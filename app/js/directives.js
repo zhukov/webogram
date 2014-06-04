@@ -634,6 +634,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       });
 
+      $('.im_submit', element).on('mousedown', function (e) {
+        $(element).trigger('submit');
+        $(element).trigger('message_send');
+        return cancelEvent(e);
+      });
+
       var lastTyping = 0;
       $(editorElement).on('keyup', function (e) {
         var now = tsNow();
