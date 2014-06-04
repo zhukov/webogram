@@ -2914,9 +2914,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   .tg_page_head .navbar > .container .navbar-brand {
     padding-left: 9px;
   }
-  .im_history_panel_info_link {
-    display: none;
-  }
   .im_history_panel_edit_link {
     margin-right: 0;
   }
@@ -2934,7 +2931,12 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
     -webkit-box-shadow: none;
     margin: 30px auto 20px;
   }
+}
 
+@media (max-width: 640px) {
+  .im_page_footer {
+    display: none;
+  }
 
   .im_panel_own_photo,
   .im_panel_peer_photo {
@@ -2954,6 +2956,9 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   }
   .im_history_typing {
     padding: 0 15px 0 60px;
+  }
+  .im_history_panel_info_link {
+    display: none;
   }
 
   .im_send_form {
@@ -2975,19 +2980,6 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
   }
   .im_edit_panel_wrap {
     margin: 0 5px;
-    padding-bottom: 34px;
-  }
-}
-
-@media (max-height: 600px) {
-  .im_page_footer {
-    display: none;
-  }
-
-  .im_send_panel_wrap {
-    padding-bottom: 10px;
-  }
-  .im_edit_panel_wrap {
     padding-bottom: 18px;
   }
 
@@ -2995,9 +2987,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
     min-height: 34px;
     max-height: 150px;
   }
-}
 
-@media (max-width: 640px) {
   .im_dialog_peer {
     white-space: normal;
     height: 2.84em;
