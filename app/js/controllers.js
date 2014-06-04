@@ -1017,7 +1017,6 @@ angular.module('myApp.controllers', [])
       if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
         list = searchCachedResult.history;
         maxID = list[list.length - 1];
-        hasMore = list.length < searchCachedResult.count;
 
         updatePrevNext();
       }
@@ -1050,10 +1049,14 @@ angular.module('myApp.controllers', [])
       if (loadingPromise) return loadingPromise;
 
       return loadingPromise = AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, maxID).then(function (searchResult) {
-        maxID = searchResult.history[searchResult.history.length - 1];
-        list = list.concat(searchResult.history);
+        if (searchResult.history.length) {
+          maxID = searchResult.history[searchResult.history.length - 1];
+          list = list.concat(searchResult.history);
+          hasMore = list.length < searchResult.count;
+        } else {
+          hasMore = false;
+        }
 
-        hasMore = list.length < searchResult.count;
         updatePrevNext();
         loadingPromise = false;
       });
