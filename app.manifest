@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Fri May 30 2014 18:56:26 GMT+0400 (MSK)
+# Time: Wed Jun 04 2014 14:15:10 GMT+0400 (MSK)
 
 
 CACHE:
@@ -29,6 +29,7 @@ img/logo_share.png
 img/sound_a.wav
 js/app.js
 js/app.js.map
+img/changelog/card_wecandoit.png
 img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
@@ -60,8 +61,8 @@ js/lib/aes_worker.js
 js/lib/mtproto.js
 js/lib/pq_worker.js
 js/lib/sha1_worker.js
-vendor/closure/long.js
 vendor/console-polyfill/console-polyfill.js
+vendor/closure/long.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.2 - messaging web application for MTProto
+ * Webogram v0.1.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -442,7 +442,7 @@ function TLSerialization (options) {
 
   this.createBuffer();
 
-  // this.debug = options.debug !== undefined ? options.debug : window._debugMode;
+  // this.debug = options.debug !== undefined ? options.debug : Config.Modes.debug;
   this.mtproto = options.mtproto || false;
   return this;
 }
@@ -726,7 +726,7 @@ function TLDeserialization (buffer, options) {
   this.intView  = new Uint32Array(this.buffer);
   this.byteView = new Uint8Array(this.buffer);
 
-  // this.debug = options.debug !== undefined ? options.debug : window._debugMode;
+  // this.debug = options.debug !== undefined ? options.debug : Config.Modes.debug;
   this.mtproto = options.mtproto || false;
   return this;
 }
@@ -1003,7 +1003,7 @@ TLDeserialization.prototype.fetchEnd = function () {
 if (typeof angular != 'undefined') angular.module('mtproto.services', ['myApp.services']).
 
 factory('MtpDcConfigurator', function () {
-  var dcOptions = window._testMode
+  var dcOptions = Config.Modes.test
     ? [
       {id: 1, host: '173.240.5.253', port: 80},
       {id: 2, host: '149.154.167.40', port: 80},
@@ -1753,7 +1753,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       body: serializer.getBytes()
     };
 
-    if (window._debugMode) {
+    if (Config.Modes.debug) {
       console.log(dT(), 'MT call', method, params, messageID, seqNo);
     }
 
@@ -1774,7 +1774,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       body: serializer.getBytes()
     };
 
-    if (window._debugMode) {
+    if (Config.Modes.debug) {
       console.log(dT(), 'MT message', object, messageID, seqNo);
     }
 
@@ -1787,10 +1787,10 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     if (!this.connectionInited) {
       serializer.storeInt(0x2b9b08fa, 'invokeWithLayer14');
       serializer.storeInt(0x69796de9, 'initConnection');
-      serializer.storeInt(2496, 'api_id');
+      serializer.storeInt(Config.App.id, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');
       serializer.storeString(navigator.platform  || 'Unknown Platform', 'system_version');
-      serializer.storeString('0.1.2', 'app_version');
+      serializer.storeString(Config.App.version, 'app_version');
       serializer.storeString(navigator.language || 'en', 'lang_code');
     }
 
@@ -1810,7 +1810,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
       isAPI: true
     };
 
-    if (window._debugMode) {
+    if (Config.Modes.debug) {
       console.log(dT(), 'Api call', method, params, messageID, seqNo, options);
     } else {
       console.log(dT(), 'Api call', method, messageID, seqNo);
@@ -2075,7 +2075,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
 
       this.sentMessages[message.msg_id] = containerSentMessage;
 
-      if (window._debugMode) {
+      if (Config.Modes.debug) {
         console.log(dT(), 'Container', innerMessages, message.msg_id, message.seq_no);
       }
     } else {
@@ -2091,7 +2091,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     this.sendEncryptedRequest(message).then(function (result) {
       self.toggleOffline(false);
       self.parseResponse(result.data).then(function (response) {
-        if (window._debugMode) {
+        if (Config.Modes.debug) {
           console.log(dT(), 'Server response', self.dcID, response);
         }
 
@@ -2483,7 +2483,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
             }
           } else {
             if (deferred) {
-              if (window._debugMode) {
+              if (Config.Modes.debug) {
                 console.log(dT(), 'Rpc response', message.result);
               } else {
                 console.log(dT(), 'Rpc response', message.result._);
@@ -2849,8 +2849,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
       fileWriteBytes(fileWriter, fromFileEntry).then(function () {
         deferred.resolve(fileWriter);
       }, function (e) {
-        fileWriter.truncate(0);
         deferred.reject(e);
+        fileWriter.truncate(0);
       });
     }, function (e) {
       deferred.reject(e);
@@ -2903,8 +2903,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
         };
 
     requestFS().then(function () {
@@ -2940,8 +2940,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         cacheFileWriter,
         errorHandler = function (error) {
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
         },
         doDownload = function () {
           cachedFs.root.getFile(fileName, {create: true}, function(fileEntry) {
@@ -3019,8 +3019,8 @@ factory('MtpApiFileManager', function (MtpApiManager, $q, $window) {
         errorHandler = function (error) {
           // console.error('Dl Error', error);
           deferred.reject(error);
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
           errorHandler = angular.noop;
+          if (cacheFileWriter) cacheFileWriter.truncate(0);
         },
         saveToFileEntry = function (fileEntry) {
           fileEntry.createWriter(function (fileWriter) {
