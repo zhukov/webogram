@@ -63,6 +63,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
           return cancelEvent(e);
         }
+        if (e.keyCode >= 96 && e.keyCode <= 105 && !e.shiftKey && e.altKey) { // Alt + [0-9 numpad keys]
+          var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a')[(e.keyCode - 96 || 10) - 1];
+          if (currentSelected) {
+            currentSelected.click();
+          }
+          return cancelEvent(e);
+        }
 
         if (e.keyCode == 27 || e.keyCode == 9 && e.shiftKey) { // ESC or Shift + Tab
           if (!searchFocused) {
