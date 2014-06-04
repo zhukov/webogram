@@ -172,8 +172,13 @@
 		 This function was added by Igor Zhukov to save recent used emojis.
 		 */
 	util.emojiInserted = function (emojiKey, menu) {
-		var curEmojisStr = localStorage.getItem('emojis_recent'),
-				curEmojis = curEmojisStr && curEmojisStr.split(',') || [],
+		try {
+			var curEmojisStr = localStorage.getItem('emojis_recent');
+		} catch (e) {
+			return false;
+		}
+
+		var curEmojis = curEmojisStr && curEmojisStr.split(',') || [],
 				pos = curEmojis.indexOf(emojiKey);
 
 		if (!pos) {
@@ -608,14 +613,16 @@
 				}
 			}
 		} else {
-			var curEmojis = (localStorage.getItem('emojis_recent') || '').split(','),
-					key, i;
-			for (i = 0; i < curEmojis.length; i++) {
-				key = curEmojis[i]
-				if (options[key]) {
-					html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key]) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+			try {
+				var curEmojis = (localStorage.getItem('emojis_recent') || '').split(','),
+						key, i;
+				for (i = 0; i < curEmojis.length; i++) {
+					key = curEmojis[i]
+					if (options[key]) {
+						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key]) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+					}
 				}
-			}
+			} catch (e) {}
 		}
 
 		this.$items.html(html.join(''));
@@ -632,8 +639,12 @@
 			 */
 	EmojiMenu.prototype.updateRecentTab = function(curEmojis) {
 		if (curEmojis === undefined) {
-			var curEmojisStr = localStorage.getItem('emojis_recent');
-			curEmojis = curEmojisStr && curEmojisStr.split(',') || [];
+			try {
+				var curEmojisStr = localStorage.getItem('emojis_recent');
+				curEmojis = curEmojisStr && curEmojisStr.split(',') || [];
+			} catch (e) {
+				curEmojis = [];
+			}
 		}
 
 		if (this.hasRecent != (curEmojis.length > 1)) {
