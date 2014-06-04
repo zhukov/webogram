@@ -380,6 +380,7 @@ angular.module('myApp.services', [])
     saveApiUsers: saveApiUsers,
     saveApiUser: saveApiUser,
     getUser: getUser,
+    getUserInput: getUserInput,
     getUserPhoto: getUserPhoto,
     getUserString: getUserString,
     getUserSearchText: getUserSearchText,
@@ -1410,6 +1411,10 @@ angular.module('myApp.services', [])
         case 'inputMediaContact':
           media = angular.extend({}, inputMedia, {_: 'messageMediaContact'});
           break;
+
+        case 'inputMediaPhoto':
+          media = {photo: AppPhotosManager.getPhoto(inputMedia.id.id)};
+          break;
       }
 
       var message = {
@@ -1982,7 +1987,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiFileManager, AppUsersManager) {
+.service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager) {
   var photos = {};
 
   function savePhoto (apiPhoto) {
@@ -2016,6 +2021,56 @@ angular.module('myApp.services', [])
     return bestPhotoSize;
   }
 
+  function getUserPhotos (inputUser, maxID, limit) {
+    return MtpApiManager.invokeApi('photos.getUserPhotos', {
+      user_id: inputUser,
+      offset: 0,
+      limit: limit || 20,
+      max_id: maxID || 0
+    }).then(function (photosResult) {
+      AppUsersManager.saveApiUsers(photosResult.users);
+      var photoIDs = [];
+      for (var i = 0; i < photosResult.photos.length; i++) {
+        savePhoto(photosResult.photos[i]);
+        photoIDs.push(photosResult.photos[i].id)
+      }
+
+      return {
+        count: photosResult.count || photosResult.photos.length,
+        photos: photoIDs
+      };
+    });
+  }
+
+  function preloadPhoto (photoID) {
+    if (!photos[photoID]) {
+      return;
+    }
+    var photo = photos[photoID],
+        fullWidth = $(window).width() - 36,
+        fullHeight = $($window).height() - 150,
+        fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight);
+
+    if (fullPhotoSize && !fullPhotoSize.preloaded) {
+      fullPhotoSize.preloaded = true;
+      if (fullPhotoSize.size) {
+        MtpApiFileManager.downloadFile(fullPhotoSize.location.dc_id, {
+          _: 'inputFileLocation',
+          volume_id: fullPhotoSize.location.volume_id,
+          local_id: fullPhotoSize.location.local_id,
+          secret: fullPhotoSize.location.secret
+        }, fullPhotoSize.size);
+      } else {
+        MtpApiFileManager.downloadSmallFile(fullPhotoSize.location);
+      }
+    }
+  };
+  $rootScope.preloadPhoto = preloadPhoto;
+
+  function getPhoto (photoID) {
+    return photos[photoID] || {_: 'photoEmpty'};
+  }
+
   function wrapForHistory (photoID) {
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
         width = 260,
@@ -2046,31 +2101,6 @@ angular.module('myApp.services', [])
 
     return photo;
   }
-
-  function preloadPhoto (photoID) {
-    if (!photos[photoID]) {
-      return;
-    }
-    var photo = photos[photoID],
-        fullWidth = $(window).width() - 36,
-        fullHeight = $($window).height() - 150,
-        fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight);
-
-    if (fullPhotoSize && !fullPhotoSize.preloaded) {
-      fullPhotoSize.preloaded = true;
-      if (fullPhotoSize.size) {
-        MtpApiFileManager.downloadFile(fullPhotoSize.location.dc_id, {
-          _: 'inputFileLocation',
-          volume_id: fullPhotoSize.location.volume_id,
-          local_id: fullPhotoSize.location.local_id,
-          secret: fullPhotoSize.location.secret
-        }, fullPhotoSize.size);
-      } else {
-        MtpApiFileManager.downloadSmallFile(fullPhotoSize.location);
-      }
-    }
-  };
-  $rootScope.preloadPhoto = preloadPhoto;
 
   function wrapForFull (photoID) {
     var photo = wrapForHistory(photoID),
@@ -2117,14 +2147,23 @@ angular.module('myApp.services', [])
     return photo;
   }
 
-  function openPhoto (photoID, messageID) {
+  function openPhoto (photoID, peerListID) {
+    if (!photoID || photoID === '0') {
+      return false;
+    }
+
     var scope = $rootScope.$new(true);
+
     scope.photoID = photoID;
-    scope.messageID = messageID;
+    if (peerListID < 0) {
+      scope.userID = -peerListID;
+    } else{
+      scope.messageID = peerListID;
+    }
 
     var modalInstance = $modal.open({
       templateUrl: 'partials/photo_modal.html',
-      controller: 'PhotoModalController',
+      controller: scope.userID ? 'UserpicModalController' : 'PhotoModalController',
       scope: scope,
       windowClass: 'photo_modal_window'
     });
@@ -2195,6 +2234,8 @@ angular.module('myApp.services', [])
   return {
     savePhoto: savePhoto,
     preloadPhoto: preloadPhoto,
+    getUserPhotos: getUserPhotos,
+    getPhoto: getPhoto,
     wrapForHistory: wrapForHistory,
     wrapForFull: wrapForFull,
     openPhoto: openPhoto,

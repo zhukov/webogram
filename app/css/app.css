@@ -38,6 +38,10 @@ a:hover {
 a:hover {
   cursor: pointer;
 }
+a.disabled {
+  cursor: default;
+  pointer-events: none;
+}
 .form-control {
   color: #000;
   border: 1px solid #d9dbde;
@@ -2039,9 +2043,9 @@ img.img_fullsize {
   margin-bottom: 15px;
 }
 .user_modal_image_wrap {
+  display: block;
   width: 100px;
   margin-right: 22px;
-  display: block;
   overflow: hidden;
   border-radius: 3px;
 }

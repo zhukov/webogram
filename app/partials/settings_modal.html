@@ -6,13 +6,13 @@
 
     <div class="user_modal_photo_profile_wrap">
 
-      <div class="user_modal_image_wrap pull-left">
+      <a href="" ng-click="openPhoto(photo.id, -profile.id)" class="user_modal_image_wrap pull-left" ng-class="{disabled: !photo.id}">
         <img
           class="user_modal_image"
           my-load-thumb
           thumb="photo"
         />
-      </div>
+      </a>
 
       <div class="user_modal_info_wrap clearfix">
         <h4 class="user_modal_header" ng-bind-html="profile.rFullName"></h4>

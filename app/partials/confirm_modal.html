@@ -42,7 +42,7 @@
     <a class="btn btn-link" ng-click="$dismiss()" ng-switch="type">
       <span ng-switch-default>Cancel</span>
     </a>
-    <button type="button" class="btn btn-primary" ng-switch="type" ng-click="$close()">
+    <button type="button" class="btn btn-primary" ng-switch="type" ng-click="$close()" my-focused>
       <span ng-switch-when="LOGOUT">Log Out</span>
       <span ng-switch-when="HISTORY_FLUSH">Delete Chat</span>
       <span ng-switch-when="FILES_CLIPBOARD_PASTE">Send</span>

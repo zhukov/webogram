@@ -1017,6 +1017,7 @@ angular.module('myApp.controllers', [])
       if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
         list = searchCachedResult.history;
         maxID = list[list.length - 1];
+        hasMore = list.length < searchCachedResult.count;
 
         updatePrevNext();
       }
@@ -1052,7 +1053,7 @@ angular.module('myApp.controllers', [])
         maxID = searchResult.history[searchResult.history.length - 1];
         list = list.concat(searchResult.history);
 
-        hasMore = searchResult.history.length || list.length < searchResult.count;
+        hasMore = list.length < searchResult.count;
         updatePrevNext();
         loadingPromise = false;
       });
@@ -1062,6 +1063,7 @@ angular.module('myApp.controllers', [])
       var index = list.indexOf($scope.messageID);
       $scope.nav.hasNext = index > 0;
       $scope.nav.hasPrev = hasMore || index < list.length - 1;
+      $scope.canForward = $scope.canDelete = $scope.messageID > 0;
     };
 
     $scope.nav.next = function () {
@@ -1125,6 +1127,116 @@ angular.module('myApp.controllers', [])
 
   })
 
+  .controller('UserpicModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppUsersManager, AppPeersManager, AppMessagesManager, PeersSelectService, ErrorService) {
+
+    $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
+    $scope.nav = {};
+    $scope.canForward = true;
+
+    var inputUser = AppUsersManager.getUserInput($scope.userID),
+        list = [$scope.photoID],
+        maxID = $scope.photoID,
+        hasMore = true;
+
+    updatePrevNext();
+
+    AppPhotosManager.getUserPhotos(inputUser, 0, 1000).then(function (userpicCachedResult) {
+      if (userpicCachedResult.photos.indexOf($scope.photoID) >= 0) {
+        list = userpicCachedResult.photos;
+        maxID = list[list.length - 1];
+        hasMore = list.length < userpicCachedResult.count;
+
+        updatePrevNext();
+      }
+    });
+
+
+    var jump = 0;
+    function movePosition (sign) {
+      var curIndex = list.indexOf($scope.photoID),
+          index = curIndex >= 0 ? curIndex + sign : 0,
+          curJump = ++jump;
+
+      var promise = index >= list.length ? loadMore() : $q.when();
+      promise.then(function () {
+        if (curJump != jump) {
+          return;
+        }
+
+        $scope.photoID = list[index];
+        $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
+
+        updatePrevNext();
+      });
+    };
+
+    var loadingPromise = false;
+    function loadMore () {
+      if (loadingPromise) return loadingPromise;
+
+      return loadingPromise = AppPhotosManager.getUserPhotos(inputUser, maxID).then(function (userpicResult) {
+        maxID = userpicResult.photos[userpicResult.photos.length - 1];
+        list = list.concat(userpicResult.photos);
+
+        hasMore = list.length < userpicResult.count;
+
+        updatePrevNext();
+        loadingPromise = false;
+      }, function () {
+        loadingPromise = false;
+      });
+    };
+
+    function updatePrevNext () {
+      var index = list.indexOf($scope.photoID);
+      $scope.nav.hasNext = index > 0;
+      $scope.nav.hasPrev = hasMore || index < list.length - 1;
+    };
+
+    $scope.nav.next = function () {
+      if (!$scope.nav.hasNext) {
+        return false;
+      }
+
+      movePosition(-1);
+    };
+
+    $scope.nav.prev = function () {
+      if (!$scope.nav.hasPrev) {
+        return false;
+      }
+      movePosition(+1);
+    };
+
+    $scope.forward = function () {
+      var messageID = $scope.photoID;
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.sendOther(peerID, {
+          _: 'inputMediaPhoto',
+          id: {
+            _: 'inputPhoto',
+            id: $scope.photoID,
+            access_hash: $scope.photo.access_hash,
+          }
+        });
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
+      });
+    };
+
+    $scope.delete = function () {
+      var messageID = $scope.photoID;
+      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
+        AppMessagesManager.deleteMessages([messageID]);
+      });
+    };
+
+    $scope.download = function () {
+      AppPhotosManager.downloadPhoto($scope.photoID);
+    };
+
+  })
+
   .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppVideoManager, AppPeersManager, ErrorService) {
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
 
@@ -1156,7 +1268,7 @@ angular.module('myApp.controllers', [])
     });
   })
 
-  .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, NotificationsManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
+  .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
 
     var peerString = AppUsersManager.getUserString($scope.userID);
 
@@ -1165,20 +1277,31 @@ angular.module('myApp.controllers', [])
 
     $scope.settings = {notifications: true};
 
-    NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
-      $scope.settings.notifications = !muted;
+    MtpApiManager.invokeApi('users.getFullUser', {
+      id: AppUsersManager.getUserInput($scope.userID)
+    }).then(function (userFullResult) {
+      AppUsersManager.saveApiUser(userFullResult.user);
+      AppPhotosManager.savePhoto(userFullResult.profile_photo);
+      if (userFullResult.profile_photo._ != 'photoEmpty') {
+        $scope.userPhoto.id = userFullResult.profile_photo.id;
+      }
 
-      $scope.$watch('settings.notifications', function(newValue, oldValue) {
-        if (newValue === oldValue) {
-          return false;
-        }
-        NotificationsManager.getPeerSettings($scope.userID).then(function (settings) {
-          if (newValue) {
-            settings.mute_until = 0;
-          } else {
-            settings.mute_until = 2000000000;
+      NotificationsManager.savePeerSettings($scope.userID, userFullResult.notify_settings);
+      NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
+        $scope.settings.notifications = !muted;
+
+        $scope.$watch('settings.notifications', function(newValue, oldValue) {
+          if (newValue === oldValue) {
+            return false;
           }
-          NotificationsManager.updatePeerSettings($scope.userID, settings);
+          NotificationsManager.getPeerSettings($scope.userID).then(function (settings) {
+            if (newValue) {
+              settings.mute_until = 0;
+            } else {
+              settings.mute_until = 2000000000;
+            }
+            NotificationsManager.updatePeerSettings($scope.userID, settings);
+          });
         });
       });
     });
@@ -1409,7 +1532,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, ErrorService) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, ErrorService) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -1418,6 +1541,16 @@ angular.module('myApp.controllers', [])
     MtpApiManager.getUserID().then(function (id) {
       $scope.profile = AppUsersManager.getUser(id);
       $scope.photo = AppUsersManager.getUserPhoto(id, 'User');
+    });
+
+    MtpApiManager.invokeApi('users.getFullUser', {
+      id: {_: 'inputUserSelf'}
+    }).then(function (userFullResult) {
+      AppUsersManager.saveApiUser(userFullResult.user);
+      AppPhotosManager.savePhoto(userFullResult.profile_photo);
+      if (userFullResult.profile_photo._ != 'photoEmpty') {
+        $scope.photo.id = userFullResult.profile_photo.id;
+      }
     });
 
     $scope.notify = {};
@@ -1550,11 +1683,11 @@ angular.module('myApp.controllers', [])
         }
         $rootScope.$broadcast('settings_changed');
       }
-
-      $scope.openChangelog = function () {
-        ChangelogNotifyService.showChangelog(false);
-      }
     });
+
+    $scope.openChangelog = function () {
+      ChangelogNotifyService.showChangelog(false);
+    }
   })
 
   .controller('ProfileEditModalController', function ($rootScope, $scope, $timeout, $modal, $modalInstance, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager) {
@@ -1599,7 +1732,7 @@ angular.module('myApp.controllers', [])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager) {
+  .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager, ErrorService) {
 
     $scope.contacts = [];
     $scope.search = {};
@@ -1678,6 +1811,10 @@ angular.module('myApp.controllers', [])
       }).result.then(function (foundUserID) {
         if (foundUserID) {
           updateContacts($scope.search && $scope.search.query || '');
+        } else {
+          ErrorService.show({
+            error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
+          });
         }
       });
     };

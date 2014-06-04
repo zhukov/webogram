@@ -47,6 +47,9 @@
         Sorry, there is no <strong>Telegram</strong> account for {{phone | phoneNumber}}<br/><br/>
         Please <strong>sign up</strong> using our mobile apps for <a href="https://telegram.org/" target="_blank">iOS</a> or <a href="https://telegram.org/" target="_blank">Android</a>.
       </span>
+      <span ng-switch-when="USER_NOT_USING_TELEGRAM">
+        Sorry, there is no <strong>Telegram</strong> account with the phone number you provided.
+      </span>
 
 
       <div ng-switch-default ng-switch="error.code">
