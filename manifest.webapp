@@ -1,7 +1,7 @@
 {
   "name": "Webogram",
   "description": "Webogram – UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "launch_path": "/index.html",
   "developer": {
     "name": "Igor Zhukov",
