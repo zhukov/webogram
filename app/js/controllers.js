@@ -220,7 +220,7 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ErrorService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ChangelogNotifyService, ErrorService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -289,6 +289,8 @@ angular.module('myApp.controllers', [])
         peer: $routeParams.p || false
       };
     }
+
+    ChangelogNotifyService.checkUpdate();
   })
 
   .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ErrorService) {
@@ -1407,7 +1409,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ErrorService) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, MtpApiManager, AppConfigManager, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, ErrorService) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -1547,6 +1549,10 @@ angular.module('myApp.controllers', [])
           AppConfigManager.set({send_ctrlenter: true});
         }
         $rootScope.$broadcast('settings_changed');
+      }
+
+      $scope.openChangelog = function () {
+        ChangelogNotifyService.showChangelog(false);
       }
     });
   })

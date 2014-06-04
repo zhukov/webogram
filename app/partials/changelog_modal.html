@@ -1,0 +1,48 @@
+<div class="changelog_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="changelog_card_wrap" ng-switch="lastVersion === false">
+      <div ng-switch-when="true">
+        <div class="changelog_card"></div>
+        <h2 class="changelog_header"><strong>Telegram</strong> recent updates</h2>
+      </div>
+      <div ng-switch-default>
+        <div class="changelog_card"></div>
+        <h2 class="changelog_header"><strong>Telegram</strong> has been updated!</h2>
+      </div>
+    </div>
+
+    <div class="changelog_versions_wrap">
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          <span class="pull-right">current version</span>
+          Version 0.1.3
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added this welcome message</li>
+            <li>Added keyboard shortcuts:</li>
+            <ul>
+              <li><strong>Tab</strong> - set focus to message field</li>
+              <li><strong>Esc</strong> or <strong>Shift+Tab</strong> - focus search field</li>
+              <li><strong>Up/Down</strong> (while in search field) - move around dialogs</li>
+              <li><strong>Enter</strong> (while in search field) - open selected or first dialog</li>
+              <li><strong>Alt+[0-9]</strong> - Switch to Nth dialog</li>
+              <li><strong>Alt+Up/Down</strong> - move to previous/next dialog</li>
+            </ul>
+            <li>Improved messages grouping</li>
+            <li>Fixed video modal position bug</li>
+            <li>Fixed mobile focus issues</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
