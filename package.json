@@ -1,6 +1,6 @@
 {
   "name": "webogram",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Telegram UNOFFICIAL Web App",
   "main": "app/index.html",
   "single-instance": true,
