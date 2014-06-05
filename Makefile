@@ -1,4 +1,5 @@
 package:
+	./node_modules/gulp/bin/gulp.js clean
 	./node_modules/gulp/bin/gulp.js package
 	find dist | grep "DS_Store" | xargs rm -rf
 	cd dist && zip -r ../releases/webogram_v$(version).zip .
