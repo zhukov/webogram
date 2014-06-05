@@ -1123,9 +1123,9 @@ a.im_dialog_selected .im_dialog_date {
   margin: 0 23px 0 15px;
   cursor: pointer;
   position: relative;
-  -webkit-box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.12);
-  -moz-box-shadow:    0px 2px 0px rgba(0, 0, 0, 0.12);
-  box-shadow:         0px 2px 0px rgba(0, 0, 0, 0.12);
+  -webkit-box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.12);
+  -moz-box-shadow:    0px 1px 0px rgba(0, 0, 0, 0.12);
+  box-shadow:         0px 1px 0px rgba(0, 0, 0, 0.12);
 
   position: relative;
   z-index: 2;
