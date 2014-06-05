@@ -6,6 +6,7 @@
 node_modules
 npm-debug.log
 dist
+dist_package
 releases
 webogram*.zip
 app/js/templates.js

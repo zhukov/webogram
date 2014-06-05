@@ -1,8 +1,9 @@
 package:
 	./node_modules/gulp/bin/gulp.js clean
 	./node_modules/gulp/bin/gulp.js package
-	find dist | grep "DS_Store" | xargs rm -rf
-	cd dist && zip -r ../releases/webogram_v$(version).zip .
+	cp -r dist dist_package
+	find dist_package | grep "\.git\|DS_Store" | xargs rm -rf
+	cd dist_package && zip -r ../releases/webogram_v$(version).zip .
 
 publish:
 	./node_modules/gulp/bin/gulp.js clean
