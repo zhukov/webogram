@@ -139,7 +139,7 @@ angular.module('myApp.controllers', [])
             $scope.credentials.phone_occupied = sentCode.phone_registered;
             $scope.error = {};
 
-            $scope.callPending.remaining = sentCode.send_call_timeout;
+            $scope.callPending.remaining = sentCode.send_call_timeout || 60;
             callCheck();
 
           }, function (error) {
@@ -171,8 +171,16 @@ angular.module('myApp.controllers', [])
           }
         });
       });
+    }
 
 
+    $scope.editPhone = function () {
+      $timeout.cancel(callTimeout);
+
+      delete $scope.credentials.phone_code_hash;
+      delete $scope.credentials.phone_occupied;
+      delete $scope.callPending.remaining;
+      delete $scope.callPending.success;
     }
 
     $scope.logIn = function (forceSignUp) {

@@ -66,7 +66,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return cancelEvent(e);
         }
 
-        if (e.keyCode == 27 || e.keyCode == 9 && e.shiftKey) { // ESC or Shift + Tab
+        if (e.keyCode == 27 || e.keyCode == 9 && e.shiftKey && !e.ctrlKey && !e.metaKey) { // ESC or Shift + Tab
           if (!searchFocused) {
             searchField.focus();
             if (searchField.value) {
@@ -672,7 +672,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       function onKeyDown(e) {
-        if (e.keyCode == 9 && !e.shiftKey && !$modalStack.getTop()) { // TAB
+        if (e.keyCode == 9 && !e.shiftKey && !e.ctrlKey && !e.metaKey && !$modalStack.getTop()) { // TAB
           editorElement.focus();
           return cancelEvent(e);
         }
