@@ -2,7 +2,8 @@
 
 
 <div class="login_form_wrap" my-vertical-position="0.4">
-  <div class="error" ng-if="error.message">{{ error.message }}</div>
+  <div class="error" ng-if="error.message" ng-bind="error.message"></div>
+
   <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
     <h3 class="login_form_head">Sign in</h3>
     <p class="login_form_lead">Please choose your country and enter your full phone number.</p>
@@ -25,8 +26,9 @@
     </button>
   </form>
 
-  <form name="myLoginForm" ng-if="credentials.phone_code_hash" ng-submit="logIn()">
-    <h3 class="login_form_head"><span ng-bind="credentials.phone_country"></span> <span ng-bind="credentials.phone_number"></span> <small>(<a ng-click="editPhone()">edit</a>)</small></h3>
+  <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
+    <h3 class="login_form_head"><span ng-bind="credentials.phone_country"></span> <span ng-bind="credentials.phone_number"></span></h3>
+    <div class="login_edit_phone"><a ng-click="editPhone()">Edit phone number</a></div>
     <p class="login_form_lead">We have sent you a code via SMS.<br/>Please enter it below.</p>
 
     <p class="login_form_lead">
@@ -45,4 +47,25 @@
       <span ng-switch-default>Next</span>
     </button>
   </form>
+
+  <form name="myFullNameForm" ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" ng-submit="logIn(true)">
+    <h3 class="login_form_head">Your info</h3>
+    <p class="login_form_lead">Please enter your full name to set up a Telegram account.</p>
+
+    <div class="form-group login_first_name_wrap" ng-class="{'has-error': error.field == 'first_name'}">
+      <label class="control-label" for="first_name" ng-if="error.field == 'first_name'">Incorrect first name</label>
+      <input my-focused class="form-control" name="first_name" ng-model="credentials.first_name" placeholder="First name" autocomplete="off" required>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': error.field == 'last_name'}">
+      <label class="control-label" for="last_name" ng-if="error.field == 'last_name'">Incorrect last name</label>
+      <input class="form-control" name="last_name" ng-model="credentials.last_name" placeholder="Last name" autocomplete="off">
+    </div>
+
+    <button class="btn btn-primary btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" ng-switch="progress.enabled">
+      <span ng-switch-when="true">Signing in<span my-loading-dots></span></span>
+      <span ng-switch-default>Sign up</span>
+    </button>
+  </form>
+
 </div>

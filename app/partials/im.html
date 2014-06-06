@@ -13,9 +13,9 @@
             <span class="icon-bar"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a href="" ng-click="openGroup()">New Group</a></li>
-            <li><a href="" ng-click="openContacts()">Contacts</a></li>
-            <li><a href="" ng-click="openSettings()">Settings</a></li>
+            <li><a ng-click="openGroup()">New Group</a></li>
+            <li><a ng-click="openContacts()">Contacts</a></li>
+            <li><a ng-click="openSettings()">Settings</a></li>
           </ul>
         </div>
         <div class="im_dialogs_search">
@@ -26,9 +26,17 @@
       <div my-dialogs-list class="im_dialogs_col">
         <div class="im_dialogs_wrap nano">
           <div class="im_dialogs_scrollable_wrap content">
+
+            <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts">
+              <h3 class="im_dialogs_empty_header">No contacts yet</h3>
+              <p class="im_dialogs_empty_lead">Get started by adding a contact to chat with</p>
+              <button type="button" class="btn btn-primary btn-sm" ng-click="importContact()">Add contact</button>
+            </div>
+
             <ul class="nav nav-pills nav-stacked">
               <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
             </ul>
+
             <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
               <h5>Contacts</h5>
               <ul class="nav nav-pills nav-stacked">
@@ -53,14 +61,22 @@
                 </li>
               </ul>
             </div>
+
           </div>
         </div>
       </div>
     </div>
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
-      <div ng-show="state.notSelected" class="im_history_not_selected" my-vertical-position="0.35">
-        Please select a chat to start messaging
+      <div ng-show="state.notSelected" ng-switch="isEmpty.contacts &amp;&amp; isEmpty.dialogs">
+        <div ng-switch-when="true" class="im_history_no_dialogs_wrap">
+          <h3 class="im_dialogs_empty_header">Get started</h3>
+          <p class="im_dialogs_empty_lead">Welcome to Telegram Web. You can always set your profile photo and change your name in Settings.</p>
+          <button type="button" class="btn btn-primary btn-sm" ng-click="openSettings()">Open Settings</button>
+        </div>
+        <div ng-switch-default class="im_history_not_selected" my-vertical-position="0.35">
+          Please select a chat to start messaging
+        </div>
       </div>
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35">
         Loading history<span my-loading-dots></span>

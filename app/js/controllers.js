@@ -114,46 +114,24 @@ angular.module('myApp.controllers', [])
         phone_number: $scope.credentials.phone_number
       }).then(function () {
         $scope.progress.enabled = true;
-        MtpApiManager.invokeApi('auth.checkPhone', {
-          phone_number: $scope.credentials.phone_full
-        }, options).then(function (result) {
+        MtpApiManager.invokeApi('auth.sendCode', {
+          phone_number: $scope.credentials.phone_full,
+          sms_type: 0,
+          api_id: Config.App.id,
+          api_hash: Config.App.hash
+        }, options).then(function (sentCode) {
           $scope.progress.enabled = false;
-          if (!result.phone_registered) {
-            ErrorService.show({
-              error: {code: 400, type: 'ACCOUNT_REQUIRED'},
-              phone: $scope.credentials.phone_full
-            });
-            return false;
-          }
 
-          $scope.progress.enabled = true;
-          MtpApiManager.invokeApi('auth.sendCode', {
-            phone_number: $scope.credentials.phone_full,
-            sms_type: 0,
-            api_id: Config.App.id,
-            api_hash: Config.App.hash
-          }, options).then(function (sentCode) {
-            $scope.progress.enabled = false;
+          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
+          $scope.credentials.phone_occupied = sentCode.phone_registered;
+          $scope.error = {};
 
-            $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
-            $scope.credentials.phone_occupied = sentCode.phone_registered;
-            $scope.error = {};
+          $scope.callPending.remaining = sentCode.send_call_timeout || 60;
+          callCheck();
 
-            $scope.callPending.remaining = sentCode.send_call_timeout || 60;
-            callCheck();
-
-          }, function (error) {
-            $scope.progress.enabled = false;
-            console.log('sendCode error', error);
-            switch (error.type) {
-              case 'PHONE_NUMBER_INVALID':
-                $scope.error = {field: 'phone'};
-                error.handled = true;
-                break;
-            }
-          });
         }, function (error) {
           $scope.progress.enabled = false;
+          console.log('sendCode error', error);
           switch (error.type) {
             case 'NETWORK_BAD_REQUEST':
               if (location.protocol == 'https:') {
@@ -178,7 +156,8 @@ angular.module('myApp.controllers', [])
       $timeout.cancel(callTimeout);
 
       delete $scope.credentials.phone_code_hash;
-      delete $scope.credentials.phone_occupied;
+      delete $scope.credentials.phone_unoccupied;
+      delete $scope.credentials.phone_code_valid;
       delete $scope.callPending.remaining;
       delete $scope.callPending.success;
     }
@@ -202,7 +181,9 @@ angular.module('myApp.controllers', [])
         $scope.progress.enabled = false;
         if (error.code == 400 && error.type == 'PHONE_NUMBER_UNOCCUPIED') {
           error.handled = true;
-          return $scope.logIn(true);
+          $scope.credentials.phone_code_valid = true;
+          $scope.credentials.phone_unoccupied = true;
+          return;
         } else if (error.code == 400 && error.type == 'PHONE_NUMBER_OCCUPIED') {
           error.handled = true;
           return $scope.logIn(false);
@@ -220,6 +201,7 @@ angular.module('myApp.controllers', [])
             break;
           case 'PHONE_CODE_INVALID':
             $scope.error = {field: 'phone_code'};
+            delete $scope.credentials.phone_code_valid;
             error.handled = true;
             break;
         }
@@ -243,6 +225,8 @@ angular.module('myApp.controllers', [])
 
 
     $scope.isLoggedIn = true;
+    $scope.isEmpty = {};
+
     $scope.openSettings = function () {
       $modal.open({
         templateUrl: 'partials/settings_modal.html',
@@ -308,6 +292,7 @@ angular.module('myApp.controllers', [])
     $scope.dialogs = [];
     $scope.contacts = [];
     $scope.search = {};
+    $scope.contactsLoaded = false;
 
     var offset = 0,
         maxID = 0,
@@ -361,6 +346,14 @@ angular.module('myApp.controllers', [])
 
     $scope.$watch('search.query', loadDialogs);
 
+    $scope.importContact = function () {
+      AppUsersManager.openImportContact().then(function () {
+        if (contactsShown) {
+          loadDialogs();
+        }
+      });
+    };
+
     function loadDialogs () {
       offset = 0;
       maxID = 0;
@@ -382,12 +375,16 @@ angular.module('myApp.controllers', [])
             peersInDialogs[dialog.peerID] = true;
             $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
           });
+          delete $scope.isEmpty.dialogs;
         }
 
         $scope.$broadcast('ui_dialogs_change');
 
         if (!$scope.search.query) {
           AppMessagesManager.getDialogs('', maxID, 100);
+          if (!dialogsResult.dialogs.length) {
+            $scope.isEmpty.dialogs = true;
+          }
         } else {
           showMoreDialogs();
         }
@@ -416,7 +413,7 @@ angular.module('myApp.controllers', [])
         return;
       }
 
-      if (!hasMore && $scope.search.query) {
+      if (!hasMore && ($scope.search.query || !$scope.dialogs.length)) {
         contactsShown = true;
 
         AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
@@ -431,6 +428,12 @@ angular.module('myApp.controllers', [])
               });
             }
           });
+
+          if (contactsList.length) {
+            delete $scope.isEmpty.contacts;
+          } else if (!$scope.search.query) {
+            $scope.isEmpty.contacts = true;
+          }
         });
         $scope.$broadcast('ui_dialogs_append');
         return;
@@ -1815,18 +1818,8 @@ angular.module('myApp.controllers', [])
     }
 
     $scope.importContact = function () {
-      $modal.open({
-        templateUrl: 'partials/import_contact_modal.html',
-        controller: 'ImportContactModalController',
-        windowClass: 'import_contact_modal_window'
-      }).result.then(function (foundUserID) {
-        if (foundUserID) {
-          updateContacts($scope.search && $scope.search.query || '');
-        } else {
-          ErrorService.show({
-            error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
-          });
-        }
+      AppUsersManager.openImportContact().then(function () {
+        updateContacts($scope.search && $scope.search.query || '');
       });
     };
 
@@ -1937,8 +1930,8 @@ angular.module('myApp.controllers', [])
         $scope.progress = {enabled: true};
         AppUsersManager.importContact(
           $scope.importContact.phone,
-          $scope.importContact.first_name,
-          $scope.importContact.last_name
+          $scope.importContact.first_name || '',
+          $scope.importContact.last_name || ''
         ).then(function (foundUserID) {
           $modalInstance.close(foundUserID);
         })['finally'](function () {

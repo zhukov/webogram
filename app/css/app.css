@@ -154,14 +154,20 @@ input[type="number"] {
   background: #7999b3;
   border-color: #7999b3;
 }
+.btn-primary:focus {
+  outline: none;
+}
 
 
 
 .btn-link {
   color: #3a6d99;
+  text-decoration: none !important;
+  border-radius: 3px;
+  overflow: hidden;
 }
 .btn-link:hover {
-  text-decoration: none;
+  background: #f2f6fa;
 }
 
 .tg_page_head .navbar {
@@ -758,7 +764,12 @@ a.tg_radio_on:hover i.icon-radio {
 .login_form_head {
   color: #222222;
   margin-top: 0;
+  margin-bottom: 7px;
   text-align: center;
+}
+.login_edit_phone {
+  text-align: center;
+  margin-bottom: 3px;
 }
 .login_form_lead {
   color: #959595;
@@ -800,6 +811,9 @@ a.tg_radio_on:hover i.icon-radio {
 }
 .login_phone_number {
   width: 198px;
+}
+.login_first_name_wrap {
+  margin-bottom: 11px;
 }
 
 
@@ -852,6 +866,20 @@ a.tg_radio_on:hover i.icon-radio {
 
 
 /* Dialogs list */
+.im_dialogs_empty_wrap {
+  margin: 60px 50px;
+  text-align: center;
+}
+.im_dialogs_empty_header {
+  font-size: 15px;
+  color: #808080;
+  margin: 0 0 15px;
+}
+.im_dialogs_empty_lead {
+  color: #808080;
+  margin-bottom: 18px;
+}
+
 .im_dialogs_col {
   margin-right: -7px;
 }
@@ -1195,6 +1223,22 @@ a.im_dialog_selected .im_dialog_date {
   -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
 }
+
+
+.im_history_no_dialogs_wrap {
+  margin: 122px 170px 60px;
+  text-align: center;
+}
+.im_dialogs_empty_header {
+  font-size: 15px;
+  color: #808080;
+  margin: 0 0 15px;
+}
+.im_dialogs_empty_lead {
+  color: #808080;
+  margin-bottom: 18px;
+}
+
 
 
 .im_history_wrap {
