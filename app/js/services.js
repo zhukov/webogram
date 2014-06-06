@@ -2541,6 +2541,7 @@ angular.module('myApp.services', [])
         switch (action) {
           case 1:
             window.open(url, '_blank');
+            break;
 
           default:
             var a = $('<a>Download</a>')
