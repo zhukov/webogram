@@ -25,30 +25,29 @@ Here are some screenshots of the interface:
 * View list of existings chats (up-posting) with infinite scrolling
 * View messages history for each chat/group (bottom-posting) with infinite scrolling
 * View brief profile info
+* Create new group
 * View/edit group info
-* View/edit members list
+* View/edit group participants
 * View media in messages: photo, video
 * Download documents from messages
 * Emoji display in all browsers (Chrome, non-OSX ones)
-* Emoji keyboard
+* Emoji keyboard, recent emojis
 * Send plain-text messages to user or group
 * Send files (photos or documents) via attach icon or drag'n'drop
 * Desktop notifications
-* Create new group
-* Edit group participants
 * Settings
 * Edit profile/userpic
-* Contacts
+* Contacts view, search
+* Contacts add/edit
 * Edit, delete, forward messsages
 
 
 ### Unsupported at the moment
 
 * Registration
-* Contacts add/edit
 * Secret chats
 * Search messages
-* a lot more...
+* ...
 
 
 ## Technical details

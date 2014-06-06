@@ -2897,8 +2897,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .im_message_selected .im_message_date,
 .im_message_selected .im_message_fwd_header,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_date,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_header {
-  color: #91a6ba;
+.im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_header,
+.im_message_selected .im_message_document_size,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_document_size {
+  color: #68839c;
 }
 
 .im_message_wrap {
