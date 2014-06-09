@@ -21,7 +21,8 @@ Config = window.Config || {};
 Config.App = {
   id: 2496,
   hash: '8da85b0d5bfe62527e5b244c209159c3',
-  version: '0.1.5'
+  version: '0.1.5',
+  packaged: false
 };
 
 Config.Modes = {

@@ -169,6 +169,9 @@ input[type="number"] {
 .btn-link:hover {
   background: #f2f6fa;
 }
+.btn-link.dropdown-toggle:hover {
+  background: none;
+}
 
 .tg_page_head .navbar {
   min-height: 44px;
@@ -878,6 +881,9 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_empty_lead {
   color: #808080;
   margin-bottom: 18px;
+}
+.im_dialogs_import_phonebook {
+  margin-top: 10px;
 }
 
 .im_dialogs_col {
@@ -2742,7 +2748,6 @@ a:hover .icon-twitter {
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
-  margin-bottom: 0;
   margin: 0;
 }
 .is_1x .contacts_modal_search_field {
@@ -3320,8 +3325,46 @@ ce671b orange
 }
 
 .countries_modal_search {
-  padding: 0 20px 12px;
+  padding: 0 0 12px;
+  margin: 0 20px;
+  position: relative;
+}
+
+.countries_modal_search_field {
+  font-size: 12px;
+  line-height: normal;
+  background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
+  background-size: 42px 710px;
+  border: 1px solid #F2F2F2;
+  border-radius: 3px;
+  padding: 6px 20px 6px 30px;
+  margin-bottom: 0;
   margin: 0;
+}
+.is_1x .countries_modal_search_field {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
+.countries_modal_search_field:focus,
+.countries_modal_search_field:active {
+  background-color: #FFF;
+}
+.countries_modal_search_clear {
+  position: absolute;
+  right: 9px;
+  margin-top: -23px;
+  color: #999;
+  width: 13px;
+  height: 13px;
+  vertical-align: text-top;
+  background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
+  background-size: 42px 710px;
+  opacity: 0.6;
+}
+.is_1x .countries_modal_search_clear {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
+.countries_modal_search_clear:hover {
+  opacity: 1;
 }
 
 .countries_modal_wrap .modal-body {

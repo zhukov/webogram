@@ -130,7 +130,7 @@ angular.module('myApp.services', [])
   };
 })
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService) {
   var users = {},
       cachedPhotoLocations = {},
       contactsFillPromise,
@@ -307,7 +307,39 @@ angular.module('myApp.services', [])
         onContactUpdated(foundUserID = importedContact.user_id, true);
       });
 
-      return foundUserID;
+      return foundUserID ? 1 : 0;
+    });
+  };
+
+  function importContacts (contacts) {
+    var inputContacts = [],
+        i, j;
+
+    for (i = 0; i < contacts.length; i++) {
+      for (j = 0; j < contacts[i].phones.length; j++) {
+        inputContacts.push({
+          _: 'inputPhoneContact',
+          client_id: (i << 16 | j).toString(10),
+          phone: contacts[i].phones[j],
+          first_name: contacts[i].first_name,
+          last_name: contacts[i].last_name
+        });
+      }
+    }
+
+    return MtpApiManager.invokeApi('contacts.importContacts', {
+      contacts: inputContacts,
+      replace: false
+    }).then(function (importedContactsResult) {
+      saveApiUsers(importedContactsResult.users);
+
+      var result = [];
+      angular.forEach(importedContactsResult.imported, function (importedContact) {
+        onContactUpdated(importedContact.user_id, true);
+        result.push(importedContact.user_id);
+      });
+
+      return result;
     });
   };
 
@@ -348,9 +380,6 @@ angular.module('myApp.services', [])
       windowClass: 'import_contact_modal_window'
     }).result.then(function (foundUserID) {
       if (!foundUserID) {
-        ErrorService.show({
-          error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
-        });
         return $q.reject();
       }
       return foundUserID;
@@ -402,11 +431,85 @@ angular.module('myApp.services', [])
     getUserSearchText: getUserSearchText,
     hasUser: hasUser,
     importContact: importContact,
+    importContacts: importContacts,
     deleteContacts: deleteContacts,
     wrapForFull: wrapForFull,
     openUser: openUser,
     openImportContact: openImportContact
   }
+})
+
+.service('PhonebookContactsService', function ($q, $modal, $sce) {
+
+  var phonebookContactsPromise;
+
+  return {
+    isAvailable: isAvailable,
+    openPhonebookImport: openPhonebookImport,
+    getPhonebookContacts: getPhonebookContacts
+  }
+
+  function isAvailable () {
+    return window.navigator && window.navigator.mozContacts && window.navigator.mozContacts.getAll;
+  }
+
+  function openPhonebookImport () {
+    return $modal.open({
+      templateUrl: 'partials/phonebook_modal.html',
+      controller: 'PhonebookModalController',
+      windowClass: 'phonebook_modal_window'
+    });
+  }
+
+  function getPhonebookContacts () {
+    if (phonebookContactsPromise) {
+      return phonebookContactsPromise;
+    }
+
+    var deferred = $q.defer(),
+        contacts = [],
+        request = window.navigator.mozContacts.getAll({}),
+        count = 0;
+
+    request.onsuccess = function () {
+      if (this.result) {
+        var contact = {
+          id: count,
+          first_name: (this.result.givenName || []).join(' '),
+          last_name: (this.result.familyName || []).join(' '),
+          phones: []
+        };
+
+        for (var i = 0; i < this.result.tel.length; i++) {
+          contact.phones.push(this.result.tel[i].value);
+        }
+        if (this.result.photo) {
+          contact.photo = URL.createObjectURL(this.result.photo[0]);
+        } else {
+          contact.photo = 'img/placeholders/UserAvatar' + ((Math.abs(count) % 8) + 1) + '@2x.png';
+        }
+        contact.photo = $sce.trustAsResourceUrl(contact.photo);
+
+        count++;
+        contacts.push(contact);
+      }
+
+      if (!this.result || count >= 1000) {
+        deferred.resolve(contacts);
+        return;
+      }
+
+      this.continue();
+    }
+
+    request.onerror = function (e) {
+      console.log('phonebook error', e, e.type, e.message);
+      deferred.reject(e);
+    }
+
+    return phonebookContactsPromise = deferred.promise;
+  }
+
 })
 
 .service('AppChatsManager', function ($rootScope, $modal, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {

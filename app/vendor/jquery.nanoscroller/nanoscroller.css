@@ -23,6 +23,12 @@
 .has-scrollbar .content::-webkit-scrollbar {
   visibility: visible;
 }
+.nano .content::-moz-scrollbar {
+  visibility: hidden;
+}
+.has-scrollbar .content::-moz-scrollbar {
+  visibility: visible;
+}
 .nano > .pane {
   background : rgba(0,0,0,.1);
   position   : absolute;

@@ -285,7 +285,7 @@ angular.module('myApp.controllers', [])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ErrorService) {
+  .controller('AppImDialogsController', function ($scope, $location, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, PhonebookContactsService, ErrorService) {
 
     // console.log('init controller');
 
@@ -293,6 +293,7 @@ angular.module('myApp.controllers', [])
     $scope.contacts = [];
     $scope.search = {};
     $scope.contactsLoaded = false;
+    $scope.phonebookAvailable = PhonebookContactsService.isAvailable();
 
     var offset = 0,
         maxID = 0,
@@ -347,11 +348,19 @@ angular.module('myApp.controllers', [])
     $scope.$watch('search.query', loadDialogs);
 
     $scope.importContact = function () {
-      AppUsersManager.openImportContact().then(function () {
-        if (contactsShown) {
+      AppUsersManager.openImportContact().then(function (foundContact) {
+        if (contactsShown && foundContact) {
           loadDialogs();
         }
       });
+    };
+
+    $scope.importPhonebook = function () {
+      PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
+        if (contactsShown && foundContacts.length) {
+          loadDialogs();
+        }
+      })
     };
 
     function loadDialogs () {
@@ -1920,10 +1929,12 @@ angular.module('myApp.controllers', [])
     };
   })
 
-  .controller('ImportContactModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager) {
+  .controller('ImportContactModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, ErrorService, PhonebookContactsService) {
     if ($scope.importContact === undefined) {
       $scope.importContact = {};
     }
+
+    $scope.phonebookAvailable = PhonebookContactsService.isAvailable();
 
     $scope.doImport = function () {
       if ($scope.importContact && $scope.importContact.phone) {
@@ -1933,11 +1944,26 @@ angular.module('myApp.controllers', [])
           $scope.importContact.first_name || '',
           $scope.importContact.last_name || ''
         ).then(function (foundUserID) {
+          if (!foundUserID) {
+            ErrorService.show({
+              error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
+            });
+          }
           $modalInstance.close(foundUserID);
         })['finally'](function () {
           delete $scope.progress.enabled;
         });
       }
+    };
+
+    $scope.importPhonebook = function () {
+      PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
+        if (foundContacts) {
+          $modalInstance.close(foundContacts[0]);
+        } else {
+          $modalInstance.dismiss();
+        }
+      })
     };
 
   })
@@ -1975,4 +2001,109 @@ angular.module('myApp.controllers', [])
       }
 
     });
+  })
+
+
+  .controller('PhonebookModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, PhonebookContactsService, SearchIndexManager, ErrorService) {
+
+    $scope.search           = {};
+    $scope.phonebook        = [];
+    $scope.selectedContacts = {};
+    $scope.selectedCount    = 0;
+    $scope.slice            = {limit: 20, limitDelta: 20};
+    $scope.progress         = {enabled: false};
+    $scope.multiSelect      = true;
+
+    var searchIndex = SearchIndexManager.createIndex(),
+        phonebookReady = false;
+
+    PhonebookContactsService.getPhonebookContacts().then(function (phonebook) {
+      for (var i = 0; i < phonebook.length; i++) {
+        SearchIndexManager.indexObject(i, phonebook[i].first_name + ' ' + phonebook[i].last_name + ' ' + phonebook[i].phones.join(' '), searchIndex);
+      }
+      $scope.phonebook = phonebook;
+      $scope.toggleSelection(true);
+      phonebookReady = true;
+      updateList();
+    });
+
+    function updateList () {
+      var filtered = false,
+          results = {};
+
+      if (angular.isString($scope.search.query) && $scope.search.query.length) {
+        filtered = true;
+        results = SearchIndexManager.search($scope.search.query, searchIndex);
+
+        $scope.contacts = [];
+        for (var i = 0; i < $scope.phonebook.length; i++) {
+          if (!filtered || results[i]) {
+            $scope.contacts.push($scope.phonebook[i]);
+          }
+        }
+      } else {
+        $scope.contacts = $scope.phonebook;
+      }
+
+      $scope.slice.limit = 20;
+    }
+
+    $scope.$watch('search.query', function (newValue) {
+      if (phonebookReady) {
+        updateList();
+      }
+    });
+
+    $scope.contactSelect = function (i) {
+      if (!$scope.multiSelect) {
+        return $modalInstance.close($scope.phonebook[i]);
+      }
+      if ($scope.selectedContacts[i]) {
+        delete $scope.selectedContacts[i];
+        $scope.selectedCount--;
+      } else {
+        $scope.selectedContacts[i] = true;
+        $scope.selectedCount++;
+      }
+    };
+
+    $scope.toggleSelection = function (fill) {
+      if (!$scope.selectedCount || fill) {
+        $scope.selectedCount = $scope.phonebook.length;
+        for (var i = 0; i < $scope.phonebook.length; i++) {
+          $scope.selectedContacts[i] = true;
+        }
+      } else {
+        $scope.selectedCount = 0;
+        $scope.selectedContacts = {};
+      }
+    };
+
+    $scope.submitSelected = function () {
+      if ($scope.selectedCount <= 0) {
+        $modalInstance.dismiss();
+      }
+
+      var selectedContacts = [];
+      angular.forEach($scope.selectedContacts, function (t, i) {
+        selectedContacts.push($scope.phonebook[i]);
+      });
+
+      ErrorService.confirm({
+        type: 'CONTACTS_IMPORT_PERFORM'
+      }).then(function () {
+        $scope.progress.enabled = true;
+        AppUsersManager.importContacts(selectedContacts).then(function (foundContacts) {
+          if (!foundContacts.length) {
+            ErrorService.show({
+              error: {code: 404, type: 'USERS_NOT_USING_TELEGRAM'}
+            });
+          }
+          $modalInstance.close(foundContacts);
+        })['finally'](function () {
+          $scope.progress.enabled = false;
+        });
+      });
+    };
+
   })

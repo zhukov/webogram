@@ -23,6 +23,7 @@
   </div>
 
   <div class="modal-footer">
+    <a class="btn btn-link pull-left" ng-if="phonebookAvailable" ng-click="importPhonebook()">Phonebook</a>
     <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
     <button class="btn btn-primary" ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'Importing...' : 'Save'" ng-disabled="progress.enabled"></button>
   </div>
