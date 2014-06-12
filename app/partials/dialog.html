@@ -1,4 +1,4 @@
-<a class="im_dialog" ng-click="dialogSelect(dialogMessage.peerString)">
+<a class="im_dialog" ng-click="dialogSelect(dialogMessage.peerString, search.messages &amp;&amp; dialogMessage.id)">
 
   <div class="im_dialog_meta pull-right text-right">
     <div class="im_dialog_date" ng-bind="dialogMessage.dateText"></div>
@@ -52,7 +52,7 @@
       </span>
 
       <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
-        <span ng-switch-when="messageActionChatCreate"> created the group </span>
+        <span ng-switch-when="messageActionChatCreate">created the group</span>
         <span ng-switch-when="messageActionChatEditTitle">changed group name</span>
         <span ng-switch-when="messageActionChatEditPhoto">changed group photo</span>
         <span ng-switch-when="messageActionChatDeletePhoto">removed group photo</span>

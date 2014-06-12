@@ -23,7 +23,15 @@
           <input class="form-control im_dialogs_search_field" type="search" placeholder="Search" ng-model="search.query"/>
           <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
         </div>
+
+        <div class="im_dialogs_tabs_wrap" ng-show="search.query.length">
+          <div class="im_dialogs_tabs clearfix">
+            <a href="" class="im_dialogs_tab" ng-class="{active: !search.messages}" ng-click="search.messages = false">Conversations</a>
+            <a href="" class="im_dialogs_tab" ng-class="{active: search.messages}" ng-click="search.messages = true">Messages</a>
+          </div>
+        </div>
       </div>
+
       <div my-dialogs-list class="im_dialogs_col">
         <div class="im_dialogs_wrap nano">
           <div class="im_dialogs_scrollable_wrap content">
@@ -35,9 +43,14 @@
               <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-sm im_dialogs_import_phonebook" ng-click="importPhonebook()">Import phonebook</button>
             </div>
 
-            <ul class="nav nav-pills nav-stacked">
-              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
-            </ul>
+            <div ng-switch="search.messages">
+              <ul ng-switch-when="true" class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.id" ng-class="{active: curDialog.peerID == dialogMessage.peerID &amp;&amp; curDialog.messageID == dialogMessage.id}"></li>
+              </ul>
+              <ul ng-switch-default class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+              </ul>
+            </div>
 
             <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
               <h5>Contacts</h5>

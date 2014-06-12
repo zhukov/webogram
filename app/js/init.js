@@ -22,7 +22,7 @@
     setTimeout(function () {callback(result)}, 10);
   };
 
-  if (!window.applicationCache || Config.App.packaged || !window.addEventListener) {
+  if (!window.applicationCache || Config.Modes.packed || !window.addEventListener) {
     return;
   }
 

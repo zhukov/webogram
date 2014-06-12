@@ -1785,7 +1785,7 @@ factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerato
     var serializer = new TLSerialization(options);
 
     if (!this.connectionInited) {
-      serializer.storeInt(0x2b9b08fa, 'invokeWithLayer14');
+      serializer.storeInt(0xb4418b64, 'invokeWithLayer15');
       serializer.storeInt(0x69796de9, 'initConnection');
       serializer.storeInt(Config.App.id, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');

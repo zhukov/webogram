@@ -750,7 +750,6 @@ angular.module('myApp.services', [])
   }
 
   function search (query, searchIndex) {
-    console.time('search');
     var shortIndexes = searchIndex.shortIndexes,
         fullTexts = searchIndex.fullTexts;
 
@@ -787,7 +786,6 @@ angular.module('myApp.services', [])
       }
     }
 
-    console.timeEnd('search');
     return newFoundObjs;
   }
 })
@@ -873,9 +871,7 @@ angular.module('myApp.services', [])
         }
       }
 
-      curDialogStorage.count = dialogsResult._ == 'messages.dialogsSlice'
-        ? dialogsResult.count
-        : dialogsResult.dialogs.length;
+      curDialogStorage.count = dialogsResult.count || dialogsResult.dialogs.length;
 
       curDialogStorage.dialogs.splice(offset, curDialogStorage.dialogs.length - offset);
       angular.forEach(dialogsResult.dialogs, function (dialog) {
@@ -904,21 +900,29 @@ angular.module('myApp.services', [])
     });
   }
 
-  function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
-    console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
+  function requestHistory (inputPeer, maxID, limit, backLimit) {
+    maxID = maxID || 0;
+    limit = limit || 0;
+    backLimit = backLimit || 0;
+
     return MtpApiManager.invokeApi('messages.getHistory', {
       peer: inputPeer,
-      offset: 0,
-      limit: fullLimit,
+      offset: -backLimit,
+      limit: limit + backLimit,
       max_id: maxID || 0
     }).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
       AppChatsManager.saveApiChats(historyResult.chats);
       saveMessages(historyResult.messages);
 
-      historyStorage.count = historyResult._ == 'messages.messagesSlice'
-        ? historyResult.count
-        : historyResult.messages.length;
+      return historyResult;
+    });
+  }
+
+  function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
+    console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
+    return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
+      historyStorage.count = historyResult.count || historyResult.messages.length;
 
       var offset = 0;
       if (maxID > 0) {
@@ -945,8 +949,7 @@ angular.module('myApp.services', [])
     });
   };
 
-  function getHistory (inputPeer, maxID, limit) {
-
+  function getHistory (inputPeer, maxID, limit, backLimit) {
     var peerID = AppPeersManager.getPeerID(inputPeer),
         historyStorage = historiesStorage[peerID],
         offset = 0,
@@ -979,9 +982,17 @@ angular.module('myApp.services', [])
     if (historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
       historyStorage.history.length >= offset + (limit || 1)
     ) {
+      if (backLimit) {
+        backLimit = Math.min(offset, backLimit);
+        offset = Math.max(0, offset - backLimit);
+        limit += backLimit;
+      } else {
+        limit = limit || 20;
+      }
+
       return $q.when({
         count: historyStorage.count,
-        history: resultPending.concat(historyStorage.history.slice(offset, offset + (limit || 20))),
+        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
         unreadLimit: unreadLimit
       });
     }
@@ -989,8 +1000,26 @@ angular.module('myApp.services', [])
     if (unreadLimit) {
       limit = Math.max(20, unreadLimit + 2);
     }
+    else if (!backLimit && !limit) {
+      limit = 20;
+    }
 
-    limit = limit || 20;
+    if (backLimit || maxID && historyStorage.history.indexOf(maxID) == -1) {
+      return requestHistory(inputPeer, maxID, limit, backLimit).then(function (historyResult) {
+        historyStorage.count = historyResult.count || historyResult.messages.length;
+
+        var history = [];
+        angular.forEach(historyResult.messages, function (message) {
+          history.push(message.id);
+        });
+
+        return {
+          count: historyStorage.count,
+          history: resultPending.concat(history),
+          unreadLimit: unreadLimit
+        };
+      })
+    }
 
     return fillHistoryStorage(inputPeer, maxID, limit, historyStorage).then(function () {
       offset = 0;
@@ -1102,9 +1131,7 @@ angular.module('myApp.services', [])
       AppChatsManager.saveApiChats(searchResult.chats);
       saveMessages(searchResult.messages);
 
-      var foundCount = searchResult._ == 'messages.messagesSlice'
-        ? searchResult.count
-        : searchResult.messages.length;
+      var foundCount = searchResult.count || searchResult.messages.length;
 
       foundMsgs = [];
       angular.forEach(searchResult.messages, function (message) {
@@ -1186,6 +1213,10 @@ angular.module('myApp.services', [])
       }
     }
 
+    if (historyStorage.readPromise) {
+      return historyStorage.readPromise;
+    }
+
     var promise = MtpApiManager.invokeApi('messages.readHistory', {
       peer: inputPeer,
       offset: 0,
@@ -1198,6 +1229,8 @@ angular.module('myApp.services', [])
         foundDialog[0].unread_count = 0;
         $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0});
       }
+    })['finally'](function () {
+      delete historyStorage.readPromise;
     });
 
 
@@ -3125,9 +3158,10 @@ angular.module('myApp.services', [])
           videoID = youtubeMatches && youtubeMatches[1];
 
       if (videoID) {
-        text = text + '<div class="im_message_iframe_video"><iframe type="text/html" frameborder="0" ' +
+        var tag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+        text = text + '<div class="im_message_iframe_video"><' + tag + ' type="text/html" frameborder="0" ' +
               'src="http://www.youtube.com/embed/' + videoID +
-              '?autoplay=0&amp;controls=2"></iframe></div>'
+              '?autoplay=0&amp;controls=2"></' + tag + '></div>'
       }
     }
 

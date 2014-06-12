@@ -910,7 +910,7 @@ a.tg_radio_on:hover i.icon-radio {
 }
 
 .im_dialogs_panel {
-  padding: 14px 12px;
+  padding: 12px 12px 6px;
   position: relative;
 }
  .im_dialogs_search {
@@ -927,8 +927,7 @@ a.tg_radio_on:hover i.icon-radio {
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
-  margin-bottom: 0;
-  margin: 0;
+  margin: 0 0 6px;
 }
 .is_1x .im_dialogs_search_field {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -941,7 +940,7 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_search_clear {
   position: absolute;
   right: 9px;
-  margin-top: -23px;
+  margin-top: -30px;
   color: #999;
   width: 13px;
   height: 13px;
@@ -956,6 +955,37 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_search_clear:hover {
   opacity: 1;
 }
+
+.im_dialogs_tabs {
+  padding: 4px 0;
+  position: relative;
+}
+.im_dialogs_tab {
+  color: #8c8c8c;
+  background: #f2f2f2;
+  height: 30px;
+  text-align: center;
+  overflow: hidden;
+  width: 50%;
+  float: left;
+  padding: 7px 0;
+}
+.im_dialogs_tab:hover,
+.im_dialogs_tab:active {
+  color: #8c8c8c;
+  text-decoration: none;
+}
+.im_dialogs_tab.active {
+  color: #FFF;
+  background: #6490b1;
+}
+.im_dialogs_tab:first-child {
+  border-radius: 2px 0 0 2px;
+}
+.im_dialogs_tab:last-child {
+  border-radius: 0 2px 2px 0;
+}
+
 
 .im_dialogs_panel_dropdown {
   position: absolute;
@@ -1499,7 +1529,8 @@ div.im_message_video_thumb {
     overflow: hidden;
     margin-top: 5px;
 }
-.im_message_iframe_video iframe {
+.im_message_iframe_video iframe,
+.im_message_iframe_video webview {
     position: absolute;
     top: 0;
     left: 0;
@@ -2937,6 +2968,15 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .im_message_selected {
   background: #f2f6fa;
 }
+.im_message_focus {
+  background-color: #f2f6fa;
+  -webkit-transition: background-color linear 1s;
+  transition: background-color linear 1s;
+}
+/*.im_message_focus.inactive {
+  background-color: none;
+}*/
+
 .im_history_selectable .im_message_outer_wrap {
   cursor: pointer;
 }
@@ -3103,7 +3143,8 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
     margin-top: 1px;
     border: 0;
   }
-  .im_message_grouped .icon-message-status {
+  .im_message_grouped1 .icon-message-status,
+  .im_message_grouped2 .icon-message-status {
     margin-top: -8px;
   }
 }

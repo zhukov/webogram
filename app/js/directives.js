@@ -329,7 +329,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           headWrap = $('.tg_page_head')[0],
           footer = $('.im_page_footer')[0],
           sendForm = $('.im_send_form', element)[0],
-          moreNotified = false;
+          moreNotified = false,
+          lessNotified = false;
 
       onContentLoaded(function () {
         scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
@@ -337,6 +338,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       var updateScroller = function (delay) {
+        // console.trace('scroller update', delay);
         $timeout(function () {
           if (!$(scrollableWrap).hasClass('im_history_to_bottom')) {
             $(historyWrap).nanoScroller();
@@ -357,7 +359,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var animated = transform ? true : false,
           curAnimation = false;
 
-      $scope.$on('ui_history_append', function (e, options) {
+      $scope.$on('ui_history_append_new', function (e, options) {
         if (!atBottom && !options.my) {
           return;
         }
@@ -392,6 +394,24 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
+      function changeScroll () {
+        var unreadSplit, focusMessage;
+
+        if (focusMessage = $('.im_message_focus', scrollableWrap)[0]) {
+          scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - 52);
+          atBottom = false;
+        } else if (unreadSplit = $('.im_message_unread_split', scrollableWrap)[0]) {
+          scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
+          atBottom = false;
+        } else {
+          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+        }
+        updateScroller();
+        $timeout(function () {
+          $(scrollableWrap).trigger('scroll');
+        });
+      };
+
       $scope.$on('ui_history_change', function () {
         $(scrollableWrap).addClass('im_history_to_bottom');
         $(scrollable).css({bottom: 0});
@@ -399,22 +419,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(scrollableWrap).removeClass('im_history_to_bottom');
           $(scrollable).css({bottom: ''});
           updateSizes(true);
-
-          var unreadSplit = $('.im_message_unread_split', scrollableWrap);
-          if (unreadSplit[0]) {
-            scrollableWrap.scrollTop = Math.max(0, unreadSplit[0].offsetTop - 52);
-            atBottom = false;
-          } else {
-            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-          }
-
-          updateScroller();
           moreNotified = false;
-
-          $timeout(function () {
-            $(scrollableWrap).trigger('scroll');
-          });
+          lessNotified = false;
+          changeScroll();
         });
+      });
+
+      $scope.$on('ui_history_change_scroll', function () {
+        onContentLoaded(changeScroll)
       });
 
       $scope.$on('ui_history_focus', function () {
@@ -441,6 +453,20 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           updateBottomizer();
           moreNotified = false;
+
+          $timeout(function () {
+            if (scrollableWrap.scrollHeight != sh) {
+              $(scrollableWrap).trigger('scroll');
+            }
+          });
+        });
+      });
+
+      $scope.$on('ui_history_append', function () {
+        var sh = scrollableWrap.scrollHeight;
+        onContentLoaded(function () {
+          updateBottomizer();
+          lessNotified = false;
 
           $timeout(function () {
             if (scrollableWrap.scrollHeight != sh) {
@@ -492,6 +518,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!moreNotified && scrollableWrap.scrollTop <= 300) {
           moreNotified = true;
           $scope.$emit('history_need_more');
+        }
+        else if (!lessNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+          lessNotified = true;
+          $scope.$emit('history_need_less');
         }
       });
 
@@ -623,6 +653,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (submit) {
             $(element).trigger('submit');
             $(element).trigger('message_send');
+            resetAfterSubmit();
             return cancelEvent(e);
           }
         }
@@ -632,18 +663,27 @@ angular.module('myApp.directives', ['myApp.filters'])
       $('.im_submit', element).on('mousedown', function (e) {
         $(element).trigger('submit');
         $(element).trigger('message_send');
+        resetAfterSubmit();
         return cancelEvent(e);
       });
 
-      var lastTyping = 0;
+      var lastTyping = 0,
+          lastLength;
       $(editorElement).on('keyup', function (e) {
-        var now = tsNow();
-        if (now - lastTyping < 5000) {
-          return;
+        var now = tsNow(),
+            length = (editorElement[richTextarea ? 'innerText' : 'value']).length;
+
+        if (now - lastTyping > 5000 && length != lastLength) {
+          lastTyping = now;
+          lastLength = length;
+          $scope.$emit('ui_typing');
         }
-        lastTyping = now;
-        $scope.$emit('ui_typing');
       });
+
+      function resetAfterSubmit () {
+        lastTyping = 0;
+        lastLength = 0;
+      };
 
       function updateField () {
         if (richTextarea) {
