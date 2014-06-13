@@ -355,6 +355,9 @@ angular.module('myApp.controllers', [])
 
     var prevMessages = false;
     $scope.$watchCollection('search', function () {
+      if ($scope.search.messages && (!angular.isString($scope.search.query) || !$scope.search.query.length)) {
+        prevMessages = $scope.search.messages = false;
+      }
       if ($scope.search.messages != prevMessages) {
         prevMessages = $scope.search.messages;
         $scope.dialogs = [];
