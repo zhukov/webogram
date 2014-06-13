@@ -1,13 +1,11 @@
 CACHE MANIFEST
-# Time: Fri Jun 06 2014 19:10:33 GMT+0400 (MSK)
+# Time: Sat Jun 14 2014 00:44:18 GMT+0400 (MSK)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
 css/app.css
-js/app.js
-js/app.js.map
 img/TLogo2_1x.png
 img/TLogo2_2x.png
 img/TLogo_1x.png
@@ -29,11 +27,10 @@ img/emojisprite_4.png
 img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
-js/lib/aes_worker.js
-js/lib/mtproto.js
-js/lib/pq_worker.js
-js/lib/sha1_worker.js
+js/app.js
+js/app.js.map
 img/changelog/card_wecandoit.png
+img/changelog/search.png
 img/icons/AboutLogos_1x.png
 img/icons/AboutLogos_2x.png
 img/icons/Checks1_1x.png
@@ -63,8 +60,12 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-vendor/console-polyfill/console-polyfill.js
+js/lib/aes_worker.js
+js/lib/mtproto.js
+js/lib/pq_worker.js
+js/lib/sha1_worker.js
 vendor/closure/long.js
+vendor/console-polyfill/console-polyfill.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 

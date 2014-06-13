@@ -1,7 +1,8 @@
 {
   "name": "Webogram",
   "description": "Webogram – UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.1.5",
+  "version": "0.1.6",
+  "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
     "name": "Igor Zhukov",
@@ -12,7 +13,11 @@
   ],
   "permissions": {
     "desktop-notification": {
-      "description": "To show new message notifications etc"
+      "description": "Required to show new message notifications"
+    },
+    "contacts": {
+      "description": "Required to import phonebook contacts",
+      "access": "readonly"
     }
   },
   "icons": {
