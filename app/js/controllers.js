@@ -216,7 +216,7 @@ angular.module('myApp.controllers', [])
 
     $scope.$on('history_focus', function (e, peerData) {
       $modalStack.dismissAll();
-      if (peerData.peerString == $scope.curDialog.peer && !peerData.messageID) {
+      if (peerData.peerString == $scope.curDialog.peer && peerData.messageID == $scope.curDialog.messageID) {
         $scope.$broadcast('ui_history_focus');
       } else {
         $location.url('/im?p=' + peerData.peerString + (peerData.messageID ? '&m=' + peerData.messageID : ''));
@@ -543,6 +543,7 @@ angular.module('myApp.controllers', [])
 
     $scope.history = [];
     $scope.mediaType = false;
+    $scope.skippedHistory = false;
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
     $scope.selectActions = false;
@@ -557,6 +558,7 @@ angular.module('myApp.controllers', [])
     $scope.selectedFlush = selectedFlush;
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
+    $scope.returnToRecent = returnToRecent;
     $scope.showPeerInfo = showPeerInfo;
 
     var peerID,
@@ -703,7 +705,7 @@ angular.module('myApp.controllers', [])
         } else {
           minID = 0;
         }
-        hasLess = minID > 0;
+        $scope.skippedHistory = hasLess = minID > 0;
       });
     }
 
@@ -737,9 +739,11 @@ angular.module('myApp.controllers', [])
       });
     };
 
-    function loadHistory () {
+    function loadHistory (forceRecent) {
+      $scope.missedCount = 0;
+
       hasMore = false;
-      hasLess = false;
+      $scope.skippedHistory = hasLess = false;
       maxID = 0;
       minID = 0;
 
@@ -749,6 +753,9 @@ angular.module('myApp.controllers', [])
         maxID = parseInt($scope.curDialog.messageID);
         limit = 5;
         backLimit = 5;
+      }
+      else if (forceRecent) {
+        limit = 10;
       }
 
       var curJump = ++jump,
@@ -762,12 +769,12 @@ angular.module('myApp.controllers', [])
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
 
-        minID = maxID && historyResult.history.indexOf(maxID)>= backLimit - 1
+        minID = (historyResult.unreadSkip || maxID && historyResult.history.indexOf(maxID) >= backLimit - 1)
                   ? historyResult.history[0]
                   : 0;
         maxID = historyResult.history[historyResult.history.length - 1];
 
-        hasLess = minID > 0;
+        $scope.skippedHistory = hasLess = minID > 0;
         hasMore = historyResult.count === null ||
                   historyResult.history.length && historyResult.history.length < historyResult.count;
 
@@ -782,13 +789,10 @@ angular.module('myApp.controllers', [])
 
         updateHistoryGroups();
 
-        if (historyResult.unreadLimit) {
-          $scope.historyUnread = {
-            beforeID: historyResult.history[historyResult.unreadLimit - 1],
-            count: historyResult.unreadLimit
-          };
+        if (historyResult.unreadOffset) {
+          $scope.historyUnreadAfter = historyResult.history[historyResult.unreadOffset - 1];
         } else {
-          $scope.historyUnread = {};
+          $scope.historyUnreadAfter = {};
         }
 
         $scope.historyFocus = $scope.curDialog.messageID || 0;
@@ -924,12 +928,21 @@ angular.module('myApp.controllers', [])
     }
 
     function toggleMedia (mediaType) {
-      if (mediaType) {
-        $scope.missedCount = 0;
-      }
       $scope.mediaType = mediaType || false;
       $scope.history = [];
       loadHistory();
+    }
+
+    function returnToRecent () {
+      if ($scope.mediaType) {
+        toggleMedia();
+      } else {
+        if ($scope.curDialog.messageID) {
+          $rootScope.$broadcast('history_focus', {peerString: $scope.curDialog.peer});
+        } else {
+          loadHistory(true);
+        }
+      }
     }
 
     function showPeerInfo () {
@@ -947,17 +960,9 @@ angular.module('myApp.controllers', [])
 
     $scope.$on('history_append', function (e, addedMessage) {
       if (addedMessage.peerID == $scope.curDialog.peerID) {
-        if (minID) {
+        if ($scope.mediaType || $scope.skippedHistory) {
           if (addedMessage.my) {
-            $rootScope.$broadcast('history_focus', {peerString: $scope.curDialog.peer});
-          } else {
-            $scope.missedCount++;
-          }
-          return;
-        }
-        if ($scope.mediaType) {
-          if (addedMessage.my) {
-            toggleMedia();
+            returnToRecent();
           } else {
             $scope.missedCount++;
           }
@@ -972,8 +977,6 @@ angular.module('myApp.controllers', [])
         if (addedMessage.my) {
           $scope.historyUnread = {};
         }
-
-        offset++;
 
         // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
         if (!$rootScope.idle.isIDLE) {

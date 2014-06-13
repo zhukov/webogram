@@ -4,7 +4,7 @@
 
   <div class="im_page_split clearfix">
 
-    <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController" my-dialogs>
+    <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}">
       <div class="im_dialogs_panel">
         <div class="dropdown im_dialogs_panel_dropdown pull-right">
           <a class="dropdown-toggle">
@@ -24,7 +24,7 @@
           <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
         </div>
 
-        <div class="im_dialogs_tabs_wrap" ng-show="search.query.length">
+        <div class="im_dialogs_tabs_wrap">
           <div class="im_dialogs_tabs clearfix">
             <a href="" class="im_dialogs_tab" ng-class="{active: !search.messages}" ng-click="search.messages = false">Conversations</a>
             <a href="" class="im_dialogs_tab" ng-class="{active: search.messages}" ng-click="search.messages = true">Messages</a>
@@ -117,8 +117,9 @@
                     <li><a ng-click="toggleMedia('audio')">Voice messages</a></li>
                   </ul>
                 </div>
-                <a ng-show="mediaType !== false" class="im_history_panel_return_link pull-right" ng-click="toggleMedia()">
-                  Show all messages
+                <a ng-show="mediaType !== false || skippedHistory" class="im_history_panel_return_link pull-right" ng-click="returnToRecent()" ng-switch="skippedHistory">
+                  <span ng-switch-when="true">Show recent messages</span>
+                  <span ng-switch-default>Show all messages</span>
                   <strong class="im_history_panel_return_count" ng-show="missedCount > 0" ng-bind="'+' + missedCount"></strong>
                 </a>
 

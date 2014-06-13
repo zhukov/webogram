@@ -900,15 +900,11 @@ angular.module('myApp.services', [])
     });
   }
 
-  function requestHistory (inputPeer, maxID, limit, backLimit) {
-    maxID = maxID || 0;
-    limit = limit || 0;
-    backLimit = backLimit || 0;
-
+  function requestHistory (inputPeer, maxID, limit, offset) {
     return MtpApiManager.invokeApi('messages.getHistory', {
       peer: inputPeer,
-      offset: -backLimit,
-      limit: limit + backLimit,
+      offset: offset || 0,
+      limit: limit || 0,
       max_id: maxID || 0
     }).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
@@ -920,7 +916,7 @@ angular.module('myApp.services', [])
   }
 
   function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
-    console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
+    // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
     return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
       historyStorage.count = historyResult.count || historyResult.messages.length;
 
@@ -953,6 +949,9 @@ angular.module('myApp.services', [])
     var peerID = AppPeersManager.getPeerID(inputPeer),
         historyStorage = historiesStorage[peerID],
         offset = 0,
+        offsetNotFound = false,
+        unreadOffset = false,
+        unreadSkip = false,
         resultPending = [];
 
     if (historyStorage === undefined) {
@@ -962,24 +961,31 @@ angular.module('myApp.services', [])
       resultPending = historyStorage.pending.slice();
     }
 
-    var unreadLimit = false;
     if (!limit && !maxID) {
       var foundDialog = getDialogByPeerID(peerID);
       if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 1) {
-        unreadLimit = Math.min(1000, foundDialog[0].unread_count);
-        limit = unreadLimit;
+        var unreadCount = foundDialog[0].unread_count;
+        if (unreadSkip = (unreadCount > 50)) {
+          limit = 10;
+          unreadOffset = 6;
+          offset = unreadCount - unreadOffset;
+        } else {
+          limit = Math.max(10, unreadCount + 2);
+          unreadOffset = unreadCount;
+        }
       }
     }
-
-    if (maxID > 0) {
+    else if (maxID > 0) {
+      offsetNotFound = true;
       for (offset = 0; offset < historyStorage.history.length; offset++) {
         if (maxID > historyStorage.history[offset]) {
+          offsetNotFound = false;
           break;
         }
       }
     }
 
-    if (historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
+    if (!offsetNotFound && historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
       historyStorage.history.length >= offset + (limit || 1)
     ) {
       if (backLimit) {
@@ -993,19 +999,24 @@ angular.module('myApp.services', [])
       return $q.when({
         count: historyStorage.count,
         history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
-        unreadLimit: unreadLimit
+        unreadOffset: unreadOffset,
+        unreadSkip: unreadSkip
       });
     }
 
-    if (unreadLimit) {
-      limit = Math.max(20, unreadLimit + 2);
-    }
-    else if (!backLimit && !limit) {
+    if (!backLimit && !limit) {
       limit = 20;
     }
+    if (offsetNotFound) {
+      offset = 0;
+    }
 
-    if (backLimit || maxID && historyStorage.history.indexOf(maxID) == -1) {
-      return requestHistory(inputPeer, maxID, limit, backLimit).then(function (historyResult) {
+    if (backLimit || unreadSkip || maxID && historyStorage.history.indexOf(maxID) == -1) {
+      if (backLimit) {
+        offset = -backLimit;
+        limit += backLimit;
+      }
+      return requestHistory(inputPeer, maxID, limit, offset).then(function (historyResult) {
         historyStorage.count = historyResult.count || historyResult.messages.length;
 
         var history = [];
@@ -1016,7 +1027,8 @@ angular.module('myApp.services', [])
         return {
           count: historyStorage.count,
           history: resultPending.concat(history),
-          unreadLimit: unreadLimit
+          unreadOffset: unreadOffset,
+          unreadSkip: unreadSkip
         };
       })
     }
@@ -1034,7 +1046,8 @@ angular.module('myApp.services', [])
       return {
         count: historyStorage.count,
         history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
-        unreadLimit: unreadLimit
+        unreadOffset: unreadOffset,
+        unreadSkip: unreadSkip
       };
     });
   }

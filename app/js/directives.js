@@ -29,7 +29,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myDialogs', function ($modalStack) {
+  .directive('myDialogs', function ($modalStack, $transition) {
 
     return {
       link: link
@@ -40,6 +40,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           searchField = $('.im_dialogs_search_field', element)[0],
+          tabsWrap = $('.im_dialogs_tabs_wrap', element)[0],
           searchFocused = false;
 
 
@@ -50,6 +51,28 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(scrollableWrap).find('.im_dialog_selected').removeClass('im_dialog_selected');
         }
       });
+
+      attrs.$observe('hasTabs', function (newValue) {
+        newValue = newValue == 'true';
+        if (newValue) {
+          $scope.$broadcast('ui_dialogs_tabs', true);
+        }
+        var trigger = function () {
+          $(tabsWrap)[newValue ? 'addClass' : 'removeClass']('shown');
+        }
+        $transition($(tabsWrap), trigger).then(function () {
+          if (!newValue) {
+            $scope.$broadcast('ui_dialogs_tabs', false);
+          }
+        });
+      });
+
+      $(document).on('keydown', onKeyDown);
+
+      $scope.$on('$destroy', function () {
+        $(document).off('keydown', onKeyDown);
+      });
+
 
       function onKeyDown(e) {
         if (!searchFocused && $modalStack.getTop()) {
@@ -149,12 +172,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      $(document).on('keydown', onKeyDown);
-
-      $scope.$on('$destroy', function () {
-        $(document).off('keydown', onKeyDown);
-      });
-
     }
 
 
@@ -163,7 +180,8 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myDialogsList', function($window, $timeout) {
 
     return {
-      link: link
+      link: link,
+      scope: true
     };
 
 
@@ -172,6 +190,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
           footer = $('.im_page_footer')[0],
+          hasTabs = false,
           moreNotified = false;
 
       onContentLoaded(function () {
@@ -185,6 +204,11 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('ui_dialogs_prepend', updateScroller);
+
+      $scope.$on('ui_dialogs_tabs', function (e, newHasTabs) {
+        hasTabs = newHasTabs;
+        updateSizes();
+      })
 
 
       $scope.$on('ui_dialogs_append', function () {
@@ -235,7 +259,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           footer = $('.im_page_footer')[0];
         }
         $(element).css({
-          height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - 72
+          height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (hasTabs ? 38 : 0) - 68
         });
 
         updateScroller();
@@ -398,7 +422,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var unreadSplit, focusMessage;
 
         if (focusMessage = $('.im_message_focus', scrollableWrap)[0]) {
-          scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - 52);
+          scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
           atBottom = false;
         } else if (unreadSplit = $('.im_message_unread_split', scrollableWrap)[0]) {
           scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);

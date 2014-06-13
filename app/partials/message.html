@@ -1,7 +1,5 @@
-<div class="im_message_unread_split" bo-if="historyUnread.beforeID == historyMessage.id" ng-show="historyUnread.beforeID == historyMessage.id">
-  <ng-pluralize count="historyUnread.count"
-                   when="{'one': '1 unread message', 'other': '{} unread messages'}">
-  </ng-pluralize>
+<div class="im_message_unread_split" bo-if="historyUnreadAfter == historyMessage.id" ng-show="historyUnreadAfter == historyMessage.id">
+  Unread messages
 </div>
 
 <div class="im_message_outer_wrap" ng-class="[ selectedMsgs[historyMessage.id] &amp;&amp; 'im_message_selected', historyMessage.grouped &amp;&amp; ('im_message_grouped' + historyMessage.grouped) , historyFocus == historyMessage.id &amp;&amp; 'im_message_focus']" ng-click="toggleMessage(historyMessage.id, $event)">

@@ -956,6 +956,18 @@ a.tg_radio_on:hover i.icon-radio {
   opacity: 1;
 }
 
+.im_dialogs_tabs_wrap {
+  overflow: hidden;
+  height: 0;
+  -webkit-transition    : height ease-out 0.3s;
+  -moz-transition       : height ease-out 0.3s;
+  -o-transition         : height ease-out 0.3s;
+  transition            : height ease-out 0.3s;
+}
+.im_dialogs_tabs_wrap.shown {
+  height: 38px;
+}
+
 .im_dialogs_tabs {
   padding: 4px 0;
   position: relative;
