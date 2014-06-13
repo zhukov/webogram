@@ -706,11 +706,13 @@ angular.module('myApp.controllers', [])
       AppMessagesManager.getHistory($scope.curDialog.inputPeer, minID, limit, backLimit).then(function (historyResult) {
         if (curJump != jump || curLessJump != lessJump) return;
 
-        angular.forEach(historyResult.history, function (id) {
+        var i, id;
+        for (i = historyResult.history.length - 1; i >= 0; i--) {
+          id = historyResult.history[i];
           if (id > minID) {
             $scope.history.push(AppMessagesManager.wrapForHistory(id));
           }
-        });
+        }
 
         if (historyResult.history.length) {
           minID = historyResult.history.length >= backLimit
