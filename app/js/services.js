@@ -1170,12 +1170,13 @@ angular.module('myApp.services', [])
     return MtpApiManager.invokeApi('messages.deleteMessages', {
       id: messageIDs
     }).then(function (deletedMessageIDs) {
-
-      ApiUpdatesManager.saveUpdate({
-        _: 'updateDeleteMessages',
-        messages: deletedMessageIDs
+      ApiUpdatesManager.processUpdateMessage({
+        _: 'updateShort',
+        update: {
+          _: 'updateDeleteMessages',
+          messages: deletedMessageIDs
+        }
       });
-
       return deletedMessageIDs;
     });
   }
@@ -1361,22 +1362,25 @@ angular.module('myApp.services', [])
           peer: inputPeer,
           message: text,
           random_id: randomID
-        }, sentRequestOptions).then(function (result) {
-          if (ApiUpdatesManager.saveSeq(result.seq)) {
-            ApiUpdatesManager.saveUpdate({
+        }, sentRequestOptions).then(function (sentMessage) {
+          message.date = sentMessage.date;
+          message.id = sentMessage.id;
+
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updates',
+            users: [],
+            chats: [],
+            seq: sentMessage.seq,
+            updates: [{
               _: 'updateMessageID',
               random_id: randomIDS,
-              id: result.id
-            });
-
-            message.date = result.date;
-            message.id = result.id;
-            ApiUpdatesManager.saveUpdate({
+              id: sentMessage.id
+            }, {
               _: 'updateNewMessage',
               message: message,
-              pts: result.pts
-            });
-          }
+              pts: sentMessage.pts
+            }]
+          });
         }, function (error) {
           toggleError(true);
         })['finally'](function () {
@@ -1503,25 +1507,26 @@ angular.module('myApp.services', [])
               peer: inputPeer,
               media: inputMedia,
               random_id: randomID
-            }).then(function (result) {
-              if (ApiUpdatesManager.saveSeq(result.seq)) {
-                ApiUpdatesManager.saveUpdate({
+            }).then(function (statedMessage) {
+              message.date = statedMessage.message.date;
+              message.id = statedMessage.message.id;
+              message.media = statedMessage.message.media;
+
+              ApiUpdatesManager.processUpdateMessage({
+                _: 'updates',
+                users: statedMessage.users,
+                chats: statedMessage.chats,
+                seq: statedMessage.seq,
+                updates: [{
                   _: 'updateMessageID',
                   random_id: randomIDS,
-                  id: result.message.id
-                });
-
-                message.date = result.message.date;
-                message.id = result.message.id;
-                message.media = result.message.media;
-
-                ApiUpdatesManager.saveUpdate({
+                  id: statedMessage.message.id
+                }, {
                   _: 'updateNewMessage',
                   message: message,
-                  pts: result.pts
-                });
-              }
-
+                  pts: statedMessage.pts
+                }]
+              });
             }, function (error) {
               toggleError(true);
             });
@@ -1617,24 +1622,26 @@ angular.module('myApp.services', [])
           peer: inputPeer,
           media: inputMedia,
           random_id: randomID
-        }).then(function (result) {
-          if (ApiUpdatesManager.saveSeq(result.seq)) {
-            ApiUpdatesManager.saveUpdate({
+        }).then(function (statedMessage) {
+          message.date = statedMessage.message.date;
+          message.id = statedMessage.message.id;
+          message.media = statedMessage.message.media;
+
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updates',
+            users: statedMessage.users,
+            chats: statedMessage.chats,
+            seq: statedMessage.seq,
+            updates: [{
               _: 'updateMessageID',
               random_id: randomIDS,
-              id: result.message.id
-            });
-
-            message.date = result.message.date;
-            message.id = result.message.id;
-            message.media = result.message.media;
-
-            ApiUpdatesManager.saveUpdate({
+              id: statedMessage.message.id
+            }, {
               _: 'updateNewMessage',
               message: message,
-              pts: result.pts
-            });
-          }
+              pts: statedMessage.pts
+            }]
+          });
         }, function (error) {
           toggleError(true);
         });
@@ -1656,22 +1663,23 @@ angular.module('myApp.services', [])
     return MtpApiManager.invokeApi('messages.forwardMessages', {
       peer: AppPeersManager.getInputPeerByID(peerID),
       id: msgIDs
-    }).then(function (forwardResult) {
-      AppUsersManager.saveApiUsers(forwardResult.users);
-      AppChatsManager.saveApiChats(forwardResult.chats);
-
-      if (ApiUpdatesManager.saveSeq(forwardResult.seq)) {
-        angular.forEach(forwardResult.messages, function(apiMessage) {
-
-          ApiUpdatesManager.saveUpdate({
-            _: 'updateNewMessage',
-            message: apiMessage,
-            pts: forwardResult.pts
-          });
-
+    }).then(function (statedMessages) {
+      var updates = [];
+      angular.forEach(statedMessages.messages, function(apiMessage) {
+        updates.push({
+          _: 'updateNewMessage',
+          message: apiMessage,
+          pts: statedMessages.pts
         });
-      }
+      });
 
+      ApiUpdatesManager.processUpdateMessage({
+        _: 'updates',
+        users: statedMessages.users,
+        chats: statedMessages.chats,
+        seq: statedMessages.seq,
+        updates: updates
+      });
     });
   };
 
@@ -1686,9 +1694,12 @@ angular.module('myApp.services', [])
           historyStorage = historiesStorage[peerID],
           i;
 
-      ApiUpdatesManager.saveUpdate({
-        _: 'updateDeleteMessages',
-        messages: [tempID]
+      ApiUpdatesManager.processUpdateMessage({
+        _: 'updateShort',
+        update: {
+          _: 'updateDeleteMessages',
+          messages: [tempID]
+        }
       });
 
       for (i = 0; i < historyStorage.pending.length; i++) {
@@ -2828,15 +2839,28 @@ angular.module('myApp.services', [])
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
 
-  var curState = {invalid: true};
+  var isSynchronizing = true,
+      getDifferencePending = false,
+      curState = {},
+      pendingUpdates = {};
+
+  function popPendingUpdate () {
+    var updateMessage = pendingUpdates[curState.seq + 1];
+    if (updateMessage && processUpdateMessage(updateMessage)) {
+      delete pendingUpdates[curState.seq + 1];
+    }
+  }
+
+  function forceGetDifference () {
+    if (!isSynchronizing) {
+      getDifference();
+    }
+  }
 
   function processUpdateMessage (updateMessage) {
-    if (curState.invalid) {
-      return false;
-    }
-
     if (updateMessage.seq) {
       if (!saveSeq(updateMessage.seq, updateMessage.seq_start)) {
+        pendingUpdates[updateMessage.seq_start || updateMessage.seq] = updateMessage;
         return false;
       }
       if (updateMessage.date) {
@@ -2847,47 +2871,18 @@ angular.module('myApp.services', [])
 
     switch (updateMessage._) {
       case 'updatesTooLong':
-        getDifference();
+        forceGetDifference();
         break;
 
       case 'updateShort':
         saveUpdate(updateMessage.update);
         break;
 
-      case 'updatesCombined':
-      case 'updates':
-        AppUsersManager.saveApiUsers(updateMessage.users);
-        AppChatsManager.saveApiChats(updateMessage.chats);
-
-        var i, update, message;
-        for (var i = 0; i < updateMessage.updates.length; i++) {
-          update = updateMessage.updates[i];
-          switch (update._) {
-            case 'updateNewMessage':
-              message = update.message;
-              if (message.from_id && !AppUsersManager.hasUser(message.from_id)) {
-                console.log('User not found', message.from_id, 'getDiff');
-                getDifference();
-                return false;
-              }
-              if (message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
-                console.log('Chat not found', message.to_id.chat_id, 'getDiff');
-                getDifference();
-                return false;
-              }
-              break;
-          }
-        }
-
-        angular.forEach(updateMessage.updates, function (update) {
-          saveUpdate(update);
-        });
-        break;
 
       case 'updateShortMessage':
         if (!AppUsersManager.hasUser(updateMessage.from_id)) {
           console.log('User not found', updateMessage.from_id, 'getDiff');
-          getDifference();
+          forceGetDifference();
           break;
         }
         saveUpdate({
@@ -2911,7 +2906,7 @@ angular.module('myApp.services', [])
         if (!AppUsersManager.hasUser(updateMessage.from_id) ||
             !AppChatsManager.hasChat(updateMessage.chat_id)) {
           console.log('User or chat not found', updateMessage.from_id, updateMessage.chat_id, 'getDiff');
-          getDifference();
+          forceGetDifference();
           break;
         }
         saveUpdate({
@@ -2930,22 +2925,63 @@ angular.module('myApp.services', [])
           pts: updateMessage.pts
         });
         break;
+
+      case 'updatesCombined':
+      case 'updates':
+      default:
+        AppUsersManager.saveApiUsers(updateMessage.users);
+        AppChatsManager.saveApiChats(updateMessage.chats);
+
+        var i, update, message;
+        for (var i = 0; i < updateMessage.updates.length; i++) {
+          update = updateMessage.updates[i];
+          switch (update._) {
+            case 'updateNewMessage':
+              message = update.message;
+              if (message.from_id && !AppUsersManager.hasUser(message.from_id)) {
+                console.log('User not found', message.from_id, 'getDiff');
+                forceGetDifference();
+                return false;
+              }
+              if (message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
+                console.log('Chat not found', message.to_id.chat_id, 'getDiff');
+                forceGetDifference();
+                return false;
+              }
+              break;
+          }
+        }
+
+        angular.forEach(updateMessage.updates, function (update) {
+          saveUpdate(update);
+        });
+        break;
+    }
+
+    popPendingUpdate();
+
+    if (getDifferencePending && curState.seq >= getDifferencePending.seqAwaiting) {
+      clearTimeout(getDifferencePending.timeout);
+      getDifferencePending = false;
     }
 
     return true;
   }
 
-  function getDifference (force) {
-    if (curState.invalid && !force) {
-      return false;
+  function getDifference () {
+    isSynchronizing = true;
+
+    if (getDifferencePending) {
+      clearTimeout(getDifferencePending.timeout);
+      getDifferencePending = false;
     }
 
-    curState.invalid = true;
     MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: 0}).then(function (differenceResult) {
       if (differenceResult._ == 'updates.differenceEmpty') {
         curState.date = differenceResult.date;
         curState.seq = differenceResult.seq;
-        delete curState.invalid;
+        isSynchronizing = false;
+        popPendingUpdate();
         return false;
       }
 
@@ -2954,7 +2990,7 @@ angular.module('myApp.services', [])
 
       // Should be first because of updateMessageID
       angular.forEach(differenceResult.other_updates, function(update){
-        saveUpdate(update, true);
+        saveUpdate(update);
       });
 
       angular.forEach(differenceResult.new_messages, function (apiMessage) {
@@ -2962,7 +2998,7 @@ angular.module('myApp.services', [])
           _: 'updateNewMessage',
           message: apiMessage,
           pts: curState.pts
-        }, true);
+        });
       });
 
       var nextState = differenceResult.intermediate_state || differenceResult.state;
@@ -2973,15 +3009,12 @@ angular.module('myApp.services', [])
       if (differenceResult._ == 'updates.differenceSlice') {
         getDifference(true);
       } else {
-        delete curState.invalid;
+        isSynchronizing = false;
       }
     });
   }
 
-  function saveUpdate (update, force) {
-    if (curState.invalid && !force) {
-      return false;
-    }
+  function saveUpdate (update) {
     if (update.pts) {
       curState.pts = update.pts;
     }
@@ -2989,23 +3022,31 @@ angular.module('myApp.services', [])
     $rootScope.$broadcast('apiUpdate', update);
   }
 
+
+
   function saveSeq (seq, seqStart) {
     // console.log('saving seq', curState.invalid, seq, seqStart, curState.seq);
-
-    if (curState.invalid) {
-      return false;
-    }
-
     seqStart = seqStart || seq;
 
     if (!seqStart) {
       return true;
     }
 
+    if (isSynchronizing) {
+      return false;
+    }
+
     if (seqStart != curState.seq + 1) {
       if (seqStart > curState.seq) {
         console.warn('Seq hole', seqStart, curState.seq);
-        getDifference();
+        if (!getDifferencePending) {
+          getDifferencePending = {
+            seqAwaiting: seqStart,
+            timeout: setTimeout(function () {
+              getDifference();
+            }, 5000)
+          };
+        }
       }
       return false;
     }
@@ -3021,13 +3062,13 @@ angular.module('myApp.services', [])
       curState.seq = stateResult.seq;
       curState.pts = stateResult.pts;
       curState.date = stateResult.date;
-      delete curState.invalid;
+      isSynchronizing = false;
     })
   }
 
 
   return {
-    saveUpdate: saveUpdate,
+    processUpdateMessage: processUpdateMessage,
     saveSeq: saveSeq,
     attach: attach
   }
