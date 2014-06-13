@@ -783,7 +783,11 @@ angular.module('myApp.controllers', [])
 
         $scope.history = [];
         angular.forEach(historyResult.history, function (id) {
-          $scope.history.push(AppMessagesManager.wrapForHistory(id));
+          var message = AppMessagesManager.wrapForHistory(id);
+          if ($scope.skippedHistory) {
+            delete message.unread;
+          }
+          $scope.history.push(message);
         });
         $scope.history.reverse();
 
@@ -1046,7 +1050,7 @@ angular.module('myApp.controllers', [])
     $scope.$on('history_need_more', showMoreHistory);
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
-      if (!newVal && $scope.curDialog && $scope.curDialog.peerID) {
+      if (!newVal && $scope.curDialog && $scope.curDialog.peerID && !$scope.mediaType && !$scope.skippedHistory) {
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
       }
     });
@@ -1130,7 +1134,9 @@ angular.module('myApp.controllers', [])
       // console.trace('ctrl text changed', newVal);
 
       if (newVal && newVal.length) {
-        AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+        if (!$scope.mediaType && !$scope.skippedHistory) {
+          AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+        }
 
         var backupDraftObj = {};
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;

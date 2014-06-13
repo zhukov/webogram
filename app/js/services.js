@@ -1182,7 +1182,11 @@ angular.module('myApp.services', [])
   }
 
   function processAffectedHistory (inputPeer, affectedHistory, method) {
-    if (!ApiUpdatesManager.saveSeq(affectedHistory.seq)) {
+    if (!ApiUpdatesManager.processUpdateMessage({
+        _: 'updates',
+        seq: affectedHistory.seq,
+        updates: []
+      })) {
       return false;
     }
     if (!affectedHistory.offset) {
@@ -2845,9 +2849,13 @@ angular.module('myApp.services', [])
       pendingUpdates = {};
 
   function popPendingUpdate () {
-    var updateMessage = pendingUpdates[curState.seq + 1];
-    if (updateMessage && processUpdateMessage(updateMessage)) {
-      delete pendingUpdates[curState.seq + 1];
+    var nextSeq = curState.seq + 1,
+        updateMessage = pendingUpdates[nextSeq];
+    if (updateMessage) {
+      console.log(dT(), 'pop pending update', nextSeq, updateMessage);
+      if (processUpdateMessage(updateMessage)) {
+        delete pendingUpdates[nextSeq];
+      }
     }
   }
 
@@ -2961,6 +2969,7 @@ angular.module('myApp.services', [])
     popPendingUpdate();
 
     if (getDifferencePending && curState.seq >= getDifferencePending.seqAwaiting) {
+      console.log(dT(), 'cancel pending getDiff', getDifferencePending.seqAwaiting);
       clearTimeout(getDifferencePending.timeout);
       getDifferencePending = false;
     }
@@ -2978,6 +2987,7 @@ angular.module('myApp.services', [])
 
     MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: 0}).then(function (differenceResult) {
       if (differenceResult._ == 'updates.differenceEmpty') {
+        console.log(dT(), 'apply empty diff', differenceResult.seq);
         curState.date = differenceResult.date;
         curState.seq = differenceResult.seq;
         isSynchronizing = false;
@@ -3006,6 +3016,8 @@ angular.module('myApp.services', [])
       curState.pts = nextState.pts;
       curState.date = nextState.date;
 
+      console.log(dT(), 'apply diff', curState.seq, curState.pts);
+
       if (differenceResult._ == 'updates.differenceSlice') {
         getDifference(true);
       } else {
@@ -3025,7 +3037,6 @@ angular.module('myApp.services', [])
 
 
   function saveSeq (seq, seqStart) {
-    // console.log('saving seq', curState.invalid, seq, seqStart, curState.seq);
     seqStart = seqStart || seq;
 
     if (!seqStart) {
@@ -3033,12 +3044,13 @@ angular.module('myApp.services', [])
     }
 
     if (isSynchronizing) {
+      console.log(dT(), 'Seq decline', seqStart);
       return false;
     }
 
     if (seqStart != curState.seq + 1) {
       if (seqStart > curState.seq) {
-        console.warn('Seq hole', seqStart, curState.seq);
+        console.warn(dT(), 'Seq hole', seqStart, getDifferencePending && getDifferencePending.seqAwaiting);
         if (!getDifferencePending) {
           getDifferencePending = {
             seqAwaiting: seqStart,
@@ -3049,6 +3061,8 @@ angular.module('myApp.services', [])
         }
       }
       return false;
+    } else {
+      console.log(dT(), 'Seq apply', seqStart);
     }
 
     curState.seq = seq;
@@ -3069,7 +3083,6 @@ angular.module('myApp.services', [])
 
   return {
     processUpdateMessage: processUpdateMessage,
-    saveSeq: saveSeq,
     attach: attach
   }
 })
