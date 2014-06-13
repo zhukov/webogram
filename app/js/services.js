@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.5 - messaging web application for MTProto
+ * Webogram v0.1.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -3694,7 +3694,9 @@ angular.module('myApp.services', [])
   function checkUpdate () {
     AppConfigManager.get('last_version').then(function (lastVersion) {
       if (lastVersion != Config.App.version) {
-        showChangelog(lastVersion || '0');
+        if (lastVersion) {
+          showChangelog(lastVersion);
+        }
         AppConfigManager.set({last_version: Config.App.version});
       }
     })

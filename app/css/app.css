@@ -3563,6 +3563,14 @@ ce671b orange
   background-size: 160px 160px;
   margin: 0 auto;
 }
+.changelog_card_search {
+  width: 133px;
+  height: 133px;
+  display: block;
+  background: url(../img/changelog/search.png) no-repeat 0 0;
+  background-size: 133px 133px;
+  margin: 0 auto;
+}
 
 .changelog_version_title {
   color: #9d9479;

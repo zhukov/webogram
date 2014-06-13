@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.5 - messaging web application for MTProto
+ * Webogram v0.1.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -11,7 +11,7 @@
 
 angular.module('myApp.controllers', [])
 
-  .controller('AppWelcomeController', function($scope, $location, MtpApiManager, ErrorService) {
+  .controller('AppWelcomeController', function($scope, $location, MtpApiManager, ErrorService, ChangelogNotifyService) {
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
@@ -19,9 +19,11 @@ angular.module('myApp.controllers', [])
         $scope.showWelcome = true;
       }
     });
+
+    ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService) {
+  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, ChangelogNotifyService) {
 
     $modalStack.dismissAll();
 
@@ -208,6 +210,8 @@ angular.module('myApp.controllers', [])
       });
 
     };
+
+    ChangelogNotifyService.checkUpdate();
   })
 
   .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ChangelogNotifyService, ErrorService) {
@@ -349,7 +353,16 @@ angular.module('myApp.controllers', [])
       }
     });
 
-    $scope.$watchCollection('search', loadDialogs);
+    var prevMessages = false;
+    $scope.$watchCollection('search', function () {
+      if ($scope.search.messages != prevMessages) {
+        prevMessages = $scope.search.messages;
+        $scope.dialogs = [];
+        loadDialogs(true);
+      } else {
+        loadDialogs();
+      }
+    });
 
     $scope.importContact = function () {
       AppUsersManager.openImportContact().then(function (foundContact) {
@@ -368,14 +381,14 @@ angular.module('myApp.controllers', [])
     };
 
     var searchTimeoutPromise;
-    function getDialogs() {
+    function getDialogs(force) {
       var searchMessages = $scope.search.messages && $scope.search.query.length > 0,
           curJump = ++jump,
           promise;
 
       $timeout.cancel(searchTimeoutPromise);
       if (searchMessages) {
-        searchTimeoutPromise = $timeout(angular.noop, 500);
+        searchTimeoutPromise = force ? $q.when() : $timeout(angular.noop, 500);
         promise = searchTimeoutPromise.then(function () {
           return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID)
         });
@@ -444,14 +457,14 @@ angular.module('myApp.controllers', [])
       })
     };
 
-    function loadDialogs () {
+    function loadDialogs (force) {
       offset = 0;
       maxID = 0;
       hasMore = false;
       peersInDialogs = {};
       contactsShown = false;
 
-      getDialogs().then(function (dialogsResult) {
+      getDialogs(force).then(function (dialogsResult) {
         $scope.dialogs = [];
         $scope.contacts = [];
 
