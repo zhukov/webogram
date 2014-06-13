@@ -54,17 +54,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       attrs.$observe('hasTabs', function (newValue) {
         newValue = newValue == 'true';
-        if (newValue) {
-          $scope.$broadcast('ui_dialogs_tabs', true);
-        }
-        var trigger = function () {
-          $(tabsWrap)[newValue ? 'addClass' : 'removeClass']('shown');
-        }
-        $transition($(tabsWrap), trigger).then(function () {
-          if (!newValue) {
-            $scope.$broadcast('ui_dialogs_tabs', false);
-          }
-        });
+        $(tabsWrap).toggle(newValue);
+        $scope.$broadcast('ui_dialogs_tabs', newValue);
       });
 
       $(document).on('keydown', onKeyDown);
@@ -180,8 +171,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myDialogsList', function($window, $timeout) {
 
     return {
-      link: link,
-      scope: true
+      link: link
     };
 
 
@@ -489,6 +479,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_history_append', function () {
         var sh = scrollableWrap.scrollHeight;
         onContentLoaded(function () {
+          atBottom = false;
           updateBottomizer();
           lessNotified = false;
 

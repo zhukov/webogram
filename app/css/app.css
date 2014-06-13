@@ -957,17 +957,8 @@ a.tg_radio_on:hover i.icon-radio {
 }
 
 .im_dialogs_tabs_wrap {
-  overflow: hidden;
-  height: 0;
-  -webkit-transition    : height ease-out 0.3s;
-  -moz-transition       : height ease-out 0.3s;
-  -o-transition         : height ease-out 0.3s;
-  transition            : height ease-out 0.3s;
+  display: none;
 }
-.im_dialogs_tabs_wrap.shown {
-  height: 38px;
-}
-
 .im_dialogs_tabs {
   padding: 4px 0;
   position: relative;
@@ -2977,17 +2968,10 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.im_message_selected {
+.im_message_selected,
+.im_message_focus {
   background: #f2f6fa;
 }
-.im_message_focus {
-  background-color: #f2f6fa;
-  -webkit-transition: background-color linear 1s;
-  transition: background-color linear 1s;
-}
-/*.im_message_focus.inactive {
-  background-color: none;
-}*/
 
 .im_history_selectable .im_message_outer_wrap {
   cursor: pointer;
@@ -2995,11 +2979,15 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 .im_history_selectable .im_message_outer_wrap:hover {
   background: #f2f6fa;
 }
+
 .im_message_selected .im_message_date,
 .im_message_selected .im_message_fwd_header,
+.im_message_selected .im_message_document_size,
+.im_message_focus .im_message_date,
+.im_message_focus .im_message_fwd_header,
+.im_message_focus .im_message_document_size,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_date,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_header,
-.im_message_selected .im_message_document_size,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_document_size {
   color: #68839c;
 }
