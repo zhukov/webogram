@@ -24,6 +24,7 @@
       <span ng-switch-when="true">Generating keys<span my-loading-dots></span></span>
       <span ng-switch-default>Next</span>
     </button>
+    <div class="login_form_messaging" ng-show="progress.enabled">Key generation will only happen once, it could take several minutes on slower devices, please be patient.</div>
   </form>
 
   <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
