@@ -325,7 +325,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myHistory', function ($window, $timeout, $transition) {
+  .directive('myHistory', function ($window, $timeout, $rootScope, $transition) {
 
     return {
       link: link
@@ -370,7 +370,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var animated = transform ? true : false,
+      var animated = transform && !$rootScope.idle.isIDLE ? true : false,
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {

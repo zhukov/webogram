@@ -1662,7 +1662,7 @@ angular.module('myApp.services', [])
   }
 
   function forwardMessages (peerID, msgIDs) {
-    msgIDs = $filter('orderBy')(msgIDs);
+    msgIDs = msgIDs.sort();
 
     return MtpApiManager.invokeApi('messages.forwardMessages', {
       peer: AppPeersManager.getInputPeerByID(peerID),
@@ -1987,11 +1987,19 @@ angular.module('myApp.services', [])
 
         if (historyStorage !== undefined) {
           var topMsgID = historiesStorage[peerID].history[0];
-          if (message.id <= topMsgID) {
+          if (historiesStorage[peerID].history.indexOf(message.id) != -1) {
             return false;
           }
+          else {
+            historyStorage.history.unshift(message.id);
+            if (message.id > 0 && message.id < topMsgID || true) {
+              historyStorage.history.sort(function (a, b) {
+                return b - a;
+              });
+            }
+          }
         } else {
-          historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+          historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};
         }
 
         saveMessages([message]);
@@ -2000,10 +2008,8 @@ angular.module('myApp.services', [])
           historyStorage.count++;
         }
 
-        historyStorage.history.unshift(message.id);
         var randomID = pendingByMessageID[message.id],
             pendingMessage;
-
 
         if (randomID) {
           if (pendingMessage = finalizePendingMessage(randomID, message)) {
