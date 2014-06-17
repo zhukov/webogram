@@ -4,15 +4,18 @@
 
     <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="nav.next()"> </div>
 
-    <div class="media_modal_actions pull-right">
-      <a href="" class="media_modal_action_link" ng-click="download()">Download</a>
-      <a href="" class="media_modal_action_link" ng-if="canForward" ng-click="forward()">Forward</a>
-      <a href="" class="media_modal_action_link" ng-if="canDelete" ng-click="delete()">Delete</a>
+    <div class="media_meta_wrap clearfix">
+      <div class="media_modal_actions pull-right">
+        <a href="" class="media_modal_action_link" ng-click="download()">Download</a>
+        <a href="" class="media_modal_action_link" ng-if="canForward" ng-click="forward()">Forward</a>
+        <a href="" class="media_modal_action_link" ng-if="canDelete" ng-click="delete()">Delete</a>
+      </div>
+
+      <p class="media_modal_info">
+        <span class="media_modal_author" ng-bind-html="photo.fromUser.rFullName"></span>, {{photo.date | dateOrTime}}
+      </p>
     </div>
 
-    <p class="media_modal_info">
-      <span class="media_modal_author" ng-bind-html="photo.fromUser.rFullName"></span>, {{photo.date | dateOrTime}}
-    </p>
 
   </div>
 

@@ -57,13 +57,13 @@
 
     </div>
 
-    <div bindonce bo-if="historyMessage._ != 'messageService'" class="im_content_message_wrap">
+    <div bindonce bo-if="historyMessage._ != 'messageService'" class="im_content_message_wrap" ng-class="{im_message_unread: historyMessage.unread, im_message_out: historyMessage.out, im_message_in: !historyMessage.out, im_message_error: historyMessage.error, im_message_pending: historyMessage.pending}">
       <div class="im_content_message_select_area">
         <i class="icon icon-select-tick"></i>
       </div>
 
-      <a bo-if="historyMessage.pending || historyMessage.error" ng-click="historyMessage.send()" ng-show="historyMessage.error">
-        <i class="icon-message-status icon-message-status-error" tooltip="Try again"></i>
+      <a class="im_message_error_btn" bo-if="historyMessage.pending || historyMessage.error" ng-click="historyMessage.send()">
+        <i class="icon-message-status" tooltip="Try again"></i>
       </a>
 
       <i bo-if="historyMessage.unread || historyMessage.pending" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
@@ -76,6 +76,7 @@
         />
       </a>
       <div class="im_message_meta pull-right text-right">
+        <i class="icon-message-status-tick"></i>
         <span class="im_message_date" bo-bind="historyMessage.date | dateOrTime"></span>
       </div>
 

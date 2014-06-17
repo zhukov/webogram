@@ -11,6 +11,15 @@
 
 
 angular.module('myApp.directives', ['myApp.filters'])
+
+  .directive('myHead', function() {
+    return {
+      restrict: 'AE',
+      scope: true,
+      templateUrl: 'partials/head.html'
+    };
+  })
+
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
@@ -236,7 +245,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       function updateSizes () {
         if (attrs.modal) {
           $(element).css({
-            height: $($window).height() - 200
+            height: $($window).height() -
+                    (Config.Navigator.mobile ? 100 : 200)
           });
           updateScroller();
           return;
@@ -281,7 +291,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: $($window).height() - (panelWrap && panelWrap.offsetHeight || 0) - (searchWrap && searchWrap.offsetHeight || 0) - 200
+          height: $($window).height() -
+                  (panelWrap && panelWrap.offsetHeight || 0) -
+                  (searchWrap && searchWrap.offsetHeight || 0) -
+                  (Config.Navigator.mobile ? 60 : 200)
         });
         $(contactsWrap).nanoScroller();
       }
@@ -370,21 +383,24 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var animated = transform && !$rootScope.idle.isIDLE ? true : false,
+      var animated = transform ? true : false,
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {
         if (!atBottom && !options.my) {
           return;
         }
-        if (!animated) {
+        var curAnimated = animated && !$rootScope.idle.isIDLE,
+            wasH;
+        if (!curAnimated) {
           $(scrollable).css({bottom: 0});
           $(scrollableWrap).addClass('im_history_to_bottom');
+        } else {
+          wasH = scrollableWrap.scrollHeight;
         }
 
-        var wasH = scrollableWrap.scrollHeight;
         onContentLoaded(function () {
-          if (animated) {
+          if (curAnimated) {
             curAnimation = true;
             $(historyMessagesEl).removeClass('im_history_appending');
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
@@ -740,7 +756,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
       }
 
-      if (!Config.Navigator.mobile) {
+      if (!Config.Navigator.touch) {
         $scope.$on('ui_peer_change', focusField);
         $scope.$on('ui_history_focus', focusField);
         $scope.$on('ui_history_change', focusField);
@@ -761,7 +777,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      if (!Config.Navigator.mobile) {
+      if (!Config.Navigator.touch) {
         focusField();
       }
 
@@ -1221,7 +1237,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myFocused', function(){
     return {
       link: function($scope, element, attrs) {
-        if (Config.Navigator.mobile) {
+        if (Config.Navigator.touch) {
           return false;
         }
         setTimeout(function () {
@@ -1235,7 +1251,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: function($scope, element, attrs) {
         $scope.$on(attrs.myFocusOn, function () {
-          if (Config.Navigator.mobile) {
+          if (Config.Navigator.touch) {
             return false;
           }
           onContentLoaded(function () {
@@ -1276,7 +1292,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
-        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + 36});
+        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Navigator.mobile ? 0 : 36)});
       });
     };
 
@@ -1379,6 +1395,10 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link($scope, element, attrs) {
 
       var updateMargin = function () {
+        if (Config.Navigator.mobile &&
+            $(element[0].parentNode.parentNode.parentNode).hasClass('page_modal')) {
+          return;
+        }
         var height = element[0].parentNode.offsetHeight,
             contHeight = element[0].parentNode.parentNode.parentNode.offsetHeight;
 
@@ -1416,15 +1436,21 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
-      var prevMargin = false;
+      var usePadding = attrs.padding === 'true',
+          prevMargin = 0;
 
       var updateMargin = function () {
         var height = element[0].offsetHeight,
+            fullHeight = height - (height && usePadding ? 2 * prevMargin : 0),
             contHeight = $($window).height(),
             ratio = attrs.myVerticalPosition && parseFloat(attrs.myVerticalPosition) || 0.5,
-            margin = height < contHeight ? parseInt((contHeight - height) * ratio) : '';
+            margin = fullHeight < contHeight ? parseInt((contHeight - fullHeight) * ratio) : '',
+            styles = usePadding
+              ? {paddingTop: margin, paddingBottom: margin}
+              : {marginTop: margin, marginBottom: margin};
 
-        element.css({marginTop: margin, marginBottom: margin});
+        element.css(styles);
+        element.addClass('vertical-aligned');
 
         if (prevMargin !== margin) {
           $scope.$emit('ui_height');

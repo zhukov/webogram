@@ -1,6 +1,10 @@
 <div class="contacts_modal_wrap" my-modal-position>
 
+  <a class="modal-close-button visible-xs" ng-click="$dismiss()"><i></i></a>
+
   <div class="modal-body">
+
+    <h4 class="modal_simple_header visible-xs">Contacts</h4>
 
     <div class="contacts_modal_search">
       <input class="form-control contacts_modal_search_field" my-focused type="search" placeholder="Search" ng-model="search.query"/>
@@ -44,7 +48,7 @@
 
   </div>
 
-  <div class="modal-footer" ng-switch="multiSelect">
+  <div class="modal-footer contacts_modal_panel" ng-switch="multiSelect">
     <button ng-switch-when="true" class="btn btn-success btn-block" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
       Next »
     </button>

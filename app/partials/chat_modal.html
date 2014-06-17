@@ -22,42 +22,39 @@
           </ng-pluralize>
         </p>
 
-        <div class="chat_modal_settings_wrap">
+        <div class="chat_modal_actions_wrap clearfix">
 
-          <div class="chat_modal_actions_wrap clearfix">
+          <button ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="btn btn-primary chat_modal_invite_btn" ng-click="inviteToGroup()">Add member</button>
+          <button ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left" class="btn btn-primary chat_modal_main_btn" ng-click="returnToGroup()">Return to group</button>
+          <button ng-if="chatFull.chat._ == 'chatForbidden'" class="btn btn-danger chat_modal_delete_btn" ng-click="flushHistory()">Delete chat</button>
 
-            <button ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="btn btn-primary chat_modal_invite_btn" ng-click="inviteToGroup()">Add member</button>
-            <button ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left" class="btn btn-primary chat_modal_main_btn" ng-click="returnToGroup()">Return to group</button>
-            <button ng-if="chatFull.chat._ == 'chatForbidden'" class="btn btn-danger chat_modal_delete_btn" ng-click="flushHistory()">Delete chat</button>
-
-            <span ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; !photo.updating" class="btn btn-primary chat_modal_main_btn" >
-              <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
-              Update photo
-            </span>
-            <span ng-if="photo.updating" class="btn btn-primary chat_modal_main_btn disabled" disabled>
-              Updating<span my-loading-dots></span>
-            </span>
+          <span ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; !photo.updating" class="btn btn-primary chat_modal_main_btn" >
+            <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+            Update photo
+          </span>
+          <span ng-if="photo.updating" class="btn btn-primary chat_modal_main_btn disabled" disabled>
+            Updating<span my-loading-dots></span>
+          </span>
 
 
-            <div class="dropdown chat_modal_other_btn" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
-              <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
-              <ul class="dropdown-menu">
-                <li ng-if="chatFull.thumb.location">
-                  <a ng-click="deletePhoto()">Delete photo</a>
-                </li>
-                <li>
-                  <a ng-click="editTitle()">Edit group</a>
-                </li>
-                <li>
-                  <a ng-click="leaveGroup()">Leave group</a>
-                </li>
-                <li>
-                  <a ng-click="flushHistory()">Delete chat</a>
-                </li>
-              </ul>
-            </div>
-
+          <div class="dropdown chat_modal_other_btn" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+            <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
+            <ul class="dropdown-menu">
+              <li ng-if="chatFull.thumb.location">
+                <a ng-click="deletePhoto()">Delete photo</a>
+              </li>
+              <li>
+                <a ng-click="editTitle()">Edit group</a>
+              </li>
+              <li>
+                <a ng-click="leaveGroup()">Leave group</a>
+              </li>
+              <li>
+                <a ng-click="flushHistory()">Delete chat</a>
+              </li>
+            </ul>
           </div>
+
         </div>
 
       </div>

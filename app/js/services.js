@@ -284,7 +284,7 @@ angular.module('myApp.services', [])
       templateUrl: 'partials/user_modal.html',
       controller: 'UserModalController',
       scope: scope,
-      windowClass: 'user_modal_window'
+      windowClass: 'user_modal_window page_modal'
     });
   };
   $rootScope.openUser = openUser;
@@ -377,7 +377,7 @@ angular.module('myApp.services', [])
     return $modal.open({
       templateUrl: 'partials/import_contact_modal.html',
       controller: 'ImportContactModalController',
-      windowClass: 'import_contact_modal_window'
+      windowClass: 'import_contact_modal_window page_modal'
     }).result.then(function (foundUserID) {
       if (!foundUserID) {
         return $q.reject();
@@ -457,7 +457,7 @@ angular.module('myApp.services', [])
     return $modal.open({
       templateUrl: 'partials/phonebook_modal.html',
       controller: 'PhonebookModalController',
-      windowClass: 'phonebook_modal_window'
+      windowClass: 'phonebook_modal_window page_modal'
     });
   }
 
@@ -598,7 +598,7 @@ angular.module('myApp.services', [])
     var modalInstance = $modal.open({
       templateUrl: 'partials/chat_modal.html',
       controller: 'ChatModalController',
-      windowClass: 'chat_modal_window',
+      windowClass: 'chat_modal_window page_modal',
       scope: scope
     });
   }
@@ -985,15 +985,16 @@ angular.module('myApp.services', [])
       }
     }
 
-    if (!offsetNotFound && historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
-      historyStorage.history.length >= offset + (limit || 1)
-    ) {
+    if (!offsetNotFound && (
+          historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
+          historyStorage.history.length >= offset + (limit || 1)
+    )) {
       if (backLimit) {
         backLimit = Math.min(offset, backLimit);
         offset = Math.max(0, offset - backLimit);
         limit += backLimit;
       } else {
-        limit = limit || 20;
+        limit = limit || (offset ? 20 : 5);
       }
 
       return $q.when({
@@ -2291,7 +2292,7 @@ angular.module('myApp.services', [])
 
   function wrapForFull (photoID) {
     var photo = wrapForHistory(photoID),
-        fullWidth = $(window).width() - 36,
+        fullWidth = $(window).width() - (Config.Navigator.mobile ? 20 : 36),
         fullHeight = $($window).height() - 150,
         fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
         full = {
@@ -2522,7 +2523,8 @@ angular.module('myApp.services', [])
     var modalInstance = $modal.open({
       templateUrl: 'partials/video_modal.html',
       controller: 'VideoModalController',
-      scope: scope
+      scope: scope,
+      windowClass: 'video_modal_window'
     });
   }
 
@@ -3723,7 +3725,7 @@ angular.module('myApp.services', [])
     $modal.open({
       templateUrl: 'partials/changelog_modal.html',
       scope: $scope,
-      windowClass: 'changelog_modal_window'
+      windowClass: 'changelog_modal_window page_modal'
     });
   }
 
