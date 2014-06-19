@@ -766,6 +766,11 @@ a.tg_radio_on:hover i.icon-radio {
   margin: 15px 0 30px;
   font-size: 13px;
 }
+.login_form_messaging {
+  color: #959595;
+  font-size: 13px;
+  margin-top: 10px;
+}
 
 .login_country_selector {
   cursor: pointer;
