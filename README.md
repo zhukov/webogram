@@ -40,13 +40,13 @@ Here are some screenshots of the interface:
 * Contacts view, search
 * Contacts add/edit
 * Edit, delete, forward messsages
+* Search messages
+* Registration
 
 
 ### Unsupported at the moment
 
-* Registration
 * Secret chats
-* Search messages
 * ...
 
 
