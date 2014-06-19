@@ -3109,7 +3109,7 @@ angular.module('myApp.services', [])
     emojiMap[emojiData[emojiCode][0]] = emojiCode;
   }
 
-  var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')', 'i');
+  var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\s)(#[A-Za-z0-9\_\.]{4,20})', 'i');
   var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
 
   return {
@@ -3212,6 +3212,23 @@ angular.module('myApp.services', [])
           );
         } else {
           html.push(encodeEntities(match[6]));
+        }
+      }
+      else if (match[8]) {
+        if (!options.noLinks) {
+          html.push(
+            match[7],
+            '<a href="#/im?q=',
+            encodeURIComponent(match[8]),
+            '">',
+            encodeEntities(match[8]),
+            '</a>'
+          );
+        } else {
+          html.push(
+            match[7],
+            encodeEntities(match[8])
+          );
         }
       }
       raw = raw.substr(match.index + match[0].length);
