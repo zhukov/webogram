@@ -645,18 +645,23 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      fileSelects.on('change', function () {
-        var self = this;
-        $scope.$apply(function () {
-          $scope.draftMessage.files = Array.prototype.slice.call(self.files);
-          $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
-          setTimeout(function () {
-            try {
-              self.value = '';
-            } catch (e) {};
-          }, 1000);
-        });
-      });
+      // Head is sometimes slower
+      $timeout(function () {
+        fileSelects
+          .add('.im_head_attach input')
+          .on('change', function () {
+            var self = this;
+            $scope.$apply(function () {
+              $scope.draftMessage.files = Array.prototype.slice.call(self.files);
+              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
+              setTimeout(function () {
+                try {
+                  self.value = '';
+                } catch (e) {};
+              }, 1000);
+            });
+          });
+      }, 1000);
 
       var sendOnEnter = true,
           updateSendSettings = function () {
@@ -772,6 +777,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
         $(document).off('paste', onPasteEvent);
         $(document).off('keydown', onKeyDown);
+        fileSelects.off('change');
         if (richTextarea) {
           $(richTextarea).off('DOMNodeInserted', onPastedImageEvent);
         }

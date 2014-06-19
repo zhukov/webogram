@@ -2084,6 +2084,9 @@ textarea.im_message_field {
   opacity: 1;
 }
 
+.im_head_attach {
+  display: none;
+}
 .im_attach_input,
 .im_media_attach_input {
   cursor: pointer;

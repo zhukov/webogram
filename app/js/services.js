@@ -1427,9 +1427,9 @@ angular.module('myApp.services', [])
     } else if (file.type.substr(0, 6) == 'video/') {
       attachType = 'video';
       fileName = 'video.mp4';
-    } else if (file.type == 'audio/mpeg' || file.type == 'audio/mp3') {
+    } else if (file.type.substr(0, 6) == 'audio/') {
       attachType = 'audio';
-      fileName = 'audio.mp3';
+      fileName = 'audio.' + file.type.split('/')[1] || 'mp3';
     } else {
       attachType = 'document';
       fileName = 'document.' + file.type.split('/')[1];
@@ -1497,11 +1497,11 @@ angular.module('myApp.services', [])
                 break;
 
               case 'video':
-                inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0};
+                inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0, mime_type: file.type};
                 break;
 
               case 'audio':
-                inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0};
+                inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0, mime_type: file.type};
                 break;
 
               case 'document':
