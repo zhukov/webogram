@@ -1832,6 +1832,7 @@ angular.module('myApp.services', [])
 
     if (message._ == 'messageForwarded') {
       message.fwdUser = AppUsersManager.getUser(message.fwd_from_id);
+      message.fwdPhoto = AppUsersManager.getUserPhoto(message.fwd_from_id, 'User');
     }
 
     if (message.media) {

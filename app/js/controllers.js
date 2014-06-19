@@ -693,7 +693,11 @@ angular.module('myApp.controllers', [])
             curMessage.date < prevMessage.date + 900) {
 
           var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
-          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
+          if (curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
+            curMessage.grouped = singleLine ? 4 : 3;
+          } else {
+            curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
+          }
         } else if (prevMessage || !i) {
           delete curMessage.grouped;
         }
