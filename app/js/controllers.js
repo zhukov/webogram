@@ -321,7 +321,9 @@ angular.module('myApp.controllers', [])
         if ($routeParams.q !== lastSearch) {
           $scope.search.query = lastSearch = $routeParams.q;
           $scope.search.messages = true;
-          return false;
+          if ($scope.curDialog !== undefined) {
+            return false;
+          }
         }
       } else {
         lastSearch = false;

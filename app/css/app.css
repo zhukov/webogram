@@ -879,13 +879,17 @@ a.tg_radio_on:hover i.icon-radio {
   background : rgba(0,0,0,0.0);
   width      : 12px;
   right: 0px;
-  -webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;
   -moz-border-radius    : 0;
   -webkit-border-radius : 0;
   border-radius         : 0;
+  /*-webkit-transition    : .2s;
+  -moz-transition       : .2s;
+  -o-transition         : .2s;
+  transition            : .2s;*/
+  -webkit-transition    : none;
+  -moz-transition       : none;
+  -o-transition         : none;
+  transition            : none;
 }
 .im_dialogs_col .nano > .pane > .slider {
   background: #A5B1B9;
@@ -1136,13 +1140,18 @@ a.im_dialog_selected .im_dialog_date {
   width      : 9px;
   right: 0;
   top: 0;
-  -webkit-transition    : .2s;
+  /*-webkit-transition    : .2s;
   -moz-transition       : .2s;
   -o-transition         : .2s;
-  transition            : .2s;
+  transition            : .2s;*/
   -moz-border-radius    : 2px;
   -webkit-border-radius : 2px;
   border-radius         : 2px;
+
+  -webkit-transition    : none;
+  -moz-transition       : none;
+  -o-transition         : none;
+  transition            : none;
 }
 
 .contacts_modal_col .nano > .pane {

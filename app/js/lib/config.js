@@ -35,8 +35,8 @@ Config.Navigator = {
   osX:  (navigator.platform || '').toLowerCase().indexOf('mac') != -1 ||
         (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1,
   retina: window.devicePixelRatio > 1,
-  touch: $(window).width() <= 768,
-  mobile: $(window).width() < 480
+  touch: screen.width <= 768,
+  mobile: screen.width < 480
 };
 
 Config.Schema = Config.Schema || {};
