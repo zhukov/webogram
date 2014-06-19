@@ -767,9 +767,10 @@ a.tg_radio_on:hover i.icon-radio {
   font-size: 13px;
 }
 .login_form_messaging {
+  text-align: center;
   color: #959595;
   font-size: 13px;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .login_country_selector {
