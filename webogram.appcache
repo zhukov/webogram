@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sat Jun 14 2014 01:05:20 GMT+0400 (MSK)
+# Time: Sat Jun 21 2014 02:27:01 GMT+0400 (MSK)
 
 
 CACHE:
@@ -61,7 +61,7 @@ img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
 js/lib/aes_worker.js
-js/lib/mtproto.js
+js/lib/bin_utils.js
 js/lib/pq_worker.js
 js/lib/sha1_worker.js
 vendor/closure/long.js
