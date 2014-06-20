@@ -41,8 +41,7 @@
       <div class="navbar-header">
 
         <a class="navbar-brand" href="{{isLoggedIn ? '#/im' : '#/'}}"><span class="tg_head_logo"></span><span class="tg_head_logo_text"></span></a>
-
-        <div ng-show="curDialog.peer" ng-switch="curDialog.peer &amp;&amp; historyFilter.mediaType.length">
+        <div ng-show="curDialog.peer" ng-switch="curDialog.peer &amp;&amp; historyFilter.mediaType.length > 0">
           <ul ng-switch-when="true" class="nav navbar-nav navbar-quick-nav">
             <li>
               <a ng-click="toggleMedia()" class="navbar-quick-media-back" ng-switch="historyFilter.mediaType">

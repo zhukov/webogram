@@ -294,7 +294,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height() -
                   (panelWrap && panelWrap.offsetHeight || 0) -
                   (searchWrap && searchWrap.offsetHeight || 0) -
-                  (Config.Navigator.mobile ? 60 : 200)
+                  (Config.Navigator.mobile ? 100 : 200)
         });
         $(contactsWrap).nanoScroller();
       }

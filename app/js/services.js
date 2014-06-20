@@ -258,7 +258,7 @@ angular.module('myApp.services', [])
     return $modal.open({
       templateUrl: 'partials/import_contact_modal.html',
       controller: 'ImportContactModalController',
-      windowClass: 'import_contact_modal_window page_modal'
+      windowClass: 'import_contact_modal_window'
     }).result.then(function (foundUserID) {
       if (!foundUserID) {
         return $q.reject();
@@ -338,7 +338,7 @@ angular.module('myApp.services', [])
     return $modal.open({
       templateUrl: 'partials/phonebook_modal.html',
       controller: 'PhonebookModalController',
-      windowClass: 'phonebook_modal_window page_modal'
+      windowClass: 'phonebook_modal_window'
     });
   }
 
@@ -361,8 +361,10 @@ angular.module('myApp.services', [])
           phones: []
         };
 
-        for (var i = 0; i < this.result.tel.length; i++) {
-          contact.phones.push(this.result.tel[i].value);
+        if (this.result.tel !== undefined) {
+          for (var i = 0; i < this.result.tel.length; i++) {
+            contact.phones.push(this.result.tel[i].value);
+          }
         }
         if (this.result.photo) {
           contact.photo = URL.createObjectURL(this.result.photo[0]);

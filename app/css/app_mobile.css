@@ -354,6 +354,14 @@ html {
   margin-top: -257px;
 }
 
+.im_edit_panel_wrap {
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+.im_edit_panel_border {
+  margin-bottom: 3px;
+}
+
 .im_head_attach {
   display: block;
   float: right;

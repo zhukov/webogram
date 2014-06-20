@@ -160,12 +160,7 @@ angular.module('izhukov.utils', [])
       deferred.reject();
     };
 
-    if (bytes instanceof FileEntry) {
-      bytes.file(function (file) {
-        fileWriter.write(file);
-      }, fileWriter.onerror);
-    }
-    else if (bytes instanceof Blob) { // is file bytes
+    if (bytes instanceof Blob) { // is file bytes
       fileWriter.write(bytes);
     }
     else {
