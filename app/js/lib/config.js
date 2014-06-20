@@ -27,7 +27,7 @@ Config.App = {
 Config.Modes = {
   test: location.search.indexOf('test=1') > 0,
   debug: location.search.indexOf('debug=1') > 0,
-  packed: false,
+  packed: location.protocol == 'app:' || location.protocol == 'chrome-extension:',
   chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false
 };
 
