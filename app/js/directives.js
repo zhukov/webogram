@@ -630,19 +630,62 @@ angular.module('myApp.directives', ['myApp.filters'])
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
       if (richTextarea) {
+        var updatePromise,
+          imageFromEmoji = function (emoji) {
+            var sprites = $.emojiarea.spritesheetPath.replace('!', emoji[0]),
+              top = emoji[1] * $.emojiarea.iconSize * -1,
+              left = emoji[2] * $.emojiarea.iconSize * -1,
+              spritesHeight = $.emojiarea.spritesheetDimens[emoji[0]][0] * $.emojiarea.iconSize,
+              spritesWidth = $.emojiarea.spritesheetDimens[emoji[0]][1] * $.emojiarea.iconSize,
+              img = document.createElement('img');
+            img.className = 'img';
+            img.src = $.emojiarea.path + 'img/blank.gif';
+            img.style.display = 'inline-block';
+            img.style.width = $.emojiarea.iconSize+'px';
+            img.style.height = $.emojiarea.iconSize+'px';
+            img.style.background = "url('"+ sprites +"') "+ left+'px '+top+'px no-repeat';
+            img.style.backgroundSize = spritesWidth+'px '+spritesHeight+'px';
+            return img;
+          }
+
         editorElement = richTextarea;
-        $(richTextarea).addClass('form-control');
-        $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+        $(richTextarea)
+          .addClass('form-control')
+          .attr('placeholder', $(messageField).attr('placeholder'))
+          .on('keyup', function (e) {
+            updateHeight();
 
-        var updatePromise;
-        $(richTextarea).on('keyup', function (e) {
-          updateHeight();
+            $scope.draftMessage.text = richTextarea.innerText;
 
-          $scope.draftMessage.text = richTextarea.innerText;
+            $timeout.cancel(updatePromise);
+            updatePromise = $timeout(updateValue, 1000);
+          })
+          .textcomplete([{
+            placement: 'top',
+            match  : /(^|\s)(:\w*)$/,
+            search : function (term, callback) {
+              var regexp = new RegExp('^' + term),
+                  emojies = [];
 
-          $timeout.cancel(updatePromise);
-          updatePromise = $timeout(updateValue, 1000);
-        });
+              for (var emoji in $.emojiarea.icons) {
+                if ($.emojiarea.icons.hasOwnProperty(emoji) && regexp.test(emoji)) {
+                  var obj = {};
+                  emojies.push($.emojiarea.icons[emoji]);
+                }
+              }
+//              console.log('Found '+emojies.length+' emoji(es) for autocompletion based on "'+term+'"');
+              callback(emojies);
+            },
+            template: function (emoji) {
+              return imageFromEmoji(emoji).outerHTML + ' '+emoji[3];
+            },
+            replace: function (emoji) {
+              //TODO: found no easy way to append the emoji image to the div while putting text in the textarea
+//              var range = window.getSelection().getRangeAt(0);
+//              range.insertNode(imageFromEmoji(emoji));
+              return '$1'+emoji[3]+' '; //TODO: this additional space is not going through
+            }
+          }]);
       }
 
       // Head is sometimes slower
