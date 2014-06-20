@@ -342,6 +342,9 @@ angular.module('myApp.controllers', [])
     $scope.dialogs = [];
     $scope.contacts = [];
     $scope.contactsLoaded = false;
+    if ($scope.search === undefined) {
+      $scope.search = {};
+    }
     $scope.phonebookAvailable = PhonebookContactsService.isAvailable();
 
     var offset = 0,
