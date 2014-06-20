@@ -11,125 +11,6 @@
 
 angular.module('myApp.services', [])
 
-.service('AppConfigManager', function ($q) {
-  var testPrefix = Config.Modes.test ? 't_' : '';
-  var cache = {};
-  var useCs = !!(window.chrome && chrome.storage && chrome.storage.local);
-  var useLs = !useCs && !!window.localStorage;
-
-  function getValue() {
-    var keys = Array.prototype.slice.call(arguments),
-        result = [],
-        single = keys.length == 1,
-        allFound = true;
-
-    for (var i = 0; i < keys.length; i++) {
-      keys[i] = testPrefix + keys[i];
-    }
-
-    angular.forEach(keys, function (key) {
-      if (cache[key] !== undefined) {
-        result.push(cache[key]);
-      }
-      else if (useLs) {
-        var value = localStorage.getItem(key);
-        value = (value === undefined || value === null) ? false : JSON.parse(value);
-        result.push(cache[key] = value);
-      }
-      else if (!useCs) {
-        result.push(cache[key] = false);
-      }
-      else {
-        allFound = false;
-      }
-    });
-
-    if (allFound) {
-      return $q.when(single ? result[0] : result);
-    }
-
-    var deferred = $q.defer();
-
-    chrome.storage.local.get(keys, function (resultObj) {
-      result = [];
-      angular.forEach(keys, function (key) {
-        var value = resultObj[key];
-        value = value === undefined || value === null ? false : JSON.parse(value);
-        result.push(cache[key] = value);
-      });
-
-      deferred.resolve(single ? result[0] : result);
-    });
-
-    return deferred.promise;
-  };
-
-  function setValue(obj) {
-    var keyValues = {};
-    angular.forEach(obj, function (value, key) {
-      keyValues[testPrefix + key] = JSON.stringify(value);
-      cache[testPrefix + key] = value;
-    });
-
-    if (useLs) {
-      angular.forEach(keyValues, function (value, key) {
-        localStorage.setItem(key, value);
-      });
-      return $q.when();
-    }
-
-    if (!useCs) {
-      return $q.when();
-    }
-
-    var deferred = $q.defer();
-
-    chrome.storage.local.set(keyValues, function () {
-      deferred.resolve();
-    });
-
-    return deferred.promise;
-  };
-
-  function removeValue () {
-    var keys = Array.prototype.slice.call(arguments);
-
-    for (var i = 0; i < keys.length; i++) {
-      keys[i] = testPrefix + keys[i];
-    }
-
-    angular.forEach(keys, function(key){
-      delete cache[key];
-    });
-
-    if (useLs) {
-      angular.forEach(keys, function(key){
-        localStorage.removeItem(key);
-      });
-
-      return $q.when();
-    }
-
-    if (!useCs) {
-      return $q.when();
-    }
-
-    var deferred = $q.defer();
-
-    chrome.storage.local.remove(keys, function () {
-      deferred.resolve();
-    });
-
-    return deferred.promise;
-  };
-
-  return {
-    get: getValue,
-    set: setValue,
-    remove: removeValue
-  };
-})
-
 .service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService) {
   var users = {},
       cachedPhotoLocations = {},
@@ -2176,7 +2057,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager) {
+.service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager, FileManager) {
   var photos = {};
 
   function savePhoto (apiPhoto) {
@@ -2373,48 +2254,25 @@ angular.module('myApp.services', [])
           secret: fullPhotoSize.location.secret
         };
 
-    if (window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry) {
-
-      chrome.fileSystem.chooseEntry({
-        type: 'saveFile',
-        suggestedName: fileName,
-        accepts: [{
-          mimeTypes: [mimeType],
-          extensions: [ext]
-        }]
-      }, function (writableFileEntry) {
-        var downloadPromise = MtpApiFileManager.downloadFile(fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
-          mime: mimeType,
-          toFileEntry: writableFileEntry
-        });
-        downloadPromise.then(function (url) {
-          console.log('file save done');
-        }, function (e) {
-          console.log('photo download failed', e);
-        });
-
-      });
-    } else {
-      var downloadPromise = MtpApiFileManager.downloadFile(fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {mime: mimeType});
-
-      downloadPromise.then(function (url) {
-
-        var a = $('<a>Download</a>')
-                  .css({position: 'absolute', top: 1, left: 1})
-                  .attr('href', url)
-                  .attr('target', '_blank')
-                  .attr('download', fileName)
-                  .appendTo('body');
-
-        a[0].dataset.downloadurl = [mimeType, fileName, url].join(':');
-        a[0].click();
-        $timeout(function () {
-          a.remove();
-        }, 100);
+    FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
+      MtpApiFileManager.downloadFile(
+        fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
+        mime: mimeType,
+        toFileEntry: writableFileEntry
+      }).then(function (url) {
+        console.log('file save done');
       }, function (e) {
         console.log('photo download failed', e);
       });
-    }
+    }, function () {
+      MtpApiFileManager.downloadFile(
+        fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {mime: mimeType}
+      ).then(function (url) {
+        FileManager.download(url, mimeType, fileName);
+      }, function (e) {
+        console.log('photo download failed', e);
+      });
+    });
   };
 
   $rootScope.openPhoto = openPhoto;
@@ -2433,7 +2291,7 @@ angular.module('myApp.services', [])
 })
 
 
-.service('AppVideoManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager) {
+.service('AppVideoManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
   var videos = {};
   var videosForHistory = {};
 
@@ -2551,31 +2409,21 @@ angular.module('myApp.services', [])
         mimeType = 'video/mpeg4',
         fileName = 'video' + videoID + '.' + ext;
 
-    if (window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry) {
-
-      chrome.fileSystem.chooseEntry({
-        type: 'saveFile',
-        suggestedName: fileName,
-        accepts: [{
-          mimeTypes: [mimeType],
-          extensions: [ext]
-        }]
-      }, function (writableFileEntry) {
-        var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
-          mime: mimeType,
-          toFileEntry: writableFileEntry
-        });
-        downloadPromise.then(function (url) {
-          delete historyVideo.progress;
-          console.log('file save done');
-        }, function (e) {
-          console.log('video download failed', e);
-          historyVideo.progress.enabled = false;
-        }, updateDownloadProgress);
-
-        historyVideo.progress.cancel = downloadPromise.cancel;
+    FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
+      var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
+        mime: mimeType,
+        toFileEntry: writableFileEntry
       });
-    } else {
+      downloadPromise.then(function (url) {
+        delete historyVideo.progress;
+        console.log('file save done');
+      }, function (e) {
+        console.log('video download failed', e);
+        historyVideo.progress.enabled = false;
+      }, updateDownloadProgress);
+
+      historyVideo.progress.cancel = downloadPromise.cancel;
+    }, function () {
       var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {mime: mimeType});
 
       downloadPromise.then(function (url) {
@@ -2586,25 +2434,14 @@ angular.module('myApp.services', [])
           return
         }
 
-        var a = $('<a>Download</a>')
-                  .css({position: 'absolute', top: 1, left: 1})
-                  .attr('href', url)
-                  .attr('target', '_blank')
-                  .attr('download', fileName)
-                  .appendTo('body');
-
-        a[0].dataset.downloadurl = [mimeType, fileName, url].join(':');
-        a[0].click();
-        $timeout(function () {
-          a.remove();
-        }, 100);
+        FileManager.download(url, mimeType, fileName);
       }, function (e) {
         console.log('video download failed', e);
         historyVideo.progress.enabled = false;
       }, updateDownloadProgress);
 
       historyVideo.progress.cancel = downloadPromise.cancel;
-    }
+    });
   };
 
   $rootScope.openVideo = openVideo;
@@ -2618,7 +2455,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager) {
+.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
   var docs = {};
   var docsForHistory = {};
 
@@ -2693,34 +2530,23 @@ angular.module('myApp.services', [])
       $rootScope.$broadcast('history_update');
     }
 
-
-    if (window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry) {
-      var ext = (doc.file_name.split('.', 2) || [])[1] || '';
-
-      chrome.fileSystem.chooseEntry({
-        type: 'saveFile',
-        suggestedName: doc.file_name,
-        accepts: [{
-          mimeTypes: [doc.mime_type],
-          extensions: [ext]
-        }]
-      }, function (writableFileEntry) {
-        var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
-          mime: doc.mime_type,
-          toFileEntry: writableFileEntry
-        });
-
-        downloadPromise.then(function (url) {
-          delete historyDoc.progress;
-          console.log('file save done');
-        }, function (e) {
-          console.log('document download failed', e);
-          historyDoc.progress.enabled = false;
-        }, updateDownloadProgress);
-
-        historyDoc.progress.cancel = downloadPromise.cancel;
+    var ext = (doc.file_name.split('.', 2) || [])[1] || '';
+    FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
+      var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
+        mime: doc.mime_type,
+        toFileEntry: writableFileEntry
       });
-    } else {
+
+      downloadPromise.then(function (url) {
+        delete historyDoc.progress;
+        console.log('file save done');
+      }, function (e) {
+        console.log('document download failed', e);
+        historyDoc.progress.enabled = false;
+      }, updateDownloadProgress);
+
+      historyDoc.progress.cancel = downloadPromise.cancel;
+    }, function () {
       var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {mime: doc.mime_type});
 
       downloadPromise.then(function (url) {
@@ -2734,18 +2560,7 @@ angular.module('myApp.services', [])
             break;
 
           default:
-            var a = $('<a>Download</a>')
-                      .css({position: 'absolute', top: 1, left: 1})
-                      .attr('href', url)
-                      .attr('target', '_blank')
-                      .attr('download', doc.file_name)
-                      .appendTo('body');
-
-            a[0].dataset.downloadurl = [doc.mime_type, doc.file_name, url].join(':');
-            a[0].click();
-            $timeout(function () {
-              a.remove();
-            }, 100);
+            FileManager.download(url, doc.mime_type, doc.file_name);
         }
       }, function (e) {
         console.log('document download failed', e);
@@ -2753,7 +2568,7 @@ angular.module('myApp.services', [])
       }, updateDownloadProgress);
 
       historyDoc.progress.cancel = downloadPromise.cancel;
-    }
+    });
   }
 
   $rootScope.downloadDoc = downloadDoc;
@@ -3354,7 +3169,7 @@ angular.module('myApp.services', [])
 
 })
 
-.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, AppConfigManager) {
+.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, Storage) {
 
   var notificationsUiSupport = 'Notification' in window;
   var notificationsShown = {};
@@ -3493,13 +3308,13 @@ angular.module('myApp.services', [])
       return false;
     }
 
-    AppConfigManager.get('notify_nosound', 'notify_volume').then(function (settings) {
+    Storage.get('notify_nosound', 'notify_volume').then(function (settings) {
       if (!settings[0] && settings[1] === false || settings[1] > 0) {
         playSound(settings[1] || 0.5);
       }
     })
 
-    AppConfigManager.get('notify_nodesktop').then(function (noShow) {
+    Storage.get('notify_nodesktop').then(function (noShow) {
       if (noShow) {
         return;
       }
@@ -3688,7 +3503,7 @@ angular.module('myApp.services', [])
 })
 
 
-.service('ChangelogNotifyService', function (AppConfigManager, $rootScope, $http, $modal) {
+.service('ChangelogNotifyService', function (Storage, $rootScope, $http, $modal) {
 
   function versionCompare (ver1, ver2) {
     if (typeof ver1 !== 'string') {
@@ -3718,12 +3533,12 @@ angular.module('myApp.services', [])
   }
 
   function checkUpdate () {
-    AppConfigManager.get('last_version').then(function (lastVersion) {
+    Storage.get('last_version').then(function (lastVersion) {
       if (lastVersion != Config.App.version) {
         if (lastVersion) {
           showChangelog(lastVersion);
         }
-        AppConfigManager.set({last_version: Config.App.version});
+        Storage.set({last_version: Config.App.version});
       }
     })
   }

@@ -24,7 +24,9 @@ angular.module('myApp', [
   'ngSanitize',
   'ui.bootstrap',
   'pasvaz.bindonce',
-  'mtproto.services',
+  'izhukov.utils',
+  'izhukov.mtproto',
+  'izhukov.mtproto.wrapper',
   'myApp.filters',
   'myApp.services',
   /*PRODUCTION_ONLY_BEGIN
@@ -33,7 +35,7 @@ angular.module('myApp', [
   'myApp.directives',
   'myApp.controllers'
 ]).
-config(['$locationProvider', '$routeProvider', '$compileProvider', function($locationProvider, $routeProvider, $compileProvider) {
+config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvider', function($locationProvider, $routeProvider, $compileProvider, StorageProvider) {
 
   var icons = {}, reverseIcons = {}, i, j, hex, name, dataItem, row, column, totalColumns;
 
@@ -49,6 +51,10 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
     }
   }
 
+  if (Config.Modes.test) {
+    StorageProvider.setPrefix('t_');
+  }
+
   $.emojiarea.spritesheetPath = 'img/emojisprite_!.png';
   $.emojiarea.spritesheetDimens = Config.EmojiCategorySpritesheetDimens;
   $.emojiarea.iconSize = 20;
@@ -59,7 +65,6 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', function($loc
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|file|mailto|blob|filesystem|chrome-extension|app):|data:image\//);
 
 
-  // $locationProvider.html5Mode(true);
   $routeProvider.when('/', {templateUrl: 'partials/welcome.html', controller: 'AppWelcomeController'});
   $routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'AppLoginController'});
   $routeProvider.when('/im', {templateUrl: 'partials/im.html', controller: 'AppIMController', reloadOnSearch: false});

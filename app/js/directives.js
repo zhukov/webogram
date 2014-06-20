@@ -609,7 +609,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, AppConfigManager, ErrorService) {
+  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService) {
 
     return {
       link: link,
@@ -665,7 +665,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var sendOnEnter = true,
           updateSendSettings = function () {
-            AppConfigManager.get('send_ctrlenter').then(function (sendOnCtrl) {
+            Storage.get('send_ctrlenter').then(function (sendOnCtrl) {
               sendOnEnter = !sendOnCtrl;
             });
           };
