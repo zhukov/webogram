@@ -140,20 +140,14 @@ angular.module('izhukov.utils', [])
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
 
   function fileCopyTo (fromFileEntry, toFileEntry) {
-    var deferred = $q.defer();
-
-    toFileEntry.createWriter(function (fileWriter) {
-      fileWriteData(fileWriter, fromFileEntry).then(function () {
-        deferred.resolve(fileWriter);
-      }, function (e) {
-        deferred.reject(e);
+    return getFileWriter(toFileEntry).then(function (fileWriter) {
+      return fileWriteData(fileWriter, fromFileEntry).then(function () {
+        return fileWriter;
+      }, function (error) {
+        return $q.reject(error);
         fileWriter.truncate(0);
       });
-    }, function (e) {
-      deferred.reject(e);
     });
-
-    return deferred.promise;
   }
 
   function fileWriteData(fileWriter, bytes) {
@@ -166,9 +160,15 @@ angular.module('izhukov.utils', [])
       deferred.reject();
     };
 
-    if (bytes instanceof Blob) { // is file bytes
+    if (bytes instanceof FileEntry) {
+      bytes.file(function (file) {
+        fileWriter.write(file);
+      }, fileWriter.onerror);
+    }
+    else if (bytes instanceof Blob) { // is file bytes
       fileWriter.write(bytes);
-    } else {
+    }
+    else {
       fileWriter.write(new Blob([bytesToArrayBuffer(bytes)]));
     }
 
@@ -190,6 +190,18 @@ angular.module('izhukov.utils', [])
       }]
     }, function (writableFileEntry) {
       deferred.resolve(writableFileEntry);
+    });
+
+    return deferred.promise;
+  }
+
+  function getFileWriter (fileEntry) {
+    var deferred = $q.defer();
+
+    fileEntry.createWriter(function (fileWriter) {
+      deferred.resolve(fileWriter);
+    }, function (error) {
+      deferred.reject(error);
     });
 
     return deferred.promise;
@@ -259,6 +271,7 @@ angular.module('izhukov.utils', [])
   return {
     copy: fileCopyTo,
     write: fileWriteData,
+    getFileWriter: getFileWriter,
     getFakeFileWriter: getFakeFileWriter,
     chooseSave: chooseSaveFile,
     getUrl: getUrl,
@@ -429,7 +442,7 @@ angular.module('izhukov.utils', [])
         fileEntry.file(function(file) {
           // console.log(dT(), 'aa', file);
           if (file.size >= size) {
-            deferred.resolve(fileEntry);
+            deferred.resolve(file);
           } else {
             deferred.reject(new Error('FILE_NOT_FOUND'));
           }
@@ -457,11 +470,10 @@ angular.module('izhukov.utils', [])
     return requestFS().then(function () {
       var deferred = $q.defer();
       cachedFs.root.getFile(fileName, {create: true}, function (fileEntry) {
-        fileEntry.createWriter(function (fileWriter) {
+        FileManager.getFileWriter(fileEntry).then(function (fileWriter) {
           fileWriter.finalize = function () {
             return fileEntry;
           }
-          // console.log(dT(), 'got writer');
           deferred.resolve(fileWriter);
         }, function (error) {
           deferred.reject(error);

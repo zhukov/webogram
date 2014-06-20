@@ -422,7 +422,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         deferred.resolve(cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType));
       }
     }, function () {
-      var fileWriterPromise = toFileEntry ? $q.when(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
+      var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
 
       fileWriterPromise.then(function (fileWriter) {
         cacheFileWriter = fileWriter;

@@ -7,7 +7,7 @@
 
 importScripts(
   '../../vendor/console-polyfill/console-polyfill.js',
-  'mtproto.js',
+  'bin_utils.js',
   '../../vendor/closure/long.js',
   '../../vendor/jsbn/jsbn_combined.js'
 );
