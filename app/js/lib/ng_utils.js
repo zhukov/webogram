@@ -294,19 +294,24 @@ angular.module('izhukov.utils', [])
       return openDbPromise;
     }
 
-    var request = indexedDB.open(dbName, dbVersion),
-        deferred = $q.defer(),
-        createObjectStore = function (db) {
-          db.createObjectStore(dbStoreName);
-        };
+    try {
+      var request = indexedDB.open(dbName, dbVersion),
+          deferred = $q.defer(),
+          createObjectStore = function (db) {
+            db.createObjectStore(dbStoreName);
+          };
+    } catch (error) {
+      storageIsAvailable = false;
+      return $q.reject(error);
+    }
 
     request.onsuccess = function (event) {
       db = request.result;
 
-      db.onerror = function (event) {
+      db.onerror = function (error) {
         storageIsAvailable = false;
-        console.error("Error creating/accessing IndexedDB database", event);
-        deferred.reject(event);
+        console.error('Error creating/accessing IndexedDB database', error);
+        deferred.reject(error);
       };
 
       // Interim solution for Google Chrome to create an objectStore. Will be deprecated
@@ -325,6 +330,12 @@ angular.module('izhukov.utils', [])
         deferred.resolve(db);
       }
     };
+
+    request.onerror = function (event) {
+      storageIsAvailable = false;
+      console.error('Error creating/accessing IndexedDB database', event);
+      deferred.reject(event);
+    }
 
     request.onupgradeneeded = function (event) {
       createObjectStore(event.target.result);
@@ -384,6 +395,8 @@ angular.module('izhukov.utils', [])
     });
     return $q.when(fakeWriter);
   }
+
+  openDatabase();
 
   return {
     isAvailable: isAvailable,
@@ -480,6 +493,8 @@ angular.module('izhukov.utils', [])
       return deferred.promise;
     })
   }
+
+  requestFS();
 
   return {
     isAvailable: isAvailable,
