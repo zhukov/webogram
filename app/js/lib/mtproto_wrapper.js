@@ -535,9 +535,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
               return;
             }
             var apiCurPromise = apiUploadPromise = apiUploadPromise.then(function () {
-              return MtpApiManager.invokeApi('upload.saveFilePart', {
+              return MtpApiManager.invokeApi(isBigFile ? 'upload.saveBigFilePart' : 'upload.saveFilePart', {
                 file_id: fileID,
                 file_part: part,
+                file_total_parts: totalParts,
                 bytes: bytesFromArrayBuffer(e.target.result)
               }, {
                 startMaxLength: partSize + 256,
