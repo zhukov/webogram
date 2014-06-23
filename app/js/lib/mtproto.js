@@ -1470,6 +1470,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         this.reqResendMessage(message.answer_msg_id);
         break;
 
+      case 'msgs_state_info':
+        break;
+
       case 'rpc_result':
         this.ackMessage(messageID);
 

@@ -2762,7 +2762,6 @@ angular.module('myApp.services', [])
 
       case 'updatesCombined':
       case 'updates':
-      default:
         AppUsersManager.saveApiUsers(updateMessage.users);
         AppChatsManager.saveApiChats(updateMessage.chats);
 
@@ -2790,6 +2789,9 @@ angular.module('myApp.services', [])
           saveUpdate(update);
         });
         break;
+
+      default:
+        console.warn(dT(), 'Unknown update message', updateMessage);
     }
 
     popPendingUpdate();
