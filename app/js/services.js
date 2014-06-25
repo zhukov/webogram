@@ -1119,7 +1119,7 @@ angular.module('myApp.services', [])
       return historyStorage.readPromise;
     }
 
-    var promise = MtpApiManager.invokeApi('messages.readHistory', {
+    historyStorage.readPromise = MtpApiManager.invokeApi('messages.readHistory', {
       peer: inputPeer,
       offset: 0,
       max_id: 0
@@ -1134,7 +1134,6 @@ angular.module('myApp.services', [])
     })['finally'](function () {
       delete historyStorage.readPromise;
     });
-
 
     if (historyStorage && historyStorage.history.length) {
       var messageID, message, i, peerID, foundDialog, dialog;
@@ -1153,7 +1152,7 @@ angular.module('myApp.services', [])
       }
     }
 
-    return promise;
+    return historyStorage.readPromise;
   }
 
   function flushHistory (inputPeer) {
