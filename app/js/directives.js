@@ -627,6 +627,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           dragStarted, dragTimeout,
           emojiArea = $(messageField).emojiarea({button: emojiButton, norealTime: true}),
           emojiMenu = $('.emoji-menu', element)[0],
+          submitBtn = $('.im_submit', element)[0],
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
       if (richTextarea) {
@@ -635,14 +636,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
 
         var updatePromise;
-        $(richTextarea).on('keyup', function (e) {
-          updateHeight();
+        $(richTextarea)
+          .on('DOMNodeInserted', onPastedImageEvent)
+          .on('keyup', function (e) {
+            updateHeight();
 
-          $scope.draftMessage.text = richTextarea.innerText;
+            $scope.draftMessage.text = richTextarea.innerText;
 
-          $timeout.cancel(updatePromise);
-          updatePromise = $timeout(updateValue, 1000);
-        });
+            $timeout.cancel(updatePromise);
+            updatePromise = $timeout(updateValue, 1000);
+          });
       }
 
       // Head is sometimes slower
@@ -696,7 +699,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       });
 
-      $('.im_submit', element).on('mousedown', function (e) {
+      $(submitBtn).on('mousedown', function (e) {
         $(element).trigger('submit');
         $(element).trigger('message_send');
         resetAfterSubmit();
@@ -757,9 +760,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
       $(document).on('paste', onPasteEvent);
-      if (richTextarea) {
-        $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
-      }
 
       if (!Config.Navigator.touch) {
         $scope.$on('ui_peer_change', focusField);
@@ -771,21 +771,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_peer_draft', updateField);
       $scope.$on('ui_message_before_send', updateValue);
-
-
-      $scope.$on('$destroy', function cleanup() {
-        $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
-        $(document).off('paste', onPasteEvent);
-        $(document).off('keydown', onKeyDown);
-        fileSelects.off('change');
-        if (richTextarea) {
-          $(richTextarea).off('DOMNodeInserted', onPastedImageEvent);
-        }
-      });
-
-      if (!Config.Navigator.touch) {
-        focusField();
-      }
 
       function focusField () {
         onContentLoaded(function () {
@@ -873,8 +858,25 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         return cancelEvent(e);
       };
-    }
 
+
+      $scope.$on('$destroy', function cleanup() {
+        $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
+        $(document).off('paste', onPasteEvent);
+        $(document).off('keydown', onKeyDown);
+        $(submitBtn).off('mousedown')
+        fileSelects.off('change');
+        if (richTextarea) {
+          $(richTextarea).off('DOMNodeInserted keyup', onPastedImageEvent);
+        }
+        $(editorElement).off('keydown');
+      });
+
+      if (!Config.Navigator.touch) {
+        focusField();
+      }
+
+    }
   })
 
   .directive('myLoadThumb', function(MtpApiFileManager) {
