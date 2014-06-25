@@ -157,10 +157,17 @@ angular.module('izhukov.utils', [])
       deferred.resolve();
     };
     fileWriter.onerror = function (e) {
-      deferred.reject();
+      deferred.reject(e);
     };
 
-    if (bytes instanceof Blob) { // is file bytes
+    if (bytes.file) {
+      bytes.file(function (file) {
+        fileWriter.write(file);
+      }, function (error) {
+        deferred.reject(error);
+      })
+    }
+    else if (bytes instanceof Blob) { // is file bytes
       fileWriter.write(bytes);
     }
     else {
@@ -450,7 +457,7 @@ angular.module('izhukov.utils', [])
         fileEntry.file(function(file) {
           // console.log(dT(), 'aa', file);
           if (file.size >= size) {
-            deferred.resolve(file);
+            deferred.resolve(fileEntry);
           } else {
             deferred.reject(new Error('FILE_NOT_FOUND'));
           }
