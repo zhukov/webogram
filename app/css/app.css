@@ -194,6 +194,9 @@ input[type="number"] {
 
   margin: 0;
 }
+.ios_standalone .tg_page_head .navbar > .container {
+  margin-top: 20px;
+}
 .tg_page_head .navbar > .container .navbar-brand {
   padding: 9px 15px;
   opacity: 0.9;

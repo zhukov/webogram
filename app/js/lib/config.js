@@ -28,6 +28,7 @@ Config.Modes = {
   test: location.search.indexOf('test=1') > 0,
   debug: location.search.indexOf('debug=1') > 0,
   packed: location.protocol == 'app:' || location.protocol == 'chrome-extension:',
+  ios_standalone: window.navigator.standalone && navigator.userAgent.match(/iOS|iPhone|iPad/),
   chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false
 };
 

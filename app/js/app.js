@@ -7,16 +7,6 @@
 
 'use strict';
 
-$(document.body)
-  .addClass(Config.Navigator.osX ? 'osx' : 'non_osx')
-  .addClass(Config.Navigator.retina ? 'is_2x' : 'is_1x');
-
-$(window).on('load', function () {
-  setTimeout(function () {
-    window.scrollTo(0,1);
-  }, 0);
-});
-
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
   'ngRoute',
@@ -51,10 +41,6 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
     }
   }
 
-  if (Config.Modes.test) {
-    StorageProvider.setPrefix('t_');
-  }
-
   $.emojiarea.spritesheetPath = 'img/emojisprite_!.png';
   $.emojiarea.spritesheetDimens = Config.EmojiCategorySpritesheetDimens;
   $.emojiarea.iconSize = 20;
@@ -64,6 +50,9 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
   $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//);
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|file|mailto|blob|filesystem|chrome-extension|app):|data:image\//);
 
+  if (Config.Modes.test) {
+    StorageProvider.setPrefix('t_');
+  }
 
   $routeProvider.when('/', {templateUrl: 'partials/welcome.html', controller: 'AppWelcomeController'});
   $routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'AppLoginController'});
@@ -71,3 +60,15 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
   $routeProvider.otherwise({redirectTo: '/'});
 
 }]);
+
+
+(function () {
+  var classes = [
+    Config.Navigator.osX ? 'osx' : 'non_osx',
+    Config.Navigator.retina ? 'is_2x' : 'is_1x'
+  ];
+  if (Config.Modes.ios_standalone) {
+    classes.push('ios_standalone');
+  }
+  $(document.body).addClass(classes.join(' '));
+})();
