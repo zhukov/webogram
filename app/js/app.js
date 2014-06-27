@@ -72,3 +72,7 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
   }
   $(document.body).addClass(classes.join(' '));
 })();
+
+$(function() {
+  FastClick.attach(document.body);
+});

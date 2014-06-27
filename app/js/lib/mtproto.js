@@ -1000,12 +1000,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     }
 
     if (this.pendingResends.length) {
-      var resendMsgIDs = [];
+      var resendMsgIDs = [],
+          resendOpts = {noShedule: true, notContentRelated: true};
       for (var i = 0; i < this.pendingResends.length; i++) {
         resendMsgIDs.push(this.pendingResends[i]);
       }
       // console.log('resendReq messages', resendMsgIDs);
-      this.wrapMtpMessage({_: 'msg_resend_req', msg_ids: resendMsgIDs}, {noShedule: true});
+      this.wrapMtpMessage({_: 'msg_resend_req', msg_ids: resendMsgIDs}, resendOpts);
+      this.lastResendReq = {req_msg_id: resendOpts.messageID, resend_msg_ids: resendMsgIDs};
     }
 
     var messages = [],
@@ -1471,6 +1473,17 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         break;
 
       case 'msgs_state_info':
+        this.ackMessage(message.answer_msg_id);
+        if (this.lastResendReq && this.lastResendReq.req_msg_id == message.req_msg_id && this.pendingResends.length) {
+          var i, badMsgID, pos;
+          for (i = 0; i < this.lastResendReq.resend_msg_ids.length; i++) {
+            badMsgID = this.lastResendReq.resend_msg_ids[i];
+            pos = this.pendingResends.indexOf(badMsgID);
+            if (pos != -1) {
+              this.pendingResends.splice(pos, 1);
+            }
+          }
+        }
         break;
 
       case 'rpc_result':

@@ -313,6 +313,10 @@ angular.module('myApp.controllers', [])
       $scope.$broadcast('history_media_toggle', mediaType);
     };
 
+    $scope.toggleSearch = function () {
+      $scope.$broadcast('dialogs_search_toggle');
+    };
+
     updateCurDialog();
 
     var lastSearch = false;
@@ -406,9 +410,6 @@ angular.module('myApp.controllers', [])
 
     var prevMessages = false;
     $scope.$watchCollection('search', function () {
-      if ($scope.search.messages && (!angular.isString($scope.search.query) || !$scope.search.query.length)) {
-        $scope.search.messages = false;
-      }
       if ($scope.search.messages != prevMessages) {
         prevMessages = $scope.search.messages;
         $scope.dialogs = [];
@@ -431,6 +432,12 @@ angular.module('myApp.controllers', [])
       }
     });
 
+    if (Config.Navigator.mobile) {
+      $scope.$watch('curDialog.peer', function () {
+        $scope.$broadcast('ui_dialogs_update')
+      });
+    }
+
     $scope.importPhonebook = function () {
       PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
         if (contactsShown && foundContacts.length) {
@@ -438,6 +445,13 @@ angular.module('myApp.controllers', [])
         }
       })
     };
+
+    $scope.searchClear = function () {
+      $scope.search.query = '';
+      $scope.search.messages = false;
+      $scope.$broadcast('search_clear');
+    }
+    $scope.$on('ui_dialogs_search_clear', $scope.searchClear);
 
     var searchTimeoutPromise;
     function getDialogs(force) {

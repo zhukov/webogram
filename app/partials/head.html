@@ -2,6 +2,13 @@
   <div class="navbar navbar-static-top  navbar-inverse" role="navigation" ng-class="{navbar_peer_not_selected: !curDialog.peer, navbar_offline: offline}">
     <div class="container">
 
+      <a class="navbar-peer-wrap" ng-click="showPeerInfo()">
+        <img
+          my-load-thumb
+          thumb="historyPeer.photo"
+        />
+      </a>
+
       <div class="navbar-toggle-wrap dropdown">
         <a class="dropdown-toggle navbar-toggle">
           <span class="icon-bar"></span>
@@ -32,6 +39,10 @@
           <li><a href="https://github.com/zhukov/webogram" target="_blank">About</a></li>
         </ul>
       </div>
+
+      <a class="navbar-search-wrap" ng-click="toggleSearch()">
+        <i class="icon-search"></i>
+      </a>
 
       <div class="im_head_attach">
         <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="Send media"/>

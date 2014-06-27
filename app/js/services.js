@@ -2889,7 +2889,7 @@ angular.module('myApp.services', [])
       }
       return false;
     } else {
-      console.log(dT(), 'Seq apply', seqStart);
+      // console.log(dT(), 'Seq apply', seqStart);
     }
 
     curState.seq = seq;
