@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Mon Jun 23 2014 12:53:12 GMT+0400 (MSK)
+# Time: Fri Jun 27 2014 19:23:26 GMT+0400 (MSK)
 
 
 CACHE:
@@ -41,6 +41,8 @@ img/icons/IconsetSmiles.png
 img/icons/IconsetSmiles_1x.png
 img/icons/IconsetW.png
 img/icons/IconsetW_1x.png
+img/icons/MobileIcons_1x.png
+img/icons/MobileIcons_2x.png
 img/icons/PhotoControls.png
 img/icons/PhotoControls_1x.png
 img/placeholders/DialogListAvatarSystem@2x.png
