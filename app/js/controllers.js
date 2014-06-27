@@ -349,6 +349,9 @@ angular.module('myApp.controllers', [])
     if ($scope.search === undefined) {
       $scope.search = {};
     }
+    if ($scope.isEmpty === undefined) {
+      $scope.isEmpty = {};
+    }
     $scope.phonebookAvailable = PhonebookContactsService.isAvailable();
 
     var offset = 0,

@@ -68,7 +68,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('dialogs_search_toggle', function () {
         $(panelWrap).addClass('im_dialogs_panel_search');
         $scope.$broadcast('ui_dialogs_search');
-        $($window).scrollTop(0);  
+        $($window).scrollTop(0);
         $timeout(function () {
           searchField.focus();
         })
@@ -1348,7 +1348,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var onKeyDown = function (event) {
         var target = event.target;
         if (target && (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA')) {
-          return false;
+          return;
         }
 
         switch (event.keyCode) {
