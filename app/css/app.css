@@ -944,13 +944,10 @@ a.tg_radio_on:hover i.icon-radio {
   border-radius: 2px;
   background: #f2f6fa;
 }
-.im_dialogs_scrollable_wrap .im_dialog_wrap:active a.im_dialog,
 .im_dialogs_scrollable_wrap .active a.im_dialog {
   border-radius: 2px;
   background-color: #6490b1;
 }
-.im_dialogs_scrollable_wrap .im_dialog_wrap:active a.im_dialog:hover,
-.im_dialogs_scrollable_wrap .im_dialog_wrap:active a.im_dialog_selected,
 .im_dialogs_scrollable_wrap .active a.im_dialog:hover,
 .im_dialogs_scrollable_wrap .active a.im_dialog_selected {
   background-color: #6490b1;
@@ -978,10 +975,6 @@ a.im_dialog_selected .im_dialog_message_text {
   color: #698192;
 }
 
-.im_dialog_wrap:active a.im_dialog .im_dialog_chat_from_wrap,
-.im_dialog_wrap:active a.im_dialog .im_dialog_message_media,
-.im_dialog_wrap:active a.im_dialog .im_dialog_message_service,
-.im_dialog_wrap:active a.im_dialog .im_dialog_message_text,
 .active a.im_dialog .im_dialog_chat_from_wrap,
 .active a.im_dialog .im_dialog_message_media,
 .active a.im_dialog .im_dialog_message_service,
@@ -1002,7 +995,6 @@ a.im_dialog_selected .im_dialog_message_text {
   margin-top: 2px;
   margin-bottom: 2px;
 }
-.im_dialog_wrap:active .im_dialog_peer,
 .active .im_dialog_peer {
   color: #FFF;
 }
@@ -1014,7 +1006,6 @@ a.im_dialog_selected .im_dialog_message_text {
   padding: 3px 4px;
   margin-top: 4px;
 }
-.im_dialog_wrap:active .im_dialog_badge,
 .active .im_dialog_badge {
   color: #428bca;
   background-color: #fff;
@@ -1038,7 +1029,6 @@ a.im_dialog:hover .im_dialog_unread,
 a.im_dialog_selected .im_dialog_unread {
   background: #a3c0d4;
 }
-.im_dialog_wrap:active .im_dialog_unread,
 .active .im_dialog_unread {
   background-color: #a4c4dd;
 }
@@ -1052,9 +1042,6 @@ a.im_dialog:hover .im_dialog_date,
 a.im_dialog_selected .im_dialog_date {
   color: #91a6ba;
 }
-.im_dialog_wrap:active .im_dialog_date,
-.im_dialog_wrap:active a.im_dialog:hover .im_dialog_date,
-.im_dialog_wrap:active a.im_dialog_selected .im_dialog_date,
 .active .im_dialog_date,
 .active a.im_dialog:hover .im_dialog_date,
 .active a.im_dialog_selected .im_dialog_date {

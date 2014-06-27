@@ -507,20 +507,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
         $(scrollable).css({bottom: -(sh - st - ch)});
 
-        onContentLoaded(function () {
-          $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: ''});
-          scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+        var upd = function () {
+            $(scrollableWrap).removeClass('im_history_to_bottom');
+            $(scrollable).css({bottom: ''});
+            scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
 
-          updateBottomizer();
-          moreNotified = false;
+            updateBottomizer();
+            moreNotified = false;
 
-          $timeout(function () {
-            if (scrollableWrap.scrollHeight != sh) {
-              $(scrollableWrap).trigger('scroll');
-            }
-          });
-        });
+            $timeout(function () {
+              if (scrollableWrap.scrollHeight != sh) {
+                $(scrollableWrap).trigger('scroll');
+              }
+            });
+
+            clearTimeout(timer);
+            unreg();
+          },
+          timer = setTimeout(upd, 0),
+          unreg = $scope.$on('$viewContentLoaded', upd);
       });
 
       $scope.$on('ui_history_append', function () {
