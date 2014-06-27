@@ -158,14 +158,23 @@ html {
   float: left;
   margin: 0;
 }
+.navbar-offline > li > a {
+  padding-right: 0;
+  padding-left: 0;
+}
 .navbar_offline .tg_head_logo_text {
   display: none;
+}
+.navbar-offline-text {
+  padding-left: 0px;
 }
 .tg_page_head .navbar_offline > .container .navbar-brand {
   margin-right: 0;
 }
 .navbar_offline .navbar-quick-nav li > a > h4,
-.navbar_offline .navbar-quick-nav li > a > small {
+.navbar_offline .navbar-quick-nav li > a > small,
+.navbar_offline .im_head_attach,
+.navbar_offline .navbar-search-wrap {
   display: none;
 }
 
@@ -225,7 +234,12 @@ html {
 }
 .im_content_message_wrap {
   margin-left: 0;
+  font-size: 1.2em;
 }
+.form-control {
+  font-size: 1.2em;
+}
+
 .im_history_typing {
   padding: 0 15px 0 56px;
 }
@@ -337,7 +351,7 @@ html {
 
 .im_dialog_peer,
 .im_dialog_message {
-  font-size: 1.1em;
+  font-size: 1.2em;
 }
 .im_dialog_peer {
   margin-bottom: 5px;
@@ -426,14 +440,14 @@ html {
   border: 0;
   color: #1877c3;
   font-weight: bold;
-  font-size: 14px;
-  padding: 6px 6px;
+  font-size: 15px;
+  padding: 0 6px;
   position: absolute;
   right: 0;
   top: 0;
   width: 45px;
   min-width: 0;
-  line-height: 18px;
+  line-height: 32px;
 }
 .im_submit:hover {
   color: #1877c3;
@@ -452,7 +466,6 @@ html {
 .emoji-wysiwyg-editor {
   min-height: 32px;
   max-height: 150px;
-  padding-right: 30px;
 }
 
 .emoji-menu {

@@ -103,6 +103,9 @@ input[type="number"] {
 .ios_standalone .tg_page_head .navbar > .container {
   margin-top: 20px;
 }
+.ios_standalone .modal.page_modal {
+  border-top: 20px solid #497495;
+}
 .tg_page_head .navbar > .container .navbar-brand {
   padding: 9px 15px;
   opacity: 0.9;

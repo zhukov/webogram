@@ -1255,12 +1255,43 @@ angular.module('myApp.controllers', [])
     $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
     $scope.nav = {};
 
-    if (!$scope.messageID) {
+    if (!$scope.messageID || Config.Navigator.mobile) {
       $scope.nav.next = function () {
         $modalInstance.close();
       }
+    }
+
+    if (!$scope.messageID) {
       return;
     }
+
+
+    $scope.forward = function () {
+      var messageID = $scope.messageID;
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        });
+      });
+    };
+
+
+    $scope.download = function () {
+      AppPhotosManager.downloadPhoto($scope.photoID);
+    };
+
+    if (Config.Navigator.mobile) {
+      $scope.canForward = true;
+      return;
+    }
+
+    $scope.delete = function () {
+      var messageID = $scope.messageID;
+      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
+        AppMessagesManager.deleteMessages([messageID]);
+      });
+    };
 
     var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID)),
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
@@ -1343,28 +1374,6 @@ angular.module('myApp.controllers', [])
       }
       movePosition(+1);
     };
-
-    $scope.forward = function () {
-      var messageID = $scope.messageID;
-      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
-        var peerID = AppPeersManager.getPeerID(peerString);
-        AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
-          $rootScope.$broadcast('history_focus', {peerString: peerString});
-        });
-      });
-    };
-
-    $scope.delete = function () {
-      var messageID = $scope.messageID;
-      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
-        AppMessagesManager.deleteMessages([messageID]);
-      });
-    };
-
-    $scope.download = function () {
-      AppPhotosManager.downloadPhoto($scope.photoID);
-    };
-
 
     $scope.$on('history_delete', function (e, historyUpdate) {
       console.log(dT(), 'delete', historyUpdate);

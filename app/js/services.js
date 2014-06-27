@@ -2201,7 +2201,7 @@ angular.module('myApp.services', [])
         }
       }
 
-      if (full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
+      if (!Config.Navigator.mobile && full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
         full.width = fullPhotoSize.w;
         full.height = fullPhotoSize.h;
       }
