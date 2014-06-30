@@ -292,7 +292,7 @@ angular.module('izhukov.utils', [])
       openDbPromise,
       storageIsAvailable = $window.indexedDB !== undefined && $window.IDBTransaction !== undefined;
 
-  function isAvailable (argument) {
+  function isAvailable () {
     return storageIsAvailable;
   }
 
