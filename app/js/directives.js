@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.7 - messaging web application for MTProto
+ * Webogram v0.1.8 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -68,7 +68,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('dialogs_search_toggle', function () {
         $(panelWrap).addClass('im_dialogs_panel_search');
         $scope.$broadcast('ui_dialogs_search');
-        $($window).scrollTop(0);  
+        $($window).scrollTop(0);
         $timeout(function () {
           searchField.focus();
         })
@@ -511,20 +511,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
         $(scrollable).css({bottom: -(sh - st - ch), marginLeft: -Math.ceil(pr / 2)});
 
-        onContentLoaded(function () {
-          $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: '', marginLeft: ''});
-          scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+        var upd = function () {
+            $(scrollableWrap).removeClass('im_history_to_bottom');
+            $(scrollable).css({bottom: '', marginLeft: ''});
+            scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            
+            updateBottomizer();
+            moreNotified = false;
 
-          updateBottomizer();
-          moreNotified = false;
+            $timeout(function () {
+              if (scrollableWrap.scrollHeight != sh) {
+                $(scrollableWrap).trigger('scroll');
+              }
+            });
 
-          $timeout(function () {
-            if (scrollableWrap.scrollHeight != sh) {
-              $(scrollableWrap).trigger('scroll');
-            }
-          });
-        });
+            clearTimeout(timer);
+            unreg();
+          },
+          timer = setTimeout(upd, 0),
+          unreg = $scope.$on('$viewContentLoaded', upd);
       });
 
       $scope.$on('ui_history_append', function () {
@@ -1350,7 +1355,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var onKeyDown = function (event) {
         var target = event.target;
         if (target && (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA')) {
-          return false;
+          return;
         }
 
         switch (event.keyCode) {
