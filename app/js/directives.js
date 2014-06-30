@@ -254,6 +254,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $(scrollableWrap).on('scroll', function (e) {
+        if (!element.is(':visible')) return;
         // console.log('scroll', moreNotified);
         if (!moreNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           // console.log('emit need more');
@@ -421,13 +422,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!atBottom && !options.my) {
           return;
         }
-        var curAnimated = animated && !$rootScope.idle.isIDLE,
+        var curAnimated = animated &&
+                          !$rootScope.idle.isIDLE &&
+                          historyMessagesEl.clientHeight > 0,
             wasH;
-        if (!curAnimated) {
+
+        if (curAnimated) {
+          wasH = scrollableWrap.scrollHeight;
+        } else {
           $(scrollable).css({bottom: 0});
           $(scrollableWrap).addClass('im_history_to_bottom');
-        } else {
-          wasH = scrollableWrap.scrollHeight;
         }
 
         onContentLoaded(function () {
@@ -450,7 +454,6 @@ angular.module('myApp.directives', ['myApp.filters'])
             $(scrollable).css({bottom: ''});
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             updateBottomizer();
-            $(historyWrap).nanoScroller();
           }
         });
       });
@@ -501,15 +504,16 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_history_prepend', function () {
         var sh = scrollableWrap.scrollHeight,
             st = scrollableWrap.scrollTop,
+            pr = parseInt($(scrollableWrap).css('paddingRight')),
             ch = scrollableWrap.clientHeight;
 
         $(scrollableWrap).addClass('im_history_to_bottom');
         scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
-        $(scrollable).css({bottom: -(sh - st - ch)});
+        $(scrollable).css({bottom: -(sh - st - ch), marginLeft: -Math.ceil(pr / 2)});
 
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: ''});
+          $(scrollable).css({bottom: '', marginLeft: ''});
           scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
 
           updateBottomizer();
@@ -569,10 +573,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
-        if ($(scrollableWrap).hasClass('im_history_to_bottom')) {
-          return cancelEvent(e);
-        }
-        if (curAnimation) {
+        if (!element.is(':visible') ||
+            $(scrollableWrap).hasClass('im_history_to_bottom') ||
+            curAnimation) {
           return;
         }
         atBottom = scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
@@ -607,9 +610,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(historyWrap).css({
           height: historyH
         });
-        $(historyEl).css({
-          minHeight: historyH - 44
-        });
 
         updateBottomizer();
 
@@ -626,8 +626,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateBottomizer () {
         $(historyMessagesEl).css({marginTop: 0});
-        if (historyMessagesEl.offsetHeight > 0 && historyMessagesEl.offsetHeight <= scrollableWrap.offsetHeight) {
-          $(historyMessagesEl).css({marginTop: (scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 44) + 'px'});
+        var marginTop = scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 49;
+        if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
+          $(historyMessagesEl).css({marginTop: marginTop});
         }
         $(historyWrap).nanoScroller();
       }
@@ -741,7 +742,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           lastLength;
       $(editorElement).on('keyup', function (e) {
         var now = tsNow(),
-            length = (editorElement[richTextarea ? 'innerText' : 'value']).length;
+            length = (editorElement[richTextarea ? 'textContent' : 'value']).length;
+
 
         if (now - lastTyping > 5000 && length != lastLength) {
           lastTyping = now;
@@ -1405,6 +1407,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           moreNotified = false;
 
       $(scrollableWrap).on('scroll', function (e) {
+        if (!element.is(':visible')) return;
         if (!moreNotified &&
             scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           moreNotified = true;
