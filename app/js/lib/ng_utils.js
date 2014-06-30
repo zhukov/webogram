@@ -256,6 +256,10 @@ angular.module('izhukov.utils', [])
   }
 
   function downloadFile (url, mimeType, fileName) {
+    // if (Config.Navigator.mobile) {
+    //   window.open(url, '_blank');
+    //   return;
+    // }
     var anchor = $('<a>Download</a>')
               .css({position: 'absolute', top: 1, left: 1})
               .attr('href', url)
