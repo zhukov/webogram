@@ -12,6 +12,7 @@ angular.module('myApp', [
   'ngRoute',
   'ngAnimate',
   'ngSanitize',
+  'ngTouch',
   'ui.bootstrap',
   'pasvaz.bindonce',
   'izhukov.utils',
@@ -72,7 +73,3 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
   }
   $(document.body).addClass(classes.join(' '));
 })();
-
-$(function() {
-  FastClick.attach(document.body);
-});
