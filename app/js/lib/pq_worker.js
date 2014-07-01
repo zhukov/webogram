@@ -8,6 +8,7 @@
 importScripts(
   '../../vendor/console-polyfill/console-polyfill.js',
   'bin_utils.js',
+  '../../vendor/leemon_bigint/bigint.js',
   '../../vendor/closure/long.js',
   '../../vendor/jsbn/jsbn_combined.js'
 );
