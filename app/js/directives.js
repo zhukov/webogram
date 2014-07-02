@@ -469,6 +469,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           atBottom = false;
         } else {
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          atBottom = true;
         }
         updateScroller();
         $timeout(function () {
@@ -515,7 +516,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             $(scrollableWrap).removeClass('im_history_to_bottom');
             $(scrollable).css({bottom: '', marginLeft: ''});
             scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
-            
+
             updateBottomizer();
             moreNotified = false;
 
@@ -596,7 +597,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       function updateSizes (heightOnly) {
-        if (!element.is(':visible') || !$(element[0].parentNode).is(':visible')) {
+        if (!element.is(':visible') && !$(element[0].parentNode.parentNode).is(':visible')) {
           return;
         }
         if ($(sendFormWrap).is(':visible')) {
