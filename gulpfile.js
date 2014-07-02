@@ -169,6 +169,8 @@ gulp.task('package-dev', function() {
 
     gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json'])
      .pipe(gulp.dest('dist_package')),
+    gulp.src(['app/css/**/*'])
+     .pipe(gulp.dest('dist_package/css')),
     gulp.src(['app/img/**/*'])
      .pipe(gulp.dest('dist_package/img')),
     gulp.src('app/vendor/**/*')
