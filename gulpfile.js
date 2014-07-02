@@ -41,7 +41,7 @@ gulp.task('copy-images', function() {
 
 gulp.task('copy', function() {
   return es.concat(
-    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json', 'app/**/*worker.js', 'CHANGELOG.mdown'])
+    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json', 'app/**/*worker.js'])
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
@@ -53,10 +53,10 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist/vendor/closure')),
     gulp.src('app/vendor/jsbn/jsbn_combined.js')
       .pipe(gulp.dest('dist/vendor/jsbn')),
+    gulp.src('app/vendor/leemon_bigint/bigint.js')
+      .pipe(gulp.dest('dist/vendor/leemon_bigint')),
     gulp.src('app/vendor/cryptoJS/crypto.js')
       .pipe(gulp.dest('dist/vendor/cryptoJS')),
-    gulp.src('app/vendor/bootstrap/fonts/*')
-      .pipe(gulp.dest('dist/fonts')),
     gulp.src('app/js/background.js')
       .pipe(gulp.dest('dist/js'))
   );
@@ -155,6 +155,37 @@ gulp.task('add-appcache-manifest', function() {
       )
       .pipe(gulp.dest('./dist'))
   );
+});
+
+gulp.task('package-dev', function() {
+  return es.concat(
+    gulp.src('app/partials/*.html')
+     .pipe($.angularTemplatecache('templates.js', {
+       root: 'partials',
+       module: 'myApp.templates',
+       standalone: true
+     }))
+     .pipe(gulp.dest('dist_package/js')),
+
+    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json'])
+     .pipe(gulp.dest('dist_package')),
+    gulp.src(['app/img/**/*'])
+     .pipe(gulp.dest('dist_package/img')),
+    gulp.src('app/vendor/**/*')
+     .pipe(gulp.dest('dist_package/vendor')),
+
+    gulp.src('app/**/*.html')
+      .pipe($.replace(/<html(.*?)>/, '<html$1 ng-csp="">'))
+      .pipe($.replace(/PRODUCTION_ONLY_BEGIN/g, 'PRODUCTION_ONLY_BEGIN-->'))
+      .pipe($.replace(/PRODUCTION_ONLY_END/, '<!--PRODUCTION_ONLY_END'))
+      .pipe(gulp.dest('dist_package')),
+
+    gulp.src('app/**/*.js')
+      .pipe($.ngmin())
+      .pipe($.replace(/PRODUCTION_ONLY_BEGIN(\*\/)?/g, 'PRODUCTION_ONLY_BEGIN*/'))
+      .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, '/*PRODUCTION_ONLY_END'))
+      .pipe(gulp.dest('dist_package'))
+    );
 });
 
 
