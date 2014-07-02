@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.8 - messaging web application for MTProto
+ * Webogram v0.1.9 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1408,7 +1408,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
-      var scrollableWrap = $('.content', element)[0],
+      var scrollableWrap = $('.nano-content', element)[0],
           moreNotified = false;
 
       $(scrollableWrap).on('scroll', function (e) {
