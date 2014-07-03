@@ -1129,6 +1129,10 @@ a.im_dialog_selected .im_dialog_date {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.im_dialog_message {
+  color: #808080;
+}
+
 
 /* IM history */
 .im_history_col {
