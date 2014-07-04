@@ -549,3 +549,98 @@ angular.module('izhukov.utils', [])
   };
 })
 
+.service('CryptoWorker', function ($timeout, $q) {
+
+  var worker = window.Worker && new Worker('js/lib/crypto_worker.js') || false,
+      taskID = 0,
+      awaiting = {};
+
+  if (worker) {
+    worker.onmessage = function (e) {
+      var deferred = awaiting[e.data.taskID];
+      if (deferred !== undefined) {
+        console.log(dT(), 'CW done');
+        deferred.resolve(e.data.result);
+        delete awaiting[e.data.taskID];
+      }
+    };
+
+    worker.onerror = function(error) {
+      console.log('CW error', error, error.stack);
+    };
+  }
+
+  function performTaskWorker (task, params) {
+    console.log(dT(), 'CW start', task);
+    var deferred = $q.defer();
+
+    awaiting[taskID] = deferred;
+
+    params.task = task;
+    params.taskID = taskID;
+    worker.postMessage(params);
+
+    taskID++;
+
+    return deferred.promise;
+  }
+
+  return {
+    sha1Hash: function (bytes) {
+      if (worker && false) { // due overhead for data transfer
+        return performTaskWorker ('sha1-hash', {bytes: bytes});
+      }
+      return $timeout(function () {
+        return sha1Hash(bytes);
+      });
+    },
+    aesEncrypt: function (bytes, keyBytes, ivBytes) {
+      if (worker && false) { // due overhead for data transfer
+        return performTaskWorker('aes-encrypt', {
+          bytes: bytes,
+          keyBytes: keyBytes,
+          ivBytes: ivBytes
+        });
+      }
+      return $timeout(function () {
+        return aesEncrypt(bytes, keyBytes, ivBytes);
+      });
+    },
+    aesDecrypt: function (encryptedBytes, keyBytes, ivBytes) {
+      if (worker && false) { // due overhead for data transfer
+        return performTaskWorker('aes-decrypt', {
+          encryptedBytes: encryptedBytes,
+          keyBytes: keyBytes,
+          ivBytes: ivBytes
+        });
+      }
+      return $timeout(function () {
+        return aesDecrypt(encryptedBytes, keyBytes, ivBytes);
+      });
+    },
+    factorize: function (bytes) {
+      if (worker) {
+        return performTaskWorker('factorize', {bytes: bytes});
+      }
+      return $timeout(function () {
+        return pqPrimeFactorization(bytes);
+      });
+    },
+    modPow: function (x, y, m) {
+      if (worker) {
+        return performTaskWorker('mod-pow', {
+          x: x,
+          y: y,
+          m: m
+        });
+      }
+      return $timeout(function () {
+        return bytesModPow(x, y, m);
+      });
+    },
+  };
+})
+
+
+
+

@@ -166,7 +166,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 })
 
-.factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpMessageIdGenerator, $http, $q, $timeout) {
+.factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpMessageIdGenerator, CryptoWorker, $http, $q, $timeout) {
 
   function mtpSendPlainRequest (dcID, requestBuffer) {
     var requestLength = requestBuffer.byteLength,
@@ -255,30 +255,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
 
       console.log(dT(), 'PQ factorization start', auth.pq);
-      if (!!window.Worker/* && false*/) {
-        var worker = new Worker('js/lib/pq_worker.js'),
-            curRetry = auth.pqRetry,
-            canceled = false;
-
-        worker.onmessage = function (e) {
-          auth.p = e.data[0];
-          auth.q = e.data[1];
-          console.log(dT(), 'PQ factorization done', e.data[2]);
-          mtpSendReqDhParams(auth);
-        };
-        worker.onerror = function(error) {
-          console.log('Worker error', error, error.stack);
-          deferred.reject(error);
-        };
-        worker.postMessage(auth.pq);
-      } else {
-        var pAndQ = pqPrimeFactorization(auth.pq);
+      CryptoWorker.factorize(auth.pq).then(function (pAndQ) {
         auth.p = pAndQ[0];
         auth.q = pAndQ[1];
-
         console.log(dT(), 'PQ factorization done', pAndQ[2]);
         mtpSendReqDhParams(auth);
-      }
+      }, function (error) {
+        console.log('Worker error', error, error.stack);
+        deferred.reject(error);
+      });
     }, function (error) {
       console.log(dT(), 'req_pq error', error.message);
       deferred.reject(error);
@@ -290,10 +275,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 
   function mtpSendReqDhParams (auth) {
-
-    alert('send req dh');
-    alert(auth.p);
-    alert(auth.q);
 
     var deferred = auth.deferred;
 
@@ -409,30 +390,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     MtpMessageIdGenerator.applyServerTime(auth.serverTime, auth.localTime);
   };
 
-  function mtpAsyncModPow (x, y, m) {
-    console.log(dT(), 'modPow start');
-    if (!window.Worker) {
-      var result = bytesModPow(x, y, m);
-      console.log(dT(), 'sync modPow done');
-      return $q.when(result);
-    }
-
-    var deferred = $q.defer(),
-        worker = new Worker('js/lib/mp_worker.js');
-
-    worker.onmessage = function (e) {
-      console.log(dT(), 'async modPow done');
-      deferred.resolve(e.data);
-    };
-    worker.onerror = function(error) {
-      console.log('Worker error', error, error.stack);
-      deferred.reject(error);
-    };
-    worker.postMessage([x, y, m]);
-
-    return deferred.promise;
-  }
-
   function mtpSendSetClientDhParams(auth) {
     var deferred = auth.deferred,
         gBytes = bytesFromHex(auth.g.toString(16));
@@ -440,7 +397,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     auth.b = new Array(256);
     MtpSecureRandom.nextBytes(auth.b);
 
-    mtpAsyncModPow(gBytes, auth.b, auth.dhPrime).then(function (gB) {
+    CryptoWorker.modPow(gBytes, auth.b, auth.dhPrime).then(function (gB) {
 
       var data = new TLSerialization({mtproto: true});
       data.storeObject({
@@ -482,7 +439,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           return false;
         }
 
-        mtpAsyncModPow(auth.gA, auth.b, auth.dhPrime).then(function (authKey) {
+        CryptoWorker.modPow(auth.gA, auth.b, auth.dhPrime).then(function (authKey) {
           var authKeyHash = sha1Hash(authKey),
               authKeyAux  = authKeyHash.slice(0, 8),
               authKeyID   = authKeyHash.slice(-8);
@@ -572,107 +529,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 })
 
-.factory('MtpAesService', function ($q) {
-  if (!window.Worker || true) {
-    return {
-      encrypt: function (bytes, keyBytes, ivBytes) {
-        return $q.when(aesEncrypt(bytes, keyBytes, ivBytes));
-      },
-      decrypt: function (encryptedBytes, keyBytes, ivBytes) {
-        return $q.when(aesDecrypt(encryptedBytes, keyBytes, ivBytes));
-      }
-    };
-  }
-
-  var worker = new Worker('js/lib/aes_worker.js'),
-      taskID = 0,
-      awaiting = {};
-
-  worker.onmessage = function (e) {
-    var deferred = awaiting[e.data.taskID];
-    if (deferred !== undefined) {
-      deferred.resolve(e.data.result);
-      delete awaiting[e.data.taskID];
-    }
-    // console.log('AES worker message', e.data, deferred);
-  };
-  worker.onerror = function(error) {
-    console.log('AES Worker error', error, error.stack);
-  };
-
-  return {
-    encrypt: function (bytes, keyBytes, ivBytes) {
-      var deferred = $q.defer();
-
-      awaiting[taskID] = deferred;
-
-      // console.log('AES post message', {taskID: taskID, task: 'encrypt', bytes: bytes, keyBytes: keyBytes, ivBytes: ivBytes})
-      worker.postMessage({taskID: taskID, task: 'encrypt', bytes: bytes, keyBytes: keyBytes, ivBytes: ivBytes});
-
-      taskID++;
-
-      return deferred.promise;
-    },
-    decrypt: function (encryptedBytes, keyBytes, ivBytes) {
-      var deferred = $q.defer();
-
-      awaiting[taskID] = deferred;
-      worker.postMessage({taskID: taskID, task: 'decrypt', encryptedBytes: encryptedBytes, keyBytes: keyBytes, ivBytes: ivBytes});
-
-      taskID++;
-
-      return deferred.promise;
-    }
-  }
-})
-
-.factory('MtpSha1Service', function ($q) {
-  if (!window.Worker || true) {
-    return {
-      hash: function (bytes) {
-        var deferred = $q.defer();
-
-        setTimeout(function () {
-          deferred.resolve(sha1Hash(bytes));
-        }, 0);
-
-        return deferred.promise;
-      }
-    };
-  }
-
-  var worker = new Worker('js/lib/sha1_worker.js'),
-      taskID = 0,
-      awaiting = {};
-
-  worker.onmessage = function (e) {
-    var deferred = awaiting[e.data.taskID];
-    if (deferred !== undefined) {
-      deferred.resolve(e.data.result);
-      delete awaiting[e.data.taskID];
-    }
-    // console.log('sha1 got message', e.data, deferred);
-  };
-  worker.onerror = function(error) {
-    console.log('SHA-1 Worker error', error, error.stack);
-  };
-
-  return {
-    hash: function (bytes) {
-      var deferred = $q.defer();
-
-      awaiting[taskID] = deferred;
-      // console.log(11, taskID, bytes);
-      worker.postMessage({taskID: taskID, bytes: bytes});
-
-      taskID++;
-
-      return deferred.promise;
-    }
-  }
-})
-
-.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, MtpSha1Service, MtpAesService, Storage, $http, $q, $timeout, $interval, $rootScope) {
+.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, Storage, CryptoWorker, $http, $q, $timeout, $interval, $rootScope) {
 
   var updatesProcessor,
       iii = 0,
@@ -928,10 +785,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         x = isOut ? 0 : 8;
 
     var promises = {
-      sha1a: MtpSha1Service.hash(msgKey.concat(authKey.slice(x, x + 32))),
-      sha1b: MtpSha1Service.hash(authKey.slice(32 + x, 48 + x).concat(msgKey, authKey.slice(48 + x, 64 + x))),
-      sha1c: MtpSha1Service.hash(authKey.slice(64 + x, 96 + x).concat(msgKey)),
-      sha1d: MtpSha1Service.hash(msgKey.concat(authKey.slice(96 + x, 128 + x)))
+      sha1a: CryptoWorker.sha1Hash(msgKey.concat(authKey.slice(x, x + 32))),
+      sha1b: CryptoWorker.sha1Hash(authKey.slice(32 + x, 48 + x).concat(msgKey, authKey.slice(48 + x, 64 + x))),
+      sha1c: CryptoWorker.sha1Hash(authKey.slice(64 + x, 96 + x).concat(msgKey)),
+      sha1d: CryptoWorker.sha1Hash(msgKey.concat(authKey.slice(96 + x, 128 + x)))
     };
 
     return $q.all(promises).then(function (result) {
@@ -1173,17 +1030,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
     var self = this;
 
-    // console.log('enc', bytes);
-
-    return MtpSha1Service.hash(bytes).then(function (bytesHash) {
-      // console.log('bytesHash', bytesHash);
+    return CryptoWorker.sha1Hash(bytes).then(function (bytesHash) {
       var msgKey = bytesHash.slice(-16);
       return self.getMsgKeyIv(msgKey, true).then(function (keyIv) {
-        // console.log('keyIv', keyIv);
-        // console.time('Aes encrypt ' + bytes.length + ' bytes');
-        return MtpAesService.encrypt(bytes, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
-          // console.log('encryptedBytes', encryptedBytes);
-          // console.timeEnd('Aes encrypt ' + bytes.length + ' bytes');
+        return CryptoWorker.aesEncrypt(bytes, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
           return {
             bytes: encryptedBytes,
             msgKey: msgKey
@@ -1195,11 +1045,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
   MtpNetworker.prototype.getDecryptedMessage = function (msgKey, encryptedData) {
     return this.getMsgKeyIv(msgKey, false).then(function (keyIv) {
-      // console.time('Aes decrypt ' + encryptedData.length + ' bytes');
-      return MtpAesService.decrypt(encryptedData, keyIv[0], keyIv[1])/*.then(function (a) {
-        console.timeEnd('Aes decrypt ' + encryptedData.length + ' bytes');
-        return a;
-      })*/;
+      return CryptoWorker.aesDecrypt(encryptedData, keyIv[0], keyIv[1]);
     });
   };
 
@@ -1275,7 +1121,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       var offset = deserializer.getOffset();
 
-      return MtpSha1Service.hash(dataWithPadding.slice(0, offset)).then(function (dataHashed) {
+      return CryptoWorker.sha1Hash(dataWithPadding.slice(0, offset)).then(function (dataHashed) {
         if (!bytesCmp(msgKey, dataHashed.slice(-16))) {
           throw new Error('server msgKey mismatch');
         }
