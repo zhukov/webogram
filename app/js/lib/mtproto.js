@@ -85,9 +85,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var fingerprintBytes = sha1Hash(buffer).slice(-8);
       fingerprintBytes.reverse();
 
-      var fingerprint = new BigInteger(fingerprintBytes).toString(16);
-
-      publicKeysParsed[fingerprint] = {
+      publicKeysParsed[bytesToHex(fingerprintBytes)] = {
         modulus: keyParsed.modulus,
         exponent: keyParsed.exponent
       };
@@ -404,108 +402,132 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     MtpMessageIdGenerator.applyServerTime(auth.serverTime, auth.localTime);
   };
 
+  function mtpAsyncModPow (x, y, m) {
+    console.log(dT(), 'modPow start');
+    if (!window.Worker) {
+      var result = bytesModPow(x, y, m);
+      console.log(dT(), 'sync modPow done');
+      return $q.when(result);
+    }
+
+    var deferred = $q.defer(),
+        worker = new Worker('js/lib/mp_worker.js');
+
+    worker.onmessage = function (e) {
+      console.log(dT(), 'async modPow done');
+      deferred.resolve(e.data);
+    };
+    worker.onerror = function(error) {
+      console.log('Worker error', error, error.stack);
+      deferred.reject(error);
+    };
+    worker.postMessage([x, y, m]);
+
+    return deferred.promise;
+  }
+
   function mtpSendSetClientDhParams(auth) {
-    var deferred = auth.deferred;
+    var deferred = auth.deferred,
+        gBytes = bytesFromHex(auth.g.toString(16));
 
     auth.b = new Array(256);
     MtpSecureRandom.nextBytes(auth.b);
 
-    var bBigInt = new BigInteger(auth.b);
-    var dhPrimeBigInt = new BigInteger(auth.dhPrime);
+    mtpAsyncModPow(gBytes, auth.b, auth.dhPrime).then(function (gB) {
 
-    var gB = bytesFromBigInt(bigint(auth.g).modPow(bBigInt, dhPrimeBigInt));
+      var data = new TLSerialization({mtproto: true});
+      data.storeObject({
+        _: 'client_DH_inner_data',
+        nonce: auth.nonce,
+        server_nonce: auth.serverNonce,
+        retry_id: [0, auth.retry++],
+        g_b: gB,
+      }, 'Client_DH_Inner_Data');
 
-    var data = new TLSerialization({mtproto: true});
-    data.storeObject({
-      _: 'client_DH_inner_data',
-      nonce: auth.nonce,
-      server_nonce: auth.serverNonce,
-      retry_id: [0, auth.retry++],
-      g_b: gB,
-    }, 'Client_DH_Inner_Data');
+      var dataWithHash = sha1Hash(data.getBuffer()).concat(data.getBytes());
 
-    var dataWithHash = sha1Hash(data.getBuffer()).concat(data.getBytes());
+      var encryptedData = aesEncrypt(dataWithHash, auth.tmpAesKey, auth.tmpAesIv);
 
-    var encryptedData = aesEncrypt(dataWithHash, auth.tmpAesKey, auth.tmpAesIv);
+      var request = new TLSerialization({mtproto: true});
+      request.storeMethod('set_client_DH_params', {
+        nonce: auth.nonce,
+        server_nonce: auth.serverNonce,
+        encrypted_data: encryptedData
+      });
 
-    var request = new TLSerialization({mtproto: true});
-    request.storeMethod('set_client_DH_params', {
-      nonce: auth.nonce,
-      server_nonce: auth.serverNonce,
-      encrypted_data: encryptedData
-    });
+      console.log(dT(), 'Send set_client_DH_params');
+      mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
+        var deserializer = result.data;
+        var response = deserializer.fetchObject('Set_client_DH_params_answer');
 
-    console.log(dT(), 'Send set_client_DH_params');
-    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-      var deserializer = result.data;
-      var response = deserializer.fetchObject('Set_client_DH_params_answer');
-
-      if (response._ != 'dh_gen_ok' && response._ != 'dh_gen_retry' && response._ != 'dh_gen_fail') {
-        deferred.reject(new Error('Set_client_DH_params_answer response invalid: ' + response._));
-        return false;
-      }
-
-      if (!bytesCmp (auth.nonce, response.nonce)) {
-        deferred.reject(new Error('Set_client_DH_params_answer nonce mismatch'));
-        return false
-      }
-
-      if (!bytesCmp (auth.serverNonce, response.server_nonce)) {
-        deferred.reject(new Error('Set_client_DH_params_answer server_nonce mismatch'));
-        return false;
-      }
-
-      var bBigInt = new BigInteger(auth.b);
-      var dhPrimeBigInt = new BigInteger(auth.dhPrime);
-
-      var authKey =  bytesFromBigInt((new BigInteger(auth.gA)).modPow(bBigInt, dhPrimeBigInt)),
-          authKeyHash = sha1Hash(authKey),
-          authKeyAux  = authKeyHash.slice(0, 8),
-          authKeyID   = authKeyHash.slice(-8);
-
-      console.log(dT(), 'Got Set_client_DH_params_answer', response._);
-      switch (response._) {
-        case 'dh_gen_ok':
-          var newNonceHash1 = sha1Hash(auth.newNonce.concat([1], authKeyAux)).slice(-16);
-
-          if (!bytesCmp(newNonceHash1, response.new_nonce_hash1)) {
-            deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash1 mismatch'));
-            return false;
-          }
-
-          var serverSalt = bytesXor(auth.newNonce.slice(0, 8), auth.serverNonce.slice(0, 8));
-          // console.log('Auth successfull!', authKeyID, authKey, serverSalt);
-
-          auth.authKeyID = authKeyID;
-          auth.authKey = authKey;
-          auth.serverSalt = serverSalt;
-
-          deferred.resolve(auth);
-          break;
-
-        case 'dh_gen_retry':
-          var newNonceHash2 = sha1Hash(auth.newNonce.concat([2], authKeyAux)).slice(-16);
-          if (!bytesCmp(newNonceHash2, response.new_nonce_hash2)) {
-            deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash2 mismatch'));
-            return false;
-          }
-
-          return mtpSendSetClientDhParams(auth);
-
-        case 'dh_gen_fail':
-          var newNonceHash3 = sha1Hash(auth.newNonce.concat([3], authKeyAux)).slice(-16);
-          if (!bytesCmp(newNonceHash3, response.new_nonce_hash3)) {
-            deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash3 mismatch'));
-            return false;
-          }
-
-          deferred.reject(new Error('Set_client_DH_params_answer fail'));
+        if (response._ != 'dh_gen_ok' && response._ != 'dh_gen_retry' && response._ != 'dh_gen_fail') {
+          deferred.reject(new Error('Set_client_DH_params_answer response invalid: ' + response._));
           return false;
-      }
+        }
 
+        if (!bytesCmp (auth.nonce, response.nonce)) {
+          deferred.reject(new Error('Set_client_DH_params_answer nonce mismatch'));
+          return false
+        }
+
+        if (!bytesCmp (auth.serverNonce, response.server_nonce)) {
+          deferred.reject(new Error('Set_client_DH_params_answer server_nonce mismatch'));
+          return false;
+        }
+
+        mtpAsyncModPow(auth.gA, auth.b, auth.dhPrime).then(function (authKey) {
+          var authKeyHash = sha1Hash(authKey),
+              authKeyAux  = authKeyHash.slice(0, 8),
+              authKeyID   = authKeyHash.slice(-8);
+
+          console.log(dT(), 'Got Set_client_DH_params_answer', response._);
+          switch (response._) {
+            case 'dh_gen_ok':
+              var newNonceHash1 = sha1Hash(auth.newNonce.concat([1], authKeyAux)).slice(-16);
+
+              if (!bytesCmp(newNonceHash1, response.new_nonce_hash1)) {
+                deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash1 mismatch'));
+                return false;
+              }
+
+              var serverSalt = bytesXor(auth.newNonce.slice(0, 8), auth.serverNonce.slice(0, 8));
+              // console.log('Auth successfull!', authKeyID, authKey, serverSalt);
+
+              auth.authKeyID = authKeyID;
+              auth.authKey = authKey;
+              auth.serverSalt = serverSalt;
+
+              deferred.resolve(auth);
+              break;
+
+            case 'dh_gen_retry':
+              var newNonceHash2 = sha1Hash(auth.newNonce.concat([2], authKeyAux)).slice(-16);
+              if (!bytesCmp(newNonceHash2, response.new_nonce_hash2)) {
+                deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash2 mismatch'));
+                return false;
+              }
+
+              return mtpSendSetClientDhParams(auth);
+
+            case 'dh_gen_fail':
+              var newNonceHash3 = sha1Hash(auth.newNonce.concat([3], authKeyAux)).slice(-16);
+              if (!bytesCmp(newNonceHash3, response.new_nonce_hash3)) {
+                deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash3 mismatch'));
+                return false;
+              }
+
+              deferred.reject(new Error('Set_client_DH_params_answer fail'));
+              return false;
+          }
+        }, function (error) {
+          deferred.reject(error);
+        })
+      }, function (error) {
+        deferred.reject(error);
+      });
     }, function (error) {
       deferred.reject(error);
-    });
+    })
   };
 
   var cached = {};

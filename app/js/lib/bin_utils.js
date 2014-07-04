@@ -516,3 +516,17 @@ function pqPrimeLeemon (what) {
 
   return [bytesFromLeemonBigInt(P), bytesFromLeemonBigInt(Q), it];
 }
+
+
+function bytesModPow (x, y, m) {
+  try {
+    var xBigInt = str2bigInt(x, 64),
+        yBigInt = str2bigInt(y, 64),
+        mBigInt = str2bigInt(bytesToHex(m), 16, 2),
+        resBigInt = powMod(xBigInt, yBigInt, mBigInt);
+
+    return bytesFromHex(bigInt2str(resBigInt, 16));
+  } catch (e) {}
+
+  return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)));
+}
