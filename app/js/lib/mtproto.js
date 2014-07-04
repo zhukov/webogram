@@ -264,9 +264,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           auth.p = e.data[0];
           auth.q = e.data[1];
           console.log(dT(), 'PQ factorization done', e.data[2]);
-          } catch (e) {
-            alert(e.message + ' ' + e.stack);
-          }
           mtpSendReqDhParams(auth);
         };
         worker.onerror = function(error) {
