@@ -134,11 +134,13 @@ html {
 .navbar-quick-nav h4 {
   font-size: 14px;
   color: #FFF;
+  margin: 0;
   white-space: nowrap;
-  max-width: 100px;
+}
+.navbar-quick-back-title {
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0;
 }
 .navbar-quick-media-back h4 {
   margin: 9px 0 12px 0;
@@ -173,8 +175,7 @@ html {
 .tg_page_head .navbar_offline > .container .navbar-brand {
   margin-right: 0;
 }
-.navbar_offline .navbar-quick-nav li > a > h4,
-.navbar_offline .navbar-quick-nav li > a > small,
+.navbar_offline .navbar-quick-nav li > a > .navbar-quick-back-title,
 .navbar_offline .im_head_attach,
 .navbar_offline .navbar-search-wrap {
   display: none;

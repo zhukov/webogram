@@ -57,10 +57,12 @@
             <li>
               <a ng-click="toggleMedia()" class="navbar-quick-media-back" ng-switch="historyFilter.mediaType">
                 <i class="icon icon-back"></i>
-                <h4 ng-switch-when="photos">Photos</h4>
-                <h4 ng-switch-when="video">Videos</h4>
-                <h4 ng-switch-when="documents">Documents</h4>
-                <h4 ng-switch-when="audio">Voice messages</h4>
+                <div class="navbar-quick-back-title">
+                  <h4 ng-switch-when="photos">Photos</h4>
+                  <h4 ng-switch-when="video">Videos</h4>
+                  <h4 ng-switch-when="documents">Documents</h4>
+                  <h4 ng-switch-when="audio">Voice messages</h4>
+                </div>
               </a>
             </li>
           </ul>
@@ -68,19 +70,23 @@
             <li ng-switch-when="true">
               <a href="#/im" class="navbar-quick-profile-back">
                 <i class="icon icon-back"></i>
-                <h4 ng-bind-html="historyPeer.data.rFullName"></h4>
-                <small ng-bind="historyPeer.data | userStatus"></small>
+                <div class="navbar-quick-back-title">
+                  <h4 ng-bind-html="historyPeer.data.rFullName"></h4>
+                  <small ng-bind="historyPeer.data | userStatus"></small>
+                </div>
               </a>
             </li>
             <li ng-switch-default>
               <a href="#/im" class="navbar-quick-group-back">
                 <i class="icon icon-back"></i>
-                <h4 ng-bind-html="historyPeer.data.rTitle"></h4>
-                <small>
-                  <ng-pluralize count="historyPeer.data.participants_count"
-                                   when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
-                  </ng-pluralize>
-                </small>
+                <div class="navbar-quick-back-title">
+                  <h4 ng-bind-html="historyPeer.data.rTitle"></h4>
+                  <small>
+                    <ng-pluralize count="historyPeer.data.participants_count"
+                                     when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
+                    </ng-pluralize>
+                  </small>
+                </div>
               </a>
             </li>
           </ul>
