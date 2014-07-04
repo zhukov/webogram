@@ -256,27 +256,27 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         throw new Error('No public key found');
       }
 
-      console.log(dT(), 'PQ factorization start');
+      console.log(dT(), 'PQ factorization start', auth.pq);
       if (!!window.Worker/* && false*/) {
         var worker = new Worker('js/lib/pq_worker.js');
 
         worker.onmessage = function (e) {
           auth.p = e.data[0];
           auth.q = e.data[1];
-          console.log(dT(), 'PQ factorization done');
+          console.log(dT(), 'PQ factorization done', e.data[2]);
           mtpSendReqDhParams(auth);
         };
         worker.onerror = function(error) {
           console.log('Worker error', error, error.stack);
           deferred.reject(error);
         };
-        worker.postMessage(auth.pq)
+        worker.postMessage(auth.pq);
       } else {
         var pAndQ = pqPrimeFactorization(auth.pq);
         auth.p = pAndQ[0];
         auth.q = pAndQ[1];
 
-        console.log(dT(), 'PQ factorization done');
+        console.log(dT(), 'PQ factorization done', pAndQ[2]);
         mtpSendReqDhParams(auth);
       }
     }, function (error) {

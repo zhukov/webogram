@@ -281,12 +281,11 @@ function pqPrimeFactorization (pqBytes) {
   var what = new BigInteger(pqBytes), 
       result = false;
 
-  console.log('PQ start', pqBytes, what.bitLength());
+  console.log('PQ start', pqBytes, what.toString(16), what.bitLength());
 
   try {
     result = pqPrimeLeemon(str2bigInt(what.toString(16), 16, Math.ceil(64 / bpe) + 1))
   } catch (e) {
-    console.error(e);
     console.error('Pq leemon Exception', e);
   }
 
@@ -366,7 +365,7 @@ function pqPrimeBigInteger (what) {
     Q = f;
   }
 
-  return [bytesFromBigInt(P), bytesFromBigInt(Q)];
+  return [bytesFromBigInt(P), bytesFromBigInt(Q), it];
 }
 
 function gcdLong(a, b) {
@@ -440,7 +439,7 @@ function pqPrimeLong(what) {
     Q = f;
   }
 
-  return [bytesFromHex(P.toString(16)), bytesFromHex(Q.toString(16))];
+  return [bytesFromHex(P.toString(16)), bytesFromHex(Q.toString(16)), it];
 }
 
 
@@ -515,5 +514,5 @@ function pqPrimeLeemon (what) {
 
   // console.log(dT(), 'done', bigInt2str(what, 10), bigInt2str(P, 10), bigInt2str(Q, 10));
 
-  return [bytesFromLeemonBigInt(P), bytesFromLeemonBigInt(Q)];
+  return [bytesFromLeemonBigInt(P), bytesFromLeemonBigInt(Q), it];
 }
