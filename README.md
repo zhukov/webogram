@@ -67,10 +67,6 @@ Install [node.js](http://nodejs.org/) and run `node server.js`. Open page http:/
 #### Running as Chrome Packaged App
 
 It is possible to run this application in Chrome browser as a packaged app. In order to do this, open this URL in Chrome: `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram application should appear in the list.
-Also it's necessary to replace following line in index.html:
-```<html lang="en" ng-app="myApp"><!-- ng-csp=""-->```
-with:
-```<html lang="en" ng-app="myApp" ng-csp="">```
 
 
 You can also download this application from Chrome Web Store: [chrome.google.com/webstore/detail/telegram-unofficial/clhhggbfdinjmjhajaheehoeibfljjno](https://chrome.google.com/webstore/detail/telegram-unofficial/clhhggbfdinjmjhajaheehoeibfljjno). This is more secure way to use app than plain HTTP in web, because sources are downloaded only once and via HTTPS.

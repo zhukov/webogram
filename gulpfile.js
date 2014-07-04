@@ -62,7 +62,7 @@ gulp.task('copy', function() {
   );
 });
 
-gulp.task('compress-dist', ['add-csp'], function() {
+gulp.task('compress-dist', function() {
   return gulp.src('**/*', {cwd:  path.join(process.cwd(), '/dist')})
     .pipe($.zip('webogram_v' + pj.version + '.zip'))
     .pipe(gulp.dest('releases'));
@@ -70,12 +70,6 @@ gulp.task('compress-dist', ['add-csp'], function() {
 
 gulp.task('cleanup-dist', ['compress-dist'], function() {
   return gulp.src(['releases/**/*', '!releases/*.zip']).pipe($.clean());
-});
-
-gulp.task('add-csp', ['build'], function() {
-  return gulp.src('dist/index.html')
-    .pipe($.replace(/<html(.*?)>/, '<html$1 ng-csp="">'))
-    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('update-version-manifests', function() {
@@ -177,7 +171,6 @@ gulp.task('package-dev', function() {
      .pipe(gulp.dest('dist_package/vendor')),
 
     gulp.src('app/**/*.html')
-      .pipe($.replace(/<html(.*?)>/, '<html$1 ng-csp="">'))
       .pipe($.replace(/PRODUCTION_ONLY_BEGIN/g, 'PRODUCTION_ONLY_BEGIN-->'))
       .pipe($.replace(/PRODUCTION_ONLY_END/, '<!--PRODUCTION_ONLY_END'))
       .pipe(gulp.dest('dist_package')),
