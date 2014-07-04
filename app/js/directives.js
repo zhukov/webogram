@@ -702,9 +702,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           })
           .textcomplete([{
             placement: 'top',
-            match  : /(^|\s)(:\w*)$/,
+            match  : /(^|\s)(:[\+\-_a-zA-Z0-9]*)$/,
             search : function (term, callback) {
-              var regexp = new RegExp('^' + term),
+              var regexp = new RegExp('^' + term.replace('+', '\\+')),
                   emojies = [];
 
               for (var emoji in $.emojiarea.icons) {
