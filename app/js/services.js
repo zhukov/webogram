@@ -3279,6 +3279,7 @@ angular.module('myApp.services', [])
   }
 
   function start () {
+    registerDevice();
     if (!notificationsUiSupport) {
       return false;
     }
@@ -3388,6 +3389,46 @@ angular.module('myApp.services', [])
       } catch (e) {}
     });
     notificationsShown = {};
+  }
+
+  var registeredDevice = false;
+
+  function registerDevice () {
+    if (registeredDevice) {
+      return false;
+    }
+    if (navigator.push) {
+      var req = navigator.push.register();
+      
+      req.onsuccess = function(e) {
+        registeredDevice = req.result;
+        MtpApiManager.invokeApi('account.registerDevice', {
+          token_type: 4,
+          token: registeredDevice,
+          device_model: navigator.userAgent || 'Unknown UserAgent',
+          system_version: navigator.platform  || 'Unknown Platform',
+          app_version: Config.App.version,
+          app_sandbox: false,
+          lang_code: navigator.language || 'en'
+        });
+      }
+
+      req.onerror = function(e) {
+        console.error('Push register error', e);
+      }
+    }
+  }
+
+  function unregisterDevice () {
+    if (!registeredDevice) {
+      return false;
+    }
+    MtpApiManager.invokeApi('account.unregisterDevice', {
+      token_type: 4,
+      token: registeredDevice
+    }).then(function () {
+      registeredDevice = false;
+    })
   }
 })
 

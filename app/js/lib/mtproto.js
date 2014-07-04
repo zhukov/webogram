@@ -256,12 +256,17 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       console.log(dT(), 'PQ factorization start', auth.pq);
       if (!!window.Worker/* && false*/) {
-        var worker = new Worker('js/lib/pq_worker.js');
+        var worker = new Worker('js/lib/pq_worker.js'),
+            curRetry = auth.pqRetry,
+            canceled = false;
 
         worker.onmessage = function (e) {
           auth.p = e.data[0];
           auth.q = e.data[1];
           console.log(dT(), 'PQ factorization done', e.data[2]);
+          } catch (e) {
+            alert(e.message + ' ' + e.stack);
+          }
           mtpSendReqDhParams(auth);
         };
         worker.onerror = function(error) {
@@ -288,6 +293,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 
   function mtpSendReqDhParams (auth) {
+
+    alert('send req dh');
+    alert(auth.p);
+    alert(auth.q);
+
     var deferred = auth.deferred;
 
     auth.newNonce = new Array(32);
