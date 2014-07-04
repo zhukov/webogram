@@ -6,11 +6,11 @@
 
     <div class="changelog_card_wrap" ng-switch="lastVersion === false">
       <div ng-switch-when="true">
-        <div class="changelog_card_search"></div>
+        <div class="changelog_card"></div>
         <h2 class="changelog_header">Recent updates in <strong>Telegram Web</strong></h2>
       </div>
       <div ng-switch-default>
-        <div class="changelog_card_search"></div>
+        <div class="changelog_card"></div>
         <h2 class="changelog_header"><strong>Telegram Web</strong> has been updated!</h2>
       </div>
     </div>
@@ -20,6 +20,45 @@
       <div class="modal_section changelog_version_wrap">
         <h3 class="modal_section_header changelog_version_title">
           <span class="pull-right">current version</span>
+          Version 0.1.9
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improvements of performance</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.8')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.8
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improved mobile layout</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.7')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.7
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improved mobile layout</li>
+            <li>Added file cache for Firefox and Android</li>
+            <li>New design for forwarded messages</li>
+            <li>Hash-tags support</li>
+            <li>Messaging bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.6')">
+        <h3 class="modal_section_header changelog_version_title">
           Version 0.1.6
         </h3>
         <div class="modal_section_body changelog_version_changes">
@@ -31,7 +70,7 @@
         </div>
       </div>
 
-      <div class="modal_section changelog_version_wrap">
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.5')">
         <h3 class="modal_section_header changelog_version_title">
           Version 0.1.5
         </h3>
@@ -43,7 +82,7 @@
         </div>
       </div>
 
-      <div class="modal_section changelog_version_wrap">
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.4')">
         <h3 class="modal_section_header changelog_version_title">
           Version 0.1.4
         </h3>
@@ -60,7 +99,7 @@
         </div>
       </div>
 
-      <div class="modal_section changelog_version_wrap">
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.3')">
         <h3 class="modal_section_header changelog_version_title">
           Version 0.1.3
         </h3>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app="myApp" manifest="webogram.appcache"><!--  ng-csp=""  -->
+<html lang="en" ng-app="myApp" manifest="webogram.appcache" ng-csp="">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no">
@@ -14,6 +14,15 @@
   <!-- endbuild -->
 
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <link rel="apple-touch-icon" href="img/icons/icon90.png">
+  <link rel="apple-touch-icon" sizes="90x90" href="img/icons/icon90.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="img/icons/icon120.png">
+
+  <meta name="apple-mobile-web-app-title" content="Webogram">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <meta property="og:title" content="Webogram">
   <meta property="og:url" content="http://zhukov.github.io/webogram/">
@@ -39,6 +48,7 @@
   <script type="text/javascript" src="vendor/angular/angular-route.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-animate.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-sanitize.js"></script>
+  <script type="text/javascript" src="vendor/angular/angular-touch.js"></script>
   <script type="text/javascript" src="vendor/ui-bootstrap/ui-bootstrap-custom-tpls-0.10.0.js"></script>
   <script type="text/javascript" src="vendor/bindonce/bindonce.js"></script>
 
@@ -48,8 +58,12 @@
   <script type="text/javascript" src="vendor/closure/long.js"></script>
 
 
+  <script type="text/javascript" src="js/lib/utils.js"></script>
+  <script type="text/javascript" src="js/lib/bin_utils.js"></script>
+  <script type="text/javascript" src="js/lib/tl_utils.js"></script>
+  <script type="text/javascript" src="js/lib/ng_utils.js"></script>
   <script type="text/javascript" src="js/lib/mtproto.js"></script>
-  <script type="text/javascript" src="js/util.js"></script>
+  <script type="text/javascript" src="js/lib/mtproto_wrapper.js"></script>
 
   <script type="text/javascript" src="js/app.js"></script>
   <script type="text/javascript" src="js/services.js"></script>

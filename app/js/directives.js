@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.6 - messaging web application for MTProto
+ * Webogram v0.2 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -38,7 +38,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myDialogs', function ($modalStack, $transition) {
+  .directive('myDialogs', function ($modalStack, $transition, $window, $timeout) {
 
     return {
       link: link
@@ -49,6 +49,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           searchField = $('.im_dialogs_search_field', element)[0],
+          panelWrap = $('.im_dialogs_panel', element)[0],
           tabsWrap = $('.im_dialogs_tabs_wrap', element)[0],
           searchFocused = false;
 
@@ -58,8 +59,25 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (!searchFocused) {
           $(scrollableWrap).find('.im_dialog_selected').removeClass('im_dialog_selected');
+          if (!searchField.value) {
+            $scope.$emit('ui_dialogs_search_clear');
+          }
         }
       });
+
+      $scope.$on('dialogs_search_toggle', function () {
+        $(panelWrap).addClass('im_dialogs_panel_search');
+        $scope.$broadcast('ui_dialogs_search');
+        $($window).scrollTop(0);
+        $timeout(function () {
+          searchField.focus();
+        })
+      });
+
+      $scope.$on('search_clear', function () {
+        $(panelWrap).removeClass('im_dialogs_panel_search');
+        $scope.$broadcast('ui_dialogs_search');
+      })
 
       attrs.$observe('hasTabs', function (newValue) {
         newValue = newValue == 'true';
@@ -72,7 +90,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('$destroy', function () {
         $(document).off('keydown', onKeyDown);
       });
-
 
       function onKeyDown(e) {
         if (!searchFocused && $modalStack.getTop()) {
@@ -186,8 +203,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
       var dialogsWrap = $('.im_dialogs_wrap', element)[0],
+          dialogsColWrap = $('.im_dialogs_col_wrap')[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
+          panelWrap = $('.im_dialogs_panel')[0],
           footer = $('.im_page_footer')[0],
           hasTabs = false,
           moreNotified = false;
@@ -207,7 +226,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_dialogs_tabs', function (e, newHasTabs) {
         hasTabs = newHasTabs;
         updateSizes();
-      })
+      });
+      $scope.$on('ui_dialogs_search', updateSizes);
+      $scope.$on('ui_dialogs_update', updateSizes);
 
 
       $scope.$on('ui_dialogs_append', function () {
@@ -233,6 +254,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $(scrollableWrap).on('scroll', function (e) {
+        if (!element.is(':visible')) return;
         // console.log('scroll', moreNotified);
         if (!moreNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           // console.log('emit need more');
@@ -258,8 +280,18 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!footer || !footer.offsetHeight) {
           footer = $('.im_page_footer')[0];
         }
+        if (!panelWrap || !panelWrap.offsetHeight) {
+          panelWrap = $('.im_dialogs_panel')[0];
+        }
+        if (!dialogsColWrap || !dialogsColWrap.offsetHeight) {
+          dialogsColWrap = $('.im_dialogs_col_wrap')[0];
+        }
         $(element).css({
-          height: $($window).height() - footer.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (hasTabs ? 38 : 0) - 68
+          height: $($window).height() -
+                  footer.offsetHeight -
+                  (headWrap ? headWrap.offsetHeight : 44) -
+                  (panelWrap ? panelWrap.offsetHeight : 58) -
+                  parseInt($(dialogsColWrap).css('paddingBottom') || 0)
         });
 
         updateScroller();
@@ -294,7 +326,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height() -
                   (panelWrap && panelWrap.offsetHeight || 0) -
                   (searchWrap && searchWrap.offsetHeight || 0) -
-                  (Config.Navigator.mobile ? 60 : 200)
+                  (Config.Navigator.mobile ? 100 : 200)
         });
         $(contactsWrap).nanoScroller();
       }
@@ -361,8 +393,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       onContentLoaded(function () {
         scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-        $(historyWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
       });
+      $(historyWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
 
       var updateScroller = function (delay) {
         // console.trace('scroller update', delay);
@@ -390,13 +422,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!atBottom && !options.my) {
           return;
         }
-        var curAnimated = animated && !$rootScope.idle.isIDLE,
+        var curAnimated = animated &&
+                          !$rootScope.idle.isIDLE &&
+                          historyMessagesEl.clientHeight > 0,
             wasH;
-        if (!curAnimated) {
+
+        if (curAnimated) {
+          wasH = scrollableWrap.scrollHeight;
+        } else {
           $(scrollable).css({bottom: 0});
           $(scrollableWrap).addClass('im_history_to_bottom');
-        } else {
-          wasH = scrollableWrap.scrollHeight;
         }
 
         onContentLoaded(function () {
@@ -419,7 +454,6 @@ angular.module('myApp.directives', ['myApp.filters'])
             $(scrollable).css({bottom: ''});
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             updateBottomizer();
-            $(historyWrap).nanoScroller();
           }
         });
       });
@@ -435,6 +469,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           atBottom = false;
         } else {
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          atBottom = true;
         }
         updateScroller();
         $timeout(function () {
@@ -470,26 +505,32 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_history_prepend', function () {
         var sh = scrollableWrap.scrollHeight,
             st = scrollableWrap.scrollTop,
+            pr = parseInt($(scrollableWrap).css('paddingRight')),
             ch = scrollableWrap.clientHeight;
 
         $(scrollableWrap).addClass('im_history_to_bottom');
         scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
-        $(scrollable).css({bottom: -(sh - st - ch)});
+        $(scrollable).css({bottom: -(sh - st - ch), marginLeft: -Math.ceil(pr / 2)});
 
-        onContentLoaded(function () {
-          $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: ''});
-          scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+        var upd = function () {
+            $(scrollableWrap).removeClass('im_history_to_bottom');
+            $(scrollable).css({bottom: '', marginLeft: ''});
+            scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
 
-          updateBottomizer();
-          moreNotified = false;
+            updateBottomizer();
+            moreNotified = false;
 
-          $timeout(function () {
-            if (scrollableWrap.scrollHeight != sh) {
-              $(scrollableWrap).trigger('scroll');
-            }
-          });
-        });
+            $timeout(function () {
+              if (scrollableWrap.scrollHeight != sh) {
+                $(scrollableWrap).trigger('scroll');
+              }
+            });
+
+            clearTimeout(timer);
+            unreg();
+          },
+          timer = setTimeout(upd, 0),
+          unreg = $scope.$on('$viewContentLoaded', upd);
       });
 
       $scope.$on('ui_history_append', function () {
@@ -538,10 +579,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var atBottom = true;
       $(scrollableWrap).on('scroll', function (e) {
-        if ($(scrollableWrap).hasClass('im_history_to_bottom')) {
-          return cancelEvent(e);
-        }
-        if (curAnimation) {
+        if (!element.is(':visible') ||
+            $(scrollableWrap).hasClass('im_history_to_bottom') ||
+            curAnimation) {
           return;
         }
         atBottom = scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
@@ -557,7 +597,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       function updateSizes (heightOnly) {
-        if (!element.is(':visible') || !$(element[0].parentNode).is(':visible')) {
+        if (!element.is(':visible') && !$(element[0].parentNode.parentNode).is(':visible')) {
           return;
         }
         if ($(sendFormWrap).is(':visible')) {
@@ -576,9 +616,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(historyWrap).css({
           height: historyH
         });
-        $(historyEl).css({
-          minHeight: historyH - 44
-        });
 
         updateBottomizer();
 
@@ -595,8 +632,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateBottomizer () {
         $(historyMessagesEl).css({marginTop: 0});
-        if (historyMessagesEl.offsetHeight > 0 && historyMessagesEl.offsetHeight <= scrollableWrap.offsetHeight) {
-          $(historyMessagesEl).css({marginTop: (scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 44) + 'px'});
+        var marginTop = scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 49;
+        if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
+          $(historyMessagesEl).css({marginTop: marginTop});
         }
         $(historyWrap).nanoScroller();
       }
@@ -609,7 +647,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, AppConfigManager, ErrorService) {
+  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService) {
 
     return {
       link: link,
@@ -627,6 +665,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           dragStarted, dragTimeout,
           emojiArea = $(messageField).emojiarea({button: emojiButton, norealTime: true}),
           emojiMenu = $('.emoji-menu', element)[0],
+          submitBtn = $('.im_submit', element)[0],
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
       if (richTextarea) {
@@ -646,12 +685,13 @@ angular.module('myApp.directives', ['myApp.filters'])
             img.style.background = "url('"+ sprites +"') "+ left+'px '+top+'px no-repeat';
             img.style.backgroundSize = spritesWidth+'px '+spritesHeight+'px';
             return img;
-          }
+          };
 
         editorElement = richTextarea;
         $(richTextarea)
           .addClass('form-control')
           .attr('placeholder', $(messageField).attr('placeholder'))
+          .on('DOMNodeInserted', onPastedImageEvent)
           .on('keyup', function (e) {
             updateHeight();
 
@@ -708,7 +748,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var sendOnEnter = true,
           updateSendSettings = function () {
-            AppConfigManager.get('send_ctrlenter').then(function (sendOnCtrl) {
+            Storage.get('send_ctrlenter').then(function (sendOnCtrl) {
               sendOnEnter = !sendOnCtrl;
             });
           };
@@ -739,7 +779,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       });
 
-      $('.im_submit', element).on('mousedown', function (e) {
+      $(submitBtn).on('mousedown touchstart', function (e) {
         $(element).trigger('submit');
         $(element).trigger('message_send');
         resetAfterSubmit();
@@ -750,7 +790,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           lastLength;
       $(editorElement).on('keyup', function (e) {
         var now = tsNow(),
-            length = (editorElement[richTextarea ? 'innerText' : 'value']).length;
+            length = (editorElement[richTextarea ? 'textContent' : 'value']).length;
+
 
         if (now - lastTyping > 5000 && length != lastLength) {
           lastTyping = now;
@@ -800,9 +841,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
       $(document).on('paste', onPasteEvent);
-      if (richTextarea) {
-        $(richTextarea).on('DOMNodeInserted', onPastedImageEvent);
-      }
 
       if (!Config.Navigator.touch) {
         $scope.$on('ui_peer_change', focusField);
@@ -814,21 +852,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_peer_draft', updateField);
       $scope.$on('ui_message_before_send', updateValue);
-
-
-      $scope.$on('$destroy', function cleanup() {
-        $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
-        $(document).off('paste', onPasteEvent);
-        $(document).off('keydown', onKeyDown);
-        fileSelects.off('change');
-        if (richTextarea) {
-          $(richTextarea).off('DOMNodeInserted', onPastedImageEvent);
-        }
-      });
-
-      if (!Config.Navigator.touch) {
-        focusField();
-      }
 
       function focusField () {
         onContentLoaded(function () {
@@ -916,8 +939,25 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         return cancelEvent(e);
       };
-    }
 
+
+      $scope.$on('$destroy', function cleanup() {
+        $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
+        $(document).off('paste', onPasteEvent);
+        $(document).off('keydown', onKeyDown);
+        $(submitBtn).off('mousedown')
+        fileSelects.off('change');
+        if (richTextarea) {
+          $(richTextarea).off('DOMNodeInserted keyup', onPastedImageEvent);
+        }
+        $(editorElement).off('keydown');
+      });
+
+      if (!Config.Navigator.touch) {
+        focusField();
+      }
+
+    }
   })
 
   .directive('myLoadThumb', function(MtpApiFileManager) {
@@ -1358,7 +1398,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var onKeyDown = function (event) {
         var target = event.target;
         if (target && (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA')) {
-          return false;
+          return;
         }
 
         switch (event.keyCode) {
@@ -1411,10 +1451,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
-      var scrollableWrap = $('.content', element)[0],
+      var scrollableWrap = $('.nano-content', element)[0],
           moreNotified = false;
 
       $(scrollableWrap).on('scroll', function (e) {
+        if (!element.is(':visible')) return;
         if (!moreNotified &&
             scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           moreNotified = true;

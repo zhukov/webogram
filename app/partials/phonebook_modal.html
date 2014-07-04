@@ -1,9 +1,15 @@
 <div class="contacts_modal_wrap" my-modal-position>
 
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
   <div class="modal-body">
 
+    <div class="contacts_modal_header">
+      <h4 class="contacts_modal_title">Phonebook</h4>
+    </div>
+
     <div class="contacts_modal_search">
-      <input class="form-control contacts_modal_search_field" my-focused type="search" placeholder="Search" ng-model="search.query"/>
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="Search" ng-model="search.query"/>
       <a class="contacts_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
     </div>
 
@@ -11,7 +17,7 @@
     <div my-contacts-list class="contacts_modal_col">
 
       <div class="contacts_wrap nano" my-infinite-scroller>
-        <div class="contacts_scrollable_wrap content">
+        <div class="contacts_scrollable_wrap nano-content">
 
           <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
 
@@ -47,7 +53,7 @@
 
   </div>
 
-  <div class="modal-footer" ng-if="multiSelect">
+  <div class="modal-footer contacts_modal_panel" ng-show="multiSelect">
     <a class="btn btn-link pull-left" ng-click="toggleSelection()" ng-switch="selectedCount > 0">
       <span ng-switch-when="true">Deselect all</span>
       <span ng-switch-default>Select all</span>
