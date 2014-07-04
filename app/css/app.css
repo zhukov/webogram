@@ -50,6 +50,11 @@ a.disabled {
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
           box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
 }
+.form-control.no_outline:focus {
+  border: 1px solid #d9dbde;
+  box-shadow: none;
+  outline: none;
+}
 
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -145,6 +150,7 @@ input[type="number"] {
 .btn-link:hover {
   background: #f2f6fa;
 }
+.btn-link.btn-link-noarea:hover,
 .btn-link.dropdown-toggle:hover {
   background: none;
 }
@@ -433,8 +439,8 @@ input[type="number"] {
   z-index: 1051;
   top: 0;
   right: 0;
-  width: 47px;
-  height: 47px;
+  width: 54px;
+  height: 54px;
 }
 .modal-close-button i {
   display: inline-block;
@@ -442,7 +448,7 @@ input[type="number"] {
   background-size: 42px 710px;
   width: 12px;
   height: 12px;
-  margin: 17px;
+  margin: 21px;
   opacity: 0.8;
 }
 .is_1x .modal-close-button i {
@@ -2823,7 +2829,24 @@ a:hover .icon-twitter {
 
 /* Contacts modal */
 .contacts_modal_window .modal-dialog {
-  max-width: 506px;
+  max-width: 456px;
+}
+.contacts_modal_header {
+  padding: 6px 0 18px;
+}
+.contacts_modal_edit_wrap {
+  position: absolute;
+  margin-top: -1px;
+}
+.contacts_modal_edit_link {
+  font-size: 14px;
+  padding: 5px 7px;
+}
+.contacts_modal_title {
+  font-size: 14px;
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
 }
 
 .contacts_modal_search {
@@ -2837,7 +2860,7 @@ a:hover .icon-twitter {
   background-size: 42px 710px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
-  padding: 6px 20px 6px 30px;
+  padding: 6px 15px 6px 30px;
   margin: 0;
 }
 .is_1x .contacts_modal_search_field {
@@ -2851,7 +2874,7 @@ a:hover .icon-twitter {
 .contacts_modal_search_clear {
   position: absolute;
   right: 9px;
-  margin-top: -23px;
+  margin-top: -24px;
   color: #999;
   width: 13px;
   height: 13px;
@@ -2886,16 +2909,11 @@ a:hover .icon-twitter {
   padding: 8px 9px;
   border-radius: 0;
 }
-.contacts_modal_members_list a.contacts_modal_contact:hover {
+.contacts_modal_members_list a.contacts_modal_contact:hover,
+.contacts_modal_members_list .active a.contacts_modal_contact,
+.contacts_modal_members_list .active a.contacts_modal_contact:hover {
   border-radius: 2px;
   background: #f2f6fa;
-}
-.contacts_modal_members_list .active a.contacts_modal_contact {
-  border-radius: 2px;
-  background-color: #6490b1;
-}
-.contacts_modal_members_list .active a.contacts_modal_contact:hover {
-  background-color: #6490b1;
 }
 
 
@@ -2918,34 +2936,34 @@ a:hover .icon-twitter {
 .contacts_modal_contact_status {
   color: #999;
 }
-a.contacts_modal_contact:hover .contacts_modal_contact_status {
-  color: #91a6ba;
-}
-
-.contacts_modal_members_list .active .contacts_modal_contact_name,
+a.contacts_modal_contact:hover .contacts_modal_contact_status,
 .contacts_modal_members_list .active a.contacts_modal_contact .contacts_modal_contact_status {
-  color: #FFF;
+  color: #91a6ba;
 }
 
 .icon-contact-tick {
   position: absolute;
   right: 10px;
-  top: 22px;
-  width: 17px;
-  height: 15px;
-  background: url(../img/icons/IconsetW.png) -13px -366px no-repeat;
+  top: 17px;
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
   background-size: 42px 710px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.contacts_modal_members_list a.contacts_modal_contact:hover .icon-contact-tick {
-  background-position: -13px -366px;
-  opacity: 1;
+.contacts_modal_members_list .contacts_modal_contact_wrap:hover .icon-contact-tick {
+  background-position: -9px -481px;
+  opacity: 0.5;
 }
-.contacts_modal_members_list .active .icon-contact-tick {
-  background-position: -13px -458px !important;
+.contacts_modal_members_list .contacts_modal_contact_wrap.active {
+
+}
+.contacts_modal_members_list .contacts_modal_contact_wrap.active .icon-contact-tick {
+  background-position: -9px -481px;
   opacity: 1;
 }
 .contacts_modal_members_list .disabled {
@@ -2953,6 +2971,14 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status {
 }
 .contacts_modal_members_list .disabled .icon-contact-tick {
   display: none;
+}
+
+.contacts_modal_panel {
+  text-align: center;
+}
+
+.group_edit_modal_window .modal-dialog {
+  max-width: 506px;
 }
 
 

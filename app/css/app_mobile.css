@@ -387,6 +387,12 @@ html {
   padding-left: 0;
   padding-right: 0;
 }
+.page_modal .modal-footer {
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
 
 
 .user_modal_other_btn button {

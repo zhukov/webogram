@@ -3332,10 +3332,17 @@ angular.module('myApp.services', [])
 
       notification.onclick = function () {
         notification.close();
-        if (window.chrome && chrome.app && chrome.app.window) {
-          chrome.app.window.current().focus();
+        if (window.mozApps && document.hidden) {
+          // Get app instance and launch it to bring app to foreground
+          window.mozApps.getSelf().onsuccess = function() {
+            this.result.launch();
+          };
+        } else {
+          if (window.chrome && chrome.app && chrome.app.window) {
+            chrome.app.window.current().focus();
+          }
+          window.focus();
         }
-        window.focus();
         notificationsClear();
         if (data.onclick) {
           data.onclick();
@@ -3484,13 +3491,16 @@ angular.module('myApp.services', [])
 
     var scope = $rootScope.$new();
     scope.multiSelect = multiSelect;
+    if (multiSelect) {
+      scope.action = 'select';
+    }
     angular.extend(scope, options);
 
     return $modal.open({
       templateUrl: 'partials/contacts_modal.html',
       controller: 'ContactsModalController',
       scope: scope,
-      windowClass: 'contacts_modal_window'
+      windowClass: 'contacts_modal_window page_modal'
     }).result;
   }
 
