@@ -723,6 +723,10 @@ angular.module('myApp.directives', ['myApp.filters'])
               return '$1'+emoji[3]+' '; //TODO: this additional space is not going through
             }
           }]);
+
+          $scope.$on('$destroy', function () {
+            $(richTextarea).textComplete('destroy');
+          });
       }
 
       // Head is sometimes slower
@@ -767,11 +771,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (submit) {
+            //FIXME: workaround® to circumvent weird behaviour on event queueing between textcomplete and send-on-enter
             $(editorElement).triggerHandler($.Event('keydown.textComplete', { keyCode: e.keyCode }));
             if (window.hasOwnProperty('cancelOnEnter') && window.cancelOnEnter) {
               window.cancelOnEnter = false;
               return false;
             }
+            //END OF FIX ME
             $(element).trigger('submit');
             $(element).trigger('message_send');
             resetAfterSubmit();
