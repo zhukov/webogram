@@ -675,16 +675,13 @@ angular.module('myApp.directives', ['myApp.filters'])
               top = emoji[1] * $.emojiarea.iconSize * -1,
               left = emoji[2] * $.emojiarea.iconSize * -1,
               spritesHeight = $.emojiarea.spritesheetDimens[emoji[0]][0] * $.emojiarea.iconSize,
-              spritesWidth = $.emojiarea.spritesheetDimens[emoji[0]][1] * $.emojiarea.iconSize,
-              img = document.createElement('img');
-            img.className = 'img';
-            img.src = $.emojiarea.path + 'img/blank.gif';
-            img.style.display = 'inline-block';
-            img.style.width = $.emojiarea.iconSize+'px';
-            img.style.height = $.emojiarea.iconSize+'px';
-            img.style.background = "url('"+ sprites +"') "+ left+'px '+top+'px no-repeat';
-            img.style.backgroundSize = spritesWidth+'px '+spritesHeight+'px';
-            return img;
+              spritesWidth = $.emojiarea.spritesheetDimens[emoji[0]][1] * $.emojiarea.iconSize;
+
+            return '<img class="img" src="'+$.emojiarea.path+'img/blank.gif" style="' +
+              'display: inline-block;' +
+              'width: '+$.emojiarea.iconSize+'px; height: '+$.emojiarea.iconSize+'px;' +
+              'background: url('+sprites+') '+left+'px '+top+'px no-repeat;' +
+              'background-size: '+spritesWidth+'px '+spritesHeight+'px" />';
           };
 
         editorElement = richTextarea;
@@ -717,7 +714,7 @@ angular.module('myApp.directives', ['myApp.filters'])
               callback(emojies);
             },
             template: function (emoji) {
-              return imageFromEmoji(emoji).outerHTML + ' '+emoji[3];
+              return imageFromEmoji(emoji) + ' ' + emoji[3];
             },
             replace: function (emoji) {
               //TODO: found no easy way to append the emoji image to the div while putting text in the textarea
