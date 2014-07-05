@@ -770,6 +770,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (submit) {
+            $(editorElement).triggerHandler($.Event('keydown.textComplete', { keyCode: e.keyCode }));
+            if (window.hasOwnProperty('cancelOnEnter') && window.cancelOnEnter) {
+              window.cancelOnEnter = false;
+              return false;
+            }
             $(element).trigger('submit');
             $(element).trigger('message_send');
             resetAfterSubmit();

@@ -596,6 +596,12 @@
         } else if (!modifiers && (e.keyCode === 13 || e.keyCode === 9)) {  // ENTER or TAB
           e.preventDefault();
           this.select(parseInt(this.getActiveItem().data('index'), 10));
+          if (e.keyCode === 13) {
+            if (window.cancelOnEnter === false)
+              window.cancelOnEnter = undefined;
+            else
+              window.cancelOnEnter = true;
+          }
         }
       },
 
