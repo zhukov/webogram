@@ -62,7 +62,7 @@ gulp.task('copy', function() {
   );
 });
 
-gulp.task('compress-dist', function() {
+gulp.task('compress-dist', ['build'], function() {
   return gulp.src('**/*', {cwd:  path.join(process.cwd(), '/dist')})
     .pipe($.zip('webogram_v' + pj.version + '.zip'))
     .pipe(gulp.dest('releases'));
