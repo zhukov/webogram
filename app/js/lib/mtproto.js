@@ -198,10 +198,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       responseType: 'arraybuffer',
       transformRequest: null,
       transformResponse: function (responseBuffer) {
-        var deserializer = new TLDeserialization(responseBuffer, {mtproto: true});
-
         try {
 
+          var deserializer = new TLDeserialization(responseBuffer, {mtproto: true});
           var auth_key_id = deserializer.fetchLong('auth_key_id');
           var msg_id      = deserializer.fetchLong('msg_id');
           var msg_len     = deserializer.fetchInt('msg_len');
@@ -520,7 +519,13 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       mtpSendReqPQ(auth);
     });
 
-    return cached[dcID] = auth.deferred.promise;
+    cached[dcID] = auth.deferred.promise;
+
+    cached[dcID]['catch'](function () {
+      delete cached[dcID];
+    })
+
+    return cached[dcID];
   };
 
   return {
