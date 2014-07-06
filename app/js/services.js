@@ -3226,6 +3226,20 @@ angular.module('myApp.services', [])
     }
   });
 
+  var registeredDevice = false;
+  if (window.navigator.mozSetMessageHandler) {
+    window.navigator.mozSetMessageHandler('push', function(e) {
+      console.log(dT(), 'received push', e);
+      $rootScope.$broadcast('push_received');
+    });
+
+    window.navigator.mozSetMessageHandler('push-register', function(e) {
+      console.log(dT(), 'received push', e);
+      registeredDevice = false;
+      registerDevice();
+    });
+  }
+
   return {
     start: start,
     notify: notify,
@@ -3305,6 +3319,11 @@ angular.module('myApp.services', [])
       return false;
     }
 
+    // FFOS Notification blob src bug workaround
+    if (Config.Navigator.ffos) {
+      data.image = 'https://raw.githubusercontent.com/zhukov/webogram/master/app/img/icons/icon60.png';
+    }
+
     notificationsCount++;
 
     if (!notificationsUiSupport ||
@@ -3333,9 +3352,9 @@ angular.module('myApp.services', [])
 
       notification.onclick = function () {
         notification.close();
-        if (window.mozApps && document.hidden) {
+        if (window.navigator.mozApps && document.hidden) {
           // Get app instance and launch it to bring app to foreground
-          window.mozApps.getSelf().onsuccess = function() {
+          window.navigator.mozApps.getSelf().onsuccess = function() {
             this.result.launch();
           };
         } else {
@@ -3391,15 +3410,13 @@ angular.module('myApp.services', [])
     notificationsShown = {};
   }
 
-  var registeredDevice = false;
-
   function registerDevice () {
     if (registeredDevice) {
       return false;
     }
     if (navigator.push) {
       var req = navigator.push.register();
-      
+
       req.onsuccess = function(e) {
         registeredDevice = req.result;
         MtpApiManager.invokeApi('account.registerDevice', {
@@ -3430,6 +3447,7 @@ angular.module('myApp.services', [])
       registeredDevice = false;
     })
   }
+
 })
 
 

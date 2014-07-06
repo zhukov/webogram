@@ -582,6 +582,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       $rootScope.offline = true;
       $rootScope.offlineConnecting = true;
     }
+
+    if (Config.Navigator.mobile) {
+      this.setupMobileSleep();
+    }
   };
 
   MtpNetworker.prototype.updateSession = function () {
@@ -594,6 +598,26 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       this.sessionID[0] = 0xAB;
       this.sessionID[1] = 0xCD;
     }
+  };
+
+  MtpNetworker.prototype.setupMobileSleep = function () {
+    var self = this;
+    $rootScope.$watch('idle.isIDLE', function (isIDLE) {
+      if (isIDLE) {
+        self.sleepAfter = tsNow() + 30000;
+      } else {
+        delete self.sleepAfter;
+        self.checkLongPoll();
+      }
+    });
+
+    $rootScope.$on('push_received', function () {
+      // console.log(dT(), 'push recieved', self.sleepAfter);
+      if (self.sleepAfter) {
+        self.sleepAfter = tsNow() + 30000;
+        self.checkLongPoll();
+      }
+    });
   };
 
   MtpNetworker.prototype.updateSentMessage = function (sentMessageID) {
@@ -716,14 +740,18 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
   MtpNetworker.prototype.checkLongPoll = function(force) {
     var isClean = this.cleanupSent();
-    // console.log('Check lp', this.longPollPending, tsNow());
+    // console.log('Check lp', this.longPollPending, tsNow(), this.dcID, isClean);
     if (this.longPollPending && tsNow() < this.longPollPending || this.offline) {
       return false;
     }
     var self = this;
     Storage.get('dc').then(function (baseDcID) {
-      if (isClean && (baseDcID != self.dcID || self.upload)) {
-        // console.warn('send long-poll for guest DC is delayed', self.dcID);
+      if (isClean && (
+                      baseDcID != self.dcID ||
+                      self.upload ||
+                      self.sleepAfter && tsNow() > self.sleepAfter
+      )) {
+        // console.warn(dT(), 'Send long-poll for DC is delayed', self.dcID, self.sleepAfter);
         return;
       }
       self.sendLongPoll();
