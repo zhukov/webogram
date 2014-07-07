@@ -2,6 +2,10 @@
   Unread messages
 </div>
 
+<div class="im_message_date_split im_service_message_wrap" bo-if="historyMessage.needDate" ng-show="historyMessage.needDate">
+  <div class="im_service_message" ng-bind="historyMessage.date | myDate"></div>
+</div>
+
 <div class="im_message_outer_wrap" ng-class="[ selectedMsgs[historyMessage.id] &amp;&amp; 'im_message_selected', historyMessage.grouped &amp;&amp; ('im_message_grouped' + historyMessage.grouped) , historyFocus == historyMessage.id &amp;&amp; 'im_message_focus']" ng-click="toggleMessage(historyMessage.id, $event)">
 
 
@@ -77,7 +81,7 @@
       </a>
       <div class="im_message_meta pull-right text-right">
         <i class="icon-message-status-tick"></i>
-        <span class="im_message_date" bo-bind="historyMessage.date | dateOrTime"></span>
+        <span class="im_message_date" ng-bind="historyMessage.date | time"></span><span class="im_message_date im_message_date_seconds">:<span ng-bind="historyMessage.date | seconds"></span></span>
       </div>
 
       <div class="im_message_body">

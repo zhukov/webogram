@@ -118,7 +118,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   return new SecureRandom();
 })
 
-.factory('MtpDateManager', function (Storage) {
+.factory('MtpTimeManager', function (Storage) {
   var lastMessageID = [0, 0],
       timeOffset = 0;
 
@@ -171,7 +171,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 })
 
-.factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpDateManager, CryptoWorker, $http, $q, $timeout) {
+.factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpTimeManager, CryptoWorker, $http, $q, $timeout) {
 
   function mtpSendPlainRequest (dcID, requestBuffer) {
     var requestLength = requestBuffer.byteLength,
@@ -179,7 +179,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     var header = new TLSerialization();
     header.storeLongP(0, 0, 'auth_key_id'); // Auth key
-    header.storeLong(MtpDateManager.generateID(), 'msg_id'); // Msg_id
+    header.storeLong(MtpTimeManager.generateID(), 'msg_id'); // Msg_id
     header.storeInt(requestLength, 'request_length');
 
     var headerBuffer = header.getBuffer(),
@@ -391,7 +391,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       throw new Error('server_DH_inner_data SHA1-hash mismatch');
     }
 
-    MtpDateManager.applyServerTime(auth.serverTime, auth.localTime);
+    MtpTimeManager.applyServerTime(auth.serverTime, auth.localTime);
   };
 
   function mtpSendSetClientDhParams(auth) {
@@ -539,7 +539,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 })
 
-.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpDateManager, MtpSecureRandom, Storage, CryptoWorker, $http, $q, $timeout, $interval, $rootScope) {
+.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpTimeManager, MtpSecureRandom, Storage, CryptoWorker, $http, $q, $timeout, $interval, $rootScope) {
 
   var updatesProcessor,
       iii = 0,
@@ -642,7 +642,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       sentMessage.inner = newInner;
     }
 
-    sentMessage.msg_id = MtpDateManager.generateID();
+    sentMessage.msg_id = MtpTimeManager.generateID();
     sentMessage.seq_no = this.generateSeqNo(
       sentMessage.notContentRelated ||
       sentMessage.container
@@ -669,7 +669,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     serializer.storeMethod(method, params);
 
-    var messageID = MtpDateManager.generateID(),
+    var messageID = MtpTimeManager.generateID(),
         seqNo = this.generateSeqNo(),
         message = {
       msg_id: messageID,
@@ -690,7 +690,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var serializer = new TLSerialization({mtproto: true});
     serializer.storeObject(object, 'Object');
 
-    var messageID = MtpDateManager.generateID(),
+    var messageID = MtpTimeManager.generateID(),
         seqNo = this.generateSeqNo(options.notContentRelated),
         message = {
       msg_id: messageID,
@@ -725,7 +725,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     options.resultType = serializer.storeMethod(method, params);
 
-    var messageID = MtpDateManager.generateID(),
+    var messageID = MtpTimeManager.generateID(),
         seqNo = this.generateSeqNo(),
         message = {
       msg_id: messageID,
@@ -849,7 +849,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     serializer.storeMethod('ping', {ping_id: pingID});
 
     var pingMessage = {
-      msg_id: MtpDateManager.generateID(),
+      msg_id: MtpTimeManager.generateID(),
       seq_no: this.generateSeqNo(true),
       body: serializer.getBytes()
     };
@@ -964,7 +964,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var serializer = new TLSerialization({mtproto: true});
       serializer.storeMethod('http_wait', {max_delay: 0, wait_after: 0, max_wait: 1000});
       messages.push({
-        msg_id: MtpDateManager.generateID(),
+        msg_id: MtpTimeManager.generateID(),
         seq_no: this.generateSeqNo(),
         body: serializer.getBytes()
       });
@@ -995,7 +995,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
 
       var containerSentMessage = {
-        msg_id: MtpDateManager.generateID(),
+        msg_id: MtpTimeManager.generateID(),
         seq_no: this.generateSeqNo(true),
         container: true,
         inner: innerMessages
@@ -1345,7 +1345,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         }
 
         if (message.error_code == 16 || message.error_code == 17) {
-          if (MtpDateManager.applyServerTime(
+          if (MtpTimeManager.applyServerTime(
             bigStringInt(messageID).shiftRight(32).toString(10)
           )) {
             this.updateSession();

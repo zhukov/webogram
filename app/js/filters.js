@@ -74,6 +74,37 @@ angular.module('myApp.filters', [])
     }
   }])
 
+  .filter('time', ['$filter', function($filter) {
+    var cachedDates = {};
+
+    return function (timestamp) {
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
+      }
+
+      return cachedDates[timestamp] = $filter('date')(timestamp * 1000, 'HH:mm');
+    }
+  }])
+
+  .filter('myDate', ['$filter', function($filter) {
+    var cachedDates = {};
+
+    return function (timestamp) {
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
+      }
+
+      return cachedDates[timestamp] = $filter('date')(timestamp * 1000, 'fullDate');
+    }
+  }])
+
+  .filter('seconds', function($filter) {
+    return function (timestamp) {
+      var sec = timestamp % 60;
+      return sec < 10 ? '0' + sec : sec;
+    }
+  })
+
   .filter('duration', [function() {
     return function (duration) {
       var secs = duration % 60,

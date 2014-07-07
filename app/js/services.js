@@ -673,7 +673,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, MtpTimeManager, RichTextProcessor, NotificationsManager, SearchIndexManager) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -691,6 +691,17 @@ angular.module('myApp.services', [])
 
   var lastSearchFilter = {},
       lastSearchResults = [];
+
+  var serverTimeOffset = MtpTimeManager.getTimeOffset(),
+      timestampNow = tsNow(true),
+      midnightNoOffset = timestampNow - (timestampNow % 86400),
+      midnightOffseted = new Date(),
+      midnightOffset;
+
+  midnightOffseted.setHours(0);
+  midnightOffseted.setMinutes(0);
+  midnightOffseted.setSeconds(0);
+  midnightOffset = midnightNoOffset - (Math.floor(+midnightOffseted / 1000));
 
   NotificationsManager.start();
 
@@ -1773,6 +1784,46 @@ angular.module('myApp.services', [])
     return messagesForHistory[msgID] = message;
   }
 
+  function regroupWrappedHistory (history, limit) {
+    var start = 0,
+        end = history.length,
+        i, curDay, prevDay, curMessage, prevMessage;
+
+    if (limit > 0) {
+      end = limit;
+    } else if (limit < 0) {
+      start = end + limit;
+    }
+
+    for (i = start; i < end; i++) {
+      curMessage = history[i];
+      curDay = Math.floor((curMessage.date - midnightOffset) / 86400);
+      if (curDay !== prevDay) {
+        curMessage.needDate = true;
+      } else if (prevMessage) {
+        delete curMessage.needDate;
+      }
+      if (prevMessage &&
+          curMessage.from_id == prevMessage.from_id &&
+          !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
+          !prevMessage.action &&
+          !curMessage.action &&
+          curMessage.date < prevMessage.date + 900) {
+
+        var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
+        if (curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
+          curMessage.grouped = singleLine ? 4 : 3;
+        } else {
+          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
+        }
+      } else if (prevMessage || !i) {
+        delete curMessage.grouped;
+      }
+      prevMessage = curMessage;
+      prevDay = curDay;
+    }
+  }
+
   function getDialogByPeerID (peerID) {
     for (var i = 0; i < dialogsStorage.dialogs.length; i++) {
       if (dialogsStorage.dialogs[i].peerID == peerID) {
@@ -1885,6 +1936,9 @@ angular.module('myApp.services', [])
         } else {
           historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};
         }
+
+        // Fix time offset
+        message.date -= serverTimeOffset;
 
         saveMessages([message]);
 
@@ -2054,7 +2108,8 @@ angular.module('myApp.services', [])
     forwardMessages: forwardMessages,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
-    wrapForHistory: wrapForHistory
+    wrapForHistory: wrapForHistory,
+    regroupWrappedHistory: regroupWrappedHistory
   }
 })
 

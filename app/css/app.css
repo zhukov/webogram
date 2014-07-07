@@ -1818,6 +1818,16 @@ img.im_message_document_thumb {
   padding: 0 0 20px 10px;
 }
 
+.im_message_date_seconds {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  display: none;
+}
+.im_message_meta:hover .im_message_date_seconds {
+  display: inline;
+}
+
 @media (max-width: 900px) {
 
   /* Status ticks */

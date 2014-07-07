@@ -728,39 +728,6 @@ angular.module('myApp.controllers', [])
       }
     }
 
-    function updateHistoryGroups (limit) {
-      var start = 0,
-          end = $scope.history.length,
-          i, curMessage, prevMessage;
-
-      if (limit > 0) {
-        end = limit;
-      } else if (limit < 0) {
-        start = end + limit;
-      }
-
-      for (i = start; i < end; i++) {
-        curMessage = $scope.history[i];
-        if (prevMessage &&
-            curMessage.from_id == prevMessage.from_id &&
-            !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
-            !prevMessage.action &&
-            !curMessage.action &&
-            curMessage.date < prevMessage.date + 900) {
-
-          var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
-          if (curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
-            curMessage.grouped = singleLine ? 4 : 3;
-          } else {
-            curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
-          }
-        } else if (prevMessage || !i) {
-          delete curMessage.grouped;
-        }
-        prevMessage = curMessage;
-      }
-    }
-
     function messageFocusHistory () {
       var i, found = false;
       for (i = 0; i < $scope.history.length; i++) {
@@ -803,7 +770,7 @@ angular.module('myApp.controllers', [])
           minID = historyResult.history.length >= backLimit
                     ? historyResult.history[0]
                     : 0;
-          updateHistoryGroups(-backLimit);
+          AppMessagesManager.regroupWrappedHistory($scope.history, -backLimit);
           $scope.$broadcast('ui_history_append');
         } else {
           minID = 0;
@@ -837,7 +804,7 @@ angular.module('myApp.controllers', [])
 
         if (historyResult.history.length) {
           maxID = historyResult.history[historyResult.history.length - 1];
-          updateHistoryGroups(historyResult.history.length + 1);
+          AppMessagesManager.regroupWrappedHistory($scope.history, historyResult.history.length + 1);
           $scope.$broadcast('ui_history_prepend');
         }
       });
@@ -898,7 +865,7 @@ angular.module('myApp.controllers', [])
         });
         $scope.history.reverse();
 
-        updateHistoryGroups();
+        AppMessagesManager.regroupWrappedHistory($scope.history);
 
         if (historyResult.unreadOffset) {
           $scope.historyUnreadAfter = historyResult.history[historyResult.unreadOffset - 1];
@@ -1074,7 +1041,7 @@ angular.module('myApp.controllers', [])
         // console.log('append', addedMessage);
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
-        updateHistoryGroups(-3);
+        AppMessagesManager.regroupWrappedHistory($scope.history, -3);
         $scope.typing = {};
         $scope.$broadcast('ui_history_append_new', {my: addedMessage.my});
         if (addedMessage.my) {
@@ -1100,7 +1067,7 @@ angular.module('myApp.controllers', [])
           }
         };
         $scope.history = newHistory;
-        updateHistoryGroups();
+        AppMessagesManager.regroupWrappedHistory($scope.history);
       }
     });
 
