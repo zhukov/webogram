@@ -118,7 +118,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   return new SecureRandom();
 })
 
-.factory('MtpMessageIdGenerator', function (Storage) {
+.factory('MtpDateManager', function (Storage) {
   var lastMessageID = [0, 0],
       timeOffset = 0;
 
@@ -155,18 +155,23 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     lastMessageID = [0, 0];
     timeOffset = newTimeOffset;
-    console.log('Apply server time', serverTime, localTime, newTimeOffset, changed);
+    console.log(dT(), 'Apply server time', serverTime, localTime, newTimeOffset, changed);
 
     return changed;
   };
 
+  function getTimeOffset () {
+    return timeOffset;
+  };
+
   return {
     generateID: generateMessageID,
-    applyServerTime: applyServerTime
+    applyServerTime: applyServerTime,
+    getTimeOffset: getTimeOffset
   };
 })
 
-.factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpMessageIdGenerator, CryptoWorker, $http, $q, $timeout) {
+.factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpDateManager, CryptoWorker, $http, $q, $timeout) {
 
   function mtpSendPlainRequest (dcID, requestBuffer) {
     var requestLength = requestBuffer.byteLength,
@@ -174,7 +179,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     var header = new TLSerialization();
     header.storeLongP(0, 0, 'auth_key_id'); // Auth key
-    header.storeLong(MtpMessageIdGenerator.generateID(), 'msg_id'); // Msg_id
+    header.storeLong(MtpDateManager.generateID(), 'msg_id'); // Msg_id
     header.storeInt(requestLength, 'request_length');
 
     var headerBuffer = header.getBuffer(),
@@ -386,7 +391,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       throw new Error('server_DH_inner_data SHA1-hash mismatch');
     }
 
-    MtpMessageIdGenerator.applyServerTime(auth.serverTime, auth.localTime);
+    MtpDateManager.applyServerTime(auth.serverTime, auth.localTime);
   };
 
   function mtpSendSetClientDhParams(auth) {
@@ -534,7 +539,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 })
 
-.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpMessageIdGenerator, MtpSecureRandom, Storage, CryptoWorker, $http, $q, $timeout, $interval, $rootScope) {
+.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpDateManager, MtpSecureRandom, Storage, CryptoWorker, $http, $q, $timeout, $interval, $rootScope) {
 
   var updatesProcessor,
       iii = 0,
@@ -637,7 +642,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       sentMessage.inner = newInner;
     }
 
-    sentMessage.msg_id = MtpMessageIdGenerator.generateID();
+    sentMessage.msg_id = MtpDateManager.generateID();
     sentMessage.seq_no = this.generateSeqNo(
       sentMessage.notContentRelated ||
       sentMessage.container
@@ -664,7 +669,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     serializer.storeMethod(method, params);
 
-    var messageID = MtpMessageIdGenerator.generateID(),
+    var messageID = MtpDateManager.generateID(),
         seqNo = this.generateSeqNo(),
         message = {
       msg_id: messageID,
@@ -685,7 +690,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var serializer = new TLSerialization({mtproto: true});
     serializer.storeObject(object, 'Object');
 
-    var messageID = MtpMessageIdGenerator.generateID(),
+    var messageID = MtpDateManager.generateID(),
         seqNo = this.generateSeqNo(options.notContentRelated),
         message = {
       msg_id: messageID,
@@ -720,7 +725,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     options.resultType = serializer.storeMethod(method, params);
 
-    var messageID = MtpMessageIdGenerator.generateID(),
+    var messageID = MtpDateManager.generateID(),
         seqNo = this.generateSeqNo(),
         message = {
       msg_id: messageID,
@@ -844,7 +849,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     serializer.storeMethod('ping', {ping_id: pingID});
 
     var pingMessage = {
-      msg_id: MtpMessageIdGenerator.generateID(),
+      msg_id: MtpDateManager.generateID(),
       seq_no: this.generateSeqNo(true),
       body: serializer.getBytes()
     };
@@ -959,7 +964,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var serializer = new TLSerialization({mtproto: true});
       serializer.storeMethod('http_wait', {max_delay: 0, wait_after: 0, max_wait: 1000});
       messages.push({
-        msg_id: MtpMessageIdGenerator.generateID(),
+        msg_id: MtpDateManager.generateID(),
         seq_no: this.generateSeqNo(),
         body: serializer.getBytes()
       });
@@ -990,7 +995,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
 
       var containerSentMessage = {
-        msg_id: MtpMessageIdGenerator.generateID(),
+        msg_id: MtpDateManager.generateID(),
         seq_no: this.generateSeqNo(true),
         container: true,
         inner: innerMessages
@@ -1340,7 +1345,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         }
 
         if (message.error_code == 16 || message.error_code == 17) {
-          if (MtpMessageIdGenerator.applyServerTime(
+          if (MtpDateManager.applyServerTime(
             bigStringInt(messageID).shiftRight(32).toString(10)
           )) {
             this.updateSession();

@@ -1992,14 +1992,14 @@ angular.module('myApp.services', [])
             history.msgs[messageID] = true;
 
             if (messagesForHistory[messageID]) {
-              messagesForHistory[messageID].DELETED = true;
+              messagesForHistory[messageID].deleted = true;
               delete messagesForHistory[messageID];
             }
             if (messagesForDialogs[messageID]) {
-              messagesForDialogs[messageID].DELETED = true;
+              messagesForDialogs[messageID].deleted = true;
               delete messagesForDialogs[messageID];
             }
-            message.DELETED = true;
+            message.deleted = true;
             delete messagesStorage[messageID];
           }
         }

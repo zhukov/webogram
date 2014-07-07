@@ -399,12 +399,23 @@ angular.module('myApp.controllers', [])
     $scope.$on('dialog_flush', function (e, dialog) {
       for (var i = 0; i < $scope.dialogs.length; i++) {
         if ($scope.dialogs[i].peerID == dialog.peerID) {
-          $scope.dialogs.splice(i, 1);
+          $scope.dialogs[i].deleted = true;
           break;
         }
       }
     });
 
+    $scope.$on('history_delete', function (e, historyUpdate) {
+      for (var i = 0; i < $scope.dialogs.length; i++) {
+        if ($scope.dialogs[i].peerID == historyUpdate.peerID) {
+          if (historyUpdate.msgs[$scope.dialogs[i].id]) {
+            $scope.dialogs[i].deleted = true;
+          }
+          break;
+        }
+      }
+    });
+    
     $scope.$on('contact_imported', function () {
       if (contactsShown) {
         loadDialogs();
@@ -1091,7 +1102,7 @@ angular.module('myApp.controllers', [])
         $scope.history = newHistory;
         updateHistoryGroups();
       }
-    })
+    });
 
     $scope.$on('dialog_flush', function (e, dialog) {
       if (dialog.peerID == $scope.curDialog.peerID) {
