@@ -1,4 +1,5 @@
 package:
+	rm -rf dist_package
 	./node_modules/gulp/bin/gulp.js clean
 	./node_modules/gulp/bin/gulp.js package
 	cp -r dist dist_package
