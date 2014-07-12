@@ -1818,15 +1818,6 @@ img.im_message_document_thumb {
   padding: 0 0 20px 10px;
 }
 
-.im_message_date_seconds {
-  padding: 0;
-  margin: 0;
-  position: absolute;
-  display: none;
-}
-.im_message_meta:hover .im_message_date_seconds {
-  display: inline;
-}
 
 @media (max-width: 900px) {
 
@@ -3255,6 +3246,7 @@ ce671b orange
   filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
   margin: -1px;
   padding: 1px;
+  max-width: 100%;
 }
 
 .img_gif_image {

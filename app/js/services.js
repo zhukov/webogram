@@ -1797,12 +1797,14 @@ angular.module('myApp.services', [])
 
     for (i = start; i < end; i++) {
       curMessage = history[i];
-      curDay = Math.floor((curMessage.date - midnightOffset) / 86400);
-      if (curDay !== prevDay) {
-        curMessage.needDate = true;
-      } else if (prevMessage) {
+      curDay = Math.floor((curMessage.date + midnightOffset) / 86400);
+
+      if (curDay === prevDay) {
         delete curMessage.needDate;
+      } else if (!i || prevMessage) {
+        curMessage.needDate = true;
       }
+
       if (prevMessage &&
           curMessage.from_id == prevMessage.from_id &&
           !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
@@ -2559,9 +2561,9 @@ angular.module('myApp.services', [])
     doc.thumb = thumb;
 
     doc.canDownload = !(window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry);
-    doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/|application\/pdf)/) ? 1 : 0;
+    doc.withPreview = doc.canDownload && doc.thumb && doc.mime_type.match(/^(image\/|application\/pdf)/) ? 1 : 0;
 
-    if (isGif) {
+    if (doc.withPreview && isGif) {
       doc.isSpecial = 'gif';
     }
 

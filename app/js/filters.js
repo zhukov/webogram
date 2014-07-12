@@ -86,6 +86,18 @@ angular.module('myApp.filters', [])
     }
   }])
 
+  .filter('timeSecs', ['$filter', function($filter) {
+    var cachedDates = {};
+
+    return function (timestamp) {
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
+      }
+
+      return cachedDates[timestamp] = $filter('date')(timestamp * 1000, 'HH:mm:ss');
+    }
+  }])
+
   .filter('myDate', ['$filter', function($filter) {
     var cachedDates = {};
 
