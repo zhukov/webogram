@@ -673,7 +673,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, MtpTimeManager, RichTextProcessor, NotificationsManager, SearchIndexManager) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, Storage) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -692,11 +692,17 @@ angular.module('myApp.services', [])
   var lastSearchFilter = {},
       lastSearchResults = [];
 
-  var serverTimeOffset = MtpTimeManager.getTimeOffset(),
+  var serverTimeOffset = 0,
       timestampNow = tsNow(true),
       midnightNoOffset = timestampNow - (timestampNow % 86400),
       midnightOffseted = new Date(),
       midnightOffset;
+
+  Storage.get('server_time_offset').then(function (to) {
+    if (to) {
+      serverTimeOffset = to;
+    }
+  });
 
   midnightOffseted.setHours(0);
   midnightOffseted.setMinutes(0);
@@ -1190,6 +1196,8 @@ angular.module('myApp.services', [])
     angular.forEach(apiMessages, function (apiMessage) {
       messagesStorage[apiMessage.id] = apiMessage;
 
+      apiMessage.date -= serverTimeOffset;
+
       if (apiMessage.media && apiMessage.media._ == 'messageMediaPhoto') {
         AppPhotosManager.savePhoto(apiMessage.media.photo);
       }
@@ -1228,7 +1236,7 @@ angular.module('myApp.services', [])
         to_id: AppPeersManager.getOutputPeer(peerID),
         out: true,
         unread: true,
-        date: tsNow() / 1000,
+        date: tsNow(true) + serverTimeOffset,
         message: text,
         media: {_: 'messageMediaEmpty'},
         random_id: randomIDS,
@@ -1352,7 +1360,7 @@ angular.module('myApp.services', [])
         to_id: AppPeersManager.getOutputPeer(peerID),
         out: true,
         unread: true,
-        date: tsNow() / 1000,
+        date: tsNow(true) + serverTimeOffset,
         message: '',
         media: media,
         random_id: randomIDS,
@@ -1493,7 +1501,7 @@ angular.module('myApp.services', [])
         to_id: AppPeersManager.getOutputPeer(peerID),
         out: true,
         unread: true,
-        date: tsNow() / 1000,
+        date: tsNow(true) + serverTimeOffset,
         message: '',
         media: media,
         random_id: randomIDS,
@@ -1938,9 +1946,6 @@ angular.module('myApp.services', [])
         } else {
           historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};
         }
-
-        // Fix time offset
-        message.date -= serverTimeOffset;
 
         saveMessages([message]);
 
@@ -3233,7 +3238,6 @@ angular.module('myApp.services', [])
 
   var notificationsUiSupport = 'Notification' in window;
   var notificationsShown = {};
-  // var lastClosed = [];
   var notificationIndex = 0;
   var notificationsCount = 0;
   var peerSettings = {};
@@ -3428,7 +3432,6 @@ angular.module('myApp.services', [])
 
       notification.onclose = function () {
         delete notificationsShown[key];
-        // lastClosed.push(tsNow());
         notificationsClear();
       };
 

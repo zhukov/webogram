@@ -160,14 +160,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     return changed;
   };
 
-  function getTimeOffset () {
-    return timeOffset;
-  };
-
   return {
     generateID: generateMessageID,
     applyServerTime: applyServerTime,
-    getTimeOffset: getTimeOffset
   };
 })
 
