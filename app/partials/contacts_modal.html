@@ -5,7 +5,7 @@
   <div class="modal-body">
 
     <div class="contacts_modal_header">
-      <div class="contacts_modal_edit_wrap" ng-if="action != 'select'" ng-switch="action">
+      <div class="contacts_modal_edit_wrap" ng-if="!action || action == 'edit'" ng-switch="action">
         <a ng-switch-when="edit" class="contacts_modal_edit_link" ng-click="toggleEdit(false)">
           Cancel
         </a>
@@ -13,7 +13,16 @@
           Edit
         </a>
       </div>
-      <h4 class="contacts_modal_title">Contacts</h4>
+      <h4 class="contacts_modal_title" ng-switch="action">
+        <div ng-switch-when="new_group" ng-switch="selectedCount > 0">
+          <span ng-switch-when="true">
+            <ng-pluralize count="selectedCount" when="{'one': '1 participant', 'other': '{} participants'}">
+            </ng-pluralize>
+          </span>
+          <span ng-switch-default>New Group</span>
+        </div>
+        <span ng-switch-default>Contacts</span>
+      </h4>
     </div>
 
 
@@ -60,8 +69,15 @@
   </div>
 
   <div class="modal-footer contacts_modal_panel" ng-switch="action">
+    <div ng-switch-when="new_group" class="pull-right">
+      <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+      <button class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
+        Next
+      </button>
+    </div>
+
     <button ng-switch-when="select" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
-      Next »
+      Next
     </button>
     <button ng-switch-when="edit" class="btn btn-danger"  ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
       Delete <strong ng-bind="selectedCount"></strong>

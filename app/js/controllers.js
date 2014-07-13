@@ -249,7 +249,7 @@ angular.module('myApp.controllers', [])
     };
 
     $scope.openGroup = function () {
-      ContactsSelectService.selectContacts().then(function (userIDs) {
+      ContactsSelectService.selectContacts({action: 'new_group'}).then(function (userIDs) {
 
         if (userIDs.length == 1) {
           $scope.dialogSelect(AppUsersManager.getUserString(userIDs[0]));
@@ -415,7 +415,7 @@ angular.module('myApp.controllers', [])
         }
       }
     });
-    
+
     $scope.$on('contact_imported', function () {
       if (contactsShown) {
         loadDialogs();

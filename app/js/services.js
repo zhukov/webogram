@@ -3619,10 +3619,10 @@ angular.module('myApp.services', [])
 
     var scope = $rootScope.$new();
     scope.multiSelect = multiSelect;
-    if (multiSelect) {
+    angular.extend(scope, options);
+    if (!scope.action && multiSelect) {
       scope.action = 'select';
     }
-    angular.extend(scope, options);
 
     return $modal.open({
       templateUrl: 'partials/contacts_modal.html',
