@@ -3236,7 +3236,7 @@ angular.module('myApp.services', [])
 
 .service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, Storage) {
 
-  var notificationsUiSupport = 'Notification' in window;
+  var notificationsUiSupport = ('Notification' in window) || ('mozNotification' in navigator);
   var notificationsShown = {};
   var notificationIndex = 0;
   var notificationsCount = 0;
@@ -3359,7 +3359,7 @@ angular.module('myApp.services', [])
       return false;
     }
 
-    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
       $($window).on('click', requestPermission);
     }
 
@@ -3388,7 +3388,7 @@ angular.module('myApp.services', [])
     notificationsCount++;
 
     if (!notificationsUiSupport ||
-        Notification.permission !== 'granted') {
+        'Notification' in window && Notification.permission !== 'granted') {
       return false;
     }
 
@@ -3403,13 +3403,22 @@ angular.module('myApp.services', [])
         return;
       }
       var idx = ++notificationIndex,
-          key = data.key || 'k' + idx;
+          key = data.key || 'k' + idx,
+          notification;
 
-      var notification = new Notification(data.title, {
-        icon: data.image || '',
-        body: data.message || '',
-        tag: data.tag || ''
-      });
+      if ('Notification' in window) {
+        notification = new Notification(data.title, {
+          icon: data.image || '',
+          body: data.message || '',
+          tag: data.tag || ''
+        });
+      }
+      else if ('mozNotification' in navigator) {
+        notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
+      }
+      else {
+        return;
+      }
 
       notification.onclick = function () {
         notification.close();
