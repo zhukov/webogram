@@ -331,7 +331,12 @@ angular.module('myApp.services', [])
   }
 
   function isAvailable () {
-    return window.navigator && window.navigator.mozContacts && window.navigator.mozContacts.getAll;
+    try {
+      return navigator.mozContacts && navigator.mozContacts.getAll;
+    } catch (e) {
+      console.error(dT(), 'phonebook n/a', e);
+      return false;
+    }
   }
 
   function openPhonebookImport () {
@@ -347,9 +352,14 @@ angular.module('myApp.services', [])
       return phonebookContactsPromise;
     }
 
+    try {
+      var request = window.navigator.mozContacts.getAll({});
+    } catch (e) {
+      return $q.reject(e);
+    }
+
     var deferred = $q.defer(),
         contacts = [],
-        request = window.navigator.mozContacts.getAll({}),
         count = 0;
 
     request.onsuccess = function () {
