@@ -341,6 +341,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function downloadSmallFile(location) {
+    if (!FileManager.isAvailable()) {
+      return $q.reject({type: 'BROWSER_BLOB_NOT_SUPPORTED'});
+    }
     // console.log('dload small', location);
     var fileName = getFileName(location),
         mimeType = 'image/jpeg',
@@ -379,6 +382,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function downloadFile (dcID, location, size, options) {
+    if (!FileManager.isAvailable()) {
+      return $q.reject({type: 'BROWSER_BLOB_NOT_SUPPORTED'});
+    }
+
     options = options || {};
 
     // console.log(dT(), 'Dload file', dcID, location, size);

@@ -139,6 +139,18 @@ angular.module('izhukov.utils', [])
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
 
+  var blobSupported = true;
+
+  try {
+    blobConstruct([], '');
+  } catch (e) {
+    blobSupported = false;
+  }
+
+  function isBlobAvailable () {
+    return blobSupported;
+  }
+
   function fileCopyTo (fromFileEntry, toFileEntry) {
     return getFileWriter(toFileEntry).then(function (fileWriter) {
       return fileWriteData(fileWriter, fromFileEntry).then(function () {
@@ -148,6 +160,20 @@ angular.module('izhukov.utils', [])
         fileWriter.truncate(0);
       });
     });
+  }
+
+  function blobConstruct (blobParts, mimeType) {
+    var blob;
+    try {
+      blob = new Blob(blobParts, {type: mimeType});
+    } catch (e) {
+      var bb = new BlobBuilder;
+      angular.forEach(blobParts, function(blobPart) {
+        bb.append(blobPart);
+      });
+      blob = bb.getBlob(mimeType);
+    }
+    return blob;
   }
 
   function fileWriteData(fileWriter, bytes) {
@@ -171,7 +197,12 @@ angular.module('izhukov.utils', [])
       fileWriter.write(bytes);
     }
     else {
-      fileWriter.write(new Blob([bytesToArrayBuffer(bytes)]));
+      try {
+        var blob = blobConstruct([bytesToArrayBuffer(bytes)]);
+      } catch (e) {
+        deferred.reject(e);
+      }
+      fileWriter.write(blob);
     }
 
     return deferred.promise;
@@ -213,6 +244,12 @@ angular.module('izhukov.utils', [])
     var blobParts = [],
         fakeFileWriter = {
           write: function (blob) {
+            if (!blobSupported) {
+              if (fakeFileWriter.onerror) {
+                fakeFileWriter.onerror(new Error('Blob not supported by browser'));
+              }
+              return false;
+            }
             blobParts.push(blob);
             $timeout(function () {
               if (fakeFileWriter.onwriteend) {
@@ -224,16 +261,7 @@ angular.module('izhukov.utils', [])
             blobParts = [];
           },
           finalize: function () {
-            var blob;
-            try {
-              blob = new Blob(blobParts, {type: mimeType});
-            } catch (e) {
-              var bb = new BlobBuilder;
-              angular.forEach(blobParts, function(blobPart) {
-                bb.append(blobPart);
-              });
-              blob = bb.getBlob(mimeType);
-            }
+            var blob = blobConstruct(blobParts, mimeType);
             if (saveFileCallback) {
               saveFileCallback(blob);
             }
@@ -275,6 +303,7 @@ angular.module('izhukov.utils', [])
   }
 
   return {
+    isAvailable: isBlobAvailable,
     copy: fileCopyTo,
     write: fileWriteData,
     getFileWriter: getFileWriter,
