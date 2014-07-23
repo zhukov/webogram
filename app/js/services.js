@@ -79,6 +79,8 @@ angular.module('myApp.services', [])
       apiUser.rPhone = $filter('phoneNumber')(apiUser.phone);
     }
 
+    apiUser.num = (Math.abs(apiUser.id) % 8) + 1;
+
     if (apiUser.first_name) {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true});
@@ -125,11 +127,9 @@ angular.module('myApp.services', [])
       cachedPhotoLocations[id] = user && user.photo && user.photo.photo_small || {empty: true};
     }
 
-    var num = (Math.abs(id) % 8) + 1;
-
     return {
-      num: num,
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + num + '@2x.png',
+      num: user.num,
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + user.num + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }

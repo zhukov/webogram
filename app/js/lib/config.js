@@ -38,7 +38,7 @@ Config.Navigator = {
   retina: window.devicePixelRatio > 1,
   ffos: navigator.userAgent.match(/mobi.+Gecko/i),
   touch: screen.width <= 768,
-  mobile: screen.width < 480
+  mobile: true//screen.width < 480
 };
 
 Config.Schema = Config.Schema || {};

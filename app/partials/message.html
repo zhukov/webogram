@@ -1,57 +1,23 @@
-<div class="im_message_unread_split" bo-if="historyUnreadAfter == historyMessage.id" ng-show="historyUnreadAfter == historyMessage.id">
+<div class="im_message_unread_split" ng-if="::historyUnreadAfter == historyMessage.id" ng-show="historyUnreadAfter == historyMessage.id">
   Unread messages
 </div>
 
-<div class="im_message_date_split im_service_message_wrap" bo-if="historyMessage.needDate" ng-show="historyMessage.needDate">
+<div class="im_message_date_split im_service_message_wrap" ng-if="::historyMessage.needDate" ng-show="historyMessage.needDate">
   <div class="im_service_message" ng-bind="historyMessage.date | myDate"></div>
 </div>
 
 <div class="im_message_outer_wrap" ng-class="[ selectedMsgs[historyMessage.id] &amp;&amp; 'im_message_selected', historyMessage.grouped &amp;&amp; ('im_message_grouped' + historyMessage.grouped) , historyFocus == historyMessage.id &amp;&amp; 'im_message_focus']" ng-click="toggleMessage(historyMessage.id, $event)">
 
 
-  <div class="im_message_wrap clearfix" bindonce>
+  <div class="im_message_wrap clearfix">
 
-    <div class="im_service_message_wrap" bo-if="historyMessage._ == 'messageService'">
+    <div class="im_service_message_wrap" ng-if="::historyMessage._ == 'messageService'">
       <div class="im_service_message">
-
-        <a ng-click="openUser(historyMessage.from_id)" class="im_message_author" ng-bind-html="historyMessage.fromUser.rFullName"></a>
-
-        <span class="im_message_service" bo-switch="historyMessage.action['_']">
-          <span bo-switch-when="messageActionChatCreate">
-            created the group &laquo;<strong ng-bind-html="historyMessage.action.rTitle"></strong>&raquo;
-          </span>
-          <span bo-switch-when="messageActionChatEditTitle">
-            changed group name to  &laquo;<strong ng-bind-html="historyMessage.action.rTitle"></strong>&raquo;
-          </span>
-          <span bo-switch-when="messageActionChatEditPhoto">
-            changed group photo
-          </span>
-          <span bo-switch-when="messageActionChatDeletePhoto">
-            removed group photo
-          </span>
-          <span bo-switch-when="messageActionChatAddUser">
-            <span bo-if="historyMessage.from_id != historyMessage.action.user_id">
-              invited <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
-            </span>
-            <span bo-if="historyMessage.from_id == historyMessage.action.user_id">
-              returned to group
-            </span>
-          </span>
-          <span bo-switch-when="messageActionChatDeleteUser">
-            <span bo-if="historyMessage.from_id != historyMessage.action.user_id">
-              kicked <a ng-click="openUser(historyMessage.action.user_id)" ng-bind-html="historyMessage.action.user.rFullName"></a>
-            </span>
-            <span bo-if="historyMessage.from_id == historyMessage.action.user_id">
-              left group
-            </span>
-          </span>
-
-          <span bo-switch-default ng-bind="'Unsupported action ' + historyMessage.action._"></span>
-        </span>
-
+        <a class="im_message_author" my-user-link="historyMessage.from_id"></a>
+        <span class="im_message_service" my-service-message></span>
       </div>
 
-      <a bo-if="historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.action.photo.id)">
+      <a ng-if="::historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.action.photo.id)">
         <img
           class="im_service_message_photo_thumb"
           my-load-thumb
@@ -61,205 +27,48 @@
 
     </div>
 
-    <div bindonce bo-if="historyMessage._ != 'messageService'" class="im_content_message_wrap" ng-class="{im_message_unread: historyMessage.unread, im_message_out: historyMessage.out, im_message_error: historyMessage.error, im_message_pending: historyMessage.pending, im_message_fwd: historyMessage._ == 'messageForwarded'}">
+    <div ng-if="::historyMessage._ != 'messageService'" class="im_content_message_wrap" ng-class="{im_message_unread: historyMessage.unread, im_message_out: historyMessage.out, im_message_error: historyMessage.error, im_message_pending: historyMessage.pending, im_message_fwd: historyMessage._ == 'messageForwarded'}">
       <div class="im_content_message_select_area">
         <i class="icon icon-select-tick"></i>
       </div>
 
-      <a class="im_message_error_btn" bo-if="historyMessage.pending || historyMessage.error" ng-click="historyMessage.send()">
+      <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error" ng-click="historyMessage.send()">
         <i class="icon-message-status" tooltip="Try again"></i>
       </a>
 
-      <i bo-if="historyMessage.unread || historyMessage.pending" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
+      <i ng-if="::historyMessage.unread || historyMessage.pending" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
 
-      <a ng-click="openUser(historyMessage.from_id)" class="im_message_from_photo pull-left">
-        <img
-          class="im_message_from_photo"
-          my-load-thumb
-          thumb="historyMessage.fromPhoto"
-        />
-      </a>
+      <a class="im_message_from_photo pull-left" my-user-photolink="historyMessage.from_id" img-class="im_message_from_photo"></a>
+
       <div class="im_message_meta pull-right text-right">
         <i class="icon-message-status-tick"></i>
-        <span class="im_message_date" ng-bind="historyMessage.date | timeSecs"></span>
+        <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
       </div>
 
       <div class="im_message_body">
 
-        <a bo-if="historyMessage.to_id.chat_id > 0" class="im_message_author" bo-class="'user_color_' + historyMessage.fromPhoto.num" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFullName"></a>
-        <a bo-if="!historyMessage.to_id.chat_id" class="im_message_author" ng-click="openUser(historyMessage.from_id)" ng-bind-html="historyMessage.fromUser.rFirstName" ></a>
+        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0"></a>
 
-
-        <div bo-if="historyMessage._ == 'messageForwarded'" class="im_message_fwd_from">
-          <a ng-click="openUser(historyMessage.fwd_from_id)" class="im_message_fwd_photo pull-left">
-            <img
-              class="im_message_fwd_photo"
-              my-load-thumb
-              thumb="historyMessage.fwdPhoto"
-            />
-          </a>
+        <div ng-if="::historyMessage._ == 'messageForwarded'" class="im_message_fwd_from">
+          <a class="im_message_fwd_photo pull-left" my-user-photolink="historyMessage.fwd_from_id" img-class="im_message_fwd_photo"></a>
           <div class="im_message_fwd_author_wrap">
-            <a class="im_message_fwd_author" ng-click="openUser(historyMessage.fwd_from_id)" ng-bind-html="historyMessage.fwdUser.rFirstName"></a><span class="im_message_fwd_date" ng-bind="historyMessage.fwd_date | dateOrTime"></span>
+            <a class="im_message_fwd_author" my-user-link="historyMessage.fwd_from_id" short="true"></a><span class="im_message_fwd_date" ng-bind="historyMessage.fwd_date | dateOrTime"></span>
           </div>
         </div>
 
-        <div bo-if="historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" class="im_message_media" ng-switch="historyMessage.media._">
+        <div ng-if="::historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'" class="im_message_media" ng-switch="historyMessage.media._">
 
-          <a ng-switch-when="messageMediaPhoto" class="im_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.media.photo.id, historyMessage.id)" bo-style="{width: historyMessage.media.photo.thumb.width + 'px'}" ng-mouseover="preloadPhoto(historyMessage.media.photo.id)">
-            <img
-              class="im_message_photo_thumb"
-              my-load-thumb
-              thumb="historyMessage.media.photo.thumb"
-            />
-          </a>
-
-          <div ng-switch-when="messageMediaVideo" class="im_message_video im_message_document_thumbed">
-            <a class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)" bo-style="{width: historyMessage.media.video.thumb.width + 'px'}">
-              <span class="im_message_video_duration" bo-bind="historyMessage.media.video.duration | duration"></span>
-              <i class="icon icon-videoplay"></i>
-              <img
-                class="im_message_video_thumb"
-                my-load-thumb
-                thumb="historyMessage.media.video.thumb"
-              />
-            </a>
-
-            <div class="im_message_document_info">
-              <div class="im_message_document_name_wrap">
-                <span class="im_message_document_name">Video</span>
-                <span class="im_message_document_size" ng-if="!historyMessage.media.video.progress.enabled" bo-bind="historyMessage.media.video.size | formatSize"></span>
-                <span class="im_message_document_size" ng-if="historyMessage.media.video.progress.enabled" ng-bind="historyMessage.media.video.progress | formatSizeProgress"></span>
-              </div>
-              <div class="im_message_document_actions" ng-if="!historyMessage.media.video.progress.enabled">
-                <a href="" ng-click="downloadVideo(historyMessage.media.video.id)">Download</a>
-                <a href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)">Play video</a>
-              </div>
-              <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
-                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.video.progress.cancel()">Cancel</a>
-                <div class="im_message_download_progress_wrap">
-                  <div class="progress tg_down_progress">
-                    <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.video.progress.percent + '%'}"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div ng-switch-when="messageMediaDocument" bo-switch="historyMessage.media.document.isSpecial">
-
-            <div bo-switch-when="gif" my-load-gif document="historyMessage.media.document"></div>
-
-            <div bo-switch-default class="im_message_document" ng-class="{im_message_document_thumbed: !!historyMessage.media.document.thumb}">
-              <a href="" ng-click="downloadDoc(historyMessage.media.document.id, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
-                <i class="icon icon-document" bo-if="!historyMessage.media.document.thumb"></i>
-                <div class="im_message_document_thumb_wrap" bo-if="historyMessage.media.document.thumb">
-                  <img
-                    class="im_message_document_thumb"
-                    my-load-thumb
-                    thumb="historyMessage.media.document.thumb"
-                  />
-                </div>
-              </a>
-
-              <div class="im_message_document_info">
-                <div class="im_message_document_name_wrap">
-                  <span class="im_message_document_name" bo-bind="historyMessage.media.document.file_name"></span>
-                  <span class="im_message_document_size" ng-if="!historyMessage.media.document.progress.enabled" bo-bind="historyMessage.media.document.size | formatSize"></span>
-                  <span class="im_message_document_size" ng-if="historyMessage.media.document.progress.enabled" ng-bind="historyMessage.media.document.progress | formatSizeProgress"></span>
-                </div>
-                <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
-                  <a href="" ng-click="downloadDoc(historyMessage.media.document.id)">Download</a>
-                  <a href="" ng-click="downloadDoc(historyMessage.media.document.id, 1)" bo-if="historyMessage.media.document.withPreview">Open</a>
-                </div>
-                <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
-                  <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.document.progress.cancel()">Cancel</a>
-                  <div class="im_message_download_progress_wrap">
-                    <div class="progress tg_down_progress">
-                      <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.document.progress.percent + '%'}"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-
-          <div ng-switch-when="messageMediaAudio" class="im_message_document">
-            <a href="" ng-click="openAudio(historyMessage.media.audio.id)" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
-              <i class="icon icon-audio"></i>
-            </a>
-            <i class="icon icon-audio" ng-if="historyMessage.media.audio.progress.enabled || historyMessage.media.audio.url"></i>
-
-            <div class="im_message_audio_info">
-              <div class="im_message_audio_name_wrap" ng-if="!historyMessage.media.audio.url">
-                <span class="im_message_audio_name">
-                  Voice message
-                </span>
-                <span class="im_message_audio_duration" ng-if="!historyMessage.media.audio.progress.enabled" bo-bind="historyMessage.media.audio.duration | duration"></span>
-                <span class="im_message_audio_size" ng-if="historyMessage.media.audio.progress.enabled" ng-bind="historyMessage.media.audio.progress | formatSizeProgress"></span>
-              </div>
-              <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
-                <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
-              </div>
-              <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
-                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.audio.progress.cancel()">Cancel</a>
-                <div class="im_message_download_progress_wrap">
-                  <div class="progress tg_down_progress">
-                    <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.audio.progress.percent + '%'}"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
-                <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
-                  <source bo-src="historyMessage.media.audio.url" type="audio/ogg" />
-                  <embed bo-src="historyMessage.media.audio.url" hidden="true" autostart="true" loop="false" />
-                </audio>
-              </div>
-            </div>
-          </div>
-
-          <a ng-switch-when="messageMediaGeo" my-map-point point="historyMessage.media.geo" class="im_message_geopoint">
-            <i class="icon icon-geo-point"></i>
-          </a>
-
-          <div ng-switch-when="messageMediaContact">
-            <a bo-if="historyMessage.media.user" ng-click="openUser(historyMessage.media.user.id)" class="im_message_contact_photo pull-left">
-              <img
-                class="im_message_contact_photo"
-                my-load-thumb
-                thumb="historyMessage.media.userPhoto"
-              />
-            </a>
-            <div class="im_message_contact_name" ng-switch="!!historyMessage.media.user">
-              <a ng-switch-when="true" ng-click="openUser(historyMessage.media.user.id)" ng-bind-html="historyMessage.media.rFullName"></a>
-              <span ng-switch-default ng-bind-html="historyMessage.media.rFullName"></span>
-            </div>
-            <div class="im_message_contact_phone" bo-bind="historyMessage.media.phone_number | phoneNumber"></div>
-          </div>
-
-          <div ng-switch-when="messageMediaPending" class="im_message_upload_file" bo-class="'im_message_upload_' + historyMessage.media.type">
-            <i class="icon" bo-class="'icon-' + historyMessage.media.type"></i>
-            <div class="im_message_document_info">
-              <div class="im_message_document_name_wrap">
-                <span class="im_message_document_name" bo-bind="historyMessage.media.file_name"></span>
-                <span class="im_message_document_size" ng-if="historyMessage.media.progress" ng-bind="historyMessage.media.progress | formatSizeProgress"></span>
-              </div>
-              <div class="clearfix cancelable_progress_wrap">
-                <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.progress.cancel()">Cancel</a>
-                <div class="im_message_download_progress_wrap">
-                  <div class="progress tg_down_progress">
-                    <div class="progress-bar progress-bar-success" role="progressbar" ng-style="{width: historyMessage.media.progress.percent + '%'}"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <div ng-switch-when="messageMediaPhoto"     my-message-photo></div>
+          <div ng-switch-when="messageMediaVideo"     my-message-video></div>
+          <div ng-switch-when="messageMediaDocument"  my-message-document></div>
+          <div ng-switch-when="messageMediaAudio"     my-message-audio></div>
+          <div ng-switch-when="messageMediaGeo"       my-message-map></div>
+          <div ng-switch-when="messageMediaContact"   my-message-contact></div>
+          <div ng-switch-when="messageMediaPending"   my-message-pending></div>
 
         </div>
 
-        <div class="im_message_text" bo-if="historyMessage.message.length" ng-bind-html="historyMessage.richMessage"></div>
+        <div class="im_message_text" ng-if="::historyMessage.message.length" ng-bind-html="::historyMessage.richMessage"></div>
       </div>
 
     </div>

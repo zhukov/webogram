@@ -184,7 +184,7 @@ input[type="number"] {
   border-top: 20px solid #497495;
 }
 .tg_page_head .navbar > .container .navbar-brand {
-  padding: 9px 15px;
+  padding: 8px 15px;
   opacity: 0.9;
   margin-left: 0;
   margin-right: 20px;
@@ -197,29 +197,16 @@ input[type="number"] {
   opacity: 1;
 }
 .tg_head_logo {
-  background: url(../img/Tlogo_2x.png) 0 0 no-repeat;
-  background-size: 26px 26px;
+  background: url(../img/T_LogoM.png) 0 0 no-repeat;
+  background-size: 143px 30px;
   display: inline-block;
-  width: 26px;
-  height: 26px;
+  width: 143px;
+  height: 30px;
   vertical-align: text-top;
 }
-.is_1x .tg_head_logo {
+/*.is_1x .tg_head_logo {
   background-image: url(../img/TLogo_1x.png);
-}
-.tg_head_logo_text {
-  background: url(../img/TLogo2_2x.png) 0 0 no-repeat;
-  background-size: 97px 15px;
-  display: inline-block;
-  width: 97px;
-  height: 15px;
-  vertical-align: text-top;
-  margin-top: 7px;
-  margin-left: 10px;
-}
-.is_1x .tg_head_logo_text {
-  background-image: url(../img/TLogo2_1x.png);
-}
+}*/
 
 
 
@@ -233,8 +220,8 @@ input[type="number"] {
   float: none;
 }
 .navbar-offline-text {
-  padding: 12px 15px;
   color: #b9cfe3;
+  padding: 13px 15px;
   font-size: 13px;
   display: block;
   line-height: 20px;
@@ -252,8 +239,8 @@ input[type="number"] {
 
 
 .tg_page_head .navbar-inverse .navbar-nav > li > a {
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding-top: 13px;
+  padding-bottom: 13px;
   color: #b9cfe3;
   font-size: 13px;
 }

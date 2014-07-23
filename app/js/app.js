@@ -13,7 +13,6 @@ angular.module('myApp', [
   'ngSanitize',
   'ngTouch',
   'ui.bootstrap',
-  'pasvaz.bindonce',
   'izhukov.utils',
   'izhukov.mtproto',
   'izhukov.mtproto.wrapper',

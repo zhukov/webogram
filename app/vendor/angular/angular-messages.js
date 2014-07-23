@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.8
+ * @license AngularJS v1.3.0-beta.16
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -169,7 +169,7 @@ angular.module('ngMessages', [])
     *
     * @description
     * `ngMessages` is a directive that is designed to show and hide messages based on the state
-    * of a key/value object that is listens on. The directive itself compliments error message
+    * of a key/value object that it listens on. The directive itself compliments error message
     * reporting with the `ngModel` $error object (which stores a key/value state of validation errors).
     *
     * `ngMessages` manages the state of internal messages within its container element. The internal
@@ -240,7 +240,7 @@ angular.module('ngMessages', [])
 
     return {
       restrict: 'AE',
-      controller: function($scope) {
+      controller: ['$scope', function($scope) {
         this.$renderNgMessageClasses = angular.noop;
 
         var messages = [];
@@ -281,7 +281,7 @@ angular.module('ngMessages', [])
             return value !== null && value !== false && value;
           }
         };
-      },
+      }],
       require: 'ngMessages',
       link: function($scope, element, $attrs, ctrl) {
         ctrl.renderElementClasses = function(bool) {

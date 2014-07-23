@@ -15,7 +15,6 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myHead', function() {
     return {
       restrict: 'AE',
-      scope: true,
       templateUrl: 'partials/head.html'
     };
   })
@@ -23,18 +22,49 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
-      scope: true,
-      translude: false,
       templateUrl: 'partials/dialog.html'
     };
   })
 
   .directive('myMessage', function() {
     return {
-      restrict: 'AE',
-      scope: true,
-      translude: false,
       templateUrl: 'partials/message.html'
+    };
+  })
+
+  .directive('myMessagePhoto', function() {
+    return {
+      templateUrl: 'partials/message_attach_photo.html'
+    };
+  })
+  .directive('myMessageVideo', function() {
+    return {
+      templateUrl: 'partials/message_attach_video.html'
+    };
+  })
+  .directive('myMessageDocument', function() {
+    return {
+      templateUrl: 'partials/message_attach_document.html'
+    };
+  })
+  .directive('myMessageAudio', function() {
+    return {
+      templateUrl: 'partials/message_attach_audio.html'
+    };
+  })
+  .directive('myMessageMap', function() {
+    return {
+      templateUrl: 'partials/message_attach_map.html'
+    };
+  })
+  .directive('myMessageContact', function() {
+    return {
+      templateUrl: 'partials/message_attach_contact.html'
+    };
+  })
+  .directive('myMessagePending', function() {
+    return {
+      templateUrl: 'partials/message_attach_pending.html'
     };
   })
 
@@ -689,7 +719,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       // Head is sometimes slower
       $timeout(function () {
         fileSelects
-          .add('.im_head_attach input')
           .on('change', function () {
             var self = this;
             $scope.$apply(function () {
@@ -1519,4 +1548,56 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     };
 
+  })
+
+  
+  .directive('myUserLink', function ($window, $timeout, $rootScope, AppUsersManager) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      var userID = $scope.$eval(attrs.myUserLink),
+          user = AppUsersManager.getUser(userID);
+
+      element
+        .on('click', function () {
+          $rootScope.openUser(userID);
+        })
+        .html(user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'].valueOf());
+
+      if (attrs.color && $scope.$eval(attrs.color)) {
+        element.addClass('user_color_' + user.num);
+      }
+    }
+  })
+
+
+  .directive('myUserPhotolink', function ($window, $timeout, $rootScope, AppUsersManager) {
+
+    return {
+      link: link,
+      scope: {
+        userID: '=myUserPhotolink'
+      },
+      template: '<img my-load-thumb thumb="photo" /><i class="icon status_online" ng-if="::showStatus" ng-show="user.status._ == \'userStatusOnline\'"></i>'
+    };
+
+    function link($scope, element, attrs) {
+      $scope.photo = AppUsersManager.getUserPhoto($scope.userID, 'User');
+
+      if ($scope.showStatus = attrs.status && $scope.$eval(attrs.status)) {
+        $scope.user = AppUsersManager.getUser($scope.userID);
+      }
+
+      element.on('click', function (e) {
+        $rootScope.openUser(userID);
+      });
+
+      if (attrs.imgClass) {
+        $(element[0].firstChild).addClass(attrs.imgClass)
+      }
+
+    }
   })
