@@ -1013,13 +1013,14 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       })
 
-      var cleanup = angular.noop;
-      // function () {
-      //   setTimeout(function () {
-      //     $scope.$destroy()
-      //     stopWatching();
-      //   }, 0);
-      // };
+      var cleanup = attrs.watch
+            ? angular.noop
+            : function () {
+                setTimeout(function () {
+                  $scope.$destroy()
+                  stopWatching();
+                }, 0);
+              };
     }
 
   })
@@ -1550,7 +1551,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  
+
   .directive('myUserLink', function ($window, $timeout, $rootScope, AppUsersManager) {
 
     return {
