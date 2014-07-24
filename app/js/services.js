@@ -2115,7 +2115,9 @@ angular.module('myApp.services', [])
 })
 
 .service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager, FileManager) {
-  var photos = {};
+  var photos = {},
+      windowW = $(window).width(),
+      windowH = $(window).height();
 
   function savePhoto (apiPhoto) {
     photos[apiPhoto.id] = apiPhoto;
@@ -2200,8 +2202,8 @@ angular.module('myApp.services', [])
 
   function wrapForHistory (photoID) {
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = 260,
-        height = 260,
+        width = Math.min(windowW - 80, 260),
+        height = Math.min(windowH - 100, 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -2211,10 +2213,15 @@ angular.module('myApp.services', [])
 
     // console.log('chosen photo size', photoID, thumbPhotoSize);
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      } else {
+      }
+      else {
         thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+        if (thumb.width > width) {
+          thumb.height = parseInt(thumb.height * width / thumb.width);
+          thumb.width = width;
+        }
       }
 
       thumb.location = thumbPhotoSize.location;
@@ -2349,8 +2356,10 @@ angular.module('myApp.services', [])
 
 
 .service('AppVideoManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
-  var videos = {};
-  var videosForHistory = {};
+  var videos = {},
+      videosForHistory = {},
+      windowW = $(window).width(),
+      windowH = $(window).height();
 
   function saveVideo (apiVideo) {
     videos[apiVideo.id] = apiVideo;
@@ -2371,8 +2380,8 @@ angular.module('myApp.services', [])
     }
 
     var video = angular.copy(videos[videoID]),
-        width = 200,
-        height = 200,
+        width = Math.min(windowW - 80, windowW <= 479 ? 260 : 200),
+        height = Math.min(windowH - 100, windowW <= 479 ? 260 : 200),
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',
@@ -2381,10 +2390,15 @@ angular.module('myApp.services', [])
         };
 
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      } else {
+      }
+      else {
         thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+        if (thumb.width > width) {
+          thumb.height = parseInt(thumb.height * width / thumb.width);
+          thumb.width = width;
+        }
       }
 
       thumb.location = thumbPhotoSize.location;
@@ -2513,8 +2527,10 @@ angular.module('myApp.services', [])
 })
 
 .service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
-  var docs = {};
-  var docsForHistory = {};
+  var docs = {},
+      docsForHistory = {},
+      windowW = $(window).width(),
+      windowH = $(window).height();
 
   function saveDoc (apiDoc) {
     docs[apiDoc.id] = apiDoc;
@@ -2536,20 +2552,25 @@ angular.module('myApp.services', [])
 
     var doc = angular.copy(docs[docID]),
         isGif = doc.mime_type == 'image/gif',
-        width = isGif ? 260 : 100,
-        height = isGif ? 260 : 100,
+        width = isGif ? Math.min(windowW - 80, 260) : 100,
+        height = isGif ? Math.min(windowH - 100, 260) : 100,
         thumbPhotoSize = doc.thumb,
         thumb = {
-          // placeholder: 'img/placeholders/DocThumbConversation.jpg',
           width: width,
           height: height
         };
 
+
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      } else {
+      }
+      else {
         thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+        if (thumb.width > width) {
+          thumb.height = parseInt(thumb.height * width / thumb.width);
+          thumb.width = width;
+        }
       }
 
       thumb.location = thumbPhotoSize.location;
@@ -3257,7 +3278,10 @@ angular.module('myApp.services', [])
         var time = tsNow();
         if (!notificationsCount || time % 2000 > 1000) {
           document.title = titleBackup;
-          $('link[rel="icon"]').replaceWith(faviconBackupEl);
+          var curFav = $('link[rel="icon"]');
+          if (curFav.attr('href').indexOf('favicon_unread') != -1) {
+            curFav.replaceWith(faviconBackupEl);
+          }
         } else {
           document.title = notificationsCount > 1
             ? (notificationsCount + ' notifications')

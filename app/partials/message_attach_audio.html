@@ -1,4 +1,4 @@
-<div class="im_message_document">
+<div class="im_message_document im_message_audio" ng-class="{im_message_audio_done: historyMessage.media.audio.url, im_message_audio_progress: historyMessage.media.audio.progress.enabled}">
   <a href="" ng-click="openAudio(historyMessage.media.audio.id)" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
     <i class="icon icon-audio"></i>
   </a>
@@ -25,8 +25,8 @@
     </div>
     <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
       <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
-        <source ng-src="::historyMessage.media.audio.url" type="audio/ogg" />
-        <embed ng-src="::historyMessage.media.audio.url" hidden="true" autostart="true" loop="false" />
+        <source ng-src="{{::historyMessage.media.audio.url}}" type="audio/ogg" />
+        <embed ng-src="{{::historyMessage.media.audio.url}}" hidden="true" autostart="true" loop="false" />
       </audio>
     </div>
   </div>

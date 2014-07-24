@@ -1564,12 +1564,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       var userID = $scope.$eval(attrs.myUserLink),
           user = AppUsersManager.getUser(userID);
 
-      element
-        .on('click', function () {
-          $rootScope.openUser(userID);
-        })
-        .html(user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'].valueOf());
+      element.html(
+        (user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'] || '').valueOf()
+      );
 
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          $rootScope.openUser(userID);
+        });
+      }
       if (attrs.color && $scope.$eval(attrs.color)) {
         element.addClass('user_color_' + user.num);
       }

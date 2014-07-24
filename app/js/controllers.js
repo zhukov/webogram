@@ -305,15 +305,15 @@ angular.module('myApp.controllers', [])
     $scope.toggleEdit = function () {
       $scope.$broadcast('history_edit_toggle');
     };
-
-    $scope.returnToRecent = function () {
-      $scope.$broadcast('history_return_recent');
+    $scope.selectedFlush = function () {
+      $scope.$broadcast('history_edit_flush');
     };
-
     $scope.toggleMedia = function (mediaType) {
       $scope.$broadcast('history_media_toggle', mediaType);
     };
-
+    $scope.returnToRecent = function () {
+      $scope.$broadcast('history_return_recent');
+    };
     $scope.toggleSearch = function () {
       $scope.$broadcast('dialogs_search_toggle');
     };
@@ -653,9 +653,12 @@ angular.module('myApp.controllers', [])
     $scope.returnToRecent = returnToRecent;
 
     $scope.$on('history_edit_toggle', toggleEdit);
+    $scope.$on('history_edit_flush', selectedFlush);
     $scope.$on('history_media_toggle', function (e, mediaType) {
       toggleMedia(mediaType);
     });
+
+
     $scope.$on('history_return_recent', returnToRecent);
 
     var peerID,
@@ -1262,6 +1265,7 @@ angular.module('myApp.controllers', [])
 
     if (Config.Navigator.mobile) {
       $scope.canForward = true;
+      $scope.canDelete = true;
       return;
     }
 
@@ -1510,6 +1514,10 @@ angular.module('myApp.controllers', [])
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
         AppMessagesManager.deleteMessages([messageID]);
       });
+    };
+
+    $scope.download = function () {
+      $rootScope.downloadVideo($scope.videoID)
     };
 
     $scope.$on('history_delete', function (e, historyUpdate) {

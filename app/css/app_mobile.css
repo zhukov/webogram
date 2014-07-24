@@ -130,7 +130,7 @@ html {
   height: 18px;
   vertical-align: text-top;
 
-  background: url(../img/icons/IconsetW.png) -15px -419px no-repeat;
+  background: url(../img/icons/IconsetW.png) -15px -418px no-repeat;
   background-size: 42px 710px;
   opacity: 0.8;
 }
@@ -158,9 +158,7 @@ html {
   font-size: 13px;
   height: 46px;
 }
-.tg_page_head .navbar-inverse .navbar-quick-nav > li > a:hover {
-  color: #b9cfe3;
-}
+.tg_page_head .navbar-inverse .navbar-quick-nav > li > a:hover,
 .tg_page_head .navbar-inverse .navbar-quick-nav > li > a:active {
   background-color: rgba(0,0,0,0.1);
 }
@@ -176,7 +174,7 @@ html {
   white-space: nowrap;
 }
 .navbar-quick-back-title {
-  max-width: 130px;
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -225,7 +223,8 @@ html {
 }
 .navbar_offline .navbar-quick-nav li > a > .navbar-quick-back-title,
 .navbar_offline .im_head_attach,
-.navbar_offline .navbar-search-wrap {
+.navbar_offline .navbar-search-wrap,
+.navbar_offline .navbar-history-edit {
   display: none;
 }
 
@@ -244,6 +243,33 @@ html {
 }
 .navbar_peer_not_selected .navbar-peer-wrap {
   display: none;
+}
+
+
+.navbar_history_select .navbar-peer-wrap,
+.navbar_history_select .navbar-toggle-wrap {
+  display: none;
+}
+.tg_page_head .navbar-quick-nav li.navbar-quick-right {
+  float: right;
+}
+.tg_page_head .navbar-quick-nav li.navbar-quick-left {
+  float: left;
+}
+.tg_page_head .navbar-inverse .navbar-quick-nav > .navbar-quick-right > a,
+.tg_page_head .navbar-inverse .navbar-quick-nav > .navbar-quick-left > a {
+  font-size: 15px;
+  color: #FFF;
+  padding: 14px 15px;
+}
+.tg_page_head .navbar-quick-nav li.navbar-quick-title {
+  position: static;
+  float: none;
+  color: #FFF;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 14px 0;
+  text-align: center;
 }
 
 
@@ -272,28 +298,131 @@ html {
 }
 .im_message_text,
 .im_message_document {
-  /*float: left;*/
   padding: 7px 10px;
   border-radius: 3px;
   background: #f1f1f1;
 }
+.im_history_selectable .im_message_outer_wrap:hover,
+.im_message_selected {
+  background: #e1e9f0;
+}
 .im_message_out .im_message_text,
 .im_message_out .im_message_document {
   background: #e4ecf2;
-  /*float: right;*/
 }
+
+.im_message_selected .im_message_text,
+.im_message_selected .im_message_document,
+.im_message_selected .im_message_text a {
+  color: #FFF;
+  background: #497495;
+}
+
+
 .im_message_document {
   padding: 5px;
   width: 250px;
 }
+.im_message_audio,
+.im_message_document {
+  position: relative;
+}
+.im_message_audio > a,
+.im_message_document .icon-document,
+.im_message_audio .icon-audio,
+.im_message_document_thumb_wrap {
+  position: absolute;
+}
+.im_message_document_thumb_wrap {
+  background-color: transparent;
+}
+.im_message_audio_done i {
+  display: none;
+}
+.im_message_audio_info,
+.im_message_document_info {
+  float: none;
+  margin-left: 48px;
+  width: auto;
+  min-height: 38px;
+}
+.im_message_document_thumbed .im_message_document_info {
+  margin-left: 110px;
+}
+.im_message_audio_name,
+.im_message_audio_duration {
+  display: inline;
+  vertical-align: baseline;
+  line-height: 38px;
+}
+.im_message_audio_progress .im_message_audio_name,
+.im_message_audio_progress .im_message_audio_duration, {
+  line-height: 18px;
+}
+.im_message_audio_done .im_message_audio_info {
+  margin-left: 0;
+  width: auto;
+  float: none;
+}
+.im_message_audio_actions,
+.im_message_document_actions {
+  display: none;
+}
+.im_message_audio_player_wrap {
+  height: 38px;
+  line-height: 38px;
+}
+.im_message_document_size {
+  display: block;
+  padding-left: 0;
+}
+.im_message_document_thumbed .im_message_document_info {
+  min-height: 100px;
+}
+.im_message_document_info .cancelable_progress_wrap,
+.im_message_audio_info .cancelable_progress_wrap {
+  margin-top: 4px;
+}
 .im_message_document_thumbed .im_message_document_name_wrap,
-.im_message_document_thumbed .im_message_audio_name_wrap,
+.im_message_document_name_wrap,
+.im_message_audio_name_wrap {
+  width: auto;
+}
+.im_message_document_progress .im_message_document_size {
+  display: inline;
+}
+.im_message_document_progress .im_message_document_name  {
+  max-width: 50%;
+}
+.im_message_document_progress.im_message_document_thumbed .im_message_document_name  {
+  display: inline;
+  max-width: none;
+}
+
+.im_message_document_thumbed .im_message_document_name {
+  white-space: normal;
+}
+
+
 .im_message_document_thumbed .im_message_upload_progress_wrap,
 .im_message_document_thumbed .im_message_download_progress_wrap {
   width: 130px;
 }
-.im_message_document_thumbed .im_message_document_name {
-  max-width: 70px;
+.img_gif_label,
+.img_gif_size,
+.im_message_video_duration {
+  font-size: 13px;
+}
+
+a.im_message_video_thumb {
+  margin-right: 0;
+}
+.im_message_video .im_message_document_info {
+  display: none;
+}
+
+.im_message_document_thumb_wrap {
+  position: absolute;
 }
 /*.im_message_document,
 .im_message_audio,
@@ -396,28 +525,43 @@ a.im_message_author {
 .form-control {
   font-size: 1.2em;
 }
-
-.im_history_typing {
-  padding: 0 15px 0 56px;
+.im_history_typing_wrap {
+  display: none;
 }
 .im_history_panel_info_link {
   display: none;
 }
 
 .im_edit_flush_link,
-.im_edit_cancel_link,
+.im_edit_cancel_link {
+  display: none;
+}
 .im_edit_delete_btn,
 .im_edit_forward_btn {
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 6px 4px;
+  background: none !important;
+  border: 0 !important;
+  width: 50%;
+  margin: 0;
+  font-size: 15px;
+  padding: 13px 0;
 }
+.im_edit_forward_btn {
+  color: #497495 !important;
+}
+.im_edit_delete_btn {
+  color: #c3584d !important;
+}
+.im_edit_delete_btn strong,
+.im_edit_forward_btn strong {
+  font-weight: normal;
+}
+
 .im_edit_panel_border {
-  margin: 0 18px 22px 3px;
+  display: none;
 }
 .im_edit_panel_wrap {
-  margin: 0 5px;
-  padding-bottom: 18px;
+  padding: 5px 0;
+  margin: 0;
 }
 .im_history_col .nano > .nano-pane {
   top: 3px;
@@ -743,14 +887,6 @@ a.im_dialog_selected .im_dialog_unread {
 .emoji-menu {
   margin-left: -20px;
   margin-top: -267px;
-}
-
-.im_edit_panel_wrap {
-  padding-top: 2px;
-  padding-bottom: 4px;
-}
-.im_edit_panel_border {
-  margin-bottom: 3px;
 }
 
 .im_head_attach {

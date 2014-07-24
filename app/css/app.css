@@ -1686,6 +1686,7 @@ img.im_message_document_thumb {
   padding-left: 2px;
 }
 .im_message_audio_info audio {
+  width: 100%;
   height: 38px;
   line-height: 38px;
 }
