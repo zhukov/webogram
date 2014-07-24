@@ -168,6 +168,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 .factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpTimeManager, CryptoWorker, $http, $q, $timeout) {
 
+  var chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/),
+      chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false;
+
   function mtpSendPlainRequest (dcID, requestBuffer) {
     var requestLength = requestBuffer.byteLength,
         requestArray  = new Int32Array(requestBuffer);
@@ -190,7 +193,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     delete $http.defaults.headers.post['Content-Type'];
     delete $http.defaults.headers.common['Accept'];
 
-    if (!('ArrayBufferView' in window)) {
+    if (!('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30)) {
       resultArray = resultArray.buffer;
     }
 
@@ -539,7 +542,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   var updatesProcessor,
       iii = 0,
       offline,
-      offlineInited = false;
+      offlineInited = false,
+      chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/),
+      chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false;
 
   $rootScope.retryOnline = function () {
     $(document.body).trigger('online');
@@ -589,7 +594,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 
   MtpNetworker.prototype.updateSession = function () {
-    console.log(dT(), 'Update session');
     this.seqNo = 0;
     this.sessionID = new Array(8);
     MtpSecureRandom.nextBytes(this.sessionID);
@@ -1108,7 +1112,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       delete $http.defaults.headers.common['Accept'];
 
       var resultArray = request.getArray();
-      if (!('ArrayBufferView' in window)) {
+      if (!('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30)) {
         resultArray = resultArray.buffer;
       }
 
@@ -1239,7 +1243,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 
   MtpNetworker.prototype.onSessionCreate = function (sessionID, messageID) {
-    console.log(dT(), 'New session created', bytesToHex(sessionID));
+    // console.log(dT(), 'New session created', bytesToHex(sessionID));
   };
 
   MtpNetworker.prototype.ackMessage = function (msgID) {
@@ -1343,6 +1347,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           if (MtpTimeManager.applyServerTime(
             bigStringInt(messageID).shiftRight(32).toString(10)
           )) {
+            console.log(dT(), 'Update session');
             this.updateSession();
           }
           var badMessage = this.updateSentMessage(message.bad_msg_id);
@@ -1414,7 +1419,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               if (Config.Modes.debug) {
                 console.log(dT(), 'Rpc response', message.result);
               } else {
-                console.log(dT(), 'Rpc response', message.result._);
+                var dRes = message.result._;
+                if (!dRes) {
+                  if (message.result.length > 5) {
+                    dRes = '[..' + message.result.length + '..]';
+                  } else {
+                    dRes = message.result;
+                  }
+                }
+                console.log(dT(), 'Rpc response', dRes);
               }
               sentMessage.deferred.resolve(message.result);
             }
