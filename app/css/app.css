@@ -250,6 +250,7 @@ input[type="number"] {
 .tg_page_head .navbar-inverse .navbar-toggle {
   border-color: #497495;
   outline: 0;
+  border: 0;
 }
 .tg_page_head .navbar-inverse .navbar-collapse,
 .tg_page_head .navbar-inverse .navbar-form {
@@ -288,9 +289,6 @@ input[type="number"] {
 .dropdown-menu > li > a {
   padding: 5px 14px;
   font-size: 13px;
-}
-.dropdown-header {
-  padding: 3px 14px;
 }
 
 .modal-backdrop {

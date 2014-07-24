@@ -709,7 +709,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           .on('keyup', function (e) {
             updateHeight();
 
-            $scope.draftMessage.text = richTextarea.innerText;
+            $scope.$apply(function () {
+              $scope.draftMessage.text = richTextarea.innerText;
+            });
 
             $timeout.cancel(updatePromise);
             updatePromise = $timeout(updateValue, 1000);
@@ -792,7 +794,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         lastLength = 0;
       };
 
-      function updateField () {
+      function updateRichTextarea () {
         if (richTextarea) {
           $timeout.cancel(updatePromise);
           var html = $('<div>').text($scope.draftMessage.text || '').html();
@@ -837,7 +839,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_message_send', focusField);
 
-      $scope.$on('ui_peer_draft', updateField);
+      $scope.$on('ui_peer_draft', updateRichTextarea);
       $scope.$on('ui_message_before_send', updateValue);
 
       function focusField () {

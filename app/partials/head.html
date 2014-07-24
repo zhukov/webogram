@@ -24,17 +24,12 @@
           <li><a ng-click="logOut()">Log Out</a></li>
         </ul>
         <ul ng-if="curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
-          <li><a ng-click="showPeerInfo()" ng-switch="historyPeer.id > 0">
-            <span ng-switch-when="true">Profile</span>
-            <span ng-switch-default>Group info</span>
-          </a></li>
-          <li><a ng-click="toggleEdit()">Edit chat</a></li>
+          <li><a ng-click="toggleEdit()">Edit messages</a></li>
           <li ng-if="!historyFilter.mediaType" class="divider"></li>
-          <li ng-if="!historyFilter.mediaType" class="dropdown-header">Media</li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')">Photos</a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('video')">Videos</a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('documents')">Documents</a></li>
-          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')">Voice messages</a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')">Voice notes</a></li>
         </ul>
         <ul ng-if="!isLoggedIn" class="dropdown-menu">
           <li><a href="https://github.com/zhukov/webogram" target="_blank">About</a></li>
