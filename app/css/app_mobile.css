@@ -296,26 +296,9 @@ html {
 .im_panel_peer_photo {
   display: none;
 }
-.im_message_text,
-.im_message_document {
-  padding: 7px 10px;
-  border-radius: 3px;
-  background: #f1f1f1;
-}
 .im_history_selectable .im_message_outer_wrap:hover,
 .im_message_selected {
   background: #e1e9f0;
-}
-.im_message_out .im_message_text,
-.im_message_out .im_message_document {
-  background: #e4ecf2;
-}
-
-.im_message_selected .im_message_text,
-.im_message_selected .im_message_document,
-.im_message_selected .im_message_text a {
-  color: #FFF;
-  background: #497495;
 }
 
 
@@ -461,19 +444,45 @@ a.im_message_video_thumb {
   position: static;
 }
 .im_message_wrap {
-  padding: 0 10px;
+  padding: 0 8px;
 }
 .im_content_message_wrap {
   font-size: 1.2em;
   margin-right: 65px;
   margin-left: 0;
+  /*margin-bottom: 0;*/
   float: left;
   position: relative;
+  max-width: 80%;
 }
 .im_message_out.im_content_message_wrap {
   margin-right: 0;
   margin-left: 80px;
   float: right;
+}
+.im_message_fwd.im_content_message_wrap {
+  float: none;
+}
+.im_history_messages_group .im_message_grouped1 .im_content_message_wrap,
+.im_history_messages_group .im_message_grouped2 .im_content_message_wrap,
+.im_history_messages_group .im_message_grouped3 .im_content_message_wrap,
+.im_history_messages_group .im_message_grouped4 .im_content_message_wrap {
+  margin-top: 0;
+  margin-left: 45px;
+}
+.im_message_grouped1 .im_message_out.im_content_message_wrap,
+.im_message_grouped2 .im_message_out.im_content_message_wrap,
+.im_message_grouped3 .im_message_out.im_content_message_wrap,
+.im_message_grouped4 .im_message_out.im_content_message_wrap {
+  margin-left: 0;
+}
+.im_message_grouped1 .im_message_fwd.im_content_message_wrap,
+.im_message_grouped2 .im_message_fwd.im_content_message_wrap,
+.im_message_grouped3 .im_message_fwd.im_content_message_wrap,
+.im_message_grouped4 .im_message_fwd.im_content_message_wrap {
+  margin-left: 80px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 .im_message_meta {
   float: none;
@@ -482,17 +491,80 @@ a.im_message_video_thumb {
   right: -44px;
 }
 .im_message_date {
-  font-size: 13px;
+  font-size: 12px;
 }
 .im_message_out .im_message_meta {
   right: auto;
   left: -60px;
 }
 
-a.im_message_from_photo,
-a.im_message_author {
+.im_message_body,
+.im_message_document {
+  padding: 7px 10px;
+  border-radius: 3px;
+  background: #f1f1f1;
+}
+.im_message_out .im_message_body,
+.im_message_out .im_message_document {
+  background: #e4ecf2;
+}
+.im_message_body_media,
+.im_message_out .im_message_body_media {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.im_message_selected .im_message_body,
+.im_message_selected .im_message_document {
+  background: #497495;
+  color: #FFF;
+}
+.im_message_selected .im_message_body_media {
+  background: none;
+  color: inherit;
+}
+.im_message_selected .im_message_body a {
+  color: #FFF;
+}
+
+
+.im_message_from_photo {
+  width: 40px;
+  height: 40px;
+}
+a.im_message_from_photo {
+  margin-right: 5px;
   display: none;
 }
+.im_history_messages_group a.im_message_from_photo {
+  display: block;
+}
+.im_message_author {
+  display: none;
+}
+.im_history_messages_group a.im_message_author {
+  display: inline;
+  font-size: 13px;
+  font-weight: normal;
+}
+.im_message_grouped1 a.im_message_from_photo,
+.im_message_grouped1 a.im_message_author,
+.im_message_grouped2 a.im_message_from_photo,
+.im_message_grouped2 a.im_message_author,
+.im_message_grouped3 a.im_message_author,
+.im_message_grouped3 a.im_message_from_photo,
+.im_message_grouped4 a.im_message_author,
+.im_message_grouped4 a.im_message_from_photo,
+.im_message_out a.im_message_author,
+.im_message_out a.im_message_from_photo {
+  display: none;
+}
+.im_message_wrap {
+  padding: 0 7px;
+}
+
+
 
 
 .im_message_out .icon-message-status-tick {
@@ -681,6 +753,15 @@ a.im_dialog_selected .im_dialog_unread {
 .im_dialog_message_text {
   color: #8f8f8f;
 }
+
+.im_message_grouped4 .im_message_fwd.im_message_out .im_message_fwd_author_wrap,
+.im_message_grouped4 .im_message_fwd.im_message_out .im_message_text,
+.im_message_grouped4 .im_message_fwd.im_message_out .im_message_media {
+  /*margin-left: 0;*/
+}
+
+
+
 .im_dialogs_scrollable_wrap a.im_dialog:hover,
 .im_dialogs_scrollable_wrap a.im_dialog_selected,
 .im_dialogs_scrollable_wrap .active a.im_dialog,
