@@ -1321,6 +1321,11 @@ a.im_dialog_selected .im_dialog_date {
   margin: 0 auto;
   padding: 0 77px 0 77px;
 }
+.im_history_typing a.im_history_typing_author {
+  color: #999;
+  font-weight: bold;
+}
+
 
 .im_message_unread_split {
   background: #f4f4f4;

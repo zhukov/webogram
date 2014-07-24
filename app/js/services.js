@@ -467,7 +467,6 @@ angular.module('myApp.services', [])
       MtpApiManager.getUserID().then(function (myID) {
         angular.forEach(chatFull.participants.participants, function(participant){
           participant.user = AppUsersManager.getUser(participant.user_id);
-          participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
           participant.inviter = AppUsersManager.getUser(participant.inviter_id);
           participant.canKick = myID != participant.user_id && (myID == chatFull.participants.admin_id || myID == participant.inviter_id);
         });
@@ -1741,14 +1740,6 @@ angular.module('myApp.services', [])
       message.media.progress = messagesStorage[msgID].media.progress;
     }
 
-    message.fromUser = AppUsersManager.getUser(message.from_id);
-    message.fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
-
-    if (message._ == 'messageForwarded') {
-      message.fwdUser = AppUsersManager.getUser(message.fwd_from_id);
-      message.fwdPhoto = AppUsersManager.getUserPhoto(message.fwd_from_id, 'User');
-    }
-
     if (message.media) {
       switch (message.media._) {
         case 'messageMediaPhoto':
@@ -1774,11 +1765,6 @@ angular.module('myApp.services', [])
           );
           break;
       }
-
-      if (message.media.user_id) {
-        message.media.user = AppUsersManager.getUser(message.media.user_id);
-        message.media.userPhoto = AppUsersManager.getUserPhoto(message.media.user_id, 'User');
-      }
     }
     else if (message.action) {
       switch (message.action._) {
@@ -1790,11 +1776,6 @@ angular.module('myApp.services', [])
         case 'messageActionChatEditTitle':
           message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || 'DELETED';
           break;
-      }
-
-      if (message.action.user_id) {
-        message.action.user = AppUsersManager.getUser(message.action.user_id);
-        message.action.userPhoto = AppUsersManager.getUserPhoto(message.action.user_id, 'User');
       }
     }
 

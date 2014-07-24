@@ -153,7 +153,7 @@ html {
 
 .tg_page_head .navbar-inverse .navbar-quick-nav > li > a {
   padding-left: 15px;
-  padding: 6px 10px 2px 25px;
+  padding: 6px 10px 2px 28px;
   color: #b9cfe3;
   font-size: 13px;
   height: 46px;
@@ -166,7 +166,7 @@ html {
 }
 .navbar-quick-nav .icon-back {
   position: absolute;
-  margin-left: -15px;
+  margin-left: -18px;
   margin-top: 10px;
 }
 .navbar-quick-nav h4 {

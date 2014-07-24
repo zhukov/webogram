@@ -1554,7 +1554,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myUserLink', function ($window, $timeout, $rootScope, AppUsersManager) {
+  .directive('myUserLink', function ($timeout, $rootScope, AppUsersManager) {
 
     return {
       link: link
@@ -1576,8 +1576,24 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myUserStatus', function ($filter, AppUsersManager) {
 
-  .directive('myUserPhotolink', function ($window, $timeout, $rootScope, AppUsersManager) {
+    var statusFilter = $filter('userStatus');
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      var userID = $scope.$eval(attrs.myUserStatus),
+          user = AppUsersManager.getUser(userID);
+
+      element.html(statusFilter(user));
+    }
+  })
+
+
+  .directive('myUserPhotolink', function ($rootScope, AppUsersManager) {
 
     return {
       link: link,

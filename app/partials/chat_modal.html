@@ -86,9 +86,9 @@
             <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 
             <div class="chat_modal_participant_name">
-              <a my-user-link="participant.user.id"></a>
+              <a my-user-link="participant.user_id"></a>
             </div>
-            <div class="chat_modal_participant_status" ng-bind="participant.user | userStatus"></div>
+            <div class="chat_modal_participant_status" my-user-status="participant.user_id"></div>
           </div>
 
         </div>
