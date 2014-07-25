@@ -5,13 +5,14 @@
     <div class="video_modal_image_wrap" my-load-video video="video"></div>
 
     <div class="media_meta_wrap clearfix">
-      <div class="media_modal_actions pull-right" ng-if="messageID">
-        <a href="" class="media_modal_action_link" ng-click="forward()">Forward</a>
-        <a href="" class="media_modal_action_link" ng-click="delete()">Delete</a>
+      <div class="media_modal_actions pull-right">
+        <a href="" class="media_modal_action_link" ng-click="download()">Download</a>
+        <a ng-if="messageID" href="" class="media_modal_action_link" ng-click="forward()">Forward</a>
+        <a ng-if="messageID" href="" class="media_modal_action_link" ng-click="delete()">Delete</a>
       </div>
 
       <p class="media_modal_info">
-        <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName" ></span>, {{video.date | dateOrTime}}
+        <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName"></span>, <span ng-bind="video.date | dateOrTime"></span>
       </p>
     </div>
 

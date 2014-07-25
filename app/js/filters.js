@@ -52,7 +52,8 @@ angular.module('myApp.filters', [])
   }])
 
   .filter('dateOrTime', ['$filter', function($filter) {
-    var cachedDates = {};
+    var cachedDates = {},
+        dateFilter = $filter('date');
 
     return function (timestamp) {
 
@@ -70,52 +71,36 @@ angular.module('myApp.filters', [])
       else if (diff > 43200000) { // 12 hours
         format = 'EEE';
       }
-      return cachedDates[timestamp] = $filter('date')(ticks, format);
+      return cachedDates[timestamp] = dateFilter(ticks, format);
     }
   }])
 
   .filter('time', ['$filter', function($filter) {
-    var cachedDates = {};
+    var cachedDates = {},
+        dateFilter = $filter('date'),
+        format = Config.Navigator.mobile ? 'HH:mm' : 'HH:mm:ss';
 
     return function (timestamp) {
       if (cachedDates[timestamp]) {
         return cachedDates[timestamp];
       }
 
-      return cachedDates[timestamp] = $filter('date')(timestamp * 1000, 'HH:mm');
-    }
-  }])
-
-  .filter('timeSecs', ['$filter', function($filter) {
-    var cachedDates = {};
-
-    return function (timestamp) {
-      if (cachedDates[timestamp]) {
-        return cachedDates[timestamp];
-      }
-
-      return cachedDates[timestamp] = $filter('date')(timestamp * 1000, 'HH:mm:ss');
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, format);
     }
   }])
 
   .filter('myDate', ['$filter', function($filter) {
-    var cachedDates = {};
+    var cachedDates = {},
+        dateFilter = $filter('date');
 
     return function (timestamp) {
       if (cachedDates[timestamp]) {
         return cachedDates[timestamp];
       }
 
-      return cachedDates[timestamp] = $filter('date')(timestamp * 1000, 'fullDate');
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, 'fullDate');
     }
   }])
-
-  .filter('seconds', function($filter) {
-    return function (timestamp) {
-      var sec = timestamp % 60;
-      return sec < 10 ? '0' + sec : sec;
-    }
-  })
 
   .filter('duration', [function() {
     return function (duration) {

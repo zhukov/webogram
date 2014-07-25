@@ -69,7 +69,7 @@
                         <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
                       </div>
                       <div class="im_dialog_message">
-                        <span class="im_dialog_message_text" ng-bind="contact.user | userStatus"></span>
+                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
                       </div>
                     </div>
                   </a>
@@ -132,7 +132,7 @@
                   <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
                     <div ng-switch-when="true">
                       <span ng-bind-html="historyPeer.data.rFullName"></span>
-                      <small class="im_peer_online" ng-bind="historyPeer.data | userStatus"></small>
+                      <small class="im_peer_online" my-user-status="historyPeer.id"></small>
                     </div>
                     <div ng-switch-default>
                       <span ng-bind-html="historyPeer.data.rTitle"></span>
@@ -156,20 +156,29 @@
             <div class="im_history_scrollable_wrap nano-content">
 
               <div class="im_history_scrollable">
-                  <div class="im_history" ng-class="{im_history_selectable: selectActions}">
+                  <div class="im_history" ng-class="{im_history_selectable: historyState.selectActions}">
                     <div ng-if="!history.length"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
                       <span ng-switch-when="true">Loading history<span my-loading-dots></span></span>
                       <span ng-switch-default>No messages here yet...</span>
                     </div>
 
-                    <div class="im_history_messages">
-                      <div class="im_history_message_wrap" my-message bindonce ng-repeat="historyMessage in history"></div>
+                    <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
+                      <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
                     </div>
                   </div>
 
                   <div class="im_history_typing_wrap">
-                    <div class="im_history_typing" ng-show="typing.user &amp;&amp; !historyFilter.mediaType">
-                      <strong class="im_history_typing_author" ng-bind-html="typing.user.rFullName"></strong> is typing<span my-loading-dots></span>
+
+                    <div class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType" ng-switch="historyState.typing.length">
+                      <span ng-switch-when="1">
+                        <a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a> is typing<span my-loading-dots></span>
+                      </span>
+                      <span ng-switch-when="2">
+                        <a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a> and <a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a> are typing<span my-loading-dots></span>
+                      </span>
+                      <span ng-switch-default>
+                        <a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a>, <a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a> and {{historyState.typing.length - 2}} more are typing<span my-loading-dots></span>
+                      </span>
                     </div>
                   </div>
 
@@ -181,7 +190,7 @@
 
           <div class="im_bottom_panel_wrap">
 
-            <div class="im_edit_panel_wrap clearfix" ng-show="selectActions">
+            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
               <div class="im_edit_panel_border"></div>
               <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-switch="historyPeer.id > 0">
                 <span ng-switch-when="true">Delete Chat</span>
@@ -197,7 +206,7 @@
               </div>
             </div>
 
-            <div class="im_send_panel_wrap" ng-hide="selectActions">
+            <div class="im_send_panel_wrap" ng-hide="historyState.selectActions">
 
               <div class="im_send_form_wrap1">
 
@@ -206,6 +215,7 @@
                     <img
                       class="im_panel_peer_photo"
                       my-load-thumb
+                      watch="true"
                       thumb="historyPeer.photo"
                     />
                     <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
@@ -214,10 +224,11 @@
                     <img
                       class="im_panel_own_photo"
                       my-load-thumb
+                      watch="true"
                       thumb="ownPhoto"
                     />
                   </div>
-                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-submit="sendMessage($event)">
+                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}" ng-submit="sendMessage($event)">
 
                     <div class="im_send_field_wrap">
                       <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
@@ -238,7 +249,9 @@
                       <i class="icon icon-emoji"></i>
                     </div>
 
-                    <button type="submit" class="btn btn-success im_submit">Send</button>
+                    <button type="submit" class="btn btn-success im_submit">
+                      <span class="im_submit_text">Send</span>
+                    </button>
                   </form>
                 </div>
 
@@ -263,4 +276,3 @@
 </div>
 
 <div id="notify_sound"></div>
-

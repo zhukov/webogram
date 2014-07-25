@@ -15,7 +15,6 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myHead', function() {
     return {
       restrict: 'AE',
-      scope: true,
       templateUrl: 'partials/head.html'
     };
   })
@@ -23,18 +22,54 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
-      scope: true,
-      translude: false,
       templateUrl: 'partials/dialog.html'
     };
   })
 
   .directive('myMessage', function() {
     return {
-      restrict: 'AE',
-      scope: true,
-      translude: false,
       templateUrl: 'partials/message.html'
+    };
+  })
+
+  .directive('myServiceMessage', function() {
+    return {
+      templateUrl: 'partials/message_service.html'
+    };
+  })
+  .directive('myMessagePhoto', function() {
+    return {
+      templateUrl: 'partials/message_attach_photo.html'
+    };
+  })
+  .directive('myMessageVideo', function() {
+    return {
+      templateUrl: 'partials/message_attach_video.html'
+    };
+  })
+  .directive('myMessageDocument', function() {
+    return {
+      templateUrl: 'partials/message_attach_document.html'
+    };
+  })
+  .directive('myMessageAudio', function() {
+    return {
+      templateUrl: 'partials/message_attach_audio.html'
+    };
+  })
+  .directive('myMessageMap', function() {
+    return {
+      templateUrl: 'partials/message_attach_map.html'
+    };
+  })
+  .directive('myMessageContact', function() {
+    return {
+      templateUrl: 'partials/message_attach_contact.html'
+    };
+  })
+  .directive('myMessagePending', function() {
+    return {
+      templateUrl: 'partials/message_attach_pending.html'
     };
   })
 
@@ -679,7 +714,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           .on('keyup', function (e) {
             updateHeight();
 
-            $scope.draftMessage.text = richTextarea.innerText;
+            $scope.$apply(function () {
+              $scope.draftMessage.text = richTextarea.textContent;
+            });
 
             $timeout.cancel(updatePromise);
             updatePromise = $timeout(updateValue, 1000);
@@ -689,7 +726,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       // Head is sometimes slower
       $timeout(function () {
         fileSelects
-          .add('.im_head_attach input')
           .on('change', function () {
             var self = this;
             $scope.$apply(function () {
@@ -763,7 +799,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         lastLength = 0;
       };
 
-      function updateField () {
+      function updateRichTextarea () {
         if (richTextarea) {
           $timeout.cancel(updatePromise);
           var html = $('<div>').text($scope.draftMessage.text || '').html();
@@ -808,7 +844,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_message_send', focusField);
 
-      $scope.$on('ui_peer_draft', updateField);
+      $scope.$on('ui_peer_draft', updateRichTextarea);
       $scope.$on('ui_message_before_send', updateValue);
 
       function focusField () {
@@ -984,13 +1020,14 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       })
 
-      var cleanup = angular.noop;
-      // function () {
-      //   setTimeout(function () {
-      //     $scope.$destroy()
-      //     stopWatching();
-      //   }, 0);
-      // };
+      var cleanup = attrs.watch
+            ? angular.noop
+            : function () {
+                setTimeout(function () {
+                  $scope.$destroy()
+                  stopWatching();
+                }, 0);
+              };
     }
 
   })
@@ -1519,4 +1556,91 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     };
 
+  })
+
+
+  .directive('myUserLink', function ($timeout, $rootScope, AppUsersManager) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      var userID = $scope.$eval(attrs.myUserLink),
+          user = AppUsersManager.getUser(userID);
+
+      element.html(
+        (user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'] || '').valueOf()
+      );
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          $rootScope.openUser(userID);
+        });
+      }
+      if (attrs.color && $scope.$eval(attrs.color)) {
+        element.addClass('user_color_' + user.num);
+      }
+    }
+  })
+
+  .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
+
+    var statusFilter = $filter('userStatus');
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      var userID,
+          update = function () {
+            var user = AppUsersManager.getUser(userID);
+            element
+              .html(statusFilter(user))
+              .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline');
+          };
+
+      $scope.$watch(attrs.myUserStatus, function (newUserID) {
+        console.log(attrs.myUserStatus, newUserID);
+        userID = newUserID;
+        update();
+      });
+      $rootScope.$on('user_update', function (e, updUserID) {
+        if (userID == updUserID) {
+          update();
+        }
+      });
+    }
+  })
+
+
+  .directive('myUserPhotolink', function ($rootScope, AppUsersManager) {
+
+    return {
+      link: link,
+      scope: {
+        userID: '=myUserPhotolink'
+      },
+      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus" ng-show="user.status._ == \'userStatusOnline\'"></i>'
+    };
+
+    function link($scope, element, attrs) {
+      $scope.photo = AppUsersManager.getUserPhoto($scope.userID, 'User');
+
+      if ($scope.showStatus = attrs.status && $scope.$eval(attrs.status)) {
+        $scope.user = AppUsersManager.getUser($scope.userID);
+      }
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function (e) {
+          $rootScope.openUser($scope.userID);
+        });
+      }
+
+      if (attrs.imgClass) {
+        $(element[0].firstChild).addClass(attrs.imgClass)
+      }
+
+    }
   })

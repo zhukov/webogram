@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.8
+ * @license AngularJS v1.3.0-beta.16
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -69,7 +69,7 @@ function minErr(module) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.3.0-beta.8/' +
+    message = message + '\nhttp://errors.angularjs.org/1.3.0-beta.16/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i-2) + '=' +
@@ -124,7 +124,7 @@ function setupModuleLoader(window) {
      *
      * # Module
      *
-     * A module is a collection of services, directives, filters, and configuration information.
+     * A module is a collection of services, directives, controllers, filters, and configuration information.
      * `angular.module` is used to configure the {@link auto.$injector $injector}.
      *
      * ```js
