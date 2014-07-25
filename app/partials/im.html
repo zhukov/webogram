@@ -69,7 +69,7 @@
                         <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
                       </div>
                       <div class="im_dialog_message">
-                        <span class="im_dialog_message_text" ng-bind="contact.user | userStatus"></span>
+                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
                       </div>
                     </div>
                   </a>
@@ -132,7 +132,7 @@
                   <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
                     <div ng-switch-when="true">
                       <span ng-bind-html="historyPeer.data.rFullName"></span>
-                      <small class="im_peer_online" ng-bind="historyPeer.data | userStatus"></small>
+                      <small class="im_peer_online" my-user-status="historyPeer.id"></small>
                     </div>
                     <div ng-switch-default>
                       <span ng-bind-html="historyPeer.data.rTitle"></span>

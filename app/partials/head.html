@@ -75,10 +75,10 @@
                   <div class="navbar-quick-back-title">
                     <h4 ng-bind-html="historyPeer.data.rFullName"></h4>
                     <small ng-switch="historyState.typing.length">
-                      <span ng-switch-when="1">
+                      <span ng-switch-when="1" class="status_online">
                         typing<span my-loading-dots></span>
                       </span>
-                      <span ng-switch-default ng-bind="historyPeer.data | userStatus"></span>
+                      <span ng-switch-default my-user-status="historyPeer.id"></span>
                     </small>
                   </div>
                 </a>
@@ -92,13 +92,13 @@
                       <ng-pluralize ng-switch-when="0" count="historyPeer.data.participants_count"
                                        when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
                       </ng-pluralize>
-                      <span ng-switch-when="1">
+                      <span ng-switch-when="1" class="status_online">
                         <span my-user-link="historyState.typing[0]" short="true"></span> is typing<span my-loading-dots></span>
                       </span>
-                      <span ng-switch-when="2">
+                      <span ng-switch-when="2" class="status_online">
                         <span my-user-link="historyState.typing[0]" short="true"></span>, <span my-user-link="historyState.typing[1]" short="true"></span><span my-loading-dots></span>
                       </span>
-                      <span ng-switch-default>
+                      <span ng-switch-default class="status_online">
                         <span my-user-link="historyState.typing[0]" short="true"></span>+{{historyState.typing.length - 1}}<span my-loading-dots></span>
                       </span>
                     </small>

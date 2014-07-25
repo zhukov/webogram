@@ -17,7 +17,7 @@
 
       <div class="user_modal_info_wrap clearfix">
         <h4 class="user_modal_header" ng-bind-html="profile.rFullName"></h4>
-        <p class="user_modal_status" ng-bind="profile | userStatus"></p>
+        <p class="user_modal_status" my-user-status="::profile.id"></p>
 
         <div class="user_modal_actions_wrap clearfix">
           <span class="btn btn-primary user_modal_main_btn" ng-if="!photo.updating">

@@ -181,13 +181,20 @@ html {
 .navbar-quick-media-back h4 {
   margin: 9px 0 12px 0;
 }
+.navbar-quick-profile-back h4,
+.navbar-quick-group-back h4 {
+  font-weight: bold;
+}
 .navbar-quick-profile-back small,
 .navbar-quick-group-back small {
-  font-size: 12px;
-  color: #FFF;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   margin-left: 0;
+}
+.navbar-quick-profile-back .status_online,
+.navbar-quick-group-back .status_online {
+  color: #FFF;
 }
 
 .navbar-menu {
@@ -499,7 +506,7 @@ a.im_message_video_thumb {
   padding: 0 8px;
 }
 .im_content_message_wrap {
-  font-size: 1.2em;
+  font-size: 15px;
   float: left;
   position: relative;
   max-width: 80%;
@@ -795,6 +802,7 @@ a.im_message_from_photo {
   border-radius: 0 !important;
   padding-right: 11px;
 }
+
 .im_dialog_wrap:last-child a.im_dialog {
   border-bottom: 0;
 }
@@ -807,20 +815,20 @@ a.im_message_from_photo {
 
 .im_dialog_peer,
 .im_dialog_message {
-  font-size: 1.2em;
+  font-size: 1.3em;
 }
 .im_dialog_peer {
   margin-bottom: 7px;
   margin-top: 5px;
 }
 .im_dialog_meta {
-  margin-top: 5px;
+  margin-top: 6px;
 }
 .im_dialog_date,
 a.im_dialog:hover .im_dialog_date,
 a.im_dialog_selected .im_dialog_date {
   color: #b3b3b3;
-  font-size: 13px;
+  font-size: 12px;
   margin-right: 3px;
 }
 .im_dialog_badge {
@@ -837,7 +845,9 @@ a.im_dialog:hover .im_dialog_unread,
 a.im_dialog_selected .im_dialog_unread {
   background: #7cacc7;
 }
-.im_dialog_message_text {
+.im_dialog_message_text,
+a.im_dialog:hover .im_dialog_message_text,
+a.im_dialog_selected .im_dialog_message_text {
   color: #8f8f8f;
 }
 
@@ -1011,7 +1021,7 @@ a.im_message_fwd_author {
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
   background-size: 42px 891px;
-  opacity: 1;
+  opacity: 0.8;
 }
 .is_1x .icon-camera {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1071,11 +1081,14 @@ a.im_message_fwd_author {
   min-height: 32px;
   max-height: 150px;
   margin-bottom: 0;
+  font-size: 15px;
 }
 .emoji-wysiwyg-editor:empty {
   background: #f1f1f1;
   border-color: #f1f1f1;
-  content: attr(placeholder);
+}
+.emoji-wysiwyg-editor:empty:before {
+  color: #999;
 }
 .emoji-wysiwyg-editor:active,
 .emoji-wysiwyg-editor:focus {

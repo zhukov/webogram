@@ -1584,7 +1584,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myUserStatus', function ($filter, AppUsersManager) {
+  .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
 
     var statusFilter = $filter('userStatus');
 
@@ -1593,10 +1593,24 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link($scope, element, attrs) {
-      var userID = $scope.$eval(attrs.myUserStatus),
-          user = AppUsersManager.getUser(userID);
+      var userID,
+          update = function () {
+            var user = AppUsersManager.getUser(userID);
+            element
+              .html(statusFilter(user))
+              .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline');
+          };
 
-      element.html(statusFilter(user));
+      $scope.$watch(attrs.myUserStatus, function (newUserID) {
+        console.log(attrs.myUserStatus, newUserID);
+        userID = newUserID;
+        update();
+      });
+      $rootScope.$on('user_update', function (e, updUserID) {
+        if (userID == updUserID) {
+          update();
+        }
+      });
     }
   })
 
@@ -1608,7 +1622,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope: {
         userID: '=myUserPhotolink'
       },
-      template: '<img my-load-thumb thumb="photo" /><i class="icon status_online" ng-if="::showStatus" ng-show="user.status._ == \'userStatusOnline\'"></i>'
+      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus" ng-show="user.status._ == \'userStatusOnline\'"></i>'
     };
 
     function link($scope, element, attrs) {
@@ -1618,9 +1632,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.user = AppUsersManager.getUser($scope.userID);
       }
 
-      element.on('click', function (e) {
-        $rootScope.openUser($scope.userID);
-      });
+      if (element[0].tagName == 'A') {
+        element.on('click', function (e) {
+          $rootScope.openUser($scope.userID);
+        });
+      }
 
       if (attrs.imgClass) {
         $(element[0].firstChild).addClass(attrs.imgClass)
