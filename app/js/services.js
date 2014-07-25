@@ -1788,7 +1788,8 @@ angular.module('myApp.services', [])
 
   function regroupWrappedHistory (history, limit) {
     var start = 0,
-        end = history.length,
+        len = history.length,
+        end = len,
         i, curDay, prevDay, curMessage, prevMessage;
 
     if (limit > 0) {
@@ -1816,12 +1817,24 @@ angular.module('myApp.services', [])
 
         var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
         if (curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
-          curMessage.grouped = singleLine ? 4 : 3;
+          curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {
-          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
+          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 'im_grouped_short' : 'im_grouped';
+        }
+        if (curMessage.fwd_from_id) {
+          if (!prevMessage.grouped) {
+            prevMessage.grouped = 'im_grouped_fwd_start';
+          }
+          if (curMessage.grouped && i == len - 1) {
+            curMessage.grouped += ' im_grouped_fwd_end';
+          }
         }
       } else if (prevMessage || !i) {
         delete curMessage.grouped;
+
+        if (prevMessage && prevMessage.grouped && prevMessage.fwd_from_id) {
+          prevMessage.grouped += ' im_grouped_fwd_end';
+        }
       }
       prevMessage = curMessage;
       prevDay = curDay;
@@ -1854,6 +1867,7 @@ angular.module('myApp.services', [])
         case 'messageMediaPhoto': notificationMessage = 'Photo'; break;
         case 'messageMediaVideo': notificationMessage = 'Video'; break;
         case 'messageMediaDocument': notificationMessage = 'Document'; break;
+        case 'messageMediaAudio': notificationMessage = 'Voice message'; break;
         case 'messageMediaGeo': notificationMessage = 'Location'; break;
         case 'messageMediaContact': notificationMessage = 'Contact'; break;
         default: notificationMessage = 'Attachment'; break;

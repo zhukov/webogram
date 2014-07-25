@@ -32,6 +32,11 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myServiceMessage', function() {
+    return {
+      templateUrl: 'partials/message_service.html'
+    };
+  })
   .directive('myMessagePhoto', function() {
     return {
       templateUrl: 'partials/message_attach_photo.html'
@@ -710,7 +715,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             updateHeight();
 
             $scope.$apply(function () {
-              $scope.draftMessage.text = richTextarea.innerText;
+              $scope.draftMessage.text = richTextarea.textContent;
             });
 
             $timeout.cancel(updatePromise);
@@ -1614,7 +1619,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       element.on('click', function (e) {
-        $rootScope.openUser(userID);
+        $rootScope.openUser($scope.userID);
       });
 
       if (attrs.imgClass) {
