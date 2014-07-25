@@ -1,15 +1,13 @@
 CACHE MANIFEST
-# Time: Thu Jul 03 2014 00:10:19 GMT+0400 (MSK)
+# Time: Fri Jul 25 2014 19:06:23 GMT+0400 (MSK)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
 css/app.css
-img/TLogo2_1x.png
-img/TLogo2_2x.png
-img/TLogo_1x.png
-img/Tlogo_2x.png
+img/T_LogoM.png
+img/T_LogoM_1x.png
 img/WebIntro1.png
 img/WebIntro1_1x.png
 img/WebIntro2.png
@@ -24,6 +22,8 @@ img/emojisprite_1.png
 img/emojisprite_2.png
 img/emojisprite_3.png
 img/emojisprite_4.png
+img/iphone_home120.png
+img/iphone_startup.png
 img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
@@ -62,10 +62,8 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-js/lib/aes_worker.js
 js/lib/bin_utils.js
-js/lib/pq_worker.js
-js/lib/sha1_worker.js
+js/lib/crypto_worker.js
 vendor/closure/long.js
 vendor/console-polyfill/console-polyfill.js
 vendor/cryptoJS/crypto.js

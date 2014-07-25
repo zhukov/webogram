@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.9 - messaging web application for MTProto
+ * Webogram v0.2.5 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -281,12 +281,11 @@ function pqPrimeFactorization (pqBytes) {
   var what = new BigInteger(pqBytes), 
       result = false;
 
-  console.log('PQ start', pqBytes, what.bitLength());
+  console.log('PQ start', pqBytes, what.toString(16), what.bitLength());
 
   try {
     result = pqPrimeLeemon(str2bigInt(what.toString(16), 16, Math.ceil(64 / bpe) + 1))
   } catch (e) {
-    console.error(e);
     console.error('Pq leemon Exception', e);
   }
 
@@ -366,7 +365,7 @@ function pqPrimeBigInteger (what) {
     Q = f;
   }
 
-  return [bytesFromBigInt(P), bytesFromBigInt(Q)];
+  return [bytesFromBigInt(P), bytesFromBigInt(Q), it];
 }
 
 function gcdLong(a, b) {
@@ -440,7 +439,7 @@ function pqPrimeLong(what) {
     Q = f;
   }
 
-  return [bytesFromHex(P.toString(16)), bytesFromHex(Q.toString(16))];
+  return [bytesFromHex(P.toString(16)), bytesFromHex(Q.toString(16)), it];
 }
 
 
@@ -515,5 +514,19 @@ function pqPrimeLeemon (what) {
 
   // console.log(dT(), 'done', bigInt2str(what, 10), bigInt2str(P, 10), bigInt2str(Q, 10));
 
-  return [bytesFromLeemonBigInt(P), bytesFromLeemonBigInt(Q)];
+  return [bytesFromLeemonBigInt(P), bytesFromLeemonBigInt(Q), it];
+}
+
+
+function bytesModPow (x, y, m) {
+  try {
+    var xBigInt = str2bigInt(x, 64),
+        yBigInt = str2bigInt(y, 64),
+        mBigInt = str2bigInt(bytesToHex(m), 16, 2),
+        resBigInt = powMod(xBigInt, yBigInt, mBigInt);
+
+    return bytesFromHex(bigInt2str(resBigInt, 16));
+  } catch (e) {}
+
+  return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)));
 }

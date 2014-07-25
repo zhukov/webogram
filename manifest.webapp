@@ -1,7 +1,7 @@
 {
-  "name": "Webogram",
-  "description": "Webogram – UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.1.9",
+  "name": "Telegram",
+  "description": "UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.2.5",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
@@ -11,6 +11,11 @@
   "installs_allowed_from": [
     "*"
   ],
+  "messages": [{
+    "push": "/index.html"
+  }, {
+    "push-register": "/index.html"
+  }],
   "permissions": {
     "desktop-notification": {
       "description": "Required to show new message notifications"
@@ -18,6 +23,9 @@
     "contacts": {
       "description": "Required to import phonebook contacts",
       "access": "readonly"
+    },
+    "push": {
+      "description": "Required for notifications"
     }
   },
   "icons": {
