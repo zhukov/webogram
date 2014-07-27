@@ -79,3 +79,11 @@ Build emoji list in apropriate format. Generate sheet in future, when needed.
 **License**: https://github.com/github/gemoji/blob/master/LICENSE
 
 Emoji images
+
+
+### [jQuery Textcomplete](https://github.com/yuku-t/jquery-textcomplete)
+
+**Author**: Yuku Takahashi
+**License**: MIT - https://github.com/yuku-t/jquery-textcomplete#license
+
+Autocomplete for text fields - used to autocomplete emojies.

@@ -704,12 +704,25 @@ angular.module('myApp.directives', ['myApp.filters'])
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
       if (richTextarea) {
-        editorElement = richTextarea;
-        $(richTextarea).addClass('form-control');
-        $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+        var updatePromise,
+          imageFromEmoji = function (emoji) {
+            var sprites = $.emojiarea.spritesheetPath.replace('!', emoji[0]),
+              top = emoji[1] * $.emojiarea.iconSize * -1,
+              left = emoji[2] * $.emojiarea.iconSize * -1,
+              spritesHeight = $.emojiarea.spritesheetDimens[emoji[0]][0] * $.emojiarea.iconSize,
+              spritesWidth = $.emojiarea.spritesheetDimens[emoji[0]][1] * $.emojiarea.iconSize;
 
-        var updatePromise;
+            return '<img class="img" src="'+$.emojiarea.path+'img/blank.gif" style="' +
+              'display: inline-block;' +
+              'width: '+$.emojiarea.iconSize+'px; height: '+$.emojiarea.iconSize+'px;' +
+              'background: url('+sprites+') '+left+'px '+top+'px no-repeat;' +
+              'background-size: '+spritesWidth+'px '+spritesHeight+'px" />';
+          };
+
+        editorElement = richTextarea;
         $(richTextarea)
+          .addClass('form-control')
+          .attr('placeholder', $(messageField).attr('placeholder'))
           .on('DOMNodeInserted', onPastedImageEvent)
           .on('keyup', function (e) {
             updateHeight();
@@ -720,6 +733,36 @@ angular.module('myApp.directives', ['myApp.filters'])
 
             $timeout.cancel(updatePromise);
             updatePromise = $timeout(updateValue, 1000);
+          })
+          .textcomplete([{
+            placement: 'top',
+            match  : /(^|\s)(:[\+\-_a-zA-Z0-9]*)$/,
+            search : function (term, callback) {
+              var regexp = new RegExp('^' + term.replace('+', '\\+')),
+                  emojies = [];
+
+              for (var emoji in $.emojiarea.icons) {
+                if ($.emojiarea.icons.hasOwnProperty(emoji) && regexp.test(emoji)) {
+                  var obj = {};
+                  emojies.push($.emojiarea.icons[emoji]);
+                }
+              }
+//              console.log('Found '+emojies.length+' emoji(es) for autocompletion based on "'+term+'"');
+              callback(emojies);
+            },
+            template: function (emoji) {
+              return imageFromEmoji(emoji) + ' ' + emoji[3];
+            },
+            replace: function (emoji) {
+              //TODO: found no easy way to append the emoji image to the div while putting text in the textarea
+//              var range = window.getSelection().getRangeAt(0);
+//              range.insertNode(imageFromEmoji(emoji));
+              return '$1'+emoji[3]+' '; //TODO: this additional space is not going through
+            }
+          }]);
+
+          $scope.$on('$destroy', function () {
+            $(richTextarea).textComplete('destroy');
           });
       }
 
@@ -764,6 +807,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (submit) {
+            //FIXME: workaround® to circumvent weird behaviour on event queueing between textcomplete and send-on-enter
+            $(editorElement).triggerHandler($.Event('keydown.textComplete', { keyCode: e.keyCode }));
+            if (window.hasOwnProperty('cancelOnEnter') && window.cancelOnEnter) {
+              window.cancelOnEnter = false;
+              return false;
+            }
+            //END OF FIX ME
             $(element).trigger('submit');
             $(element).trigger('message_send');
             resetAfterSubmit();
