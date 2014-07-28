@@ -13,7 +13,7 @@
   </span>
   <span ng-switch-when="messageActionChatAddUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
     <span ng-switch-when="true">
-      invited <a my-user-link="historyMessage.action.user_id"></a>
+      invited <a my-user-link="historyMessage.action.user_id" color="true"></a>
     </span>
     <span ng-switch-default>
       returned to group
@@ -21,7 +21,7 @@
   </span>
   <span ng-switch-when="messageActionChatDeleteUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
     <span ng-switch-when="true">
-      kicked <a my-user-link="historyMessage.action.user_id"></a>
+      kicked <a my-user-link="historyMessage.action.user_id" color="true"></a>
     </span>
     <span ng-switch-default>
       left group

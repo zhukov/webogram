@@ -328,7 +328,7 @@ angular.module('myApp.services', [])
     isAvailable: isAvailable,
     openPhonebookImport: openPhonebookImport,
     getPhonebookContacts: getPhonebookContacts
-  }
+  };
 
   function isAvailable () {
     if (Config.Navigator.ffos && Config.Modes.packed) {

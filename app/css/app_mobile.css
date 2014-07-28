@@ -172,6 +172,8 @@ html {
   color: #FFF;
   margin: 0;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 .navbar-quick-back-title {
   max-width: 160px;
