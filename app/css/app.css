@@ -1040,7 +1040,8 @@ a.im_dialog_selected .im_dialog_message_text {
 .active a.im_dialog .im_dialog_chat_from_wrap,
 .active a.im_dialog .im_dialog_message_media,
 .active a.im_dialog .im_dialog_message_service,
-.active a.im_dialog .im_dialog_message_text {
+.active a.im_dialog .im_dialog_message_text,
+.active a.im_dialog .im_dialog_message {
   color: #FFF;
 }
 .im_dialog_photo {
@@ -1278,6 +1279,10 @@ a.im_dialog_selected .im_dialog_date {
 .im_history_scrollable_wrap {
   outline: none ! important;
   -webkit-user-select: text;
+
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
 }
 
 .im_history_to_bottom .im_history_scrollable {

@@ -724,7 +724,7 @@ angular.module('myApp.controllers', [])
       });
 
       if (preload) {
-        $scope.historyState.typing.splice();
+        $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
         $scope.$broadcast('ui_peer_change');
         $scope.$broadcast('ui_history_change');
         safeReplaceObject($scope.state, {loaded: true});
@@ -1043,7 +1043,7 @@ angular.module('myApp.controllers', [])
         // console.trace();
         $scope.history.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
         AppMessagesManager.regroupWrappedHistory($scope.history, -3);
-        $scope.historyState.typing.splice();
+        $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
         $scope.$broadcast('ui_history_append_new', {my: addedMessage.my});
         if (addedMessage.my) {
           delete $scope.historyUnreadAfter;
