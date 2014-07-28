@@ -1104,6 +1104,10 @@ a.im_message_fwd_author {
 .emoji-menu {
   margin-left: -20px;
   margin-top: -267px;
+  width: 262px;
+}
+.emoji-menu .emoji-items a {
+  padding: 5px;
 }
 
 .im_head_attach {

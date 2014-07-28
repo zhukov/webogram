@@ -114,7 +114,7 @@
 
         <ul ng-switch-when="true" class="nav navbar-nav navbar-offline">
           <li ng-show="!offlineConnecting"><span class="navbar-offline-text">Waiting for network<span my-loading-dots></span></span></li>
-          <li ng-show="!offlineConnecting"><a href="" ng-click="retryOnline()">Retry</a></li>
+          <li ng-show="!offlineConnecting" class="hidden-xs"><a href="" ng-click="retryOnline()">Retry</a></li>
           <li ng-show="offlineConnecting"><span class="navbar-offline-text">Connecting<span my-loading-dots></span></span></li>
         </ul>
 
