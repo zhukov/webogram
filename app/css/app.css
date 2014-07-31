@@ -1224,6 +1224,7 @@ a.im_dialog_selected .im_dialog_date {
   font-size: 13px;
   margin-right: 20px;
 }
+.im_history_panel_media_dropdown,
 .im_history_panel_return_count {
   margin-left: 5px;
 }

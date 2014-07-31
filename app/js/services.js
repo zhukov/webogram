@@ -2091,7 +2091,15 @@ angular.module('myApp.services', [])
               delete messagesForDialogs[messageID];
             }
             message.deleted = true;
-            delete messagesStorage[messageID];
+            messagesStorage[messageID] = {
+              deleted: true,
+              id: messageID,
+              from_id: message.from_id,
+              to_id: message.to_id,
+              out: message.out,
+              unread: message.unread,
+              date: message.date
+            };
           }
         }
 
