@@ -673,7 +673,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateBottomizer () {
         $(historyMessagesEl).css({marginTop: 0});
-        var marginTop = scrollableWrap.offsetHeight - historyMessagesEl.offsetHeight - 20 - 49;
+        var marginTop = scrollableWrap.offsetHeight
+                        - historyMessagesEl.offsetHeight
+                        - 20
+                        - (Config.Navigator.mobile ? 0 : 49);
+
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
           $(historyMessagesEl).css({marginTop: marginTop});
         }
