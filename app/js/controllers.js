@@ -221,7 +221,7 @@ angular.module('myApp.controllers', [])
     $scope.$on('history_focus', function (e, peerData) {
       $modalStack.dismissAll();
       if (peerData.peerString == $scope.curDialog.peer && peerData.messageID == $scope.curDialog.messageID) {
-        $scope.$broadcast('ui_history_focus');
+        $scope.$broadcast(peerData.messageID ? 'ui_history_change_scroll' : 'ui_history_focus');
       } else {
         $location.url('/im?p=' + peerData.peerString + (peerData.messageID ? '&m=' + peerData.messageID : ''));
       }

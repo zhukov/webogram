@@ -1806,15 +1806,18 @@ angular.module('myApp.services', [])
   }
 
   function regroupWrappedHistory (history, limit) {
+    if (!history || !history.length) {
+      return;
+    }
     var start = 0,
         len = history.length,
         end = len,
         i, curDay, prevDay, curMessage, prevMessage;
 
     if (limit > 0) {
-      end = limit;
+      end = Math.min(limit, len);
     } else if (limit < 0) {
-      start = end + limit;
+      start = Math.max(0, end + limit);
     }
 
     for (i = start; i < end; i++) {
