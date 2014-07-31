@@ -1,0 +1,89 @@
+<div class="mobile_user_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-toggle-wrap dropdown">
+          <a class="dropdown-toggle navbar-toggle">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-if="user._ == 'userContact'">
+              <a ng-click="importContact(true)">Edit contact</a>
+            </li>
+            <li ng-if="user._ == 'userContact'">
+              <a ng-click="deleteContact()">Delete contact</a>
+            </li>
+            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
+              <a ng-click="importContact()">Add to contacts</a>
+            </li>
+            <li>
+              <a ng-click="flushHistory()">Delete chat</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$close()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4>Contact info</h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="mobile_user_modal_photo_profile_wrap">
+
+      <a href="" ng-click="openPhoto(userPhoto.id, -user.id)" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !userPhoto.id}">
+        <img
+          class="mobile_user_modal_image"
+          my-load-thumb
+          thumb="userPhoto"
+        />
+      </a>
+
+      <div class="mobile_user_modal_info_wrap clearfix">
+        <h4 class="mobile_user_modal_header" ng-bind="user | userName"></h4>
+        <p class="mobile_user_modal_status" ng-if="user.status" my-user-status="::user.id"></p>
+      </div>
+
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action" ng-click="goToHistory()">Send message</a>
+    </div>
+
+    <div ng-if="user.phone.length > 0" class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action" ng-click="shareContact()">Share contact</a>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label">Notifications</span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header">Phone</h4>
+      <div class="mobile_modal_section_value" ng-bind="user.phone | phoneNumber"></div>
+    </div>
+
+  </div>
+
+</div>

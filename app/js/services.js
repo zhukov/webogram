@@ -161,11 +161,19 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.userID = userID;
 
+    var tUrl = 'partials/user_modal.html',
+        className = 'user_modal_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/user_modal.html';
+      className += ' mobile_modal';
+    }
+
     var modalInstance = $modal.open({
-      templateUrl: 'partials/user_modal.html',
+      templateUrl: tUrl,
       controller: 'UserModalController',
       scope: scope,
-      windowClass: 'user_modal_window page_modal'
+      windowClass: className
     });
   };
   $rootScope.openUser = openUser;
@@ -493,11 +501,19 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.chatID = chatID;
 
+    var tUrl = 'partials/chat_modal.html',
+        className = 'chat_modal_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/chat_modal.html';
+      className += ' mobile_modal';
+    }
+
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html',
+      templateUrl: tUrl,
       controller: 'ChatModalController',
-      windowClass: 'chat_modal_window page_modal',
-      scope: scope
+      scope: scope,
+      windowClass: className
     });
   }
 
@@ -3632,11 +3648,19 @@ angular.module('myApp.services', [])
       angular.extend(scope, options);
     }
 
+    var tUrl = 'partials/peer_select.html',
+        className = 'peer_select_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/peer_select.html';
+      className += ' mobile_modal';
+    }
+
     return $modal.open({
-      templateUrl: 'partials/peer_select.html',
+      templateUrl: tUrl,
       controller: 'PeerSelectController',
       scope: scope,
-      windowClass: 'peer_select_window'
+      windowClass: className
     }).result;
   }
 
@@ -3659,11 +3683,19 @@ angular.module('myApp.services', [])
       scope.action = 'select';
     }
 
+    var tUrl = 'partials/contacts_modal.html',
+        className = 'contacts_modal_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/contacts_modal.html';
+      className += ' mobile_modal';
+    }
+
     return $modal.open({
-      templateUrl: 'partials/contacts_modal.html',
+      templateUrl: tUrl,
       controller: 'ContactsModalController',
       scope: scope,
-      windowClass: 'contacts_modal_window page_modal'
+      windowClass: className
     }).result;
   }
 

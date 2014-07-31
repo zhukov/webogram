@@ -236,10 +236,18 @@ angular.module('myApp.controllers', [])
     $scope.historyState = {selectActions: false, typing: []};
 
     $scope.openSettings = function () {
+      var tUrl = 'partials/settings_modal.html',
+          className = 'settings_modal_window page_modal';
+
+      if (Config.Navigator.mobile) {
+        tUrl = 'partials/mobile/settings_modal.html';
+        className += ' mobile_modal';
+      }
+
       $modal.open({
-        templateUrl: 'partials/settings_modal.html',
+        templateUrl: tUrl,
         controller: 'SettingsModalController',
-        windowClass: 'settings_modal_window page_modal'
+        windowClass: className
       });
     }
 
@@ -2118,6 +2126,10 @@ angular.module('myApp.controllers', [])
       promise.then(function () {
         $modalInstance.close(peerString);
       });
+    };
+
+    $scope.toggleSearch = function () {
+      $scope.$broadcast('dialogs_search_toggle');
     };
   })
 

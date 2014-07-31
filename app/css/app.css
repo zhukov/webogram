@@ -313,6 +313,13 @@ input[type="number"] {
 
 .modal {
   overflow-y: auto;
+  padding: 10px;
+}
+.mobile_modal {
+  padding: 0;
+}
+.modal-dialog {
+  margin: 0 auto;
 }
 .modal-content {
   border: 0;
@@ -378,13 +385,6 @@ input[type="number"] {
 .is_1x .modal_close,
 .is_1x .modal_prev {
   background-image: url(../img/icons/PhotoControls_1x.png);
-}
-
-.modal {
-  padding: 10px;
-}
-.modal-dialog {
-  margin: 0 auto;
 }
 
 .text-invisible {
@@ -2620,7 +2620,7 @@ img.chat_modal_participant_photo {
 }
 
 .settings_modal_wrap .im_attach_input {
-  z-index: 1200;
+  z-index: 999;
 }
 .settings_modal_settings {
   padding: 4px 0;
@@ -2932,6 +2932,7 @@ a:hover .icon-twitter {
   height: 40px;
   margin-right: 10px;
   overflow: hidden;
+  border-radius: 2px;
 }
 
 .contacts_modal_contact_status {

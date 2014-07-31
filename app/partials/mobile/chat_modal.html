@@ -1,0 +1,126 @@
+<div class="chat_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-toggle-wrap dropdown" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+          <a class="dropdown-toggle navbar-toggle">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-if="chatFull.thumb.location">
+              <a ng-click="deletePhoto()">Delete photo</a>
+            </li>
+            <li>
+              <a ng-click="editTitle()">Edit group</a>
+            </li>
+            <li>
+              <a ng-click="leaveGroup()">Leave group</a>
+            </li>
+            <li>
+              <a ng-click="flushHistory()">Delete chat</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$close()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4>Group info</h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="mobile_user_modal_photo_profile_wrap">
+
+      <img
+        class="mobile_user_modal_image mobile_chat_modal_image"
+        my-load-thumb
+        watch="true"
+        thumb="chatFull.thumb"
+      />
+
+      <div class="mobile_user_modal_info_wrap clearfix">
+        <h4 class="mobile_user_modal_header" ng-bind-html="chatFull.chat.rTitle"></h4>
+        <p class="mobile_user_modal_status"  ng-if="chatFull.chat.participants_count > 0">
+          <ng-pluralize count="chatFull.chat.participants_count"
+                           when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
+          </ng-pluralize>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length">
+      <a class="mobile_modal_action" ng-click="inviteToGroup()">Add member</a>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left">
+      <a class="mobile_modal_action" ng-click="returnToGroup()">Return to group</a>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ == 'chatForbidden'">
+      <a class="mobile_modal_action" ng-click="flushHistory()">Return to group</a>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; !photo.updating">
+      <span class="mobile_modal_action mobile_modal_upload_action">
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+        Update photo
+      </span>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="photo.updating">
+      <span class="mobile_modal_action">
+        Updating<span my-loading-dots></span>
+      </span>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label">Notifications</span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header">Members</h4>
+      <div class="mobile_modal_section_body">
+
+        <div class="chat_modal_members_list">
+
+          <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
+            <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)"  class="chat_modal_participant_kick pull-right">Kick</a>
+
+            <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
+
+            <div class="chat_modal_participant_name">
+              <a my-user-link="participant.user_id"></a>
+            </div>
+            <div class="chat_modal_participant_status" my-user-status="::participant.user_id"></div>
+          </div>
+
+        </div>
+
+        <div class="chat_modal_members_forbidden" ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.left">
+          Group members list is unavailable.
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

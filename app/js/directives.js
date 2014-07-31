@@ -241,7 +241,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           dialogsColWrap = $('.im_dialogs_col_wrap')[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
-          panelWrap = $('.im_dialogs_panel')[0],
+          panelWrapSelector = Config.Navigator.mobile && attrs.modal
+                              ? '.mobile_modal_body .im_dialogs_panel'
+                              : '.im_dialogs_panel',
+          panelWrap = $(panelWrapSelector)[0],
           footer = $('.im_page_footer')[0],
           hasTabs = false,
           moreNotified = false;
@@ -300,10 +303,15 @@ angular.module('myApp.directives', ['myApp.filters'])
 
 
       function updateSizes () {
+        if (!panelWrap || !panelWrap.offsetHeight) {
+          panelWrap = $(panelWrapSelector)[0];
+        }
+
         if (attrs.modal) {
           $(element).css({
             height: $($window).height() -
-                    (Config.Navigator.mobile ? 100 : 200)
+                    (panelWrap ? panelWrap.offsetHeight : 58) -
+                    (Config.Navigator.mobile ? 46 : 200)
           });
           updateScroller();
           return;
@@ -315,9 +323,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!footer || !footer.offsetHeight) {
           footer = $('.im_page_footer')[0];
         }
-        if (!panelWrap || !panelWrap.offsetHeight) {
-          panelWrap = $('.im_dialogs_panel')[0];
-        }
+
         if (!dialogsColWrap || !dialogsColWrap.offsetHeight) {
           dialogsColWrap = $('.im_dialogs_col_wrap')[0];
         }
@@ -361,7 +367,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height() -
                   (panelWrap && panelWrap.offsetHeight || 0) -
                   (searchWrap && searchWrap.offsetHeight || 0) -
-                  (Config.Navigator.mobile ? 100 : 200)
+                  (Config.Navigator.mobile ? 64 : 200)
         });
         $(contactsWrap).nanoScroller();
       }
@@ -1606,7 +1612,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           };
 
       $scope.$watch(attrs.myUserStatus, function (newUserID) {
-        console.log(attrs.myUserStatus, newUserID);
         userID = newUserID;
         update();
       });
