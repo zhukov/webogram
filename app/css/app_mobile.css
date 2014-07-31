@@ -478,6 +478,14 @@ html {
 a.im_message_video_thumb {
   margin-right: 0;
 }
+img.im_message_video_thumb,
+.img_gif_thumb {
+  -webkit-filter: none;
+  -moz-filter: none;
+  -o-filter: none;
+  -ms-filter: none;
+  filter: none;
+}
 .im_message_video .im_message_document_info {
   display: none;
 }
