@@ -1,6 +1,6 @@
 {
   "name": "Telegram",
-  "version": "0.2.5",
+  "version": "0.2.8",
   "description": "Telegram UNOFFICIAL Web App",
   "main": "app/index.html",
   "single-instance": true,
