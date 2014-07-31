@@ -985,6 +985,7 @@ span.mobile_modal_action {
 }
 span.mobile_modal_upload_action {
   position: relative;
+  overflow: hidden;
 }
 a.mobile_modal_action:hover,
 a.mobile_modal_action:active {
