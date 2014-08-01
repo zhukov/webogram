@@ -8,7 +8,7 @@ var path = require('path');
 // The generated file is being created at src
 // so it can be fetched by usemin.
 gulp.task('templates', function() {
-  return gulp.src('app/partials/*.html')
+  return gulp.src('app/partials/**/*.html')
     .pipe($.angularTemplatecache('templates.js', {
       root: 'partials',
       module: 'myApp.templates',
