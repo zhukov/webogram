@@ -216,12 +216,20 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
         return deserializer;
       }
-    })['catch'](function (error) {
-      if (!error.message && !error.type) {
-        error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+    }).then(
+      function (result) {
+        if (!result.data || !result.data.byteLength) {
+          return $q.reject({code: 406, type: 'NETWORK_BAD_REQUEST'});
+        }
+        return result;
+      },
+      function (error) {
+        if (!error.message && !error.type) {
+          error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+        }
+        return $q.reject(error);
       }
-      return $q.reject(error);
-    });
+    );
   };
 
   function mtpSendReqPQ (auth) {
@@ -1119,12 +1127,20 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       return $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, {
         responseType: 'arraybuffer',
         transformRequest: null
-      })['catch'](function (error) {
-        if (!error.message && !error.type) {
-          error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+      }).then(
+        function (result) {
+          if (!result.data || !result.data.byteLength) {
+            return $q.reject({code: 406, type: 'NETWORK_BAD_REQUEST'});
+          }
+          return result;
+        },
+        function (error) {
+          if (!error.message && !error.type) {
+            error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+          }
+          return $q.reject(error);
         }
-        return $q.reject(error);
-      });
+      );
     });
   };
 
