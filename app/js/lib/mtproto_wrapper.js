@@ -124,7 +124,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       networkerPromise = mtpGetNetworker(dcID, options);
     } else {
       networkerPromise = Storage.get('dc').then(function (baseDcID) {
-        return mtpGetNetworker(dcID = baseDcID || 1, options);
+        return mtpGetNetworker(dcID = baseDcID || 2, options);
       });
     }
 
