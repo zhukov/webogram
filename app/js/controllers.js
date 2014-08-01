@@ -40,10 +40,18 @@ angular.module('myApp.controllers', [])
     $scope.callPending = {};
 
     $scope.selectCountry = function () {
+      var tUrl = 'partials/country_select_modal.html',
+          className = 'countries_modal_window page_modal';
+
+      if (Config.Navigator.mobile) {
+        tUrl = 'partials/mobile/country_select_modal.html';
+        className += ' mobile_modal';
+      }
+
       var modal = $modal.open({
-        templateUrl: 'partials/country_select_modal.html',
+        templateUrl: tUrl,
         controller: 'CountrySelectModalController',
-        windowClass: 'countries_modal_window'
+        windowClass: className
       });
 
       modal.result.then(function (code) {

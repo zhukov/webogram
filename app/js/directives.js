@@ -398,7 +398,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: $($window).height() - (panelWrap && panelWrap.offsetHeight || 0) - (searchWrap && searchWrap.offsetHeight || 0) - 200
+          height: $($window).height()
+                    - (panelWrap && panelWrap.offsetHeight || 0)
+                    - (searchWrap && searchWrap.offsetHeight || 0)
+                    - (Config.Navigator.mobile ? 46 + 18 : 200)
         });
         $(countriesWrap).nanoScroller();
       }

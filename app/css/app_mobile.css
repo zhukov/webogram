@@ -1272,4 +1272,21 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 
 
+.countries_modal_search {
+  padding: 3px 3px 12px;
+  margin: 0;
+  position: relative;
+}
+.countries_modal_col {
+  margin: 0 -9px;
+  max-height: none;
+}
+.countries_modal_members_list {
+  padding: 0 12px 0 12px;
+}
+.countries_scrollable_wrap a.countries_modal_country {
+  padding: 8px 8px;
+}
+
+
 }
