@@ -339,7 +339,7 @@ angular.module('myApp.services', [])
   };
 
   function isAvailable () {
-    if (Config.Navigator.ffos && Config.Modes.packed) {
+    if (Config.Navigator.mobile && Config.Navigator.ffos && Config.Modes.packed) {
       try {
         return navigator.mozContacts && navigator.mozContacts.getAll;
       } catch (e) {
@@ -352,9 +352,9 @@ angular.module('myApp.services', [])
 
   function openPhonebookImport () {
     return $modal.open({
-      templateUrl: 'partials/phonebook_modal.html',
+      templateUrl: 'partials/mobile/phonebook_modal.html',
       controller: 'PhonebookModalController',
-      windowClass: 'phonebook_modal_window'
+      windowClass: 'phonebook_modal_window page_modal mobile_modal'
     });
   }
 
