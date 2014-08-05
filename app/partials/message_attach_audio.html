@@ -1,0 +1,33 @@
+<div class="im_message_document im_message_audio" ng-class="{im_message_audio_done: historyMessage.media.audio.url, im_message_audio_progress: historyMessage.media.audio.progress.enabled}">
+  <a href="" ng-click="openAudio(historyMessage.media.audio.id)" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
+    <i class="icon icon-audio"></i>
+  </a>
+  <i class="icon icon-audio" ng-if="historyMessage.media.audio.progress.enabled || historyMessage.media.audio.url"></i>
+
+  <div class="im_message_audio_info">
+    <div class="im_message_audio_name_wrap" ng-if="!historyMessage.media.audio.url">
+      <span class="im_message_audio_name">
+        Voice message
+      </span>
+      <span class="im_message_audio_duration" ng-if="!historyMessage.media.audio.progress.enabled" ng-bind="::historyMessage.media.audio.duration | duration"></span>
+      <span class="im_message_audio_size" ng-if="historyMessage.media.audio.progress.enabled" ng-bind="historyMessage.media.audio.progress | formatSizeProgress"></span>
+    </div>
+    <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
+      <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
+    </div>
+    <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
+      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.audio.progress.cancel()">Cancel</a>
+      <div class="im_message_download_progress_wrap">
+        <div class="progress tg_down_progress">
+          <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.audio.progress.percent + '%'}"></div>
+        </div>
+      </div>
+    </div>
+    <div class="im_message_audio_player_wrap" ng-if="historyMessage.media.audio.url">
+      <audio my-audio-autoplay audio="historyMessage.media.audio" controls="controls">
+        <source ng-src="{{::historyMessage.media.audio.url}}" type="audio/ogg" />
+        <embed ng-src="{{::historyMessage.media.audio.url}}" hidden="true" autostart="true" loop="false" />
+      </audio>
+    </div>
+  </div>
+</div>

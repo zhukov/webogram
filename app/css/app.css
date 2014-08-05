@@ -184,7 +184,7 @@ input[type="number"] {
   border-top: 20px solid #497495;
 }
 .tg_page_head .navbar > .container .navbar-brand {
-  padding: 9px 15px;
+  padding: 8px 15px;
   opacity: 0.9;
   margin-left: 0;
   margin-right: 20px;
@@ -197,28 +197,15 @@ input[type="number"] {
   opacity: 1;
 }
 .tg_head_logo {
-  background: url(../img/Tlogo_2x.png) 0 0 no-repeat;
-  background-size: 26px 26px;
+  background: url(../img/T_LogoM.png) 0 0 no-repeat;
+  background-size: 143px 30px;
   display: inline-block;
-  width: 26px;
-  height: 26px;
+  width: 143px;
+  height: 30px;
   vertical-align: text-top;
 }
 .is_1x .tg_head_logo {
-  background-image: url(../img/TLogo_1x.png);
-}
-.tg_head_logo_text {
-  background: url(../img/TLogo2_2x.png) 0 0 no-repeat;
-  background-size: 97px 15px;
-  display: inline-block;
-  width: 97px;
-  height: 15px;
-  vertical-align: text-top;
-  margin-top: 7px;
-  margin-left: 10px;
-}
-.is_1x .tg_head_logo_text {
-  background-image: url(../img/TLogo2_1x.png);
+  background-image: url(../img/T_LogoM_1x.png);
 }
 
 
@@ -233,8 +220,8 @@ input[type="number"] {
   float: none;
 }
 .navbar-offline-text {
-  padding: 12px 15px;
   color: #b9cfe3;
+  padding: 13px 15px;
   font-size: 13px;
   display: block;
   line-height: 20px;
@@ -252,8 +239,8 @@ input[type="number"] {
 
 
 .tg_page_head .navbar-inverse .navbar-nav > li > a {
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding-top: 13px;
+  padding-bottom: 13px;
   color: #b9cfe3;
   font-size: 13px;
 }
@@ -263,6 +250,7 @@ input[type="number"] {
 .tg_page_head .navbar-inverse .navbar-toggle {
   border-color: #497495;
   outline: 0;
+  border: 0;
 }
 .tg_page_head .navbar-inverse .navbar-collapse,
 .tg_page_head .navbar-inverse .navbar-form {
@@ -302,9 +290,6 @@ input[type="number"] {
   padding: 5px 14px;
   font-size: 13px;
 }
-.dropdown-header {
-  padding: 3px 14px;
-}
 
 .modal-backdrop {
   background: #111111;
@@ -328,6 +313,13 @@ input[type="number"] {
 
 .modal {
   overflow-y: auto;
+  padding: 10px;
+}
+.mobile_modal {
+  padding: 0;
+}
+.modal-dialog {
+  margin: 0 auto;
 }
 .modal-content {
   border: 0;
@@ -395,13 +387,6 @@ input[type="number"] {
   background-image: url(../img/icons/PhotoControls_1x.png);
 }
 
-.modal {
-  padding: 10px;
-}
-.modal-dialog {
-  margin: 0 auto;
-}
-
 .text-invisible {
   visibility: hidden;
 }
@@ -445,7 +430,7 @@ input[type="number"] {
 .modal-close-button i {
   display: inline-block;
   background: url(../img/icons/IconsetW.png) -15px -320px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   width: 12px;
   height: 12px;
   margin: 21px;
@@ -919,7 +904,7 @@ a.tg_radio_on:hover i.icon-radio {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -942,7 +927,7 @@ a.tg_radio_on:hover i.icon-radio {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -1055,7 +1040,8 @@ a.im_dialog_selected .im_dialog_message_text {
 .active a.im_dialog .im_dialog_chat_from_wrap,
 .active a.im_dialog .im_dialog_message_media,
 .active a.im_dialog .im_dialog_message_service,
-.active a.im_dialog .im_dialog_message_text {
+.active a.im_dialog .im_dialog_message_text,
+.active a.im_dialog .im_dialog_message {
   color: #FFF;
 }
 .im_dialog_photo {
@@ -1238,6 +1224,7 @@ a.im_dialog_selected .im_dialog_date {
   font-size: 13px;
   margin-right: 20px;
 }
+.im_history_panel_media_dropdown,
 .im_history_panel_return_count {
   margin-left: 5px;
 }
@@ -1252,7 +1239,7 @@ a.im_dialog_selected .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1293,6 +1280,10 @@ a.im_dialog_selected .im_dialog_date {
 .im_history_scrollable_wrap {
   outline: none ! important;
   -webkit-user-select: text;
+
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
 }
 
 .im_history_to_bottom .im_history_scrollable {
@@ -1336,6 +1327,11 @@ a.im_dialog_selected .im_dialog_date {
   margin: 0 auto;
   padding: 0 77px 0 77px;
 }
+.im_history_typing a.im_history_typing_author {
+  color: #999;
+  font-weight: bold;
+}
+
 
 .im_message_unread_split {
   background: #f4f4f4;
@@ -1356,55 +1352,55 @@ a.im_dialog_selected .im_dialog_date {
 .non_osx .im_message_fwd_author {
   font-size: 12px;
 }
-.im_message_grouped1 .im_message_from_photo,
-.im_message_grouped1 .im_message_author,
-.im_message_grouped2 .im_message_from_photo,
-.im_message_grouped2 .im_message_author,
-.im_message_grouped3 .im_message_author,
-.im_message_grouped3 .im_message_from_photo,
-.im_message_grouped4 .im_message_author,
-.im_message_grouped4 .im_message_from_photo {
+.im_grouped_short .im_message_from_photo,
+.im_grouped_short .im_message_author,
+.im_grouped .im_message_from_photo,
+.im_grouped .im_message_author,
+.im_grouped_fwd .im_message_author,
+.im_grouped_fwd .im_message_from_photo,
+.im_grouped_fwd_short .im_message_author,
+.im_grouped_fwd_short .im_message_from_photo {
   display: none;
 }
-.im_message_grouped1 .im_message_body,
-.im_message_grouped2 .im_message_body,
-.im_message_grouped3 .im_message_body,
-.im_message_grouped4 .im_message_body {
+.im_grouped_short .im_message_body,
+.im_grouped .im_message_body,
+.im_grouped_fwd .im_message_body,
+.im_grouped_fwd_short .im_message_body {
   margin-left: 46px;
 }
-.im_message_grouped1 .im_content_message_select_area,
-.im_message_grouped2 .im_content_message_select_area {
+.im_grouped_short .im_content_message_select_area,
+.im_grouped .im_content_message_select_area {
   height: 34px;
 }
 .im_history_appending .im_content_message_select_area {
   height: 52px;
 }
-.im_message_grouped1 .icon-select-tick,
-.im_message_grouped4 .icon-select-tick {
+.im_grouped_short .icon-select-tick,
+.im_grouped_fwd_short .icon-select-tick {
   margin-top: 5px;
 }
-.im_message_grouped1 .icon-message-status,
-.im_message_grouped4 .icon-message-status {
+.im_grouped_short .icon-message-status,
+.im_grouped_fwd_short .icon-message-status {
   margin-top: 5px;
 }
-.im_message_grouped3 .im_message_fwd_from,
-.im_message_grouped4 .im_message_fwd_from {
+.im_grouped_fwd .im_message_fwd_from,
+.im_grouped_fwd_short .im_message_fwd_from {
   display: none;
 }
 
-.im_message_grouped1 .im_message_fwd .im_message_date,
-.im_message_grouped2 .im_message_fwd .im_message_date,
-.im_message_grouped3 .im_message_fwd .im_message_date,
-.im_message_grouped4 .im_message_fwd .im_message_date {
+.im_grouped_short .im_message_fwd .im_message_date,
+.im_grouped .im_message_fwd .im_message_date,
+.im_grouped_fwd .im_message_fwd .im_message_date,
+.im_grouped_fwd_short .im_message_fwd .im_message_date {
   display: none;
 }
 
-.im_message_grouped3 .im_message_fwd,
-.im_message_grouped4 .im_message_fwd {
+.im_grouped_fwd .im_message_fwd,
+.im_grouped_fwd_short .im_message_fwd {
   margin-top: 8px;
 }
-.im_message_grouped3 .im_message_fwd,
-.im_message_grouped4 .im_message_fwd {
+.im_grouped_fwd .im_message_fwd,
+.im_grouped_fwd_short .im_message_fwd {
   margin-top: 8px;
 }
 
@@ -1486,7 +1482,7 @@ div.im_message_video_thumb {
   height: 42px;
 
   background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   z-index: 1;
 }
 .is_1x .icon-videoplay {
@@ -1513,7 +1509,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1574,7 +1570,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1661,13 +1657,19 @@ img.im_message_document_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -277px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   border-radius: 3px;
   margin-right: 10px;
 }
 .is_1x .icon-audio {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
+.im_message_selected .icon-audio,
+.im_history_selectable .im_message_outer_wrap:hover .icon-audio {
+  background-color: #dae6f0;
+  background-position: -2px -697px;
+}
+
 
 .im_message_audio_info {
   float: left;
@@ -1696,6 +1698,7 @@ img.im_message_document_thumb {
   padding-left: 2px;
 }
 .im_message_audio_info audio {
+  width: 100%;
   height: 38px;
   line-height: 38px;
 }
@@ -1775,7 +1778,6 @@ img.im_message_document_thumb {
 
 
 .im_content_message_wrap {
-  /*margin: 10px 0px 5px 16px;*/
   margin: 8px 0px 8px 16px
 }
 .icon-message-status {
@@ -1860,14 +1862,13 @@ div.im_message_body {
   display: block;
   overflow: hidden;
 }
-
-div.im_message_fwd_header {
-  color: #808080;
+.im_message_fwd_title {
+  display: none;
 }
 .im_message_fwd_from {
   margin-top: 5px;
 }
-.im_message_grouped2 .im_message_fwd_from {
+.im_grouped .im_message_fwd_from {
   margin-top: 0;
 }
 .im_message_fwd {
@@ -2010,7 +2011,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -2038,7 +2039,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -2092,7 +2093,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -2134,7 +2135,7 @@ div.im_panel_own_photo {
   margin-top: -7px;
   margin-left: 43px;
 }
-.status_online {
+.icon-online {
   background: #6DBF69;
   border: 1px solid #FFF;
   display: block;
@@ -2508,7 +2509,7 @@ img.chat_modal_participant_photo {
 .emoji-menu-tail {
   display: none;
   background: url(../img/icons/IconsetW.png) -14px -268px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   width: 14px;
   height: 7px;
   margin: 0 83px;
@@ -2620,7 +2621,7 @@ img.chat_modal_participant_photo {
 }
 
 .settings_modal_wrap .im_attach_input {
-  z-index: 1200;
+  z-index: 999;
 }
 .settings_modal_settings {
   padding: 4px 0;
@@ -2858,7 +2859,7 @@ a:hover .icon-twitter {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 15px 6px 30px;
@@ -2881,7 +2882,7 @@ a:hover .icon-twitter {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2932,6 +2933,7 @@ a:hover .icon-twitter {
   height: 40px;
   margin-right: 10px;
   overflow: hidden;
+  border-radius: 2px;
 }
 
 .contacts_modal_contact_status {
@@ -2950,7 +2952,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status,
   width: 25px;
   height: 25px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -3046,7 +3048,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status,
   height: 15px;
 
   background: url(../img/icons/IconsetW.png) -15px -319px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
 }
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -3064,16 +3066,19 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status,
 }
 
 .im_message_selected .im_message_date,
-.im_message_selected .im_message_fwd_header,
 .im_message_selected .im_message_document_size,
+.im_message_selected .im_message_audio_duration,
+.im_message_selected .im_message_audio_size,
 .im_message_selected .im_message_fwd_date,
 .im_message_focus .im_message_date,
-.im_message_focus .im_message_fwd_header,
 .im_message_focus .im_message_document_size,
+.im_message_focus .im_message_audio_duration,
+.im_message_focus .im_message_audio_size,
 .im_message_focus .im_message_fwd_date,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_date,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_header,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_document_size,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_audio_duration,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_audio_size,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_date {
   color: #68839c;
 }
@@ -3113,7 +3118,7 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status,
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -3316,7 +3321,7 @@ ce671b orange
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -3339,7 +3344,7 @@ ce671b orange
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 710px;
+  background-size: 42px 891px;
   opacity: 0.6;
 }
 .is_1x .countries_modal_search_clear {

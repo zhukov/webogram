@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.8
+ * @license AngularJS v1.3.0-beta.16
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -27,7 +27,7 @@ var ngRouteModule = angular.module('ngRoute', ['ng']).
 /**
  * @ngdoc provider
  * @name $routeProvider
- * @function
+ * @kind function
  *
  * @description
  *
@@ -473,9 +473,7 @@ function $RouteProvider(){
       for (var i = 1, len = m.length; i < len; ++i) {
         var key = keys[i - 1];
 
-        var val = 'string' == typeof m[i]
-              ? decodeURIComponent(m[i])
-              : m[i];
+        var val = m[i];
 
         if (key && val) {
           params[key.name] = val;
@@ -632,7 +630,7 @@ ngRouteModule.provider('$routeParams', $RouteParamsProvider);
  *  // Route: /Chapter/:chapterId/Section/:sectionId
  *  //
  *  // Then
- *  $routeParams ==> {chapterId:1, sectionId:2, search:'moby'}
+ *  $routeParams ==> {chapterId:'1', sectionId:'2', search:'moby'}
  * ```
  */
 function $RouteParamsProvider() {
@@ -695,7 +693,6 @@ ngRouteModule.directive('ngView', ngViewFillContentFactory);
           <pre>$location.path() = {{main.$location.path()}}</pre>
           <pre>$route.current.templateUrl = {{main.$route.current.templateUrl}}</pre>
           <pre>$route.current.params = {{main.$route.current.params}}</pre>
-          <pre>$route.current.scope.name = {{main.$route.current.scope.name}}</pre>
           <pre>$routeParams = {{main.$routeParams}}</pre>
         </div>
       </file>

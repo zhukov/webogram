@@ -16,7 +16,7 @@
 
       <div class="user_modal_info_wrap clearfix">
         <h4 class="user_modal_header" ng-bind="user | userName"></h4>
-        <p class="user_modal_status" ng-if="user.status" ng-bind="user | userStatus"></p>
+        <p class="user_modal_status" ng-if="user.status" my-user-status="::user.id"></p>
 
         <div class="user_modal_actions_wrap clearfix">
           <button class="btn btn-primary user_modal_main_btn" ng-click="goToHistory()">Send message</button>

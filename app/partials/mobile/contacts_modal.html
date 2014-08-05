@@ -1,0 +1,94 @@
+<div class="contacts_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-right" ng-if="!action || action == 'edit'" ng-switch="action">
+              <a ng-switch-when="edit" ng-click="toggleEdit(false)">
+                Cancel
+              </a>
+              <a ng-switch-default ng-click="toggleEdit(true)">
+                Edit
+              </a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 ng-switch="action">
+                    <div ng-switch-when="new_group" ng-switch="selectedCount > 0">
+                      <span ng-switch-when="true">
+                        <ng-pluralize count="selectedCount" when="{'one': '1 participant', 'other': '{} participants'}">
+                        </ng-pluralize>
+                      </span>
+                      <span ng-switch-default>New Group</span>
+                    </div>
+                    <span ng-switch-default>Contacts</span>
+                  </h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="contacts_modal_search">
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="Search" ng-model="search.query"/>
+      <a class="contacts_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+    </div>
+
+
+    <div my-contacts-list class="contacts_modal_col">
+
+      <div class="contacts_wrap nano" my-infinite-scroller>
+        <div class="contacts_scrollable_wrap nano-content">
+
+          <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
+
+            <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
+              <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
+
+                <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
+
+                <div class="contacts_modal_contact_photo pull-left" my-user-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
+                <div class="contacts_modal_contact_name" ng-bind-html="contact.user.rFullName"></div>
+                <div class="contacts_modal_contact_status" my-user-status="::contact.userID"></div>
+
+              </a>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="modal-footer contacts_modal_panel" ng-switch="action">
+    <button ng-switch-when="new_group" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
+      Next
+    </button>
+    <button ng-switch-when="select" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
+      Next
+    </button>
+    <button ng-switch-when="edit" class="btn btn-danger"  ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
+      Delete <strong ng-bind="selectedCount"></strong>
+    </button>
+    <button ng-switch-default class="btn btn-link" ng-click="importContact()">
+      New contact
+    </button>
+  </div>
+
+</div>

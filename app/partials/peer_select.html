@@ -36,7 +36,7 @@
                         <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
                       </div>
                       <div class="im_dialog_message">
-                        <span class="im_dialog_message_text">{{contact.user | userStatus}}</span>
+                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
                       </div>
                     </div>
                   </a>

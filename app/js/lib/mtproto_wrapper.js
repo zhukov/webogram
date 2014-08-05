@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.1 - messaging web application for MTProto
+ * Webogram v0.2.9 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -124,7 +124,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       networkerPromise = mtpGetNetworker(dcID, options);
     } else {
       networkerPromise = Storage.get('dc').then(function (baseDcID) {
-        return mtpGetNetworker(dcID = baseDcID || 1, options);
+        return mtpGetNetworker(dcID = baseDcID || 2, options);
       });
     }
 

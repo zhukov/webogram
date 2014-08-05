@@ -17,7 +17,7 @@
 
     <div ng-switch-default class="img_gif_info_wrap">
       <div class="img_gif_label pull-left">GIF</div>
-      <div ng-if="!document.url" class="img_gif_size pull-right" bo-bind="document.size | formatSize"></div>
+      <div ng-if="!document.url" class="img_gif_size pull-right" ng-bind="::document.size | formatSize"></div>
     </div>
 
   </div>

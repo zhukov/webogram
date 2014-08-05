@@ -240,20 +240,21 @@
 	/*! MODIFICATION START
 	 This function was modified by Andre Staltz so that the icon is created from a spritesheet.
 	 */
-	EmojiArea.createIcon = function(emoji) {
+	EmojiArea.createIcon = function(emoji, menu) {
 		var category = emoji[0];
 		var row = emoji[1];
 		var column = emoji[2];
 		var name = emoji[3];
 		var filename = $.emojiarea.spritesheetPath;
-		var xoffset = -($.emojiarea.iconSize * column);
-		var yoffset = -($.emojiarea.iconSize * row);
-		var scaledWidth = ($.emojiarea.spritesheetDimens[category][1] * $.emojiarea.iconSize);
-		var scaledHeight = ($.emojiarea.spritesheetDimens[category][0] * $.emojiarea.iconSize);
+		var iconSize = menu && Config.Navigator.mobile ? 26 : $.emojiarea.iconSize
+		var xoffset = -(iconSize * column);
+		var yoffset = -(iconSize * row);
+		var scaledWidth = ($.emojiarea.spritesheetDimens[category][1] * iconSize);
+		var scaledHeight = ($.emojiarea.spritesheetDimens[category][0] * iconSize);
 
 		var style = 'display:inline-block;';
-		style += 'width:' + $.emojiarea.iconSize + 'px;';
-		style += 'height:' + $.emojiarea.iconSize + 'px;';
+		style += 'width:' + iconSize + 'px;';
+		style += 'height:' + iconSize + 'px;';
 		style += 'background:url(\'' + filename.replace('!',category) + '\') ' + xoffset + 'px ' + yoffset + 'px no-repeat;';
 		style += 'background-size:' + scaledWidth + 'px ' + scaledHeight + 'px;';
 		return '<img src="img/blank.gif" class="img" style="'+ style +'" alt="' + util.htmlEntities(name) + '">';
@@ -609,7 +610,7 @@
 			for (var key in options) {
 				/* MODIFICATION: The following 2 lines were modified by Andre Staltz, in order to load only icons from the specified category. */
 				if (options.hasOwnProperty(key) && options[key][0] === (category - 1)) {
-					html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key]) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+					html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 				}
 			}
 		} else {
@@ -619,7 +620,7 @@
 				for (i = 0; i < curEmojis.length; i++) {
 					key = curEmojis[i]
 					if (options[key]) {
-						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key]) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 					}
 				}
 			} catch (e) {}

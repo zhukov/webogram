@@ -1,0 +1,32 @@
+<span ng-switch="::historyMessage.action._">
+  <span ng-switch-when="messageActionChatCreate">
+    created the group &laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;
+  </span>
+  <span ng-switch-when="messageActionChatEditTitle">
+    changed group name to  &laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;
+  </span>
+  <span ng-switch-when="messageActionChatEditPhoto">
+    changed group photo
+  </span>
+  <span ng-switch-when="messageActionChatDeletePhoto">
+    removed group photo
+  </span>
+  <span ng-switch-when="messageActionChatAddUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
+    <span ng-switch-when="true">
+      invited <a my-user-link="historyMessage.action.user_id" color="true"></a>
+    </span>
+    <span ng-switch-default>
+      returned to group
+    </span>
+  </span>
+  <span ng-switch-when="messageActionChatDeleteUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
+    <span ng-switch-when="true">
+      kicked <a my-user-link="historyMessage.action.user_id" color="true"></a>
+    </span>
+    <span ng-switch-default>
+      left group
+    </span>
+  </span>
+
+  <span ng-switch-default ng-bind="'Unsupported action ' + historyMessage.action._"></span>
+</span>

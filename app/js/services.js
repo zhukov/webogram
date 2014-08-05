@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.1 - messaging web application for MTProto
+ * Webogram v0.2.9 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -79,6 +79,8 @@ angular.module('myApp.services', [])
       apiUser.rPhone = $filter('phoneNumber')(apiUser.phone);
     }
 
+    apiUser.num = (Math.abs(apiUser.id) % 8) + 1;
+
     if (apiUser.first_name) {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true});
@@ -125,11 +127,9 @@ angular.module('myApp.services', [])
       cachedPhotoLocations[id] = user && user.photo && user.photo.photo_small || {empty: true};
     }
 
-    var num = (Math.abs(id) % 8) + 1;
-
     return {
-      num: num,
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + num + '@2x.png',
+      num: user.num,
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + user.num + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
@@ -161,11 +161,19 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.userID = userID;
 
+    var tUrl = 'partials/user_modal.html',
+        className = 'user_modal_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/user_modal.html';
+      className += ' mobile_modal';
+    }
+
     var modalInstance = $modal.open({
-      templateUrl: 'partials/user_modal.html',
+      templateUrl: tUrl,
       controller: 'UserModalController',
       scope: scope,
-      windowClass: 'user_modal_window page_modal'
+      windowClass: className
     });
   };
   $rootScope.openUser = openUser;
@@ -328,22 +336,25 @@ angular.module('myApp.services', [])
     isAvailable: isAvailable,
     openPhonebookImport: openPhonebookImport,
     getPhonebookContacts: getPhonebookContacts
-  }
+  };
 
   function isAvailable () {
-    try {
-      return navigator.mozContacts && navigator.mozContacts.getAll;
-    } catch (e) {
-      console.error(dT(), 'phonebook n/a', e);
-      return false;
+    if (Config.Navigator.mobile && Config.Navigator.ffos && Config.Modes.packed) {
+      try {
+        return navigator.mozContacts && navigator.mozContacts.getAll;
+      } catch (e) {
+        console.error(dT(), 'phonebook n/a', e);
+        return false;
+      }
     }
+    return false;
   }
 
   function openPhonebookImport () {
     return $modal.open({
-      templateUrl: 'partials/phonebook_modal.html',
+      templateUrl: 'partials/mobile/phonebook_modal.html',
       controller: 'PhonebookModalController',
-      windowClass: 'phonebook_modal_window'
+      windowClass: 'phonebook_modal_window page_modal mobile_modal'
     });
   }
 
@@ -467,7 +478,6 @@ angular.module('myApp.services', [])
       MtpApiManager.getUserID().then(function (myID) {
         angular.forEach(chatFull.participants.participants, function(participant){
           participant.user = AppUsersManager.getUser(participant.user_id);
-          participant.userPhoto = AppUsersManager.getUserPhoto(participant.user_id, 'User');
           participant.inviter = AppUsersManager.getUser(participant.inviter_id);
           participant.canKick = myID != participant.user_id && (myID == chatFull.participants.admin_id || myID == participant.inviter_id);
         });
@@ -491,11 +501,19 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.chatID = chatID;
 
+    var tUrl = 'partials/chat_modal.html',
+        className = 'chat_modal_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/chat_modal.html';
+      className += ' mobile_modal';
+    }
+
     var modalInstance = $modal.open({
-      templateUrl: 'partials/chat_modal.html',
+      templateUrl: tUrl,
       controller: 'ChatModalController',
-      windowClass: 'chat_modal_window page_modal',
-      scope: scope
+      scope: scope,
+      windowClass: className
     });
   }
 
@@ -1741,14 +1759,6 @@ angular.module('myApp.services', [])
       message.media.progress = messagesStorage[msgID].media.progress;
     }
 
-    message.fromUser = AppUsersManager.getUser(message.from_id);
-    message.fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
-
-    if (message._ == 'messageForwarded') {
-      message.fwdUser = AppUsersManager.getUser(message.fwd_from_id);
-      message.fwdPhoto = AppUsersManager.getUserPhoto(message.fwd_from_id, 'User');
-    }
-
     if (message.media) {
       switch (message.media._) {
         case 'messageMediaPhoto':
@@ -1774,11 +1784,6 @@ angular.module('myApp.services', [])
           );
           break;
       }
-
-      if (message.media.user_id) {
-        message.media.user = AppUsersManager.getUser(message.media.user_id);
-        message.media.userPhoto = AppUsersManager.getUserPhoto(message.media.user_id, 'User');
-      }
     }
     else if (message.action) {
       switch (message.action._) {
@@ -1791,11 +1796,6 @@ angular.module('myApp.services', [])
           message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || 'DELETED';
           break;
       }
-
-      if (message.action.user_id) {
-        message.action.user = AppUsersManager.getUser(message.action.user_id);
-        message.action.userPhoto = AppUsersManager.getUserPhoto(message.action.user_id, 'User');
-      }
     }
 
     if (message.message && message.message.length) {
@@ -1806,14 +1806,18 @@ angular.module('myApp.services', [])
   }
 
   function regroupWrappedHistory (history, limit) {
+    if (!history || !history.length) {
+      return;
+    }
     var start = 0,
-        end = history.length,
+        len = history.length,
+        end = len,
         i, curDay, prevDay, curMessage, prevMessage;
 
     if (limit > 0) {
-      end = limit;
+      end = Math.min(limit, len);
     } else if (limit < 0) {
-      start = end + limit;
+      start = Math.max(0, end + limit);
     }
 
     for (i = start; i < end; i++) {
@@ -1835,12 +1839,24 @@ angular.module('myApp.services', [])
 
         var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
         if (curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
-          curMessage.grouped = singleLine ? 4 : 3;
+          curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {
-          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 1 : 2;
+          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 'im_grouped_short' : 'im_grouped';
+        }
+        if (curMessage.fwd_from_id) {
+          if (!prevMessage.grouped) {
+            prevMessage.grouped = 'im_grouped_fwd_start';
+          }
+          if (curMessage.grouped && i == len - 1) {
+            curMessage.grouped += ' im_grouped_fwd_end';
+          }
         }
       } else if (prevMessage || !i) {
         delete curMessage.grouped;
+
+        if (prevMessage && prevMessage.grouped && prevMessage.fwd_from_id) {
+          prevMessage.grouped += ' im_grouped_fwd_end';
+        }
       }
       prevMessage = curMessage;
       prevDay = curDay;
@@ -1873,6 +1889,7 @@ angular.module('myApp.services', [])
         case 'messageMediaPhoto': notificationMessage = 'Photo'; break;
         case 'messageMediaVideo': notificationMessage = 'Video'; break;
         case 'messageMediaDocument': notificationMessage = 'Document'; break;
+        case 'messageMediaAudio': notificationMessage = 'Voice message'; break;
         case 'messageMediaGeo': notificationMessage = 'Location'; break;
         case 'messageMediaContact': notificationMessage = 'Contact'; break;
         default: notificationMessage = 'Attachment'; break;
@@ -2074,7 +2091,15 @@ angular.module('myApp.services', [])
               delete messagesForDialogs[messageID];
             }
             message.deleted = true;
-            delete messagesStorage[messageID];
+            messagesStorage[messageID] = {
+              deleted: true,
+              id: messageID,
+              from_id: message.from_id,
+              to_id: message.to_id,
+              out: message.out,
+              unread: message.unread,
+              date: message.date
+            };
           }
         }
 
@@ -2134,7 +2159,9 @@ angular.module('myApp.services', [])
 })
 
 .service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager, FileManager) {
-  var photos = {};
+  var photos = {},
+      windowW = $(window).width(),
+      windowH = $(window).height();
 
   function savePhoto (apiPhoto) {
     photos[apiPhoto.id] = apiPhoto;
@@ -2219,8 +2246,8 @@ angular.module('myApp.services', [])
 
   function wrapForHistory (photoID) {
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = 260,
-        height = 260,
+        width = Math.min(windowW - 80, 260),
+        height = Math.min(windowH - 100, 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -2230,10 +2257,15 @@ angular.module('myApp.services', [])
 
     // console.log('chosen photo size', photoID, thumbPhotoSize);
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      } else {
+      }
+      else {
         thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+        if (thumb.width > width) {
+          thumb.height = parseInt(thumb.height * width / thumb.width);
+          thumb.width = width;
+        }
       }
 
       thumb.location = thumbPhotoSize.location;
@@ -2368,8 +2400,10 @@ angular.module('myApp.services', [])
 
 
 .service('AppVideoManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
-  var videos = {};
-  var videosForHistory = {};
+  var videos = {},
+      videosForHistory = {},
+      windowW = $(window).width(),
+      windowH = $(window).height();
 
   function saveVideo (apiVideo) {
     videos[apiVideo.id] = apiVideo;
@@ -2390,8 +2424,8 @@ angular.module('myApp.services', [])
     }
 
     var video = angular.copy(videos[videoID]),
-        width = 200,
-        height = 200,
+        width = Math.min(windowW - 80, windowW <= 479 ? 260 : 200),
+        height = Math.min(windowH - 100, windowW <= 479 ? 260 : 200),
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',
@@ -2400,10 +2434,15 @@ angular.module('myApp.services', [])
         };
 
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      } else {
+      }
+      else {
         thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+        if (thumb.width > width) {
+          thumb.height = parseInt(thumb.height * width / thumb.width);
+          thumb.width = width;
+        }
       }
 
       thumb.location = thumbPhotoSize.location;
@@ -2532,8 +2571,10 @@ angular.module('myApp.services', [])
 })
 
 .service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
-  var docs = {};
-  var docsForHistory = {};
+  var docs = {},
+      docsForHistory = {},
+      windowW = $(window).width(),
+      windowH = $(window).height();
 
   function saveDoc (apiDoc) {
     docs[apiDoc.id] = apiDoc;
@@ -2555,20 +2596,25 @@ angular.module('myApp.services', [])
 
     var doc = angular.copy(docs[docID]),
         isGif = doc.mime_type == 'image/gif',
-        width = isGif ? 260 : 100,
-        height = isGif ? 260 : 100,
+        width = isGif ? Math.min(windowW - 80, 260) : 100,
+        height = isGif ? Math.min(windowH - 100, 260) : 100,
         thumbPhotoSize = doc.thumb,
         thumb = {
-          // placeholder: 'img/placeholders/DocThumbConversation.jpg',
           width: width,
           height: height
         };
 
+
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (thumbPhotoSize.w > thumbPhotoSize.h) {
+      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
         thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      } else {
+      }
+      else {
         thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
+        if (thumb.width > width) {
+          thumb.height = parseInt(thumb.height * width / thumb.width);
+          thumb.width = width;
+        }
       }
 
       thumb.location = thumbPhotoSize.location;
@@ -3276,7 +3322,10 @@ angular.module('myApp.services', [])
         var time = tsNow();
         if (!notificationsCount || time % 2000 > 1000) {
           document.title = titleBackup;
-          $('link[rel="icon"]').replaceWith(faviconBackupEl);
+          var curFav = $('link[rel="icon"]');
+          if (curFav.attr('href').indexOf('favicon_unread') != -1) {
+            curFav.replaceWith(faviconBackupEl);
+          }
         } else {
           document.title = notificationsCount > 1
             ? (notificationsCount + ' notifications')
@@ -3496,7 +3545,7 @@ angular.module('myApp.services', [])
     if (registeredDevice) {
       return false;
     }
-    if (navigator.push) {
+    if (navigator.push && Config.Navigator.ffos && Config.Modes.packed) {
       var req = navigator.push.register();
 
       req.onsuccess = function(e) {
@@ -3610,11 +3659,19 @@ angular.module('myApp.services', [])
       angular.extend(scope, options);
     }
 
+    var tUrl = 'partials/peer_select.html',
+        className = 'peer_select_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/peer_select.html';
+      className += ' mobile_modal';
+    }
+
     return $modal.open({
-      templateUrl: 'partials/peer_select.html',
+      templateUrl: tUrl,
       controller: 'PeerSelectController',
       scope: scope,
-      windowClass: 'peer_select_window'
+      windowClass: className
     }).result;
   }
 
@@ -3637,11 +3694,19 @@ angular.module('myApp.services', [])
       scope.action = 'select';
     }
 
+    var tUrl = 'partials/contacts_modal.html',
+        className = 'contacts_modal_window page_modal';
+
+    if (Config.Navigator.mobile) {
+      tUrl = 'partials/mobile/contacts_modal.html';
+      className += ' mobile_modal';
+    }
+
     return $modal.open({
-      templateUrl: 'partials/contacts_modal.html',
+      templateUrl: tUrl,
       controller: 'ContactsModalController',
       scope: scope,
-      windowClass: 'contacts_modal_window page_modal'
+      windowClass: className
     }).result;
   }
 
