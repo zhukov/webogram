@@ -97,6 +97,7 @@ angular.module('myApp.services', [])
     } else {
       safeReplaceObject(users[apiUser.id], apiUser);
     }
+    $rootScope.$broadcast('user_update', apiUser.id);
 
     if (cachedPhotoLocations[apiUser.id] !== undefined) {
       safeReplaceObject(cachedPhotoLocations[apiUser.id], apiUser && apiUser.photo && apiUser.photo.photo_small || {empty: true});
