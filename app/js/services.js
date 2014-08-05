@@ -2021,7 +2021,9 @@ angular.module('myApp.services', [])
         $rootScope.$broadcast('dialogs_update', dialog);
 
 
-        if ($rootScope.idle.isIDLE && !message.out && message.unread) {
+        if ((Config.Navigator.mobile && $rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
+            !message.out &&
+            message.unread) {
           NotificationsManager.getPeerMuted(peerID).then(function (muted) {
             if (!message.unread || muted) {
               return;
@@ -3217,6 +3219,10 @@ angular.module('myApp.services', [])
     if (!started) {
       started = true;
       $($window).on('blur focus keydown mousedown touchstart', onEvent);
+
+      setTimeout(function () {
+        onEvent({type: 'blur'});
+      }, 0);
     }
   }
 

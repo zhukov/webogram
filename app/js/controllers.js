@@ -701,6 +701,7 @@ angular.module('myApp.controllers', [])
         return false;
       }
 
+      $rootScope.selectedPeerID = peerID;
       $scope.curDialog.peerID = peerID;
       $scope.curDialog.inputPeer = AppPeersManager.getInputPeer(newPeer);
       $scope.historyFilter.mediaType = false;
