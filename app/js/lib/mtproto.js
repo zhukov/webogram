@@ -214,7 +214,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var msg_len     = deserializer.fetchInt('msg_len');
 
         } catch (e) {
-          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', problem: e.message, stack: e.stack});
+          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
         }
 
         rng_seed_time();
@@ -223,7 +223,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       },
       function (error) {
         if (!error.message && !error.type) {
-          error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+          error = {code: 406, type: 'NETWORK_BAD_REQUEST', originalError: error};
         }
         return $q.reject(error);
       }
