@@ -3252,6 +3252,7 @@ ce671b orange
   overflow: hidden;
   float: left;
   margin-top: 3px;
+  max-width: 100%;
 }
 
 .img_gif_thumb {
