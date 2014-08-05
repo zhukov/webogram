@@ -2899,6 +2899,18 @@ a:hover .icon-twitter {
   padding: 0 17px 0 0;
   outline: none ! important;
 }
+.contacts_modal_contacts_empty {
+  visibility: hidden;
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  line-height: 18px;
+  padding: 1px 50px;
+  margin: 0;
+}
+.contacts_modal_contacts_empty.vertical-aligned {
+  visibility: visible;
+}
 
 
 .contacts_modal_members_list .contacts_modal_contact_wrap {

@@ -2057,6 +2057,7 @@ angular.module('myApp.controllers', [])
           }
           $scope.contacts.push(contact);
         });
+        $scope.contactsEmpty = query ? false : !$scope.contacts.length;
         $scope.$broadcast('contacts_change');
       });
     };
@@ -2313,6 +2314,10 @@ angular.module('myApp.controllers', [])
       $scope.toggleSelection(true);
       phonebookReady = true;
       updateList();
+    }, function (error) {
+      ErrorService.show({
+        error: {code: 403, type: 'PHONEBOOK_GET_CONTACTS_FAILED', originalError: error}
+      });
     });
 
     function updateList () {
@@ -2324,6 +2329,7 @@ angular.module('myApp.controllers', [])
         results = SearchIndexManager.search($scope.search.query, searchIndex);
 
         $scope.contacts = [];
+        delete $scope.contactsEmpty;
         for (var i = 0; i < $scope.phonebook.length; i++) {
           if (!filtered || results[i]) {
             $scope.contacts.push($scope.phonebook[i]);
@@ -2331,6 +2337,7 @@ angular.module('myApp.controllers', [])
         }
       } else {
         $scope.contacts = $scope.phonebook;
+        $scope.contactsEmpty = !$scope.contacts.length;
       }
 
       $scope.slice.limit = 20;

@@ -56,7 +56,9 @@
       <span ng-switch-when="USERS_NOT_USING_TELEGRAM">
         Sorry, there are no <strong>Telegram</strong> accounts with the phone numbers you provided.
       </span>
-
+      <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED">
+        Telegram need access to phonebook to import contacts.
+      </span>
 
       <div ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400">One of the params is missing or invalid.</span>
