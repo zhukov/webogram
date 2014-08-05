@@ -1994,7 +1994,6 @@ angular.module('myApp.services', [])
           delete pendingByMessageID[message.id];
         }
 
-        // console.log(11, randomID, pendingMessage);
         if (!pendingMessage) {
           $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
         }

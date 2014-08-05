@@ -199,15 +199,16 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     return $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray, {
       responseType: 'arraybuffer',
-      transformRequest: null,
-      transformResponse: function (responseBuffer) {
-        if (!responseBuffer || !responseBuffer.byteLength) {
+      transformRequest: null
+    }).then(
+      function (result) {
+        if (!result.data || !result.data.byteLength) {
           return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
         }
 
         try {
 
-          var deserializer = new TLDeserialization(responseBuffer, {mtproto: true});
+          var deserializer = new TLDeserialization(result.data, {mtproto: true});
           var auth_key_id = deserializer.fetchLong('auth_key_id');
           var msg_id      = deserializer.fetchLong('msg_id');
           var msg_len     = deserializer.fetchInt('msg_len');
@@ -219,13 +220,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         rng_seed_time();
 
         return deserializer;
+      },
+      function (error) {
+        if (!error.message && !error.type) {
+          error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+        }
+        return $q.reject(error);
       }
-    })['catch'](function (error) {
-      if (!error.message && !error.type) {
-        error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
-      }
-      return $q.reject(error);
-    });
+    );
   };
 
   function mtpSendReqPQ (auth) {
