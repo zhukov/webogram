@@ -238,8 +238,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     request.storeMethod('req_pq', {nonce: auth.nonce});
 
     console.log(dT(), 'Send req_pq', bytesToHex(auth.nonce));
-    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-      var deserializer = result.data;
+    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (deserializer) {
       var response = deserializer.fetchObject('ResPQ');
 
       if (response._ != 'resPQ') {
@@ -313,8 +312,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     });
 
     console.log(dT(), 'Send req_DH_params');
-    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-      var deserializer = result.data;
+    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (deserializer) {
       var response = deserializer.fetchObject('Server_DH_Params', 'RESPONSE');
 
       if (response._ != 'server_DH_params_fail' && response._ != 'server_DH_params_ok') {
@@ -428,8 +426,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       });
 
       console.log(dT(), 'Send set_client_DH_params');
-      mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-        var deserializer = result.data;
+      mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (deserializer) {
         var response = deserializer.fetchObject('Set_client_DH_params_answer');
 
         if (response._ != 'dh_gen_ok' && response._ != 'dh_gen_retry' && response._ != 'dh_gen_fail') {
