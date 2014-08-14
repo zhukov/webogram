@@ -97,6 +97,7 @@ angular.module('myApp.services', [])
     } else {
       safeReplaceObject(users[apiUser.id], apiUser);
     }
+    $rootScope.$broadcast('user_update', apiUser.id);
 
     if (cachedPhotoLocations[apiUser.id] !== undefined) {
       safeReplaceObject(cachedPhotoLocations[apiUser.id], apiUser && apiUser.photo && apiUser.photo.photo_small || {empty: true});
@@ -1993,7 +1994,6 @@ angular.module('myApp.services', [])
           delete pendingByMessageID[message.id];
         }
 
-        // console.log(11, randomID, pendingMessage);
         if (!pendingMessage) {
           $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
         }
@@ -2021,7 +2021,9 @@ angular.module('myApp.services', [])
         $rootScope.$broadcast('dialogs_update', dialog);
 
 
-        if ($rootScope.idle.isIDLE && !message.out && message.unread) {
+        if ((Config.Navigator.mobile && $rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
+            !message.out &&
+            message.unread) {
           NotificationsManager.getPeerMuted(peerID).then(function (muted) {
             if (!message.unread || muted) {
               return;
@@ -3217,6 +3219,10 @@ angular.module('myApp.services', [])
     if (!started) {
       started = true;
       $($window).on('blur focus keydown mousedown touchstart', onEvent);
+
+      setTimeout(function () {
+        onEvent({type: 'blur'});
+      }, 0);
     }
   }
 

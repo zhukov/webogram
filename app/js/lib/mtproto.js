@@ -199,33 +199,35 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     return $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray, {
       responseType: 'arraybuffer',
-      transformRequest: null,
-      transformResponse: function (responseBuffer) {
-        if (!responseBuffer || !responseBuffer.byteLength) {
+      transformRequest: null
+    }).then(
+      function (result) {
+        if (!result.data || !result.data.byteLength) {
           return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
         }
 
         try {
 
-          var deserializer = new TLDeserialization(responseBuffer, {mtproto: true});
+          var deserializer = new TLDeserialization(result.data, {mtproto: true});
           var auth_key_id = deserializer.fetchLong('auth_key_id');
           var msg_id      = deserializer.fetchLong('msg_id');
           var msg_len     = deserializer.fetchInt('msg_len');
 
         } catch (e) {
-          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', problem: e.message, stack: e.stack});
+          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
         }
 
         rng_seed_time();
 
         return deserializer;
+      },
+      function (error) {
+        if (!error.message && !error.type) {
+          error = {code: 406, type: 'NETWORK_BAD_REQUEST', originalError: error};
+        }
+        return $q.reject(error);
       }
-    })['catch'](function (error) {
-      if (!error.message && !error.type) {
-        error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
-      }
-      return $q.reject(error);
-    });
+    );
   };
 
   function mtpSendReqPQ (auth) {
@@ -236,8 +238,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     request.storeMethod('req_pq', {nonce: auth.nonce});
 
     console.log(dT(), 'Send req_pq', bytesToHex(auth.nonce));
-    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-      var deserializer = result.data;
+    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (deserializer) {
       var response = deserializer.fetchObject('ResPQ');
 
       if (response._ != 'resPQ') {
@@ -311,8 +312,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     });
 
     console.log(dT(), 'Send req_DH_params');
-    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-      var deserializer = result.data;
+    mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (deserializer) {
       var response = deserializer.fetchObject('Server_DH_Params', 'RESPONSE');
 
       if (response._ != 'server_DH_params_fail' && response._ != 'server_DH_params_ok') {
@@ -426,8 +426,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       });
 
       console.log(dT(), 'Send set_client_DH_params');
-      mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (result) {
-        var deserializer = result.data;
+      mtpSendPlainRequest(auth.dcID, request.getBuffer()).then(function (deserializer) {
         var response = deserializer.fetchObject('Set_client_DH_params_answer');
 
         if (response._ != 'dh_gen_ok' && response._ != 'dh_gen_retry' && response._ != 'dh_gen_fail') {
