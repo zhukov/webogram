@@ -36,7 +36,7 @@ Config.Navigator = {
   osX:  (navigator.platform || '').toLowerCase().indexOf('mac') != -1 ||
         (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1,
   retina: window.devicePixelRatio > 1,
-  ffos: navigator.userAgent.match(/mobi.+Gecko/i),
+  ffos: navigator.userAgent.search(/mobi.+Gecko/i) != -1,
   touch: screen.width <= 768,
   mobile: screen.width < 480
 };
