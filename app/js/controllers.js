@@ -2403,3 +2403,8 @@ angular.module('myApp.controllers', [])
     };
 
   })
+.controller('ChangeLocalizeController', function ($scope, ChangeLocalizeService) {
+    $scope.changeLocation = function(lang){
+        ChangeLocalizeService.getTranslation(lang);
+    }
+})
