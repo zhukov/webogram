@@ -3056,7 +3056,7 @@ angular.module('myApp.services', [])
                         "\\u0253\\u0254\\u0256\\u0257\\u0259\\u025b\\u0263\\u0268\\u026f\\u0272\\u0289\\u028b" + // IPA Extensions
                         "\\u02bb" + // Hawaiian
                         "\\u0300-\\u036f" + // Combining diacritics
-                        "\\u1e00-\\u1eff"; // Latin Extended Additional (mostly for Vietnamese)
+                        "\\u1e00-\\u1eff" + // Latin Extended Additional (mostly for Vietnamese)
                         "\\u0400-\\u04ff\\u0500-\\u0527" +  // Cyrillic
                         "\\u2de0-\\u2dff\\ua640-\\ua69f" +  // Cyrillic Extended A/B
                         "\\u0591-\\u05bf\\u05c1-\\u05c2\\u05c4-\\u05c5\\u05c7" +
