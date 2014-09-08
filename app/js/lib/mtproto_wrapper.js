@@ -223,6 +223,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     getBaseDcID: getBaseDcID,
     getUserID: mtpGetUserID,
     invokeApi: mtpInvokeApi,
+    getNetworker: mtpGetNetworker,
     setUserAuth: mtpSetUserAuth,
     logOut: mtpLogOut
   }

@@ -33,13 +33,15 @@ angular.module('myApp.controllers', [])
         return;
       }
     });
-    var options = {dcID: 1, createNetworker: true};
+    var options = {dcID: 2, createNetworker: true},
+        countryChanged = false,
+        selectedCountry = false;
 
-    $scope.credentials = {phone_country: '+1', phone_country_name: 'USA', phone_number: '', phone_full: ''};
+    $scope.credentials = {phone_country: '', phone_country_name: '', phone_number: '', phone_full: ''};
     $scope.progress = {};
     $scope.callPending = {};
 
-    $scope.selectCountry = function () {
+    $scope.chooseCountry = function () {
       var tUrl = 'partials/country_select_modal.html',
           className = 'countries_modal_window page_modal';
 
@@ -54,14 +56,60 @@ angular.module('myApp.controllers', [])
         windowClass: className
       });
 
-      modal.result.then(function (code) {
-        $scope.credentials.phone_country = code;
-        $scope.$broadcast('country_selected');
-      });
+      modal.result.then(selectCountry);
     };
 
-    $scope.$watch('credentials.phone_country', updateCountry);
-    $scope.$watch('credentials.phone_number', updateCountry);
+    function initPhoneCountry () {
+      var langCode = (navigator.language || '').toLowerCase(),
+          countryIso2 = Config.LangCountries[langCode],
+          shouldPregenerate = !Config.Navigator.mobile;
+
+      if (['en', 'en-us', 'en-uk'].indexOf(langCode) == -1) {
+        if (countryIso2 !== undefined) {
+          selectPhoneCountryByIso2(countryIso2);
+        } else if (langCode.indexOf('-') > 0) {
+          selectPhoneCountryByIso2(langCode.split('-')[1].toUpperCase());
+        } else {
+          selectPhoneCountryByIso2('US');
+        }
+      } else {
+        selectPhoneCountryByIso2('US');
+      }
+
+      if (!shouldPregenerate) {
+        return;
+      }
+      var wasCountry = $scope.credentials.phone_country;
+      MtpApiManager.invokeApi('help.getNearestDc', {}, {dcID: 4, createNetworker: true}).then(function (nearestDcResult) {
+        if (wasCountry == $scope.credentials.phone_country) {
+          selectPhoneCountryByIso2(nearestDcResult.country);
+        }
+        if (nearestDcResult.nearest_dc != nearestDcResult.this_dc) {
+          MtpApiManager.getNetworker(nearestDcResult.nearest_dc, {createNetworker: true});
+        }
+      });
+    }
+
+    function selectPhoneCountryByIso2 (countryIso2) {
+      var i, country;
+      for (i = 0; i < Config.CountryCodes.length; i++) {
+        country = Config.CountryCodes[i];
+        if (country[0] == countryIso2) {
+          return selectCountry({name: country[1], code: country[2]});
+        }
+      }
+      return selectCountry({name: 'United States', code: '+1'});
+    }
+
+    function selectCountry (country) {
+      selectedCountry = country;
+      if ($scope.credentials.phone_country != country.code) {
+        $scope.credentials.phone_country = country.code;
+      } else {
+        updateCountry();
+      }
+      $scope.$broadcast('country_selected');
+    }
 
     function updateCountry () {
       var phoneNumber = (
@@ -73,12 +121,16 @@ angular.module('myApp.controllers', [])
           maxName = false;
 
       if (phoneNumber.length) {
-        for (i = 0; i < Config.CountryCodes.length; i++) {
-          for (j = 1; j < Config.CountryCodes[i].length; j++) {
-            code = Config.CountryCodes[i][j].replace(/\D+/g, '');
-            if (code.length >= maxLength && !phoneNumber.indexOf(code)) {
-              maxLength = code.length;
-              maxName = Config.CountryCodes[i][0];
+        if (selectedCountry && !phoneNumber.indexOf(selectedCountry.code.replace(/\D+/g, ''))) {
+          maxName = selectedCountry.name;
+        } else {
+          for (i = 0; i < Config.CountryCodes.length; i++) {
+            for (j = 2; j < Config.CountryCodes[i].length; j++) {
+              code = Config.CountryCodes[i][j].replace(/\D+/g, '');
+              if (code.length > maxLength && !phoneNumber.indexOf(code)) {
+                maxLength = code.length;
+                maxName = Config.CountryCodes[i][1];
+              }
             }
           }
         }
@@ -87,6 +139,11 @@ angular.module('myApp.controllers', [])
       $scope.credentials.phone_full = phoneNumber;
       $scope.credentials.phone_country_name = maxName || 'Unknown';
     };
+
+    $scope.$watch('credentials.phone_country', updateCountry);
+    $scope.$watch('credentials.phone_number', updateCountry);
+    initPhoneCountry();
+
 
     var callTimeout;
 
@@ -2284,8 +2341,8 @@ angular.module('myApp.controllers', [])
       var j;
       for (var i = 0; i < Config.CountryCodes.length; i++) {
         if (!filtered || results[i]) {
-          for (j = 1; j < Config.CountryCodes[i].length; j++) {
-            $scope.countries.push({name: Config.CountryCodes[i][0], code: Config.CountryCodes[i][j]});
+          for (j = 2; j < Config.CountryCodes[i].length; j++) {
+            $scope.countries.push({name: Config.CountryCodes[i][1], code: Config.CountryCodes[i][j]});
           }
         }
       }
