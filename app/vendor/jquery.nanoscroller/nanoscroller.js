@@ -1,9 +1,9 @@
-/*! nanoScrollerJS - v0.8.0 - 2014
+/*! nanoScrollerJS - v0.8.4 - 2014
 * http://jamesflorentino.github.com/nanoScrollerJS/
 * Copyright (c) 2014 James Florentino; Licensed MIT */
 (function($, window, document) {
   "use strict";
-  var BROWSER_IS_IE7, BROWSER_SCROLLBAR_WIDTH, DOMSCROLL, DOWN, DRAG, KEYDOWN, KEYUP, MOUSEDOWN, MOUSEMOVE, MOUSEUP, MOUSEWHEEL, NanoScroll, PANEDOWN, RESIZE, SCROLL, SCROLLBAR, TOUCHMOVE, UP, WHEEL, cAF, defaults, getBrowserScrollbarWidth, hasTransform, isFFWithBuggyScrollbar, rAF, transform, _elementStyle, _prefixStyle, _vendor;
+  var BROWSER_IS_IE7, BROWSER_SCROLLBAR_WIDTH, DOMSCROLL, DOWN, DRAG, ENTER, KEYDOWN, KEYUP, MOUSEDOWN, MOUSEENTER, MOUSEMOVE, MOUSEUP, MOUSEWHEEL, NanoScroll, PANEDOWN, RESIZE, SCROLL, SCROLLBAR, TOUCHMOVE, UP, WHEEL, cAF, defaults, getBrowserScrollbarWidth, hasTransform, isFFWithBuggyScrollbar, rAF, transform, _elementStyle, _prefixStyle, _vendor;
   defaults = {
 
     /**
@@ -131,6 +131,14 @@
   MOUSEDOWN = 'mousedown';
 
   /**
+    @property MOUSEENTER
+    @type String
+    @final
+    @private
+   */
+  MOUSEENTER = 'mouseenter';
+
+  /**
     @property MOUSEMOVE
     @type String
     @static
@@ -172,6 +180,15 @@
     @private
    */
   DRAG = 'drag';
+
+  /**
+    @property ENTER
+    @type String
+    @static
+    @final
+    @private
+   */
+  ENTER = 'enter';
 
   /**
     @property UP
@@ -338,6 +355,7 @@
       this.$el = $(this.el);
       this.doc = $(this.options.documentContext || document);
       this.win = $(this.options.windowContext || window);
+      this.body = this.doc.find('body');
       this.$content = this.$el.children("." + options.contentClass);
       this.$content.attr('tabindex', this.options.tabIndex || 0);
       this.content = this.$content[0];
@@ -443,14 +461,15 @@
         };
       }
       if (rAF) {
-        if (!this.scrollRAF) {
-          this.scrollRAF = rAF((function(_this) {
-            return function() {
-              _this.scrollRAF = null;
-              _this.slider.css(cssValue);
-            };
-          })(this));
+        if (cAF && this.scrollRAF) {
+          cAF(this.scrollRAF);
         }
+        this.scrollRAF = rAF((function(_this) {
+          return function() {
+            _this.scrollRAF = null;
+            return _this.slider.css(cssValue);
+          };
+        })(this));
       } else {
         this.slider.css(cssValue);
       }
@@ -469,14 +488,18 @@
           return function(e) {
             _this.isBeingDragged = true;
             _this.offsetY = e.pageY - _this.slider.offset().top;
+            if (!_this.slider.is(e.target)) {
+              _this.offsetY = 0;
+            }
             _this.pane.addClass('active');
             _this.doc.bind(MOUSEMOVE, _this.events[DRAG]).bind(MOUSEUP, _this.events[UP]);
+            _this.body.bind(MOUSEENTER, _this.events[ENTER]);
             return false;
           };
         })(this),
         drag: (function(_this) {
           return function(e) {
-            _this.sliderY = e.pageY - _this.$el.offset().top - _this.offsetY;
+            _this.sliderY = e.pageY - _this.$el.offset().top - _this.paneTop - (_this.offsetY || _this.sliderHeight * 0.5);
             _this.scroll();
             if (_this.contentScrollTop >= _this.maxScrollTop && _this.prevScrollTop !== _this.maxScrollTop) {
               _this.$el.trigger('scrollend');
@@ -491,6 +514,7 @@
             _this.isBeingDragged = false;
             _this.pane.removeClass('active');
             _this.doc.unbind(MOUSEMOVE, _this.events[DRAG]).unbind(MOUSEUP, _this.events[UP]);
+            _this.body.unbind(MOUSEENTER, _this.events[ENTER]);
             return false;
           };
         })(this),
@@ -549,6 +573,17 @@
             }
             _this.scroll();
             return false;
+          };
+        })(this),
+        enter: (function(_this) {
+          return function(e) {
+            var _ref;
+            if (!_this.isBeingDragged) {
+              return;
+            }
+            if ((e.buttons || e.which) !== 1) {
+              return (_ref = _this.events)[UP].apply(_ref, arguments);
+            }
           };
         })(this)
       };
@@ -611,7 +646,7 @@
       this.pane = this.$el.children("." + paneClass);
       this.slider = this.pane.find("." + sliderClass);
       if (BROWSER_SCROLLBAR_WIDTH === 0 && isFFWithBuggyScrollbar()) {
-        currentPadding = window.getComputedStyle(this.content, null).getPropertyValue('padding-right').replace(/\D+/g, '');
+        currentPadding = window.getComputedStyle(this.content, null).getPropertyValue('padding-right').replace(/[^0-9.]+/g, '');
         cssRule = {
           right: -14,
           paddingRight: +currentPadding + 14
@@ -695,6 +730,7 @@
       this.paneHeight = paneHeight;
       this.paneOuterHeight = paneOuterHeight;
       this.sliderHeight = sliderHeight;
+      this.paneTop = paneTop;
       this.slider.height(sliderHeight);
       this.events.scroll();
       this.pane.show();
@@ -738,7 +774,7 @@
       }
       this.sliderY = Math.max(0, this.sliderY);
       this.sliderY = Math.min(this.maxSliderTop, this.sliderY);
-      this.$content.scrollTop((this.paneHeight - this.contentHeight + BROWSER_SCROLLBAR_WIDTH) * this.sliderY / this.maxSliderTop * -1);
+      this.$content.scrollTop(this.maxScrollTop * this.sliderY / this.maxSliderTop);
       if (!this.iOSNativeScrolling) {
         this.updateScrollValues();
         this.setOnScrollStyles();
@@ -926,3 +962,4 @@
   };
   $.fn.nanoScroller.Constructor = NanoScroll;
 })(jQuery, window, document);
+

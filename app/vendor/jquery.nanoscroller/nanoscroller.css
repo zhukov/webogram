@@ -18,10 +18,10 @@
   outline: thin dotted;
 }
 .nano > .nano-content::-webkit-scrollbar {
-  visibility: hidden;
+  display: none;
 }
 .has-scrollbar > .nano-content::-webkit-scrollbar {
-  visibility: visible;
+  display: block;
 }
 .nano > .nano-pane {
   background : rgba(0,0,0,.25);
