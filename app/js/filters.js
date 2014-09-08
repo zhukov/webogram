@@ -169,6 +169,14 @@ angular.module('myApp.filters', [])
   }])
 
   .filter('relativeTime', ['$filter', function($filter) {
+    var langMinutes = {
+      one: 'minute ago',
+      many: 'minutes ago'
+    },
+      langHours = {
+        one: 'hour ago',
+        many: 'hours ago'
+      };
     return function (timestamp) {
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks);
@@ -177,10 +185,12 @@ angular.module('myApp.filters', [])
         return 'just now';
       }
       if (diff < 3000000) {
-        return Math.ceil(diff / 60000) + ' minutes ago';
+        var minutes = Math.ceil(diff / 60000);
+        return minutes + ' ' + langMinutes[minutes > 1 ? 'many' : 'one'];
       }
       if (diff < 10000000) {
-        return Math.ceil(diff / 3600000) + ' hours ago';
+        var hours = Math.ceil(diff / 3600000);
+        return hours + ' ' + langHours[hours > 1 ? 'many' : 'one'];
       }
       return $filter('dateOrTime')(timestamp);
     }
