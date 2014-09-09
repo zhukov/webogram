@@ -1445,7 +1445,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
-      console.log(dT(), 'bg', attrs.myCustomBackground);
       $('html').css({background: attrs.myCustomBackground});
 
       $scope.$on('$destroy', function () {
@@ -1603,14 +1602,25 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
 
-    var statusFilter = $filter('userStatus');
+    var statusFilter = $filter('userStatus'),
+        ind = 0,
+        statuses = {};
+
+    setInterval(updateAll, 90000);
 
     return {
       link: link
     };
 
+    function updateAll () {
+      angular.forEach(statuses, function (update) {
+        update();
+      });
+    }
+
     function link($scope, element, attrs) {
       var userID,
+          curInd = ind++,
           update = function () {
             var user = AppUsersManager.getUser(userID);
             element
@@ -1626,6 +1636,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (userID == updUserID) {
           update();
         }
+      });
+      statuses[curInd] = update;
+      $scope.$on('$destroy', function () {
+        delete statuses[curInd];
       });
     }
   })
