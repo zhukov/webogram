@@ -9,7 +9,7 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', [])
+angular.module('myApp.controllers', ['myApp.i18n'])
 
   .controller('AppWelcomeController', function($scope, $location, MtpApiManager, ErrorService, ChangelogNotifyService) {
     MtpApiManager.getUserID().then(function (id) {
@@ -2024,7 +2024,7 @@ angular.module('myApp.controllers', [])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, ErrorService) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, ErrorService, _) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -2047,6 +2047,7 @@ angular.module('myApp.controllers', [])
 
     $scope.notify = {};
     $scope.send = {};
+    $scope.i18n = {supported: _.supported()};
 
     $scope.$watch('photo.file', onPhotoSelected);
 
@@ -2120,9 +2121,10 @@ angular.module('myApp.controllers', [])
       });
     };
 
-    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate').then(function (settings) {
+    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'i18n_locale').then(function (settings) {
       $scope.notify.desktop = !settings[0];
       $scope.send.enter = settings[2] ? '' : '1';
+      $scope.i18n.locale = settings[5];
 
       if (settings[1]) {
         $scope.notify.volume = 0;
@@ -2194,6 +2196,11 @@ angular.module('myApp.controllers', [])
         }
         $rootScope.$broadcast('settings_changed');
       }
+
+      $scope.$watch('i18n.locale', function (newValue, oldValue) {
+        _.locale(newValue);
+        Storage.set({i18n_locale: newValue});
+      });
     });
 
     $scope.openChangelog = function () {
