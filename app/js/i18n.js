@@ -114,6 +114,18 @@ angular.module('myApp.i18n', ['izhukov.utils'])
     }
   }])
 
+  .directive('ngPluralize', ['_', function(_) {
+    return {
+      restrict: 'EA',
+      priority: 1, // execute before built-in ngPluralize
+      compile: function(element) {
+        var msgid = element.attr('when');
+        var msgstr = _(msgid);
+        element.attr('when', msgstr);
+      }
+    }
+  }])
+
   .directive('myI18nFormat', ['_', function(_) {
     return {
       restrict: 'EA',
