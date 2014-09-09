@@ -3344,7 +3344,6 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
     $interval.cancel(titlePromise);
 
     if (!newVal) {
-      notificationsCount = 0;
       document.title = titleBackup;
       $('link[rel="icon"]').replaceWith(faviconBackupEl);
       notificationsClear();
@@ -3555,11 +3554,15 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   function notificationCancel (key) {
     var notification = notificationsShown[key];
     if (notification) {
+      if (notificationsCount > 0) {
+        notificationsCount--;
+      }
       try {
         if (notification.close) {
           notification.close();
         }
       } catch (e) {}
+      delete notificationsCount[key];
     }
   }
 
@@ -3572,6 +3575,7 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
       } catch (e) {}
     });
     notificationsShown = {};
+    notificationsCount = 0;
   }
 
   function registerDevice () {
