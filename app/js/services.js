@@ -9,7 +9,7 @@
 
 /* Services */
 
-angular.module('myApp.services', [])
+angular.module('myApp.services', ['myApp.i18n'])
 
 .service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage) {
   var users = {},
@@ -729,11 +729,11 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService,Storage) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService,Storage, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
-  var messagesForDialogs = {};
+  var messagesForDialogs = {locale: _.locale()};
   var historiesStorage = {};
   var dialogsStorage = {count: null, dialogs: []};
   var pendingByRandomID = {};
@@ -1747,6 +1747,10 @@ angular.module('myApp.services', [])
 
   function wrapForDialog (msgID, unreadCount) {
     var useCache = unreadCount != -1;
+
+    if (messagesForDialogs.locale != _.locale()) {
+      messagesForDialogs = {locale: _.locale()};
+    }
 
     if (useCache && messagesForDialogs[msgID] !== undefined) {
       return messagesForDialogs[msgID];
