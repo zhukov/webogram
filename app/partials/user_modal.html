@@ -19,25 +19,25 @@
         <p class="user_modal_status" ng-if="user.status" my-user-status="::user.id"></p>
 
         <div class="user_modal_actions_wrap clearfix">
-          <button class="btn btn-primary user_modal_main_btn" ng-click="goToHistory()">Send message</button>
+          <button class="btn btn-primary user_modal_main_btn" ng-click="goToHistory()" my-i18n>Send message</button>
 
           <div class="dropdown user_modal_other_btn">
-            <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
+            <button class="btn btn-link dropdown-toggle" my-i18n>More<i class="icon icon-caret"></i></button>
             <ul class="dropdown-menu">
               <li ng-if="user._ == 'userContact'">
-                <a ng-click="importContact(true)">Edit contact</a>
+                <a ng-click="importContact(true)" my-i18n>Edit contact</a>
               </li>
               <li ng-if="user._ == 'userContact'">
-                <a ng-click="deleteContact()">Delete contact</a>
+                <a ng-click="deleteContact()" my-i18n>Delete contact</a>
               </li>
               <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
-                <a ng-click="importContact()">Add to contacts</a>
+                <a ng-click="importContact()" my-i18n>Add to contacts</a>
               </li>
               <li ng-if="user.phone.length > 0">
-                <a ng-click="shareContact()">Share contact</a>
+                <a ng-click="shareContact()" my-i18n>Share contact</a>
               </li>
               <li>
-                <a ng-click="flushHistory()">Delete chat</a>
+                <a ng-click="flushHistory()" my-i18n>Delete chat</a>
               </li>
             </ul>
           </div>
@@ -48,20 +48,20 @@
     </div>
 
     <div class="modal_section" ng-if="user.phone">
-      <h3 class="modal_section_header">Phone</h3>
+      <h3 class="modal_section_header" my-i18n>Phone</h3>
       <div class="modal_section_body">
         <p><span ng-bind="user.phone | phoneNumber"></span></p>
       </div>
     </div>
 
     <div class="modal_section">
-      <h3 class="modal_section_header">Settings</h3>
+      <h3 class="modal_section_header" my-i18n>Settings</h3>
       <div class="modal_section_body">
 
         <div class="tg_form_group">
           <a class="tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
             <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-            <span class="tg_checkbox_label">Notifications</span>
+            <span class="tg_checkbox_label" my-i18n>Notifications</span>
           </a>
         </div>
       </div>

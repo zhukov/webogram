@@ -11,16 +11,16 @@
 
   <div class="im_message_document_info">
     <div class="im_message_document_name_wrap">
-      <span class="im_message_document_name">Video</span>
+      <span class="im_message_document_name" my-i18n>Video</span>
       <span class="im_message_document_size" ng-if="!historyMessage.media.video.progress.enabled" ng-bind="::historyMessage.media.video.size | formatSize"></span>
       <span class="im_message_document_size" ng-if="historyMessage.media.video.progress.enabled" ng-bind="historyMessage.media.video.progress | formatSizeProgress"></span>
     </div>
     <div class="im_message_document_actions" ng-if="!historyMessage.media.video.progress.enabled">
-      <a href="" ng-click="downloadVideo(historyMessage.media.video.id)">Download</a>
-      <a href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)">Play video</a>
+      <a href="" ng-click="downloadVideo(historyMessage.media.video.id)" my-i18n>Download</a>
+      <a href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)" my-i18n>Play video</a>
     </div>
     <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
-      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.video.progress.cancel()">Cancel</a>
+      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.video.progress.cancel()" my-i18n>Cancel</a>
       <div class="im_message_download_progress_wrap">
         <div class="progress tg_down_progress">
           <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.video.progress.percent + '%'}"></div>

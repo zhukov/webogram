@@ -22,23 +22,23 @@
         <div class="user_modal_actions_wrap clearfix">
           <span class="btn btn-primary user_modal_main_btn" ng-if="!photo.updating">
             <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
-            Set profile photo
+            <my-i18n>Set profile photo</my-i18n>
           </span>
-          <span class="btn btn-primary user_modal_main_btn disabled" disabled ng-if="photo.updating">
+          <span class="btn btn-primary user_modal_main_btn disabled" disabled ng-if="photo.updating" my-i18n>
             Updating<span my-loading-dots></span>
           </span>
 
           <div class="dropdown user_modal_other_btn">
-            <button class="btn btn-link dropdown-toggle">More<i class="icon icon-caret"></i></button>
+            <button class="btn btn-link dropdown-toggle" my-i18n>More<i class="icon icon-caret"></i></button>
             <ul class="dropdown-menu">
               <li ng-if="photo.location">
-                <a ng-click="deletePhoto()">Delete profile photo</a>
+                <a ng-click="deletePhoto()" my-i18n>Delete profile photo</a>
               </li>
               <li>
-                <a ng-click="editProfile()">Edit profile</a>
+                <a ng-click="editProfile()" my-i18n>Edit profile</a>
               </li>
               <li>
-                <a ng-click="terminateSessions()">Terminate all sessions</a>
+                <a ng-click="terminateSessions()" my-i18n>Terminate all sessions</a>
               </li>
             </ul>
           </div>
@@ -49,30 +49,30 @@
     </div>
 
     <div class="modal_section" ng-if="profile.phone">
-      <h3 class="modal_section_header">Phone</h3>
+      <h3 class="modal_section_header" my-i18n>Phone</h3>
       <div class="modal_section_body">
         <p><span ng-bind="profile.phone | phoneNumber"></span></p>
       </div>
     </div>
 
     <div class="modal_section">
-      <h3 class="modal_section_header">Settings</h3>
+      <h3 class="modal_section_header" my-i18n>Settings</h3>
       <div class="modal_section_body">
 
         <div class="tg_form_group">
-          <label>Language</label>
+          <label my-i18n>Language</label>
           <select class="tg_select" ng-model="i18n.locale">
             <option value="{{lang}}" ng-selected="lang == i18n.locale" ng-repeat="(lang, name) in i18n.supported">{{name}}</option>
           </select>
 
           <a class="tg_checkbox" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
             <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-            <span class="tg_checkbox_label">Desktop notifications</span>
+            <span class="tg_checkbox_label" my-i18n>Desktop notifications</span>
           </a>
 
           <a class="tg_checkbox" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
             <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-            <span class="tg_checkbox_label">Sound</span>
+            <span class="tg_checkbox_label" my-i18n>Sound</span>
           </a>
 
           <div class="tg_range_wrap" ng-show="notify.volume > 0">
@@ -89,14 +89,14 @@
         <div class="tg_form_group">
           <a class="tg_radio" ng-click="toggleCtrlEnter(1)" ng-class="send.enter == 1 ? 'tg_radio_on' : ''">
             <i class="icon icon-radio"></i>
-            <span>
+            <span my-i18n>
               <strong>Enter</strong> - send message, <strong>Shift + Enter</strong> - new line
             </span>
           </a>
 
           <a class="tg_radio" ng-click="toggleCtrlEnter(0)" ng-class="send.enter == 0 ? 'tg_radio_on' : ''">
             <i class="icon icon-radio"></i>
-            <span>
+            <span my-i18n>
               <strong>Ctrl + Enter</strong> - send message, <strong>Enter</strong> - new line
             </span>
           </a>
@@ -106,14 +106,17 @@
     </div>
 
     <div class="modal_section">
-      <h3 class="modal_section_header">About</h3>
+      <h3 class="modal_section_header" my-i18n>About</h3>
       <div class="modal_section_body settings_about_section_body">
         <div class="settings_external_services pull-right">
-          <a href="https://github.com/zhukov/webogram" target="_blank" title="Source code on GitHub" class="settings_external_service"><i class="icon icon-github"></i></a>
-          <a href="https://twitter.com/telegram_web" target="_blank" title="Follow us on Twitter!" class="settings_external_service"><i class="icon icon-twitter"></i></a>
+          <a href="https://github.com/zhukov/webogram" target="_blank" title="{{'Source code on GitHub' | i18n}}" class="settings_external_service"><i class="icon icon-github"></i></a>
+          <a href="https://twitter.com/telegram_web" target="_blank" title="{{'Follow us on Twitter!' | i18n}}" class="settings_external_service"><i class="icon icon-twitter"></i></a>
         </div>
         <p>
-          <a ng-click="openChangelog()">Recent updates (ver. <span ng-bind="version"></span>)</a>
+          <a ng-click="openChangelog()" my-i18n-format>
+            <my-format>Recent updates (ver. {version})</my-format>
+            <my-param name="version"><span ng-bind="version"></span></my-param>
+          </a>
         </p>
       </div>
     </div>

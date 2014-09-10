@@ -1,32 +1,37 @@
 <span ng-switch="::historyMessage.action._">
-  <span ng-switch-when="messageActionChatCreate">
-    created the group &laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;
-  </span>
-  <span ng-switch-when="messageActionChatEditTitle">
-    changed group name to  &laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;
-  </span>
-  <span ng-switch-when="messageActionChatEditPhoto">
+  <my-i18n-format>
+    <span ng-switch-when="messageActionChatCreate" my-format>
+      created the group {group_name}
+    </span>
+    <span ng-switch-when="messageActionChatEditTitle" my-format>
+      changed group name to {group_name}
+    </span>
+    <my-param name="group_name">&laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;</my-param>
+  </my-i18n-format>
+  <span ng-switch-when="messageActionChatEditPhoto" my-i18n>
     changed group photo
   </span>
-  <span ng-switch-when="messageActionChatDeletePhoto">
+  <span ng-switch-when="messageActionChatDeletePhoto" my-i18n>
     removed group photo
   </span>
   <span ng-switch-when="messageActionChatAddUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
-    <span ng-switch-when="true">
-      invited <a my-user-link="historyMessage.action.user_id" color="true"></a>
+    <span ng-switch-when="true" my-i18n-format>
+      <my-format>invited {user}</my-format>
+      <my-param name="user"><a my-user-link="historyMessage.action.user_id" color="true"></a></my-param>
     </span>
-    <span ng-switch-default>
+    <span ng-switch-default my-i18n>
       returned to group
     </span>
   </span>
   <span ng-switch-when="messageActionChatDeleteUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
-    <span ng-switch-when="true">
-      kicked <a my-user-link="historyMessage.action.user_id" color="true"></a>
+    <span ng-switch-when="true" my-i18n-format>
+      <my-format>kicked {user}</my-format>
+      <my-param name="user"><a my-user-link="historyMessage.action.user_id" color="true"></a></my-param>
     </span>
-    <span ng-switch-default>
+    <span ng-switch-default my-i18n>
       left group
     </span>
   </span>
 
-  <span ng-switch-default ng-bind="'Unsupported action ' + historyMessage.action._"></span>
+  <span ng-switch-default ng-bind="'Unsupported action {action}' | i18n:historyMessage.action._"></span>
 </span>

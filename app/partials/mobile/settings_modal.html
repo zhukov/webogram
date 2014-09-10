@@ -12,13 +12,13 @@
           </a>
           <ul class="dropdown-menu">
             <li ng-if="photo.location">
-              <a ng-click="deletePhoto()">Delete profile photo</a>
+              <a ng-click="deletePhoto()" my-i18n>Delete profile photo</a>
             </li>
             <li>
-              <a ng-click="editProfile()">Edit profile</a>
+              <a ng-click="editProfile()" my-i18n>Edit profile</a>
             </li>
             <li>
-              <a ng-click="terminateSessions()">Terminate all sessions</a>
+              <a ng-click="terminateSessions()" my-i18n>Terminate all sessions</a>
             </li>
           </ul>
         </div>
@@ -30,7 +30,7 @@
               <a ng-click="$close()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title">
-                  <h4>Settings</h4>
+                  <h4 my-i18n>Settings</h4>
                 </div>
               </a>
             </li>
@@ -63,57 +63,60 @@
     </div>
 
     <div class="mobile_modal_action_wrap" ng-switch="photo.updating">
-      <span ng-switch-when="true" class="mobile_modal_action">
+      <span ng-switch-when="true" class="mobile_modal_action" my-i18n>
         Updating<span my-loading-dots></span>
       </span>
       <span ng-switch-default class="mobile_modal_action mobile_modal_upload_action">
         <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
-        Set profile photo
+        <my-i18n>Set profile photo</my-i18n>
       </span>
     </div>
 
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-        <span class="tg_checkbox_label">Notification alerts</span>
+        <span class="tg_checkbox_label" my-i18n>Notification alerts</span>
       </a>
     </div>
 
     <div class="mobile_modal_action_wrap" ng-if="!notify.desktop &amp;&amp; notify.canVibrate">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleVibrate()" ng-class="notify.vibrate ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-        <span class="tg_checkbox_label">Vibrate</span>
+        <span class="tg_checkbox_label" my-i18n>Vibrate</span>
       </a>
     </div>
 
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-        <span class="tg_checkbox_label">Sounds</span>
+        <span class="tg_checkbox_label" my-i18n>Sounds</span>
       </a>
     </div>
 
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleCtrlEnter(send.enter == 1 ? 0 : 1)" ng-class="send.enter == 1 ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-        <span class="tg_checkbox_label">Send on Enter</span>
+        <span class="tg_checkbox_label" my-i18n>Send on Enter</span>
       </a>
     </div>
 
     <div class="mobile_modal_section" ng-if="profile.phone">
-      <h4 class="mobile_modal_section_header">Phone</h4>
+      <h4 class="mobile_modal_section_header" my-i18n>Phone</h4>
       <div class="mobile_modal_section_value" ng-bind="profile.phone | phoneNumber"></div>
     </div>
 
     <div class="mobile_modal_section">
-      <h4 class="mobile_modal_section_header">About</h4>
+      <h4 class="mobile_modal_section_header" my-i18n>About</h4>
       <div class="mobile_modal_section_body settings_about_section_body clearfix">
         <div class="settings_external_services pull-right">
-          <a href="https://github.com/zhukov/webogram" target="_blank" title="Source code on GitHub" class="settings_external_service"><i class="icon icon-github"></i></a>
-          <a href="https://twitter.com/telegram_web" target="_blank" title="Follow us on Twitter!" class="settings_external_service"><i class="icon icon-twitter"></i></a>
+          <a href="https://github.com/zhukov/webogram" target="_blank" title="{{'Source code on GitHub' | i18n}}" class="settings_external_service"><i class="icon icon-github"></i></a>
+          <a href="https://twitter.com/telegram_web" target="_blank" title="{{'Follow us on Twitter!' | i18n}}" class="settings_external_service"><i class="icon icon-twitter"></i></a>
         </div>
         <p>
-          <a ng-click="openChangelog()">Recent updates (ver. <span ng-bind="version"></span>)</a>
+          <a ng-click="openChangelog()" my-i18n-format>
+            <my-format>Recent updates (ver. {version})</my-format>
+            <my-param name="version"><span ng-bind="version"></span></my-param>
+          </a>
         </p>
       </div>
     </div>

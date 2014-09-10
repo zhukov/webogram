@@ -17,22 +17,22 @@
           <span class="icon-bar"></span>
         </a>
         <ul ng-if="!curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
-          <li><a ng-click="openGroup()">New Group</a></li>
-          <li><a ng-click="importContact()">New Contact</a></li>
-          <li><a ng-click="openContacts()">Contacts</a></li>
-          <li><a ng-click="openSettings()">Settings</a></li>
-          <li><a ng-click="logOut()">Log Out</a></li>
+          <li><a ng-click="openGroup()" my-i18n>New Group</a></li>
+          <li><a ng-click="importContact()" my-i18n>New Contact</a></li>
+          <li><a ng-click="openContacts()" my-i18n>Contacts</a></li>
+          <li><a ng-click="openSettings()" my-i18n>Settings</a></li>
+          <li><a ng-click="logOut()" my-i18n>Log Out</a></li>
         </ul>
         <ul ng-if="curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
-          <li><a ng-click="toggleEdit()">Edit messages</a></li>
+          <li><a ng-click="toggleEdit()" my-i18n>Edit messages</a></li>
           <li ng-if="!historyFilter.mediaType" class="divider"></li>
-          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')">Photos</a></li>
-          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('video')">Videos</a></li>
-          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('documents')">Documents</a></li>
-          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')">Voice notes</a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')" my-i18n>Photos</a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('video')" my-i18n>Videos</a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('documents')" my-i18n>Documents</a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')" my-i18n>Voice notes</a></li>
         </ul>
         <ul ng-if="!isLoggedIn" class="dropdown-menu">
-          <li><a href="https://github.com/zhukov/webogram" target="_blank">About</a></li>
+          <li><a href="https://github.com/zhukov/webogram" target="_blank" my-i18n>About</a></li>
         </ul>
       </div>
 
@@ -50,10 +50,10 @@
               <a ng-click="toggleMedia()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title" ng-switch="historyFilter.mediaType">
-                  <h4 ng-switch-when="photos">Photos</h4>
-                  <h4 ng-switch-when="video">Videos</h4>
-                  <h4 ng-switch-when="documents">Documents</h4>
-                  <h4 ng-switch-when="audio">Voice messages</h4>
+                  <h4 ng-switch-when="photos" my-i18n>Photos</h4>
+                  <h4 ng-switch-when="video" my-i18n>Videos</h4>
+                  <h4 ng-switch-when="documents" my-i18n>Documents</h4>
+                  <h4 ng-switch-when="audio" my-i18n>Voice messages</h4>
                 </div>
               </a>
             </li>
@@ -61,12 +61,12 @@
           <div ng-switch-default ng-switch="historyState.selectActions">
             <ul ng-switch-when="true" class="nav navbar-navbar navbar-quick-nav navbar-history-edit">
               <li class="navbar-quick-right">
-                <a ng-click="toggleEdit()">Cancel</a>
+                <a ng-click="toggleEdit()" my-i18n>Cancel</a>
               </li>
               <li class="navbar-quick-left">
-                <a ng-click="selectedFlush()">Clear All</a>
+                <a ng-click="selectedFlush()" my-i18n>Clear All</a>
               </li>
-              <li class="navbar-quick-title">Edit</li>
+              <li class="navbar-quick-title" my-i18n>Edit</li>
             </ul>
             <ul ng-switch-default class="nav navbar-nav navbar-quick-nav" ng-switch="historyPeer.id > 0">
               <li ng-switch-when="true">
@@ -75,7 +75,7 @@
                   <div class="navbar-quick-back-title">
                     <h4 ng-bind-html="historyPeer.data.rFullName"></h4>
                     <small ng-switch="historyState.typing.length">
-                      <span ng-switch-when="1" class="status_online">
+                      <span ng-switch-when="1" class="status_online" my-i18n>
                         typing<span my-loading-dots></span>
                       </span>
                       <span ng-switch-default my-user-status="historyPeer.id"></span>
@@ -92,15 +92,21 @@
                       <ng-pluralize ng-switch-when="0" count="historyPeer.data.participants_count"
                                        when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
                       </ng-pluralize>
-                      <span ng-switch-when="1" class="status_online">
-                        <span my-user-link="historyState.typing[0]" short="true"></span> is typing<span my-loading-dots></span>
-                      </span>
-                      <span ng-switch-when="2" class="status_online">
-                        <span my-user-link="historyState.typing[0]" short="true"></span>, <span my-user-link="historyState.typing[1]" short="true"></span><span my-loading-dots></span>
-                      </span>
-                      <span ng-switch-default class="status_online">
-                        <span my-user-link="historyState.typing[0]" short="true"></span>+{{historyState.typing.length - 1}}<span my-loading-dots></span>
-                      </span>
+                      <my-i18n-format>
+                        <span ng-switch-when="1" class="status_online" my-format>
+                          {name1} is typing{dots}
+                        </span>
+                        <span ng-switch-when="2" class="status_online" my-format>
+                          {name1}, {name2}{dots}
+                        </span>
+                        <span ng-switch-default class="status_online" my-format>
+                          {name1}+{names}{dots}
+                        </span>
+                        <my-param name="name1"><span my-user-link="historyState.typing[0]" short="true"></span></my-param>
+                        <my-param name="name2"><span my-user-link="historyState.typing[1]" short="true"></span></my-param>
+                        <my-param name="names">{{historyState.typing.length - 1}}</my-param>
+                        <my-param name="dots"><span my-loading-dots></span></my-param>
+                      </my-i18n-format>
                     </small>
                   </div>
                 </a>
@@ -113,16 +119,16 @@
       <div class="navbar-menu" ng-switch="offline">
 
         <ul ng-switch-when="true" class="nav navbar-nav navbar-offline">
-          <li ng-show="!offlineConnecting"><span class="navbar-offline-text">Waiting for network<span my-loading-dots></span></span></li>
-          <li ng-show="!offlineConnecting" class="hidden-xs"><a href="" ng-click="retryOnline()">Retry</a></li>
-          <li ng-show="offlineConnecting"><span class="navbar-offline-text">Connecting<span my-loading-dots></span></span></li>
+          <li ng-show="!offlineConnecting"><span class="navbar-offline-text" my-i18n>Waiting for network<span my-loading-dots></span></span></li>
+          <li ng-show="!offlineConnecting" class="hidden-xs"><a href="" ng-click="retryOnline()" my-i18n>Retry</a></li>
+          <li ng-show="offlineConnecting"><span class="navbar-offline-text" my-i18n>Connecting<span my-loading-dots></span></span></li>
         </ul>
 
         <ul ng-switch-default class="nav navbar-nav navbar-right">
-          <li ng-if="isLoggedIn &amp;&amp; !isEmpty.contacts"><a href="" ng-click="openContacts()">Contacts</a></li>
-          <li ng-if="isLoggedIn"><a href="" ng-click="openSettings()">Settings</a></li>
-          <li ng-if="isLoggedIn"><a href="" ng-click="logOut()">Log Out</a></li>
-          <li ng-if="!isLoggedIn"><a href="https://github.com/zhukov/webogram" target="_blank">About</a></li>
+          <li ng-if="isLoggedIn &amp;&amp; !isEmpty.contacts"><a href="" ng-click="openContacts()" my-i18n>Contacts</a></li>
+          <li ng-if="isLoggedIn"><a href="" ng-click="openSettings()" my-i18n>Settings</a></li>
+          <li ng-if="isLoggedIn"><a href="" ng-click="logOut()" my-i18n>Log Out</a></li>
+          <li ng-if="!isLoggedIn"><a href="https://github.com/zhukov/webogram" target="_blank" my-i18n>About</a></li>
         </ul>
 
       </div>

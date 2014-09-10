@@ -5,68 +5,75 @@
   <div class="modal-body">
 
     <h4 ng-if="error" class="modal_simple_header" ng-switch="error.type">
-      <span ng-switch-when="ACCOUNT_REQUIRED">No account</span>
+      <span ng-switch-when="ACCOUNT_REQUIRED" my-i18n>No account</span>
       <span ng-switch-default ng-switch="error.code">
-        <span ng-switch-when="400">Error</span>
-        <span ng-switch-when="401">Unauthorized</span>
-        <span ng-switch-when="403">Access denied</span>
-        <span ng-switch-when="404">Not found</span>
-        <span ng-switch-when="406">Network error</span>
-        <span ng-switch-when="420">Too fast</span>
-        <span ng-switch-default>Server error</span>
+        <span ng-switch-when="400" my-i18n>Error</span>
+        <span ng-switch-when="401" my-i18n>Unauthorized</span>
+        <span ng-switch-when="403" my-i18n>Access denied</span>
+        <span ng-switch-when="404" my-i18n>Not found</span>
+        <span ng-switch-when="406" my-i18n>Network error</span>
+        <span ng-switch-when="420" my-i18n>Too fast</span>
+        <span ng-switch-default my-i18n>Server error</span>
       </span>
     </h4>
-    <h4 ng-if="!error" class="modal_simple_header" ng-bind="title || 'Alert'"></h4>
+    <h4 ng-if="!error" class="modal_simple_header" ng-bind="title || {{'Alert' | i18n}}"></h4>
 
     <div ng-if="error" class="error_modal_description" ng-switch="error.type">
-      <span ng-switch-when="NETWORK_BAD_REQUEST">
+      <span ng-switch-when="NETWORK_BAD_REQUEST" my-i18n>
         Please check your internet connection.
       </span>
-      <span ng-switch-when="NETWORK_BAD_RESPONSE">
+      <span ng-switch-when="NETWORK_BAD_RESPONSE" my-i18n>
         Please check your internet connection.
       </span>
-      <span ng-switch-when="FIRSTNAME_INVALID">
+      <span ng-switch-when="FIRSTNAME_INVALID" my-i18n>
         The first name you entered is invalid.
       </span>
-      <span ng-switch-when="LASTNAME_INVALID">
+      <span ng-switch-when="LASTNAME_INVALID" my-i18n>
         The last name you entered is invalid.
       </span>
-      <span ng-switch-when="PHONE_NUMBER_INVALID">
+      <span ng-switch-when="PHONE_NUMBER_INVALID" my-i18n>
         The phone number you entered is invalid.
       </span>
-      <span ng-switch-when="USERS_TOO_MUCH">
+      <span ng-switch-when="USERS_TOO_MUCH" my-i18n>
         You have selected too much users.
       </span>
-      <span ng-switch-when="PHOTO_INVALID_DIMENSIONS">
+      <span ng-switch-when="PHOTO_INVALID_DIMENSIONS" my-i18n>
         The photo dimensions are invalid, please select another file.
       </span>
-      <span ng-switch-when="VIDEO_EXT_INVALID">
+      <span ng-switch-when="VIDEO_EXT_INVALID" my-i18n>
         The video file extension is invalid or unsupported, please select another file.
       </span>
-      <span ng-switch-when="PHOTO_CROP_SIZE_SMALL">
+      <span ng-switch-when="PHOTO_CROP_SIZE_SMALL" my-i18n>
         The photo you provided is too small.
       </span>
-      <span ng-switch-when="ACCOUNT_REQUIRED">
-        Sorry, there is no <strong>Telegram</strong> account for {{phone | phoneNumber}}<br/><br/>
-        Please <strong>sign up</strong> using our mobile apps for <a href="https://telegram.org/" target="_blank">iOS</a> or <a href="https://telegram.org/" target="_blank">Android</a>.
+      <span ng-switch-when="ACCOUNT_REQUIRED" my-i18n-format>
+        <my-format>
+          Sorry, there is no <strong>Telegram</strong> account for {phone}<br/><br/>
+          Please <strong>sign up</strong> using our mobile apps for {telegram: iOS} or {telegram: Android}.
+        </my-format>
+        <my-param name="phone">{{phone | phoneNumber}}</my-param>
+        <my-param name="telegram"><a href="https://telegram.org/" target="_blank">{0}</a></my-param>
       </span>
-      <span ng-switch-when="USER_NOT_USING_TELEGRAM">
+      <span ng-switch-when="USER_NOT_USING_TELEGRAM" my-i18n>
         Sorry, there is no <strong>Telegram</strong> account with the phone number you provided.
       </span>
-      <span ng-switch-when="USERS_NOT_USING_TELEGRAM">
+      <span ng-switch-when="USERS_NOT_USING_TELEGRAM" my-i18n>
         Sorry, there are no <strong>Telegram</strong> accounts with the phone numbers you provided.
       </span>
-      <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED">
+      <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED" my-i18n>
         Telegram needs access to phonebook to import contacts.
       </span>
 
       <div ng-switch-default ng-switch="error.code">
-        <span ng-switch-when="400">One of the params is missing or invalid.</span>
-        <span ng-switch-when="401">This action requires authorization access. Please <a href="#/login">log in</a>.</span>
-        <span ng-switch-when="403">You are not allowed for this action.</span>
-        <span ng-switch-when="404">The page was not found.</span>
-        <span ng-switch-when="420">You are performing too many actions. Please try again later.</span>
-        <span ng-switch-default>Internal server error occured. Please try again later.</span>
+        <span ng-switch-when="400" my-i18n>One of the params is missing or invalid.</span>
+        <span ng-switch-when="401" my-i18n-format>
+          <my-format>This action requires authorization access. Please {login: log in}.<my-format>
+          <my-param name="login"><a href="#/login">{0}</a></my-param>
+        </span>
+        <span ng-switch-when="403" my-i18n>You are not allowed for this action.</span>
+        <span ng-switch-when="404" my-i18n>The page was not found.</span>
+        <span ng-switch-when="420" my-i18n>You are performing too many actions. Please try again later.</span>
+        <span ng-switch-default my-i18n>Internal server error occured. Please try again later.</span>
       </div>
 
     </div>
@@ -76,7 +83,7 @@
 Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}
 Stack: {{error.stack}}</textarea>
       <div ng-switch-default>
-        <a href="" ng-click="error.detailsShown = true">Technical details here</a>
+        <a href="" ng-click="error.detailsShown = true" my-i18n>Technical details here</a>
       </div>
     </div>
 

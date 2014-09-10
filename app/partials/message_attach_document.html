@@ -22,11 +22,11 @@
         <span class="im_message_document_size" ng-if="historyMessage.media.document.progress.enabled" ng-bind="historyMessage.media.document.progress | formatSizeProgress"></span>
       </div>
       <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
-        <a href="" ng-click="downloadDoc(historyMessage.media.document.id)">Download</a>
-        <a href="" ng-click="downloadDoc(historyMessage.media.document.id, 1)" ng-if="::historyMessage.media.document.withPreview">Open</a>
+        <a href="" ng-click="downloadDoc(historyMessage.media.document.id)" my-i18n>Download</a>
+        <a href="" ng-click="downloadDoc(historyMessage.media.document.id, 1)" ng-if="::historyMessage.media.document.withPreview" my-i18n>Open</a>
       </div>
       <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
-        <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.document.progress.cancel()">Cancel</a>
+        <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.document.progress.cancel()" my-i18n>Cancel</a>
         <div class="im_message_download_progress_wrap">
           <div class="progress tg_down_progress">
             <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.document.progress.percent + '%'}"></div>

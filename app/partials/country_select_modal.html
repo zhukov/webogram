@@ -2,10 +2,10 @@
 
   <div class="modal-body">
 
-    <h4 class="modal_simple_header">Country</h4>
+    <h4 class="modal_simple_header" my-i18n>Country</h4>
 
     <div class="countries_modal_search">
-      <input class="form-control countries_modal_search_field" my-focused type="search" placeholder="Search" ng-model="search.query"/>
+      <input class="form-control countries_modal_search_field" my-focused type="search" placeholder="{{'Search' | i18n}}" ng-model="search.query"/>
       <a class="countries_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
     </div>
 
@@ -33,7 +33,7 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" ng-click="$dismiss()">Done</button>
+    <button type="button" class="btn btn-primary" ng-click="$dismiss()" my-i18n>Done</button>
   </div>
 
 </div>

@@ -12,16 +12,16 @@
           </a>
           <ul class="dropdown-menu">
             <li ng-if="user._ == 'userContact'">
-              <a ng-click="importContact(true)">Edit contact</a>
+              <a ng-click="importContact(true)" my-i18n>Edit contact</a>
             </li>
             <li ng-if="user._ == 'userContact'">
-              <a ng-click="deleteContact()">Delete contact</a>
+              <a ng-click="deleteContact()" my-i18n>Delete contact</a>
             </li>
             <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
-              <a ng-click="importContact()">Add to contacts</a>
+              <a ng-click="importContact()" my-i18n>Add to contacts</a>
             </li>
             <li>
-              <a ng-click="flushHistory()">Delete chat</a>
+              <a ng-click="flushHistory()" my-i18n>Delete chat</a>
             </li>
           </ul>
         </div>
@@ -33,7 +33,7 @@
               <a ng-click="$close()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title">
-                  <h4>Contact info</h4>
+                  <h4 my-i18n>Contact info</h4>
                 </div>
               </a>
             </li>
@@ -65,22 +65,22 @@
     </div>
 
     <div class="mobile_modal_action_wrap">
-      <a class="mobile_modal_action" ng-click="goToHistory()">Send message</a>
+      <a class="mobile_modal_action" ng-click="goToHistory()" my-i18n>Send message</a>
     </div>
 
     <div ng-if="user.phone.length > 0" class="mobile_modal_action_wrap">
-      <a class="mobile_modal_action" ng-click="shareContact()">Share contact</a>
+      <a class="mobile_modal_action" ng-click="shareContact()" my-i18n>Share contact</a>
     </div>
 
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-        <span class="tg_checkbox_label">Notifications</span>
+        <span class="tg_checkbox_label" my-i18n>Notifications</span>
       </a>
     </div>
 
     <div class="mobile_modal_section">
-      <h4 class="mobile_modal_section_header">Phone</h4>
+      <h4 class="mobile_modal_section_header" my-i18n>Phone</h4>
       <div class="mobile_modal_section_value" ng-bind="user.phone | phoneNumber"></div>
     </div>
 

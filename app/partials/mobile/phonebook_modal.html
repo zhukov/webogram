@@ -9,15 +9,15 @@
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right">
               <a ng-click="toggleSelection()" ng-switch="selectedCount > 0">
-                <span ng-switch-when="true">Deselect all</span>
-                <span ng-switch-default>Select all</span>
+                <span ng-switch-when="true" my-i18n>Deselect all</span>
+                <span ng-switch-default my-i18n>Select all</span>
               </a>
             </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title">
-                  <h4>Phonebook</h4>
+                  <h4 my-i18n>Phonebook</h4>
                 </div>
               </a>
             </li>
@@ -32,7 +32,7 @@
   <div class="modal-body mobile_modal_body">
 
     <div class="contacts_modal_search">
-      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="Search" ng-model="search.query"/>
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'Search' | i18n}}" ng-model="search.query"/>
       <a class="contacts_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
     </div>
 
@@ -42,7 +42,7 @@
       <div class="contacts_wrap nano" my-infinite-scroller>
         <div class="contacts_scrollable_wrap nano-content" ng-switch="contactsEmpty">
 
-          <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true">
+          <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true" my-i18n>
             Your phonebook is empty.
           </div>
 
@@ -82,8 +82,8 @@
 
   <div class="modal-footer contacts_modal_panel" ng-show="multiSelect">
     <button class="btn btn-primary" ng-class="{disabled: !selectedCount || progress.enabled}" ng-disabled="!selectedCount || progress.enabled" ng-click="submitSelected()" type="submit" ng-switch="progress.enabled">
-      <span ng-switch-when="true">Importing<span my-loading-dots></span></span>
-      <span ng-switch-default>Import contacts</span>
+      <span ng-switch-when="true" my-i18n>Importing<span my-loading-dots></span></span>
+      <span ng-switch-default my-i18n>Import contacts</span>
     </button>
   </div>
 
