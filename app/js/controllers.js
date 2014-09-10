@@ -23,7 +23,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager, _) {
 
     $modalStack.dismissAll();
     IdleManager.start();
@@ -96,10 +96,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       for (i = 0; i < Config.CountryCodes.length; i++) {
         country = Config.CountryCodes[i];
         if (country[0] == countryIso2) {
-          return selectCountry({name: country[1], code: country[2]});
+          return selectCountry({name: _(country[1] + '_raw'), code: country[2]});
         }
       }
-      return selectCountry({name: 'United States', code: '+1'});
+      return selectCountry({name: _('country_select_modal_country_us_raw'), code: '+1'});
     }
 
     function selectCountry (country) {
@@ -130,7 +130,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               code = Config.CountryCodes[i][j].replace(/\D+/g, '');
               if (code.length > maxLength && !phoneNumber.indexOf(code)) {
                 maxLength = code.length;
-                maxName = Config.CountryCodes[i][1];
+                maxName = _(Config.CountryCodes[i][1] + '_raw');
               }
             }
           }
@@ -138,7 +138,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       $scope.credentials.phone_full = phoneNumber;
-      $scope.credentials.phone_country_name = maxName || 'Unknown';
+      $scope.credentials.phone_country_name = maxName || _('login_controller_unknown_country_raw');
     };
 
     $scope.$watch('credentials.phone_country', updateCountry);
@@ -2492,7 +2492,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, SearchIndexManager) {
+  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, SearchIndexManager, _) {
 
     $scope.search = {};
     $scope.slice = {limit: 20, limitDelta: 20}
@@ -2500,7 +2500,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var searchIndex = SearchIndexManager.createIndex();
 
     for (var i = 0; i < Config.CountryCodes.length; i++) {
-      SearchIndexManager.indexObject(i, Config.CountryCodes[i].join(' '), searchIndex);
+      var searchString = Config.CountryCodes[i][0];
+      searchString += ' ' + _(Config.CountryCodes[i][1] + '_raw');
+      searchString += ' ' + Config.CountryCodes[i].slice(2).join(' ');
+      SearchIndexManager.indexObject(i, searchString, searchIndex);
     }
 
     $scope.$watch('search.query', function (newValue) {
@@ -2519,7 +2522,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       for (var i = 0; i < Config.CountryCodes.length; i++) {
         if (!filtered || results[i]) {
           for (j = 2; j < Config.CountryCodes[i].length; j++) {
-            $scope.countries.push({name: Config.CountryCodes[i][1], code: Config.CountryCodes[i][j]});
+            $scope.countries.push({name: _(Config.CountryCodes[i][1] + '_raw'), code: Config.CountryCodes[i][j]});
           }
         }
       }

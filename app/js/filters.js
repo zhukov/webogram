@@ -11,41 +11,41 @@
 
 angular.module('myApp.filters', ['myApp.i18n'])
 
-  .filter('userName', [function() {
+  .filter('userName', ['_', function(_) {
     return function (user) {
       if (!user || !user.first_name && !user.last_name) {
-        return 'DELETED';
+        return _('user_name_deleted');
       }
       return user.first_name + ' ' + user.last_name;
     }
   }])
 
-  .filter('userFirstName', [function() {
+  .filter('userFirstName', ['_', function(_) {
     return function (user) {
       if (!user || !user.first_name && !user.last_name) {
-        return 'DELETED';
+        return _('user_first_name_deleted');
       }
       return user.first_name || user.last_name;
     }
   }])
 
-  .filter('userStatus', ['$filter', function($filter) {
+  .filter('userStatus', ['$filter', '_', function($filter, _) {
     return function (user) {
       if (!user || !user.status || user.status._ == 'userStatusEmpty') {
-        return 'offline';
+        return _('user_status_offline');
       }
       if (user.status._ == 'userStatusOnline') {
-        return 'online';
+        return _('user_status_online');
       }
 
-      return 'last seen ' + $filter('relativeTime')(user.status.was_online);
+      return _('user_status_last_seen', $filter('relativeTime')(user.status.was_online));
     }
   }])
 
-  .filter('chatTitle', [function() {
+  .filter('chatTitle', ['_', function(_) {
     return function (chat) {
       if (!chat || !chat.title) {
-        return 'DELETED';
+        return _('chat_title_deleted');
       }
       return chat.title;
     }
@@ -153,7 +153,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   }])
 
-  .filter('formatSizeProgress', ['$filter', function ($filter) {
+  .filter('formatSizeProgress', ['$filter', '_', function ($filter, _) {
     return function (progress) {
       var done = $filter('formatSize')(progress.done),
           doneParts = done.split(' '),
@@ -161,9 +161,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
           totalParts = total.split(' ');
 
       if (totalParts[1] === doneParts[1]) {
-        return doneParts[0] + ' of ' + totalParts[0] + ' ' + (doneParts[1] || '');
+        return _('format_size_progress_mulitple', {done: done, total: total, parts: (doneParts[1] || '')});
       }
-      return done + ' of ' + total;
+      return _('format_size_progress', {done: done, total: total});
     }
   }])
 
@@ -179,29 +179,29 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   }])
 
-  .filter('relativeTime', ['$filter', function($filter) {
+  .filter('relativeTime', ['$filter', '_', function($filter, _) {
     var langMinutes = {
-      one: 'minute ago',
-      many: 'minutes ago'
+      one: 'relative_time_one_minute',
+      many: 'relative_time_many_minutes'
     },
       langHours = {
-        one: 'hour ago',
-        many: 'hours ago'
+        one: 'relative_time_one_hour',
+        many: 'relative_time_many_hours'
       };
     return function (timestamp) {
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks);
 
       if (diff < 60000) {
-        return 'just now';
+        return _('relative_time_just_now');
       }
       if (diff < 3000000) {
         var minutes = Math.ceil(diff / 60000);
-        return minutes + ' ' + langMinutes[minutes > 1 ? 'many' : 'one'];
+        return _(langMinutes[minutes > 1 ? 'many' : 'one'], {minutes: minutes});
       }
       if (diff < 10000000) {
         var hours = Math.ceil(diff / 3600000);
-        return hours + ' ' + langHours[hours > 1 ? 'many' : 'one'];
+        return _(langHours[hours > 1 ? 'many' : 'one'], {hours: hours});
       }
       return $filter('dateOrTime')(timestamp);
     }

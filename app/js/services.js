@@ -11,7 +11,7 @@
 
 angular.module('myApp.services', ['myApp.i18n'])
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage, _) {
   var users = {},
       cachedPhotoLocations = {},
       contactsFillPromise,
@@ -92,8 +92,8 @@ angular.module('myApp.services', ['myApp.i18n'])
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true});
     } else {
-      apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || 'DELETED';
-      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || 'DELETED';
+      apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_first_name_deleted');
+      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_name_deleted');
     }
     apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
     apiUser.sortStatus = apiUser.status && (apiUser.status.expires || apiUser.status.was_online) || 0;
@@ -456,7 +456,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     if (!angular.isObject(apiChat)) {
       return;
     }
-    apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+    apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
     if (chats[apiChat.id] === undefined) {
       chats[apiChat.id] = apiChat;
     } else {
@@ -1835,7 +1835,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
         case 'messageActionChatCreate':
         case 'messageActionChatEditTitle':
-          message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || 'DELETED';
+          message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
           break;
       }
     }
@@ -1946,25 +1946,25 @@ angular.module('myApp.services', ['myApp.i18n'])
       notificationMessage = RichTextProcessor.wrapPlainText(message.message);
     } else if (message.media && message.media._ != 'messageMediaEmpty') {
       switch (message.media._) {
-        case 'messageMediaPhoto': notificationMessage = 'Photo'; break;
-        case 'messageMediaVideo': notificationMessage = 'Video'; break;
-        case 'messageMediaDocument': notificationMessage = 'Document'; break;
-        case 'messageMediaAudio': notificationMessage = 'Voice message'; break;
-        case 'messageMediaGeo': notificationMessage = 'Location'; break;
-        case 'messageMediaContact': notificationMessage = 'Contact'; break;
-        default: notificationMessage = 'Attachment'; break;
+        case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo'); break;
+        case 'messageMediaVideo': notificationMessage = _('conversation_media_video'); break;
+        case 'messageMediaDocument': notificationMessage = _('conversation_media_document'); break;
+        case 'messageMediaAudio': notificationMessage = _('conversation_media_audio'); break;
+        case 'messageMediaGeo': notificationMessage = _('conversation_media_location'); break;
+        case 'messageMediaContact': notificationMessage = _('conversation_media_contact'); break;
+        default: notificationMessage = _('conversation_media_attachment'); break;
       }
     } else if (message._ == 'messageService') {
       switch (message.action._) {
-        case 'messageActionChatCreate': notificationMessage = 'created the group'; break;
-        case 'messageActionChatEditTitle': notificationMessage = 'changed group name'; break;
-        case 'messageActionChatEditPhoto': notificationMessage = 'changed group photo'; break;
-        case 'messageActionChatDeletePhoto': notificationMessage = 'removed group photo'; break;
+        case 'messageActionChatCreate': notificationMessage = _('conversation_group_created'); break;
+        case 'messageActionChatEditTitle': notificationMessage = _('conversation_group_renamed'); break;
+        case 'messageActionChatEditPhoto': notificationMessage = _('conversation_group_photo_updated'); break;
+        case 'messageActionChatDeletePhoto': notificationMessage = _('conversation_group_photo_removed'); break;
         case 'messageActionChatAddUser':
-          notificationMessage = message.action.user_id == message.from_id ? 'returned to group' : 'invited user';
+          notificationMessage = message.action.user_id == message.from_id ? _('conversation_returned_to_group') : _('conversation_invited_user_message');
           break;
         case 'messageActionChatDeleteUser':
-          notificationMessage = message.action.user_id == message.from_id ? 'left group' : 'kicked user';
+          notificationMessage = message.action.user_id == message.from_id ? _('conversation_left_group') : _('conversation_kicked_user_message');
           break;
       }
     }
@@ -1979,9 +1979,9 @@ angular.module('myApp.services', ['myApp.i18n'])
       peerString = AppUsersManager.getUserString(peerID);
 
     } else {
-      notification.title = (fromUser.first_name || fromUser.last_name || 'Somebody') +
+      notification.title = (fromUser.first_name || fromUser.last_name || _('conversation_unknown_user')) +
                            ' @ ' +
-                           (AppChatsManager.getChat(-peerID).title || 'Unknown chat');
+                           (AppChatsManager.getChat(-peerID).title || _('conversation_unknown_chat'));
 
       notificationPhoto = AppChatsManager.getChatPhoto(-peerID, 'Group');
 
