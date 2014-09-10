@@ -719,7 +719,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService, Storage) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService,Storage) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -1898,7 +1898,7 @@ angular.module('myApp.services', [])
         notificationPhoto;
 
     if (message.message) {
-      notificationMessage = message.message;
+      notificationMessage = RichTextProcessor.wrapPlainText(message.message);
     } else if (message.media && message.media._ != 'messageMediaEmpty') {
       switch (message.media._) {
         case 'messageMediaPhoto': notificationMessage = 'Photo'; break;
@@ -1938,6 +1938,8 @@ angular.module('myApp.services', [])
 
       peerString = AppChatsManager.getChatString(-peerID);
     }
+
+    notification.title = RichTextProcessor.wrapPlainText(notification.title);
 
     notification.onclick = function () {
       $rootScope.$broadcast('history_focus', {peerString: peerString});
@@ -3074,6 +3076,7 @@ angular.module('myApp.services', [])
       emojiMap = {},
       emojiData = Config.Emoji,
       emojiIconSize = 18,
+      emojiSupported = navigator.userAgent.search(/OS X|iPhone|iPad|iOS|Android/i) != -1,
       emojiCode;
 
   for (emojiCode in emojiData) {
@@ -3106,13 +3109,14 @@ angular.module('myApp.services', [])
                         "\\uff21-\\uff3a\\uff41-\\uff5a" +  // full width Alphabet
                         "\\uff66-\\uff9f" +                 // half width Katakana
                         "\\uffa1-\\uffdc";                  // half width Hangul (Korean)
-var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
 
+  var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{3,20})', 'i');
   var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
 
   return {
-    wrapRichText: wrapRichText
+    wrapRichText: wrapRichText,
+    wrapPlainText: wrapPlainText
   };
 
   function encodeEntities(value) {
@@ -3258,6 +3262,43 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
     }
 
     return $sce.trustAs('html', text);
+  }
+
+  function wrapPlainText (text, options) {
+    if (emojiSupported) {
+      return text;
+    }
+    if (!text || !text.length) {
+      return '';
+    }
+
+    options = options || {};
+
+    text = text.replace(/\ufe0f/g, '', text);
+
+    var match,
+        raw = text,
+        text = [],
+        emojiTitle;
+
+    while ((match = raw.match(regExp))) {
+      text.push(raw.substr(0, match.index));
+
+      if (match[6]) {
+        if ((emojiCode = emojiMap[match[6]]) &&
+            (emojiTitle = emojiData[emojiCode][1][0])) {
+          text.push(':' + emojiTitle + ':');
+        } else {
+          text.push(match[0]);
+        }
+      } else {
+        text.push(match[0]);
+      }
+      raw = raw.substr(match.index + match[0].length);
+    }
+    text.push(raw);
+
+    return text.join('');
   }
 
 })
