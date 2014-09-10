@@ -844,7 +844,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService) {
+  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService, $interpolate) {
 
     return {
       link: link,
@@ -868,7 +868,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (richTextarea) {
         editorElement = richTextarea;
         $(richTextarea).addClass('form-control');
-        $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+        $(richTextarea).attr('placeholder', $interpolate($(messageField).attr('placeholder'))($scope));
 
         var updatePromise;
         $(richTextarea)
@@ -1198,7 +1198,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadFullPhoto', function(MtpApiFileManager) {
+  .directive('myLoadFullPhoto', function(MtpApiFileManager, _) {
 
     return {
       link: link,
@@ -1263,9 +1263,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.progress.enabled = false;
 
           if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-            $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+            $scope.error = {html: _('Your browser doesn\'t support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to display this image.<br/>Please, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.', {
+              'moz-link': '<a href="{0}" target="_blank">{1}</a>',
+              'chrome-link': '<a href="{0}" target="_blank">{1}</a>',
+              'telegram-link': '<a href="{0}" target="_blank">{1}</a>'
+            })};
           } else {
-            $scope.error = {text: 'Download failed', error: e};
+            $scope.error = {text: _('Download failed'), error: e};
           }
         }, function (progress) {
           $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
@@ -1277,7 +1281,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myLoadVideo', function($sce, MtpApiFileManager) {
+  .directive('myLoadVideo', function($sce, MtpApiFileManager, _) {
 
     return {
       link: link,
@@ -1323,9 +1327,13 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+          $scope.error = {html: _('Your browser doesn\'t support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to play this video.<br/>Please, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.', {
+              'moz-link': '<a href="{0}" target="_blank">{1}</a>',
+              'chrome-link': '<a href="{0}" target="_blank">{1}</a>',
+              'telegram-link': '<a href="{0}" target="_blank">{1}</a>'
+            })};
         } else {
-          $scope.error = {text: 'Video download failed', error: e};
+          $scope.error = {text: _('Video download failed'), error: e};
         }
 
       }, function (progress) {

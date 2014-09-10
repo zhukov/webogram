@@ -23,7 +23,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, ChangelogNotifyService) {
+  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, ChangelogNotifyService, _) {
 
     $modalStack.dismissAll();
 
@@ -137,7 +137,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       $scope.credentials.phone_full = phoneNumber;
-      $scope.credentials.phone_country_name = maxName || 'Unknown';
+      $scope.credentials.phone_country_name = maxName || _('Unknown');
     };
 
     $scope.$watch('credentials.phone_country', updateCountry);
