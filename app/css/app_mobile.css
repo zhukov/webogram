@@ -1096,7 +1096,7 @@ a.mobile_modal_action .tg_checkbox_label {
   display: none;
 }
 
-.im_media_attach {
+.im_attach {
   position: absolute;
   right: 0;
   top: 0;
@@ -1106,7 +1106,7 @@ a.mobile_modal_action .tg_checkbox_label {
   padding: 3px 13px 4px 16px;
 }
 
-.icon-camera {
+.icon-paperclip {
   display: inline-block;
   width: 19px;
   height: 23px;
@@ -1115,11 +1115,11 @@ a.mobile_modal_action .tg_checkbox_label {
   background-size: 42px 891px;
   opacity: 0.8;
 }
-.is_1x .icon-camera {
+.is_1x .icon-paperclip {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.im_media_attach:hover .icon-camera,
-.im_media_attach:active .icon-camera {
+.im_attach:hover .icon-paperclip,
+.im_attach:active .icon-paperclip {
   background-position: -12px -100px;
   opacity: 1;
 }
@@ -1129,7 +1129,7 @@ a.mobile_modal_action .tg_checkbox_label {
 .im_send_form_empty .im_submit {
   display: none;
 }
-.im_send_form_empty .im_media_attach {
+.im_send_form_empty .im_attach {
   display: block;
 }
 

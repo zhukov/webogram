@@ -743,7 +743,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             var self = this;
             $scope.$apply(function () {
               $scope.draftMessage.files = Array.prototype.slice.call(self.files);
-              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
+              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input') || Config.Navigator.mobile;
               setTimeout(function () {
                 try {
                   self.value = '';
