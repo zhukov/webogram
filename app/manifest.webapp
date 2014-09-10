@@ -15,6 +15,8 @@
     "push": "/index.html"
   }, {
     "push-register": "/index.html"
+  }, {
+    "notification": "/index.html"
   }],
   "permissions": {
     "desktop-notification": {
@@ -28,6 +30,7 @@
       "description": "Required for notifications"
     }
   },
+  "orientation": "portrait-primary",
   "icons": {
     "16": "/img/icons/icon16.png",
     "32": "/img/icons/icon32.png",

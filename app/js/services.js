@@ -351,8 +351,6 @@ angular.module('myApp.services', [])
 
 .service('PhonebookContactsService', function ($q, $modal, $sce, FileManager) {
 
-  var phonebookContactsPromise;
-
   return {
     isAvailable: isAvailable,
     openPhonebookImport: openPhonebookImport,
@@ -380,10 +378,6 @@ angular.module('myApp.services', [])
   }
 
   function getPhonebookContacts () {
-    if (phonebookContactsPromise) {
-      return phonebookContactsPromise;
-    }
-
     try {
       var request = window.navigator.mozContacts.getAll({});
     } catch (e) {
@@ -435,7 +429,7 @@ angular.module('myApp.services', [])
       deferred.reject(e);
     }
 
-    return phonebookContactsPromise = deferred.promise;
+    return deferred.promise;
   }
 
 })
@@ -3489,10 +3483,7 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   }
 
   function notify (data) {
-    // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
-    if (!$rootScope.idle.isIDLE) {
-      return false;
-    }
+    console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
 
     // FFOS Notification blob src bug workaround
     if (Config.Navigator.ffos) {
@@ -3558,6 +3549,9 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
         notificationsClear();
       };
 
+      if (notification.show) {
+        notification.show();
+      }
       notificationsShown[key] = notification;
     });
   };
@@ -3598,6 +3592,8 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
     notificationsCount = 0;
   }
 
+  var registerDevicePeriod = 1000,
+      registerDeviceTO;
   function registerDevice () {
     if (registeredDevice) {
       return false;
@@ -3606,6 +3602,8 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
       var req = navigator.push.register();
 
       req.onsuccess = function(e) {
+        clearTimeout(registerDeviceTO);
+        console.log(dT(), 'Push registered', req.result);
         registeredDevice = req.result;
         MtpApiManager.invokeApi('account.registerDevice', {
           token_type: 4,
@@ -3619,7 +3617,9 @@ var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
       }
 
       req.onerror = function(e) {
-        console.error('Push register error', e);
+        console.error('Push register error', e, e.toString());
+        registerDeviceTO = setTimeout(registerDevice, registerDevicePeriod);
+        registerDevicePeriod = Math.min(30000, registerDevicePeriod * 1.5);
       }
     }
   }
