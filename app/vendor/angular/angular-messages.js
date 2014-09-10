@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.16
+ * @license AngularJS v1.3.0-rc.0
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -233,8 +233,8 @@ angular.module('ngMessages', [])
     *   </file>
     * </example>
     */
-  .directive('ngMessages', ['$compile', '$animate', '$http', '$templateCache',
-                   function($compile,    $animate,   $http,   $templateCache) {
+  .directive('ngMessages', ['$compile', '$animate', '$templateRequest',
+                   function($compile,    $animate,   $templateRequest) {
     var ACTIVE_CLASS = 'ng-active';
     var INACTIVE_CLASS = 'ng-inactive';
 
@@ -301,8 +301,8 @@ angular.module('ngMessages', [])
 
         var tpl = $attrs.ngMessagesInclude || $attrs.include;
         if(tpl) {
-          $http.get(tpl, { cache: $templateCache })
-            .success(function processTemplate(html) {
+          $templateRequest(tpl)
+            .then(function processTemplate(html) {
               var after, container = angular.element('<div/>').html(html);
               angular.forEach(container.children(), function(elm) {
                elm = angular.element(elm);

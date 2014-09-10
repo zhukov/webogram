@@ -1652,7 +1652,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope: {
         userID: '=myUserPhotolink'
       },
-      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus" ng-show="user.status._ == \'userStatusOnline\'"></i>'
+      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus || false" ng-show="user.status._ == \'userStatusOnline\'"></i>'
     };
 
     function link($scope, element, attrs) {
