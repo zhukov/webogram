@@ -6,17 +6,15 @@
 
   <div class="im_message_audio_info">
     <div class="im_message_audio_name_wrap" ng-if="!historyMessage.media.audio.url">
-      <span class="im_message_audio_name">
-        Voice message
-      </span>
+      <span class="im_message_audio_name" my-i18n="message_attach_audio_message"></span>
       <span class="im_message_audio_duration" ng-if="!historyMessage.media.audio.progress.enabled" ng-bind="::historyMessage.media.audio.duration | duration"></span>
       <span class="im_message_audio_size" ng-if="historyMessage.media.audio.progress.enabled" ng-bind="historyMessage.media.audio.progress | formatSizeProgress"></span>
     </div>
     <div class="im_message_audio_actions" ng-if="!historyMessage.media.audio.progress.enabled &amp;&amp; !historyMessage.media.audio.url">
-      <a href="" ng-click="openAudio(historyMessage.media.audio.id)">Play</a>
+      <a href="" ng-click="openAudio(historyMessage.media.audio.id)" my-i18n="message_attach_audio_play"></a>
     </div>
     <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.audio.progress.enabled">
-      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.audio.progress.cancel()">Cancel</a>
+      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.audio.progress.cancel()" my-i18n="modal_cancel"></a>
       <div class="im_message_download_progress_wrap">
         <div class="progress tg_down_progress">
           <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.audio.progress.percent + '%'}"></div>
