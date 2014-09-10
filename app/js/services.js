@@ -3400,10 +3400,13 @@ angular.module('myApp.services', [])
 
 .service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, Storage) {
 
+  navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
+
   var notificationsUiSupport = ('Notification' in window) || ('mozNotification' in navigator);
   var notificationsShown = {};
   var notificationIndex = 0;
   var notificationsCount = 0;
+  var vibrateSupport = !!navigator.vibrate;
   var peerSettings = {};
   var faviconBackupEl = $('link[rel="icon"]'),
       faviconNewEl = $('<link rel="icon" href="favicon_unread.ico" type="image/x-icon" />');
@@ -3476,6 +3479,7 @@ angular.module('myApp.services', [])
     getPeerMuted: getPeerMuted,
     savePeerSettings: savePeerSettings,
     updatePeerSettings: updatePeerSettings,
+    getVibrateSupport: getVibrateSupport,
     testSound: playSound
   };
 
@@ -3561,8 +3565,13 @@ angular.module('myApp.services', [])
       }
     })
 
-    Storage.get('notify_nodesktop').then(function (noShow) {
-      if (noShow) {
+
+    Storage.get('notify_nodesktop', 'notify_novibrate').then(function (settings) {
+      if (settings[0]) {
+        if (vibrateSupport && !settings[1]) {
+          navigator.vibrate([200, 100, 200]);
+          return;
+        }
         return;
       }
       var idx = ++notificationIndex,
@@ -3692,6 +3701,10 @@ angular.module('myApp.services', [])
     }).then(function () {
       registeredDevice = false;
     })
+  }
+
+  function getVibrateSupport () {
+    return vibrateSupport;
   }
 
 })

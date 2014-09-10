@@ -79,6 +79,13 @@
       </a>
     </div>
 
+    <div class="mobile_modal_action_wrap" ng-if="!notify.desktop &amp;&amp; notify.canVibrate">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleVibrate()" ng-class="notify.vibrate ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label">Vibrate</span>
+      </a>
+    </div>
+
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
