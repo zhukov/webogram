@@ -719,7 +719,7 @@ angular.module('myApp.services', [])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, Storage) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService, Storage) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -1959,6 +1959,23 @@ angular.module('myApp.services', [])
     } else {
       NotificationsManager.notify(notification);
     }
+  }
+
+  if (window.navigator.mozSetMessageHandler) {
+    window.navigator.mozSetMessageHandler('activity', function(activityRequest) {
+      var source = activityRequest.source;
+      console.log(dT(), 'Received activity', source.name, source.data);
+
+      if (source.name === 'share' && source.data.blobs.length > 0) {
+        PeersSelectService.selectPeer({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerString) {
+          var peerID = AppPeersManager.getPeerID(peerString);
+          angular.forEach(source.data.blobs, function (blob) {
+            sendFile(peerID, blob, {isMedia: true});
+          });
+          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        });
+      }
+    });
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {

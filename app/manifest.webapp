@@ -30,6 +30,14 @@
       "description": "Required for notifications"
     }
   },
+  "activities": {
+    "share": {
+      "href": "/index.html",
+      "disposition": "window",
+      "filters": {},
+      "returnValue": false
+    }
+  },
   "orientation": "portrait-primary",
   "icons": {
     "16": "/img/icons/icon16.png",
