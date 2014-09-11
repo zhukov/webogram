@@ -159,6 +159,9 @@ angular.module('myApp.controllers', [])
 
     function callCheck () {
       $timeout.cancel(callTimeout);
+      if ($scope.credentials.viaApp) {
+        return;
+      }
       if (!(--$scope.callPending.remaining)) {
         $scope.callPending.success = false;
         MtpApiManager.invokeApi('auth.sendCall', {
@@ -183,7 +186,7 @@ angular.module('myApp.controllers', [])
         $scope.progress.enabled = true;
         MtpApiManager.invokeApi('auth.sendCode', {
           phone_number: $scope.credentials.phone_full,
-          sms_type: 0,
+          sms_type: 5,
           api_id: Config.App.id,
           api_hash: Config.App.hash
         }, options).then(function (sentCode) {
@@ -191,9 +194,10 @@ angular.module('myApp.controllers', [])
 
           $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
           $scope.credentials.phone_occupied = sentCode.phone_registered;
+          $scope.credentials.viaApp = sentCode._ == 'auth.sentAppCode';
+          $scope.callPending.remaining = sentCode.send_call_timeout || 60;
           $scope.error = {};
 
-          $scope.callPending.remaining = sentCode.send_call_timeout || 60;
           callCheck();
 
         }, function (error) {
@@ -218,6 +222,16 @@ angular.module('myApp.controllers', [])
       });
     }
 
+    $scope.sendSms = function () {
+      if (!$scope.credentials.viaApp) {
+        return;
+      }
+      delete $scope.credentials.viaApp;
+      MtpApiManager.invokeApi('auth.sendSms', {
+        phone_number: $scope.credentials.phone_full,
+        phone_code_hash: $scope.credentials.phone_code_hash
+      }, options).then(callCheck);
+    }
 
     $scope.editPhone = function () {
       $timeout.cancel(callTimeout);
@@ -225,6 +239,7 @@ angular.module('myApp.controllers', [])
       delete $scope.credentials.phone_code_hash;
       delete $scope.credentials.phone_unoccupied;
       delete $scope.credentials.phone_code_valid;
+      delete $scope.credentials.viaApp;
       delete $scope.callPending.remaining;
       delete $scope.callPending.success;
     }

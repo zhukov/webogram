@@ -30,13 +30,25 @@
   <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
     <h3 class="login_form_head"><span ng-bind="credentials.phone_country"></span> <span ng-bind="credentials.phone_number"></span></h3>
     <div class="login_edit_phone"><a ng-click="editPhone()">Edit phone number</a></div>
-    <p class="login_form_lead">We have sent you a code via SMS.<br/>Please enter it below.</p>
+    <div ng-switch="credentials.viaApp">
+      <div ng-switch-when="true">
+        <p class="login_form_lead">
+          Please enter the code you've just received in your other <strong>Telegram</strong> app
+        </p>
+        <p class="login_form_lead">
+          <a ng-click="sendSms()">Haven't received the code?</a>
+        </p>
+      </div>
+      <div ng-switch-default>
+        <p class="login_form_lead">We have sent you a code via SMS.<br/>Please enter it below.</p>
 
-    <p class="login_form_lead">
-      <span ng-show="callPending.remaining > 0">Telegram will call you in {{callPending.remaining | duration}}</span>
-      <span ng-show="!callPending.remaining &amp;&amp; !callPending.success">Telegram is calling you</span>
-      <span ng-show="!callPending.remaining &amp;&amp; callPending.success">Telegram dialed your number</span>
-    </p>
+        <p class="login_form_lead">
+          <span ng-show="callPending.remaining > 0">Telegram will call you in {{callPending.remaining | duration}}</span>
+          <span ng-show="!callPending.remaining &amp;&amp; !callPending.success">Telegram is calling you</span>
+          <span ng-show="!callPending.remaining &amp;&amp; callPending.success">Telegram dialed your number</span>
+        </p>
+      </div>
+    </div>
 
     <div class="form-group" ng-class="{'has-error': error.field == 'phone_code'}">
       <label class="control-label" for="phone_code" ng-if="error.field == 'phone_code'">Incorrect SMS code</label>
