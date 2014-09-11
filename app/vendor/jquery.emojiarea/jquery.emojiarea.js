@@ -172,31 +172,27 @@
 		 This function was added by Igor Zhukov to save recent used emojis.
 		 */
 	util.emojiInserted = function (emojiKey, menu) {
-		try {
-			var curEmojisStr = localStorage.getItem('emojis_recent');
-		} catch (e) {
-			return false;
-		}
+		ConfigStorage.get('emojis_recent', function (curEmojis) {
+			curEmojis = curEmojis || [];
 
-		var curEmojis = curEmojisStr && curEmojisStr.split(',') || [],
-				pos = curEmojis.indexOf(emojiKey);
+			var pos = curEmojis.indexOf(emojiKey);
+			if (!pos) {
+				return false;
+			}
+			if (pos != -1) {
+				curEmojis.splice(pos, 1);
+			}
+			curEmojis.unshift(emojiKey);
+			if (curEmojis.length > 42) {
+				curEmojis = curEmojis.slice(42);
+			}
 
-		if (!pos) {
-			return false;
-		}
-		if (pos != -1) {
-			curEmojis.splice(pos, 1);
-		}
-		curEmojis.unshift(emojiKey);
-		if (curEmojis.length > 42) {
-			curEmojis = curEmojis.slice(42);
-		}
+			ConfigStorage.set({emojis_recent: curEmojis});
 
-		localStorage.setItem('emojis_recent', curEmojis.join(','));
-
-		if (menu) {
-			menu.updateRecentTab(curEmojis);
-		}
+			if (menu) {
+				menu.updateRecentTab(curEmojis);
+			}
+		})
 	};
 	/*! MODIFICATION END */
 
@@ -246,7 +242,7 @@
 		var column = emoji[2];
 		var name = emoji[3];
 		var filename = $.emojiarea.spritesheetPath;
-		var iconSize = menu && Config.Navigator.mobile ? 26 : $.emojiarea.iconSize
+		var iconSize = menu && Config.Mobile ? 26 : $.emojiarea.iconSize
 		var xoffset = -(iconSize * column);
 		var yoffset = -(iconSize * row);
 		var scaledWidth = ($.emojiarea.spritesheetDimens[category][1] * iconSize);
@@ -562,8 +558,10 @@
 
 		/* MODIFICATION: Following line was modified by Andre Staltz, in order to select a default category. */
 		this.selectCategory(0);
-		/* MODIFICATION: Following line was added by Igor Zhukov, in order to update emoji tab visibility */
-		this.updateRecentTab();
+		/* MODIFICATION: Following 3 lines was added by Igor Zhukov, in order to update emoji tab visibility */
+		ConfigStorage.get('emojis_recent', function (curEmojis) {
+			self.updateRecentTab(curEmojis);
+		});
 	};
 
 	/*! MODIFICATION START
@@ -601,10 +599,19 @@
 		var html = [];
 		var options = $.emojiarea.icons;
 		var path = $.emojiarea.path;
+		var self = this;
 		if (path.length && path.charAt(path.length - 1) !== '/') {
 			path += '/';
 		}
+		
+		/*! MODIFICATION: Following function was added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
+		var updateItems = function () {
+			self.$items.html(html.join(''));
 
+			setTimeout(function () {
+				self.$itemsWrap.nanoScroller();
+			}, 100);
+		}
 
 		if (category > 0) {
 			for (var key in options) {
@@ -613,41 +620,25 @@
 					html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 				}
 			}
+			updateItems();
 		} else {
-			try {
-				var curEmojis = (localStorage.getItem('emojis_recent') || '').split(','),
-						key, i;
+			ConfigStorage.get('emojis_recent', function (curEmojis) {
+				var key, i;
 				for (i = 0; i < curEmojis.length; i++) {
 					key = curEmojis[i]
 					if (options[key]) {
 						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 					}
 				}
-			} catch (e) {}
+				updateItems();
+			});
 		}
-
-		this.$items.html(html.join(''));
-
-		/*! MODIFICATION: Following 4 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
-		var self = this;
-		setTimeout(function () {
-			self.$itemsWrap.nanoScroller();
-		}, 100);
 	};
 
 	/*! MODIFICATION START
 			 This function was added by Igor Zhukov to update recent emojis tab state.
 			 */
 	EmojiMenu.prototype.updateRecentTab = function(curEmojis) {
-		if (curEmojis === undefined) {
-			try {
-				var curEmojisStr = localStorage.getItem('emojis_recent');
-				curEmojis = curEmojisStr && curEmojisStr.split(',') || [];
-			} catch (e) {
-				curEmojis = [];
-			}
-		}
-
 		if (this.hasRecent != (curEmojis.length > 1)) {
 			var tabEl = this.$categoryTabs.find('.emoji-menu-tab').eq(0);
 			if (this.hasRecent) {
