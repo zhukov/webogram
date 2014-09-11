@@ -76,7 +76,7 @@
     switch (layout) {
       case 'mobile': Config.Mobile = true; break;
       case 'desktop': Config.Mobile = false; break;
-      default: Config.Mobile = Config.Mobile; break;
+      default: Config.Mobile = Config.Navigator.mobile; break;
     }
 
     $('head').append(

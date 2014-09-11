@@ -799,48 +799,7 @@ a.tg_radio_on:hover i.icon-radio {
 
 
 
-.im_page_wrap {
-  background: #FFF;
-  max-width: 1000px;
-  min-width: 300px;
-  margin: 0 auto;
 
-  -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow:    0px 1px 2px rgba(0, 0, 0, 0.1);
-  box-shadow:         0px 1px 2px rgba(0, 0, 0, 0.1);
-
-  border-radius: 0 0 3px 3px;
-  overflow: hidden;
-}
-
-
-.im_page_footer {
-  font-size: 11px;
-  text-align: center;
-  color: #9cacb9;
-  line-height: 40px;
-}
-.im_page_footer_brand {
-  color: #9cacb9;
-  font-weight: bold;
-}
-.im_page_footer_brand:hover,
-.im_page_footer_brand:active {
-  color: #8499aa;
-  text-decoration: none;
-}
-
-.im_dialogs_col_wrap {
-  float: left;
-  width: 31%;
-  border-right: 2px solid #E9EBED;
-  padding-bottom: 10px;
-}
-
-.im_history_col_wrap {
-  float: left;
-  width: 69%;
-}
 
 
 /* Dialogs list */
@@ -859,10 +818,6 @@ a.tg_radio_on:hover i.icon-radio {
 }
 .im_dialogs_import_phonebook {
   margin-top: 10px;
-}
-
-.im_dialogs_col {
-  margin-right: -7px;
 }
 
 
@@ -984,11 +939,7 @@ a.tg_radio_on:hover i.icon-radio {
 
 
 
-
-.im_dialogs_wrap {
-}
 .im_dialogs_scrollable_wrap {
-  padding: 0 19px 0 12px;
   outline: none ! important;
 }
 .im_dialogs_scrollable_wrap .im_dialog_wrap {
@@ -1127,57 +1078,6 @@ a.im_dialog_selected .im_dialog_date {
 
 
 /* IM history */
-.im_history_col {
-}
-
-.im_history_col .nano > .nano-pane,
-.contacts_modal_col .nano > .nano-pane,
-.im_dialogs_modal_col .nano > .nano-pane {
-  background : rgba(3,36,64,0.08);
-  width      : 9px;
-  right: 0;
-  top: 0;
-  /*-webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;*/
-  -moz-border-radius    : 2px;
-  -webkit-border-radius : 2px;
-  border-radius         : 2px;
-
-  -webkit-transition    : none;
-  -moz-transition       : none;
-  -o-transition         : none;
-  transition            : none;
-}
-
-.contacts_modal_col .nano > .nano-pane {
-  width: 6px;
-  right: 7px;
-}
-
-.im_dialogs_modal_col .nano > .nano-pane {
-  width: 6px;
-  right: 2px;
-}
-.im_dialogs_modal_col .im_dialogs_scrollable_wrap {
-  padding: 0 12px 0 12px;
-}
-
-.im_history_col .nano > .nano-pane {
-  top: 10px;
-  right: 8px;
-}
-.im_history_col .nano > .nano-pane > .nano-slider,
-.contacts_modal_col .nano > .nano-pane > .nano-slider,
-.im_dialogs_modal_col .nano > .nano-pane > .nano-slider {
-  background : rgba(3,46,79,0.22);
-  margin: 0;
-  -moz-border-radius    : 2px;
-  -webkit-border-radius : 2px;
-  border-radius         : 2px;
-}
-
 .im_history_panel_wrap {
   margin: 0 23px 0 15px;
   cursor: pointer;
