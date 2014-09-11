@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
@@ -15,6 +15,8 @@
     "push": "/index.html"
   }, {
     "push-register": "/index.html"
+  }, {
+    "notification": "/index.html"
   }],
   "permissions": {
     "desktop-notification": {
@@ -28,6 +30,15 @@
       "description": "Required for notifications"
     }
   },
+  "activities": {
+    "share": {
+      "href": "/index.html",
+      "disposition": "window",
+      "filters": {},
+      "returnValue": false
+    }
+  },
+  "orientation": "portrait-primary",
   "icons": {
     "16": "/img/icons/icon16.png",
     "32": "/img/icons/icon32.png",
