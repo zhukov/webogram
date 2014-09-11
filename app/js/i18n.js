@@ -5,6 +5,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
     var locale = 'en-us';
     var messages = {};
     var supported = {
+      'de-de': 'Deutsch',
       'en-us': 'English'
     };
 
