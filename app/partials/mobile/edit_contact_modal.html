@@ -1,0 +1,30 @@
+<div class="import_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <form class="modal_simple_form" ng-submit="doImport()">
+
+      <h4>Edit contact</h4>
+
+      <div class="form-group">
+        <span class="form-control uneditable-input disabled" disabled ng-bind="importContact.phone | phoneNumber"></span>
+      </div>
+      <div class="form-group">
+        <input class="form-control input-sm" my-focused type="text" placeholder="First name" ng-model="importContact.first_name"/>
+      </div>
+      <div class="form-group">
+        <input class="form-control input-sm" type="text" placeholder="Last name" ng-model="importContact.last_name"/>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
+    <button class="btn btn-primary" ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'Saving...' : 'Save'" ng-disabled="progress.enabled"></button>
+  </div>
+
+</div>

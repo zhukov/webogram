@@ -180,16 +180,13 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.userID = userID;
 
-    var tUrl = 'partials/user_modal.html',
-        className = 'user_modal_window page_modal';
-
-    if (Config.Navigator.mobile) {
-      tUrl = 'partials/mobile/user_modal.html';
+    var className = 'user_modal_window page_modal';
+    if (Config.Mobile) {
       className += ' mobile_modal';
     }
 
     var modalInstance = $modal.open({
-      templateUrl: tUrl,
+      templateUrl: templateUrl('user_modal'),
       controller: 'UserModalController',
       scope: scope,
       windowClass: className
@@ -283,7 +280,7 @@ angular.module('myApp.services', [])
 
   function openImportContact () {
     return $modal.open({
-      templateUrl: 'partials/import_contact_modal.html',
+      templateUrl: templateUrl('import_contact_modal'),
       controller: 'ImportContactModalController',
       windowClass: 'import_contact_modal_window'
     }).result.then(function (foundUserID) {
@@ -358,7 +355,7 @@ angular.module('myApp.services', [])
   };
 
   function isAvailable () {
-    if (Config.Navigator.mobile && Config.Navigator.ffos && Config.Modes.packed) {
+    if (Config.Mobile && Config.Navigator.ffos && Config.Modes.packed) {
       try {
         return navigator.mozContacts && navigator.mozContacts.getAll;
       } catch (e) {
@@ -371,7 +368,7 @@ angular.module('myApp.services', [])
 
   function openPhonebookImport () {
     return $modal.open({
-      templateUrl: 'partials/mobile/phonebook_modal.html',
+      templateUrl: templateUrl('phonebook_modal'),
       controller: 'PhonebookModalController',
       windowClass: 'phonebook_modal_window page_modal mobile_modal'
     });
@@ -516,16 +513,13 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.chatID = chatID;
 
-    var tUrl = 'partials/chat_modal.html',
-        className = 'chat_modal_window page_modal';
-
-    if (Config.Navigator.mobile) {
-      tUrl = 'partials/mobile/chat_modal.html';
+    var className = 'chat_modal_window page_modal';
+    if (Config.Mobile) {
       className += ' mobile_modal';
     }
 
     var modalInstance = $modal.open({
-      templateUrl: tUrl,
+      templateUrl: templateUrl('chat_modal'),
       controller: 'ChatModalController',
       scope: scope,
       windowClass: className
@@ -2058,7 +2052,7 @@ angular.module('myApp.services', [])
         $rootScope.$broadcast('dialogs_update', dialog);
 
 
-        if ((Config.Navigator.mobile && $rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
+        if ((Config.Mobile && $rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
             !message.out &&
             message.unread) {
           NotificationsManager.getPeerMuted(peerID).then(function (muted) {
@@ -2321,7 +2315,7 @@ angular.module('myApp.services', [])
 
   function wrapForFull (photoID) {
     var photo = wrapForHistory(photoID),
-        fullWidth = $(window).width() - (Config.Navigator.mobile ? 20 : 36),
+        fullWidth = $(window).width() - (Config.Mobile ? 20 : 36),
         fullHeight = $($window).height() - 150,
         fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
         full = {
@@ -2347,7 +2341,7 @@ angular.module('myApp.services', [])
         }
       }
 
-      if (!Config.Navigator.mobile && full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
+      if (!Config.Mobile && full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
         full.width = fullPhotoSize.w;
         full.height = fullPhotoSize.h;
       }
@@ -2379,7 +2373,7 @@ angular.module('myApp.services', [])
     }
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/photo_modal.html',
+      templateUrl: templateUrl('photo_modal'),
       controller: scope.userID ? 'UserpicModalController' : 'PhotoModalController',
       scope: scope,
       windowClass: 'photo_modal_window'
@@ -2534,7 +2528,7 @@ angular.module('myApp.services', [])
     scope.messageID = messageID;
 
     var modalInstance = $modal.open({
-      templateUrl: 'partials/video_modal.html',
+      templateUrl: templateUrl('video_modal'),
       controller: 'VideoModalController',
       scope: scope,
       windowClass: 'video_modal_window'
@@ -3730,7 +3724,7 @@ angular.module('myApp.services', [])
 
     shownBoxes++;
     var modal = $modal.open({
-      templateUrl: 'partials/error_modal.html',
+      templateUrl: templateUrl('error_modal'),
       scope: scope,
       windowClass: options.windowClass || 'error_modal_window'
     });
@@ -3755,7 +3749,7 @@ angular.module('myApp.services', [])
     angular.extend(scope, params);
 
     var modal = $modal.open({
-      templateUrl: 'partials/confirm_modal.html',
+      templateUrl: templateUrl('confirm_modal'),
       scope: scope,
       windowClass: options.windowClass || 'confirm_modal_window'
     });
@@ -3791,16 +3785,14 @@ angular.module('myApp.services', [])
       angular.extend(scope, options);
     }
 
-    var tUrl = 'partials/peer_select.html',
-        className = 'peer_select_window page_modal';
+    var className = 'peer_select_window page_modal';
 
-    if (Config.Navigator.mobile) {
-      tUrl = 'partials/mobile/peer_select.html';
+    if (Config.Mobile) {
       className += ' mobile_modal';
     }
 
     return $modal.open({
-      templateUrl: tUrl,
+      templateUrl: templateUrl('peer_select'),
       controller: 'PeerSelectController',
       scope: scope,
       windowClass: className
@@ -3826,16 +3818,13 @@ angular.module('myApp.services', [])
       scope.action = 'select';
     }
 
-    var tUrl = 'partials/contacts_modal.html',
-        className = 'contacts_modal_window page_modal';
-
-    if (Config.Navigator.mobile) {
-      tUrl = 'partials/mobile/contacts_modal.html';
+    var className = 'contacts_modal_window page_modal';
+    if (Config.Mobile) {
       className += ' mobile_modal';
     }
 
     return $modal.open({
-      templateUrl: tUrl,
+      templateUrl: templateUrl('contacts_modal'),
       controller: 'ContactsModalController',
       scope: scope,
       windowClass: className
@@ -3906,7 +3895,7 @@ angular.module('myApp.services', [])
     };
 
     $modal.open({
-      templateUrl: 'partials/changelog_modal.html',
+      templateUrl: templateUrl('changelog_modal'),
       scope: $scope,
       windowClass: 'changelog_modal_window page_modal'
     });

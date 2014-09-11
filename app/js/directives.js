@@ -15,61 +15,61 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myHead', function() {
     return {
       restrict: 'AE',
-      templateUrl: 'partials/head.html'
+      templateUrl: templateUrl('head')
     };
   })
 
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
-      templateUrl: 'partials/dialog.html'
+      templateUrl: templateUrl('dialog')
     };
   })
 
   .directive('myMessage', function() {
     return {
-      templateUrl: 'partials/message.html'
+      templateUrl: templateUrl('message')
     };
   })
 
   .directive('myServiceMessage', function() {
     return {
-      templateUrl: 'partials/message_service.html'
+      templateUrl: templateUrl('message_service')
     };
   })
   .directive('myMessagePhoto', function() {
     return {
-      templateUrl: 'partials/message_attach_photo.html'
+      templateUrl: templateUrl('message_attach_photo')
     };
   })
   .directive('myMessageVideo', function() {
     return {
-      templateUrl: 'partials/message_attach_video.html'
+      templateUrl: templateUrl('message_attach_video')
     };
   })
   .directive('myMessageDocument', function() {
     return {
-      templateUrl: 'partials/message_attach_document.html'
+      templateUrl: templateUrl('message_attach_document')
     };
   })
   .directive('myMessageAudio', function() {
     return {
-      templateUrl: 'partials/message_attach_audio.html'
+      templateUrl: templateUrl('message_attach_audio')
     };
   })
   .directive('myMessageMap', function() {
     return {
-      templateUrl: 'partials/message_attach_map.html'
+      templateUrl: templateUrl('message_attach_map')
     };
   })
   .directive('myMessageContact', function() {
     return {
-      templateUrl: 'partials/message_attach_contact.html'
+      templateUrl: templateUrl('message_attach_contact')
     };
   })
   .directive('myMessagePending', function() {
     return {
-      templateUrl: 'partials/message_attach_pending.html'
+      templateUrl: templateUrl('message_attach_pending')
     };
   })
 
@@ -241,7 +241,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           dialogsColWrap = $('.im_dialogs_col_wrap')[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
-          panelWrapSelector = Config.Navigator.mobile && attrs.modal
+          panelWrapSelector = Config.Mobile && attrs.modal
                               ? '.mobile_modal_body .im_dialogs_panel'
                               : '.im_dialogs_panel',
           panelWrap = $(panelWrapSelector)[0],
@@ -311,7 +311,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(element).css({
             height: $($window).height() -
                     (panelWrap ? panelWrap.offsetHeight : 58) -
-                    (Config.Navigator.mobile ? 46 : 200)
+                    (Config.Mobile ? 46 : 200)
           });
           updateScroller();
           return;
@@ -367,7 +367,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height() -
                   (panelWrap && panelWrap.offsetHeight || 0) -
                   (searchWrap && searchWrap.offsetHeight || 0) -
-                  (Config.Navigator.mobile ? 64 : 200)
+                  (Config.Mobile ? 64 : 200)
         });
         $(contactsWrap).nanoScroller();
       }
@@ -401,7 +401,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height()
                     - (panelWrap && panelWrap.offsetHeight || 0)
                     - (searchWrap && searchWrap.offsetHeight || 0)
-                    - (Config.Navigator.mobile ? 46 + 18 : 200)
+                    - (Config.Mobile ? 46 + 18 : 200)
         });
         $(countriesWrap).nanoScroller();
       }
@@ -679,7 +679,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var marginTop = scrollableWrap.offsetHeight
                         - historyMessagesEl.offsetHeight
                         - 20
-                        - (Config.Navigator.mobile ? 0 : 49);
+                        - (Config.Mobile ? 0 : 49);
 
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
           $(historyMessagesEl).css({marginTop: marginTop});
@@ -743,7 +743,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             var self = this;
             $scope.$apply(function () {
               $scope.draftMessage.files = Array.prototype.slice.call(self.files);
-              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input') || Config.Navigator.mobile;
+              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input') || Config.Mobile;
               setTimeout(function () {
                 try {
                   self.value = '';
@@ -1054,7 +1054,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       transclude: true,
-      templateUrl: 'partials/full_photo.html',
+      templateUrl: templateUrl('full_photo'),
       scope: {
         fullPhoto: '=',
         thumbLocation: '='
@@ -1133,7 +1133,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       transclude: true,
-      templateUrl: 'partials/full_video.html',
+      templateUrl: templateUrl('full_video'),
       scope: {
         video: '='
       }
@@ -1196,7 +1196,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     return {
       link: link,
-      templateUrl: 'partials/full_gif.html',
+      templateUrl: templateUrl('full_gif'),
       scope: {
         document: '='
       }
@@ -1393,7 +1393,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
-        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Navigator.mobile ? 0 : 36)});
+        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Mobile ? 0 : 36)});
       });
     };
 
@@ -1496,7 +1496,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link($scope, element, attrs) {
 
       var updateMargin = function () {
-        if (Config.Navigator.mobile &&
+        if (Config.Mobile &&
             $(element[0].parentNode.parentNode.parentNode).hasClass('page_modal')) {
           return;
         }

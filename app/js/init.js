@@ -1,4 +1,4 @@
-;(function () {
+;(function initAutoUpgrade () {
 
   // Prevent click-jacking
   try {
@@ -60,4 +60,30 @@
 
   scheduleUpdate(3000);
   window.addEventListener('load', attach);
+})();
+
+(function initApplication () {
+  var classes = [
+    Config.Navigator.osX ? 'osx' : 'non_osx',
+    Config.Navigator.retina ? 'is_2x' : 'is_1x'
+  ];
+  if (Config.Modes.ios_standalone) {
+    classes.push('ios_standalone');
+  }
+  $(document.body).addClass(classes.join(' '));
+
+  ConfigStorage.get('current_layout', function (layout) {
+    switch (layout) {
+      case 'mobile': Config.Mobile = true; break;
+      case 'desktop': Config.Mobile = false; break;
+      default: Config.Mobile = Config.Mobile; break;
+    }
+
+    $('head').append(
+      '<link rel="stylesheet" href="css/' + (Config.Mobile ? 'mobile.css' : 'desktop.css') + '" />'
+    );
+    $(document).ready(function() {
+      angular.bootstrap(document, ['myApp']);
+    });
+  });
 })();

@@ -1,0 +1,24 @@
+<div class="contacts_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <form class="modal_simple_form" ng-submit="updateGroup()">
+
+      <h4>Edit Group</h4>
+
+      <div class="form-group">
+        <input class="form-control input-sm" my-focused type="text" placeholder="Group name" ng-model="group.name"/>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
+    <button class="btn btn-primary" ng-class="{disabled: group.updating}" ng-click="updateGroup()" ng-bind="group.updating ? 'Saving...' : 'Save'" ng-disabled="group.updating"></button>
+  </div>
+
+</div>

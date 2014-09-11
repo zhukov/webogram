@@ -62,3 +62,132 @@ Config.EmojiCategorySpritesheetDimens = [[7, 27], [4, 29], [7, 33], [3, 34], [6,
 Config.CountryCodes = [["AB", "Abkhazia", "+7 840", "+7 940", "+995 44"], ["AF", "Afghanistan", "+93"], ["AX", "Åland Islands", "+358 18"], ["AL", "Albania", "+355"], ["DZ", "Algeria", "+213"], ["AS", "American Samoa", "+1 684"], ["AD", "Andorra", "+376"], ["AO", "Angola", "+244"], ["AI", "Anguilla", "+1 264"], ["AG", "Antigua and Barbuda", "+1 268"], ["AR", "Argentina", "+54"], ["AM", "Armenia", "+374"], ["AW", "Aruba", "+297"], ["SH", "Ascension", "+247"], ["AU", "Australia", "+61"], ["AU", "Australian External Territories", "+672"], ["AT", "Austria", "+43"], ["AZ", "Azerbaijan", "+994"], ["BS", "Bahamas", "+1 242"], ["BH", "Bahrain", "+973"], ["BD", "Bangladesh", "+880"], ["BB", "Barbados", "+1 246"], ["AG", "Barbuda", "+1 268"], ["BY", "Belarus", "+375"], ["BE", "Belgium", "+32"], ["BZ", "Belize", "+501"], ["BJ", "Benin", "+229"], ["BM", "Bermuda", "+1 441"], ["BT", "Bhutan", "+975"], ["BO", "Bolivia", "+591"], ["BQ", "Bonaire", "+599 7"], ["BA", "Bosnia and Herzegovina", "+387"], ["BW", "Botswana", "+267"], ["BR", "Brazil", "+55"], ["IO", "British Indian Ocean Territory", "+246"], ["VG", "British Virgin Islands", "+1 284"], ["BN", "Brunei Darussalam", "+673"], ["BG", "Bulgaria", "+359"], ["BF", "Burkina Faso", "+226"], ["MY", "Burma", "+95"], ["BI", "Burundi", "+257"], ["KH", "Cambodia", "+855"], ["CM", "Cameroon", "+237"], ["CA", "Canada", "+1"], ["CV", "Cape Verde", "+238"], ["KY", "Cayman Islands", "+1 345"], ["CF", "Central African Republic", "+236"], ["TD", "Chad", "+235"], ["CL", "Chile", "+56"], ["CN", "China", "+86"], ["CX", "Christmas Island", "+61"], ["CC", "Cocos (Keeling) Islands", "+61"], ["CO", "Colombia", "+57"], ["KM", "Comoros", "+269"], ["CG", "Congo", "+242"], ["CD", "Congo, Democratic Republic of the (Zaire)", "+243"], ["CK", "Cook Islands", "+682"], ["CR", "Costa Rica", "+506"], ["CI", "Côte d'Ivoire", "+225"], ["HR", "Croatia", "+385"], ["CU", "Cuba", "+53"], ["CW", "Curaçao", "+599 9"], ["CY", "Cyprus", "+357"], ["CZ", "Czech Republic", "+420"], ["DK", "Denmark", "+45"], ["DG", "Diego Garcia", "+246"], ["DJ", "Djibouti", "+253"], ["DM", "Dominica", "+1 767"], ["DO", "Dominican Republic", "+1 809", "+1 829", "+1 849"], ["TL", "East Timor", "+670"], ["EC", "Ecuador", "+593"], ["EG", "Egypt", "+20"], ["SV", "El Salvador", "+503"], ["GQ", "Equatorial Guinea", "+240"], ["ER", "Eritrea", "+291"], ["EE", "Estonia", "+372"], ["ET", "Ethiopia", "+251"], ["FK", "Falkland Islands", "+500"], ["FO", "Faroe Islands", "+298"], ["FJ", "Fiji", "+679"], ["FI", "Finland", "+358"], ["FR", "France", "+33"], ["GF", "French Guiana", "+594"], ["PF", "French Polynesia", "+689"], ["GA", "Gabon", "+241"], ["GM", "Gambia", "+220"], ["GE", "Georgia", "+995"], ["DE", "Germany", "+49"], ["GH", "Ghana", "+233"], ["GI", "Gibraltar", "+350"], ["GR", "Greece", "+30"], ["GL", "Greenland", "+299"], ["GD", "Grenada", "+1 473"], ["GP", "Guadeloupe", "+590"], ["GU", "Guam", "+1 671"], ["GT", "Guatemala", "+502"], ["GG", "Guernsey", "+44"], ["GN", "Guinea", "+224"], ["GW", "Guinea-Bissau", "+245"], ["GY", "Guyana", "+592"], ["HT", "Haiti", "+509"], ["HN", "Honduras", "+504"], ["HK", "Hong Kong", "+852"], ["HU", "Hungary", "+36"], ["IS", "Iceland", "+354"], ["IN", "India", "+91"], ["ID", "Indonesia", "+62"], ["IR", "Iran", "+98"], ["IQ", "Iraq", "+964"], ["IE", "Ireland", "+353"], ["IL", "Israel", "+972"], ["IT", "Italy", "+39"], ["JM", "Jamaica", "+1 876"], ["SJ", "Jan Mayen", "+47 79"], ["JP", "Japan", "+81"], ["JE", "Jersey", "+44"], ["JO", "Jordan", "+962"], ["KZ", "Kazakhstan", "+7 6", "+7 7"], ["KE", "Kenya", "+254"], ["KI", "Kiribati", "+686"], ["KP", "Korea, North", "+850"], ["KR", "Korea, South", "+82"], ["KW", "Kuwait", "+965"], ["KG", "Kyrgyzstan", "+996"], ["LA", "Laos", "+856"], ["LV", "Latvia", "+371"], ["LB", "Lebanon", "+961"], ["LS", "Lesotho", "+266"], ["LR", "Liberia", "+231"], ["LY", "Libya", "+218"], ["LI", "Liechtenstein", "+423"], ["LT", "Lithuania", "+370"], ["LU", "Luxembourg", "+352"], ["MO", "Macau", "+853"], ["MK", "Macedonia", "+389"], ["MG", "Madagascar", "+261"], ["MW", "Malawi", "+265"], ["MY", "Malaysia", "+60"], ["MV", "Maldives", "+960"], ["ML", "Mali", "+223"], ["MT", "Malta", "+356"], ["MH", "Marshall Islands", "+692"], ["MQ", "Martinique", "+596"], ["MR", "Mauritania", "+222"], ["MU", "Mauritius", "+230"], ["YT", "Mayotte", "+262"], ["MX", "Mexico", "+52"], ["FM", "Micronesia, Federated States of", "+691"], ["MD", "Moldova", "+373"], ["MC", "Monaco", "+377"], ["MN", "Mongolia", "+976"], ["ME", "Montenegro", "+382"], ["MS", "Montserrat", "+1 664"], ["MA", "Morocco", "+212"], ["MZ", "Mozambique", "+258"], ["NA", "Namibia", "+264"], ["NR", "Nauru", "+674"], ["NP", "Nepal", "+977"], ["NL", "Netherlands", "+31"], ["NC", "New Caledonia", "+687"], ["NZ", "New Zealand", "+64"], ["NI", "Nicaragua", "+505"], ["NE", "Niger", "+227"], ["NG", "Nigeria", "+234"], ["NU", "Niue", "+683"], ["NF", "Norfolk Island", "+672"], ["MP", "Northern Mariana Islands", "+1 670"], ["NO", "Norway", "+47"], ["OM", "Oman", "+968"], ["PK", "Pakistan", "+92"], ["PW", "Palau", "+680"], ["PS", "Palestinian territories", "+970"], ["PA", "Panama", "+507"], ["PG", "Papua New Guinea", "+675"], ["PY", "Paraguay", "+595"], ["PE", "Peru", "+51"], ["PH", "Philippines", "+63"], ["PN", "Pitcairn Islands", "+64"], ["PL", "Poland", "+48"], ["PT", "Portugal", "+351"], ["PR", "Puerto Rico", "+1 787", "+1 939"], ["QA", "Qatar", "+974"], ["RE", "Réunion", "+262"], ["RO", "Romania", "+40"], ["RU", "Russia", "+7"], ["RW", "Rwanda", "+250"], ["BL", "Saint Barthélemy", "+590"], ["SH", "Saint Helena", "+290"], ["KN", "Saint Kitts and Nevis", "+1 869"], ["LC", "Saint Lucia", "+1 758"], ["MF", "Saint Martin (France)", "+590"], ["PM", "Saint Pierre and Miquelon", "+508"], ["VC", "Saint Vincent and the Grenadines", "+1 784"], ["WS", "Samoa", "+685"], ["SM", "San Marino", "+378"], ["ST", "São Tomé and Príncipe", "+239"], ["SA", "Saudi Arabia", "+966"], ["SN", "Senegal", "+221"], ["RS", "Serbia", "+381"], ["SC", "Seychelles", "+248"], ["SL", "Sierra Leone", "+232"], ["SG", "Singapore", "+65"], ["BQ", "Sint Eustatius", "+599 3"], ["SX", "Sint Maarten (Netherlands)", "+1 721"], ["SK", "Slovakia", "+421"], ["SI", "Slovenia", "+386"], ["SB", "Solomon Islands", "+677"], ["SO", "Somalia", "+252"], ["ZA", "South Africa", "+27"], ["GS", "South Georgia and the South Sandwich Islands", "+500"], [false, "South Ossetia", "+995 34"], ["SS", "South Sudan", "+211"], ["ES", "Spain", "+34"], ["LK", "Sri Lanka", "+94"], ["SD", "Sudan", "+249"], ["SR", "Suriname", "+597"], ["SJ", "Svalbard", "+47 79"], ["SZ", "Swaziland", "+268"], ["SE", "Sweden", "+46"], ["CH", "Switzerland", "+41"], ["SY", "Syria", "+963"], ["TW", "Taiwan", "+886"], ["TJ", "Tajikistan", "+992"], ["TZ", "Tanzania", "+255"], ["TH", "Thailand", "+66"], ["TG", "Togo", "+228"], ["TK", "Tokelau", "+690"], ["TO", "Tonga", "+676"], ["TT", "Trinidad and Tobago", "+1 868"], ["TN", "Tunisia", "+216"], ["TR", "Turkey", "+90"], ["TM", "Turkmenistan", "+993"], ["TC", "Turks and Caicos Islands", "+1 649"], ["TV", "Tuvalu", "+688"], ["UG", "Uganda", "+256"], ["UA", "Ukraine", "+380"], ["AE", "United Arab Emirates", "+971"], ["UK", "United Kingdom", "+44"], ["US", "United States", "+1"], ["UY", "Uruguay", "+598"], ["VI", "US Virgin Islands", "+1 340"], ["UZ", "Uzbekistan", "+998"], ["VU", "Vanuatu", "+678"], ["VE", "Venezuela", "+58"], ["VA", "Vatican City State (Holy See)", "+39 06 698", "+379"], ["VN", "Vietnam", "+84"], ["WF", "Wallis and Futuna", "+681"], ["YE", "Yemen", "+967"], ["ZM", "Zambia", "+260"], [false, "Zanzibar", "+255"], ["ZW", "Zimbabwe", "+263"] ];
 
 Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "IT", "nl": "NL", "fr": "FR", "ca": "ES", "es-419": "MX", "ar": "SA", "he": "IL", "tr": "TR", "id": "ID", "pl": "PL"};
+
+
+
+
+
+// ConfigStorage
+(function (window) {
+  var keyPrefix = '';
+  var noPrefix = false;
+  var cache = {};
+  var useCs = !!(window.chrome && chrome.storage && chrome.storage.local);
+  var useLs = !useCs && !!window.localStorage;
+
+  function storageSetPrefix (newPrefix) {
+    keyPrefix = newPrefix;
+  }
+
+  function storageSetNoPrefix() {
+    noPrefix = true;
+  }
+
+  function storageGetPrefix () {
+    if (noPrefix) {
+      noPrefix = false;
+      return '';
+    }
+    return keyPrefix;
+  }
+
+  function storageGetValue() {
+    var keys = Array.prototype.slice.call(arguments),
+        callback = keys.pop(),
+        result = [],
+        single = keys.length == 1,
+        allFound = true,
+        prefix = storageGetPrefix(),
+        i, key;
+
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i] = prefix + keys[i];
+      if (cache[key] !== undefined) {
+        result.push(cache[key]);
+      }
+      else if (useLs) {
+        var value = localStorage.getItem(key);
+        value = (value === undefined || value === null) ? false : JSON.parse(value);
+        result.push(cache[key] = value);
+      }
+      else if (!useCs) {
+        result.push(cache[key] = false);
+      }
+      else {
+        allFound = false;
+      }
+    }
+
+    if (allFound) {
+      return callback(single ? result[0] : result);
+    }
+
+    chrome.storage.local.get(keys, function (resultObj) {
+      var value;
+      result = [];
+      for (i = 0; i < keys.length; i++) {
+        key = keys[i];
+        value = resultObj[key];
+        value = value === undefined || value === null ? false : JSON.parse(value);
+        result.push(cache[key] = value);
+      }
+
+      callback(single ? result[0] : result);
+    });
+  };
+
+  function storageSetValue(obj, callback) {
+    var keyValues = {},
+        prefix = storageGetPrefix(),
+        key, value;
+
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        value = obj[key];
+        key = prefix + key;
+        cache[key] = value;
+        value = JSON.stringify(value);
+        if (useLs) {
+          localStorage.setItem(key, value);
+        } else {
+          keyValues[key] = value;
+        }
+      }
+    }
+
+    if (useLs || !useCs) {
+      if (callback) {
+        callback();
+      }
+      return;
+    }
+
+    chrome.storage.local.set(keyValues, callback);
+  };
+
+  function storageRemoveValue () {
+    var keys = Array.prototype.slice.call(arguments),
+        prefix = storageGetPrefix(),
+        i, key;
+
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i] = prefix + keys[i];
+      delete cache[key];
+      if (useLs) {
+        localStorage.removeItem(key);
+      }
+    }
+    if (useCs) {
+      chrome.storage.local.remove(keys);
+    }
+  };
+
+  window.ConfigStorage = {
+    prefix: storageSetPrefix,
+    noPrefix: storageSetNoPrefix,
+    get: storageGetValue,
+    set: storageSetValue,
+    remove: storageRemoveValue
+  };
+
+})(this);

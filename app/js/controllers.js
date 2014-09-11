@@ -42,16 +42,13 @@ angular.module('myApp.controllers', [])
     $scope.callPending = {};
 
     $scope.chooseCountry = function () {
-      var tUrl = 'partials/country_select_modal.html',
-          className = 'countries_modal_window page_modal';
-
-      if (Config.Navigator.mobile) {
-        tUrl = 'partials/mobile/country_select_modal.html';
+      var className = 'countries_modal_window page_modal';
+      if (Config.Mobile) {
         className += ' mobile_modal';
       }
 
       var modal = $modal.open({
-        templateUrl: tUrl,
+        templateUrl: templateUrl('country_select_modal'),
         controller: 'CountrySelectModalController',
         windowClass: className
       });
@@ -62,7 +59,7 @@ angular.module('myApp.controllers', [])
     function initPhoneCountry () {
       var langCode = (navigator.language || '').toLowerCase(),
           countryIso2 = Config.LangCountries[langCode],
-          shouldPregenerate = !Config.Navigator.mobile;
+          shouldPregenerate = !Config.Mobile;
 
       if (['en', 'en-us', 'en-uk'].indexOf(langCode) == -1) {
         if (countryIso2 !== undefined) {
@@ -316,16 +313,13 @@ angular.module('myApp.controllers', [])
     $scope.historyState = {selectActions: false, typing: []};
 
     $scope.openSettings = function () {
-      var tUrl = 'partials/settings_modal.html',
-          className = 'settings_modal_window page_modal';
-
-      if (Config.Navigator.mobile) {
-        tUrl = 'partials/mobile/settings_modal.html';
+      var className = 'settings_modal_window page_modal';
+      if (Config.Mobile) {
         className += ' mobile_modal';
       }
 
       $modal.open({
-        templateUrl: tUrl,
+        templateUrl: templateUrl('settings_modal'),
         controller: 'SettingsModalController',
         windowClass: className
       });
@@ -347,7 +341,7 @@ angular.module('myApp.controllers', [])
           scope.userIDs = userIDs;
 
           $modal.open({
-            templateUrl: 'partials/chat_create_modal.html',
+            templateUrl: templateUrl('chat_create_modal'),
             controller: 'ChatCreateModalController',
             scope: scope,
             windowClass: 'group_edit_modal_window'
@@ -535,7 +529,7 @@ angular.module('myApp.controllers', [])
       }
     });
 
-    if (Config.Navigator.mobile) {
+    if (Config.Mobile) {
       $scope.$watch('curDialog.peer', function () {
         $scope.$broadcast('ui_dialogs_update')
       });
@@ -879,7 +873,7 @@ angular.module('myApp.controllers', [])
       var curJump = jump,
           curMoreJump = moreJump,
           inputMediaFilter = $scope.historyFilter.mediaType && {_: inputMediaFilters[$scope.historyFilter.mediaType]},
-          limit = Config.Navigator.mobile ? 20 : 0,
+          limit = Config.Mobile ? 20 : 0,
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, limit)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit);
@@ -920,7 +914,7 @@ angular.module('myApp.controllers', [])
       else if (forceRecent) {
         limit = 10;
       }
-      else if (Config.Navigator.mobile) {
+      else if (Config.Mobile) {
         limit = 20;
       }
 
@@ -1330,7 +1324,7 @@ angular.module('myApp.controllers', [])
       AppPhotosManager.downloadPhoto($scope.photoID);
     };
 
-    if (!$scope.messageID || Config.Navigator.mobile) {
+    if (!$scope.messageID || Config.Mobile) {
       $scope.nav.next = function () {
         $modalInstance.close();
       }
@@ -1352,7 +1346,7 @@ angular.module('myApp.controllers', [])
     };
 
 
-    if (Config.Navigator.mobile) {
+    if (Config.Mobile) {
       $scope.canForward = true;
       $scope.canDelete = true;
       return;
@@ -1676,7 +1670,7 @@ angular.module('myApp.controllers', [])
       };
 
       $modal.open({
-        templateUrl: edit ? 'partials/edit_contact_modal.html' : 'partials/import_contact_modal.html',
+        templateUrl: templateUrl(edit ? 'edit_contact_modal' : 'import_contact_modal'),
         controller: 'ImportContactModalController',
         windowClass: 'import_contact_modal_window page_modal',
         scope: scope
@@ -1873,7 +1867,7 @@ angular.module('myApp.controllers', [])
       scope.chatID = $scope.chatID;
 
       $modal.open({
-        templateUrl: 'partials/chat_edit_modal.html',
+        templateUrl: templateUrl('chat_edit_modal'),
         controller: 'ChatEditModalController',
         scope: scope,
         windowClass: 'group_edit_modal_window'
@@ -1966,7 +1960,7 @@ angular.module('myApp.controllers', [])
 
     $scope.editProfile = function () {
       $modal.open({
-        templateUrl: 'partials/profile_edit_modal.html',
+        templateUrl: templateUrl('profile_edit_modal'),
         controller: 'ProfileEditModalController',
         windowClass: 'profile_edit_modal_window page_modal'
       });

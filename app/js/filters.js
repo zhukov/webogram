@@ -78,7 +78,7 @@ angular.module('myApp.filters', [])
   .filter('time', ['$filter', function($filter) {
     var cachedDates = {},
         dateFilter = $filter('date'),
-        format = Config.Navigator.mobile ? 'HH:mm' : 'HH:mm:ss';
+        format = Config.Mobile ? 'HH:mm' : 'HH:mm:ss';
 
     return function (timestamp) {
       if (cachedDates[timestamp]) {

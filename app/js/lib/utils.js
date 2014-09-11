@@ -135,3 +135,7 @@ if (!Function.prototype.bind) {
   };
 }
 
+function templateUrl (tplName) {
+  return 'partials/' + (Config.Navigator.mobile ? 'mobile' : 'desktop') + '/' + tplName + '.html';
+}
+

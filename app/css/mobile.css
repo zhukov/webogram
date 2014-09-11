@@ -1,5 +1,3 @@
-@media (max-width: 479px) {
-
 html {
   background: #FFF;
 }
@@ -1286,7 +1284,4 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .countries_scrollable_wrap a.countries_modal_country {
   padding: 8px 8px;
-}
-
-
 }

@@ -53,21 +53,9 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
     StorageProvider.setPrefix('t_');
   }
 
-  $routeProvider.when('/', {templateUrl: 'partials/welcome.html', controller: 'AppWelcomeController'});
-  $routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'AppLoginController'});
-  $routeProvider.when('/im', {templateUrl: 'partials/im.html', controller: 'AppIMController', reloadOnSearch: false});
+  $routeProvider.when('/', {templateUrl: templateUrl('welcome'), controller: 'AppWelcomeController'});
+  $routeProvider.when('/login', {templateUrl: templateUrl('login'), controller: 'AppLoginController'});
+  $routeProvider.when('/im', {templateUrl: templateUrl('im'), controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
 }]);
-
-
-(function () {
-  var classes = [
-    Config.Navigator.osX ? 'osx' : 'non_osx',
-    Config.Navigator.retina ? 'is_2x' : 'is_1x'
-  ];
-  if (Config.Modes.ios_standalone) {
-    classes.push('ios_standalone');
-  }
-  $(document.body).addClass(classes.join(' '));
-})();
