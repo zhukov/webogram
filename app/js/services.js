@@ -1915,8 +1915,12 @@ angular.module('myApp.services', [])
         case 'messageActionChatEditTitle': notificationMessage = 'changed group name'; break;
         case 'messageActionChatEditPhoto': notificationMessage = 'changed group photo'; break;
         case 'messageActionChatDeletePhoto': notificationMessage = 'removed group photo'; break;
-        case 'messageActionChatAddUser': notificationMessage = 'invited user'; break;
-        case 'messageActionChatDeleteUser': notificationMessage = 'kicked user'; break;
+        case 'messageActionChatAddUser':
+          notificationMessage = message.action.user_id == message.from_id ? 'returned to group' : 'invited user';
+          break;
+        case 'messageActionChatDeleteUser':
+          notificationMessage = message.action.user_id == message.from_id ? 'left group' : 'kicked user';
+          break;
       }
     }
 
