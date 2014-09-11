@@ -13,14 +13,14 @@
             <span class="icon-bar"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a ng-click="openGroup()">New Group</a></li>
+            <li><a ng-click="openGroup()">{{lang.NEW_GROUP}}</a></li>
             <li><a ng-click="importContact()">New Contact</a></li>
             <li><a ng-click="openContacts()">Contacts</a></li>
             <li><a ng-click="openSettings()">Settings</a></li>
           </ul>
         </div>
         <div class="im_dialogs_search">
-          <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="Search" ng-model="search.query"/>
+          <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{lang.SEARCH_PLACEHOLDER}}" ng-model="search.query"/>
           <a class="im_dialogs_search_clear" ng-click="searchClear()" ng-show="search.query.length"></a>
         </div>
 

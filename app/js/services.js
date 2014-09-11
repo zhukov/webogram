@@ -3917,3 +3917,22 @@ angular.module('myApp.services', [])
     showChangelog: showChangelog
   }
 })
+
+.service('ChangeLocalizeService', function ($http, $resource, $rootScope, $cookies) {
+    this.getTranslation = function(lang) {
+        var language = lang || $cookies.lang || navigator.language;
+        var languageFilePath = 'translations/translation_'+language+'.json';
+        $http({method: 'GET', url: languageFilePath}).
+            success(function(data) {
+                $cookies.lang = language;
+                $rootScope.lang = data;
+            }).
+            error(function() {
+                $resource('translations/translation_en.json').get(function(data){
+                    $cookies.lang = 'en';
+                    $rootScope.lang = data;
+                })
+            });
+        $resource('vendor/angular/i18n/angular-locale_'+language+'.js');
+    };
+})

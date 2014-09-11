@@ -10,6 +10,8 @@
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
   'ngRoute',
+    'ngCookies',
+    'ngResource',
   'ngSanitize',
   'ngTouch',
   'ui.bootstrap',
@@ -58,7 +60,10 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
   $routeProvider.when('/im', {templateUrl: 'partials/im.html', controller: 'AppIMController', reloadOnSearch: false});
   $routeProvider.otherwise({redirectTo: '/'});
 
-}]);
+}])
+.run(function (ChangeLocalizeService) {
+    ChangeLocalizeService.getTranslation();
+});
 
 
 (function () {

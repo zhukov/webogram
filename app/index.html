@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en" ng-app="myApp" manifest="webogram.appcache" ng-csp="">
+        <!-- manifest="webogram.appcache"-->
+<html lang="en" ng-app="myApp" ng-csp="">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Webogram</title>
+  <title>ProTelegram</title>
 
   <!-- build:css css/app.css -->
   <link rel="stylesheet" href="vendor/angular/angular-csp.css"/>
@@ -19,17 +20,17 @@
   <link rel="apple-touch-icon" sizes="120x120" href="img/iphone_home120.png">
   <link rel="apple-touch-startup-image" media="(device-width: 320px)" href="img/iphone_startup.png">
 
-  <meta name="apple-mobile-web-app-title" content="Telegram Web">
+  <meta name="apple-mobile-web-app-title" content="Pro Telegram">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 
-  <meta property="og:title" content="Webogram">
+  <meta property="og:title" content="ProTelegram">
   <meta property="og:url" content="http://zhukov.github.io/webogram/">
   <meta property="og:image" content="http://zhukov.github.io/webogram/img/logo_share.png">
-  <meta property="og:site_name" content="Webogram">
-  <meta property="og:description" content="Welcome to an experimental web-client of Telegram messenger. See https://github.com/zhukov/webogram for more info.">
+  <meta property="og:site_name" content="ProTelegram">
+  <meta property="og:description" content="Welcome to an experimental web-client of Telegram messenger with Add-ons.">
 
 </head>
 <body>
@@ -46,6 +47,8 @@
 
   <script type="text/javascript" src="vendor/angular/angular.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-route.js"></script>
+  <script type="text/javascript" src="vendor/angular/angular-cookies.js"></script>
+  <script type="text/javascript" src="vendor/angular/angular-resource.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-animate.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-sanitize.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-touch.js"></script>
@@ -55,7 +58,6 @@
   <script type="text/javascript" src="vendor/cryptoJS/crypto.js"></script>
   <script type="text/javascript" src="vendor/zlib/gunzip.min.js"></script>
   <script type="text/javascript" src="vendor/closure/long.js"></script>
-
 
   <script type="text/javascript" src="js/lib/utils.js"></script>
   <script type="text/javascript" src="js/lib/bin_utils.js"></script>
