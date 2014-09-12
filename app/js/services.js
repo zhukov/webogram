@@ -163,11 +163,19 @@ angular.module('myApp.services', [])
     var timestampNow = tsNow(true) + serverTimeOffset;
     angular.forEach(users, function (user) {
       if (user.status && user.status._ == 'userStatusOnline' &&
-          user.status.expires > timestampNow) {
+          user.status.expires < timestampNow) {
         user.status = {_: 'userStatusOffline', was_online: user.status.expires};
         $rootScope.$broadcast('user_update', user.id);
       }
     });
+  }
+
+  function forceUserOnline (id) {
+    var user = getUser(id);
+    if (user && (!user.status || user.status._ != 'userStatusOnline')) {
+      user.status = {_: 'userStatusOnline', expires: tsNow(true) + serverTimeOffset + 60};
+      $rootScope.$broadcast('user_update', id);
+    }
   }
 
   function wrapForFull (id) {
@@ -311,6 +319,7 @@ angular.module('myApp.services', [])
       case 'updateUserPhoto':
         var userID = update.user_id;
         if (users[userID]) {
+          forceUserOnline(userID);
           safeReplaceObject(users[userID].photo, update.photo);
 
           if (cachedPhotoLocations[userID] !== undefined) {
@@ -336,6 +345,7 @@ angular.module('myApp.services', [])
     saveApiUser: saveApiUser,
     getUser: getUser,
     getUserInput: getUserInput,
+    forceUserOnline: forceUserOnline,
     getUserPhoto: getUserPhoto,
     getUserString: getUserString,
     getUserSearchText: getUserSearchText,
@@ -1998,6 +2008,10 @@ angular.module('myApp.services', [])
             peerID = getMessagePeer(message),
             historyStorage = historiesStorage[peerID];
 
+        if (!message.out) {
+          AppUsersManager.forceUserOnline(message.from_id);
+        }
+
         if (historyStorage !== undefined) {
           var topMsgID = historiesStorage[peerID].history[0];
           if (historiesStorage[peerID].history.indexOf(message.id) != -1) {
@@ -2058,9 +2072,8 @@ angular.module('myApp.services', [])
         $rootScope.$broadcast('dialogs_update', dialog);
 
 
-        if ((Config.Navigator.mobile && $rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
-            !message.out &&
-            message.unread) {
+        if (($rootScope.idle.isIDLE || Config.Mobile && $rootScope.selectedPeerID != peerID) &&
+            !message.out && message.unread) {
           NotificationsManager.getPeerMuted(peerID).then(function (muted) {
             if (!message.unread || muted) {
               return;
@@ -2093,6 +2106,9 @@ angular.module('myApp.services', [])
               }
 
               NotificationsManager.cancel('msg' + messageID);
+            }
+            else if (peerID > 0) {
+              AppUsersManager.forceUserOnline(peerID);
             }
           }
         }

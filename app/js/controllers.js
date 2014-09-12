@@ -1251,6 +1251,7 @@ angular.module('myApp.controllers', [])
       switch (update._) {
         case 'updateUserTyping':
         case 'updateChatUserTyping':
+          AppUsersManager.forceUserOnline(update.user_id);
           if (AppUsersManager.hasUser(update.user_id) &&
               $scope.curDialog.peerID == (update._ == 'updateUserTyping'
                 ? update.user_id
