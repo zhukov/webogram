@@ -26,10 +26,134 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myMessage', function() {
+  .directive('myMessage', function($filter) {
+
+    var dateFilter = $filter('myDate'),
+        dateSplitHtml = '<div class="im_message_date_split im_service_message_wrap"><div class="im_service_message"></div></div>',
+        unreadSplitHtml = '<div class="im_message_unread_split">Unread messages</div>',
+        selectedClass = 'im_message_selected',
+        focusClass = 'im_message_focus',
+        unreadClass =  'im_message_unread',
+        errorClass = 'im_message_error',
+        pendingClass = 'im_message_pending';
+
     return {
+      link: link,
       templateUrl: 'partials/message.html'
     };
+
+    function link($scope, element, attrs) {
+      var selected = false,
+          grouped = false,
+          focused = false,
+          error = false,
+          pending = false,
+          needDate = false,
+          unreadAfter = false,
+          applySelected = function () {
+            if (selected != ($scope.selectedMsgs[$scope.historyMessage.id] || false)) {
+              selected = !selected;
+              element.toggleClass(selectedClass, selected);
+            }
+          },
+          needDateSplit,
+          applyGrouped = function () {
+            if (grouped != $scope.historyMessage.grouped) {
+              if (grouped) {
+                element.removeClass(grouped);
+              }
+              grouped = $scope.historyMessage.grouped;
+              if (grouped) {
+                element.addClass(grouped);
+              }
+            }
+            if (needDate != ($scope.historyMessage.needDate || false)) {
+              needDate = !needDate;
+              if (needDate) {
+                if (needDateSplit) {
+                  needDateSplit.show();
+                } else {
+                  needDateSplit = $(dateSplitHtml);
+                  $(needDateSplit[0].firstChild).text(dateFilter($scope.historyMessage.date));
+                  if (unreadAfterSplit) {
+                    needDateSplit.insertBefore(unreadAfterSplit)
+                  } else {
+                    needDateSplit.prependTo(element);
+                  }
+                }
+              } else {
+                needDateSplit.hide();
+              }
+            }
+          },
+          unreadAfterSplit;
+
+      applySelected();
+      applyGrouped();
+
+      $scope.$on('messages_select', applySelected);
+      $scope.$on('messages_regroup', applyGrouped);
+
+      $scope.$on('messages_focus', function (e, focusedMsgID) {
+        if ((focusedMsgID == $scope.historyMessage.id) != focused) {
+          focused = !focused;
+          element.toggleClass(focusClass, focused);
+        }
+      });
+
+      if ($scope.historyMessage.unread) {
+        var deregisterUnreadAfter;
+        if (!$scope.historyMessage.out) {
+          var applyUnreadAfter = function () {
+            if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.id)) {
+              unreadAfter = !unreadAfter;
+              if (unreadAfter) {
+                if (unreadAfterSplit) {
+                  unreadAfterSplit.show();
+                } else {
+                  unreadAfterSplit = $(unreadSplitHtml).prependTo(element);
+                }
+              } else {
+                unreadAfterSplit.hide();
+                if (deregisterUnreadAfter) {
+                  deregisterUnreadAfter();
+                }
+              }
+            }
+          };
+          applyUnreadAfter();
+          deregisterUnreadAfter = $scope.$on('messages_unread_after', applyUnreadAfter);
+        }
+        element.addClass(unreadClass);
+        var deregisterUnread = $scope.$on('messages_read', function () {
+          if (!$scope.historyMessage.unread) {
+            element.removeClass(unreadClass);
+            deregisterUnread();
+            if (deregisterUnreadAfter && !unreadAfter) {
+              deregisterUnreadAfter();
+            }
+          }
+        });
+      }
+      if ($scope.historyMessage.error || $scope.historyMessage.pending) {
+        var applyPending = function () {
+              if (pending != ($scope.historyMessage.pending || false)) {
+                pending = !pending;
+                element.toggleClass(pendingClass, pending);
+              }
+              if (error != ($scope.historyMessage.error || false)) {
+                error = !error;
+                element.toggleClass(errorClass, error);
+              }
+              if (!error && !pending) {
+                deregisterPending();
+              }
+            },
+            deregisterPending = $scope.$on('messages_pending', applyPending);
+
+        applyPending();
+      }
+    }
   })
 
   .directive('myServiceMessage', function() {
@@ -132,9 +256,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (e.keyCode == 36 &&  !e.shiftKey && !e.ctrlKey && e.altKey) { // Alt + Home
-          var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a')[0];
-          if (currentSelected) {
-            currentSelected.click();
+          var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a');
+          if (currentSelected.length) {
+            currentSelected.trigger('mousedown');
             scrollableWrap.scrollTop = 0;
             $(dialogsWrap).nanoScroller({flash: true});
           }
@@ -154,7 +278,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (searchFocused && e.keyCode == 13) { // Enter
           var currentSelected = $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.im_dialog_wrap a')[0];
           if (currentSelected) {
-            currentSelected.click();
+            $(currentSelected).trigger('mousedown');
           }
           return cancelEvent(e);
         }
@@ -191,7 +315,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (skip) {
             if (nextDialogWrap) {
-              $(nextDialogWrap).find('a')[0].click();
+              $(nextDialogWrap).find('a').trigger('mousedown');
             }
           } else {
             if (currentSelectedWrap && nextDialogWrap) {
@@ -505,13 +629,17 @@ angular.module('myApp.directives', ['myApp.filters'])
       function changeScroll () {
         var unreadSplit, focusMessage;
 
+        // console.log('change scroll');
         if (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0]) {
+          // console.log('change scroll focus', focusMessage.offsetTop);
           scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
           atBottom = false;
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
+          // console.log('change scroll unread', unreadSplit.offsetTop);
           scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
+          // console.log('change scroll bottom');
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
@@ -522,11 +650,13 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       $scope.$on('ui_history_change', function () {
+        var pr = parseInt($(scrollableWrap).css('paddingRight'))
         $(scrollableWrap).addClass('im_history_to_bottom');
-        $(scrollable).css({bottom: 0});
+        scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
+        $(scrollable).css({bottom: 0, marginLeft: -Math.ceil(pr / 2)});
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: ''});
+          $(scrollable).css({bottom: '', marginLeft: ''});
           updateSizes(true);
           moreNotified = false;
           lessNotified = false;

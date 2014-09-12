@@ -3069,8 +3069,8 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status,
 .is_1x .icon-delete {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.im_message_selected,
-.im_message_focus {
+.im_message_selected .im_message_outer_wrap,
+.im_message_focus .im_message_outer_wrap {
   background: #f2f6fa;
 }
 

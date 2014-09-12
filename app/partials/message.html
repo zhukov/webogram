@@ -1,12 +1,4 @@
-<div class="im_message_unread_split" ng-if="::historyUnreadAfter == historyMessage.id || false" ng-show="historyUnreadAfter == historyMessage.id">
-  Unread messages
-</div>
-
-<div class="im_message_date_split im_service_message_wrap" ng-if="::historyMessage.needDate || false" ng-show="historyMessage.needDate">
-  <div class="im_service_message" ng-bind="historyMessage.date | myDate"></div>
-</div>
-
-<div class="im_message_outer_wrap" ng-class="[selectedMsgs[historyMessage.id] ? 'im_message_selected' : '', historyMessage.grouped, historyFocus == historyMessage.id ? 'im_message_focus' : '', historyMessage.unread ? 'im_message_unread' : '', historyMessage.error ? 'im_message_error' : '', historyMessage.pending ? 'im_message_pending' : '']" ng-click="toggleMessage(historyMessage.id, $event)">
+<div class="im_message_outer_wrap" ng-click="toggleMessage(historyMessage.id, $event)">
 
 
   <div class="im_message_wrap clearfix">
@@ -45,7 +37,7 @@
         <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
       </div>
 
-      <div class="im_message_body" ng-class="{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'}">
+      <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'}">
 
         <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0"></a>
 
