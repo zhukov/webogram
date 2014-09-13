@@ -219,7 +219,7 @@ input[type="number"] {
   float: left;
 }
 .navbar-offline {
-  max-width: 250px;
+  max-width: 400px;
   margin: 0 auto;
   float: none;
 }
