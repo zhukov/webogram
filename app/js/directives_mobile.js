@@ -126,16 +126,6 @@ angular.module('myApp.directives')
       onContentLoaded(function () {
         scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
       });
-      $(historyWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
-
-      var updateScroller = function (delay) {
-        // console.trace('scroller update', delay);
-        $timeout(function () {
-          if (!$(scrollableWrap).hasClass('im_history_to_bottom')) {
-            $(historyWrap).nanoScroller();
-          }
-        }, delay || 0);
-      }
 
       var transform = false,
           trs = ['transform', 'webkitTransform', 'MozTransform', 'msTransform', 'OTransform'],
@@ -172,7 +162,6 @@ angular.module('myApp.directives')
             $(historyMessagesEl).removeClass('im_history_appending');
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             $(historyMessagesEl).css(transform, 'translate(0px, ' + (scrollableWrap.scrollHeight - wasH) + 'px)');
-            $(historyWrap).nanoScroller();
             var styles = {};
             styles[transform] = 'translate(0px, 0px)';
             $(historyMessagesEl).addClass('im_history_appending');
@@ -193,17 +182,16 @@ angular.module('myApp.directives')
       function changeScroll () {
         var unreadSplit, focusMessage;
 
-        if (focusMessage = $('.im_message_focus', scrollableWrap)[0]) {
+        if (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0]) {
           scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
           atBottom = false;
-        } else if (unreadSplit = $('.im_message_unread_split', scrollableWrap)[0]) {
+        } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
           scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
-        updateScroller();
         $timeout(function () {
           $(scrollableWrap).trigger('scroll');
         });
@@ -229,7 +217,6 @@ angular.module('myApp.directives')
       $scope.$on('ui_history_focus', function () {
         if (!atBottom) {
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-          updateScroller();
           atBottom = true;
         }
       });
@@ -353,10 +340,8 @@ angular.module('myApp.directives')
         if (atBottom) {
           onContentLoaded(function () {
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-            updateScroller();
           });
         }
-        updateScroller(100);
       }
 
       function updateBottomizer () {
@@ -369,7 +354,6 @@ angular.module('myApp.directives')
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
           $(historyMessagesEl).css({marginTop: marginTop});
         }
-        $(historyWrap).nanoScroller();
       }
 
       $($window).on('resize', updateSizes);

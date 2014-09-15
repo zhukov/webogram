@@ -506,11 +506,17 @@ img.im_message_video_thumb,
 .im_send_panel_wrap {
   padding: 10px 0 12px;
 }
-.icon-select-tick {
-  margin: 10px 0 0 -24px
+.im_history_scrollable_wrap {
+  overflow: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 .im_history {
   position: static;
+}
+
+.icon-select-tick {
+  margin: 10px 0 0 -24px
 }
 .im_message_wrap {
   padding: 0 8px;
