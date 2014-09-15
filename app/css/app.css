@@ -231,12 +231,6 @@ input[type="number"] {
   line-height: 20px;
 }
 
-.navbar-peer-wrap {
-  display: none;
-}
-.navbar-toggle-wrap {
-  display: none;
-}
 .tg_page_head .navbar-menu .navbar-nav.navbar-right {
   margin-right: 0;
 }
@@ -825,29 +819,7 @@ a.tg_radio_on:hover i.icon-radio {
 }
 
 
-.im_dialogs_col .nano > .nano-pane {
-  background : rgba(0,0,0,0.0);
-  width      : 12px;
-  right: 0px;
-  -moz-border-radius    : 0;
-  -webkit-border-radius : 0;
-  border-radius         : 0;
-  /*-webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;*/
-  -webkit-transition    : none;
-  -moz-transition       : none;
-  -o-transition         : none;
-  transition            : none;
-}
-.im_dialogs_col .nano > .nano-pane > .nano-slider {
-  background: #A5B1B9;
-  margin: 0 5px;
-  -moz-border-radius    : 0;
-  -webkit-border-radius : 0;
-  border-radius         : 0;
-}
+
 
 .im_dialogs_panel {
   padding: 12px 12px 6px;
@@ -1190,7 +1162,10 @@ a.im_dialog_selected .im_dialog_date {
   -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
 }
-
+.im_history_to_bottom {
+  overflow: hidden;
+  position: relative;
+}
 .im_history_to_bottom .im_history_scrollable {
   position: absolute;
   bottom: 0;
@@ -1892,10 +1867,6 @@ textarea.im_message_field {
   background-position: -10px -36px;
   opacity: 1;
 }
-
-.im_head_attach {
-  display: none;
-}
 .im_attach_input,
 .im_media_attach_input {
   cursor: pointer;
@@ -2358,16 +2329,6 @@ img.chat_modal_participant_photo {
 }
 
 
-.emoji-menu .nano > .nano-pane {
-  background : rgba(255,255,255,0.0);
-  right: -2px;
-}
-.emoji-menu .nano > .nano-pane > .nano-slider {
-  background: #d1d1d1;
-  margin: 0 3px 0 4px;
-}
-
-
 .error_modal_window .modal-dialog {
   max-width: 350px;
 }
@@ -2727,11 +2688,7 @@ a:hover .icon-twitter {
   opacity: 1;
 }
 
-.contacts_modal_col {
-  margin-right: -17px;
-}
 .contacts_scrollable_wrap {
-  padding: 0 17px 0 0;
   outline: none ! important;
 }
 .contacts_modal_contacts_empty {
@@ -3204,27 +3161,6 @@ ce671b orange
 
 .countries_modal_wrap .modal-body {
   padding: 14px 0;
-}
-
-.countries_modal_col .nano > .nano-pane {
-  background : rgba(3,36,64,0.08);
-  width      : 3px;
-  right: 6px;
-  top: 0;
-  -webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;
-  -moz-border-radius    : 0;
-  -webkit-border-radius : 0;
-  border-radius         : 0;
-}
-.countries_modal_col .nano > .nano-pane > .nano-slider {
-  background : rgba(3,46,79,0.22);
-  margin: 0;
-  -moz-border-radius    : 0;
-  -webkit-border-radius : 0;
-  border-radius         : 0;
 }
 
 

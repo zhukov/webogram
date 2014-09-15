@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <div my-dialogs-list-mobile class="im_dialogs_col im_dialogs_scrollable_wrap">
+      <div my-dialogs-list-mobile class="im_dialogs_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
 
         <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts">
           <h3 class="im_dialogs_empty_header">No contacts yet</h3>
@@ -65,13 +65,6 @@
     </div>
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
-      <div ng-show="state.notSelected">
-        <div class="im_history_no_dialogs_wrap">
-          <h3 class="im_dialogs_empty_header">Get started</h3>
-          <p class="im_dialogs_empty_lead">Welcome to Telegram Web. You can always set your profile photo and change your name in Settings.</p>
-          <button type="button" class="btn btn-primary btn-sm" ng-click="openSettings()">Open Settings</button>
-        </div>
-      </div>
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35" padding="true">
         Loading history<span my-loading-dots></span>
       </div>
@@ -79,58 +72,7 @@
       <div ng-show="state.loaded">
         <div my-history-mobile class="im_history_col">
 
-          <div class="im_history_panel_wrap">
-
-            <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
-              <div class="im_history_panel_title">
-
-                <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()">Info</a>
-                <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()">Edit</a>
-
-                <div class="dropdown im_history_panel_media_dropdown pull-right">
-                  <a class="dropdown-toggle">Media<i class="icon icon-caret"></i></a>
-                  <ul class="dropdown-menu">
-                    <li><a ng-click="toggleMedia('photos')">Photos</a></li>
-                    <li><a ng-click="toggleMedia('video')">Videos</a></li>
-                    <li><a ng-click="toggleMedia('documents')">Documents</a></li>
-                    <li><a ng-click="toggleMedia('audio')">Voice messages</a></li>
-                  </ul>
-                </div>
-                <a ng-show="historyFilter.mediaType.length || skippedHistory" class="im_history_panel_return_link pull-right" ng-click="returnToRecent()" ng-switch="skippedHistory">
-                  <span ng-switch-when="true">Show recent messages</span>
-                  <span ng-switch-default>Show all messages</span>
-                  <strong class="im_history_panel_return_count" ng-show="missedCount > 0" ng-bind="'+' + missedCount"></strong>
-                </a>
-
-                <div ng-switch="historyFilter.mediaType">
-                  <h4 ng-switch-when="photos">Photos</h4>
-                  <h4 ng-switch-when="video">Videos</h4>
-                  <h4 ng-switch-when="documents">Documents</h4>
-                  <h4 ng-switch-when="audio">Voice messages</h4>
-
-                  <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
-                    <div ng-switch-when="true">
-                      <span ng-bind-html="historyPeer.data.rFullName"></span>
-                      <small class="im_peer_online" my-user-status="historyPeer.id"></small>
-                    </div>
-                    <div ng-switch-default>
-                      <span ng-bind-html="historyPeer.data.rTitle"></span>
-                      <small class="im_chat_users">
-                        <ng-pluralize count="historyPeer.data.participants_count"
-                                         when="{'0': 'No members', 'one': '1 member', 'other': '{} members'}">
-                        </ng-pluralize>
-                      </small>
-                    </div>
-                  </h4>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <div class="im_history_wrap im_history_scrollable_wrap">
+          <div class="im_history_wrap im_history_scrollable_wrap mobile_scrollable_wrap">
 
             <div class="im_history_scrollable">
                 <div class="im_history" ng-class="{im_history_selectable: historyState.selectActions}">
@@ -140,7 +82,7 @@
                   </div>
 
                   <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
-                    <div ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
+                    <div class="im_history_messages_peer" ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
                       <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in peerHistory.messages"></div>
                     </div>
                   </div>

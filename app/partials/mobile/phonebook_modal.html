@@ -37,45 +37,41 @@
     </div>
 
 
-    <div my-contacts-list class="contacts_modal_col">
+    <div class="contacts_modal_col contacts_wrap contacts_scrollable_wrap mobile_scrollable_wrap" my-contacts-list-mobile my-infinite-scroller-mobile>
+      <div ng-switch="contactsEmpty">
 
-      <div class="contacts_wrap nano" my-infinite-scroller>
-        <div class="contacts_scrollable_wrap nano-content" ng-switch="contactsEmpty">
-
-          <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true">
-            Your phonebook is empty.
-          </div>
-
-          <ul ng-switch-default class="contacts_modal_members_list nav nav-pills nav-stacked">
-
-            <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | limitTo: slice.limit track by contact.id" ng-class="{active: selectedContacts[contact.id]}">
-              <a class="contacts_modal_contact" ng-click="contactSelect(contact.id)">
-
-                <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
-
-                <div class="contacts_modal_contact_photo pull-left">
-                  <img
-                    class="contacts_modal_contact_photo"
-                    ng-src="{{contact.photo}}"
-                  />
-                </div>
-
-                <div class="contacts_modal_contact_name">
-                  <span ng-bind="contact.first_name"></span>
-                  <span ng-bind="contact.last_name"></span>
-                </div>
-                <div class="contacts_modal_contact_status" ng-repeat="phone in contact.phones">
-                  <span ng-bind="phone | phoneNumber"></span>
-                </div>
-
-              </a>
-            </li>
-
-          </ul>
-
+        <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true">
+          Your phonebook is empty.
         </div>
-      </div>
 
+        <ul ng-switch-default class="contacts_modal_members_list nav nav-pills nav-stacked">
+
+          <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | limitTo: slice.limit track by contact.id" ng-class="{active: selectedContacts[contact.id]}">
+            <a class="contacts_modal_contact" ng-click="contactSelect(contact.id)">
+
+              <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
+
+              <div class="contacts_modal_contact_photo pull-left">
+                <img
+                  class="contacts_modal_contact_photo"
+                  ng-src="{{contact.photo}}"
+                />
+              </div>
+
+              <div class="contacts_modal_contact_name">
+                <span ng-bind="contact.first_name"></span>
+                <span ng-bind="contact.last_name"></span>
+              </div>
+              <div class="contacts_modal_contact_status" ng-repeat="phone in contact.phones">
+                <span ng-bind="phone | phoneNumber"></span>
+              </div>
+
+            </a>
+          </li>
+
+        </ul>
+
+      </div>
     </div>
 
   </div>

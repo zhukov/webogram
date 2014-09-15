@@ -48,30 +48,22 @@
     </div>
 
 
-    <div my-contacts-list class="contacts_modal_col">
+    <div class="contacts_modal_col contacts_wrap contacts_scrollable_wrap mobile_scrollable_wrap" my-contacts-list-mobile my-infinite-scroller-mobile>
+      <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
 
-      <div class="contacts_wrap nano" my-infinite-scroller>
-        <div class="contacts_scrollable_wrap nano-content">
+        <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
+          <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
 
-          <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
+            <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
 
-            <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
-              <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
+            <div class="contacts_modal_contact_photo pull-left" my-user-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
+            <div class="contacts_modal_contact_name" ng-bind-html="contact.user.rFullName"></div>
+            <div class="contacts_modal_contact_status" my-user-status="::contact.userID"></div>
 
-                <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
+          </a>
+        </li>
 
-                <div class="contacts_modal_contact_photo pull-left" my-user-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
-                <div class="contacts_modal_contact_name" ng-bind-html="contact.user.rFullName"></div>
-                <div class="contacts_modal_contact_status" my-user-status="::contact.userID"></div>
-
-              </a>
-            </li>
-
-          </ul>
-
-        </div>
-      </div>
-
+      </ul>
     </div>
 
   </div>

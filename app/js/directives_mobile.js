@@ -89,7 +89,7 @@ angular.module('myApp.directives')
         }
         $(element).css({
           height: $($window).height() -
-                  (headWrap ? headWrap.offsetHeight : 44) -
+                  (headWrap ? headWrap.offsetHeight : 46) -
                   (panelWrap ? panelWrap.offsetHeight : 58) -
                   parseInt($(dialogsColWrap).css('paddingBottom') || 0)
         });
@@ -112,10 +112,8 @@ angular.module('myApp.directives')
     function link ($scope, element, attrs) {
       var historyWrap = $('.im_history_wrap', element)[0],
           historyMessagesEl = $('.im_history_messages', element)[0],
-          historyEl = $('.im_history', element)[0],
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
-          panelWrap = $('.im_history_panel_wrap', element)[0],
           bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
@@ -127,82 +125,58 @@ angular.module('myApp.directives')
         scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
       });
 
-      var transform = false,
-          trs = ['transform', 'webkitTransform', 'MozTransform', 'msTransform', 'OTransform'],
-          i;
-      for (i = 0; i < trs.length; i++) {
-        if (trs[i] in historyMessagesEl.style) {
-          transform = trs[i];
-          break;
-        }
-      }
-
-      var animated = transform ? true : false,
-          curAnimation = false;
-
       $scope.$on('ui_history_append_new', function (e, options) {
         if (!atBottom && !options.my) {
           return;
         }
-        var curAnimated = animated &&
-                          !$rootScope.idle.isIDLE &&
-                          historyMessagesEl.clientHeight > 0,
-            wasH;
-
-        if (curAnimated) {
-          wasH = scrollableWrap.scrollHeight;
-        } else {
-          $(scrollable).css({bottom: 0});
-          $(scrollableWrap).addClass('im_history_to_bottom');
-        }
+        
+        var pr = parseInt($(scrollableWrap).css('paddingRight'))
+        $(scrollableWrap).addClass('im_history_to_bottom');
+        $(scrollable).css({bottom: 0, marginLeft: -Math.ceil(pr / 2)});
 
         onContentLoaded(function () {
-          if (curAnimated) {
-            curAnimation = true;
-            $(historyMessagesEl).removeClass('im_history_appending');
-            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-            $(historyMessagesEl).css(transform, 'translate(0px, ' + (scrollableWrap.scrollHeight - wasH) + 'px)');
-            var styles = {};
-            styles[transform] = 'translate(0px, 0px)';
-            $(historyMessagesEl).addClass('im_history_appending');
-            $transition($(historyMessagesEl), styles).then(function () {
-              curAnimation = false;
-              $(historyMessagesEl).removeClass('im_history_appending');
-              updateBottomizer();
-            });
-          } else {
-            $(scrollableWrap).removeClass('im_history_to_bottom');
-            $(scrollable).css({bottom: ''});
-            scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
-            updateBottomizer();
-          }
+          $(scrollableWrap).removeClass('im_history_to_bottom');
+          $(scrollable).css({bottom: '', marginLeft: ''});
+          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          updateBottomizer();
         });
       });
 
       function changeScroll () {
         var unreadSplit, focusMessage;
 
+        // console.trace('change scroll');
         if (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0]) {
-          scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
+          var ch = scrollableWrap.clientHeight,
+              st = scrollableWrap.scrollTop,
+              ot = focusMessage.offsetTop,
+              h = focusMessage.clientHeight;
+          if (!st || st + ch < ot || st > ot + h) {
+            scrollableWrap.scrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
+          }
           atBottom = false;
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
+          // console.log('change scroll unread', unreadSplit.offsetTop);
           scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
+          // console.log('change scroll bottom');
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
         $timeout(function () {
           $(scrollableWrap).trigger('scroll');
+          scrollTopInitial = scrollableWrap.scrollTop;
         });
       };
 
       $scope.$on('ui_history_change', function () {
+        var pr = parseInt($(scrollableWrap).css('paddingRight'))
         $(scrollableWrap).addClass('im_history_to_bottom');
-        $(scrollable).css({bottom: 0});
+        $(scrollable).css({bottom: 0, marginLeft: -Math.ceil(pr / 2)});
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: ''});
+          $(scrollable).css({bottom: '', marginLeft: ''});
           updateSizes(true);
           moreNotified = false;
           lessNotified = false;
@@ -227,14 +201,18 @@ angular.module('myApp.directives')
             pr = parseInt($(scrollableWrap).css('paddingRight')),
             ch = scrollableWrap.clientHeight;
 
+        $(scrollable).css({marginBottom: -(sh - st - ch - 4), marginLeft: -Math.ceil(pr / 2)});
         $(scrollableWrap).addClass('im_history_to_bottom');
-        scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
-        $(scrollable).css({bottom: -(sh - st - ch), marginLeft: -Math.ceil(pr / 2)});
+
 
         var upd = function () {
             $(scrollableWrap).removeClass('im_history_to_bottom');
-            $(scrollable).css({bottom: '', marginLeft: ''});
-            scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            $(scrollable).css({marginBottom: '', marginLeft: ''});
+            if (scrollTopInitial >= 0) {
+              changeScroll();
+            } else {
+              scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            }
 
             updateBottomizer();
             moreNotified = false;
@@ -258,6 +236,10 @@ angular.module('myApp.directives')
           atBottom = false;
           updateBottomizer();
           lessNotified = false;
+
+          if (scrollTopInitial >= 0) {
+            changeScroll();
+          }
 
           $timeout(function () {
             if (scrollableWrap.scrollHeight != sh) {
@@ -293,23 +275,26 @@ angular.module('myApp.directives')
       $scope.$on('ui_editor_resize', updateSizes);
       $scope.$on('ui_height', function () {
         onContentLoaded(updateSizes);
-        // updateSizes();
       });
 
-      var atBottom = true;
+      var atBottom = true,
+          scrollTopInitial = -1;
       $(scrollableWrap).on('scroll', function (e) {
         if (!element.is(':visible') ||
-            $(scrollableWrap).hasClass('im_history_to_bottom') ||
-            curAnimation) {
+            $(scrollableWrap).hasClass('im_history_to_bottom')) {
           return;
         }
-        atBottom = scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
+        var st = scrollableWrap.scrollTop;
+        atBottom = st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
+        if (scrollTopInitial >= 0 && scrollTopInitial != st) {
+          scrollTopInitial = -1;
+        }
 
-        if (!moreNotified && scrollableWrap.scrollTop <= 300) {
+        if (!moreNotified && st <= 300) {
           moreNotified = true;
           $scope.$emit('history_need_more');
         }
-        else if (!lessNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+        else if (!lessNotified && st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           lessNotified = true;
           $scope.$emit('history_need_less');
         }
@@ -328,7 +313,7 @@ angular.module('myApp.directives')
         if (!headWrap || !headWrap.offsetHeight) {
           headWrap = $('.tg_page_head')[0];
         }
-        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44);
+        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 46);
         $(historyWrap).css({
           height: historyH
         });
@@ -345,11 +330,11 @@ angular.module('myApp.directives')
       }
 
       function updateBottomizer () {
+        return;
         $(historyMessagesEl).css({marginTop: 0});
         var marginTop = scrollableWrap.offsetHeight
                         - historyMessagesEl.offsetHeight
-                        - 20
-                        - (Config.Mobile ? 0 : 49);
+                        - 20;
 
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
           $(historyMessagesEl).css({marginTop: marginTop});
@@ -362,4 +347,87 @@ angular.module('myApp.directives')
       onContentLoaded(updateSizes);
     }
 
+  })
+
+  .directive('myContactsListMobile', function($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var searchWrap = $('.contacts_modal_search')[0],
+          panelWrap = $('.contacts_modal_panel')[0];
+
+      function updateSizes () {
+        $(element).css({
+          height: $($window).height() -
+                  (panelWrap && panelWrap.offsetHeight || 0) -
+                  (searchWrap && searchWrap.offsetHeight || 0) -
+                  64
+        });
+      }
+
+      $($window).on('resize', updateSizes);
+      $scope.$on('contacts_change', function () {
+        onContentLoaded(updateSizes)
+      });
+      onContentLoaded(updateSizes);
+    };
+
+  })
+
+  .directive('myCountriesListMobile', function($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var searchWrap = $('.countries_modal_search')[0],
+          panelWrap = $('.countries_modal_panel')[0];
+
+      function updateSizes () {
+        $(element).css({
+          height: $($window).height()
+                    - (panelWrap && panelWrap.offsetHeight || 0)
+                    - (searchWrap && searchWrap.offsetHeight || 0)
+                    - (46 + 18)
+        });
+      }
+
+      $($window).on('resize', updateSizes);
+      onContentLoaded(updateSizes);
+    };
+
+  })
+
+  .directive('myInfiniteScrollerMobile', function () {
+
+    return {
+      link: link,
+      scope: true
+    };
+
+    function link($scope, element, attrs) {
+
+      var scrollableWrap = element[0],
+          moreNotified = false;
+
+      $(scrollableWrap).on('scroll', function (e) {
+        if (!element.is(':visible')) return;
+        if (!moreNotified &&
+            scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+          moreNotified = true;
+          $scope.$apply(function () {
+            $scope.slice.limit += ($scope.slice.limitDelta || 20);
+          });
+
+          onContentLoaded(function () {
+            moreNotified = false;
+          });
+        }
+      });
+
+    };
   })
