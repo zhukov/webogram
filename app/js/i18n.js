@@ -18,7 +18,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           if (match[1] != undefined) {
             param = insertParams(param, match[1].split('|'));
           }
-          msgstr = msgstr.replace(match[0], param.trim());
+          msgstr = msgstr.replace(match[0], param.toString().trim());
         }
       }
       return msgstr;
