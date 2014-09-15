@@ -94,9 +94,9 @@
 	"Somebody": "Somebody",
 	"Unknown chat": "Unknown chat",
 
-	"Recent updates in <strong>Telegram Web</strong>": "Recent updates in <strong>Telegram Web</strong>",
-	"<strong>Telegram Web</strong> has been updated!": "<strong>Telegram Web</strong> has been updated!",
-	"current version": "current version",
+	"changelog_header_recent_updates": "Recent updates in <strong>Telegram Web</strong>",
+	"changelog_header_new_updates": "<strong>Telegram Web</strong> has been updated!",
+	"changelog_title_current_version": "current version",
 
 	"Creating...": "Creating...",
 	"Create Group": "Create Group",
