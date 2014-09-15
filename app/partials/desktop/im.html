@@ -157,14 +157,17 @@
 
               <div class="im_history_scrollable">
                   <div class="im_history" ng-class="{im_history_selectable: historyState.selectActions}">
-                    <div ng-if="!history.length"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
+                    <div ng-if="state.empty"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
                       <span ng-switch-when="true">Loading history<span my-loading-dots></span></span>
                       <span ng-switch-default>No messages here yet...</span>
                     </div>
 
                     <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
-                      <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in history"></div>
+                      <div ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
+                        <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in peerHistory.messages"></div>
+                      </div>
                     </div>
+
                   </div>
 
                   <div class="im_history_typing_wrap">

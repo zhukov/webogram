@@ -154,6 +154,10 @@ input[type="number"] {
 .btn-link.dropdown-toggle:hover {
   background: none;
 }
+.btn-link.dropdown-toggle:active {
+  outline: none;
+  box-shadow: none;
+}
 
 .tg_page_head .navbar-quick-nav,
 .tg_page_head .navbar-toggle {

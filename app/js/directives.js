@@ -505,10 +505,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       function changeScroll () {
         var unreadSplit, focusMessage;
 
-        if (focusMessage = $('.im_message_focus', scrollableWrap)[0]) {
+        if (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0]) {
           scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
           atBottom = false;
-        } else if (unreadSplit = $('.im_message_unread_split', scrollableWrap)[0]) {
+        } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
           scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
