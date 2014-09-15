@@ -108,7 +108,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
     return {
       restrict: 'EA',
       compile: function(element) {
-        var msgid = element.html().replace(/\s+/g, ' ').trim();
+        var msgid = element.attr("my-i18n") || element.attr("msgid") || element.html().replace(/\s+/g, ' ').trim();
         var msgstr = _(msgid);
         element.html(msgstr);
       }
@@ -138,9 +138,10 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           param = angular.element(param);
           params[param.attr('name')] = param.html();
         });
-        element.children('my-format, [my-format]').each(function(index, element) {
+        var formats = element.attr("my-i18n-format") || element.attr("msgid") ? element : element.children('my-format, [my-format]');
+        formats.each(function(index, element) {
           var format = angular.element(element);
-          var msgid = format.html().replace(/\s+/g, ' ').trim();
+          var msgid = format.attr("my-i18n-format") || format.attr("msgid") || format.html().replace(/\s+/g, ' ').trim();
           var msgstr;
           if (named.length) {
             msgstr = _.apply(this, [msgid, params]);
