@@ -629,10 +629,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       function changeScroll () {
         var unreadSplit, focusMessage;
 
-        // console.log('change scroll');
+        // console.trace('change scroll');
         if (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0]) {
-          // console.log('change scroll focus', focusMessage.offsetTop);
-          scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
+          var ch = scrollableWrap.clientHeight,
+              st = scrollableWrap.scrollTop,
+              ot = focusMessage.offsetTop,
+              h = focusMessage.clientHeight;
+          if (!st || st + ch < ot || st > ot + h) {
+            scrollableWrap.scrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
+          }
           atBottom = false;
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
           // console.log('change scroll unread', unreadSplit.offsetTop);
@@ -646,6 +651,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateScroller();
         $timeout(function () {
           $(scrollableWrap).trigger('scroll');
+          scrollTopInitial = scrollableWrap.scrollTop;
         });
       };
 
@@ -689,7 +695,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         var upd = function () {
             $(scrollableWrap).removeClass('im_history_to_bottom');
             $(scrollable).css({bottom: '', marginLeft: ''});
-            scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            if (scrollTopInitial >= 0) {
+              changeScroll();
+            } else {
+              scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            }
 
             updateBottomizer();
             moreNotified = false;
@@ -713,6 +723,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           atBottom = false;
           updateBottomizer();
           lessNotified = false;
+
+          if (scrollTopInitial >= 0) {
+            changeScroll();
+          }
 
           $timeout(function () {
             if (scrollableWrap.scrollHeight != sh) {
@@ -751,22 +765,27 @@ angular.module('myApp.directives', ['myApp.filters'])
         // updateSizes();
       });
 
-      var atBottom = true;
+      var atBottom = true,
+          scrollTopInitial = -1;
       $(scrollableWrap).on('scroll', function (e) {
         if (!element.is(':visible') ||
             $(scrollableWrap).hasClass('im_history_to_bottom') ||
             curAnimation) {
           return;
         }
-        atBottom = scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
-
-        if (!moreNotified && scrollableWrap.scrollTop <= 300) {
-          moreNotified = true;
-          $scope.$emit('history_need_more');
+        var st = scrollableWrap.scrollTop;
+        atBottom = st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
+        if (scrollTopInitial >= 0 && scrollTopInitial != st) {
+          scrollTopInitial = -1;
         }
-        else if (!lessNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+
+        if (!lessNotified && st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           lessNotified = true;
           $scope.$emit('history_need_less');
+        }
+        else if (!moreNotified && st <= 300) {
+          moreNotified = true;
+          $scope.$emit('history_need_more');
         }
       });
 

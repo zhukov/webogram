@@ -760,6 +760,8 @@ angular.module('myApp.services', [])
     }
   });
 
+  var dateOrTimeFilter = $filter('dateOrTime');
+
   midnightOffseted.setHours(0);
   midnightOffseted.setMinutes(0);
   midnightOffseted.setSeconds(0);
@@ -1744,7 +1746,9 @@ angular.module('myApp.services', [])
   }
 
   function wrapForDialog (msgID, unreadCount) {
-    if (messagesForDialogs[msgID] !== undefined) {
+    var useCache = unreadCount != -1;
+
+    if (useCache && messagesForDialogs[msgID] !== undefined) {
       return messagesForDialogs[msgID];
     }
 
@@ -1773,10 +1777,13 @@ angular.module('myApp.services', [])
       message.richMessage = RichTextProcessor.wrapRichText(message.message.substr(0, 64), {noLinks: true, noLinebreaks: true});
     }
 
-    message.dateText = $filter('dateOrTime')(message.date);
+    message.dateText = dateOrTimeFilter(message.date);
 
+    if (useCache) {
+      messagesForDialogs[msgID] = message;
+    }
 
-    return messagesForDialogs[msgID] = message;
+    return message;
   }
 
   function wrapForHistory (msgID) {

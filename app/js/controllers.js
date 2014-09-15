@@ -566,7 +566,7 @@ angular.module('myApp.controllers', [])
       if (searchMessages) {
         searchTimeoutPromise = force ? $q.when() : $timeout(angular.noop, 500);
         promise = searchTimeoutPromise.then(function () {
-          return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID)
+          return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID);
         });
       } else {
         promise = AppMessagesManager.getDialogs($scope.search.query, maxID);
@@ -585,7 +585,7 @@ angular.module('myApp.controllers', [])
             dialogs.push({
               peerID: peerID,
               top_message: messageID,
-              unread_count: 0
+              unread_count: -1
             });
           });
 
@@ -644,7 +644,8 @@ angular.module('myApp.controllers', [])
 
           angular.forEach(dialogsResult.dialogs, function (dialog) {
             peersInDialogs[dialog.peerID] = true;
-            $scope.dialogs.push(AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count));
+            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count);
+            $scope.dialogs.push(wrappedDialog);
           });
           delete $scope.isEmpty.dialogs;
         }
@@ -764,7 +765,11 @@ angular.module('myApp.controllers', [])
         },
         jump = 0,
         moreJump = 0,
-        lessJump = 0;
+        moreActive = false,
+        morePending = false,
+        lessJump = 0,
+        lessActive = false,
+        lessPending = false;
 
     function applyDialogSelect (newDialog, oldDialog) {
       var newPeer = newDialog.peer || $scope.curDialog.peer || '';
@@ -867,10 +872,12 @@ angular.module('myApp.controllers', [])
           found = false,
           history = historiesQueueFind();
 
-      for (i = 0; i < history.messages.length; i++) {
-        if ($scope.curDialog.messageID == history.messages[i].id) {
-          found = true;
-          break;
+      if (history) {
+        for (i = 0; i < history.messages.length; i++) {
+          if ($scope.curDialog.messageID == history.messages[i].id) {
+            found = true;
+            break;
+          }
         }
       }
 
@@ -887,12 +894,19 @@ angular.module('myApp.controllers', [])
       if (!hasLess) {
         return;
       }
+      if (moreActive) {
+        lessPending = true;
+        return;
+      }
+      lessPending = false;
+      lessActive = true;
 
       var curJump = jump,
           curLessJump = ++lessJump,
           limit = 0,
           backLimit = 20;
       AppMessagesManager.getHistory($scope.curDialog.inputPeer, minID, limit, backLimit).then(function (historyResult) {
+        lessActive = false;
         if (curJump != jump || curLessJump != lessJump) return;
 
         var i, id;
@@ -916,6 +930,10 @@ angular.module('myApp.controllers', [])
           minID = 0;
         }
         $scope.skippedHistory = hasLess = minID > 0;
+
+        if (morePending) {
+          showMoreHistory();
+        }
       });
     }
 
@@ -923,6 +941,12 @@ angular.module('myApp.controllers', [])
       if (!hasMore) {
         return;
       }
+      if (lessActive) {
+        morePending = true;
+        return;
+      }
+      morePending = false;
+      moreActive = true;
 
       var curJump = jump,
           curMoreJump = moreJump,
@@ -933,6 +957,7 @@ angular.module('myApp.controllers', [])
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit);
 
       getMessagesPromise.then(function (historyResult) {
+        moreActive = false;
         if (curJump != jump || curMoreJump != moreJump) return;
 
         angular.forEach(historyResult.history, function (id) {
@@ -949,6 +974,10 @@ angular.module('myApp.controllers', [])
             $scope.$broadcast('messages_regroup');
           }
           $scope.$broadcast('ui_history_prepend');
+        }
+
+        if (lessPending) {
+          showLessHistory();
         }
       });
     };
@@ -967,8 +996,8 @@ angular.module('myApp.controllers', [])
 
       if ($scope.curDialog.messageID) {
         maxID = parseInt($scope.curDialog.messageID);
-        limit = 5;
-        backLimit = 5;
+        limit = 10;
+        backLimit = 10;
       }
       else if (forceRecent) {
         limit = 10;
@@ -976,6 +1005,11 @@ angular.module('myApp.controllers', [])
       else if (Config.Navigator.mobile) {
         limit = 20;
       }
+
+      moreActive = false;
+      morePending = false;
+      lessActive = false;
+      lessPending = false;
 
       var curJump = ++jump,
           inputMediaFilter = $scope.historyFilter.mediaType && {_: inputMediaFilters[$scope.historyFilter.mediaType]},
@@ -1024,7 +1058,9 @@ angular.module('myApp.controllers', [])
           delete $scope.historyUnreadAfter;
           $scope.$broadcast('messages_unread_after');
         }
-        $scope.$broadcast('messages_focus', $scope.curDialog.messageID || 0);
+        onContentLoaded(function () {
+          $scope.$broadcast('messages_focus', $scope.curDialog.messageID || 0);
+        })
         $scope.$broadcast('ui_history_change');
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
