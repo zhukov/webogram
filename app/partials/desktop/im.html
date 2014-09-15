@@ -56,7 +56,7 @@
               <h5>Contacts</h5>
               <ul class="nav nav-pills nav-stacked">
                 <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
-                  <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
+                  <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
                     <div class="im_dialog_photo pull-left">
                       <img
                         class="im_dialog_photo"
@@ -163,7 +163,7 @@
                     </div>
 
                     <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
-                      <div ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
+                      <div class="im_history_messages_peer" ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
                         <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in peerHistory.messages"></div>
                       </div>
                     </div>
