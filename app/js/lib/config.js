@@ -107,7 +107,11 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
       }
       else if (useLs) {
         var value = localStorage.getItem(key);
-        value = (value === undefined || value === null) ? false : JSON.parse(value);
+        try {
+          value = (value === undefined || value === null) ? false : JSON.parse(value);
+        } catch (e) {
+          value = false;
+        }
         result.push(cache[key] = value);
       }
       else if (!useCs) {
