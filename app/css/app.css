@@ -788,6 +788,9 @@ a.tg_radio_on:hover i.icon-radio {
 .login_phone_number {
   width: 198px;
 }
+.login_phone_code {
+  text-align: center;
+}
 .login_first_name_wrap {
   margin-bottom: 11px;
 }

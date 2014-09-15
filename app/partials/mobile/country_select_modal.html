@@ -30,7 +30,7 @@
       <a class="countries_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
     </div>
 
-    <div class="countries_modal_col countries_wrap countries_scrollable_wrap" my-countries-list-mobile my-infinite-scroller-mobile>
+    <div class="countries_modal_col countries_wrap countries_scrollable_wrap mobile_scrollable_wrap" my-countries-list-mobile my-infinite-scroller-mobile>
       <ul class="countries_modal_members_list nav nav-pills nav-stacked">
 
         <li class="countries_modal_country_wrap clearfix" ng-repeat="country in countries | limitTo : slice.limit track by $index">

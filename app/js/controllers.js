@@ -59,7 +59,7 @@ angular.module('myApp.controllers', [])
     function initPhoneCountry () {
       var langCode = (navigator.language || '').toLowerCase(),
           countryIso2 = Config.LangCountries[langCode],
-          shouldPregenerate = !Config.Mobile;
+          shouldPregenerate = !Config.Navigator.mobile;
 
       if (['en', 'en-us', 'en-uk'].indexOf(langCode) == -1) {
         if (countryIso2 !== undefined) {
