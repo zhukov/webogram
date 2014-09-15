@@ -914,6 +914,10 @@ a.tg_radio_on:hover i.icon-radio {
   padding: 6px 20px 6px 30px;
   margin: 0 0 6px;
 }
+.im_dialogs_modal_col_wrap .im_dialogs_search_field {
+  background-color: #FFF;
+  border-color: #d9dbde;
+}
 .is_1x .im_dialogs_search_field {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
@@ -921,6 +925,7 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_search_field:active {
   background-color: #FFF;
 }
+
 
 .im_dialogs_search_clear {
   position: absolute;
@@ -2862,19 +2867,15 @@ a:hover .icon-twitter {
 .contacts_modal_search_field {
   font-size: 12px;
   line-height: normal;
-  background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
+  background: url(../img/icons/IconsetW.png) -6px -205px no-repeat;
   background-size: 42px 891px;
-  border: 1px solid #F2F2F2;
+  border: 1px solid #d9dbde;
   border-radius: 3px;
   padding: 6px 15px 6px 30px;
   margin: 0;
 }
 .is_1x .contacts_modal_search_field {
   background-image: url(../img/icons/IconsetW_1x.png);
-}
-.contacts_modal_search_field:focus,
-.contacts_modal_search_field:active {
-  background-color: #FFF;
 }
 
 .contacts_modal_search_clear {
@@ -2918,7 +2919,7 @@ a:hover .icon-twitter {
 
 
 .contacts_modal_members_list .contacts_modal_contact_wrap {
-  /*margin-top: 0;*/
+  margin-top: 0;
 }
 .contacts_modal_members_list a.contacts_modal_contact {
   clear: both;

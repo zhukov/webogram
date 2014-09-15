@@ -163,7 +163,7 @@
                     </div>
 
                     <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
-                      <div ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
+                      <div class="im_history_messages_peer" ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
                         <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in peerHistory.messages"></div>
                       </div>
                     </div>

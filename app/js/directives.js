@@ -779,13 +779,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollTopInitial = -1;
         }
 
-        if (!lessNotified && st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
-          lessNotified = true;
-          $scope.$emit('history_need_less');
-        }
-        else if (!moreNotified && st <= 300) {
+        if (!moreNotified && st <= 300) {
           moreNotified = true;
           $scope.$emit('history_need_more');
+        }
+        else if (!lessNotified && st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+          lessNotified = true;
+          $scope.$emit('history_need_less');
         }
       });
 
