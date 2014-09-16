@@ -11,14 +11,16 @@ angular.module('myApp.i18n', ['izhukov.utils'])
 
     function insertParams(msgstr, params) {
       for (var i in params) {
-        var param = params[i];
-        var regex = new RegExp('\{ *' + i + '(?: *: *(.*))? *\}');
-        var match = regex.exec(msgstr);
-        if (match) {
-          if (match[1] != undefined) {
-            param = insertParams(param, match[1].split('|'));
+        if (params.hasOwnProperty(i)){
+          var param = params[i];
+          var regex = new RegExp('\{ *' + i + '(?: *: *(.*))? *\}');
+          var match = regex.exec(msgstr);
+          if (match) {
+            if (match[1] != undefined) {
+              param = insertParams(param, match[1].split('|'));
+            }
+            msgstr = msgstr.replace(match[0], param.toString().trim());
           }
-          msgstr = msgstr.replace(match[0], param.toString().trim());
         }
       }
       return msgstr;
@@ -133,8 +135,8 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       compile: function(element) {
         var params = element.children('my-param:not([name])').map(function(index, param) {
           return angular.element(param).html();
-        });
-        var named = element.children('my-param[name]').each(function(i, param) {
+        }).toArray();
+        element.children('my-param[name]').each(function(i, param) {
           param = angular.element(param);
           params[param.attr('name')] = param.html();
         });
@@ -142,12 +144,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
         formats.each(function(index, element) {
           var format = angular.element(element);
           var msgid = format.attr("my-i18n-format") || format.attr("msgid") || format.html().replace(/\s+/g, ' ').trim();
-          var msgstr;
-          if (named.length) {
-            msgstr = _.apply(this, [msgid, params]);
-          } else {
-            msgstr = _.apply(this, [msgid].concat(params.toArray()));
-          }
+          var msgstr = _(msgid, params);
           format.html(msgstr);
         });
         element.children('my-param').remove();
