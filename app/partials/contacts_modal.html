@@ -6,28 +6,24 @@
 
     <div class="contacts_modal_header">
       <div class="contacts_modal_edit_wrap" ng-if="!action || action == 'edit'" ng-switch="action">
-        <a ng-switch-when="edit" class="contacts_modal_edit_link" ng-click="toggleEdit(false)">
-          Cancel
-        </a>
-        <a ng-switch-default class="contacts_modal_edit_link" ng-click="toggleEdit(true)">
-          Edit
-        </a>
+        <a ng-switch-when="edit" class="contacts_modal_edit_link" ng-click="toggleEdit(false)" my-i18n="contacts_modal_edit_cancel"></a>
+        <a ng-switch-default class="contacts_modal_edit_link" ng-click="toggleEdit(true)" my-i18n="contacts_modal_edit_list"></a>
       </div>
       <h4 class="contacts_modal_title" ng-switch="action">
         <div ng-switch-when="new_group" ng-switch="selectedCount > 0">
           <span ng-switch-when="true">
-            <ng-pluralize count="selectedCount" when="{'one': '1 participant', 'other': '{} participants'}">
+            <ng-pluralize count="selectedCount" when="contacts_modal_pluralize_new_group_members">
             </ng-pluralize>
           </span>
-          <span ng-switch-default>New Group</span>
+          <span ng-switch-default my-i18n="group_create_contacts_modal_title"></span>
         </div>
-        <span ng-switch-default>Contacts</span>
+        <span ng-switch-default my-i18n="contacts_modal_title"></span>
       </h4>
     </div>
 
 
     <div class="contacts_modal_search">
-      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="Search" ng-model="search.query"/>
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
       <a class="contacts_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
     </div>
 
@@ -37,8 +33,8 @@
       <div class="contacts_wrap nano" my-infinite-scroller>
         <div class="contacts_scrollable_wrap nano-content" ng-switch="contactsEmpty">
 
-          <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true">
-            Your contacts list is empty. You can <a href="" ng-click="importContact()">add new contact</a> by phone number.
+          <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true" my-i18n="contacts_modal_empty_list">
+            <my-i18n-param name="import-link"><a href="" ng-click="importContact()">{0}</a></my-i18n-param>
           </div>
 
           <ul ng-switch-default class="contacts_modal_members_list nav nav-pills nav-stacked">
@@ -66,21 +62,16 @@
 
   <div class="modal-footer contacts_modal_panel" ng-switch="action">
     <div ng-switch-when="new_group" class="pull-right">
-      <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
-      <button class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
-        Next
-      </button>
+      <button class="btn btn-link" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+      <button class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
     </div>
 
-    <button ng-switch-when="select" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit">
-      Next
-    </button>
+    <button ng-switch-when="select" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
     <button ng-switch-when="edit" class="btn btn-danger"  ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
-      Delete <strong ng-bind="selectedCount"></strong>
+      <my-i18n msgid="contacts_modal_edit_delete"></my-i18n>
+      <strong ng-bind="selectedCount"></strong>
     </button>
-    <button ng-switch-default class="btn btn-link" ng-click="importContact()">
-      New contact
-    </button>
+    <button ng-switch-default class="btn btn-link" ng-click="importContact()" my-i18n="contacts_modal_new_contact"></button>
   </div>
 
 </div>
