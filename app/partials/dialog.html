@@ -33,7 +33,7 @@
 
     <div ng-switch="dialogMessage.deleted">
       <div ng-switch-when="true" class="im_dialog_message">
-        <span class="im_dialog_message_text" my-i18n>deleted message</span>
+        <span class="im_dialog_message_text" my-i18n="conversation_message_deleted"></span>
       </div>
       <div ng-switch-default class="im_dialog_message">
         <span class="im_dialog_chat_from_wrap">
@@ -44,42 +44,36 @@
           ></span><span
             class="im_dialog_chat_from"
             ng-if="dialogMessage.out"
-            my-i18n
-          >You</span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
+            my-i18="conversation_you"
+          ></span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
         </span>
 
         <span class="im_dialog_message_media" ng-if="dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty'" ng-switch="dialogMessage.media._">
-          <span ng-switch-when="messageMediaPhoto" my-i18n>Photo</span>
-          <span ng-switch-when="messageMediaVideo" my-i18n>Video</span>
-          <span ng-switch-when="messageMediaDocument" my-i18n>Document</span>
-          <span ng-switch-when="messageMediaAudio" my-i18n>Audio</span>
-          <span ng-switch-when="messageMediaGeo" my-i18n>Location</span>
-          <span ng-switch-when="messageMediaContact" my-i18n>Contact</span>
+          <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
+          <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
+          <span ng-switch-when="messageMediaDocument" my-i18n="conversation_media_document"></span>
+          <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
+          <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
+          <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
         </span>
 
         <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
-          <span ng-switch-when="messageActionChatCreate" my-i18n>created the group</span>
-          <span ng-switch-when="messageActionChatEditTitle" my-i18n>changed group name</span>
-          <span ng-switch-when="messageActionChatEditPhoto" my-i18n>changed group photo</span>
-          <span ng-switch-when="messageActionChatDeletePhoto" my-i18n>removed group photo</span>
+          <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
+          <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
+          <span ng-switch-when="messageActionChatEditPhoto" my-i18n="conversation_group_photo_updated"></span>
+          <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="conversation_group_photo_removed"></span>
 
           <span ng-switch-when="messageActionChatAddUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
-            <span ng-switch-when="true" my-i18n>
-              returned to group
-            </span>
-            <span ng-switch-default my-i18n-format>
-              <my-format>invited {name}</my-format>
-              <my-param name="name"><span ng-bind-html="dialogMessage.action.user.rFullName"></span></my-param>
+            <span ng-switch-when="true" my-i18n="conversation_returned_to_group"></span>
+            <span ng-switch-default my-i18n-format="conversation_invited_user">
+              <my-param name="name" ng-bind-html="dialogMessage.action.user.rFullName"></my-param>
             </span>
           </span>
 
           <span ng-switch-when="messageActionChatDeleteUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
-            <span ng-switch-when="true" my-i18n>
-              left group
-            </span>
-            <span ng-switch-default>
-              <my-format>kicked {name}</my-format>
-              <my-param name="name"><span ng-bind-html="dialogMessage.action.user.rFullName"></span>/my-param>
+            <span ng-switch-when="true" my-i18n="conversation_left_group"></span>
+            <span ng-switch-default my-i18n-format="conversation_kicked_user">
+              <my-param name="name" ng-bind-html="dialogMessage.action.user.rFullName"></my-param>
             </span>
           </span>
         </span>

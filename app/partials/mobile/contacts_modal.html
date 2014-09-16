@@ -8,12 +8,8 @@
 
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right" ng-if="!action || action == 'edit'" ng-switch="action">
-              <a ng-switch-when="edit" ng-click="toggleEdit(false)" my-i18n>
-                Cancel
-              </a>
-              <a ng-switch-default ng-click="toggleEdit(true)" my-i18n>
-                Edit
-              </a>
+              <a ng-switch-when="edit" class="contacts_modal_edit_link" ng-click="toggleEdit(false)" my-i18n="contacts_modal_edit_cancel"></a>
+              <a ng-switch-default class="contacts_modal_edit_link" ng-click="toggleEdit(true)" my-i18n="contacts_modal_edit_list"></a>
             </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
@@ -25,9 +21,9 @@
                         <ng-pluralize count="selectedCount" when="{'one': '1 participant', 'other': '{} participants'}">
                         </ng-pluralize>
                       </span>
-                      <span ng-switch-default my-i18n>New Group</span>
+                      <span ng-switch-default my-i18n="group_create_contacts_modal_title"></span>
                     </div>
-                    <span ng-switch-default my-i18n>Contacts</span>
+                    <span ng-switch-default my-i18n="contacts_modal_title"></span>
                   </h4>
                 </div>
               </a>
@@ -43,7 +39,7 @@
   <div class="modal-body mobile_modal_body">
 
     <div class="contacts_modal_search">
-      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'Search' | i18n}}" ng-model="search.query"/>
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
       <a class="contacts_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
     </div>
 
@@ -77,19 +73,13 @@
   </div>
 
   <div class="modal-footer contacts_modal_panel" ng-switch="action">
-    <button ng-switch-when="new_group" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n>
-      Next
-    </button>
-    <button ng-switch-when="select" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n>
-      Next
-    </button>
+    <button ng-switch-when="new_group" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
+    <button ng-switch-when="select" class="btn btn-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
     <button ng-switch-when="edit" class="btn btn-danger"  ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()" my-i18n-format>
-      <my-format>Delete {count}</my-format>
-      <my-param name="count"><strong ng-bind="selectedCount"></strong></my-param>
+      <my-i18n msgid="contacts_modal_edit_delete"></my-i18n>
+      <strong ng-bind="selectedCount"></strong>
     </button>
-    <button ng-switch-default class="btn btn-link" ng-click="importContact()" my-i18n>
-      New contact
-    </button>
+    <button ng-switch-default class="btn btn-link" ng-click="importContact()" my-i18n="contacts_modal_new_contact"></button>
   </div>
 
 </div>

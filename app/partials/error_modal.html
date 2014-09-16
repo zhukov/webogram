@@ -5,75 +5,44 @@
   <div class="modal-body">
 
     <h4 ng-if="error" class="modal_simple_header" ng-switch="error.type">
-      <span ng-switch-when="ACCOUNT_REQUIRED" my-i18n>No account</span>
       <span ng-switch-default ng-switch="error.code">
-        <span ng-switch-when="400" my-i18n>Error</span>
-        <span ng-switch-when="401" my-i18n>Unauthorized</span>
-        <span ng-switch-when="403" my-i18n>Access denied</span>
-        <span ng-switch-when="404" my-i18n>Not found</span>
-        <span ng-switch-when="406" my-i18n>Network error</span>
-        <span ng-switch-when="420" my-i18n>Too fast</span>
-        <span ng-switch-default my-i18n>Server error</span>
+        <span ng-switch-when="400" my-i18n="error_modal_bad_request_title"></span>
+        <span ng-switch-when="401" my-i18n="error_modal_unauthorized_title"></span>
+        <span ng-switch-when="403" my-i18n="error_modal_forbidden_title"></span>
+        <span ng-switch-when="404" my-i18n="error_modal_not_found_title"></span>
+        <span ng-switch-when="406" my-i18n="error_modal_network_title"></span>
+        <span ng-switch-when="420" my-i18n="error_modal_flood_title"></span>
+        <span ng-switch-default my-i18n="error_modal_internal_title"></span>
       </span>
     </h4>
-    <h4 ng-if="!error" class="modal_simple_header" ng-bind="title || {{'Alert' | i18n}}"></h4>
+    <h4 ng-if="!error" class="modal_simple_header" ng-switch="title.length > 0">
+      <span ng-switch-when="true" ng-bind="title"></span>
+      <span ng-switch-default my-i18n="error_modal_alert"></span>
+    </h4>
 
     <div ng-if="error" class="error_modal_description" ng-switch="error.type">
-      <span ng-switch-when="NETWORK_BAD_REQUEST" my-i18n>
-        Please check your internet connection.
-      </span>
-      <span ng-switch-when="NETWORK_BAD_RESPONSE" my-i18n>
-        Please check your internet connection.
-      </span>
-      <span ng-switch-when="FIRSTNAME_INVALID" my-i18n>
-        The first name you entered is invalid.
-      </span>
-      <span ng-switch-when="LASTNAME_INVALID" my-i18n>
-        The last name you entered is invalid.
-      </span>
-      <span ng-switch-when="PHONE_NUMBER_INVALID" my-i18n>
-        The phone number you entered is invalid.
-      </span>
-      <span ng-switch-when="USERS_TOO_MUCH" my-i18n>
-        You have selected too much users.
-      </span>
-      <span ng-switch-when="PHOTO_INVALID_DIMENSIONS" my-i18n>
-        The photo dimensions are invalid, please select another file.
-      </span>
-      <span ng-switch-when="VIDEO_EXT_INVALID" my-i18n>
-        The video file extension is invalid or unsupported, please select another file.
-      </span>
-      <span ng-switch-when="PHOTO_CROP_SIZE_SMALL" my-i18n>
-        The photo you provided is too small.
-      </span>
-      <span ng-switch-when="ACCOUNT_REQUIRED" my-i18n-format>
-        <my-format>
-          Sorry, there is no <strong>Telegram</strong> account for {phone}<br/><br/>
-          Please <strong>sign up</strong> using our mobile apps for {telegram: iOS} or {telegram: Android}.
-        </my-format>
-        <my-param name="phone">{{phone | phoneNumber}}</my-param>
-        <my-param name="telegram"><a href="https://telegram.org/" target="_blank">{0}</a></my-param>
-      </span>
-      <span ng-switch-when="USER_NOT_USING_TELEGRAM" my-i18n>
-        Sorry, there is no <strong>Telegram</strong> account with the phone number you provided.
-      </span>
-      <span ng-switch-when="USERS_NOT_USING_TELEGRAM" my-i18n>
-        Sorry, there are no <strong>Telegram</strong> accounts with the phone numbers you provided.
-      </span>
-      <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED" my-i18n>
-        Telegram needs access to phonebook to import contacts.
-      </span>
+      <span ng-switch-when="NETWORK_BAD_REQUEST" my-i18n="error_modal_network_description"></span>
+      <span ng-switch-when="NETWORK_BAD_RESPONSE" my-i18n="error_modal_network_description"></span>
+      <span ng-switch-when="FIRSTNAME_INVALID" my-i18n="error_modal_firstname_invali_description"></span>
+      <span ng-switch-when="LASTNAME_INVALID" my-i18n="error_modal_lastname_invalid_description"></span>
+      <span ng-switch-when="PHONE_NUMBER_INVALID" my-i18n="error_modal_phone_invalid_description"></span>
+      <span ng-switch-when="USERS_TOO_MUCH" my-i18n="error_modal_users_too_much_description"></span>
+      <span ng-switch-when="PHOTO_INVALID_DIMENSIONS" my-i18n="error_modal_photo_dimensions_invalid_description"></span>
+      <span ng-switch-when="VIDEO_EXT_INVALID" my-i18n="error_modal_video_file_invalid_description"></span>
+      <span ng-switch-when="PHOTO_CROP_SIZE_SMALL" my-i18n="error_modal_photo_too_small_description"></span>
+      <span ng-switch-when="USER_NOT_USING_TELEGRAM" my-i18n="error_modal_no_phone_user_description_md"></span>
+      <span ng-switch-when="USERS_NOT_USING_TELEGRAM" my-i18n="error_modal_no_phone_users_description_md"></span>
+      <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED" my-i18n="error_modal_phonebook_required_description"></span>
 
       <div ng-switch-default ng-switch="error.code">
-        <span ng-switch-when="400" my-i18n>One of the params is missing or invalid.</span>
-        <span ng-switch-when="401" my-i18n-format>
-          <my-format>This action requires authorization access. Please {login: log in}.<my-format>
-          <my-param name="login"><a href="#/login">{0}</a></my-param>
+        <span ng-switch-when="400" my-i18n="error_modal_bad_request_description"></span>
+        <span ng-switch-when="401" my-i18n-format="error_modal_unauthorized_description">
+          <my-param name="login-link"><a href="#/login">{0}</a></my-param>
         </span>
-        <span ng-switch-when="403" my-i18n>You are not allowed for this action.</span>
-        <span ng-switch-when="404" my-i18n>The page was not found.</span>
-        <span ng-switch-when="420" my-i18n>You are performing too many actions. Please try again later.</span>
-        <span ng-switch-default my-i18n>Internal server error occured. Please try again later.</span>
+        <span ng-switch-when="403" my-i18n="error_modal_forbidden_description"></span>
+        <span ng-switch-when="404" my-i18n="error_modal_not_found_description"></span>
+        <span ng-switch-when="420" my-i18n="error_modal_flood_description"></span>
+        <span ng-switch-default my-i18n="error_modal_internal_description"></span>
       </div>
 
     </div>
@@ -83,7 +52,7 @@
 Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}
 Stack: {{error.stack}}</textarea>
       <div ng-switch-default>
-        <a href="" ng-click="error.detailsShown = true" my-i18n>Technical details here</a>
+        <a href="" ng-click="error.detailsShown = true" my-i18n="error_modal_tech_details"></a>
       </div>
     </div>
 
