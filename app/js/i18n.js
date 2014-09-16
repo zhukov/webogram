@@ -1,41 +1,78 @@
 'use strict';
 
 angular.module('myApp.i18n', ['izhukov.utils'])
-  .factory('_', ['$http', '$route', 'Storage', '$locale', function($http, $route, Storage, $locale) {
+  .factory('_', ['$http', '$route', '$sanitize', 'Storage', '$locale', function($http, $route, $sanitize, Storage, $locale) {
     var locale = 'en-us';
     var messages = {};
-    var fallback_messages = {};
+    var fallbackMessages = {};
     var supported = {
       'de-de': 'Deutsch',
       'en-us': 'English'
     };
+    var paramRegEx = /\{\s*([a-zA-Z\d\--]+)(?:\s*:\s*(.*?))?\s*\}/g,
+        markdownRegEx = /\*\*(.+?)\*\*|(\n)/g,
+        parserCache = {};
 
     function insertParams(msgstr, params) {
-      for (var i in params) {
-        if (params.hasOwnProperty(i)){
-          var param = params[i];
-          var regex = new RegExp('\{ *' + i + '(?: *: *(.*))? *\}');
-          var match = regex.exec(msgstr);
-          if (match) {
-            if (match[1] != undefined) {
-              param = insertParams(param, match[1].split('|'));
-            }
-            msgstr = msgstr.replace(match[0], param.toString().trim());
-          }
+      return msgstr.replace(paramRegEx, function ($0, paramKey, nestedMsgStr) {
+        var param = params[paramKey];
+        if (param === undefined) {
+          console.warn('[i18n] missing param ' + paramKey + ' for key ' + msgstr);
+          return '';
         }
+        if (nestedMsgStr !== undefined) {
+          param = insertParams(param, nestedMsgStr.split('|'));
+        }
+        return param.toString().trim();
+      });
+    }
+
+    function encodeEntities(value) {
+      return value.
+        replace(/&/g, '&amp;').
+        replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
+          return '&#' + value.charCodeAt(0) + ';';
+        }).
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;');
+    }
+
+    function parseMarkdownString(msgstr, msgid) {
+      if (parserCache[msgid] !== undefined) {
+        return parserCache[msgid];
       }
-      return msgstr;
+      var raw = msgstr,
+          match,
+          html = [],
+          result;
+
+      while (match = raw.match(markdownRegEx)) {
+        html.push(encodeEntities(raw.substr(0, match.index)));
+        if (match[1]) {
+          html.push('<strong>', encodeEntities(match[1]), '</strong>')
+        } else if (match[2]) {
+          html.push('<br/>')
+        }
+        raw = raw.substr(match.index + match[0].length);
+      }
+      html.push(encodeEntities(raw));
+
+      return parserCache[msgid] = $sanitize(html.join(''));
     }
 
     function _(msgid, params) {
       var msgstr = msgid;
       if (messages.hasOwnProperty(msgid)) {
         msgstr = messages[msgid];
-      } else if (fallback_messages.hasOwnProperty(msgid)) {
-        msgstr = fallback_messages[msgid];
-        console.log('missing message for key ' + msgid + ' for current locale ' + locale);
+      } else if (fallbackMessages.hasOwnProperty(msgid)) {
+        msgstr = fallbackMessages[msgid];
+        console.warn('[i18n] missing locale key ' + locale + ' / ' + msgid);
       } else {
-        console.log('missing message for key ' + msgid);
+        console.warn('[i18n] missing key ' + msgid);
+        return msgid;
+      }
+      if (msgid.substr(-3) == '_md') {
+        msgstr = parseMarkdownString(msgstr);
       }
       if (arguments.length > 1) {
         if (typeof params == 'string') {
@@ -62,10 +99,10 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       }
 
       if (locale != newValue) {
-        var new_messages = false;
+        var newMessages = false;
         var ngLocaleReady = false;
         var onReady = function() {
-          if (new_messages === false || ngLocaleReady === false) {
+          if (newMessages === false || ngLocaleReady === false) {
             // only execute when both - ngLocale and the new messages - are loaded
             return;
           }
@@ -83,7 +120,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           // already holding a reference to our $locale will get the new values as well
           // this hack is necessary because ngLocale just isn't designed to be changed at runtime
           deepUpdate($locale, angular.injector(['ngLocale']).get('$locale'));
-          messages = new_messages;
+          messages = newMessages;
           locale = newValue;
           $route.reload();
         };
@@ -97,14 +134,14 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           .attr('src', 'vendor/angular/i18n/angular-locale_' + newValue + '.js');
 
         $http({method: 'GET', url: 'js/locales/' + newValue + '.json'}).success(function(json){
-          new_messages = json;
+          newMessages = json;
           onReady();
         });
       }
     };
 
     $http({method: 'GET', url: 'js/locales/en-us.json'}).success(function(json){
-      fallback_messages = json;
+      fallbackMessages = json;
     });
 
     Storage.get('i18n_locale').then(_.locale);
@@ -122,7 +159,11 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       compile: function(element) {
         var msgid = element.attr("my-i18n") || element.attr("msgid") || element.html().replace(/\s+/g, ' ').trim();
         var msgstr = _(msgid);
-        element.html(msgstr);
+        if (msgid.substr(-3) == '_md') {
+          element.html(msgstr);
+        } else {
+          element.text(msgstr);
+        }
       }
     }
   }])
@@ -155,7 +196,11 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           var format = angular.element(element);
           var msgid = format.attr("my-i18n-format") || format.attr("msgid") || format.html().replace(/\s+/g, ' ').trim();
           var msgstr = _(msgid, params);
-          format.html(msgstr);
+          if (msgid.substr(-3) == '_md') {
+            format.html(msgstr);
+          } else {
+            format.text(msgstr);
+          }
         });
         element.children('my-param').remove();
       }
