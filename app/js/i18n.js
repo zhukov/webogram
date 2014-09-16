@@ -4,41 +4,72 @@ angular.module('myApp.i18n', ['izhukov.utils'])
   .factory('_', ['$http', '$route', 'Storage', '$locale', function($http, $route, Storage, $locale) {
     var locale = 'en-us';
     var messages = {};
-    var fallback_messages = {};
+    var fallbackMessages = {};
     var supported = {
       'en-us': 'English'
     };
     var aliases = {
       'en': 'en-us'
     };
+    var paramRegEx = /\{\s*([a-zA-Z\d\--]+)(?:\s*:\s*(.*?))?\s*\}/g;
 
     function insertParams(msgstr, params) {
-      for (var i in params) {
-        if (params.hasOwnProperty(i)){
-          var param = params[i];
-          var regex = new RegExp('\{ *' + i + '(?: *: *(.*))? *\}');
-          var match = regex.exec(msgstr);
-          if (match) {
-            if (match[1] != undefined) {
-              param = insertParams(param, match[1].split('|'));
-            }
-            msgstr = msgstr.replace(match[0], param.toString().trim());
-          }
+      return msgstr.replace(paramRegEx, function ($0, paramKey, nestedMsgStr) {
+        var param = params[paramKey];
+        if (param === undefined) {
+          console.warn('[i18n] missing param ' + paramKey + ' for message "' + msgstr + '"');
+          return '';
         }
-      }
+        if (nestedMsgStr !== undefined) {
+          param = insertParams(param, nestedMsgStr.split('|'));
+        }
+        return param.toString().trim();
+      });
+    }
+
+    function encodeEntities(value) {
+      return value.
+        replace(/&/g, '&amp;').
+        replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
+          return '&#' + value.charCodeAt(0) + ';';
+        }).
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;');
+    }
+
+    function parseMarkdownString(msgstr, msgid) {
+      msgstr = msgstr.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n/g, "<br/>");
       return msgstr;
     }
 
     function _(msgid, params) {
+      var raw = false;
       var msgstr = msgid;
+
+      if (msgid.substr(-4) === '_raw') {
+        raw = true;
+        msgid = msgid.substr(0, msgid.length - 4);
+      }
+
       if (messages.hasOwnProperty(msgid)) {
         msgstr = messages[msgid];
-      } else if (fallback_messages.hasOwnProperty(msgid)) {
-        msgstr = fallback_messages[msgid];
-        console.log('missing message for key ' + msgid + ' for current locale ' + locale);
+      } else if (fallbackMessages.hasOwnProperty(msgid)) {
+        msgstr = fallbackMessages[msgid];
+        console.warn('[i18n] missing locale key ' + locale + ' / ' + msgid);
       } else {
-        console.log('missing message for key ' + msgid);
+        console.warn('[i18n] missing key ' + msgid);
+        return msgid;
       }
+
+      if (!raw) {
+        msgstr = encodeEntities(msgstr);
+      }
+
+      if (msgid.substr(-3) == '_md') {
+        msgstr = parseMarkdownString(msgstr);
+      }
+
       if (arguments.length > 1) {
         if (typeof params == 'string') {
           Array.prototype.shift.apply(arguments);
@@ -47,6 +78,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           msgstr = insertParams(msgstr, params);
         }
       }
+
       return msgstr;
     }
 
@@ -64,10 +96,10 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       }
 
       if (locale != newValue) {
-        var new_messages = false;
+        var newMessages = false;
         var ngLocaleReady = false;
         var onReady = function() {
-          if (new_messages === false || ngLocaleReady === false) {
+          if (newMessages === false || ngLocaleReady === false) {
             // only execute when both - ngLocale and the new messages - are loaded
             return;
           }
@@ -85,7 +117,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           // already holding a reference to our $locale will get the new values as well
           // this hack is necessary because ngLocale just isn't designed to be changed at runtime
           deepUpdate($locale, angular.injector(['ngLocale']).get('$locale'));
-          messages = new_messages;
+          messages = newMessages;
           locale = newValue;
           $route.reload();
         };
@@ -99,16 +131,16 @@ angular.module('myApp.i18n', ['izhukov.utils'])
           .attr('src', 'vendor/angular/i18n/angular-locale_' + newValue + '.js');
 
         $http({method: 'GET', url: 'js/locales/' + newValue + '.json'}).success(function(json){
-          new_messages = json;
+          newMessages = json;
           onReady();
         });
       }
     };
 
     $http({method: 'GET', url: 'js/locales/en-us.json'}).success(function(json){
-      fallback_messages = json;
+      fallbackMessages = json;
       if (locale == 'en-us') {
-        messages = fallback_messages;
+        messages = fallbackMessages;
       }
       $route.reload();
     });
