@@ -33,6 +33,9 @@ angular.module('myApp.i18n', ['izhukov.utils'])
         msgstr = messages[msgid];
       } else if (fallback_messages.hasOwnProperty(msgid)) {
         msgstr = fallback_messages[msgid];
+        console.log('missing message for key ' + msgid + ' for current locale ' + locale);
+      } else {
+        console.log('missing message for key ' + msgid);
       }
       if (arguments.length > 1) {
         if (typeof params == 'string') {
