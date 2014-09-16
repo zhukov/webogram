@@ -4,6 +4,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
   .factory('_', ['$http', '$route', 'Storage', '$locale', function($http, $route, Storage, $locale) {
     var locale = 'en-us';
     var messages = {};
+    var fallback_messages = {};
     var supported = {
       'de-de': 'Deutsch',
       'en-us': 'English'
@@ -30,6 +31,8 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       var msgstr = msgid;
       if (messages.hasOwnProperty(msgid)) {
         msgstr = messages[msgid];
+      } else if (fallback_messages.hasOwnProperty(msgid)) {
+        msgstr = fallback_messages[msgid];
       }
       if (arguments.length > 1) {
         if (typeof params == 'string') {
@@ -96,6 +99,10 @@ angular.module('myApp.i18n', ['izhukov.utils'])
         });
       }
     };
+
+    $http({method: 'GET', url: 'js/locales/en-us.json'}).success(function(json){
+      fallback_messages = json;
+    });
 
     Storage.get('i18n_locale').then(_.locale);
 
