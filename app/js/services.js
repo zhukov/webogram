@@ -3608,6 +3608,9 @@ angular.module('myApp.services', [])
     if (Config.Navigator.ffos) {
       data.image = 'https://raw.githubusercontent.com/zhukov/webogram/master/app/img/icons/icon60.png';
     }
+    else if (!data.image) {
+      data.image = 'img/icons/icon60.png';
+    }
 
     notificationsCount++;
 
