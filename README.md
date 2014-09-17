@@ -66,7 +66,7 @@ Here are some screenshots of the interface:
 
 
 **Hosted version**: the app is downloaded via HTTP as a usual website.
-o
+
 **Packed version**: the app is downloaded at once in a package via HTTPS. This is a more secure way to use app, but the package is updated less frequently than the Web-version.
 
 All of the apps above are submitted and maintained by [@zhukov](https://github.com/zhukov), so feel free to use them and report bugs [here](https://github.com/zhukov/webogram/issues). Please do not report bugs which reproduce only in different locations.
