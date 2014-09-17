@@ -21,11 +21,15 @@
 
       <div my-dialogs-list-mobile class="im_dialogs_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
 
-        <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts">
+        <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts" my-vertical-position="0.4">
           <h3 class="im_dialogs_empty_header">No contacts yet</h3>
           <p class="im_dialogs_empty_lead">Get started by adding a contact to chat with</p>
-          <button type="button" class="btn btn-primary btn-sm" ng-click="importContact()">Add contact</button>
-          <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-sm im_dialogs_import_phonebook" ng-click="importPhonebook()">Import phonebook</button>
+          <button type="button" class="btn btn-primary btn-block im_dialogs_add_contact" ng-click="importContact()">
+            Add contact
+          </button>
+          <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-block im_dialogs_import_phonebook" ng-click="importPhonebook()">
+            Import phonebook
+          </button>
         </div>
 
         <div ng-switch="search.messages">

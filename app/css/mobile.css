@@ -17,6 +17,7 @@ html {
 
 .tg_page_head .navbar > .container .navbar-brand {
   padding-left: 9px;
+  outline: none;
 }
 .im_history_panel_edit_link {
   margin-right: 0;
@@ -294,6 +295,29 @@ html {
   box-shadow: none;
   -webkit-box-shadow: none;
   margin: 30px auto 20px;
+}
+.login_form_wrap .btn-primary {
+  padding: 12px 13px;
+}
+.login_phone_country,
+.login_phone_number {
+  height: 42px;
+}
+
+.im_dialogs_empty_header {
+  font-size: 19px;
+  margin-bottom: 10px;
+}
+.im_dialogs_empty_lead {
+  font-size: 14px;
+  line-height: 160%;
+}
+.im_dialogs_add_contact,
+.im_dialogs_import_phonebook {
+  padding: 12px 13px;
+}
+.im_dialogs_add_contact + .im_dialogs_import_phonebook {
+  margin-top: 10px;
 }
 
 .im_page_wrap {

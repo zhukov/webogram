@@ -1,7 +1,7 @@
 <div my-head></div>
 
 
-<div class="login_form_wrap" my-vertical-position="0.4">
+<div class="login_form_wrap" my-vertical-position="0.3">
   <div class="error" ng-if="error.message" ng-bind="error.message"></div>
 
   <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
@@ -16,8 +16,8 @@
     <div class="form-group" ng-class="{'has-error': error.field == 'phone'}">
       <label class="control-label" ng-if="error.field == 'phone'">Incorrect phone number</label>
       <div class="clearfix">
-        <input type="tel" autocomplete="off" class="form-control pull-left login_phone_country" my-focused name="phone_country" ng-model="credentials.phone_country">
-        <input type="tel" autocomplete="off" class="form-control pull-left login_phone_number" my-focus-on="country_selected" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
+        <input type="tel" autocomplete="off" class="form-control input-lg pull-left login_phone_country" my-focused name="phone_country" ng-model="credentials.phone_country">
+        <input type="tel" autocomplete="off" class="form-control input-lg pull-left login_phone_number" my-focus-on="country_selected" name="phone_number" ng-model="credentials.phone_number" placeholder="Enter your phone" required>
       </div>
     </div>
     <button class="btn btn-primary btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" ng-switch="progress.enabled">

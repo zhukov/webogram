@@ -43,7 +43,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link($scope, element, attrs) {
-      console.log(111);
       var selected = false,
           grouped = false,
           focused = false,

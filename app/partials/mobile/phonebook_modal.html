@@ -8,9 +8,9 @@
 
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right">
-              <a ng-click="toggleSelection()" ng-switch="selectedCount > 0">
-                <span ng-switch-when="true">Deselect all</span>
-                <span ng-switch-default>Select all</span>
+              <a ng-class="{disabled: !selectedCount || progress.enabled}" ng-click="submitSelected()" ng-switch="progress.enabled">
+                <span ng-switch-when="true">Importing<span my-loading-dots></span></span>
+                <span ng-switch-default>Import</span>
               </a>
             </li>
             <li>
@@ -77,9 +77,9 @@
   </div>
 
   <div class="modal-footer contacts_modal_panel" ng-show="multiSelect">
-    <button class="btn btn-primary" ng-class="{disabled: !selectedCount || progress.enabled}" ng-disabled="!selectedCount || progress.enabled" ng-click="submitSelected()" type="submit" ng-switch="progress.enabled">
-      <span ng-switch-when="true">Importing<span my-loading-dots></span></span>
-      <span ng-switch-default>Import contacts</span>
+    <button class="btn btn-primary" ng-click="toggleSelection()" ng-switch="selectedCount > 0">
+      <span ng-switch-when="true">Deselect all</span>
+      <span ng-switch-default>Select all</span>
     </button>
   </div>
 

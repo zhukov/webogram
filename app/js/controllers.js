@@ -2326,6 +2326,7 @@ angular.module('myApp.controllers', [])
         });
         AppUsersManager.deleteContacts(selectedUserIDs).then(function () {
           resetSelected();
+          $scope.action = '';
           updateContacts($scope.search.query);
         });
       }

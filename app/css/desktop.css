@@ -241,6 +241,13 @@
   opacity: 1;
 }
 
+.im_submit {
+  padding: 6px 13px;
+  font-size: 13px;
+  line-height: 17px;
+  min-width: 60px;
+}
+
 
 @media (max-width: 900px) {
 
