@@ -23,9 +23,10 @@ angular.module('myApp.controllers', [])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppLoginController', function ($scope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, ChangelogNotifyService) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager) {
 
     $modalStack.dismissAll();
+    IdleManager.start();
 
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
@@ -181,6 +182,12 @@ angular.module('myApp.controllers', [])
         phone_number: $scope.credentials.phone_number
       }).then(function () {
         $scope.progress.enabled = true;
+
+        onContentLoaded(function () {
+          $scope.$broadcast('ui_height');
+        });
+
+        var authKeyStarted = tsNow();
         MtpApiManager.invokeApi('auth.sendCode', {
           phone_number: $scope.credentials.phone_full,
           sms_type: 5,
@@ -196,6 +203,10 @@ angular.module('myApp.controllers', [])
           $scope.error = {};
 
           callCheck();
+
+          onContentLoaded(function () {
+            $scope.$broadcast('ui_height');
+          });
 
         }, function (error) {
           $scope.progress.enabled = false;
@@ -214,6 +225,14 @@ angular.module('myApp.controllers', [])
               $scope.error = {field: 'phone'};
               error.handled = true;
               break;
+          }
+        })['finally'](function () {
+          if ($rootScope.idle.isIDLE || tsNow() - authKeyStarted > 60000) {
+            NotificationsManager.notify({
+              title: 'Telegram',
+              message: 'Your authorization key was successfully generated! Open the app to log in.',
+              tag: 'auth_key'
+            });
           }
         });
       });
@@ -1060,7 +1079,7 @@ angular.module('myApp.controllers', [])
         }
         onContentLoaded(function () {
           $scope.$broadcast('messages_focus', $scope.curDialog.messageID || 0);
-        })
+        });
         $scope.$broadcast('ui_history_change');
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);

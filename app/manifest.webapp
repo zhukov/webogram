@@ -34,7 +34,9 @@
     "share": {
       "href": "/index.html",
       "disposition": "window",
-      "filters": {},
+      "filters": {
+        "type": ["image/*","audio/*","video/*"]
+      },
       "returnValue": false
     }
   },

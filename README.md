@@ -17,7 +17,10 @@ That said, I'm using this app myself and I'd like to share its sources, so anyon
 
 Here are some screenshots of the interface:
 
+
 ![Sample screenshot 1](/app/img/screenshot1.png)
+![Mobile screenshot 2](/app/img/screenshot2.png)
+![Mobile screenshot 3](/app/img/screenshot3.png)
 
 
 ### Implemented functionality list

@@ -39,9 +39,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     return {
       templateUrl: templateUrl('message'),
+      link: link
     };
 
     function link($scope, element, attrs) {
+      console.log(111);
       var selected = false,
           grouped = false,
           focused = false,
