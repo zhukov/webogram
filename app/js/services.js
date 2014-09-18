@@ -220,7 +220,7 @@ angular.module('myApp.services', [])
         onContactUpdated(foundUserID = importedContact.user_id, true);
       });
 
-      return foundUserID ? 1 : 0;
+      return foundUserID || false;
     });
   };
 
@@ -272,7 +272,7 @@ angular.module('myApp.services', [])
 
   function onContactUpdated (userID, isContact) {
     if (angular.isArray(contactsList)) {
-      var curPos = curIsContact = contactsList.indexOf(userID),
+      var curPos = curIsContact = contactsList.indexOf(parseInt(userID)),
           curIsContact = curPos != -1;
 
       if (isContact != curIsContact) {
@@ -282,6 +282,7 @@ angular.module('myApp.services', [])
         } else {
           contactsList.splice(curPos, 1);
         }
+        $rootScope.$broadcast('contacts_update', userID);
       }
     }
   }

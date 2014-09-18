@@ -484,15 +484,17 @@
 		'<td><a class="emoji-menu-tab icon-car"></a></td>' +
 		'<td><a class="emoji-menu-tab icon-grid"></a></td>' +
 		'</tr></table>').appendTo(this.$itemsTailWrap);
-		this.$itemsWrap = $('<div class="emoji-items-wrap nano"></div>').appendTo(this.$itemsTailWrap);
+		this.$itemsWrap = $('<div class="emoji-items-wrap nano mobile_scrollable_wrap"></div>').appendTo(this.$itemsTailWrap);
 		this.$items = $('<div class="emoji-items nano-content">').appendTo(this.$itemsWrap);
 		$('<div class="emoji-menu-tail">').appendTo(this.$menu);
 		/*! MODIFICATION END */
 
 		$body.append(this.$menu);
 
-		/*! MODIFICATION: Following line is added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
-		this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+		/*! MODIFICATION: Following 3 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
+		if (!Config.Mobile) {
+			this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+		}
 
 		$body.on('keydown', function(e) {
 			if (e.keyCode === KEY_ESC || e.keyCode === KEY_TAB) {
@@ -583,7 +585,9 @@
 		});
 		this.currentCategory = category;
 		this.load(category);
-    this.$itemsWrap.nanoScroller({ scroll: 'top' });
+		if (!Config.Mobile) {
+	    this.$itemsWrap.nanoScroller({ scroll: 'top' });
+		}
 	};
 	/*! MODIFICATION END */
 
@@ -608,9 +612,11 @@
 		var updateItems = function () {
 			self.$items.html(html.join(''));
 
-			setTimeout(function () {
-				self.$itemsWrap.nanoScroller();
-			}, 100);
+			if (!Config.Mobile) {
+				setTimeout(function () {
+					self.$itemsWrap.nanoScroller();
+				}, 100);
+			}
 		}
 
 		if (category > 0) {

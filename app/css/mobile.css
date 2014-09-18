@@ -1203,8 +1203,11 @@ a.mobile_modal_action .tg_checkbox_label {
 
 .emoji-menu {
   margin-left: -20px;
-  margin-top: -267px;
+  margin-top: -202px;
   width: 262px;
+}
+.emoji-menu .emoji-items-wrap {
+  height: 106px;
 }
 .emoji-menu .emoji-items a {
   padding: 5px;

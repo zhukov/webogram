@@ -15,7 +15,7 @@
           <ul class="dropdown-menu">
             <li><a ng-click="openGroup()">New Group</a></li>
             <li><a ng-click="importContact()">New Contact</a></li>
-            <li><a ng-click="openContacts()">Contacts</a></li>
+            <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">Contacts</a></li>
             <li><a ng-click="openSettings()">Settings</a></li>
           </ul>
         </div>

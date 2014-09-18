@@ -373,7 +373,9 @@ angular.module('myApp.controllers', [])
     $scope.importContact = function () {
       AppUsersManager.openImportContact().then(function (foundContact) {
         if (foundContact) {
-          $scope.$broadcast('contact_imported');
+          $rootScope.$broadcast('history_focus', {
+            peerString: AppUsersManager.getUserString(foundContact)
+          });
         }
       });
     };
@@ -496,6 +498,14 @@ angular.module('myApp.controllers', [])
         offset++;
       }
       $scope.dialogs.unshift(wrappedDialog);
+
+      if (!peersInDialogs[dialog.peerID]) {
+        peersInDialogs[dialog.peerID] = true;
+        if (contactsShown) {
+          showMoreContacts();
+        }
+      }
+
     });
 
     $scope.$on('dialog_flush', function (e, dialog) {
@@ -517,12 +527,6 @@ angular.module('myApp.controllers', [])
         }
       }
     });
-
-    $scope.$on('contact_imported', function () {
-      if (contactsShown) {
-        loadDialogs();
-      }
-    })
 
     var prevMessages = false;
     $scope.$watchCollection('search', function () {
@@ -555,12 +559,14 @@ angular.module('myApp.controllers', [])
     }
 
     $scope.importPhonebook = function () {
-      PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
-        if (contactsShown && foundContacts.length) {
-          loadDialogs();
-        }
-      })
+      PhonebookContactsService.openPhonebookImport();
     };
+
+    $scope.$on('contacts_update', function () {
+      if (contactsShown) {
+        showMoreContacts();
+      }
+    });
 
     $scope.searchClear = function () {
       $scope.search.query = '';
@@ -630,14 +636,6 @@ angular.module('myApp.controllers', [])
       });
     };
 
-    $scope.importPhonebook = function () {
-      PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
-        if (contactsShown && foundContacts.length) {
-          loadDialogs();
-        }
-      })
-    };
-
     function loadDialogs (force) {
       offset = 0;
       maxID = 0;
@@ -669,6 +667,7 @@ angular.module('myApp.controllers', [])
           AppMessagesManager.getDialogs('', maxID, 100);
           if (!dialogsResult.dialogs.length) {
             $scope.isEmpty.dialogs = true;
+            showMoreDialogs();
           }
         } else {
           showMoreDialogs();
@@ -677,36 +676,40 @@ angular.module('myApp.controllers', [])
       });
     }
 
+    function showMoreContacts () {
+      contactsShown = true;
+
+      var curJump = ++jump;
+      AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
+        if (curJump != jump) return;
+        $scope.contacts = [];
+        angular.forEach(contactsList, function(userID) {
+          if (peersInDialogs[userID] === undefined) {
+            $scope.contacts.push({
+              userID: userID,
+              user: AppUsersManager.getUser(userID),
+              userPhoto: AppUsersManager.getUserPhoto(userID, 'User'),
+              peerString: AppUsersManager.getUserString(userID)
+            });
+          }
+        });
+
+        if (contactsList.length) {
+          delete $scope.isEmpty.contacts;
+        } else if (!$scope.search.query) {
+          $scope.isEmpty.contacts = true;
+        }
+      });
+      $scope.$broadcast('ui_dialogs_append');
+    }
+
     function showMoreDialogs () {
       if (contactsShown && (!hasMore || !offset)) {
         return;
       }
 
       if (!hasMore && !$scope.search.messages && ($scope.search.query || !$scope.dialogs.length)) {
-        contactsShown = true;
-
-        var curJump = ++jump;
-        AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
-          if (curJump != jump) return;
-          $scope.contacts = [];
-          angular.forEach(contactsList, function(userID) {
-            if (peersInDialogs[userID] === undefined) {
-              $scope.contacts.push({
-                userID: userID,
-                user: AppUsersManager.getUser(userID),
-                userPhoto: AppUsersManager.getUserPhoto(userID, 'User'),
-                peerString: AppUsersManager.getUserString(userID)
-              });
-            }
-          });
-
-          if (contactsList.length) {
-            delete $scope.isEmpty.contacts;
-          } else if (!$scope.search.query) {
-            $scope.isEmpty.contacts = true;
-          }
-        });
-        $scope.$broadcast('ui_dialogs_append');
+        showMoreContacts();
         return;
       }
 
@@ -2285,6 +2288,9 @@ angular.module('myApp.controllers', [])
     };
 
     $scope.$watch('search.query', updateContacts);
+    $scope.$on('contacts_update', function () {
+      updateContacts($scope.search && $scope.search.query || '');
+    });
 
     $scope.toggleEdit = function (enabled) {
       $scope.action = enabled ? 'edit' : '';
@@ -2325,17 +2331,13 @@ angular.module('myApp.controllers', [])
           selectedUserIDs.push(userID);
         });
         AppUsersManager.deleteContacts(selectedUserIDs).then(function () {
-          resetSelected();
-          $scope.action = '';
-          updateContacts($scope.search.query);
+          $scope.toggleEdit(false);
         });
       }
     };
 
     $scope.importContact = function () {
-      AppUsersManager.openImportContact().then(function () {
-        updateContacts($scope.search && $scope.search.query || '');
-      });
+      AppUsersManager.openImportContact();
     };
 
   })
