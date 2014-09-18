@@ -101,29 +101,33 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      if ($scope.historyMessage.unread) {
-        var deregisterUnreadAfter;
-        if (!$scope.historyMessage.out) {
-          var applyUnreadAfter = function () {
-            if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.id)) {
-              unreadAfter = !unreadAfter;
-              if (unreadAfter) {
-                if (unreadAfterSplit) {
-                  unreadAfterSplit.show();
-                } else {
-                  unreadAfterSplit = $(unreadSplitHtml).prependTo(element);
-                }
+      var deregisterUnreadAfter;
+      if (!$scope.historyMessage.out &&
+          ($scope.historyMessage.unread || $scope.historyMessage.unreadAfter)) {
+        var applyUnreadAfter = function () {
+          if ($scope.peerHistory.peerID != $scope.historyPeer.id) {
+            return;
+          }
+          if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.id)) {
+            unreadAfter = !unreadAfter;
+            if (unreadAfter) {
+              if (unreadAfterSplit) {
+                unreadAfterSplit.show();
               } else {
-                unreadAfterSplit.hide();
-                if (deregisterUnreadAfter) {
-                  deregisterUnreadAfter();
-                }
+                unreadAfterSplit = $(unreadSplitHtml).prependTo(element);
+              }
+            } else {
+              unreadAfterSplit.hide();
+              if (deregisterUnreadAfter) {
+                deregisterUnreadAfter();
               }
             }
-          };
-          applyUnreadAfter();
-          deregisterUnreadAfter = $scope.$on('messages_unread_after', applyUnreadAfter);
-        }
+          }
+        };
+        applyUnreadAfter();
+        deregisterUnreadAfter = $scope.$on('messages_unread_after', applyUnreadAfter);
+      }
+      if ($scope.historyMessage.unread) {
         element.addClass(unreadClass);
         var deregisterUnread = $scope.$on('messages_read', function () {
           if (!$scope.historyMessage.unread) {

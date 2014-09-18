@@ -1018,9 +1018,6 @@ angular.module('myApp.controllers', [])
       else if (forceRecent) {
         limit = 10;
       }
-      else if (Config.Mobile) {
-        limit = 20;
-      }
 
       moreActive = false;
       morePending = false;
@@ -1063,6 +1060,9 @@ angular.module('myApp.controllers', [])
           var message = AppMessagesManager.wrapForHistory(id);
           if ($scope.skippedHistory) {
             delete message.unread;
+          }
+          if (historyResult.unreadOffset) {
+            message.unreadAfter = true;
           }
           peerHistory.messages.push(message);
         });

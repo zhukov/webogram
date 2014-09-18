@@ -929,6 +929,9 @@ angular.module('myApp.services', [])
           unreadOffset = unreadCount;
         }
       }
+      else if (Config.Mobile) {
+        limit = 20;
+      }
     }
     else if (maxID > 0) {
       offsetNotFound = true;
