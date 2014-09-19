@@ -44,7 +44,8 @@ Config.Navigator = {
 Config.I18n = {
   locale: 'en-us',
   supported: {
-    'en-us': 'English'
+    'en-us': 'English',
+    'de-de': 'Deutsch'
   },
   aliases: {
     'en': 'en-us'

@@ -101,21 +101,36 @@
 }
 
 
-.im_page_footer {
+.footer_wrap {
   font-size: 11px;
   text-align: center;
   color: #9cacb9;
   line-height: 40px;
 }
-.im_page_footer_brand {
+.footer_brand {
   color: #9cacb9;
   font-weight: bold;
 }
-.im_page_footer_brand:hover,
-.im_page_footer_brand:active {
+a.footer_lang_link {
+  color: #9cacb9;
+}
+a.footer_lang_link.active {
+  font-weight: bold;
+}
+.footer_brand:hover,
+.footer_brand:active,
+a.footer_lang_link.active:hover,
+a.footer_lang_link.active:active {
   color: #8499aa;
   text-decoration: none;
 }
+
+.footer_link_divider {
+  padding: 0 5px;
+}
+/*.footer_link_divider:last-child {
+  display: none;
+}*/
 
 .im_dialogs_col {
   margin-right: -7px;

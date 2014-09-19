@@ -19,6 +19,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myLangFooter', function() {
+    return {
+      restrict: 'AE',
+      templateUrl: templateUrl('lang_footer')
+    };
+  })
+
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
@@ -373,7 +380,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                               ? '.mobile_modal_body .im_dialogs_panel'
                               : '.im_dialogs_panel',
           panelWrap = $(panelWrapSelector)[0],
-          footer = $('.im_page_footer')[0],
+          footer = $('.footer_wrap')[0],
           hasTabs = false,
           moreNotified = false;
 
@@ -449,7 +456,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           headWrap = $('.tg_page_head')[0];
         }
         if (!footer || !footer.offsetHeight) {
-          footer = $('.im_page_footer')[0];
+          footer = $('.footer_wrap')[0];
         }
 
         if (!dialogsColWrap || !dialogsColWrap.offsetHeight) {
@@ -457,7 +464,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         $(element).css({
           height: $($window).height() -
-                  footer.offsetHeight -
+                  (footer ? footer.offsetHeight : 0)  -
                   (headWrap ? headWrap.offsetHeight : 44) -
                   (panelWrap ? panelWrap.offsetHeight : 58) -
                   parseInt($(dialogsColWrap).css('paddingBottom') || 0)
@@ -558,7 +565,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
-          footer = $('.im_page_footer')[0],
+          footer = $('.footer_wrap')[0],
           sendForm = $('.im_send_form', element)[0],
           moreNotified = false,
           lessNotified = false;
@@ -807,9 +814,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           headWrap = $('.tg_page_head')[0];
         }
         if (!footer || !footer.offsetHeight) {
-          footer = $('.im_page_footer')[0];
+          footer = $('.footer_wrap')[0];
         }
-        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - footer.offsetHeight;
+        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (footer ? footer.offsetHeight : 0);
         $(historyWrap).css({
           height: historyH
         });

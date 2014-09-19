@@ -1455,6 +1455,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
+  .controller('AppLangFooterController', function ($scope, _, Storage, ErrorService) {
+    $scope.supportedLangs = _.supported();
+    $scope.curLocale = _.locale();
+
+    $scope.localeSelect = function localeSelect (newLocale) {
+      Storage.set({i18n_locale: newLocale});
+      if ($scope.curLocale !== newLocale) {
+        ErrorService.confirm({type: 'APPLY_LANG_WITH_RELOAD'}).then(function () {
+          location.reload();
+        });
+      }
+    };
+  })
+
   .controller('PhotoModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
 
     $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
@@ -2108,10 +2122,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'i18n_locale').then(function (settings) {
+    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate').then(function (settings) {
       $scope.notify.desktop = !settings[0];
       $scope.send.enter = settings[2] ? '' : '1';
-      $scope.i18n.locale = settings[5];
 
       if (settings[1]) {
         $scope.notify.volume = 0;
@@ -2183,13 +2196,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         $rootScope.$broadcast('settings_changed');
       }
-
-      $scope.$watch('i18n.locale', function (newValue, oldValue) {
-        Storage.set({i18n_locale: newValue});
-        ErrorService.confirm({type: 'APPLY_LANG_WITH_RELOAD'}).then(function () {
-          location.reload();
-        });
-      });
     });
 
     $scope.openChangelog = function () {
