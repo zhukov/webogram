@@ -72,18 +72,78 @@
   }
   $(document.body).addClass(classes.join(' '));
 
-  ConfigStorage.get('current_layout', function (layout) {
+  ConfigStorage.get('current_layout', 'i18n_locale', function (params) {
+    var layout = params[0],
+        locale = params[1],
+        defaultLocale = 'en-us',
+        bootReady = {
+          dom: false,
+          i18n_ng: Config.I18n.locale == defaultLocale, // Already included
+          i18n_messages: false,
+          i18n_fallback: false
+        }
+
     switch (layout) {
       case 'mobile': Config.Mobile = true; break;
       case 'desktop': Config.Mobile = false; break;
       default: Config.Mobile = Config.Navigator.mobile; break;
     }
-
     $('head').append(
       '<link rel="stylesheet" href="css/' + (Config.Mobile ? 'mobile.css' : 'desktop.css') + '" />'
     );
-    $(document).ready(function() {
-      angular.bootstrap(document, ['myApp']);
+
+    if (!locale) {
+      locale = (navigator.language || '').toLowerCase();
+      locale = Config.I18n.aliases[locale] || locale;
+    }
+    if (Config.I18n.supported[locale]) {
+      Config.I18n.locale = locale;
+    }
+
+    if (!bootReady.i18n_ng) {
+      $('head').append($('<script>')
+        .on('load', function() {
+          bootReady.i18n_ng = true;
+          checkReady();
+        })
+        .attr('src', 'vendor/angular/i18n/angular-locale_' + Config.I18n.locale + '.js')
+      );
+    }
+
+    $.get('js/locales/' + Config.I18n.locale + '.json').success(function (json) {
+      Config.I18n.messages = json;
+      bootReady.i18n_messages = true;
+      if (locale == defaultLocale) { // No fallback, leave empty object
+        bootReady.i18n_fallback = true;
+      }
+      checkReady();
     });
+
+    if (Config.I18n.locale != defaultLocale) {
+      $.get('js/locales/en-us.json').success(function (json) {
+        Config.I18n.fallback_messages = json;
+        bootReady.i18n_fallback = true;
+        checkReady();
+      });
+    }
+
+    $(document).ready(function() {
+      bootReady.dom = true;
+      checkReady();
+    });
+
+    var checkReady = function checkReady () {
+      var i, ready = true;
+      for (i in bootReady) {
+        if (bootReady.hasOwnProperty(i) && bootReady[i] === false) {
+          ready = false;
+          break;
+        }
+      }
+      if (ready) {
+        bootReady.boot = false; 
+        angular.bootstrap(document, ['myApp']);
+      }
+    }
   });
 })();

@@ -2185,8 +2185,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       $scope.$watch('i18n.locale', function (newValue, oldValue) {
-        _.locale(newValue);
         Storage.set({i18n_locale: newValue});
+        ErrorService.confirm({type: 'APPLY_LANG_WITH_RELOAD'}).then(function () {
+          location.reload();
+        });
       });
     });
 

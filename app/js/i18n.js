@@ -1,16 +1,10 @@
 'use strict';
 
 angular.module('myApp.i18n', ['izhukov.utils'])
-  .factory('_', ['$http', '$route', 'Storage', '$locale', function($http, $route, Storage, $locale) {
-    var locale = 'en-us';
-    var messages = {};
-    var fallbackMessages = {};
-    var supported = {
-      'en-us': 'English'
-    };
-    var aliases = {
-      'en': 'en-us'
-    };
+  .factory('_', [function() {
+    var locale = Config.I18n.locale;
+    var messages = Config.I18n.messages;
+    var fallbackMessages = Config.I18n.fallback_messages;
     var paramRegEx = /\{\s*([a-zA-Z\d\--]+)(?:\s*:\s*(.*?))?\s*\}/g;
 
     function insertParams(msgstr, params) {
@@ -82,76 +76,13 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       return msgstr;
     }
 
-    _.supported = function() {
-      return supported;
+    _.supported = function () {
+      return Config.I18n.supported;
     };
 
-    _.locale = function(newValue) {
-      if (newValue === undefined) {
-        return locale;
-      }
-
-      if (!supported.hasOwnProperty(newValue)) {
-        newValue = 'en-us'; // fallback
-      }
-
-      if (locale != newValue) {
-        var newMessages = false;
-        var ngLocaleReady = false;
-        var onReady = function() {
-          if (newMessages === false || ngLocaleReady === false) {
-            // only execute when both - ngLocale and the new messages - are loaded
-            return;
-          }
-          function deepUpdate(oldValue, newValue) {
-            for (var i in newValue) {
-              if (i in oldValue && typeof oldValue[i] === 'object' && i !== null){
-                deepUpdate(oldValue[i], newValue[i]);
-              } else {
-                oldValue[i] = newValue[i];
-              }
-            }
-          }
-          // first we need to explizitly request the new $locale so it gets initialized
-          // then we recursively update our current $locale with it so all other modules
-          // already holding a reference to our $locale will get the new values as well
-          // this hack is necessary because ngLocale just isn't designed to be changed at runtime
-          deepUpdate($locale, angular.injector(['ngLocale']).get('$locale'));
-          messages = newMessages;
-          locale = newValue;
-          $route.reload();
-        };
-
-        angular.element('<script>')
-          .appendTo(angular.element('head'))
-          .on('load', function() {
-            ngLocaleReady = true;
-            onReady();
-          })
-          .attr('src', 'vendor/angular/i18n/angular-locale_' + newValue + '.js');
-
-        $http({method: 'GET', url: 'js/locales/' + newValue + '.json'}).success(function(json){
-          newMessages = json;
-          onReady();
-        });
-      }
+    _.locale = function () {
+      return locale;
     };
-
-    $http({method: 'GET', url: 'js/locales/en-us.json'}).success(function(json){
-      fallbackMessages = json;
-      if (locale == 'en-us') {
-        messages = fallbackMessages;
-      }
-      $route.reload();
-    });
-
-    Storage.get('i18n_locale').then(function(newLocale) {
-      if (!newLocale) {
-        newLocale = (navigator.language || '').toLowerCase();
-        newLocale = aliases[newLocale] ? aliases[newLocale] : newLocale;
-      }
-      _.locale(newLocale);
-    });
 
     return _;
   }])
