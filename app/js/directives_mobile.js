@@ -201,13 +201,14 @@ angular.module('myApp.directives')
             pr = parseInt($(scrollableWrap).css('paddingRight')),
             ch = scrollableWrap.clientHeight;
 
-        $(scrollable).css({marginBottom: -(sh - st - ch - 4), marginLeft: -Math.ceil(pr / 2)});
         $(scrollableWrap).addClass('im_history_to_bottom');
+        scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
+        $(scrollable).css({bottom: -(sh - st - ch), marginLeft: -Math.ceil(pr / 2)});
 
 
         var upd = function () {
             $(scrollableWrap).removeClass('im_history_to_bottom');
-            $(scrollable).css({marginBottom: '', marginLeft: ''});
+            $(scrollable).css({bottom: '', marginLeft: ''});
             if (scrollTopInitial >= 0) {
               changeScroll();
             } else {
