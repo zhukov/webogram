@@ -24,7 +24,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
     function encodeEntities(value) {
       return value.
         replace(/&/g, '&amp;').
-        replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
+        replace(/([^\#-~| |!\n\*])/g, function (value) { // non-alphanumeric
           return '&#' + value.charCodeAt(0) + ';';
         }).
         replace(/</g, '&lt;').
@@ -59,7 +59,6 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       if (!raw) {
         msgstr = encodeEntities(msgstr);
       }
-
       if (msgid.substr(-3) == '_md') {
         msgstr = parseMarkdownString(msgstr);
       }
@@ -76,10 +75,6 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       return msgstr;
     }
 
-    _.supported = function () {
-      return Config.I18n.supported;
-    };
-
     _.locale = function () {
       return locale;
     };
@@ -88,7 +83,9 @@ angular.module('myApp.i18n', ['izhukov.utils'])
   }])
 
   .filter('i18n', ['_', function(_) {
-    return _;
+    return function (msgid, params) {
+      return _(msgid + '_raw', params);
+    }
   }])
 
   .directive('ngPluralize', ['_', function(_) {

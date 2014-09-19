@@ -1456,8 +1456,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   })
 
   .controller('AppLangFooterController', function ($scope, _, Storage, ErrorService) {
-    $scope.supportedLangs = _.supported();
-    $scope.curLocale = _.locale();
+    $scope.supportedLocales = Config.I18n.supported;
+    $scope.langNames = Config.I18n.languages;
+    $scope.curLocale = Config.I18n.locale;
 
     $scope.localeSelect = function localeSelect (newLocale) {
       Storage.set({i18n_locale: newLocale});
@@ -2048,7 +2049,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.notify = {};
     $scope.send = {};
-    $scope.i18n = {supported: _.supported()};
 
     $scope.$watch('photo.file', onPhotoSelected);
 

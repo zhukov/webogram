@@ -109,7 +109,7 @@
       locale = (navigator.language || '').toLowerCase();
       locale = Config.I18n.aliases[locale] || locale;
     }
-    if (Config.I18n.supported[locale]) {
+    if (Config.I18n.supported.indexOf(locale) != -1) {
       Config.I18n.locale = locale;
     }
 

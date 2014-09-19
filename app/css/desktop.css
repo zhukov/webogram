@@ -128,9 +128,6 @@ a.footer_lang_link.active:active {
 .footer_link_divider {
   padding: 0 5px;
 }
-/*.footer_link_divider:last-child {
-  display: none;
-}*/
 
 .im_dialogs_col {
   margin-right: -7px;

@@ -3105,7 +3105,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   function attach () {
     MtpNetworkerFactory.setUpdatesProcessor(processUpdateMessage);
-    MtpApiManager.invokeApi('updates.getState').then(function (stateResult) {
+    MtpApiManager.invokeApi('updates.getState', {noErrorBox: true}).then(function (stateResult) {
       curState.seq = stateResult.seq;
       curState.pts = stateResult.pts;
       curState.date = stateResult.date;

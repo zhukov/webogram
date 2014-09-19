@@ -116,6 +116,7 @@
 	"confirm_modal_forward_to_peer": "Forward to {peer}?",
 	"confirm_modal_send_to_peer": "Send to {peer}?",
 	"confirm_modal_share_file_peer": "Share with {peer}?",
+	"confirm_modal_apply_lang_with_reload_md": "Language preference was saved.\nReload the App now?",
 	"confirm_modal_are_u_sure": "Are you sure?",
 
 	"confirm_modal_logout_submit": "Log Out",

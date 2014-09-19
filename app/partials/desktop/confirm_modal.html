@@ -39,9 +39,10 @@
           </strong>
         </my-i18n-param>
       </my-i18n>
+      <div ng-switch-when="APPLY_LANG_WITH_RELOAD" my-i18n="confirm_modal_apply_lang_with_reload_md"></div>
       <span ng-switch-default ng-switch="message.length > 0">
         <span ng-switch-when="true" ng-bind="message"></span>
-        <span ng-switch-default ng-bind="'confirm_modal_are_u_sure' | i18n"></span>
+        <span ng-switch-default my-i18n="confirm_modal_are_u_sure"></span>
       </span>
     </div>
 
