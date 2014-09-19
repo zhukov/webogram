@@ -51,17 +51,14 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   }])
 
-  .filter('dateOrTime', ['$filter', '_', function($filter, _) {
+  .filter('dateOrTime', ['$filter', function($filter) {
     var cachedDates = {},
         dateFilter = $filter('date');
 
     return function (timestamp) {
-      if (!cachedDates.hasOwnProperty(_.locale())) {
-        cachedDates[_.locale()] = {};
-      }
 
-      if (cachedDates[_.locale()][timestamp]) {
-        return cachedDates[_.locale()][timestamp];
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
       }
 
       var ticks = timestamp * 1000,
@@ -74,42 +71,34 @@ angular.module('myApp.filters', ['myApp.i18n'])
       else if (diff > 43200000) { // 12 hours
         format = 'EEE';
       }
-      return cachedDates[_.locale()][timestamp] = dateFilter(ticks, format);
+      return cachedDates[timestamp] = dateFilter(ticks, format);
     }
   }])
 
-  .filter('time', ['$filter', '_', function($filter, _) {
+  .filter('time', ['$filter', function($filter) {
     var cachedDates = {},
         dateFilter = $filter('date'),
         format = Config.Mobile ? 'HH:mm' : 'HH:mm:ss';
 
     return function (timestamp) {
-      if (!cachedDates.hasOwnProperty(_.locale())) {
-        cachedDates[_.locale()] = {};
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
       }
 
-      if (cachedDates[_.locale()][timestamp]) {
-        return cachedDates[_.locale()][timestamp];
-      }
-
-      return cachedDates[_.locale()][timestamp] = dateFilter(timestamp * 1000, format);
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, format);
     }
   }])
 
-  .filter('myDate', ['$filter', '_', function($filter, _) {
+  .filter('myDate', ['$filter', function($filter) {
     var cachedDates = {},
         dateFilter = $filter('date');
 
     return function (timestamp) {
-      if (!cachedDates.hasOwnProperty(_.locale())) {
-        cachedDates[_.locale()] = {};
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
       }
 
-      if (cachedDates[_.locale()][timestamp]) {
-        return cachedDates[_.locale()][timestamp];
-      }
-
-      return cachedDates[_.locale()][timestamp] = dateFilter(timestamp * 1000, 'fullDate');
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, 'fullDate');
     }
   }])
 
