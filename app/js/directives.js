@@ -1263,7 +1263,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.progress.enabled = false;
 
           if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-            $scope.error = {html: _('browser_no_local_file_system_image', {
+            $scope.error = {html: _('error_browser_no_local_file_system_image_md', {
               'moz-link': '<a href="{0}" target="_blank">{1}</a>',
               'chrome-link': '<a href="{0}" target="_blank">{1}</a>',
               'telegram-link': '<a href="{0}" target="_blank">{1}</a>'
@@ -1327,7 +1327,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          $scope.error = {html: _('error_browser_no_local_file_system_video', {
+          $scope.error = {html: _('error_browser_no_local_file_system_video_md', {
               'moz-link': '<a href="{0}" target="_blank">{1}</a>',
               'chrome-link': '<a href="{0}" target="_blank">{1}</a>',
               'telegram-link': '<a href="{0}" target="_blank">{1}</a>'

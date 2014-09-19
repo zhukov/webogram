@@ -69,9 +69,9 @@
 	"media_modal_download": "Download",
 	"media_modal_delete": "Delete",
 
-	"error_browser_no_local_file_system_image": "Your browser doesn't support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to display this image.\nPlease, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.",
+	"error_browser_no_local_file_system_image_md": "Your browser doesn't support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to display this image.\nPlease, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.",
 	"error_image_download_failed": "Download failed",
-	"error_browser_no_local_file_system_video": "Your browser doesn't support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to play this video.\nPlease, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.",
+	"error_browser_no_local_file_system_video_md": "Your browser doesn't support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to play this video.\nPlease, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.",
 	"error_video_download_failed": "Video download failed",
 
 	"user_name_deleted": "DELETED",
@@ -107,7 +107,7 @@
 	"confirm_modal_update_reload": "A new version of Webogram has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
 	"confirm_modal_terminate_sessions": "Are you sure you want to log out all devices except for the current one?",
-	"confirm_modal_mixed_content_fail_http_redirect": "Your browser {moz-link: does not support} mixed content which is neccessary for MTProto support on https. {issue-link: Learn more}\n\n Would you like to use http-version instead?",
+	"confirm_modal_mixed_content_fail_http_redirect_md": "Your browser {moz-link: does not support} mixed content which is neccessary for MTProto support on https. {issue-link: Learn more}\n\n Would you like to use http-version instead?",
 	"confirm_modal_clipboard_file_send": "Are you sure to send file(s) from clipboard?",
 	"confirm_modal_clipboard_X_files_send": "{'one': 'Are you sure to send file from clipboard?', 'other': 'Are you sure to send {} files from clipboard?'}",
 	"confirm_modal_message_delete": "Are you sure you want to delete the message?",
@@ -284,7 +284,7 @@
 	"login_edit_number": "Edit phone number",
 	"login_enter_code_label_md": "Please enter the code you've just received in your other **Telegram** app",
 	"login_code_not_received": "Haven't received the code?",
-	"login_enter_sms_code_label": "We have sent you a code via SMS.\nPlease enter it below.",
+	"login_enter_sms_code_label_md": "We have sent you a code via SMS.\nPlease enter it below.",
 	"login_call_remaining": "Telegram will call you in {remaining}",
 	"login_calling": "Telegram is calling you",
 	"login_number_dialed": "Telegram dialed your number",
@@ -333,7 +333,7 @@
 	"welcome_easy_sharing_header": "Easy file sharing",
 	"welcome_easy_sharing_text": "Share files of any type using drag-and-drop or the attachment icon",
 	"welcome_powerful_tools_header": "Powerful tools",
-	"welcome_powerful_tools_text": "Browse shared media and files by type \n and set custom notifications",
+	"welcome_powerful_tools_text_md": "Browse shared media and files by type \n and set custom notifications",
 
 	"country_select_modal_country_ab": "Abkhazia",
 	"country_select_modal_country_af": "Afghanistan",
