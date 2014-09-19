@@ -126,7 +126,7 @@
     $.getJSON('js/locales/' + Config.I18n.locale + '.json').success(function (json) {
       Config.I18n.messages = json;
       bootReady.i18n_messages = true;
-      if (locale == defaultLocale) { // No fallback, leave empty object
+      if (Config.I18n.locale == defaultLocale) { // No fallback, leave empty object
         bootReady.i18n_fallback = true;
       }
       checkReady();
