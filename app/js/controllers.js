@@ -1064,12 +1064,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (historyResult.unreadOffset) {
           $scope.historyUnreadAfter = historyResult.history[historyResult.unreadOffset - 1];
-          $scope.$broadcast('messages_unread_after');
         }
         else if ($scope.historyUnreadAfter) {
           delete $scope.historyUnreadAfter;
-          $scope.$broadcast('messages_unread_after');
         }
+        $scope.$broadcast('messages_unread_after');
         onContentLoaded(function () {
           $scope.$broadcast('messages_focus', $scope.curDialog.messageID || 0);
         });
