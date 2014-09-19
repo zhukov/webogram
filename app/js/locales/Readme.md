@@ -8,7 +8,7 @@ Adding a new locale is pretty easy, all you got to do is:
 2. copy `js/locales/en-us.json` to `js/locales/<locale>.json`
 3. without changing the key strings translate and change the value strings into your target locale
 4. add your locale in js/i18n.js to the object of supported languages with locale and its native name so it will be listed in the settings
-5. enjoy your awesome new webogram in your own language!
+5. enjoy your awesome new Webogram in your own language!
 
 You may also want to join the project on [transifex](https://www.transifex.com/projects/p/telegram-web/).
 

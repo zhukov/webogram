@@ -116,11 +116,17 @@ The source code is licensed under GPL v3. License is available [here](/LICENSE).
 
 ## Contribute
 
-You can help this project by reporting problems, suggestions, or contributing to the code.
+You can help this project by reporting problems, suggestions, localizing it or contributing to the code.
 
 ### Report a problem or suggestion
 
 Go to our [issue tracker](https://github.com/zhukov/webogram/issues) and check if your problem/suggestion is already reported. If not, create a new issue with a descriptive title and detail your suggestion or steps to reproduce the problem.
+
+### Localization
+
+If you don't see your native language available for Webogram and you can help with translation, please join [Telegram Web project on Transifex](https://www.transifex.com/organization/telegram/dashboard).
+
+To test your translation live, use [Localization guide](/app/js/locales/README.md).
 
 ### Contribute to the code
 
