@@ -486,7 +486,6 @@
 		'</tr></table>').appendTo(this.$itemsTailWrap);
 		this.$itemsWrap = $('<div class="emoji-items-wrap nano mobile_scrollable_wrap"></div>').appendTo(this.$itemsTailWrap);
 		this.$items = $('<div class="emoji-items nano-content">').appendTo(this.$itemsWrap);
-		$('<div class="emoji-menu-tail">').appendTo(this.$menu);
 		/*! MODIFICATION END */
 
 		$body.append(this.$menu);

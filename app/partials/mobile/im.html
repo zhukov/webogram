@@ -93,21 +93,6 @@
 
                 </div>
 
-                <div class="im_history_typing_wrap">
-
-                  <div class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType" ng-switch="historyState.typing.length">
-                    <span ng-switch-when="1">
-                      <a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a> is typing<span my-loading-dots></span>
-                    </span>
-                    <span ng-switch-when="2">
-                      <a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a> and <a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a> are typing<span my-loading-dots></span>
-                    </span>
-                    <span ng-switch-default>
-                      <a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a>, <a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a> and {{historyState.typing.length - 2}} more are typing<span my-loading-dots></span>
-                    </span>
-                  </div>
-                </div>
-
             </div>
 
           </div>
@@ -115,12 +100,6 @@
           <div class="im_bottom_panel_wrap">
 
             <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
-              <div class="im_edit_panel_border"></div>
-              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-switch="historyPeer.id > 0">
-                <span ng-switch-when="true">Delete Chat</span>
-                <span ng-switch-default>Clear History</span>
-              </a>
-              <a class="im_edit_cancel_link" ng-click="selectedCancel()">Cancel</a>
               <div class="im_edit_selected_actions">
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount">
                   Forward <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
@@ -135,33 +114,11 @@
               <div class="im_send_form_wrap1">
 
                 <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
-                  <div class="pull-right im_panel_peer_photo" ng-click="showPeerInfo()">
-                    <img
-                      class="im_panel_peer_photo"
-                      my-load-thumb
-                      watch="true"
-                      thumb="historyPeer.photo"
-                    />
-                    <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
-                  </div>
-                  <div class="pull-left im_panel_own_photo">
-                    <img
-                      class="im_panel_own_photo"
-                      my-load-thumb
-                      watch="true"
-                      thumb="ownPhoto"
-                    />
-                  </div>
                   <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}" ng-submit="sendMessage($event)">
 
                     <div class="im_send_field_wrap">
                       <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
                       <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field no_outline"></textarea>
-                    </div>
-
-                    <div class="im_media_attach pull-right">
-                      <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="Send media"/>
-                      <i class="icon icon-camera"></i>
                     </div>
 
                     <div class="im_attach pull-right">
@@ -173,9 +130,7 @@
                       <i class="icon icon-emoji"></i>
                     </div>
 
-                    <button type="submit" class="btn btn-success im_submit">
-                      <span class="im_submit_text">Send</span>
-                    </button>
+                    <button type="submit" class="btn btn-success im_submit"></button>
                   </form>
                 </div>
 

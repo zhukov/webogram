@@ -1,27 +1,46 @@
-<div class="profile_edit_modal_wrap" my-modal-position>
+<div class="profile_edit_modal_wrap">
 
-  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-right">
+              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'Saving...' : 'Save'" ng-disabled="profile.updating"></a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4>
+                    Edit Profile
+                  </h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <div class="modal-body">
 
-    <form class="modal_simple_form" ng-submit="updateProfile()">
+    <form class="modal_simple_form" ng-submit="updateProfile()" my-vertical-position="0.3">
 
-      <h4>Edit Profile</h4>
-
-      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': error.field == 'first_name'}">
-        <input class="form-control input-sm" my-focused type="text" placeholder="First name" ng-model="profile.first_name"  name="first_name"/>
+      <div class="form-group" ng-class="{'has-error': error.field == 'first_name'}">
+        <input class="form-control input-lg" my-focused type="text" placeholder="First name" ng-model="profile.first_name"  name="first_name"/>
       </div>
-      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': error.field == 'last_name'}">
-        <input class="form-control input-sm" type="text" placeholder="Last name" ng-model="profile.last_name"/>
+      <div class="form-group" ng-class="{'has-error': error.field == 'last_name'}">
+        <input class="form-control input-lg" type="text" placeholder="Last name" ng-model="profile.last_name"/>
       </div>
 
     </form>
 
-  </div>
-
-  <div class="modal-footer">
-    <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
-    <button class="btn btn-primary" ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'Saving...' : 'Save'" ng-disabled="profile.updating"></button>
   </div>
 
 </div>

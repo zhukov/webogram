@@ -232,7 +232,6 @@ html {
   margin-right: 0;
 }
 .navbar_offline .navbar-quick-nav li > a > .navbar-quick-back-title,
-.navbar_offline .im_head_attach,
 .navbar_offline .navbar-search-wrap,
 .navbar_offline .navbar-history-edit {
   display: none;
@@ -325,15 +324,6 @@ html {
   box-shadow: none;
   border: 0;
   overflow: hidden;
-}
-
-.im_page_footer {
-  display: none;
-}
-
-.im_panel_own_photo,
-.im_panel_peer_photo {
-  display: none;
 }
 .im_history_selectable .im_message_outer_wrap:hover,
 .im_message_selected {
@@ -453,10 +443,6 @@ html {
   width: auto;
   float: none;
 }
-.im_message_audio_actions,
-.im_message_document_actions {
-  display: none;
-}
 .im_message_audio_player_wrap {
   height: 38px;
   line-height: 38px;
@@ -513,9 +499,6 @@ img.im_message_video_thumb,
   -o-filter: none;
   -ms-filter: none;
   filter: none;
-}
-.im_message_video .im_message_document_info {
-  display: none;
 }
 
 .im_message_document_thumb_wrap {
@@ -612,6 +595,7 @@ img.im_message_video_thumb,
 }
 .im_message_date {
   font-size: 12px;
+  padding-left: 4px;
 }
 .im_message_out .im_message_meta {
   right: auto;
@@ -735,19 +719,9 @@ a.im_message_from_photo {
 }
 
 
-.form-control {
+.im_dialogs_search_field,
+.contacts_modal_search_field {
   font-size: 1.2em;
-}
-.im_history_typing_wrap {
-  display: none;
-}
-.im_history_panel_info_link {
-  display: none;
-}
-
-.im_edit_flush_link,
-.im_edit_cancel_link {
-  display: none;
 }
 .im_edit_delete_btn,
 .im_edit_forward_btn {
@@ -767,10 +741,6 @@ a.im_message_from_photo {
 .im_edit_delete_btn strong,
 .im_edit_forward_btn strong {
   font-weight: normal;
-}
-
-.im_edit_panel_border {
-  display: none;
 }
 .im_edit_panel_wrap {
   padding: 5px 0;
@@ -797,10 +767,6 @@ a.im_message_from_photo {
 .im_page_peer_not_selected .im_dialogs_col_wrap {
   display: block;
 }
-.im_dialogs_col {
-}
-.im_dialogs_scrollable_wrap {
-}
 
 .im_dialogs_panel {
   display: none;
@@ -809,9 +775,6 @@ a.im_message_from_photo {
 }
 .im_dialogs_panel_search.im_dialogs_panel {
   display: block;
-}
-.im_dialogs_panel_dropdown {
-  display: none;
 }
 .im_page_split .im_dialogs_search {
   margin-right: 0;
@@ -872,7 +835,9 @@ a.im_dialog:hover .im_dialog_message_text,
 a.im_dialog_selected .im_dialog_message_text {
   color: #8f8f8f;
 }
-
+.im_message_fwd_title {
+  display: none;
+}
 .im_grouped_fwd_start .im_message_fwd_title {
   display: block;
   color: #8a8a8a;
@@ -911,12 +876,6 @@ a.im_message_fwd_author {
   margin-left: 50px;
 }
 
-.im_grouped_fwd_short .im_message_fwd.im_message_out .im_message_fwd_author_wrap,
-.im_grouped_fwd_short .im_message_fwd.im_message_out .im_message_text,
-.im_grouped_fwd_short .im_message_fwd.im_message_out .im_message_media {
-  /*margin-left: 0;*/
-}
-
 
 
 .im_dialogs_scrollable_wrap a.im_dialog:hover,
@@ -928,29 +887,29 @@ a.im_message_fwd_author {
   background-color: #f4f4f4;
 }
 
-
-.modal.page_modal {
+.modal.mobile_modal {
   background: #FFF;
+  padding: 0;
 }
-.page_modal .modal-content {
+.mobile_modal .modal-content {
   border-radius: 0;
   box-shadow: none;
 }
-.page_modal .modal-dialog {
+.mobile_modal .modal-dialog {
   margin: 0;
 }
-.page_modal .modal-content .modal-body {
+.mobile_modal .modal-content .modal-body {
   padding-left: 0;
   padding-right: 0;
 }
-.page_modal .modal-footer {
+.mobile_modal .modal-footer {
   padding-left: 0;
   padding-right: 0;
   padding-bottom: 9px;
 }
 
 .mobile_modal_body,
-.page_modal .modal-content .mobile_modal_body {
+.mobile_modal .modal-content .mobile_modal_body {
   padding: 9px;
 }
 
@@ -1101,9 +1060,6 @@ a.mobile_modal_action .tg_checkbox_label {
 .is_1x .im_submit {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.im_submit_text {
-  display: none;
-}
 
 .im_attach {
   position: absolute;
@@ -1133,7 +1089,6 @@ a.mobile_modal_action .tg_checkbox_label {
   opacity: 1;
 }
 
-.im_media_attach,
 .im_attach,
 .im_send_form_empty .im_submit {
   display: none;
@@ -1250,7 +1205,6 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .countries_modal_col {
   margin: 0 -9px;
-  max-height: none;
 }
 .countries_modal_members_list {
   padding: 0 12px 0 12px;

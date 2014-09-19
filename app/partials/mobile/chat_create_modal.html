@@ -1,24 +1,43 @@
-<div class="contacts_modal_wrap" my-modal-position>
+<div class="contacts_modal_wrap">
 
-  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-right">
+              <a ng-class="{disabled: group.creating}" ng-click="createGroup()" ng-bind="group.creating ? 'Creating...' : 'OK'" ng-disabled="group.creating"></a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4>
+                    Create Group
+                  </h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <div class="modal-body">
 
-    <form class="modal_simple_form" ng-submit="createGroup()">
-
-      <h4>Create Group</h4>
+    <form class="modal_simple_form" ng-submit="createGroup()" my-vertical-position="0.25">
 
       <div class="form-group">
-        <input class="form-control input-sm" my-focused type="text" placeholder="Group name" ng-model="group.name"/>
+        <input class="form-control input-lg" my-focused type="text" placeholder="Group name" ng-model="group.name"/>
       </div>
 
     </form>
 
-  </div>
-
-  <div class="modal-footer">
-    <a class="btn btn-link" ng-click="$dismiss()">Cancel</a>
-    <button class="btn btn-primary" ng-class="{disabled: group.creating}" ng-click="createGroup()" ng-bind="group.creating ? 'Creating...' : 'Create Group'" ng-disabled="group.creating"></button>
   </div>
 
 </div>

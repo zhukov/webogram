@@ -1650,7 +1650,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var updateMargin = function () {
         if (Config.Mobile &&
-            $(element[0].parentNode.parentNode.parentNode).hasClass('page_modal')) {
+            $(element[0].parentNode.parentNode.parentNode).hasClass('mobile_modal')) {
           return;
         }
         var height = element[0].parentNode.offsetHeight,

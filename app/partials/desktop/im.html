@@ -83,16 +83,6 @@
     </div>
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
-      <div ng-show="state.notSelected" ng-switch="isEmpty.contacts &amp;&amp; isEmpty.dialogs">
-        <div ng-switch-when="true" class="im_history_no_dialogs_wrap">
-          <h3 class="im_dialogs_empty_header">Get started</h3>
-          <p class="im_dialogs_empty_lead">Welcome to Telegram Web. You can always set your profile photo and change your name in Settings.</p>
-          <button type="button" class="btn btn-primary btn-sm" ng-click="openSettings()">Open Settings</button>
-        </div>
-        <div ng-switch-default class="im_history_not_selected" my-vertical-position="0.35" padding="true">
-          Please select a chat to start messaging
-        </div>
-      </div>
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35" padding="true">
         Loading history<span my-loading-dots></span>
       </div>

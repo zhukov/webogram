@@ -20,14 +20,6 @@
     </div>
 
     <div ng-if="::historyMessage._ != 'messageService'" class="im_content_message_wrap" ng-class="::[historyMessage.out ? 'im_message_out' : 'im_message_in', historyMessage._ == 'messageForwarded' ? 'im_message_fwd' : '']">
-      <div class="im_content_message_select_area">
-        <i class="icon icon-select-tick"></i>
-      </div>
-
-      <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
-        <i class="icon-message-status" tooltip="Try again"></i>
-      </a>
-
       <i ng-if="::historyMessage.unread || historyMessage.pending || false" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
 
       <a class="im_message_from_photo pull-left" my-user-photolink="historyMessage.from_id" img-class="im_message_from_photo"></a>

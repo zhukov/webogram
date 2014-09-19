@@ -188,16 +188,11 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.userID = userID;
 
-    var className = 'user_modal_window page_modal';
-    if (Config.Mobile) {
-      className += ' mobile_modal';
-    }
-
     var modalInstance = $modal.open({
       templateUrl: templateUrl('user_modal'),
       controller: 'UserModalController',
       scope: scope,
-      windowClass: className
+      windowClass: 'user_modal_window mobile_modal'
     });
   };
   $rootScope.openUser = openUser;
@@ -291,7 +286,7 @@ angular.module('myApp.services', [])
     return $modal.open({
       templateUrl: templateUrl('import_contact_modal'),
       controller: 'ImportContactModalController',
-      windowClass: 'import_contact_modal_window'
+      windowClass: 'import_contact_modal_window mobile_modal'
     }).result.then(function (foundUserID) {
       if (!foundUserID) {
         return $q.reject();
@@ -381,7 +376,7 @@ angular.module('myApp.services', [])
     return $modal.open({
       templateUrl: templateUrl('phonebook_modal'),
       controller: 'PhonebookModalController',
-      windowClass: 'phonebook_modal_window page_modal mobile_modal'
+      windowClass: 'phonebook_modal_window mobile_modal'
     });
   }
 
@@ -524,16 +519,11 @@ angular.module('myApp.services', [])
     var scope = $rootScope.$new();
     scope.chatID = chatID;
 
-    var className = 'chat_modal_window page_modal';
-    if (Config.Mobile) {
-      className += ' mobile_modal';
-    }
-
     var modalInstance = $modal.open({
       templateUrl: templateUrl('chat_modal'),
       controller: 'ChatModalController',
       scope: scope,
-      windowClass: className
+      windowClass: 'chat_modal_window mobile_modal'
     });
   }
 
@@ -3846,17 +3836,11 @@ angular.module('myApp.services', [])
       angular.extend(scope, options);
     }
 
-    var className = 'peer_select_window page_modal';
-
-    if (Config.Mobile) {
-      className += ' mobile_modal';
-    }
-
     return $modal.open({
       templateUrl: templateUrl('peer_select'),
       controller: 'PeerSelectController',
       scope: scope,
-      windowClass: className
+      windowClass: 'peer_select_window mobile_modal'
     }).result;
   }
 
@@ -3879,16 +3863,11 @@ angular.module('myApp.services', [])
       scope.action = 'select';
     }
 
-    var className = 'contacts_modal_window page_modal';
-    if (Config.Mobile) {
-      className += ' mobile_modal';
-    }
-
     return $modal.open({
       templateUrl: templateUrl('contacts_modal'),
       controller: 'ContactsModalController',
       scope: scope,
-      windowClass: className
+      windowClass: 'contacts_modal_window mobile_modal'
     }).result;
   }
 
@@ -3958,7 +3937,7 @@ angular.module('myApp.services', [])
     $modal.open({
       templateUrl: templateUrl('changelog_modal'),
       scope: $scope,
-      windowClass: 'changelog_modal_window page_modal'
+      windowClass: 'changelog_modal_window mobile_modal'
     });
   }
 

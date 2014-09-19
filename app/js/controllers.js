@@ -43,15 +43,10 @@ angular.module('myApp.controllers', [])
     $scope.callPending = {};
 
     $scope.chooseCountry = function () {
-      var className = 'countries_modal_window page_modal';
-      if (Config.Mobile) {
-        className += ' mobile_modal';
-      }
-
       var modal = $modal.open({
         templateUrl: templateUrl('country_select_modal'),
         controller: 'CountrySelectModalController',
-        windowClass: className
+        windowClass: 'countries_modal_window mobile_modal'
       });
 
       modal.result.then(selectCountry);
@@ -332,15 +327,10 @@ angular.module('myApp.controllers', [])
     $scope.historyState = {selectActions: false, typing: []};
 
     $scope.openSettings = function () {
-      var className = 'settings_modal_window page_modal';
-      if (Config.Mobile) {
-        className += ' mobile_modal';
-      }
-
       $modal.open({
         templateUrl: templateUrl('settings_modal'),
         controller: 'SettingsModalController',
-        windowClass: className
+        windowClass: 'settings_modal_window mobile_modal'
       });
     }
 
@@ -363,7 +353,7 @@ angular.module('myApp.controllers', [])
             templateUrl: templateUrl('chat_create_modal'),
             controller: 'ChatCreateModalController',
             scope: scope,
-            windowClass: 'group_edit_modal_window'
+            windowClass: 'group_edit_modal_window mobile_modal'
           });
         }
 
@@ -1821,7 +1811,7 @@ angular.module('myApp.controllers', [])
       $modal.open({
         templateUrl: templateUrl(edit ? 'edit_contact_modal' : 'import_contact_modal'),
         controller: 'ImportContactModalController',
-        windowClass: 'import_contact_modal_window page_modal',
+        windowClass: 'import_contact_modal_window mobile_modal',
         scope: scope
       }).result.then(function (foundUserID) {
         if ($scope.userID == foundUserID) {
@@ -2015,7 +2005,7 @@ angular.module('myApp.controllers', [])
         templateUrl: templateUrl('chat_edit_modal'),
         controller: 'ChatEditModalController',
         scope: scope,
-        windowClass: 'group_edit_modal_window'
+        windowClass: 'group_edit_modal_window mobile_modal'
       });
     }
 
@@ -2107,7 +2097,7 @@ angular.module('myApp.controllers', [])
       $modal.open({
         templateUrl: templateUrl('profile_edit_modal'),
         controller: 'ProfileEditModalController',
-        windowClass: 'profile_edit_modal_window page_modal'
+        windowClass: 'profile_edit_modal_window mobile_modal'
       });
     };
 

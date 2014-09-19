@@ -36,6 +36,11 @@
           </div>
 
           <ul ng-switch-default class="nav navbar-nav navbar-quick-nav">
+            <li ng-if="action == 'select' || action == 'new_group'" class="navbar-quick-right">
+              <a ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()">
+                Next
+              </a>
+            </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
