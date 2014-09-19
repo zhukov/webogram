@@ -9,127 +9,26 @@ angular.module('izhukov.utils', [])
 
 .provider('Storage', function () {
 
-  var keyPrefix = '';
-  var cache = {};
-  var useCs = !!(window.chrome && chrome.storage && chrome.storage.local);
-  var useLs = !useCs && !!window.localStorage;
-
   this.setPrefix = function (newPrefix) {
-    keyPrefix = newPrefix
+    ConfigStorage.prefix(newPrefix);
   };
 
   this.$get = ['$q', function ($q) {
-    function getValue() {
-      var keys = Array.prototype.slice.call(arguments),
-          result = [],
-          single = keys.length == 1,
-          allFound = true;
+    var methods = {};
+    angular.forEach(['get', 'set', 'remove'], function (methodName) {
+      methods[methodName] = function () {
+        var deferred = $q.defer(),
+            args = Array.prototype.slice.call(arguments);
 
-      for (var i = 0; i < keys.length; i++) {
-        keys[i] = keyPrefix + keys[i];
-      }
-
-      angular.forEach(keys, function (key) {
-        if (cache[key] !== undefined) {
-          result.push(cache[key]);
-        }
-        else if (useLs) {
-          var value = localStorage.getItem(key);
-          value = (value === undefined || value === null) ? false : JSON.parse(value);
-          result.push(cache[key] = value);
-        }
-        else if (!useCs) {
-          result.push(cache[key] = false);
-        }
-        else {
-          allFound = false;
-        }
-      });
-
-      if (allFound) {
-        return $q.when(single ? result[0] : result);
-      }
-
-      var deferred = $q.defer();
-
-      chrome.storage.local.get(keys, function (resultObj) {
-        result = [];
-        angular.forEach(keys, function (key) {
-          var value = resultObj[key];
-          value = value === undefined || value === null ? false : JSON.parse(value);
-          result.push(cache[key] = value);
+        args.push(function (result) {
+          deferred.resolve(result);
         });
+        ConfigStorage[methodName].apply(ConfigStorage, args);
 
-        deferred.resolve(single ? result[0] : result);
-      });
-
-      return deferred.promise;
-    };
-
-    function setValue(obj) {
-      var keyValues = {};
-      angular.forEach(obj, function (value, key) {
-        keyValues[keyPrefix + key] = JSON.stringify(value);
-        cache[keyPrefix + key] = value;
-      });
-
-      if (useLs) {
-        angular.forEach(keyValues, function (value, key) {
-          localStorage.setItem(key, value);
-        });
-        return $q.when();
-      }
-
-      if (!useCs) {
-        return $q.when();
-      }
-
-      var deferred = $q.defer();
-
-      chrome.storage.local.set(keyValues, function () {
-        deferred.resolve();
-      });
-
-      return deferred.promise;
-    };
-
-    function removeValue () {
-      var keys = Array.prototype.slice.call(arguments);
-
-      for (var i = 0; i < keys.length; i++) {
-        keys[i] = keyPrefix + keys[i];
-      }
-
-      angular.forEach(keys, function(key){
-        delete cache[key];
-      });
-
-      if (useLs) {
-        angular.forEach(keys, function(key){
-          localStorage.removeItem(key);
-        });
-
-        return $q.when();
-      }
-
-      if (!useCs) {
-        return $q.when();
-      }
-
-      var deferred = $q.defer();
-
-      chrome.storage.local.remove(keys, function () {
-        deferred.resolve();
-      });
-
-      return deferred.promise;
-    };
-
-    return {
-      get: getValue,
-      set: setValue,
-      remove: removeValue
-    };
+        return deferred.promise;
+      };
+    });
+    return methods;
   }];
 
 })
@@ -284,7 +183,7 @@ angular.module('izhukov.utils', [])
   }
 
   function downloadFile (url, mimeType, fileName) {
-    // if (Config.Navigator.mobile) {
+    // if (Config.Mobile) {
     //   window.open(url, '_blank');
     //   return;
     // }

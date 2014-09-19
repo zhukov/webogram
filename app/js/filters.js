@@ -81,7 +81,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
   .filter('time', ['$filter', '_', function($filter, _) {
     var cachedDates = {},
         dateFilter = $filter('date'),
-        format = Config.Navigator.mobile ? 'HH:mm' : 'HH:mm:ss';
+        format = Config.Mobile ? 'HH:mm' : 'HH:mm:ss';
 
     return function (timestamp) {
       if (!cachedDates.hasOwnProperty(_.locale())) {

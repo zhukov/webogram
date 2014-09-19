@@ -1,0 +1,65 @@
+<div class="confirm_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="confirm_modal_description" ng-switch="type">
+      <span ng-switch-when="LOGOUT">Are you sure you want to log out?</span>
+      <span ng-switch-when="WEBOGRAM_UPDATED_RELOAD">A new version of Webogram has been downloaded. Launch it?</span>
+      <span ng-switch-when="HISTORY_FLUSH">Are you sure? This can not be undone!</span>
+      <span ng-switch-when="TERMINATE_SESSIONS">Are you sure you want to log out all devices except for the current one?</span>
+      <span ng-switch-when="HTTPS_MIXED_FAIL">
+        Your browser <a href="http://mzl.la/13jCUSU" target="_blank">does not support</a> mixed content which is neccessary for MTProto support on https. <a href="https://github.com/zhukov/webogram/issues/237" target="_blank">Learn more &raquo;</a><br/><br/>
+        Would you like use http-version instead?
+      </span>
+
+      <span ng-switch-when="FILES_CLIPBOARD_PASTE">
+        <ng-pluralize count="files.length"
+                     when="{'one': 'Are you sure to send file from clipboard?', 'other': 'Are you sure to send {} files from clipboard?'}">
+        </ng-pluralize>
+      </span>
+      <span ng-switch-when="FILE_CLIPBOARD_PASTE">Are you sure to send file(s) from clipboard?</span>
+      <span ng-switch-when="MESSAGE_DELETE">Are you sure you want to delete the message?</span>
+      <span ng-switch-when="CONTACTS_IMPORT_PERFORM">Telegram will now sync your contacts in order to find your friends.</span>
+      <div ng-switch-when="LOGIN_PHONE_CORRECT">
+        Is this phone number correct?
+        <div class="confirm_phone_number"> <span ng-bind="country_code"></span> <span ng-bind="phone_number"></span> </div>
+      </div>
+      <span ng-switch-when="FORWARD_PEER">Forward to <strong ng-switch="peer_id > 0">
+        <span ng-switch-when="true" ng-bind-html="peer_data.rFullName"></span>
+        <span ng-switch-default ng-bind-html="peer_data.rTitle"></span>
+      </strong>?</span>
+      <span ng-switch-when="SHARE_CONTACT_PEER">Send to <strong ng-switch="peer_id > 0">
+        <span ng-switch-when="true" ng-bind-html="peer_data.rFullName"></span>
+        <span ng-switch-default ng-bind-html="peer_data.rTitle"></span>
+      </strong>?</span>
+      <span ng-switch-when="EXT_SHARE_PEER">Share with <strong ng-switch="peer_id > 0">
+        <span ng-switch-when="true" ng-bind-html="peer_data.rFullName"></span>
+        <span ng-switch-default ng-bind-html="peer_data.rTitle"></span>
+      </strong>?</span>
+      <span ng-switch-default ng-bind="message || 'Are you sure?'"></span>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()" ng-switch="type">
+      <span ng-switch-default>Cancel</span>
+    </a>
+    <button type="button" class="btn btn-primary" ng-switch="type" ng-click="$close()" my-focused>
+      <span ng-switch-when="LOGOUT">Log Out</span>
+      <span ng-switch-when="HISTORY_FLUSH">Delete Chat</span>
+      <span ng-switch-when="FILES_CLIPBOARD_PASTE">Send</span>
+      <span ng-switch-when="FILE_CLIPBOARD_PASTE">Send</span>
+      <span ng-switch-when="MESSAGE_DELETE">Delete</span>
+      <span ng-switch-when="FORWARD_PEER">Forward message</span>
+      <span ng-switch-when="PHOTO_SHARE_PEER">Forward photo</span>
+      <span ng-switch-when="VIDEO_SHARE_PEER">Forward video</span>
+      <span ng-switch-when="SHARE_CONTACT_PEER">Send contact</span>
+      <span ng-switch-when="EXT_SHARE_PEER">Share file</span>
+      <span ng-switch-default>OK</span>
+    </button>
+  </div>
+
+</div>

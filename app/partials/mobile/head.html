@@ -19,7 +19,7 @@
         <ul ng-if="!curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
           <li><a ng-click="openGroup()" my-i18n="head_new_group"></a></li>
           <li><a ng-click="importContact()" my-i18n="head_new_contact"></a></li>
-          <li><a ng-click="openContacts()" my-i18n="head_contacts"></a></li>
+          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" my-i18n="head_contacts"></a></li>
           <li><a ng-click="openSettings()" my-i18n="head_settings"></a></li>
           <li><a ng-click="logOut()" my-i18n="head_log_out"></a></li>
         </ul>
@@ -98,7 +98,7 @@
                         <span ng-switch-default class="status_online" my-i18n-format="head_many_typing"></span>
                         <my-i18n-param name="name1"><span my-user-link="historyState.typing[0]" short="true"></span></my-i18n-param>
                         <my-i18n-param name="name2"><span my-user-link="historyState.typing[1]" short="true"></span></my-i18n-param>
-                        <my-i18n-param name="names">{{historyState.typing.length - 1}}</my-i18n-param>
+                        <my-i18n-param name="names" ng-bind="historyState.typing.length - 1"></my-i18n-param>
                         <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
                       </my-i18n>
                     </small>
@@ -110,21 +110,13 @@
         </div>
       </div>
 
-      <div class="navbar-menu" ng-switch="offline">
+      <div class="navbar-menu" ng-if="offline">
 
-        <ul ng-switch-when="true" class="nav navbar-nav navbar-offline">
+        <ul class="nav navbar-nav navbar-offline">
           <li ng-show="!offlineConnecting"><span class="navbar-offline-text"><my-i18n msgid="head_waiting_for_network"></my-i18n><span my-loading-dots></span></span></li>
           <li ng-show="!offlineConnecting" class="hidden-xs"><a href="" ng-click="retryOnline()" my-i18n="head_retry"></a></li>
           <li ng-show="offlineConnecting"><span class="navbar-offline-text"><my-i18n msgid="head_connecting"></my-i18n><span my-loading-dots></span></span></li>
         </ul>
-
-        <ul ng-switch-default class="nav navbar-nav navbar-right">
-          <li ng-if="isLoggedIn &amp;&amp; !isEmpty.contacts"><a href="" ng-click="openContacts()" my-i18n="head_contacts"></a></li>
-          <li ng-if="isLoggedIn"><a href="" ng-click="openSettings()" my-i18n="head_settings"></a></li>
-          <li ng-if="isLoggedIn"><a href="" ng-click="logOut()" my-i18n="head_log_out"></a></li>
-          <li ng-if="!isLoggedIn"><a href="https://github.com/zhukov/webogram" target="_blank" my-i18n="head_about"></a></li>
-        </ul>
-
       </div>
 
     </div>

@@ -43,18 +43,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.callPending = {};
 
     $scope.chooseCountry = function () {
-      var tUrl = 'partials/country_select_modal.html',
-          className = 'countries_modal_window page_modal';
-
-      if (Config.Navigator.mobile) {
-        tUrl = 'partials/mobile/country_select_modal.html';
-        className += ' mobile_modal';
-      }
-
       var modal = $modal.open({
-        templateUrl: tUrl,
+        templateUrl: templateUrl('country_select_modal'),
         controller: 'CountrySelectModalController',
-        windowClass: className
+        windowClass: 'countries_modal_window mobile_modal'
       });
 
       modal.result.then(selectCountry);
@@ -335,18 +327,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.historyState = {selectActions: false, typing: []};
 
     $scope.openSettings = function () {
-      var tUrl = 'partials/settings_modal.html',
-          className = 'settings_modal_window page_modal';
-
-      if (Config.Navigator.mobile) {
-        tUrl = 'partials/mobile/settings_modal.html';
-        className += ' mobile_modal';
-      }
-
       $modal.open({
-        templateUrl: tUrl,
+        templateUrl: templateUrl('settings_modal'),
         controller: 'SettingsModalController',
-        windowClass: className
+        windowClass: 'settings_modal_window mobile_modal'
       });
     }
 
@@ -366,10 +350,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           scope.userIDs = userIDs;
 
           $modal.open({
-            templateUrl: 'partials/chat_create_modal.html',
+            templateUrl: templateUrl('chat_create_modal'),
             controller: 'ChatCreateModalController',
             scope: scope,
-            windowClass: 'group_edit_modal_window'
+            windowClass: 'group_edit_modal_window mobile_modal'
           });
         }
 
@@ -379,7 +363,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.importContact = function () {
       AppUsersManager.openImportContact().then(function (foundContact) {
         if (foundContact) {
-          $scope.$broadcast('contact_imported');
+          $rootScope.$broadcast('history_focus', {
+            peerString: AppUsersManager.getUserString(foundContact)
+          });
         }
       });
     };
@@ -502,6 +488,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         offset++;
       }
       $scope.dialogs.unshift(wrappedDialog);
+
+      if (!peersInDialogs[dialog.peerID]) {
+        peersInDialogs[dialog.peerID] = true;
+        if (contactsShown) {
+          showMoreContacts();
+        }
+      }
+
     });
 
     $scope.$on('dialog_flush', function (e, dialog) {
@@ -523,12 +517,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       }
     });
-
-    $scope.$on('contact_imported', function () {
-      if (contactsShown) {
-        loadDialogs();
-      }
-    })
 
     var prevMessages = false;
     $scope.$watchCollection('search', function () {
@@ -554,19 +542,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     });
 
-    if (Config.Navigator.mobile) {
+    if (Config.Mobile) {
       $scope.$watch('curDialog.peer', function () {
         $scope.$broadcast('ui_dialogs_update')
       });
     }
 
     $scope.importPhonebook = function () {
-      PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
-        if (contactsShown && foundContacts.length) {
-          loadDialogs();
-        }
-      })
+      PhonebookContactsService.openPhonebookImport();
     };
+
+    $scope.$on('contacts_update', function () {
+      if (contactsShown) {
+        showMoreContacts();
+      }
+    });
 
     $scope.searchClear = function () {
       $scope.search.query = '';
@@ -636,14 +626,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    $scope.importPhonebook = function () {
-      PhonebookContactsService.openPhonebookImport().result.then(function (foundContacts) {
-        if (contactsShown && foundContacts.length) {
-          loadDialogs();
-        }
-      })
-    };
-
     function loadDialogs (force) {
       offset = 0;
       maxID = 0;
@@ -675,6 +657,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           AppMessagesManager.getDialogs('', maxID, 100);
           if (!dialogsResult.dialogs.length) {
             $scope.isEmpty.dialogs = true;
+            showMoreDialogs();
           }
         } else {
           showMoreDialogs();
@@ -683,36 +666,40 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     }
 
+    function showMoreContacts () {
+      contactsShown = true;
+
+      var curJump = ++jump;
+      AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
+        if (curJump != jump) return;
+        $scope.contacts = [];
+        angular.forEach(contactsList, function(userID) {
+          if (peersInDialogs[userID] === undefined) {
+            $scope.contacts.push({
+              userID: userID,
+              user: AppUsersManager.getUser(userID),
+              userPhoto: AppUsersManager.getUserPhoto(userID, 'User'),
+              peerString: AppUsersManager.getUserString(userID)
+            });
+          }
+        });
+
+        if (contactsList.length) {
+          delete $scope.isEmpty.contacts;
+        } else if (!$scope.search.query) {
+          $scope.isEmpty.contacts = true;
+        }
+      });
+      $scope.$broadcast('ui_dialogs_append');
+    }
+
     function showMoreDialogs () {
       if (contactsShown && (!hasMore || !offset)) {
         return;
       }
 
       if (!hasMore && !$scope.search.messages && ($scope.search.query || !$scope.dialogs.length)) {
-        contactsShown = true;
-
-        var curJump = ++jump;
-        AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
-          if (curJump != jump) return;
-          $scope.contacts = [];
-          angular.forEach(contactsList, function(userID) {
-            if (peersInDialogs[userID] === undefined) {
-              $scope.contacts.push({
-                userID: userID,
-                user: AppUsersManager.getUser(userID),
-                userPhoto: AppUsersManager.getUserPhoto(userID, 'User'),
-                peerString: AppUsersManager.getUserString(userID)
-              });
-            }
-          });
-
-          if (contactsList.length) {
-            delete $scope.isEmpty.contacts;
-          } else if (!$scope.search.query) {
-            $scope.isEmpty.contacts = true;
-          }
-        });
-        $scope.$broadcast('ui_dialogs_append');
+        showMoreContacts();
         return;
       }
 
@@ -970,7 +957,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var curJump = jump,
           curMoreJump = moreJump,
           inputMediaFilter = $scope.historyFilter.mediaType && {_: inputMediaFilters[$scope.historyFilter.mediaType]},
-          limit = Config.Navigator.mobile ? 20 : 0,
+          limit = Config.Mobile ? 20 : 0,
           getMessagesPromise = inputMediaFilter
         ? AppMessagesManager.getSearch($scope.curDialog.inputPeer, '', inputMediaFilter, maxID, limit)
         : AppMessagesManager.getHistory($scope.curDialog.inputPeer, maxID, limit);
@@ -1021,9 +1008,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       else if (forceRecent) {
         limit = 10;
       }
-      else if (Config.Navigator.mobile) {
-        limit = 20;
-      }
 
       moreActive = false;
       morePending = false;
@@ -1066,6 +1050,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           var message = AppMessagesManager.wrapForHistory(id);
           if ($scope.skippedHistory) {
             delete message.unread;
+          }
+          if (historyResult.unreadOffset) {
+            message.unreadAfter = true;
           }
           peerHistory.messages.push(message);
         });
@@ -1477,7 +1464,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       AppPhotosManager.downloadPhoto($scope.photoID);
     };
 
-    if (!$scope.messageID || Config.Navigator.mobile) {
+    if (!$scope.messageID || Config.Mobile) {
       $scope.nav.next = function () {
         $modalInstance.close();
       }
@@ -1499,7 +1486,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
 
-    if (Config.Navigator.mobile) {
+    if (Config.Mobile) {
       $scope.canForward = true;
       $scope.canDelete = true;
       return;
@@ -1822,9 +1809,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       };
 
       $modal.open({
-        templateUrl: edit ? 'partials/edit_contact_modal.html' : 'partials/import_contact_modal.html',
+        templateUrl: templateUrl(edit ? 'edit_contact_modal' : 'import_contact_modal'),
         controller: 'ImportContactModalController',
-        windowClass: 'import_contact_modal_window page_modal',
+        windowClass: 'import_contact_modal_window mobile_modal',
         scope: scope
       }).result.then(function (foundUserID) {
         if ($scope.userID == foundUserID) {
@@ -2015,10 +2002,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       scope.chatID = $scope.chatID;
 
       $modal.open({
-        templateUrl: 'partials/chat_edit_modal.html',
+        templateUrl: templateUrl('chat_edit_modal'),
         controller: 'ChatEditModalController',
         scope: scope,
-        windowClass: 'group_edit_modal_window'
+        windowClass: 'group_edit_modal_window mobile_modal'
       });
     }
 
@@ -2109,9 +2096,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.editProfile = function () {
       $modal.open({
-        templateUrl: 'partials/profile_edit_modal.html',
+        templateUrl: templateUrl('profile_edit_modal'),
         controller: 'ProfileEditModalController',
-        windowClass: 'profile_edit_modal_window page_modal'
+        windowClass: 'profile_edit_modal_window mobile_modal'
       });
     };
 
@@ -2298,6 +2285,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.$watch('search.query', updateContacts);
+    $scope.$on('contacts_update', function () {
+      updateContacts($scope.search && $scope.search.query || '');
+    });
 
     $scope.toggleEdit = function (enabled) {
       $scope.action = enabled ? 'edit' : '';
@@ -2338,16 +2328,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           selectedUserIDs.push(userID);
         });
         AppUsersManager.deleteContacts(selectedUserIDs).then(function () {
-          resetSelected();
-          updateContacts($scope.search.query);
+          $scope.toggleEdit(false);
         });
       }
     };
 
     $scope.importContact = function () {
-      AppUsersManager.openImportContact().then(function () {
-        updateContacts($scope.search && $scope.search.query || '');
-      });
+      AppUsersManager.openImportContact();
     };
 
   })
