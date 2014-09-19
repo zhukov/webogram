@@ -50,7 +50,8 @@ Config.I18n = {
     'es-es': 'Español'
   },
   aliases: {
-    'en': 'en-us'
+    'en': 'en-us',
+    'de': 'de-de'
   },
   messages: {},
   fallback_messages: {}
