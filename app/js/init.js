@@ -81,7 +81,20 @@
           i18n_ng: Config.I18n.locale == defaultLocale, // Already included
           i18n_messages: false,
           i18n_fallback: false
-        }
+        },
+        checkReady = function checkReady () {
+          var i, ready = true;
+          for (i in bootReady) {
+            if (bootReady.hasOwnProperty(i) && bootReady[i] === false) {
+              ready = false;
+              break;
+            }
+          }
+          if (ready) {
+            bootReady.boot = false; 
+            angular.bootstrap(document, ['myApp']);
+          }
+        };
 
     switch (layout) {
       case 'mobile': Config.Mobile = true; break;
@@ -131,19 +144,5 @@
       bootReady.dom = true;
       checkReady();
     });
-
-    var checkReady = function checkReady () {
-      var i, ready = true;
-      for (i in bootReady) {
-        if (bootReady.hasOwnProperty(i) && bootReady[i] === false) {
-          ready = false;
-          break;
-        }
-      }
-      if (ready) {
-        bootReady.boot = false; 
-        angular.bootstrap(document, ['myApp']);
-      }
-    }
   });
 })();
