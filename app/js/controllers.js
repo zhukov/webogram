@@ -305,7 +305,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ChangelogNotifyService, ErrorService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -382,7 +382,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       ErrorService.confirm({type: 'LOGOUT'}).then(function () {
         MtpApiManager.logOut().then(function () {
           location.hash = '/login';
-          location.reload();
+          AppRuntimeManager.reload();
         });
       })
     };
@@ -1455,7 +1455,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('AppLangFooterController', function ($scope, _, Storage, ErrorService) {
+  .controller('AppLangFooterController', function ($scope, _, Storage, ErrorService, AppRuntimeManager) {
     $scope.supportedLocales = Config.I18n.supported;
     $scope.langNames = Config.I18n.languages;
     $scope.curLocale = Config.I18n.locale;
@@ -1464,7 +1464,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       Storage.set({i18n_locale: newLocale});
       if ($scope.curLocale !== newLocale) {
         ErrorService.confirm({type: 'APPLY_LANG_WITH_RELOAD'}).then(function () {
-          location.reload();
+          AppRuntimeManager.reload();
         });
       }
     };

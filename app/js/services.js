@@ -3448,7 +3448,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
 })
 
-.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, Storage) {
+.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager) {
 
   navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
 
@@ -3647,17 +3647,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
       notification.onclick = function () {
         notification.close();
-        if (window.navigator.mozApps && document.hidden) {
-          // Get app instance and launch it to bring app to foreground
-          window.navigator.mozApps.getSelf().onsuccess = function() {
-            this.result.launch();
-          };
-        } else {
-          if (window.chrome && chrome.app && chrome.app.window) {
-            chrome.app.window.current().focus();
-          }
-          window.focus();
-        }
+        AppRuntimeManager.focus();
         notificationsClear();
         if (data.onclick) {
           data.onclick();
