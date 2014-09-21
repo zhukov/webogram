@@ -104,6 +104,7 @@
     "confirm_modal_forward_to_peer": "An {peer} weiterleiten?",
     "confirm_modal_send_to_peer": "An {peer} senden?",
     "confirm_modal_share_file_peer": "Mit {peer} teilen?",
+    "confirm_modal_apply_lang_with_reload_md": "Spracheinstellungen wurden gespeichert.\nAnwendung jetzt neustarten?",
     "confirm_modal_are_u_sure": "Bist du sicher?",
     "confirm_modal_logout_submit": "Abmelden",
     "confirm_modal_history_flush_submit": "Chat löschen",

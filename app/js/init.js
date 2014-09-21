@@ -78,7 +78,7 @@
         defaultLocale = 'en-us',
         bootReady = {
           dom: false,
-          i18n_ng: Config.I18n.locale == defaultLocale, // Already included
+          i18n_ng: locale == defaultLocale, // Already included
           i18n_messages: false,
           i18n_fallback: false
         },
@@ -114,13 +114,12 @@
     }
 
     if (!bootReady.i18n_ng) {
-      $('head').append($('<script>')
-        .on('load', function() {
-          bootReady.i18n_ng = true;
-          checkReady();
-        })
-        .attr('src', 'vendor/angular/i18n/angular-locale_' + Config.I18n.locale + '.js')
-      );
+      $('<script>').appendTo('head')
+      .on('load', function() {
+        bootReady.i18n_ng = true;
+        checkReady();
+      })
+      .attr('src', 'vendor/angular/i18n/angular-locale_' + Config.I18n.locale + '.js');
     }
 
     $.getJSON('js/locales/' + Config.I18n.locale + '.json').success(function (json) {

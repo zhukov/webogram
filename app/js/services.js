@@ -718,7 +718,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   var messagesStorage = {};
   var messagesForHistory = {};
-  var messagesForDialogs = {locale: _.locale()};
+  var messagesForDialogs = {};
   var historiesStorage = {};
   var dialogsStorage = {count: null, dialogs: []};
   var pendingByRandomID = {};
@@ -1735,10 +1735,6 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   function wrapForDialog (msgID, unreadCount) {
     var useCache = unreadCount != -1;
-
-    if (messagesForDialogs.locale != _.locale()) {
-      messagesForDialogs = {locale: _.locale()};
-    }
 
     if (useCache && messagesForDialogs[msgID] !== undefined) {
       return messagesForDialogs[msgID];

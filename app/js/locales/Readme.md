@@ -7,7 +7,7 @@ Adding a new locale is pretty easy, all you got to do is:
 1. ensure that the angular-locale file `vendor/angular/i18n/angular-locale_<locale>.js` exists. If not copy one of the others being most similar to your target locale and adapt it accordingly. See also the [angular docs](https://docs.angularjs.org/guide/i18n).
 2. copy `js/locales/en-us.json` to `js/locales/<locale>.json`
 3. without changing the key strings translate and change the value strings into your target locale
-4. add your locale in js/i18n.js to the object of supported languages with locale and its native name so it will be listed in the settings
+4. add your locale to `Config.I18n` in `js/lib/config.js` with locale and its native name so it will be listed in the settings
 5. enjoy your awesome new Webogram in your own language!
 
 You may also want to join the project on [transifex](https://www.transifex.com/projects/p/telegram-web/).
@@ -65,16 +65,16 @@ This is an unofficial web-client for the <strong>Telegram Messenger</strong>.
 Including html markup in the messages directly isn't supported and any contained markup will be escaped before inserting.
 
 #### Step 4: adding the newly created locale
-The final step is to add the new locale to the list with supported (i.e. existing) locales for webogram in the factory of the localization function `_` in `js/i18n.js`.
-The key for this is the locale string while the value is the name of the language to be displayed in the settings.
-After adding to the list (and perhaps restarting the app) it appears in the select input and can be used.
+The final step is to add the new locale to the list with supported (i.e. existing) locales for Webogram in `Config.I18n` object in `js/lib/config.js`.
+Add the locale to the `Config.I18n.supported` array and to `Config.I18n.languages` with the locale as key and the native name of the language as value.
+After adding to the list (and perhaps restarting the app) it appears in the footer.
 
-Additionally you can add your locale to the `aliases` object. This object is used when there is no locale configured yet and we're trying to guess the best fit from the browsers current language.
-Since we're retrieving the browser language through `navigator.language` which may contain a locale with or without country code, we use `aliases` here to map between these and our supported locales whereby the keys are the lookup values and the values a locale we support, e.g:
+Additionally you can add your locale to `Config.I18n.aliases`. This object is used when there is no locale configured yet and we're trying to guess the best fit from the browsers current language.
+Since we're retrieving the browser language through `navigator.language` which may contain a locale with or without country code, we use `Config.I18n.aliases` here to map between these and our supported locales whereby the keys are the lookup values and the values a locale we support, e.g:
 ```javascript
-var aliases = {
+Config.I18n.aliases= {
 	'en': 'en-us'
-};
+}
 ```
 This maps a `navigator.language == 'en'` to `en-us` as locale to use.
 
