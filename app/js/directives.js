@@ -269,7 +269,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (e.keyCode == 36 &&  !e.shiftKey && !e.ctrlKey && e.altKey) { // Alt + Home
           var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a');
           if (currentSelected.length) {
-            currentSelected.trigger('mousedown');
+            $(currentSelected[0]).trigger('mousedown');
             scrollableWrap.scrollTop = 0;
             $(dialogsWrap).nanoScroller({flash: true});
           }
