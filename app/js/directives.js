@@ -1842,3 +1842,14 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     }
   })
+
+  .directive('myAudioPlayer', function ($scope) {
+
+    return {
+      link: link,
+      templateUrl: templateUrl('audio_player')
+    };
+
+    function link($scope, element, attrs) {
+    }
+  })
