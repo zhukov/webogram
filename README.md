@@ -124,7 +124,7 @@ Go to our [issue tracker](https://github.com/zhukov/webogram/issues) and check i
 
 ### Localization
 
-If you don't see your native language available for Webogram and you can help with translation, please join the [Telegram Web project on Transifex](www.transifex.com/projects/p/telegram-web/).
+If you don't see your native language available for Webogram and you can help with translation, please join the [Telegram Web project on Transifex](https://www.transifex.com/projects/p/telegram-web/).
 
 To test your translation live, use [Localization guide](/app/js/locales/README.md).
 
