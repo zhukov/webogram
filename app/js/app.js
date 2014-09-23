@@ -13,6 +13,7 @@ angular.module('myApp', [
   'ngSanitize',
   'ngTouch',
   'ui.bootstrap',
+  'mediaPlayer',
   'izhukov.utils',
   'izhukov.mtproto',
   'izhukov.mtproto.wrapper',

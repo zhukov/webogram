@@ -1,13 +1,15 @@
-<div class="audio_player_wrap">
-	<div class="audio_player_button">
+<div class="audio_player_wrap" ng-class="">
+	<div class="audio_player_button" ng-click="togglePlay()">
 		<i class="icon audio_player_btn_icon"></i>
 	</div>
 	<div class="audio_player_title_wrap">
-		<div class="audio_player_title"></div>
-		<div class="audio_player_meta"></div>
+		<div class="audio_player_title" my-i18n="message_attach_audio_message"></div>
+		<div class="audio_player_meta">
+			<span class="audio_player_duration"></span>
+		</div>
 	</div>
 	<div class="audio_player_progress_wrap">
-		<div class="audio_player_progress"></div>
-		<i class="icon icon-player-track"></i>
+		<div class="audio_player_progress" ng-style="{width: audio.progress.percent + '%'}"></div>
+		<!-- <i class="icon icon-player-track"></i> -->
 	</div>
 </div>
