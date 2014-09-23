@@ -104,6 +104,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
   .filter('duration', [function() {
     return function (duration) {
+      duration = parseInt(duration);
       var secs = duration % 60,
           mins = Math.floor((duration - secs) / 60.0);
 

@@ -430,7 +430,9 @@ angular.module('mediaPlayer', ['mediaPlayer.helpers'])
         } else {
           playlist = scope[playlistName];
         }
-        if (mediaName !== undefined) { scope[mediaName] = player; }
+        if (mediaName !== undefined) {
+          scope.$eval(mediaName + ' = player', {player: player});
+        }
 
         if (element[0].tagName !== 'AUDIO' && element[0].tagName !== 'VIDEO') {
           return new Error('player directive works only when attached to an <audio>/<video> type tag');

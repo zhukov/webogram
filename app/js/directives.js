@@ -1482,27 +1482,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioAutoplay', function() {
-
-    return {
-      link: link,
-      scope: {
-        audio: '='
-      }
-    };
-
-    function link ($scope, element, attrs) {
-      $scope.$watch('audio.autoplay', function (autoplay) {
-        if (autoplay) {
-          element.autoplay = true;
-          element[0].play();
-        } else {
-          element.autoplay = false;
-        }
-      });
-    }
-  })
-
   .directive('myFocused', function(){
     return {
       link: function($scope, element, attrs) {
@@ -1843,13 +1822,63 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($scope) {
+  .directive('myAudioPlayer', function ($sce, $timeout, MtpApiFileManager) {
 
     return {
       link: link,
+      scope: {
+        audio: '='
+      },
       templateUrl: templateUrl('audio_player')
     };
 
+    function downloadAudio (audio) {
+      var inputFileLocation = {
+            _: audio._ == 'document' ? 'inputDocumentFileLocation' : 'inputAudioFileLocation',
+            id: audio.id,
+            access_hash: audio.access_hash
+          };
+
+      audio.progress = {enabled: true, percent: 1, total: audio.size};
+
+      var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {mime: 'audio/ogg'});
+
+      audio.progress.cancel = downloadPromise.cancel;
+
+      return downloadPromise.then(function (url) {
+        delete audio.progress;
+        audio.url = $sce.trustAsResourceUrl(url);
+      }, function (e) {
+        console.log('audio download failed', e);
+        audio.progress.enabled = false;
+      }, function (progress) {
+        console.log('audio dl progress', progress);
+        audio.progress.done = progress.done;
+        audio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+      });
+    }
+
     function link($scope, element, attrs) {
+      $scope.mediaPlayer = {};
+
+      $scope.togglePlay = function () {
+        if ($scope.audio.url) {
+          $scope.mediaPlayer.player.playPause();
+        }
+        else if ($scope.audio.progress && $scope.audio.progress.enabled) {
+          $scope.audio.progress.cancel();
+        }
+        else {
+          downloadAudio($scope.audio).then(function () {
+            $timeout(function () {
+              var audioElement = $('audio', element)[0];
+              if (audioElement) {
+                audioElement.autoplay = false;
+                audioElement.removeAttribute('autoplay');
+              }
+            }, 1000);
+          })
+        }
+      }
     }
   })

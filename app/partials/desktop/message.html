@@ -37,18 +37,18 @@
         <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
       </div>
 
-      <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty'}">
+      <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media ? true : false}">
 
         <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0"></a>
 
         <div ng-if="::historyMessage._ == 'messageForwarded' || false" class="im_message_fwd_from">
           <a class="im_message_fwd_photo pull-left" my-user-photolink="historyMessage.fwd_from_id" img-class="im_message_fwd_photo"></a>
           <div class="im_message_fwd_author_wrap">
-            <a class="im_message_fwd_author" my-user-link="historyMessage.fwd_from_id" short="true"></a><span class="im_message_fwd_date" ng-bind="historyMessage.fwd_date | dateOrTime"></span>
+            <a class="im_message_fwd_author" my-user-link="historyMessage.fwd_from_id" short="true"></a><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
           </div>
         </div>
 
-        <div ng-if="::historyMessage.media &amp;&amp; historyMessage.media._ != 'messageMediaEmpty' || false" class="im_message_media" ng-switch="historyMessage.media._">
+        <div ng-if="::historyMessage.media ? true : false" class="im_message_media" ng-switch="historyMessage.media._">
 
           <div ng-switch-when="messageMediaPhoto"     my-message-photo></div>
           <div ng-switch-when="messageMediaVideo"     my-message-video></div>

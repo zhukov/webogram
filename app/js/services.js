@@ -1809,6 +1809,9 @@ angular.module('myApp.services', ['myApp.i18n'])
             {noLinks: true, noLinebreaks: true}
           );
           break;
+
+        case 'messageMediaEmpty':
+          delete message.media;
       }
     }
     else if (message.action) {
@@ -1839,7 +1842,8 @@ angular.module('myApp.services', ['myApp.i18n'])
         len = history.length,
         end = len,
         i, curDay, prevDay, curMessage, prevMessage, curGrouped, prevGrouped,
-        wasUpdated = false;
+        wasUpdated = false,
+        groupFwd = !Config.Mobile;
 
     if (limit > 0) {
       end = Math.min(limit, len);
@@ -1874,12 +1878,12 @@ angular.module('myApp.services', ['myApp.i18n'])
           curMessage.date < prevMessage.date + 900) {
 
         var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
-        if (curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
+        if (groupFwd && curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
           curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {
           curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 'im_grouped_short' : 'im_grouped';
         }
-        if (curMessage.fwd_from_id) {
+        if (groupFwd && curMessage.fwd_from_id) {
           if (!prevMessage.grouped) {
             prevMessage.grouped = 'im_grouped_fwd_start';
           }
@@ -1890,7 +1894,7 @@ angular.module('myApp.services', ['myApp.i18n'])
       } else if (prevMessage || !i) {
         delete curMessage.grouped;
 
-        if (prevMessage && prevMessage.grouped && prevMessage.fwd_from_id) {
+        if (groupFwd && prevMessage && prevMessage.grouped && prevMessage.fwd_from_id) {
           prevMessage.grouped += ' im_grouped_fwd_end';
         }
       }
@@ -2328,8 +2332,8 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   function wrapForHistory (photoID) {
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = Math.min(windowW - 80, 260),
-        height = Math.min(windowH - 100, 260),
+        width = Math.min(windowW - 80, Config.Mobile ? 210 : 260),
+        height = Math.min(windowH - 100, Config.Mobile ? 210 : 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -2506,8 +2510,8 @@ angular.module('myApp.services', ['myApp.i18n'])
     }
 
     var video = angular.copy(videos[videoID]),
-        width = Math.min(windowW - 80, windowW <= 479 ? 260 : 200),
-        height = Math.min(windowH - 100, windowW <= 479 ? 260 : 200),
+        width = Math.min(windowW - 80, Config.Mobile ? 210 : 200),
+        height = Math.min(windowH - 100, Config.Mobile ? 210 : 200),
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',
@@ -2677,6 +2681,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     var doc = angular.copy(docs[docID]),
         isGif = doc.mime_type == 'image/gif',
+        isAudio = doc.mime_type.substr(0, 6) == 'audio/',
         width = isGif ? Math.min(windowW - 80, 260) : 100,
         height = isGif ? Math.min(windowH - 100, 260) : 100,
         thumbPhotoSize = doc.thumb,
@@ -2710,6 +2715,9 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     if (doc.withPreview && isGif) {
       doc.isSpecial = 'gif';
+    }
+    else if (isAudio) {
+      doc.isSpecial = 'audio';
     }
 
     return docsForHistory[docID] = doc;
@@ -2836,6 +2844,8 @@ angular.module('myApp.services', ['myApp.i18n'])
     }, updateDownloadProgress);
 
     historyAudio.progress.cancel = downloadPromise.cancel;
+
+    return downloadPromise;
   }
 
   $rootScope.openAudio = openAudio;
