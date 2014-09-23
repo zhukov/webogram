@@ -150,7 +150,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
           totalParts = total.split(' ');
 
       if (totalParts[1] === doneParts[1]) {
-        return _('format_size_progress_mulitple', {done: done, total: total, parts: (doneParts[1] || '')});
+        return _('format_size_progress_mulitple', {done: doneParts[0], total: totalParts[0], parts: (doneParts[1] || '')});
       }
       return _('format_size_progress', {done: done, total: total});
     }
