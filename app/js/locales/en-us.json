@@ -128,7 +128,7 @@
 	"confirm_modal_share_photo_submit": "Forward photo",
 	"confirm_modal_share_video_submit": "Forward video",
 	"confirm_modal_share_contact_submit": "Send contact",
-	"confirm_modal_share_file_submit": "Send contact",
+	"confirm_modal_share_file_submit": "Share file",
 
 	"contacts_modal_edit_list": "Edit",
 	"contacts_modal_edit_cancel": "Cancel",
