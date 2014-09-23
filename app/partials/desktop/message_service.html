@@ -2,7 +2,7 @@
   <my-i18n>
     <span ng-switch-when="messageActionChatCreate" my-i18n-format="message_service_created_group"></span>
     <span ng-switch-when="messageActionChatEditTitle" my-i18n-format="message_service_changed_group_name"></span>
-    <my-i18n-param name="group_name">&laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;</my-i18n-param>
+    <my-i18n-param name="group-name">&laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;</my-i18n-param>
   </my-i18n>
   <span ng-switch-when="messageActionChatEditPhoto" my-i18n="message_service_changed_group_photo"></span>
   <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="message_service_removed_group_photo"></span>

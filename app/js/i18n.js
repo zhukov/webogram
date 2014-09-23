@@ -5,7 +5,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
     var locale = Config.I18n.locale;
     var messages = Config.I18n.messages;
     var fallbackMessages = Config.I18n.fallback_messages;
-    var paramRegEx = /\{\s*([a-zA-Z\d\--]+)(?:\s*:\s*(.*?))?\s*\}/g;
+    var paramRegEx = /\{\s*([a-zA-Z\d\-_]+)(?:\s*:\s*(.*?))?\s*\}/g;
 
     function insertParams(msgstr, params) {
       return msgstr.replace(paramRegEx, function ($0, paramKey, nestedMsgStr) {

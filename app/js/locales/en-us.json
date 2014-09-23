@@ -173,8 +173,8 @@
 	"conversation_unknown_user": "Somebody",
 	"conversation_unknown_chat": "Unknown chat",
 
-	"message_service_created_group": "created the group {group_name}",
-	"message_service_changed_group_name": "changed group name to {group_name}",
+	"message_service_created_group": "created the group {group-name}",
+	"message_service_changed_group_name": "changed group name to {group-name}",
 	"message_service_changed_group_photo": "changed group photo",
 	"message_service_removed_group_photo": "removed group photo",
 	"message_service_invited_user": "invited {user}",
