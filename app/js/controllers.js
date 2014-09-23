@@ -1281,9 +1281,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       };
       history.messages = newMessages;
-      if (AppMessagesManager.regroupWrappedHistory(history.messages)) {
-        $scope.$broadcast('messages_regroup');
-      }
+      AppMessagesManager.regroupWrappedHistory(history.messages);
+      $scope.$broadcast('messages_regroup');
       if (historyUpdate.peerID == $scope.curDialog.peerID) {
         $scope.state.empty = !newMessages.length;
       }
