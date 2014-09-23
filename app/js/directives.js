@@ -1822,7 +1822,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($sce, $timeout, MtpApiFileManager) {
+  .directive('myAudioPlayer', function ($sce, $timeout, $q, FileManager, MtpApiFileManager) {
 
     return {
       link: link,
@@ -1847,6 +1847,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       return downloadPromise.then(function (url) {
         delete audio.progress;
+        audio.rawUrl = url;
         audio.url = $sce.trustAsResourceUrl(url);
       }, function (e) {
         console.log('audio download failed', e);
@@ -1861,6 +1862,14 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link($scope, element, attrs) {
       $scope.mediaPlayer = {};
 
+      $scope.download = function () {
+        ($scope.audio.rawUrl ? $q.when() : downloadAudio($scope.audio)).then(
+          function () {
+            FileManager.download($scope.audio.rawUrl, $scope.audio.mime_type || 'audio/ogg', $scope.audio.file_name || 'audio.ogg');
+          }
+        );
+      };
+
       $scope.togglePlay = function () {
         if ($scope.audio.url) {
           $scope.mediaPlayer.player.playPause();
@@ -1870,15 +1879,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         else {
           downloadAudio($scope.audio).then(function () {
-            $timeout(function () {
-              var audioElement = $('audio', element)[0];
-              if (audioElement) {
-                audioElement.autoplay = false;
-                audioElement.removeAttribute('autoplay');
-              }
-            }, 1000);
+            onContentLoaded(function () {
+              $scope.mediaPlayer.player.play();
+            })
           })
         }
-      }
+      };
     }
   })

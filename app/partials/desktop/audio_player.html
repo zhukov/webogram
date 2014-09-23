@@ -3,12 +3,13 @@
 		<i class="icon audio_player_btn_icon" ng-class="{audio_player_btn_icon_pause: mediaPlayer.player.playing, audio_player_btn_icon_cancel: audio.progress.enabled}"></i>
 	</button>
 	<div class="audio_player_title_wrap clearfix">
-		<div class="audio_player_title" ng-switch="::audio.file_name.length > 0">
+		<a ng-click="download()" class="audio_player_title" ng-switch="::audio.file_name.length > 0">
 			<span ng-switch-when="true" ng-bind="::audio.file_name"></span>
 			<span ng-switch-default my-i18n="message_attach_audio_message"></span>
-		</div>
-		<div class="audio_player_meta" ng-switch="audio.progress.enabled || !mediaPlayer.player.duration &amp;&amp; !audio.duration">
-			<span ng-switch-when="true" class="audio_player_size" ng-bind="audio.progress | formatSizeProgress"></span>
+		</a>
+		<div class="audio_player_meta" ng-switch="audio.progress.enabled ? 'progress' : (!mediaPlayer.player.duration &amp;&amp; !audio.duration ? 'size' : '')">
+			<span ng-switch-when="progress" class="audio_player_size" ng-bind="audio.progress | formatSizeProgress"></span>
+			<span ng-switch-when="size" class="audio_player_size" ng-bind="audio.size | formatSize"></span>
 			<span ng-switch-default class="audio_player_duration" ng-bind="(mediaPlayer.player.playing || mediaPlayer.player.currentTime > 0) ? mediaPlayer.player.currentTime : (mediaPlayer.player.duration || audio.duration) | duration"></span>
 		</div>
 	</div>
@@ -24,7 +25,7 @@
 	    <div class="progress-bar progress-bar-success" ng-style="{width: mediaPlayer.player.currentTime / (mediaPlayer.player.duration || audio.duration) * 100 + '%'}"></div>
 	  </div>
 	</div>
-	<audio ng-if="audio.url" media-player="mediaPlayer.player" autoplay="autoplay">
+	<audio ng-if="audio.url" media-player="mediaPlayer.player">
 	  <source ng-src="{{::audio.url}}" type="audio/ogg" />
 	</audio>
 </div>

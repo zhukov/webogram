@@ -1456,6 +1456,9 @@ img.im_message_document_thumb {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.audio_player_title:hover {
+  color: #222;
+}
 .audio_player_meta {
   overflow: hidden;
   vertical-align: text-top;
