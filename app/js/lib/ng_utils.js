@@ -365,7 +365,7 @@ angular.module('izhukov.utils', [])
 
     var deferred = $q.defer();
 
-    $window.requestFileSystem($window.TEMPORARY, 5*1024*1024, function (fs) {
+    $window.requestFileSystem($window.TEMPORARY, 500 * 1024 * 1024, function (fs) {
       cachedFs = fs;
       deferred.resolve();
     }, function (e) {
@@ -423,9 +423,11 @@ angular.module('izhukov.utils', [])
           }
           deferred.resolve(fileWriter);
         }, function (error) {
+          storageIsAvailable = false;
           deferred.reject(error);
         });
       }, function (error) {
+        storageIsAvailable = false;
         deferred.reject(error);
       });
 
