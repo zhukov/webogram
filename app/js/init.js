@@ -99,7 +99,9 @@
     switch (layout) {
       case 'mobile': Config.Mobile = true; break;
       case 'desktop': Config.Mobile = false; break;
-      default: Config.Mobile = Config.Navigator.mobile; break;
+      default:
+        Config.Mobile = Config.Navigator.mobile || $(window).width() < 480;
+        break;
     }
     $('head').append(
       '<link rel="stylesheet" href="css/' + (Config.Mobile ? 'mobile.css' : 'desktop.css') + '" />'
