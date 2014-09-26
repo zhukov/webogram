@@ -2519,6 +2519,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
         }
       }
+      $scope.countries.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
+      });
 
     });
   })
