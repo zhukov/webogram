@@ -425,7 +425,7 @@ input[type="number"] {
 .modal-close-button i {
   display: inline-block;
   background: url(../img/icons/IconsetW.png) -15px -320px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   width: 12px;
   height: 12px;
   margin: 21px;
@@ -877,7 +877,7 @@ input.tg_range::-moz-range-thumb {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -905,7 +905,7 @@ input.tg_range::-moz-range-thumb {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -1111,7 +1111,7 @@ a.im_dialog_selected .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1273,7 +1273,7 @@ div.im_message_video_thumb {
   height: 42px;
 
   background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   z-index: 1;
 }
 .is_1x .icon-videoplay {
@@ -1300,7 +1300,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1361,7 +1361,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1439,6 +1439,22 @@ img.im_message_document_thumb {
   height: 38px;
   border-radius: 3px;
   margin-right: 12px;
+}
+.audio_player_btn_icon {
+  display: block;
+  width: 13px;
+  height: 18px;
+  background: url(../img/icons/IconsetW.png) -15px -898px no-repeat;
+  background-size: 42px 971px;
+}
+.is_1x .audio_player_btn_icon {
+  background-image: url(../img/icons/IconsetW_1x.png);
+}
+.audio_player_btn_icon_pause {
+  background-position: -15px -924px;
+}
+.audio_player_btn_icon_cancel {
+  background-position: -15px -948px;
 }
 .audio_player_title_wrap {
   overflow: hidden;
@@ -1698,7 +1714,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1726,7 +1742,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1775,7 +1791,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -2114,7 +2130,7 @@ a:hover .icon-twitter {
   font-size: 12px;
   line-height: normal;
   background: url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border: 1px solid #d9dbde;
   border-radius: 3px;
   padding: 6px 15px 6px 30px;
@@ -2133,7 +2149,7 @@ a:hover .icon-twitter {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2249,7 +2265,7 @@ img.chat_modal_participant_photo {
   width: 25px;
   height: 25px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -2330,7 +2346,7 @@ img.chat_modal_participant_photo {
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -2449,7 +2465,7 @@ ce671b orange
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -2472,7 +2488,7 @@ ce671b orange
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.6;
 }
 .is_1x .countries_modal_search_clear {
