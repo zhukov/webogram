@@ -304,6 +304,7 @@
 	"login_controller_unknown_country": "Unknown",
 
 	"message_forwarded_message": "Forwarded message",
+	"message_forwarded_message_mobile": "Forwarded from {from}, {date}",
 
 	"message_attach_audio_message": "Voice message",
 	"message_attach_audio_play": "Play",

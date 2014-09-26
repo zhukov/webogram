@@ -425,7 +425,7 @@ input[type="number"] {
 .modal-close-button i {
   display: inline-block;
   background: url(../img/icons/IconsetW.png) -15px -320px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   width: 12px;
   height: 12px;
   margin: 21px;
@@ -877,7 +877,7 @@ input.tg_range::-moz-range-thumb {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -905,7 +905,7 @@ input.tg_range::-moz-range-thumb {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -1111,7 +1111,7 @@ a.im_dialog_selected .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1194,57 +1194,7 @@ a.im_dialog_selected .im_dialog_date {
 .non_osx .im_message_fwd_author {
   font-size: 12px;
 }
-.im_grouped_short .im_message_from_photo,
-.im_grouped_short .im_message_author,
-.im_grouped .im_message_from_photo,
-.im_grouped .im_message_author,
-.im_grouped_fwd .im_message_author,
-.im_grouped_fwd .im_message_from_photo,
-.im_grouped_fwd_short .im_message_author,
-.im_grouped_fwd_short .im_message_from_photo {
-  display: none;
-}
-.im_grouped_short .im_message_body,
-.im_grouped .im_message_body,
-.im_grouped_fwd .im_message_body,
-.im_grouped_fwd_short .im_message_body {
-  margin-left: 46px;
-}
-.im_grouped_short .im_content_message_select_area,
-.im_grouped .im_content_message_select_area {
-  height: 34px;
-}
-.im_history_appending .im_content_message_select_area {
-  height: 52px;
-}
-.im_grouped_short .icon-select-tick,
-.im_grouped_fwd_short .icon-select-tick {
-  margin-top: 5px;
-}
-.im_grouped_short .icon-message-status,
-.im_grouped_fwd_short .icon-message-status {
-  margin-top: 5px;
-}
-.im_grouped_fwd .im_message_fwd_from,
-.im_grouped_fwd_short .im_message_fwd_from {
-  display: none;
-}
 
-.im_grouped_short .im_message_fwd .im_message_date,
-.im_grouped .im_message_fwd .im_message_date,
-.im_grouped_fwd .im_message_fwd .im_message_date,
-.im_grouped_fwd_short .im_message_fwd .im_message_date {
-  display: none;
-}
-
-.im_grouped_fwd .im_message_fwd,
-.im_grouped_fwd_short .im_message_fwd {
-  margin-top: 8px;
-}
-.im_grouped_fwd .im_message_fwd,
-.im_grouped_fwd_short .im_message_fwd {
-  margin-top: 8px;
-}
 
 .im_message_from_photo,
 .im_message_contact_photo,
@@ -1323,7 +1273,7 @@ div.im_message_video_thumb {
   height: 42px;
 
   background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   z-index: 1;
 }
 .is_1x .icon-videoplay {
@@ -1350,7 +1300,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1392,12 +1342,14 @@ div.im_message_video_thumb {
 }
 
 .im_message_document,
-.im_message_audio,
 .im_message_upload_file {
   margin-top: 3px;
   border-radius: 3px;
   display: inline-block;
   width: 340px;
+}
+.im_message_audio {
+  margin-top: 3px;
 }
 .icon-document,
 .icon-photo,
@@ -1409,7 +1361,7 @@ div.im_message_video_thumb {
   vertical-align: text-top;
 
   background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border-radius: 3px;
   margin-right: 10px;
 }
@@ -1478,44 +1430,39 @@ img.im_message_document_thumb {
   color: #999;
   padding-left: 2px;
 }
-.im_message_document_actions a {
+.im_message_document_actions a,
+.audio_player_actions a {
   margin-right: 10px;
 }
-
-.icon-audio {
-  display: block;
-  float: left;
+.audio_player_button {
   width: 38px;
   height: 38px;
-  vertical-align: text-top;
-
-  background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -277px no-repeat;
-  background-size: 42px 891px;
   border-radius: 3px;
-  margin-right: 10px;
+  margin-right: 12px;
 }
-.is_1x .icon-audio {
+.audio_player_btn_icon {
+  display: block;
+  width: 13px;
+  height: 18px;
+  background: url(../img/icons/IconsetW.png) -15px -898px no-repeat;
+  background-size: 42px 971px;
+}
+.is_1x .audio_player_btn_icon {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.im_message_selected .icon-audio,
-.im_history_selectable .im_message_outer_wrap:hover .icon-audio {
-  background-color: #dae6f0;
-  background-position: -2px -697px;
+.audio_player_btn_icon_pause {
+  background-position: -15px -924px;
 }
-
-
-.im_message_audio_info {
-  float: left;
-  width: 292px;
+.audio_player_btn_icon_cancel {
+  background-position: -15px -948px;
 }
-.im_message_audio_name_wrap {
+.audio_player_title_wrap {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 290px;
   padding: 0 0 1px;
 }
-.im_message_audio_name {
+.audio_player_title {
   color: #222;
   display: inline-block;
   font-weight: bold;
@@ -1525,15 +1472,18 @@ img.im_message_document_thumb {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.im_message_audio_duration,
-.im_message_audio_size {
+.audio_player_title:hover {
+  color: #222;
+}
+.audio_player_meta {
+  overflow: hidden;
+  vertical-align: text-top;
+  display: inline-block;
+}
+.audio_player_size,
+.audio_player_duration {
   color: #999;
   padding-left: 2px;
-}
-.im_message_audio_info audio {
-  width: 100%;
-  height: 38px;
-  line-height: 38px;
 }
 
 .im_message_upload_progress_wrap,
@@ -1541,9 +1491,14 @@ img.im_message_document_thumb {
   margin-top: 5px;
   width: 290px;
 }
+.audio_player_progress_wrap {
+  margin-top: 5px;
+  max-width: 290px;
+  border-radius: 2px;
+  overflow: hidden;
+}
 
 .im_message_document_thumbed .im_message_document_name_wrap,
-.im_message_document_thumbed .im_message_audio_name_wrap,
 .im_message_document_thumbed .im_message_upload_progress_wrap,
 .im_message_document_thumbed .im_message_download_progress_wrap {
   width: 230px;
@@ -1566,7 +1521,8 @@ img.im_message_document_thumb {
 }
 
 .tg_up_progress,
-.tg_down_progress {
+.tg_down_progress,
+.tg_play_progress {
   height: 5px;
   margin: 0;
   padding: 0;
@@ -1577,7 +1533,8 @@ img.im_message_document_thumb {
   box-shadow: none;
 }
 .tg_up_progress .progress-bar,
-.tg_down_progress .progress-bar {
+.tg_down_progress .progress-bar,
+.tg_play_progress .progress-bar {
   height: 5px;
   line-height: 5px;
   background: #6B9ABD;
@@ -1585,6 +1542,18 @@ img.im_message_document_thumb {
   overflow: hidden;
   -webkit-box-shadow: none;
   box-shadow: none;
+}
+.tg_play_progress {
+  background: #e4e9ed;
+  border-radius: 2px;
+}
+.tg_play_progress .progress-bar {
+  background: #628fb2;
+  border-radius: 2px;
+  /*-webkit-transition: width 1s linear;
+  transition: width 1s linear;*/
+  -webkit-transition: none;
+  transition: none;
 }
 
 
@@ -1626,23 +1595,10 @@ div.im_message_body {
   display: block;
   overflow: hidden;
 }
-.im_message_fwd_from {
-  margin-top: 5px;
-}
-.im_grouped .im_message_fwd_from {
-  margin-top: 0;
-}
-.im_message_fwd {
-  margin-top: 4px;
-  margin-bottom: 4px;
-}
 
 a.im_message_fwd_photo {
   position: absolute;
   margin-top: 1px;
-}
-.im_message_fwd_author {
-  margin-right: 5px;
 }
 .im_message_fwd_date {
   padding: 0;
@@ -1758,7 +1714,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1786,7 +1742,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1835,7 +1791,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -2174,7 +2130,7 @@ a:hover .icon-twitter {
   font-size: 12px;
   line-height: normal;
   background: url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border: 1px solid #d9dbde;
   border-radius: 3px;
   padding: 6px 15px 6px 30px;
@@ -2193,7 +2149,7 @@ a:hover .icon-twitter {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2309,7 +2265,7 @@ img.chat_modal_participant_photo {
   width: 25px;
   height: 25px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -2378,8 +2334,8 @@ img.chat_modal_participant_photo {
 
 .im_message_focus .im_message_date,
 .im_message_focus .im_message_document_size,
-.im_message_focus .im_message_audio_duration,
-.im_message_focus .im_message_audio_size,
+.im_message_focus .audio_player_duration,
+.im_message_focus .audio_player_size,
 .im_message_focus .im_message_fwd_date {
   color: #68839c;
 }
@@ -2390,7 +2346,7 @@ img.chat_modal_participant_photo {
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -2509,7 +2465,7 @@ ce671b orange
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -2532,7 +2488,7 @@ ce671b orange
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 891px;
+  background-size: 42px 971px;
   opacity: 0.6;
 }
 .is_1x .countries_modal_search_clear {
