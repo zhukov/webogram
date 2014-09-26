@@ -1936,7 +1936,7 @@ angular.module('myApp.services', ['myApp.i18n'])
       switch (message.media._) {
         case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo'); break;
         case 'messageMediaVideo': notificationMessage = _('conversation_media_video'); break;
-        case 'messageMediaDocument': notificationMessage = _('conversation_media_document'); break;
+        case 'messageMediaDocument': notificationMessage = message.media.document.file_name || _('conversation_media_document'); break;
         case 'messageMediaAudio': notificationMessage = _('conversation_media_audio'); break;
         case 'messageMediaGeo': notificationMessage = _('conversation_media_location'); break;
         case 'messageMediaContact': notificationMessage = _('conversation_media_contact'); break;

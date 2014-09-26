@@ -1824,6 +1824,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   .directive('myAudioPlayer', function ($sce, $timeout, $q, FileManager, MtpApiFileManager) {
 
+    var currentPlayer = false;
+
     return {
       link: link,
       scope: {
@@ -1859,6 +1861,16 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
 
+    function checkPlayer (newPlayer) {
+      if (newPlayer === currentPlayer) {
+        return false;
+      }
+      if (currentPlayer) {
+        currentPlayer.pause();
+      }
+      currentPlayer = newPlayer;
+    }
+
     function link($scope, element, attrs) {
       $scope.mediaPlayer = {};
 
@@ -1872,6 +1884,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.togglePlay = function () {
         if ($scope.audio.url) {
+          checkPlayer($scope.mediaPlayer.player);
           $scope.mediaPlayer.player.playPause();
         }
         else if ($scope.audio.progress && $scope.audio.progress.enabled) {
@@ -1880,6 +1893,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         else {
           downloadAudio($scope.audio).then(function () {
             onContentLoaded(function () {
+              checkPlayer($scope.mediaPlayer.player);
               $scope.mediaPlayer.player.play();
             })
           })

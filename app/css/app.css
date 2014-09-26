@@ -1545,11 +1545,11 @@ img.im_message_document_thumb {
 }
 .tg_play_progress {
   background: #e4e9ed;
-  border-radius: 2px;
+  border-radius: 1px;
 }
 .tg_play_progress .progress-bar {
   background: #628fb2;
-  border-radius: 2px;
+  border-radius: 1px;
   /*-webkit-transition: width 1s linear;
   transition: width 1s linear;*/
   -webkit-transition: none;
