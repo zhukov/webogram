@@ -1414,6 +1414,9 @@ img.im_message_document_thumb {
   width: 290px;
   padding: 0 0 1px;
 }
+.im_message_document_actions {
+  width: 290px;
+}
 
 
 .im_message_document_name {
@@ -1500,14 +1503,16 @@ img.im_message_document_thumb {
 
 .im_message_document_thumbed .im_message_document_name_wrap,
 .im_message_document_thumbed .im_message_upload_progress_wrap,
-.im_message_document_thumbed .im_message_download_progress_wrap {
+.im_message_document_thumbed .im_message_download_progress_wrap,
+.im_message_document_thumbed .im_message_document_actions {
   width: 230px;
 }
 .im_message_document_thumbed .im_message_document_name {
   max-width: 150px;
 }
 .im_message_video .im_message_document_name_wrap,
-.im_message_video .im_message_download_progress_wrap {
+.im_message_video .im_message_download_progress_wrap,
+.im_message_video .im_message_document_actions {
   width: 150px;
 }
 .im_message_video .im_message_document_name_wrap {

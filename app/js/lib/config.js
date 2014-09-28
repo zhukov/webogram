@@ -43,7 +43,7 @@ Config.Navigator = {
 
 Config.I18n = {
   locale: 'en-us',
-  supported: ['en-us', 'es-es', 'de-de'],
+  supported: ["en-us", "es-es", "de-de"], // To be copied to package.json
   languages: {
     'en-us': 'English',
     'de-de': 'Deutsch',

@@ -21,7 +21,7 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
   return gulp.src('app/index.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.ngmin(), $.uglify(/*{outSourceMap: true}*/)],
+      js: ['concat', $.ngmin(), $.uglify({outSourceMap: false})],
       css: [$.minifyCss(), 'concat']
     }))
     .pipe(gulp.dest('dist'));
@@ -51,6 +51,8 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist/js/lib')),
     gulp.src('app/vendor/closure/long.js')
       .pipe(gulp.dest('dist/vendor/closure')),
+    gulp.src(['app/css/desktop.css', 'app/css/mobile.css'])
+      .pipe(gulp.dest('dist/css')),
     gulp.src('app/vendor/jsbn/jsbn_combined.js')
       .pipe(gulp.dest('dist/vendor/jsbn')),
     gulp.src('app/vendor/leemon_bigint/bigint.js')
@@ -59,6 +61,22 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist/vendor/cryptoJS')),
     gulp.src('app/js/background.js')
       .pipe(gulp.dest('dist/js'))
+  );
+});
+
+gulp.task('copy-locales', function() {
+  var langpackSrc = [],
+      ngSrc = [];
+
+  pj.locales.forEach(function (locale) {
+    langpackSrc.push('app/js/locales/' + locale + '.json');
+    ngSrc.push('app/vendor/angular/i18n/angular-locale_' + locale + '.js');
+  });
+  return es.concat(
+    gulp.src(langpackSrc)
+      .pipe(gulp.dest('dist/js/locales/')),
+    gulp.src(ngSrc)
+      .pipe(gulp.dest('dist/vendor/angular/i18n/'))
   );
 });
 
@@ -192,7 +210,7 @@ gulp.task('bump', ['update-version-manifests', 'update-version-config'], functio
   gulp.start('update-version-comments');
 });
 
-gulp.task('build', ['usemin', 'copy', 'copy-images'], function () {
+gulp.task('build', ['usemin', 'copy', 'copy-locales', 'copy-images'], function () {
   gulp.start('disable-production');
 });
 gulp.task('package', ['cleanup-dist']);
