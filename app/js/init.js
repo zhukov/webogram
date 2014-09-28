@@ -78,7 +78,7 @@
         defaultLocale = 'en-us',
         bootReady = {
           dom: false,
-          i18n_ng: locale == defaultLocale, // Already included
+          i18n_ng: false,
           i18n_messages: false,
           i18n_fallback: false
         },
@@ -114,15 +114,7 @@
     if (Config.I18n.supported.indexOf(locale) != -1) {
       Config.I18n.locale = locale;
     }
-
-    if (!bootReady.i18n_ng) {
-      $('<script>').appendTo('head')
-      .on('load', function() {
-        bootReady.i18n_ng = true;
-        checkReady();
-      })
-      .attr('src', 'vendor/angular/i18n/angular-locale_' + Config.I18n.locale + '.js');
-    }
+    bootReady.i18n_ng = Config.I18n.locale == defaultLocale; // Already included
 
     $.getJSON('js/locales/' + Config.I18n.locale + '.json').success(function (json) {
       Config.I18n.messages = json;
@@ -143,7 +135,16 @@
 
     $(document).ready(function() {
       bootReady.dom = true;
-      checkReady();
+      if (!bootReady.i18n_ng) { // onDOMready because needs to be after angular
+        $('<script>').appendTo('body')
+        .on('load', function() {
+          bootReady.i18n_ng = true;
+          checkReady();
+        })
+        .attr('src', 'vendor/angular/i18n/angular-locale_' + Config.I18n.locale + '.js');
+      } else {
+        checkReady();
+      }
     });
   });
 })();
