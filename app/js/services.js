@@ -1728,7 +1728,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     if (toID < 0) {
       return toID;
-    } else if (message.out) {
+    } else if (message.out || message.flags & 2) {
       return toID;
     }
     return message.from_id;
@@ -2032,10 +2032,6 @@ angular.module('myApp.services', ['myApp.i18n'])
             peerID = getMessagePeer(message),
             historyStorage = historiesStorage[peerID];
 
-        if (!message.out) {
-          AppUsersManager.forceUserOnline(message.from_id);
-        }
-
         if (historyStorage !== undefined) {
           var topMsgID = historiesStorage[peerID].history[0];
           if (historiesStorage[peerID].history.indexOf(message.id) != -1) {
@@ -2054,6 +2050,10 @@ angular.module('myApp.services', ['myApp.i18n'])
         }
 
         saveMessages([message]);
+
+        if (!message.out) {
+          AppUsersManager.forceUserOnline(message.from_id);
+        }
 
         if (historyStorage.count !== null) {
           historyStorage.count++;
