@@ -1143,7 +1143,8 @@ angular.module('myApp.services', ['myApp.i18n'])
     return MtpApiManager.invokeApi(method, {
       peer: inputPeer,
       offset: affectedHistory.offset,
-      max_id: 0
+      max_id: 0,
+      read_contents: true
     }).then(function (affectedHistory) {
       return processAffectedHistory(inputPeer, affectedHistory, method);
     });
@@ -1185,7 +1186,8 @@ angular.module('myApp.services', ['myApp.i18n'])
     historyStorage.readPromise = MtpApiManager.invokeApi('messages.readHistory', {
       peer: inputPeer,
       offset: 0,
-      max_id: 0
+      max_id: 0,
+      read_contents: true
     }).then(function (affectedHistory) {
       return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
     }).then(function () {
@@ -1241,6 +1243,8 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   function saveMessages (apiMessages) {
     angular.forEach(apiMessages, function (apiMessage) {
+      apiMessage.unread = apiMessage.flags & 1 ? true : false;
+      apiMessage.out = apiMessage.flags & 2 ? true : false;
       messagesStorage[apiMessage.id] = apiMessage;
 
       apiMessage.date -= serverTimeOffset;
@@ -1281,8 +1285,7 @@ angular.module('myApp.services', ['myApp.i18n'])
         id: messageID,
         from_id: fromID,
         to_id: AppPeersManager.getOutputPeer(peerID),
-        out: true,
-        unread: true,
+        flags: 3,
         date: tsNow(true) + serverTimeOffset,
         message: text,
         media: {_: 'messageMediaEmpty'},
@@ -1406,8 +1409,7 @@ angular.module('myApp.services', ['myApp.i18n'])
         id: messageID,
         from_id: fromID,
         to_id: AppPeersManager.getOutputPeer(peerID),
-        out: true,
-        unread: true,
+        flags: 3,
         date: tsNow(true) + serverTimeOffset,
         message: '',
         media: media,
@@ -1548,8 +1550,7 @@ angular.module('myApp.services', ['myApp.i18n'])
         id: messageID,
         from_id: fromID,
         to_id: AppPeersManager.getOutputPeer(peerID),
-        out: true,
-        unread: true,
+        flags: 3,
         date: tsNow(true) + serverTimeOffset,
         message: '',
         media: media,
@@ -2182,6 +2183,7 @@ angular.module('myApp.services', ['myApp.i18n'])
               id: messageID,
               from_id: message.from_id,
               to_id: message.to_id,
+              flags: message.flags,
               out: message.out,
               unread: message.unread,
               date: message.date
@@ -2937,8 +2939,7 @@ angular.module('myApp.services', ['myApp.i18n'])
             id: updateMessage.id,
             from_id: updateMessage.from_id,
             to_id: AppPeersManager.getOutputPeer(MtpApiManager.getUserID()),
-            out: false,
-            unread: true,
+            flags: 1,
             date: updateMessage.date,
             message: updateMessage.message,
             media: {_: 'messageMediaEmpty'}
@@ -2961,8 +2962,7 @@ angular.module('myApp.services', ['myApp.i18n'])
             id: updateMessage.id,
             from_id: updateMessage.from_id,
             to_id: AppPeersManager.getOutputPeer(-updateMessage.chat_id),
-            out: false,
-            unread: true,
+            flags: 1,
             date: updateMessage.date,
             message: updateMessage.message,
             media: {_: 'messageMediaEmpty'}

@@ -98,9 +98,9 @@ chatPhotoEmpty#37c1011c = ChatPhoto;
 chatPhoto#6153276a photo_small:FileLocation photo_big:FileLocation = ChatPhoto;
 
 messageEmpty#83e5de54 id:int = Message;
-message#22eb6aba id:int from_id:int to_id:Peer out:Bool unread:Bool date:int message:string media:MessageMedia = Message;
-messageForwarded#5f46804 id:int fwd_from_id:int fwd_date:int from_id:int to_id:Peer out:Bool unread:Bool date:int message:string media:MessageMedia = Message;
-messageService#9f8d60bb id:int from_id:int to_id:Peer out:Bool unread:Bool date:int action:MessageAction = Message;
+message#567699b3 flags:int id:int from_id:int to_id:Peer date:int message:string media:MessageMedia = Message;
+messageForwarded#a367e716 flags:int id:int fwd_from_id:int fwd_date:int from_id:int to_id:Peer date:int message:string media:MessageMedia = Message;
+messageService#1d86f70e flags:int id:int from_id:int to_id:Peer date:int action:MessageAction = Message;
 
 messageMediaEmpty#3ded6320 = MessageMedia;
 messageMediaPhoto#c8c45a2a photo:Photo = MessageMedia;
@@ -231,8 +231,8 @@ updateMessageID#4e90bfd6 id:int random_id:long = Update;
 updateReadMessages#c6649e31 messages:Vector<int> pts:int = Update;
 updateDeleteMessages#a92bfe26 messages:Vector<int> pts:int = Update;
 updateRestoreMessages#d15de04d messages:Vector<int> pts:int = Update;
-updateUserTyping#6baa8508 user_id:int = Update;
-updateChatUserTyping#3c46cfe6 chat_id:int user_id:int = Update;
+updateUserTyping#5c486927 user_id:int action:SendMessageAction = Update;
+updateChatUserTyping#9a65ea1f chat_id:int user_id:int action:SendMessageAction = Update;
 updateChatParticipants#7761198 participants:ChatParticipants = Update;
 updateUserStatus#1bfbd823 user_id:int status:UserStatus = Update;
 updateUserName#da22d9ad user_id:int first_name:string last_name:string = Update;
@@ -378,6 +378,17 @@ updateNotifySettings#bec268ef peer:NotifyPeer notify_settings:PeerNotifySettings
 
 auth.sentAppCode#e325edcf phone_registered:Bool phone_code_hash:string send_call_timeout:int is_password:Bool = auth.SentCode;
 
+sendMessageTypingAction#16bf744e = SendMessageAction;
+sendMessageCancelAction#fd5ec8f5 = SendMessageAction;
+sendMessageRecordVideoAction#a187d66f = SendMessageAction;
+sendMessageUploadVideoAction#92042ff7 = SendMessageAction;
+sendMessageRecordAudioAction#d52f73f7 = SendMessageAction;
+sendMessageUploadAudioAction#e6ac8a6f = SendMessageAction;
+sendMessageUploadPhotoAction#990a3c1a = SendMessageAction;
+sendMessageUploadDocumentAction#8faee98e = SendMessageAction;
+sendMessageGeoLocationAction#176f8ba1 = SendMessageAction;
+sendMessageChooseContactAction#628cbc6f = SendMessageAction;
+
 ---functions---
 
 invokeAfterMsg#cb9f372d msg_id:long query:!X = X;
@@ -425,12 +436,12 @@ messages.getMessages#4222fa74 id:Vector<int> = messages.Messages;
 messages.getDialogs#eccf1df6 offset:int max_id:int limit:int = messages.Dialogs;
 messages.getHistory#92a1df2f peer:InputPeer offset:int max_id:int limit:int = messages.Messages;
 messages.search#7e9f2ab peer:InputPeer q:string filter:MessagesFilter min_date:int max_date:int offset:int max_id:int limit:int = messages.Messages;
-messages.readHistory#b04f2510 peer:InputPeer max_id:int offset:int = messages.AffectedHistory;
+messages.readHistory#eed884c6 peer:InputPeer max_id:int offset:int read_contents:Bool = messages.AffectedHistory;
 messages.deleteHistory#f4f8fb61 peer:InputPeer offset:int = messages.AffectedHistory;
 messages.deleteMessages#14f2dd0a id:Vector<int> = Vector<int>;
 messages.restoreMessages#395f9d7e id:Vector<int> = Vector<int>;
 messages.receivedMessages#28abcb68 max_id:int = Vector<int>;
-messages.setTyping#719839e9 peer:InputPeer typing:Bool = Bool;
+messages.setTyping#a3825e50 peer:InputPeer action:SendMessageAction = Bool;
 messages.sendMessage#4cde0aab peer:InputPeer message:string random_id:long = messages.SentMessage;
 messages.sendMedia#a3c85d76 peer:InputPeer media:InputMedia random_id:long = messages.StatedMessage;
 messages.forwardMessages#514cd10f peer:InputPeer id:Vector<int> = messages.StatedMessages;
@@ -494,4 +505,6 @@ help.getSupport#9cdf08cd = help.Support;
 
 auth.sendSms#da9f3e8 phone_number:string phone_code_hash:string = Bool;
 
-invokeWithLayer16#cf5f0987 query:!X = X;
+messages.readMessageContents#354b5bc2 id:Vector<int> = Vector<int>;
+
+invokeWithLayer17#50858a19 query:!X = X;
