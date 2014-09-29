@@ -37,7 +37,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var dateFilter = $filter('myDate'),
         dateSplitHtml = '<div class="im_message_date_split im_service_message_wrap"><div class="im_service_message"></div></div>',
-        unreadSplitHtml = '<div class="im_message_unread_split">Unread messages</div>',
+        unreadSplitHtml = '<div class="im_message_unread_split" my-i18n="unread_messages_split"></div>',
         selectedClass = 'im_message_selected',
         focusClass = 'im_message_focus',
         unreadClass =  'im_message_unread',

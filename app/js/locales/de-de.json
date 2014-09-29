@@ -66,6 +66,7 @@
     "error_image_download_failed": "Download fehlgeschlagen",
     "error_browser_no_local_file_system_video_md": "Dein Browser unterstützt nicht die {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem}-Funktion, welche zum Abspielen dieses Videos benötigt wird.\nBitte installiere {chrome-link: http://google.com/chrome | Google Chrome} oder benutze stattdessen die {telegram-link: https://telegram.org/ | mobile App}.",
     "error_video_download_failed": "Videodownload fehlgeschlagen",
+    "unread_messages_split": "ungelesene Nachrichten",
     "user_name_deleted": "Gelöscht",
     "user_first_name_deleted": "Gelöscht",
     "user_status_offline": "offline",
