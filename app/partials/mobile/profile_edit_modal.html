@@ -8,7 +8,7 @@
 
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right">
-              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'Saving...' : 'Save'" ng-disabled="profile.updating"></a>
+              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="profile.updating"></a>
             </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
