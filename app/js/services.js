@@ -2713,9 +2713,9 @@ angular.module('myApp.services', ['myApp.i18n'])
     doc.thumb = thumb;
 
     doc.canDownload = !(window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry);
-    doc.withPreview = doc.canDownload && doc.thumb && doc.mime_type.match(/^(image\/|application\/pdf)/) ? 1 : 0;
+    doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/|application\/pdf)/) ? 1 : 0;
 
-    if (doc.withPreview && isGif) {
+    if (isGif && doc.withPreview && doc.thumb) {
       doc.isSpecial = 'gif';
     }
     else if (isAudio) {
