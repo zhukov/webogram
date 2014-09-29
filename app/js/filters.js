@@ -63,7 +63,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks),
-          format = 'HH:mm';
+          format = 'shortTime';
 
       if (diff > 518400000) { // 6 days
         format = 'shortDate';
@@ -78,7 +78,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
   .filter('time', ['$filter', function($filter) {
     var cachedDates = {},
         dateFilter = $filter('date'),
-        format = Config.Mobile ? 'HH:mm' : 'HH:mm:ss';
+        format = Config.Mobile ? 'shortTime' : 'mediumTime';
 
     return function (timestamp) {
       if (cachedDates[timestamp]) {
