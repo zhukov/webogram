@@ -8,15 +8,13 @@
 
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right">
-              <a ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'Saving...' : 'Save'" ng-disabled="progress.enabled"></a>
+              <a ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'contact_edit_modal_submit_active' : 'contact_edit_modal_submit'| i18n" ng-disabled="progress.enabled"></a>
             </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title">
-                  <h4>
-                    Edit contact
-                  </h4>
+                  <h4 my-i18n="contact_edit_modal_title"></h4>
                 </div>
               </a>
             </li>
@@ -36,10 +34,10 @@
         <span class="form-control uneditable_input input-lg disabled" disabled my-focused type="text" ng-bind="importContact.phone | phoneNumber"></span>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="First name" ng-model="importContact.first_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name"/>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="Last name" ng-model="importContact.last_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name"/>
       </div>
 
     </form>

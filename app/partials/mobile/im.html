@@ -7,14 +7,14 @@
     <div ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}" class="im_dialogs_col_wrap">
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
-          <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="Search" ng-model="search.query"/>
+          <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
           <a class="im_dialogs_search_clear" ng-click="searchClear()" ng-show="search.query.length"></a>
         </div>
 
         <div class="im_dialogs_tabs_wrap">
           <div class="im_dialogs_tabs clearfix">
-            <a href="" class="im_dialogs_tab" ng-class="{active: !search.messages}" ng-click="search.messages = false">Conversations</a>
-            <a href="" class="im_dialogs_tab" ng-class="{active: search.messages}" ng-click="search.messages = true">Messages</a>
+            <a href="" class="im_dialogs_tab" ng-class="{active: !search.messages}" ng-click="search.messages = false" my-i18n="im_conversations"></a>
+            <a href="" class="im_dialogs_tab" ng-class="{active: search.messages}" ng-click="search.messages = true" my-i18n="im_messages"></a>
           </div>
         </div>
       </div>
@@ -22,14 +22,10 @@
       <div my-dialogs-list-mobile class="im_dialogs_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
 
         <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts" my-vertical-position="0.4">
-          <h3 class="im_dialogs_empty_header">No contacts yet</h3>
-          <p class="im_dialogs_empty_lead">Get started by adding a contact to chat with</p>
-          <button type="button" class="btn btn-primary btn-block im_dialogs_add_contact" ng-click="importContact()">
-            Add contact
-          </button>
-          <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-block im_dialogs_import_phonebook" ng-click="importPhonebook()">
-            Import phonebook
-          </button>
+          <h3 class="im_dialogs_empty_header" my-i18n="im_no_contacts"></h3>
+          <p class="im_dialogs_empty_lead" my-i18n="im_get_started_long"></p>
+          <button type="button" class="btn btn-primary btn-block im_dialogs_add_contact" ng-click="importContact()" my-i18n="im_add_contact"> </button>
+          <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-block im_dialogs_import_phonebook" ng-click="importPhonebook()" my-i18n="im_import_phonebook"></button>
         </div>
 
         <div ng-switch="search.messages">
@@ -42,7 +38,7 @@
         </div>
 
         <div class="im_dialogs_contacts_wrap" ng-show="!search.messages &amp;&amp; contacts.length > 0">
-          <h5>Contacts</h5>
+          <h5 my-i18n="im_contacts_title"></h5>
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
               <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
@@ -70,7 +66,7 @@
 
     <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35" padding="true">
-        Loading history<span my-loading-dots></span>
+        <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
       </div>
 
       <div ng-show="state.loaded">
@@ -81,8 +77,10 @@
             <div class="im_history_scrollable">
                 <div class="im_history" ng-class="{im_history_selectable: historyState.selectActions}">
                   <div ng-if="state.empty"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
-                    <span ng-switch-when="true">Loading history<span my-loading-dots></span></span>
-                    <span ng-switch-default>No messages here yet...</span>
+                    <span ng-switch-when="true">
+                      <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
+                    </span>
+                    <span ng-switch-default my-i18n="im_no_messages"></span>
                   </div>
 
                   <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
@@ -100,12 +98,10 @@
           <div class="im_bottom_panel_wrap">
 
             <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
-              <div class="im_edit_selected_actions">
-                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount">
-                  Forward <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
-                </a><a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount">
-                  Delete <strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong>
-                </a>
+              <div class="im_edit_selected_actions" my-i18n>
+                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
+                <a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete"></a>
+                <my-i18n-param name="count"><strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong></my-i18n-param>
               </div>
             </div>
 
@@ -117,16 +113,16 @@
                   <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}" ng-submit="sendMessage($event)">
 
                     <div class="im_send_field_wrap">
-                      <div class="im_send_dropbox_wrap"> Drop photos here to send </div>
-                      <textarea ng-model="draftMessage.text" placeholder="Write a message..." class="form-control im_message_field no_outline"></textarea>
+                      <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
+                      <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline"></textarea>
                     </div>
 
                     <div class="im_attach pull-right">
-                      <input type="file" class="im_attach_input" size="28" multiple="true" title="Send file" />
+                      <input type="file" class="im_attach_input" size="28" multiple="true" title="{{'im_media_attach_title' | i18n}}" />
                       <i class="icon icon-paperclip"></i>
                     </div>
 
-                    <div class="im_emoji_btn pull-right" title="Insert emoticon">
+                    <div class="im_emoji_btn pull-right" title="{{'im_emoji_btn_title' | i18n}}">
                       <i class="icon icon-emoji"></i>
                     </div>
 
@@ -147,7 +143,4 @@
 
   </div>
 
-
 </div>
-
-<div id="notify_sound"></div>
