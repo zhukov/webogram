@@ -148,7 +148,9 @@
               <div class="im_history_scrollable">
                   <div class="im_history" ng-class="{im_history_selectable: historyState.selectActions}">
                     <div ng-if="state.empty"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
-                      <span ng-switch-when="true"><my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span></span>
+                      <span ng-switch-when="true">
+                        <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
+                      </span>
                       <span ng-switch-default my-i18n="im_no_messages"></span>
                     </div>
 
@@ -187,7 +189,7 @@
                 <span ng-switch-when="true" my-i18n="im_delete_chat"></span>
                 <span ng-switch-default my-i18n="im_clear_history"></span>
               </a>
-              <a class="im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel">Cancel</a>
+              <a class="im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
               <div class="im_edit_selected_actions" my-i18n>
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
                 <a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete"></a>
@@ -256,7 +258,6 @@
     </div>
 
   </div>
-
 
 </div>
 

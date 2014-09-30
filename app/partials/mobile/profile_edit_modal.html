@@ -8,15 +8,13 @@
 
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right">
-              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'Saving...' : 'Save'" ng-disabled="profile.updating"></a>
+              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="profile.updating"></a>
             </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title">
-                  <h4>
-                    Edit Profile
-                  </h4>
+                  <h4 my-i18n="profile_edit_modal_title"></h4>
                 </div>
               </a>
             </li>
@@ -33,10 +31,10 @@
     <form class="modal_simple_form" ng-submit="updateProfile()" my-vertical-position="0.3">
 
       <div class="form-group" ng-class="{'has-error': error.field == 'first_name'}">
-        <input class="form-control input-lg" my-focused type="text" placeholder="First name" ng-model="profile.first_name"  name="first_name"/>
+        <input class="form-control input-lg" my-focused type="text" placeholder="{{'profile_edit_first_name' | i18n}}" ng-model="profile.first_name"  name="first_name"/>
       </div>
       <div class="form-group" ng-class="{'has-error': error.field == 'last_name'}">
-        <input class="form-control input-lg" type="text" placeholder="Last name" ng-model="profile.last_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'profile_edit_last_name' | i18n}}" ng-model="profile.last_name"/>
       </div>
 
     </form>

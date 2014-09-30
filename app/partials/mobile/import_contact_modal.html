@@ -8,15 +8,13 @@
 
           <ul class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-right">
-              <a ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'Importing...' : 'Save'" ng-disabled="progress.enabled"></a>
+              <a ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'contact_import_modal_submit_active' : 'contact_import_modal_submit' | i18n" ng-disabled="progress.enabled"></a>
             </li>
             <li>
               <a ng-click="$dismiss()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title">
-                  <h4>
-                    Add new contact
-                  </h4>
+                  <h4 my-i18n="contact_import_modal_title"></h4>
                 </div>
               </a>
             </li>
@@ -33,13 +31,13 @@
     <form class="modal_simple_form" ng-submit="doImport()" my-vertical-position="0.3">
 
       <div class="form-group">
-        <input class="form-control input-lg" my-focused type="text" placeholder="Phone number" ng-model="importContact.phone"/>
+        <input class="form-control input-lg" my-focused type="text" placeholder="{{'contact_import_modal_phone' | i18n}}" ng-model="importContact.phone"/>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="First name" ng-model="importContact.first_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name"/>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="Last name" ng-model="importContact.last_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name"/>
       </div>
 
     </form>
@@ -47,7 +45,7 @@
   </div>
 
   <div class="modal-footer" ng-if="phonebookAvailable">
-    <a class="btn btn-link" ng-click="importPhonebook()">Phonebook</a>
+    <a class="btn btn-link" ng-click="importPhonebook()" my-i18n="contact_import_modal_phonebook"></a>
   </div>
 
 </div>
