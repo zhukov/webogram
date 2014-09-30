@@ -169,15 +169,14 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   }])
 
-  .filter('relativeTime', ['$filter', '_', function($filter, _) {
-    var langMinutes = {
-      one: 'relative_time_one_minute',
-      many: 'relative_time_many_minutes'
-    },
-      langHours = {
-        one: 'relative_time_one_hour',
-        many: 'relative_time_many_hours'
-      };
+  .filter('relativeTime', ['$rootScope', '$filter', '$locale', '_', function($rootScope, $filter, $locale, _) {
+    var langMinutes = $rootScope.$eval(
+          _('relative_time_pluralize_minutes_ago')
+        ),
+        langHours = $rootScope.$eval(
+          _('relative_time_pluralize_hours_ago')
+        );
+
     return function (timestamp) {
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks);
@@ -187,11 +186,11 @@ angular.module('myApp.filters', ['myApp.i18n'])
       }
       if (diff < 3000000) {
         var minutes = Math.ceil(diff / 60000);
-        return _(langMinutes[minutes > 1 ? 'many' : 'one'], {minutes: minutes});
+        return (langMinutes[$locale.pluralCat(minutes)] || '').replace('{}', minutes);
       }
       if (diff < 10000000) {
         var hours = Math.ceil(diff / 3600000);
-        return _(langHours[hours > 1 ? 'many' : 'one'], {hours: hours});
+        return (langHours[$locale.pluralCat(hours)] || '').replace('{}', hours);
       }
       return $filter('dateOrTime')(timestamp);
     }

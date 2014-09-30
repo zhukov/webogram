@@ -1935,25 +1935,25 @@ angular.module('myApp.services', ['myApp.i18n'])
       notificationMessage = RichTextProcessor.wrapPlainText(message.message);
     } else if (message.media && message.media._ != 'messageMediaEmpty') {
       switch (message.media._) {
-        case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo'); break;
-        case 'messageMediaVideo': notificationMessage = _('conversation_media_video'); break;
-        case 'messageMediaDocument': notificationMessage = message.media.document.file_name || _('conversation_media_document'); break;
-        case 'messageMediaAudio': notificationMessage = _('conversation_media_audio'); break;
-        case 'messageMediaGeo': notificationMessage = _('conversation_media_location'); break;
-        case 'messageMediaContact': notificationMessage = _('conversation_media_contact'); break;
-        default: notificationMessage = _('conversation_media_attachment'); break;
+        case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo_raw'); break;
+        case 'messageMediaVideo': notificationMessage = _('conversation_media_video_raw'); break;
+        case 'messageMediaDocument': notificationMessage = message.media.document.file_name || _('conversation_media_document_raw'); break;
+        case 'messageMediaAudio': notificationMessage = _('conversation_media_audio_raw'); break;
+        case 'messageMediaGeo': notificationMessage = _('conversation_media_location_raw'); break;
+        case 'messageMediaContact': notificationMessage = _('conversation_media_contact_raw'); break;
+        default: notificationMessage = _('conversation_media_attachment_raw'); break;
       }
     } else if (message._ == 'messageService') {
       switch (message.action._) {
-        case 'messageActionChatCreate': notificationMessage = _('conversation_group_created'); break;
-        case 'messageActionChatEditTitle': notificationMessage = _('conversation_group_renamed'); break;
-        case 'messageActionChatEditPhoto': notificationMessage = _('conversation_group_photo_updated'); break;
-        case 'messageActionChatDeletePhoto': notificationMessage = _('conversation_group_photo_removed'); break;
+        case 'messageActionChatCreate': notificationMessage = _('conversation_group_created_raw'); break;
+        case 'messageActionChatEditTitle': notificationMessage = _('conversation_group_renamed_raw'); break;
+        case 'messageActionChatEditPhoto': notificationMessage = _('conversation_group_photo_updated_raw'); break;
+        case 'messageActionChatDeletePhoto': notificationMessage = _('conversation_group_photo_removed_raw'); break;
         case 'messageActionChatAddUser':
-          notificationMessage = message.action.user_id == message.from_id ? _('conversation_returned_to_group') : _('conversation_invited_user_message');
+          notificationMessage = message.action.user_id == message.from_id ? _('conversation_returned_to_group') : _('conversation_invited_user_message_raw');
           break;
         case 'messageActionChatDeleteUser':
-          notificationMessage = message.action.user_id == message.from_id ? _('conversation_left_group') : _('conversation_kicked_user_message');
+          notificationMessage = message.action.user_id == message.from_id ? _('conversation_left_group') : _('conversation_kicked_user_message_raw');
           break;
       }
     }
@@ -1968,9 +1968,9 @@ angular.module('myApp.services', ['myApp.i18n'])
       peerString = AppUsersManager.getUserString(peerID);
 
     } else {
-      notification.title = (fromUser.first_name || fromUser.last_name || _('conversation_unknown_user')) +
+      notification.title = (fromUser.first_name || fromUser.last_name || _('conversation_unknown_user_raw')) +
                            ' @ ' +
-                           (AppChatsManager.getChat(-peerID).title || _('conversation_unknown_chat'));
+                           (AppChatsManager.getChat(-peerID).title || _('conversation_unknown_chat_raw'));
 
       notificationPhoto = AppChatsManager.getChatPhoto(-peerID, 'Group');
 

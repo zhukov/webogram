@@ -43,15 +43,26 @@ Config.Navigator = {
 
 Config.I18n = {
   locale: 'en-us',
-  supported: ["en-us", "es-es", "de-de"], // To be copied to package.json
+  supported: [
+    "en-us"
+    ,"es-es"
+    ,"de-de"
+    ,"it-it"
+    // ,"ru-ru"
+  ], // To be copied to package.json
   languages: {
     'en-us': 'English',
     'de-de': 'Deutsch',
-    'es-es': 'Español'
+    'es-es': 'Español',
+    'it-it': 'Italiano',
+    'ru-ru': 'Русский'
   },
   aliases: {
     'en': 'en-us',
-    'de': 'de-de'
+    'de': 'de-de',
+    'es': 'es-es',
+    'it': 'it-it',
+    'ru': 'ru-ru'
   },
   messages: {},
   fallback_messages: {}

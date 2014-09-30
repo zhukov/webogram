@@ -82,10 +82,8 @@
 	"chat_title_deleted": "DELETED",
 	"format_size_progress_mulitple": "{done} of {total} {parts}",
 	"format_size_progress": "{done} of {total}",
-	"relative_time_one_minute": "{minutes} minute ago",
-	"relative_time_many_minutes": "{minutes} minutes ago",
-	"relative_time_one_hour": "{hours} hour ago",
-	"relative_time_many_hours": "{hours} hours ago",
+	"relative_time_pluralize_minutes_ago": "{'one': '1 minute ago', 'other': '{} minutes ago'}",
+	"relative_time_pluralize_hours_ago": "{'one': '1 hour ago', 'other': '{} hours ago'}",
 	"relative_time_just_now": "just now",
 
 	"changelog_modal_header_recent_updates_md": "Recent updates in **Telegram Web**",

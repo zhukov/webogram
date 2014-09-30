@@ -94,7 +94,7 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       priority: 1, // execute before built-in ngPluralize
       compile: function(element) {
         var msgid = element.attr('when');
-        var msgstr = _(msgid);
+        var msgstr = _(msgid + '_raw');
         element.attr('when', msgstr);
       }
     }
