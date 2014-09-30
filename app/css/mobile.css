@@ -517,7 +517,7 @@ img.im_message_video_thumb,
   float: none;
   position: absolute;
   bottom: 6px;
-  right: 0;
+  right: -12px;
 }
 .im_message_date {
   font-size: 12px;
@@ -525,7 +525,7 @@ img.im_message_video_thumb,
 }
 .im_message_out .im_message_meta {
   right: auto;
-  left: 0;
+  left: -12px;
 }
 
 .im_message_out .im_message_fwd_date {
