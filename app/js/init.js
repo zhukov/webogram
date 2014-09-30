@@ -111,7 +111,7 @@
       locale = (navigator.language || '').toLowerCase();
       locale = Config.I18n.aliases[locale] || locale;
     }
-    if (Config.I18n.supported.indexOf(locale) != -1) {
+    if (!Config.Mobile && Config.I18n.supported.indexOf(locale) != -1) {
       Config.I18n.locale = locale;
     }
     bootReady.i18n_ng = Config.I18n.locale == defaultLocale; // Already included

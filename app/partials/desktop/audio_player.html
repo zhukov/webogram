@@ -2,7 +2,7 @@
 	<button class="btn btn-primary pull-left audio_player_button" ng-click="togglePlay()">
 		<i class="icon audio_player_btn_icon" ng-class="{audio_player_btn_icon_pause: mediaPlayer.player.playing, audio_player_btn_icon_cancel: audio.progress.enabled}"></i>
 	</button>
-	<div class="audio_player_title_wrap clearfix">
+	<div class="audio_player_title_wrap">
 		<a ng-click="download()" class="audio_player_title" ng-switch="::audio.file_name.length > 0">
 			<span ng-switch-when="true" ng-bind="::audio.file_name"></span>
 			<span ng-switch-default my-i18n="message_attach_audio_message"></span>

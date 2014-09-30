@@ -1457,13 +1457,16 @@ img.im_message_document_thumb {
   background-position: -15px -924px;
 }
 .audio_player_btn_icon_cancel {
-  background-position: -15px -948px;
+  background-position: -15px -924px;
+  /*background-position: -15px -948px;*/
 }
 .audio_player_title_wrap {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   padding: 0 0 1px;
+  line-height: 18px;
+  height: 19px;
 }
 .audio_player_title {
   color: #222;

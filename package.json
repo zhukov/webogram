@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/zhukov/webogram/issues"
   },
-  "locales": ["en-us", "es-es", "de-de"],
+  "locales": ["en-us", "es-es", "de-de", "it-it", "ru-ru"],
   "homepage": "http://zhukov.github.io/webogram",
   "devDependencies": {
     "gulp": "~3.5.5",
