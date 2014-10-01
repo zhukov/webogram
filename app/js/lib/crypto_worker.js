@@ -6,7 +6,7 @@
  */
 
 importScripts(
-  '../../vendor/console-polyfill/console-polyfill.js',
+  'polyfill.js',
   'bin_utils.js',
   '../../vendor/jsbn/jsbn_combined.js',
   '../../vendor/leemon_bigint/bigint.js',

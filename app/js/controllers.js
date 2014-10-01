@@ -1505,7 +1505,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return;
     }
 
-    $scope.delete = function () {
+    $scope['delete'] = function () {
       var messageID = $scope.messageID;
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
         AppMessagesManager.deleteMessages([messageID]);
@@ -1714,7 +1714,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    $scope.delete = function () {
+    $scope['delete'] = function () {
       var messageID = $scope.photoID;
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
         AppMessagesManager.deleteMessages([messageID]);
@@ -1744,7 +1744,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    $scope.delete = function () {
+    $scope['delete'] = function () {
       var messageID = $scope.messageID;
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
         AppMessagesManager.deleteMessages([messageID]);

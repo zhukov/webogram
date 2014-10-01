@@ -594,9 +594,9 @@ input.tg_range {
   width: 100%;
   max-width: 362px;
   display: inline-block;
-  background: #c7c7c7;
-  height: 3px;
-  line-height: 18px;
+  /*background: #c7c7c7;*/
+  /*height: 18px;
+  line-height: 18px;*/
   vertical-align: top;
   margin: 8px 0;
   border-radius: 2px;
@@ -624,8 +624,30 @@ input.tg_range::-webkit-slider-thumb {
   border-radius: 6px;
   overflow: hidden;
 }
-
 input.tg_range::-moz-range-thumb {
+  border: 0;
+  background: #568cb5;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+input.tg_range::-ms-track {
+  color: transparent;
+  border: 0;
+  cursor: pointer;
+  outline: none !important;
+  width: 100%;
+  max-width: 362px;
+  display: inline-block;
+  background: #c7c7c7;
+  height: 3px;
+  line-height: 18px;
+  vertical-align: top;
+  margin: 8px 0;
+  border-radius: 2px;
+}
+input.tg_range::-ms-thumb {
   border: 0;
   background: #568cb5;
   width: 12px;
@@ -687,6 +709,9 @@ input.tg_range::-moz-range-thumb {
   width: 160px;
   height: 160px;
   margin: 0 auto;
+}
+img.welcome_logo {
+  background: none;
 }
 .welcome_header {
   text-align: center;
@@ -2648,4 +2673,22 @@ ce671b orange
 }
 .changelog_version_changes_list li {
   line-height: 20px;
+}
+
+
+.bad_browser_wrap {
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #FFF;
+  max-width: 600px;
+  margin: 50px auto 0;
+  padding: 40px;
+}
+.bad_browser_wrap h2 {
+  margin-top: 0;
+}
+.bad_browser_text {
+  font-size: 14px;
+  line-height: 160%;
+  margin: 25px 0 30px;
 }

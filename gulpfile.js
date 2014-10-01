@@ -45,8 +45,8 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
-    gulp.src('app/vendor/console-polyfill/console-polyfill.js')
-      .pipe(gulp.dest('dist/vendor/console-polyfill')),
+    gulp.src('app/js/polyfill.js')
+      .pipe(gulp.dest('dist/js/polyfill.js')),
     gulp.src('app/js/lib/bin_utils.js')
       .pipe(gulp.dest('dist/js/lib')),
     gulp.src('app/vendor/closure/long.js')

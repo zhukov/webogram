@@ -424,7 +424,7 @@ angular.module('myApp.services', ['myApp.i18n'])
         return;
       }
 
-      this.continue();
+      this['continue']();
     }
 
     request.onerror = function (e) {

@@ -111,8 +111,13 @@
       locale = (navigator.language || '').toLowerCase();
       locale = Config.I18n.aliases[locale] || locale;
     }
-    if (!Config.Mobile && Config.I18n.supported.indexOf(locale) != -1) {
-      Config.I18n.locale = locale;
+    if (!Config.Mobile) {
+      for (var i = 0; i < Config.I18n.supported.length; i++) {
+        if (Config.I18n.supported[i] == locale) {
+          Config.I18n.locale = locale;
+          break;
+        }
+      }
     }
     bootReady.i18n_ng = Config.I18n.locale == defaultLocale; // Already included
 

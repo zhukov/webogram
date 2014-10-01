@@ -1,6 +1,9 @@
 <!doctype html>
-<html lang="en" manifest="webogram.appcache" ng-csp="">
+<html lang="en" manifest="webogram.appcache" ng-csp="" xmlns:ng="http://angularjs.org" id="ng-app">
 <head>
+  <!--[if lte IE 9]>
+  <meta HTTP-EQUIV="REFRESH" content="0; url=badbrowser.html">
+  <![endif]-->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Telegram Web</title>
@@ -37,7 +40,7 @@
   <div id="notify_sound"></div>
 
   <!-- build:js js/app.js -->
-  <script type="text/javascript" src="vendor/console-polyfill/console-polyfill.js"></script>
+  <script type="text/javascript" src="js/lib/polyfill.js"></script>
   <script type="text/javascript" src="vendor/jquery/jquery.min.js"></script>
   <script type="text/javascript" src="js/lib/config.js"></script>
   <script type="text/javascript" src="js/init.js"></script>
