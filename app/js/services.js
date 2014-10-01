@@ -2451,6 +2451,10 @@ angular.module('myApp.services', ['myApp.i18n'])
         };
 
     FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
+      if (!writableFileEntry) {
+        return;
+      }
+      
       MtpApiFileManager.downloadFile(
         fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
         mime: mimeType,
@@ -2612,6 +2616,10 @@ angular.module('myApp.services', ['myApp.i18n'])
         fileName = 'video' + videoID + '.' + ext;
 
     FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
+      if (!writableFileEntry) {
+        return;
+      }
+
       var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
         mime: mimeType,
         toFileEntry: writableFileEntry
@@ -2715,7 +2723,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     doc.canDownload = !(window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry);
     doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/|application\/pdf)/) ? 1 : 0;
 
-    if (isGif && doc.withPreview && doc.thumb) {
+    if (isGif && doc.thumb) {
       doc.isSpecial = 'gif';
     }
     else if (isAudio) {
@@ -2734,8 +2742,6 @@ angular.module('myApp.services', ['myApp.i18n'])
           access_hash: doc.access_hash
         };
 
-    historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
-
     function updateDownloadProgress (progress) {
       console.log('dl progress', progress);
       historyDoc.progress.done = progress.done;
@@ -2745,6 +2751,12 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     var ext = (doc.file_name.split('.', 2) || [])[1] || '';
     FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
+      if (!writableFileEntry) {
+        return;
+      }
+
+      historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
+
       var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
         mime: doc.mime_type,
         toFileEntry: writableFileEntry
@@ -2760,6 +2772,8 @@ angular.module('myApp.services', ['myApp.i18n'])
 
       historyDoc.progress.cancel = downloadPromise.cancel;
     }, function () {
+      historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
+
       var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {mime: doc.mime_type});
 
       downloadPromise.then(function (url) {

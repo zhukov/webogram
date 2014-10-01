@@ -8,7 +8,6 @@
 chrome.app.runtime.onLaunched.addListener(function(launchData) {
   chrome.app.window.create('../index.html', {
   	id: 'webogram-chat',
-    hidden: true,
     innerBounds: {
       width: 1000,
       height: 700
