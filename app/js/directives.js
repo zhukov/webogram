@@ -294,14 +294,23 @@ angular.module('myApp.directives', ['myApp.filters'])
           return cancelEvent(e);
         }
 
-        if (e.keyCode == 38 || e.keyCode == 40) { // UP, DOWN
-          var skip = !e.shiftKey && e.altKey;
+        var next, prev, skip, ctrlTabSupported = Config.Modes.packed;
+        if (e.keyCode == 40 || e.keyCode == 38) { // UP, DOWN
+          next = e.keyCode == 40;
+          prev = !next;
+          skip = !e.shiftKey && e.altKey
+        }
+        else if (ctrlTabSupported && e.keyCode == 9 && e.ctrlKey && !e.metaKey) { // Ctrl + Tab, Shift + Ctrl + Tab
+          next = !e.shiftKey;
+          prev = !next;
+          skip = true;
+        }
+        if (next || prev) {
           if (!skip && (!searchFocused || e.metaKey)) {
             return true;
           }
 
-          var next = e.keyCode == 40,
-              currentSelected = !skip && $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.active a.im_dialog')[0],
+          var currentSelected = !skip && $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.active a.im_dialog')[0],
               currentSelectedWrap = currentSelected && currentSelected.parentNode,
               nextDialogWrap;
 
