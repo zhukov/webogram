@@ -1453,16 +1453,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('AppLangFooterController', function ($scope, _, Storage, ErrorService, AppRuntimeManager) {
+  .controller('AppLangSelectController', function ($scope, _, Storage, ErrorService, AppRuntimeManager) {
     $scope.supportedLocales = Config.I18n.supported;
     $scope.langNames = Config.I18n.languages;
     $scope.curLocale = Config.I18n.locale;
+    $scope.form = {locale: Config.I18n.locale};
 
     $scope.localeSelect = function localeSelect (newLocale) {
-      Storage.set({i18n_locale: newLocale});
+      newLocale = newLocale || $scope.form.locale;
       if ($scope.curLocale !== newLocale) {
         ErrorService.confirm({type: 'APPLY_LANG_WITH_RELOAD'}).then(function () {
-          AppRuntimeManager.reload();
+          Storage.set({i18n_locale: newLocale}).then(function () {
+            AppRuntimeManager.reload();
+          });
+        }, function () {
+          $scope.form.locale = $scope.curLocale;
         });
       }
     };

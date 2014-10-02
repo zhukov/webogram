@@ -201,7 +201,11 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
   function storageRemoveValue () {
     var keys = Array.prototype.slice.call(arguments),
         prefix = storageGetPrefix(),
-        i, key;
+        i, key, callback;
+
+    if (typeof keys[keys.length - 1] === 'function') {
+      callback = keys.pop();
+    }
 
     for (i = 0; i < keys.length; i++) {
       key = keys[i] = prefix + keys[i];
@@ -211,7 +215,10 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
       }
     }
     if (useCs) {
-      chrome.storage.local.remove(keys);
+      chrome.storage.local.remove(keys, callback);
+    }
+    else if (callback) {
+      callback();
     }
   };
 

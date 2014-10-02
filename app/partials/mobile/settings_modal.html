@@ -101,6 +101,16 @@
       </a>
     </div>
 
+
+    <div class="mobile_modal_action_wrap" ng-controller="AppLangSelectController">
+      <div class="mobile_modal_select_wrap pull-right">
+        <select class="form-control" ng-change="localeSelect()" ng-model="form.locale">
+          <option ng-repeat="locale in ::supportedLocales" value="{{locale}}" ng-bind="langNames[locale]" ng-selected="locale == curLocale"></option>
+        </select>
+      </div>
+      <span class="mobile_modal_action" my-i18n="settings_modal_language"></span>
+    </div>
+
     <div class="mobile_modal_section" ng-if="profile.phone">
       <h4 class="mobile_modal_section_header" my-i18n="settings_modal_phone"></h4>
       <div class="mobile_modal_section_value" ng-bind="profile.phone | phoneNumber"></div>

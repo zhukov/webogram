@@ -851,6 +851,9 @@ a.im_message_fwd_author {
 .mobile_modal_action_wrap {
   border-bottom: 1px solid #e0e0e0;
 }
+.mobile_modal_select_wrap {
+  margin: 7px 12px 0;
+}
 a.mobile_modal_action,
 span.mobile_modal_action {
   color: #000;
