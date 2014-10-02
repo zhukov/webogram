@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-rc.0
+ * @license AngularJS v1.3.0-rc.4
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -141,10 +141,16 @@ function shallowClearAndCopy(src, dst) {
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     request body and headers and returns its transformed (typically serialized) version.
+ *     By default, transformRequest will contain one function that checks if the request data is
+ *     an object and serializes to using `angular.toJson`. To prevent this behavior, set
+ *     `transformRequest` to an empty array: `transformRequest: []`
  *   - **`transformResponse`** –
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     response body and headers and returns its transformed (typically deserialized) version.
+ *     By default, transformResponse will contain one function that checks if the response looks like
+ *     a JSON string and deserializes it using `angular.fromJson`. To prevent this behavior, set
+ *     `transformResponse` to an empty array: `transformResponse: []`
  *   - **`cache`** – `{boolean|Cache}` – If true, a default $http cache will be used to cache the
  *     GET request, otherwise if a cache instance built with
  *     {@link ng.$cacheFactory $cacheFactory}, this cache will be used for
@@ -186,7 +192,7 @@ function shallowClearAndCopy(src, dst) {
  *   read, update, delete) on server-side data like this:
  *   ```js
  *   var User = $resource('/user/:userId', {userId:'@id'});
- *   var user = User.get({id:123}, function() {
+ *   var user = User.get({userId:123}, function() {
  *     user.abc = true;
  *     user.$save();
  *   });
@@ -578,9 +584,8 @@ angular.module('ngResource', ['ng']).
                 // jshint -W018
                 if (angular.isArray(data) !== (!!action.isArray)) {
                   throw $resourceMinErr('badcfg',
-                      'Error in resource configuration. Expected ' +
-                      'response to contain an {0} but got an {1}',
-                    action.isArray ? 'array' : 'object',
+                      'Error in resource configuration for action `{0}`. Expected response to ' +
+                      'contain an {1} but got an {2}', name, action.isArray ? 'array' : 'object',
                     angular.isArray(data) ? 'array' : 'object');
                 }
                 // jshint +W018
