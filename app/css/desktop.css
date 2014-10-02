@@ -140,6 +140,11 @@ a.footer_lang_link.active:active {
 }
 .im_dialogs_scrollable_wrap {
   padding: 0 19px 0 12px;
+
+  /* Hardware acceleration in Safari */
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
 }
 .im_dialogs_col .nano > .nano-pane {
   background : rgba(0,0,0,0.0);
@@ -164,6 +169,12 @@ a.footer_lang_link.active:active {
 .im_history_col_wrap {
   float: left;
   width: 69%;
+}
+.im_history_scrollable_wrap {
+  /* Hardware acceleration in Safari */
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
 }
 .im_history_col .nano > .nano-pane,
 .contacts_modal_col .nano > .nano-pane,
@@ -582,7 +593,14 @@ div.im_panel_own_photo {
 }
 
 .chat_modal_actions_wrap {
+  float: right;
   position: relative;
+  width: 332px;
+}
+.chat_modal_actions_wrap > button,
+.chat_modal_actions_wrap > .chat_modal_other_btn > button,
+.chat_modal_actions_wrap > span.btn {
+  padding: 7px 10px;
 }
 
 .chat_modal_main_btn {

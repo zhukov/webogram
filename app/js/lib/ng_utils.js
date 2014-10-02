@@ -496,7 +496,8 @@ angular.module('izhukov.utils', [])
     };
 
     worker.onerror = function(error) {
-      console.log('CW error', error, error.stack);
+      console.error('CW error', error, error.stack);
+      worker = false;
     };
   }
 

@@ -18,7 +18,7 @@ gulp.task('templates', function() {
 });
 
 gulp.task('usemin', ['templates', 'enable-production'], function() {
-  return gulp.src('app/index.html')
+  return gulp.src(['app/index.html', 'app/badbrowser.html'])
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
       js: ['concat', $.ngmin(), $.uglify({outSourceMap: false})],
@@ -45,9 +45,7 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
-    gulp.src('app/js/polyfill.js')
-      .pipe(gulp.dest('dist/js/polyfill.js')),
-    gulp.src('app/js/lib/bin_utils.js')
+    gulp.src(['app/js/lib/polyfill.js', 'app/js/lib/bin_utils.js'])
       .pipe(gulp.dest('dist/js/lib')),
     gulp.src('app/vendor/closure/long.js')
       .pipe(gulp.dest('dist/vendor/closure')),

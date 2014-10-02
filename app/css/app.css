@@ -1158,10 +1158,6 @@ a.im_dialog_selected .im_dialog_date {
 .im_history_scrollable_wrap {
   outline: none ! important;
   -webkit-user-select: text;
-
-  -webkit-transform: translateZ(0);
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
   position: relative;
 }
 .im_history_to_bottom {
