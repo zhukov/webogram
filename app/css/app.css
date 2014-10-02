@@ -594,9 +594,9 @@ input.tg_range {
   width: 100%;
   max-width: 362px;
   display: inline-block;
-  /*background: #c7c7c7;*/
-  /*height: 18px;
-  line-height: 18px;*/
+  background: #c7c7c7;
+  height: 3px;
+  line-height: 18px;
   vertical-align: top;
   margin: 8px 0;
   border-radius: 2px;
