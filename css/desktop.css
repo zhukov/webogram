@@ -1,0 +1,931 @@
+/** initial setup **/
+.nano {
+  position : relative;
+  width    : 100%;
+  height   : 100%;
+  overflow : hidden;
+}
+.nano > .nano-content {
+  position      : absolute;
+  overflow      : scroll;
+  overflow-x    : hidden;
+  top           : 0;
+  right         : 0;
+  bottom        : 0;
+  left          : 0;
+}
+.nano > .nano-content:focus {
+  outline: thin dotted;
+}
+.nano > .nano-content::-webkit-scrollbar {
+  display: none;
+}
+.has-scrollbar > .nano-content::-webkit-scrollbar {
+  display: block;
+}
+.nano > .nano-pane {
+  background : rgba(0,0,0,.25);
+  position   : absolute;
+  width      : 10px;
+  right      : 0;
+  top        : 0;
+  bottom     : 0;
+  visibility : hidden\9; /* Target only IE7 and IE8 with this hack */
+  opacity    : .01;
+  -webkit-transition    : .2s;
+  -moz-transition       : .2s;
+  -o-transition         : .2s;
+  transition            : .2s;
+  -moz-border-radius    : 5px;
+  -webkit-border-radius : 5px;
+  border-radius         : 5px;
+}
+.nano > .nano-pane > .nano-slider {
+  background: #444;
+  background: rgba(0,0,0,.5);
+  position              : relative;
+  margin                : 0 1px;
+  -moz-border-radius    : 3px;
+  -webkit-border-radius : 3px;
+  border-radius         : 3px;
+}
+.nano:hover > .nano-pane, .nano-pane.active, .nano-pane.flashed {
+  visibility : visible\9; /* Target only IE7 and IE8 with this hack */
+  opacity    : 0.99;
+}
+
+.emoji-menu .nano > .nano-pane {
+  background : rgba(255,255,255,0.0);
+  right: -2px;
+}
+.emoji-menu .nano > .nano-pane > .nano-slider {
+  background: #d1d1d1;
+  margin: 0 3px 0 4px;
+}
+
+.countries_modal_col .nano > .nano-pane {
+  background : rgba(3,36,64,0.08);
+  width      : 3px;
+  right: 6px;
+  top: 0;
+  -webkit-transition    : .2s;
+  -moz-transition       : .2s;
+  -o-transition         : .2s;
+  transition            : .2s;
+  -moz-border-radius    : 0;
+  -webkit-border-radius : 0;
+  border-radius         : 0;
+}
+.countries_modal_col .nano > .nano-pane > .nano-slider {
+  background : rgba(3,46,79,0.22);
+  margin: 0;
+  -moz-border-radius    : 0;
+  -webkit-border-radius : 0;
+  border-radius         : 0;
+}
+
+
+
+.im_page_wrap {
+  background: #FFF;
+  max-width: 1000px;
+  min-width: 300px;
+  margin: 0 auto;
+
+  -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow:    0px 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow:         0px 1px 2px rgba(0, 0, 0, 0.1);
+
+  border-radius: 0 0 3px 3px;
+  overflow: hidden;
+}
+
+
+.footer_wrap {
+  font-size: 11px;
+  text-align: center;
+  color: #9cacb9;
+  line-height: 40px;
+}
+.footer_brand {
+  color: #9cacb9;
+  font-weight: bold;
+}
+a.footer_lang_link {
+  color: #9cacb9;
+}
+a.footer_lang_link.active {
+  font-weight: bold;
+}
+.footer_brand:hover,
+.footer_brand:active,
+a.footer_lang_link.active:hover,
+a.footer_lang_link.active:active {
+  color: #8499aa;
+  text-decoration: none;
+}
+
+.footer_link_divider {
+  padding: 0 5px;
+}
+
+.im_dialogs_col {
+  margin-right: -7px;
+}
+.im_dialogs_col_wrap {
+  float: left;
+  width: 31%;
+  border-right: 2px solid #E9EBED;
+  padding-bottom: 10px;
+}
+.im_dialogs_scrollable_wrap {
+  padding: 0 19px 0 12px;
+
+  /* Hardware acceleration in Safari */
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+}
+.im_dialogs_col .nano > .nano-pane {
+  background : rgba(0,0,0,0.0);
+  width      : 12px;
+  right: 0px;
+  -moz-border-radius    : 0;
+  -webkit-border-radius : 0;
+  border-radius         : 0;
+  -webkit-transition    : none;
+  -moz-transition       : none;
+  -o-transition         : none;
+  transition            : none;
+}
+.im_dialogs_col .nano > .nano-pane > .nano-slider {
+  background: #A5B1B9;
+  margin: 0 5px;
+  -moz-border-radius    : 0;
+  -webkit-border-radius : 0;
+  border-radius         : 0;
+}
+
+.im_history_col_wrap {
+  float: left;
+  width: 69%;
+}
+.im_history_scrollable_wrap {
+  /* Hardware acceleration in Safari */
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+}
+.im_history_col .nano > .nano-pane,
+.contacts_modal_col .nano > .nano-pane,
+.im_dialogs_modal_col .nano > .nano-pane {
+  background : rgba(3,36,64,0.08);
+  width      : 9px;
+  right: 0;
+  top: 0;
+  -moz-border-radius    : 2px;
+  -webkit-border-radius : 2px;
+  border-radius         : 2px;
+
+  -webkit-transition    : none;
+  -moz-transition       : none;
+  -o-transition         : none;
+  transition            : none;
+}
+.contacts_modal_col .nano > .nano-pane {
+  width: 6px;
+  right: 7px;
+}
+
+.im_dialogs_modal_col .nano > .nano-pane {
+  width: 6px;
+  right: 2px;
+}
+.im_dialogs_modal_col .im_dialogs_scrollable_wrap {
+  padding: 0 12px 0 12px;
+}
+.contacts_modal_col {
+  margin-right: -17px;
+}
+.contacts_scrollable_wrap {
+  padding: 0 17px 0 0;
+}
+
+.im_history_col .nano > .nano-pane {
+  top: 10px;
+  right: 8px;
+}
+.im_history_col .nano > .nano-pane > .nano-slider,
+.contacts_modal_col .nano > .nano-pane > .nano-slider,
+.im_dialogs_modal_col .nano > .nano-pane > .nano-slider {
+  background : rgba(3,46,79,0.22);
+  margin: 0;
+  -moz-border-radius    : 2px;
+  -webkit-border-radius : 2px;
+  border-radius         : 2px;
+}
+
+
+.im_history_panel_wrap {
+  margin: 0 23px 0 15px;
+  cursor: pointer;
+  position: relative;
+  -webkit-box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.12);
+  -moz-box-shadow:    0px 1px 0px rgba(0, 0, 0, 0.12);
+  box-shadow:         0px 1px 0px rgba(0, 0, 0, 0.12);
+
+  position: relative;
+  z-index: 2;
+  min-height: 44px;
+}
+.im_history_panel {
+  padding: 10px 4px 0;
+}
+.im_history_panel_title h4 {
+  font-size: 17px;
+  line-height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin: 8px 0 6px;
+}
+.im_history_panel_title h4 small {
+  color: #999;
+  font-size: 13px;
+  margin-left: 5px;
+}
+.im_history_panel_info_link,
+.im_history_panel_edit_link,
+.im_history_panel_return_link,
+.im_history_panel_media_dropdown .dropdown-toggle {
+  font-size: 13px;
+  font-weight: normal;
+  padding-top: 5px;
+  line-height: 1;
+}
+.im_history_panel_media_dropdown {
+  padding-top: 2px;
+}
+.im_history_panel_edit_link,
+.im_history_panel_return_link,
+.im_history_panel_media_dropdown {
+  font-size: 13px;
+  margin-right: 20px;
+}
+.im_history_panel_media_dropdown,
+.im_history_panel_return_count {
+  margin-left: 5px;
+}
+
+.im_history_panel_media_dropdown .dropdown-menu {
+  border-radius: 2px;
+  right: auto;
+  left: -15px;
+  margin-top: 11px;
+  padding: 0;
+
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.175);
+}
+
+.im_history_no_dialogs_wrap {
+  margin: 122px 170px 60px;
+  text-align: center;
+}
+
+.im_history_appending {
+  -webkit-transition: all ease-in-out 0.2s;
+  -moz-transition: all ease-in-out 0.2s;
+  -ms-transition: all ease-in-out 0.2s;
+  -o-transition: all ease-in-out 0.2s;
+  transition: all ease-in-out 0.2s;
+}
+
+/* Contacts modal */
+.contacts_modal_window .modal-dialog {
+  max-width: 456px;
+}
+.contacts_modal_header {
+  padding: 6px 0 18px;
+}
+.contacts_modal_edit_wrap {
+  position: absolute;
+  margin-top: -1px;
+}
+.contacts_modal_edit_link {
+  font-size: 14px;
+  padding: 5px 7px;
+}
+.contacts_modal_title {
+  font-size: 14px;
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+.icon-message-status {
+  background: #43A4DB;
+  border: 0;
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 7px;
+  position: absolute;
+  margin-left: -26px;
+  margin-top: 13px;
+  opacity: 0;
+}
+.im_message_unread .icon-message-status {
+  opacity: 1.0;
+}
+.im_message_pending .icon-message-status {
+  opacity: 0.5;
+}
+.im_message_error_btn {
+  display: none;
+}
+.im_message_error .im_message_error_btn {
+  display: inline;
+}
+.im_message_error_btn .icon-message-status {
+  background: #da564d;
+  opacity: 0.85;
+}
+.im_message_error_btn .icon-message-status:hover {
+  opacity: 1;
+}
+
+
+.im_edit_flush_link,
+.im_edit_cancel_link {
+  display: block;
+  padding: 6px 17px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 6px 6px;
+}
+.im_edit_cancel_link {
+  float: left;
+}
+.im_edit_flush_link {
+  float: right;
+}
+.im_edit_flush_link:hover,
+.im_edit_cancel_link:hover {
+  background: #f2f6fa;
+  text-decoration: none;
+}
+
+.im_submit {
+  padding: 6px 13px;
+  font-size: 13px;
+  line-height: 17px;
+  min-width: 60px;
+}
+
+.im_message_selected .im_message_date,
+.im_message_selected .im_message_document_size,
+.im_message_selected .im_message_audio_duration,
+.im_message_selected .im_message_audio_size,
+.im_message_selected .im_message_fwd_date,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_date,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_document_size,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_audio_duration,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_audio_size,
+.im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_date {
+  color: #68839c;
+}
+
+.im_content_message_select_area {
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  width: 112px;
+  height: 52px;
+  margin: -8px 0 0 -112px;
+  -webkit-user-select: text;
+}
+@media (min-width: 1024px) {
+  .im_content_message_select_area {
+    display: block;
+  }
+  .im_message_wrap {
+    position: relative;
+  }
+}
+
+.im_history_selectable .icon-select-tick,
+.im_content_message_select_area:hover .icon-select-tick {
+  display: inline-block;
+}
+.im_message_selected .icon-select-tick,
+.im_history_selectable .im_message_outer_wrap:hover .icon-select-tick,
+.im_content_message_select_area:hover .icon-select-tick {
+  background-position: -9px -481px;
+  opacity: 0.5;
+}
+.im_message_selected .icon-select-tick {
+  opacity: 1 !important;
+}
+
+/* Dialogs modal */
+.peer_select_window .modal-dialog {
+  max-width: 506px;
+}
+.peer_select_modal_wrap .modal-body {
+  padding: 0 2px 14px;
+}
+
+
+@media (max-width: 900px) {
+
+  /* Status ticks */
+  .icon-message-status,
+  .im_message_error_btn,
+  .icon-message-status-tick {
+    display: none;
+  }
+  .im_message_out .icon-message-status-tick {
+    display: inline-block;
+    width: 16px;
+    height: 10px;
+    background: url(../img/icons/Checks2_2x.png);
+    background-size: 16px 10px;
+    top: 2px;
+    position: relative;
+  }
+  .is_1x .im_message_out .icon-message-status-tick {
+    background-image: url(../img/icons/Checks2_1x.png);
+  }
+  .im_message_pending .icon-message-status-tick {
+    display: none;
+  }
+  .im_message_unread .icon-message-status-tick {
+    background: url(../img/icons/Checks1_2x.png);
+    background-size: 16px 10px;
+  }
+  .is_1x .im_message_unread .icon-message-status-tick {
+    background-image: url(../img/icons/Checks1_1x.png);
+  }
+  .im_message_date {
+    padding: 0;
+  }
+}
+
+
+.im_message_fwd_author {
+  margin-right: 5px;
+}
+.im_message_fwd .im_message_fwd_author_wrap,
+.im_message_fwd .im_message_text,
+.im_message_fwd .im_message_media {
+  margin-left: 42px;
+}
+
+.im_send_panel_wrap {
+  max-width: 526px;
+}
+.im_send_form {
+  max-width: 389px;
+  left: 62px;
+  right: 62px;
+}
+
+.im_panel_peer_photo,
+.im_panel_own_photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+div.im_panel_peer_photo {
+  cursor: pointer;
+  margin-left: 12px;
+  height: 55px;
+}
+div.im_panel_own_photo {
+  margin-right: 12px;
+}
+
+.im_panel_peer_online {
+  background: #6DBF69;
+  border: 1px solid #FFF;
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: absolute;
+  margin-top: -7px;
+  margin-left: 43px;
+}
+
+/* Peer modals */
+.user_modal_window .modal-dialog {
+  max-width: 506px;
+}
+.user_modal_photo_profile_wrap {
+  padding: 13px 12px;
+  margin-bottom: 15px;
+}
+.user_modal_image_wrap {
+  display: block;
+  width: 100px;
+  margin-right: 22px;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.user_modal_image {
+  width: 100px;
+  height: 100px;
+}
+.user_modal_header {
+  font-weight: bold;
+  margin: 2px 0 7px;
+}
+.user_modal_status {
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.user_modal_main_btn {
+  border: 0;
+  font-size: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin: 8px 10px 0 0;
+  float: left;
+}
+.user_modal_other_btn {
+  margin: 8px 0 0 0;
+  float: left;
+}
+.user_modal_other_btn .dropdown-toggle {
+  border: 0;
+  font-size: 12px;
+}
+.user_modal_other_btn .dropdown-menu {
+  margin-left: -3px;
+}
+
+.user_modal_settings_wrap {
+  margin-top: 25px;
+}
+.user_modal_notifications {
+  font-weight: bold;
+}
+.user_modal_clear {
+  margin-top: 20px;
+}
+
+
+.chat_modal_window .modal-dialog {
+  max-width: 506px;
+}
+
+.chat_modal_header {
+  font-weight: bold;
+  margin: 0 0 10px;
+}
+.chat_modal_members_count {
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.chat_modal_actions_wrap {
+  float: right;
+  position: relative;
+  width: 332px;
+}
+.chat_modal_actions_wrap > button,
+.chat_modal_actions_wrap > .chat_modal_other_btn > button,
+.chat_modal_actions_wrap > span.btn {
+  padding: 7px 10px;
+}
+
+.chat_modal_main_btn {
+  border: 0;
+  font-size: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  float: left;
+  position: relative;
+  overflow: hidden;
+  margin-right: 10px;
+  margin-top: 8px;
+}
+.chat_modal_invite_btn {
+  border: 0;
+  font-size: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  float: left;
+  position: relative;
+  margin-right: 10px;
+  margin-top: 8px;
+}
+.chat_modal_delete_btn {
+  border: 0;
+  font-size: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  float: left;
+  margin-right: 10px;
+  margin-top: 8px;
+}
+.chat_modal_other_btn {
+  margin-top: 8px;
+  float: left;
+}
+.chat_modal_other_btn .dropdown-toggle {
+  border: 0;
+  font-size: 12px;
+}
+.chat_modal_other_btn .dropdown-menu {
+  margin-left: -3px;
+}
+
+.chat_modal_photo_update_link {
+  display: block;
+  padding: 5px 14px;
+  clear: both;
+  font-weight: normal;
+  line-height: 1.428571429;
+  color: #333333;
+  white-space: nowrap;
+  font-size: 13px;
+  overflow: hidden;
+  position: relative;
+}
+.chat_modal_photo_update_link:hover {
+  text-decoration: none;
+  color: #262626;
+  background-color: #f5f5f5;
+}
+
+.chat_modal_settings_wrap {
+  margin-top: 10px;
+}
+
+.settings_modal_window .modal-dialog {
+  max-width: 482px;
+}
+.settings_modal_settings {
+  padding: 4px 0;
+  margin: 0;
+}
+.settings_modal_wrap .user_modal_main_btn {
+  position: relative;
+  overflow: hidden;
+}
+.settings_profile_edit_form {
+  margin-bottom: 15px;
+}
+.settings_profile_image_wrap {
+  float: left;
+  width: 120px;
+  margin-right: 22px;
+}
+.settings_profile_first_name,
+.settings_profile_last_name {
+  width: 180px;
+  float: left;
+  margin-bottom: 0;
+}
+.settings_profile_first_name label,
+.settings_profile_last_name label {
+  margin-bottom: 3px;
+}
+.settings_profile_first_name {
+  margin-right: 22px;
+  margin-bottom: 10px;
+}
+.settings_profile_last_name {
+  margin-right: 10px;
+  margin-bottom: 15px;
+}
+.settings_profile_save {
+  padding-top: 21px;
+  float: left;
+}
+.settings_profile_save_btn {
+  width: 50px;
+}
+
+.settings_profile_edit_form {
+  margin-bottom: 0;
+}
+.settings_profile_edit_form input {
+  font-size: 12px;
+  line-height: normal;
+  background: #F2F2F2;
+  border: 1px solid #F2F2F2;
+  border-radius: 0;
+  padding: 6px 6px 6px 6px;
+  margin-bottom: 0;
+  margin: 0;
+}
+.settings_profile_edit_form input:focus,
+.settings_profile_edit_form input:active {
+  background-color: #FFF;
+}
+
+.settings_send_choose_form input {
+  margin-top: 2px;
+}
+.settings_send_choose_form {
+  margin-bottom: 20px;
+}
+
+.settings_user_phone,
+.settings_version {
+  color: #999;
+}
+.icon-volume-outer {
+  display: inline-block;
+  background: #c7c7c7;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 18px;
+  padding: 5px 8px;
+  margin: 0 9px 0 0;
+  width: 32px;
+}
+.icon-volume-inner {
+  display: block;
+  background: #fff;
+  float: left;
+  width: 2px;
+  vertical-align: bottom;
+  margin: 0 1px 0;
+  height: 8px;
+}
+.icon-volume-inner1 {
+  height: 2px;
+  margin-top: 6px;
+}
+.icon-volume-inner2 {
+  height: 4px;
+  margin-top: 4px;
+}
+.icon-volume-inner3 {
+  height: 6px;
+  margin-top: 2px;
+}
+
+.icon-volume-outer1 .icon-volume-inner2,
+.icon-volume-outer1 .icon-volume-inner3,
+.icon-volume-outer1 .icon-volume-inner4,
+.icon-volume-outer2 .icon-volume-inner3,
+.icon-volume-outer2 .icon-volume-inner4,
+.icon-volume-outer3 .icon-volume-inner4 {
+  display: none;
+}
+
+
+.im_message_selected .im_message_outer_wrap,
+.im_message_focus .im_message_outer_wrap {
+  background: #f2f6fa;
+}
+.im_history_selectable .im_message_outer_wrap {
+  cursor: pointer;
+}
+.im_history_selectable .im_message_outer_wrap:hover {
+  background: #f2f6fa;
+}
+
+.im_message_wrap {
+  max-width: 526px;
+  padding: 0 15px;
+  margin: 0 auto;
+}
+
+.im_message_wrap {
+  position: static;
+}
+@media (min-width: 901px) {
+  .im_message_wrap {
+    position: relative;
+  }
+}
+
+/* Groupings */
+.im_message_fwd_from {
+  margin-top: 5px;
+}
+.im_grouped .im_message_fwd_from {
+  margin-top: 0;
+}
+.im_message_fwd {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+.im_grouped_short .im_message_from_photo,
+.im_grouped_short .im_message_author,
+.im_grouped .im_message_from_photo,
+.im_grouped .im_message_author,
+.im_grouped_fwd .im_message_author,
+.im_grouped_fwd .im_message_from_photo,
+.im_grouped_fwd_short .im_message_author,
+.im_grouped_fwd_short .im_message_from_photo {
+  display: none;
+}
+.im_grouped_short .im_message_body,
+.im_grouped .im_message_body,
+.im_grouped_fwd .im_message_body,
+.im_grouped_fwd_short .im_message_body {
+  margin-left: 46px;
+}
+.im_grouped_short .im_content_message_select_area,
+.im_grouped .im_content_message_select_area {
+  height: 34px;
+}
+.im_history_appending .im_content_message_select_area {
+  height: 52px;
+}
+.im_grouped_short .icon-select-tick,
+.im_grouped_fwd_short .icon-select-tick {
+  margin-top: 5px;
+}
+.im_grouped_short .icon-message-status,
+.im_grouped_fwd_short .icon-message-status {
+  margin-top: 5px;
+}
+.im_grouped_fwd .im_message_fwd_from,
+.im_grouped_fwd_short .im_message_fwd_from {
+  display: none;
+}
+
+.im_grouped_short .im_message_fwd .im_message_date,
+.im_grouped .im_message_fwd .im_message_date,
+.im_grouped_fwd .im_message_fwd .im_message_date,
+.im_grouped_fwd_short .im_message_fwd .im_message_date {
+  display: none;
+}
+
+.im_grouped_fwd .im_message_fwd,
+.im_grouped_fwd_short .im_message_fwd {
+  margin-top: 8px;
+}
+.im_grouped_fwd .im_message_fwd,
+.im_grouped_fwd_short .im_message_fwd {
+  margin-top: 8px;
+}
+
+
+.tooltip-inner {
+  background: rgba(0,0,0, 0.8);
+}
+.tooltip-arrow {
+  opacity: 0.8;
+}
+
+.im_dialogs_panel_dropdown {
+  margin-left: 8px;
+}
+
+.im_dialogs_panel_dropdown .dropdown-toggle {
+  background: #F2F2F2;
+  display: block;
+  border-radius: 2px;
+  overflow: hidden;
+  padding: 11px 12px;
+  width: 38px;
+  height: 34px;
+}
+.im_dialogs_panel_dropdown .dropdown-toggle .icon-bar {
+  background: #b3b3b3;
+  display: block;
+  height: 2px;
+  margin-bottom: 3px;
+}
+.im_dialogs_panel_dropdown .dropdown-toggle .icon-bar:last-child {
+  margin-bottom: 0;
+}
+
+
+
+.im_dialogs_panel_dropdown.open .dropdown-toggle {
+  background: #6690b0;
+}
+.im_dialogs_panel_dropdown.open .dropdown-toggle .icon-bar {
+  background: #fff;
+}
+
+/* Import contact modal */
+.import_contact_modal_window .modal-dialog {
+  max-width: 480px;
+}
+
+.modal-content-animated {
+  -webkit-transition: margin-top linear 0.2s;
+  transition: margin-top linear 0.2s;
+}
+
+.countries_modal_col {
+  max-height: 350px;
+}
+
+.changelog_modal_window .modal-dialog {
+  max-width: 506px;
+}

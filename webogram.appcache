@@ -1,11 +1,14 @@
 CACHE MANIFEST
-# Time: Mon Sep 15 2014 15:55:12 GMT+0400 (MSK) + 1
+# Time: Thu Oct 02 2014 17:17:07 GMT+0400 (MSK)
 
 
 CACHE:
+badbrowser.html
 favicon.ico
 favicon_unread.ico
 css/app.css
+css/desktop.css
+css/mobile.css
 img/T_LogoM.png
 img/T_LogoM_1x.png
 img/WebIntro1.png
@@ -28,7 +31,6 @@ img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
 js/app.js
-js/app.js.map
 img/changelog/card_wecandoit.png
 img/changelog/search.png
 img/icons/AboutLogos_1x.png
@@ -64,11 +66,21 @@ img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
 js/lib/bin_utils.js
 js/lib/crypto_worker.js
+js/lib/polyfill.js
+js/locales/de-de.json
+js/locales/en-us.json
+js/locales/es-es.json
+js/locales/it-it.json
+js/locales/ru-ru.json
 vendor/closure/long.js
-vendor/console-polyfill/console-polyfill.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
+vendor/angular/i18n/angular-locale_de-de.js
+vendor/angular/i18n/angular-locale_en-us.js
+vendor/angular/i18n/angular-locale_es-es.js
+vendor/angular/i18n/angular-locale_it-it.js
+vendor/angular/i18n/angular-locale_ru-ru.js
 
 
 NETWORK:

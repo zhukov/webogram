@@ -1,6 +1,7 @@
 {
-  "name": "Telegram UNOFFICIAL",
-  "version": "0.3.0",
+  "name": "Telegram",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.3.1",
   "short_name": "Webogram",
   "manifest_version": 2,
   "app": {

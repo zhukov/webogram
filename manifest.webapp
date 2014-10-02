@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
-  "description": "UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.3.0",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.3.1",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
@@ -34,7 +34,9 @@
     "share": {
       "href": "/index.html",
       "disposition": "window",
-      "filters": {},
+      "filters": {
+        "type": ["image/*","audio/*","video/*"]
+      },
       "returnValue": false
     }
   },
