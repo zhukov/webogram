@@ -220,6 +220,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           searchField = $('.im_dialogs_search_field', element)[0],
           panelWrap = $('.im_dialogs_panel', element)[0],
+          searchClear = $('.im_dialogs_search_clear', element)[0],
           tabsWrap = $('.im_dialogs_tabs_wrap', element)[0],
           searchFocused = false;
 
@@ -282,6 +283,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             if (searchField.value) {
               searchField.select();
             }
+          }
+          else if (searchField.value) {
+            $(searchClear).trigger('click');
           }
           return cancelEvent(e);
         }
