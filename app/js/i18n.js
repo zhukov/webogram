@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('myApp.i18n', ['izhukov.utils'])
-  .factory('_', [function() {
+  .factory('_', ['$rootScope', '$locale', function($rootScope, $locale) {
     var locale = Config.I18n.locale;
     var messages = Config.I18n.messages;
     var fallbackMessages = Config.I18n.fallback_messages;
@@ -77,6 +77,13 @@ angular.module('myApp.i18n', ['izhukov.utils'])
 
     _.locale = function () {
       return locale;
+    };
+
+    _.pluralize = function (msgid) {
+      var categories = $rootScope.$eval(_(msgid + '_raw'));
+      return function (count) {
+        return (categories[$locale.pluralCat(count)] || '').replace('{}', count);
+      }
     };
 
     return _;

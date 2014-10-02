@@ -47,6 +47,8 @@
 	"settings_modal_follow_us_twitter": "Follow us on Twitter!",
 	"settings_modal_recent_updates": "Recent updates (ver. {version})",
 
+	"page_title_pluralize_notifications": "{'0': 'No notifications', 'one': '1 notification', 'other': '{} notifications'}",
+
 	"profile_edit_modal_title": "Edit profile",
 	"profile_edit_first_name": "First name",
 	"profile_edit_last_name": "Last name",

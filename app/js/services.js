@@ -3468,7 +3468,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
 })
 
-.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager) {
+.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager) {
 
   navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
 
@@ -3478,8 +3478,9 @@ angular.module('myApp.services', ['myApp.i18n'])
   var notificationsCount = 0;
   var vibrateSupport = !!navigator.vibrate;
   var peerSettings = {};
-  var faviconBackupEl = $('link[rel="icon"]'),
+  var faviconBackupEl = $('link[rel="icon"]:first'),
       faviconNewEl = $('<link rel="icon" href="favicon_unread.ico" type="image/x-icon" />');
+  var langNotificationsPluralize = _.pluralize('page_title_pluralize_notifications');
 
   var titleBackup = document.title,
       titlePromise;
@@ -3490,7 +3491,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     if (!newVal) {
       document.title = titleBackup;
-      $('link[rel="icon"]').replaceWith(faviconBackupEl);
+      $('link[rel="icon"]:first').replaceWith(faviconBackupEl);
       notificationsClear();
     } else {
       titleBackup = document.title;
@@ -3499,16 +3500,13 @@ angular.module('myApp.services', ['myApp.i18n'])
         var time = tsNow();
         if (!notificationsCount || time % 2000 > 1000) {
           document.title = titleBackup;
-          var curFav = $('link[rel="icon"]');
+          var curFav = $('link[rel="icon"]:first');
           if (curFav.attr('href').indexOf('favicon_unread') != -1) {
             curFav.replaceWith(faviconBackupEl);
           }
         } else {
-          document.title = notificationsCount > 1
-            ? (notificationsCount + ' notifications')
-            : '1 notification';
-
-          $('link[rel="icon"]').replaceWith(faviconNewEl);
+          document.title = langNotificationsPluralize(notificationsCount);
+          $('link[rel="icon"]:first').replaceWith(faviconNewEl);
         }
       }, 1000);
     }
