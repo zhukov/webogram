@@ -8,7 +8,7 @@
     "group_modal_pluralize_participants": "{'0': 'Keine Mitglieder', 'one': '1 Mitglied', 'other': '{} Mitglieder'}",
     "group_modal_add_member": "Person hinzufügen",
     "group_modal_return": "Zurück zur Gruppe",
-    "group_modal_update_photo": "Bild aktualisieren",
+    "group_modal_update_photo": "Neues Bild",
     "group_modal_update_active": "Aktualisiere",
     "group_modal_menu_more": "Weiteres",
     "group_modal_menu_delete_photo": "Bild löschen",

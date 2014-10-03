@@ -285,7 +285,9 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 
-
+.welcome_text {
+  line-height: 150%;
+}
 .login_form_wrap {
   border-radius: 0;
   max-width: auto;

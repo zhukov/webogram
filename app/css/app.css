@@ -724,6 +724,7 @@ img.welcome_logo {
   margin-bottom: 26px;
   font-size: 14px;
   line-height: 14px;
+  padding: 0 15px;
 }
 .welcome_btn_wrap {
   max-width: 219px;
