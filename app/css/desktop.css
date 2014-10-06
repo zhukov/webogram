@@ -383,6 +383,27 @@ a.footer_lang_link.active:active {
   min-width: 60px;
 }
 
+.im_emoji_quick_select_area {
+  display: block;
+  height: 30px;
+  overflow: hidden;
+  padding: 0 5px;
+}
+
+.im_emoji_quick_select_area a {
+  display: inline-block;
+  margin: 3px 0;
+  padding: 2px;
+}
+
+.im_emoji_quick_select_area a:hover {
+  background-color: #edf2f5;
+}
+
+.im_emoji_quick_select_area a .label {
+  display: none;
+}
+
 .im_message_selected .im_message_date,
 .im_message_selected .im_message_document_size,
 .im_message_selected .im_message_audio_duration,
