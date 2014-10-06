@@ -1373,7 +1373,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadGif', function(MtpApiFileManager) {
+  .directive('myLoadGif', function($rootScope, MtpApiFileManager) {
 
     return {
       link: link,
@@ -1397,7 +1397,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       /*return $scope.document.progress = {enabled: true, percent: 30, total: $scope.document.size};*/
 
-      $scope.toggle = function () {
+      $scope.toggle = function (e) {
+        if (checkClick(e, true)) {
+          $rootScope.downloadDoc($scope.document.id);
+          return false;
+        }
+
         if ($scope.document.url) {
           $scope.isActive = !$scope.isActive;
           $scope.$emit('ui_height');
