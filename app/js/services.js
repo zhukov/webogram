@@ -437,7 +437,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
 })
 
-.service('AppChatsManager', function ($rootScope, $modal, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
+.service('AppChatsManager', function ($rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
   var chats = {},
       cachedPhotoLocations = {};
 
