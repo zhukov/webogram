@@ -1,0 +1,19 @@
+<div class="img_fullsize_with_progress_wrap">
+  <div class="img_fullsize_progress_overlay" ng-show="progress.enabled">
+    <div class="img_fullsize_progress_wrap">
+      <div class="img_fullsize_progress progress tg_progress" ng-show="progress.percent > 0">
+        <div class="progress-bar progress-bar-success" ng-style="{width: progress.percent + '%'}">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="photo_full_wrap">
+    <a class="photo_modal_image">
+      <img class="photo_modal_image"/>
+    </a>
+  </div>
+  <div class="photo_modal_error_wrap" ng-if="error">
+    <div class="photo_modal_error" ng-if="error.html" ng-bind-html="error.html"></div>
+    <div class="photo_modal_error" ng-if="error.text" ng-bind="error.text"></div>
+  </div>
+</div>

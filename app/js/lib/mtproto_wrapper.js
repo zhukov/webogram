@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.9 - messaging web application for MTProto
+ * Webogram v0.3.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -143,6 +143,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           console.error(dT(), 'Error', error.code, error.type, baseDcID, dcID);
           if (error.code == 401 && baseDcID == dcID) {
             Storage.remove('dc', 'user_auth');
+            rejectPromise(error);
           }
           else if (error.code == 401 && baseDcID && dcID != baseDcID) {
             if (cachedExportPromise[dcID] === undefined) {
@@ -175,7 +176,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             });
           }
           else if (error.code == 303) {
-            var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_)(\d+)/)[2];
+            var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_|USER_MIGRATE_)(\d+)/)[2];
             if (newDcID != dcID) {
               if (options.dcID) {
                 options.dcID = newDcID;
@@ -223,6 +224,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     getBaseDcID: getBaseDcID,
     getUserID: mtpGetUserID,
     invokeApi: mtpInvokeApi,
+    getNetworker: mtpGetNetworker,
     setUserAuth: mtpSetUserAuth,
     logOut: mtpLogOut
   }

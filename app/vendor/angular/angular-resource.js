@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.16
+ * @license AngularJS v1.3.0-rc.4
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -111,8 +111,10 @@ function shallowClearAndCopy(src, dst) {
  *   Given a template `/path/:verb` and parameter `{verb:'greet', salutation:'Hello'}` results in
  *   URL `/path/greet?salutation=Hello`.
  *
- *   If the parameter value is prefixed with `@` then the value of that parameter will be taken
- *   from the corresponding key on the data object (useful for non-GET operations).
+ *   If the parameter value is prefixed with `@` then the value for that parameter will be extracted
+ *   from the corresponding property on the `data` object (provided when calling an action method).  For
+ *   example, if the `defaultParam` object is `{someParam: '@someProp'}` then the value of `someParam`
+ *   will be `data.someProp`.
  *
  * @param {Object.<Object>=} actions Hash with declaration of custom action that should extend
  *   the default set of resource actions. The declaration should be created in the format of {@link
@@ -126,8 +128,8 @@ function shallowClearAndCopy(src, dst) {
  *
  *   - **`action`** – {string} – The name of action. This name becomes the name of the method on
  *     your resource object.
- *   - **`method`** – {string} – HTTP request method. Valid methods are: `GET`, `POST`, `PUT`,
- *     `DELETE`, and `JSONP`.
+ *   - **`method`** – {string} – Case insensitive HTTP method (e.g. `GET`, `POST`, `PUT`,
+ *     `DELETE`, `JSONP`, etc).
  *   - **`params`** – {Object=} – Optional set of pre-bound parameters for this action. If any of
  *     the parameter value is a function, it will be executed every time when a param value needs to
  *     be obtained for a request (unless the param was overridden).
@@ -139,10 +141,16 @@ function shallowClearAndCopy(src, dst) {
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     request body and headers and returns its transformed (typically serialized) version.
+ *     By default, transformRequest will contain one function that checks if the request data is
+ *     an object and serializes to using `angular.toJson`. To prevent this behavior, set
+ *     `transformRequest` to an empty array: `transformRequest: []`
  *   - **`transformResponse`** –
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     response body and headers and returns its transformed (typically deserialized) version.
+ *     By default, transformResponse will contain one function that checks if the response looks like
+ *     a JSON string and deserializes it using `angular.fromJson`. To prevent this behavior, set
+ *     `transformResponse` to an empty array: `transformResponse: []`
  *   - **`cache`** – `{boolean|Cache}` – If true, a default $http cache will be used to cache the
  *     GET request, otherwise if a cache instance built with
  *     {@link ng.$cacheFactory $cacheFactory}, this cache will be used for
@@ -315,20 +323,20 @@ function shallowClearAndCopy(src, dst) {
  * # Creating a custom 'PUT' request
  * In this example we create a custom method on our resource to make a PUT request
  * ```js
- *		var app = angular.module('app', ['ngResource', 'ngRoute']);
+ *    var app = angular.module('app', ['ngResource', 'ngRoute']);
  *
- *		// Some APIs expect a PUT request in the format URL/object/ID
- *		// Here we are creating an 'update' method
- *		app.factory('Notes', ['$resource', function($resource) {
+ *    // Some APIs expect a PUT request in the format URL/object/ID
+ *    // Here we are creating an 'update' method
+ *    app.factory('Notes', ['$resource', function($resource) {
  *    return $resource('/notes/:id', null,
  *        {
  *            'update': { method:'PUT' }
  *        });
- *		}]);
+ *    }]);
  *
- *		// In our controller we get the ID from the URL using ngRoute and $routeParams
- *		// We pass in $routeParams and our Notes factory along with $scope
- *		app.controller('NotesCtrl', ['$scope', '$routeParams', 'Notes',
+ *    // In our controller we get the ID from the URL using ngRoute and $routeParams
+ *    // We pass in $routeParams and our Notes factory along with $scope
+ *    app.controller('NotesCtrl', ['$scope', '$routeParams', 'Notes',
                                       function($scope, $routeParams, Notes) {
  *    // First get a note object from the factory
  *    var note = Notes.get({ id:$routeParams.id });
@@ -338,7 +346,7 @@ function shallowClearAndCopy(src, dst) {
  *    Notes.update({ id:$id }, note);
  *
  *    // This will PUT /notes/ID with the note object in the request payload
- *		}]);
+ *    }]);
  * ```
  */
 angular.module('ngResource', ['ng']).
@@ -576,9 +584,8 @@ angular.module('ngResource', ['ng']).
                 // jshint -W018
                 if (angular.isArray(data) !== (!!action.isArray)) {
                   throw $resourceMinErr('badcfg',
-                      'Error in resource configuration. Expected ' +
-                      'response to contain an {0} but got an {1}',
-                    action.isArray ? 'array' : 'object',
+                      'Error in resource configuration for action `{0}`. Expected response to ' +
+                      'contain an {1} but got an {2}', name, action.isArray ? 'array' : 'object',
                     angular.isArray(data) ? 'array' : 'object');
                 }
                 // jshint +W018

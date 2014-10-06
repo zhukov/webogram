@@ -1,0 +1,17 @@
+<div class="im_message_document im_message_upload_file" ng-class="::'im_message_upload_' + historyMessage.media.type">
+  <i class="icon" ng-class="::'icon-' + historyMessage.media.type"></i>
+  <div class="im_message_document_info">
+    <div class="im_message_document_name_wrap">
+      <span class="im_message_document_name" ng-bind="::historyMessage.media.file_name"></span>
+      <span class="im_message_document_size" ng-if="historyMessage.media.progress" ng-bind="historyMessage.media.progress | formatSizeProgress"></span>
+    </div>
+    <div class="clearfix cancelable_progress_wrap">
+      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.progress.cancel()" my-i18n="modal_cancel"></a>
+      <div class="im_message_download_progress_wrap">
+        <div class="progress tg_down_progress">
+          <div class="progress-bar progress-bar-success" role="progressbar" ng-style="{width: historyMessage.media.progress.percent + '%'}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

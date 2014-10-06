@@ -10,3 +10,4 @@ dist_package
 releases
 webogram*.zip
 app/js/templates.js
+cldr

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.9 - messaging web application for MTProto
+ * Webogram v0.3.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -16,10 +16,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     ]
     : [
       {id: 1, host: '173.240.5.1',   port: 80},
-      {id: 2, host: '149.154.167.50', port: 80},
+      {id: 2, host: '149.154.167.51', port: 80},
       {id: 3, host: '174.140.142.6', port: 80},
-      {id: 4, host: '149.154.167.90', port: 80},
-      {id: 5, host: '116.51.22.2',   port: 80},
+      {id: 4, host: '149.154.167.91', port: 80},
+      {id: 5, host: '149.154.171.5',   port: 80},
     ];
 
   var chosenServers = {};
@@ -711,7 +711,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var serializer = new TLSerialization(options);
 
     if (!this.connectionInited) {
-      serializer.storeInt(0xb4418b64, 'invokeWithLayer15');
+      serializer.storeInt(0x50858a19, 'invokeWithLayer17');
       serializer.storeInt(0x69796de9, 'initConnection');
       serializer.storeInt(Config.App.id, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');

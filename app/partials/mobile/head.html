@@ -1,0 +1,124 @@
+<div class="tg_page_head">
+  <div class="navbar navbar-static-top  navbar-inverse" role="navigation" ng-class="{navbar_peer_not_selected: !curDialog.peer, navbar_offline: offline, navbar_history_select: historyState.selectActions}">
+    <div class="container">
+
+      <a class="navbar-peer-wrap" ng-click="showPeerInfo()">
+        <img
+          my-load-thumb
+          watch="true"
+          thumb="historyPeer.photo"
+        />
+      </a>
+
+      <div class="navbar-toggle-wrap dropdown">
+        <a class="dropdown-toggle navbar-toggle">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <ul ng-if="!curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
+          <li><a ng-click="openGroup()" my-i18n="head_new_group"></a></li>
+          <li><a ng-click="importContact()" my-i18n="head_new_contact"></a></li>
+          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" my-i18n="head_contacts"></a></li>
+          <li><a ng-click="openSettings()" my-i18n="head_settings"></a></li>
+          <li><a ng-click="logOut()" my-i18n="head_log_out"></a></li>
+        </ul>
+        <ul ng-if="curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
+          <li><a ng-click="toggleEdit()" my-i18n="head_edit_messages"></a></li>
+          <li ng-if="!historyFilter.mediaType" class="divider"></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
+        </ul>
+        <ul ng-if="!isLoggedIn" class="dropdown-menu">
+          <li><a href="https://github.com/zhukov/webogram" target="_blank" my-i18n="head_about"></a></li>
+        </ul>
+      </div>
+
+      <a ng-if="isLoggedIn" class="navbar-search-wrap" ng-click="toggleSearch()">
+        <i class="icon-search"></i>
+      </a>
+
+      <div class="navbar-header">
+
+        <a class="navbar-brand" href="{{isLoggedIn ? '#/im' : '#/'}}"><span class="tg_head_logo"></span></a>
+
+        <div ng-show="curDialog.peer" ng-switch="curDialog.peer &amp;&amp; historyFilter.mediaType.length > 0">
+          <ul ng-switch-when="true" class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="toggleMedia()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title" ng-switch="historyFilter.mediaType">
+                  <h4 ng-switch-when="photos" my-i18n="head_media_photos"></h4>
+                  <h4 ng-switch-when="video" my-i18n="head_media_video"></h4>
+                  <h4 ng-switch-when="documents" my-i18n="head_media_documents"></h4>
+                  <h4 ng-switch-when="audio" my-i18n="head_media_audio"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+          <div ng-switch-default ng-switch="historyState.selectActions">
+            <ul ng-switch-when="true" class="nav navbar-navbar navbar-quick-nav navbar-history-edit">
+              <li class="navbar-quick-right">
+                <a ng-click="toggleEdit()" my-i18n="modal_cancel"></a>
+              </li>
+              <li class="navbar-quick-left">
+                <a ng-click="selectedFlush()" my-i18n="head_clear_all"></a>
+              </li>
+              <li class="navbar-quick-title" my-i18n="head_edit"></li>
+            </ul>
+            <ul ng-switch-default class="nav navbar-nav navbar-quick-nav" ng-switch="historyPeer.id > 0">
+              <li ng-switch-when="true">
+                <a href="#/im" class="navbar-quick-profile-back">
+                  <i class="icon icon-back"></i>
+                  <div class="navbar-quick-back-title">
+                    <h4 ng-bind-html="historyPeer.data.rFullName"></h4>
+                    <small ng-switch="historyState.typing.length">
+                      <span ng-switch-when="1" class="status_online">
+                        <my-i18n msgid="head_typing"></my-i18n><span my-loading-dots></span>
+                      </span>
+                      <span ng-switch-default my-user-status="historyPeer.id"></span>
+                    </small>
+                  </div>
+                </a>
+              </li>
+              <li ng-switch-default>
+                <a href="#/im" class="navbar-quick-group-back">
+                  <i class="icon icon-back"></i>
+                  <div class="navbar-quick-back-title">
+                    <h4 ng-bind-html="historyPeer.data.rTitle"></h4>
+                    <small ng-switch="historyState.typing.length">
+                      <ng-pluralize ng-switch-when="0" count="historyPeer.data.participants_count"
+                                       when="head_pluralize_participants">
+                      </ng-pluralize>
+                      <my-i18n>
+                        <span ng-switch-when="1" class="status_online" my-i18n-format="head_one_typing"></span>
+                        <span ng-switch-when="2" class="status_online" my-i18n-format="head_two_typing"></span>
+                        <span ng-switch-default class="status_online" my-i18n-format="head_many_typing"></span>
+                        <my-i18n-param name="name1"><span my-user-link="historyState.typing[0]" short="true"></span></my-i18n-param>
+                        <my-i18n-param name="name2"><span my-user-link="historyState.typing[1]" short="true"></span></my-i18n-param>
+                        <my-i18n-param name="names" ng-bind="historyState.typing.length - 1"></my-i18n-param>
+                        <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+                      </my-i18n>
+                    </small>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="navbar-menu" ng-if="offline">
+
+        <ul class="nav navbar-nav navbar-offline">
+          <li ng-show="!offlineConnecting"><span class="navbar-offline-text"><my-i18n msgid="head_waiting_for_network"></my-i18n><span my-loading-dots></span></span></li>
+          <li ng-show="!offlineConnecting" class="hidden-xs"><a href="" ng-click="retryOnline()" my-i18n="head_retry"></a></li>
+          <li ng-show="offlineConnecting"><span class="navbar-offline-text"><my-i18n msgid="head_connecting"></my-i18n><span my-loading-dots></span></span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>

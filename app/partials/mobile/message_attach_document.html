@@ -1,0 +1,43 @@
+<div ng-switch="::historyMessage.media.document.isSpecial">
+
+  <div ng-switch-when="gif" my-load-gif document="historyMessage.media.document"></div>
+
+  <div ng-switch-when="audio" class="im_message_audio">
+    <div my-audio-player audio="historyMessage.media.document"></div>
+  </div>
+
+  <div ng-switch-default class="im_message_document" ng-class="{im_message_document_thumbed: !!historyMessage.media.document.thumb, im_message_document_progress: historyMessage.media.document.progress.enabled}">
+
+    <a href="" ng-click="downloadDoc(historyMessage.media.document.id, historyMessage.media.document.withPreview)" ng-class="{im_message_document_link_disabled: historyMessage.media.document.progress.enabled}">
+      <i class="icon icon-document" ng-if="::!historyMessage.media.document.thumb"></i>
+      <div class="im_message_document_thumb_wrap" ng-if="::historyMessage.media.document.thumb">
+        <img
+          class="im_message_document_thumb"
+          my-load-thumb
+          thumb="historyMessage.media.document.thumb"
+        />
+      </div>
+    </a>
+
+    <div class="im_message_document_info">
+      <div class="im_message_document_name_wrap">
+        <span class="im_message_document_name" ng-bind="::historyMessage.media.document.file_name"></span>
+        <span class="im_message_document_size" ng-if="!historyMessage.media.document.progress.enabled" ng-bind="::historyMessage.media.document.size | formatSize"></span>
+        <span class="im_message_document_size" ng-if="historyMessage.media.document.progress.enabled" ng-bind="historyMessage.media.document.progress | formatSizeProgress"></span>
+      </div>
+      <div class="im_message_document_actions" ng-if="!historyMessage.media.document.progress.enabled">
+        <a href="" ng-click="downloadDoc(historyMessage.media.document.id)" my-i18n="message_attach_document_download"></a>
+        <a href="" ng-click="downloadDoc(historyMessage.media.document.id, 1)" ng-if="::historyMessage.media.document.withPreview" my-i18n="message_attach_document_open"></a>
+      </div>
+      <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.document.progress.enabled">
+        <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.document.progress.cancel()" my-i18n="modal_cancel"></a>
+        <div class="im_message_download_progress_wrap">
+          <div class="progress tg_down_progress">
+            <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.document.progress.percent + '%'}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

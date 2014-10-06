@@ -1,0 +1,106 @@
+<div class="chat_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="user_modal_photo_profile_wrap">
+
+      <div class="user_modal_image_wrap pull-left">
+        <img
+          class="user_modal_image"
+          my-load-thumb
+          watch="true"
+          thumb="chatFull.thumb"
+        />
+      </div>
+
+      <div class="chat_modal_info_wrap clearfix">
+        <h4 class="chat_modal_header" ng-bind-html="chatFull.chat.rTitle"></h4>
+        <p class="chat_modal_members_count" ng-if="chatFull.chat.participants_count > 0">
+          <ng-pluralize count="chatFull.chat.participants_count"
+                           when="group_modal_pluralize_participants">
+          </ng-pluralize>
+        </p>
+
+        <div class="chat_modal_actions_wrap clearfix">
+
+          <button ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="btn btn-primary chat_modal_invite_btn" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></button>
+          <button ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left" class="btn btn-primary chat_modal_main_btn" ng-click="returnToGroup()" my-i18n="group_modal_return"></button>
+          <button ng-if="chatFull.chat._ == 'chatForbidden'" class="btn btn-danger chat_modal_delete_btn" ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></button>
+
+          <span ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; !photo.updating" class="btn btn-primary chat_modal_main_btn" >
+            <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+            <my-i18n msgid="group_modal_update_photo"></my-i18n>
+          </span>
+          <span ng-if="photo.updating" class="btn btn-primary chat_modal_main_btn disabled" disabled>
+            <my-i18n msgid="group_modal_update_active"></my-i18n><span my-loading-dots></span>
+          </span>
+
+
+          <div class="dropdown chat_modal_other_btn" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+            <button class="btn btn-link dropdown-toggle">
+              <my-i18n msgid="group_modal_menu_more"></my-i18n>
+              <i class="icon icon-caret"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li ng-if="chatFull.thumb.location">
+                <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
+              </li>
+              <li>
+                <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
+              </li>
+              <li>
+                <a ng-click="leaveGroup()" my-i18n="group_modal_menu_leave_group"></a>
+              </li>
+              <li>
+                <a ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal_section">
+      <h3 class="modal_section_header" my-i18n="group_modal_settings"></h3>
+      <div class="modal_section_body">
+
+        <div class="tg_form_group">
+          <a class="tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+            <span class="tg_checkbox_label" my-i18n="group_modal_notifications"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal_section">
+      <h3 class="modal_section_header" my-i18n="group_modal_members"></h3>
+      <div class="modal_section_body">
+
+        <div class="chat_modal_members_list">
+
+          <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
+            <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)"  class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
+
+            <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
+
+            <div class="chat_modal_participant_name">
+              <a my-user-link="participant.user_id"></a>
+            </div>
+            <div class="chat_modal_participant_status" my-user-status="::participant.user_id"></div>
+          </div>
+
+        </div>
+
+        <div class="chat_modal_members_forbidden" ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.left" my-i18n="group_modal_members_unavailable"></div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,51 @@
+<div class="peer_select_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button visible-xs" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController" my-dialogs>
+      <div class="im_dialogs_panel">
+        <div class="im_dialogs_search">
+          <input my-focused class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+          <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+        </div>
+      </div>
+      <div my-dialogs-list modal="true" class="im_dialogs_modal_col">
+        <div class="im_dialogs_wrap nano">
+          <div class="im_dialogs_scrollable_wrap nano-content">
+            <ul class="nav nav-pills nav-stacked">
+              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"></li>
+            </ul>
+            <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
+              <h5 my-i18n="conversation_select_modal_contacts"></h5>
+              <ul class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
+                  <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
+                    <div class="im_dialog_photo pull-left">
+                      <img
+                        class="im_dialog_photo"
+                        my-load-thumb
+                        thumb="contact.userPhoto"
+                      />
+                    </div>
+                    <div class="im_dialog_message_wrap">
+                      <div class="im_dialog_peer">
+                        <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
+                      </div>
+                      <div class="im_dialog_message">
+                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

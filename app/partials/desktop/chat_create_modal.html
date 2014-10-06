@@ -1,0 +1,24 @@
+<div class="contacts_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <form class="modal_simple_form" ng-submit="createGroup()">
+
+      <h4 my-i18n="group_create_modal_title"></h4>
+
+      <div class="form-group">
+        <input class="form-control input-sm" my-focused type="text" placeholder="{{'group_create_name' | i18n}}" ng-model="group.name"/>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()" my-i18n="modal_cancel"></a>
+    <button class="btn btn-primary" ng-class="{disabled: group.creating}" ng-click="createGroup()" ng-bind="group.creating ? 'group_create_submit_active' : 'group_create_submit' | i18n" ng-disabled="group.creating"></button>
+  </div>
+
+</div>

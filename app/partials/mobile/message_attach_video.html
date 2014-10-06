@@ -1,0 +1,11 @@
+<div class="im_message_video im_message_document_thumbed">
+  <a class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)" ng-style="::{width: historyMessage.media.video.thumb.width + 'px'}">
+    <span class="im_message_video_duration" ng-bind="::historyMessage.media.video.duration | duration"></span>
+    <i class="icon icon-videoplay"></i>
+    <img
+      class="im_message_video_thumb"
+      my-load-thumb
+      thumb="historyMessage.media.video.thumb"
+    />
+  </a>
+</div>

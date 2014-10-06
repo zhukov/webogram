@@ -1,0 +1,22 @@
+<div my-modal-width="{{photo.full.modalWidth}}" class="media_modal_wrap photo_modal_wrap" my-modal-position animation="no" my-modal-nav next="nav.next()" prev="nav.prev()">
+
+  <div class="modal-body">
+
+    <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="nav.next()"> </div>
+
+    <div class="media_meta_wrap clearfix">
+      <div class="media_modal_actions pull-right">
+        <a href="" class="media_modal_action_link" ng-click="download()" my-i18n="media_modal_download"></a>
+        <a href="" class="media_modal_action_link" ng-if="canForward" ng-click="forward()" my-i18n="media_modal_forward"></a>
+        <a href="" class="media_modal_action_link" ng-if="canDelete" ng-click="delete()" my-i18n="media_modal_delete"></a>
+      </div>
+
+      <p class="media_modal_info">
+        <span class="media_modal_author" ng-bind-html="::photo.fromUser.rFullName"></span>, <span ng-bind="photo.date | dateOrTime"></span>
+      </p>
+    </div>
+
+
+  </div>
+
+</div>

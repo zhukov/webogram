@@ -1,0 +1,27 @@
+<div class="profile_edit_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <form class="modal_simple_form" ng-submit="updateProfile()">
+
+      <h4 my-i18n="profile_edit_modal_title"></h4>
+
+      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': error.field == 'first_name'}">
+        <input class="form-control input-sm" my-focused type="text" placeholder="{{'profile_edit_first_name' | i18n}}" ng-model="profile.first_name"  name="first_name"/>
+      </div>
+      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': error.field == 'last_name'}">
+        <input class="form-control input-sm" type="text" placeholder="{{'profile_edit_last_name' | i18n}}" ng-model="profile.last_name"/>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()" my-i18n="modal_cancel"></a>
+    <button class="btn btn-primary" ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="profile.updating"></button>
+  </div>
+
+</div>

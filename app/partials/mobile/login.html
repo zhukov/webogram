@@ -1,0 +1,86 @@
+<div my-head></div>
+
+
+<div class="login_form_wrap" my-vertical-position="0.3">
+  <div class="error" ng-if="error.message" ng-bind="error.message"></div>
+
+  <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
+    <h3 class="login_form_head" my-i18n="login_sign_in"></h3>
+    <p class="login_form_lead" my-i18n="login_enter_number_description"></p>
+
+    <div class="login_country_selector" ng-click="chooseCountry()">
+      <span ng-bind="credentials.phone_country_name"></span>
+      <i class="icon icon-caret pull-right"></i>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': error.field == 'phone'}">
+      <label class="control-label" ng-if="error.field == 'phone'" my-i18n="login_incorrect_number"></label>
+      <div class="clearfix">
+        <input type="tel" autocomplete="off" class="form-control pull-left login_phone_country" my-focused name="phone_country" ng-model="credentials.phone_country">
+        <input type="tel" autocomplete="off" class="form-control pull-left login_phone_number" my-focus-on="country_selected" name="phone_number" ng-model="credentials.phone_number" placeholder="{{'login_tel_input_placeholder' | i18n}}" required>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" ng-switch="progress.enabled">
+      <span ng-switch-when="true"><my-i18n msgid="login_generating_key"></my-i18n><span my-loading-dots></span></span>
+      <span ng-switch-default my-i18n="modal_next"></span>
+    </button>
+    <div class="login_form_messaging" ng-show="progress.enabled" my-i18n="login_generating_keys_info"></div>
+  </form>
+
+  <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
+    <h3 class="login_form_head"><span ng-bind="credentials.phone_country"></span> <span ng-bind="credentials.phone_number"></span></h3>
+    <div class="login_edit_phone"><a ng-click="editPhone()" my-i18n="login_edit_number"></a></div>
+    <div ng-switch="credentials.viaApp">
+      <div ng-switch-when="true">
+        <p class="login_form_lead" my-i18n="login_enter_code_label_md"></p>
+        <p class="login_form_lead">
+          <a ng-click="sendSms()" my-i18n="login_code_not_received"></a>
+        </p>
+      </div>
+      <div ng-switch-default>
+        <p class="login_form_lead" my-i18n="login_enter_sms_code_label_md"></p>
+
+        <p class="login_form_lead">
+          <span ng-show="callPending.remaining > 0" my-i18n="login_call_remaining">
+            <my-i18n-param name="remaining">{{callPending.remaining | duration}}</my-i18n-param>
+          </span>
+          <span ng-show="!callPending.remaining &amp;&amp; !callPending.success" my-i18n="login_calling"></span>
+          <span ng-show="!callPending.remaining &amp;&amp; callPending.success" my-i18n="login_number_dialed"></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': error.field == 'phone_code'}">
+      <label class="control-label" for="phone_code" ng-if="error.field == 'phone_code'" my-i18n="login_incorrect_sms_code"></label>
+      <input type="number" my-focused class="form-control login_phone_code" name="phone_code" ng-model="credentials.phone_code" placeholder="{{'login_number_input_placeholder' | i18n}}" autocomplete="off" required>
+    </div>
+
+    <button class="btn btn-primary btn-block" type="submit" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" ng-switch="progress.enabled">
+      <span ng-switch-when="true"><my-i18n msgid="login_checking_code"></my-i18n><span my-loading-dots></span></span>
+      <span ng-switch-default my-i18n="modal_next"></span>
+    </button>
+  </form>
+
+  <form name="myFullNameForm" ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" ng-submit="logIn(true)">
+    <h3 class="login_form_head" my-i18n="login_your_info"></h3>
+    <p class="login_form_lead" my-i18n="login_fulll_name_label"></p>
+
+    <div class="form-group login_first_name_wrap" ng-class="{'has-error': error.field == 'first_name'}">
+      <label class="control-label" for="first_name" ng-if="error.field == 'first_name'" my-i18n="login_incorrect_first_name"></label>
+      <input my-focused class="form-control" name="first_name" ng-model="credentials.first_name" placeholder="{{'login_first_name' | i18n}}" autocomplete="off" required>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': error.field == 'last_name'}">
+      <label class="control-label" for="last_name" ng-if="error.field == 'last_name'" my-i18n="login_incorrect_last_name"></label>
+      <input class="form-control" name="last_name" ng-model="credentials.last_name" placeholder="{{'login_last_name' | i18n}}" autocomplete="off">
+    </div>
+
+    <button class="btn btn-primary btn-block" ng-class="{disabled: progress.enabled}" ng-disabled="progress.enabled" type="submit" ng-switch="progress.enabled">
+      <span ng-switch-when="true"><my-i18n msgid="login_signing_up"></my-i18n><span my-loading-dots></span></span>
+      <span ng-switch-default my-i18n="login_sign_up"></span>
+    </button>
+  </form>
+
+</div>
+
+<!-- <div my-lang-footer></div> -->

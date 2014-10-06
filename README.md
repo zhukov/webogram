@@ -17,7 +17,10 @@ That said, I'm using this app myself and I'd like to share its sources, so anyon
 
 Here are some screenshots of the interface:
 
+
 ![Sample screenshot 1](/app/img/screenshot1.png)
+![Mobile screenshot 2](/app/img/screenshot2.png)
+![Mobile screenshot 3](/app/img/screenshot3.png)
 
 
 ### Implemented functionality list
@@ -51,9 +54,27 @@ Here are some screenshots of the interface:
 * ...
 
 
+### Maintained locations
+
+
+| Description        | URL           | Type  |
+| ------------- |-------------| -----:|
+| Online Web-version (hosted on GitHub pages)      | http://zhukov.github.io/webogram | hosted
+| Chrome Web Store      | [https://chrome.google.com/webstore/detail/telegram/ clhhggbfdinjmjhajaheehoeibfljjno](https://chrome.google.com/webstore/detail/telegram/clhhggbfdinjmjhajaheehoeibfljjno) |   packed
+| Firefox & FirefoxOS Marketplace | https://marketplace.firefox.com/app/telegram |    packed
+
+
+
+**Hosted version**: the app is downloaded via HTTP as a usual website.
+
+**Packed version**: the app is downloaded at once in a package via HTTPS. This is a more secure way to use app, but the package is updated less frequently than the Web-version.
+
+All of the apps above are submitted and maintained by [@zhukov](https://github.com/zhukov), so feel free to use them and report bugs [here](https://github.com/zhukov/webogram/issues). Please do not report bugs which reproduce only in different locations.
+
+
 ## Technical details
 
-The app is based on AngularJS JavaScript framework, written in pure JavaScript (migration to CoffeeScript is planned for the future). jQuery is used for DOM manipulations, and Bootstrap is the CSS-framework.
+The app is based on AngularJS JavaScript framework, written in pure JavaScript. jQuery is used for DOM manipulations, and Bootstrap is the CSS-framework.
 
 
 ### Running locally
@@ -66,10 +87,11 @@ Install [node.js](http://nodejs.org/) and run `node server.js`. Open page http:/
 
 #### Running as Chrome Packaged App
 
-It is possible to run this application in Chrome browser as a packaged app. In order to do this, open this URL in Chrome: `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram application should appear in the list.
+To run this application in Google Chrome browser as a packaged app, open this URL in Chrome: `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram application should appear in the list.
 
+#### Running as Firefox OS App
 
-You can also download this application from Chrome Web Store: [chrome.google.com/webstore/detail/telegram-unofficial/clhhggbfdinjmjhajaheehoeibfljjno](https://chrome.google.com/webstore/detail/telegram-unofficial/clhhggbfdinjmjhajaheehoeibfljjno). This is more secure way to use app than plain HTTP in web, because sources are downloaded only once and via HTTPS.
+To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or use `Shift + F8` shortcut). Choose "Open packaged app" from Project menu and select `app` folder.
 
 
 ### Third party libraries
@@ -94,11 +116,17 @@ The source code is licensed under GPL v3. License is available [here](/LICENSE).
 
 ## Contribute
 
-You can help this project by reporting problems, suggestions, or contributing to the code.
+You can help this project by reporting problems, suggestions, localizing it or contributing to the code.
 
 ### Report a problem or suggestion
 
 Go to our [issue tracker](https://github.com/zhukov/webogram/issues) and check if your problem/suggestion is already reported. If not, create a new issue with a descriptive title and detail your suggestion or steps to reproduce the problem.
+
+### Localization
+
+If you don't see your native language available for Webogram and you can help with translation, please join the [Telegram Web project on Transifex](https://www.transifex.com/projects/p/telegram-web/).
+
+To test your translation live, use [Localization guide](/app/js/locales/README.md).
 
 ### Contribute to the code
 

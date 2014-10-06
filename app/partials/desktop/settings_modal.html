@@ -1,0 +1,124 @@
+<div class="settings_modal_wrap modal_content_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="user_modal_photo_profile_wrap">
+
+      <a href="" ng-click="openPhoto(photo.id, -profile.id)" class="user_modal_image_wrap pull-left" ng-class="{disabled: !photo.id}">
+        <img
+          class="user_modal_image"
+          my-load-thumb
+          watch="true"
+          thumb="photo"
+        />
+      </a>
+
+      <div class="user_modal_info_wrap clearfix">
+        <h4 class="user_modal_header" ng-bind-html="profile.rFullName"></h4>
+        <p class="user_modal_status" my-user-status="::profile.id"></p>
+
+        <div class="user_modal_actions_wrap clearfix">
+          <span class="btn btn-primary user_modal_main_btn" ng-if="!photo.updating">
+            <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+            <my-i18n msgid="settings_modal_set_photo"></my-i18n>
+          </span>
+          <span class="btn btn-primary user_modal_main_btn disabled" disabled ng-if="photo.updating">
+            <my-i18n msgid="settings_modal_photo_updating"></my-i18n>
+            <span my-loading-dots></span>
+          </span>
+
+          <div class="dropdown user_modal_other_btn">
+            <button class="btn btn-link dropdown-toggle">
+              <my-i18n msgid="settings_modal_menu_more"></my-i18n>
+              <i class="icon icon-caret"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li ng-if="photo.location">
+                <a ng-click="deletePhoto()" my-i18n="settings_modal_delete_photo"></a>
+              </li>
+              <li>
+                <a ng-click="editProfile()" my-i18n="settings_modal_edit_profile"></a>
+              </li>
+              <li>
+                <a ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal_section" ng-if="profile.phone">
+      <h3 class="modal_section_header" my-i18n="settings_modal_phone"></h3>
+      <div class="modal_section_body">
+        <p><span ng-bind="profile.phone | phoneNumber"></span></p>
+      </div>
+    </div>
+
+    <div class="modal_section">
+      <h3 class="modal_section_header" my-i18n="settings_modal_settings"></h3>
+      <div class="modal_section_body">
+
+        <div class="tg_form_group">
+          <!--label my-i18n="settings_modal_language"></label>
+          <select class="tg_select" ng-model="i18n.locale">
+            <option value="{{lang}}" ng-selected="lang == i18n.locale" ng-repeat="(lang, name) in i18n.supported" ng-bind="name"></option>
+          </select-->
+
+          <a class="tg_checkbox" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
+            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+            <span class="tg_checkbox_label" my-i18n="settings_modal_notifications"></span>
+          </a>
+
+          <a class="tg_checkbox" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
+            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+            <span class="tg_checkbox_label" my-i18n="settings_modal_sound"></span>
+          </a>
+
+          <div class="tg_range_wrap" ng-show="notify.volume > 0">
+            <span class="icon icon-volume-outer" ng-class="'icon-volume-outer' + notify.volumeOf4()">
+              <i class="icon-volume-inner icon-volume-inner1"></i>
+              <i class="icon-volume-inner icon-volume-inner2"></i>
+              <i class="icon-volume-inner icon-volume-inner3"></i>
+              <i class="icon-volume-inner icon-volume-inner4"></i>
+            </span>
+            <input type="range" class="tg_range" ng-model="notify.volume" min="1" max="10">
+          </div>
+        </div>
+
+        <div class="tg_form_group">
+          <a class="tg_radio" ng-click="toggleCtrlEnter(1)" ng-class="send.enter == 1 ? 'tg_radio_on' : ''">
+            <i class="icon icon-radio"></i>
+            <span my-i18n="settings_modal_enter_send_description_md"></span>
+          </a>
+
+          <a class="tg_radio" ng-click="toggleCtrlEnter(0)" ng-class="send.enter == 0 ? 'tg_radio_on' : ''">
+            <i class="icon icon-radio"></i>
+            <span my-i18n="settings_modal_ctrl_enter_send_description_md"></span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal_section">
+      <h3 class="modal_section_header" my-i18n="settings_modal_about"></h3>
+      <div class="modal_section_body settings_about_section_body">
+        <div class="settings_external_services pull-right">
+          <a href="https://github.com/zhukov/webogram" target="_blank" title="{{'settings_modal_source_code_github' | i18n}}" class="settings_external_service"><i class="icon icon-github"></i></a>
+          <a href="https://twitter.com/telegram_web" target="_blank" title="{{'settings_modal_follow_us_twitter' | i18n}}" class="settings_external_service"><i class="icon icon-twitter"></i></a>
+        </div>
+        <p>
+          <a ng-click="openChangelog()" my-i18n="settings_modal_recent_updates">
+            <my-i18n-param name="version" ng-bind="version"></my-i18n-param>
+          </a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

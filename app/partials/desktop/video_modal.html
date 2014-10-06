@@ -1,0 +1,21 @@
+<div class="media_modal_wrap video_modal_wrap" my-modal-position>
+
+  <div class="modal-body">
+
+    <div class="video_modal_image_wrap" my-load-video video="video"></div>
+
+    <div class="media_meta_wrap clearfix">
+      <div class="media_modal_actions pull-right">
+        <a href="" class="media_modal_action_link" ng-click="download()" my-i18n="media_modal_download"></a>
+        <a ng-if="messageID" href="" class="media_modal_action_link" ng-click="forward()" my-i18n="media_modal_forward"></a>
+        <a ng-if="messageID" href="" class="media_modal_action_link" ng-click="delete()" my-i18n="media_modal_delete"></a>
+      </div>
+
+      <p class="media_modal_info">
+        <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName"></span>, <span ng-bind="video.date | dateOrTime"></span>
+      </p>
+    </div>
+
+  </div>
+
+</div>

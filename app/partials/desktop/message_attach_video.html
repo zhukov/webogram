@@ -1,0 +1,31 @@
+<div class="im_message_video im_message_document_thumbed">
+  <a class="im_message_video_thumb" href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)" ng-style="::{width: historyMessage.media.video.thumb.width + 'px'}">
+    <span class="im_message_video_duration" ng-bind="::historyMessage.media.video.duration | duration"></span>
+    <i class="icon icon-videoplay"></i>
+    <img
+      class="im_message_video_thumb"
+      my-load-thumb
+      thumb="historyMessage.media.video.thumb"
+    />
+  </a>
+
+  <div class="im_message_document_info">
+    <div class="im_message_document_name_wrap">
+      <span class="im_message_document_name" my-i18n="message_attach_video_video"></span>
+      <span class="im_message_document_size" ng-if="!historyMessage.media.video.progress.enabled" ng-bind="::historyMessage.media.video.size | formatSize"></span>
+      <span class="im_message_document_size" ng-if="historyMessage.media.video.progress.enabled" ng-bind="historyMessage.media.video.progress | formatSizeProgress"></span>
+    </div>
+    <div class="im_message_document_actions" ng-if="!historyMessage.media.video.progress.enabled">
+      <a href="" ng-click="downloadVideo(historyMessage.media.video.id)" my-i18n="message_attach_video_download"></a>
+      <a href="" ng-click="openVideo(historyMessage.media.video.id, historyMessage.id)" my-i18n="message_attach_video_play"></a>
+    </div>
+    <div class="clearfix cancelable_progress_wrap" ng-if="historyMessage.media.video.progress.enabled">
+      <a class="im_message_media_progress_cancel pull-right" ng-click="historyMessage.media.video.progress.cancel()" my-i18n="modal_cancel"></a>
+      <div class="im_message_download_progress_wrap">
+        <div class="progress tg_down_progress">
+          <div class="progress-bar progress-bar-success" ng-style="{width: historyMessage.media.video.progress.percent + '%'}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

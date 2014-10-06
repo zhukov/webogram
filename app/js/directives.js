@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.9 - messaging web application for MTProto
+ * Webogram v0.3.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -15,61 +15,196 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myHead', function() {
     return {
       restrict: 'AE',
-      templateUrl: 'partials/head.html'
+      templateUrl: templateUrl('head')
+    };
+  })
+
+  .directive('myLangFooter', function() {
+    return {
+      restrict: 'AE',
+      templateUrl: templateUrl('lang_footer')
     };
   })
 
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
-      templateUrl: 'partials/dialog.html'
+      templateUrl: templateUrl('dialog')
     };
   })
 
-  .directive('myMessage', function() {
+  .directive('myMessage', function($filter, _) {
+
+    var dateFilter = $filter('myDate'),
+        dateSplitHtml = '<div class="im_message_date_split im_service_message_wrap"><div class="im_service_message"></div></div>',
+        unreadSplitHtml = '<div class="im_message_unread_split">' + _('unread_messages_split') + '</div>',
+        selectedClass = 'im_message_selected',
+        focusClass = 'im_message_focus',
+        unreadClass =  'im_message_unread',
+        errorClass = 'im_message_error',
+        pendingClass = 'im_message_pending';
+
     return {
-      templateUrl: 'partials/message.html'
+      templateUrl: templateUrl('message'),
+      link: link
     };
+
+    function link($scope, element, attrs) {
+      var selected = false,
+          grouped = false,
+          focused = false,
+          error = false,
+          pending = false,
+          needDate = false,
+          unreadAfter = false,
+          applySelected = function () {
+            if (selected != ($scope.selectedMsgs[$scope.historyMessage.id] || false)) {
+              selected = !selected;
+              element.toggleClass(selectedClass, selected);
+            }
+          },
+          needDateSplit,
+          applyGrouped = function () {
+            if (grouped != $scope.historyMessage.grouped) {
+              if (grouped) {
+                element.removeClass(grouped);
+              }
+              grouped = $scope.historyMessage.grouped;
+              if (grouped) {
+                element.addClass(grouped);
+              }
+            }
+            if (needDate != ($scope.historyMessage.needDate || false)) {
+              needDate = !needDate;
+              if (needDate) {
+                if (needDateSplit) {
+                  needDateSplit.show();
+                } else {
+                  needDateSplit = $(dateSplitHtml);
+                  $(needDateSplit[0].firstChild).text(dateFilter($scope.historyMessage.date));
+                  if (unreadAfterSplit) {
+                    needDateSplit.insertBefore(unreadAfterSplit)
+                  } else {
+                    needDateSplit.prependTo(element);
+                  }
+                }
+              } else {
+                needDateSplit.hide();
+              }
+            }
+          },
+          unreadAfterSplit;
+
+      applySelected();
+      applyGrouped();
+
+      $scope.$on('messages_select', applySelected);
+      $scope.$on('messages_regroup', applyGrouped);
+
+      $scope.$on('messages_focus', function (e, focusedMsgID) {
+        if ((focusedMsgID == $scope.historyMessage.id) != focused) {
+          focused = !focused;
+          element.toggleClass(focusClass, focused);
+        }
+      });
+
+      var deregisterUnreadAfter;
+      if (!$scope.historyMessage.out &&
+          ($scope.historyMessage.unread || $scope.historyMessage.unreadAfter)) {
+        var applyUnreadAfter = function () {
+          if ($scope.peerHistory.peerID != $scope.historyPeer.id) {
+            return;
+          }
+          if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.id)) {
+            unreadAfter = !unreadAfter;
+            if (unreadAfter) {
+              if (unreadAfterSplit) {
+                unreadAfterSplit.show();
+              } else {
+                unreadAfterSplit = $(unreadSplitHtml).prependTo(element);
+              }
+            } else {
+              unreadAfterSplit.hide();
+              if (deregisterUnreadAfter) {
+                deregisterUnreadAfter();
+              }
+            }
+          }
+        };
+        applyUnreadAfter();
+        deregisterUnreadAfter = $scope.$on('messages_unread_after', applyUnreadAfter);
+      }
+      if ($scope.historyMessage.unread) {
+        element.addClass(unreadClass);
+        var deregisterUnread = $scope.$on('messages_read', function () {
+          if (!$scope.historyMessage.unread) {
+            element.removeClass(unreadClass);
+            deregisterUnread();
+            if (deregisterUnreadAfter && !unreadAfter) {
+              deregisterUnreadAfter();
+            }
+          }
+        });
+      }
+      if ($scope.historyMessage.error || $scope.historyMessage.pending) {
+        var applyPending = function () {
+              if (pending != ($scope.historyMessage.pending || false)) {
+                pending = !pending;
+                element.toggleClass(pendingClass, pending);
+              }
+              if (error != ($scope.historyMessage.error || false)) {
+                error = !error;
+                element.toggleClass(errorClass, error);
+              }
+              if (!error && !pending) {
+                deregisterPending();
+              }
+            },
+            deregisterPending = $scope.$on('messages_pending', applyPending);
+
+        applyPending();
+      }
+    }
   })
 
   .directive('myServiceMessage', function() {
     return {
-      templateUrl: 'partials/message_service.html'
+      templateUrl: templateUrl('message_service')
     };
   })
   .directive('myMessagePhoto', function() {
     return {
-      templateUrl: 'partials/message_attach_photo.html'
+      templateUrl: templateUrl('message_attach_photo')
     };
   })
   .directive('myMessageVideo', function() {
     return {
-      templateUrl: 'partials/message_attach_video.html'
+      templateUrl: templateUrl('message_attach_video')
     };
   })
   .directive('myMessageDocument', function() {
     return {
-      templateUrl: 'partials/message_attach_document.html'
+      templateUrl: templateUrl('message_attach_document')
     };
   })
   .directive('myMessageAudio', function() {
     return {
-      templateUrl: 'partials/message_attach_audio.html'
+      templateUrl: templateUrl('message_attach_audio')
     };
   })
   .directive('myMessageMap', function() {
     return {
-      templateUrl: 'partials/message_attach_map.html'
+      templateUrl: templateUrl('message_attach_map')
     };
   })
   .directive('myMessageContact', function() {
     return {
-      templateUrl: 'partials/message_attach_contact.html'
+      templateUrl: templateUrl('message_attach_contact')
     };
   })
   .directive('myMessagePending', function() {
     return {
-      templateUrl: 'partials/message_attach_pending.html'
+      templateUrl: templateUrl('message_attach_pending')
     };
   })
 
@@ -85,6 +220,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           searchField = $('.im_dialogs_search_field', element)[0],
           panelWrap = $('.im_dialogs_panel', element)[0],
+          searchClear = $('.im_dialogs_search_clear', element)[0],
           tabsWrap = $('.im_dialogs_tabs_wrap', element)[0],
           searchFocused = false;
 
@@ -132,9 +268,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (e.keyCode == 36 &&  !e.shiftKey && !e.ctrlKey && e.altKey) { // Alt + Home
-          var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a')[0];
-          if (currentSelected) {
-            currentSelected.click();
+          var currentSelected = $(scrollableWrap).find('.im_dialog_wrap a');
+          if (currentSelected.length) {
+            $(currentSelected[0]).trigger('mousedown');
             scrollableWrap.scrollTop = 0;
             $(dialogsWrap).nanoScroller({flash: true});
           }
@@ -148,25 +284,37 @@ angular.module('myApp.directives', ['myApp.filters'])
               searchField.select();
             }
           }
+          else if (searchField.value) {
+            $(searchClear).trigger('click');
+          }
           return cancelEvent(e);
         }
 
         if (searchFocused && e.keyCode == 13) { // Enter
           var currentSelected = $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.im_dialog_wrap a')[0];
           if (currentSelected) {
-            currentSelected.click();
+            $(currentSelected).trigger('mousedown');
           }
           return cancelEvent(e);
         }
 
-        if (e.keyCode == 38 || e.keyCode == 40) { // UP, DOWN
-          var skip = !e.shiftKey && e.altKey;
+        var next, prev, skip, ctrlTabSupported = Config.Modes.packed;
+        if (e.keyCode == 40 || e.keyCode == 38) { // UP, DOWN
+          next = e.keyCode == 40;
+          prev = !next;
+          skip = !e.shiftKey && e.altKey
+        }
+        else if (ctrlTabSupported && e.keyCode == 9 && e.ctrlKey && !e.metaKey) { // Ctrl + Tab, Shift + Ctrl + Tab
+          next = !e.shiftKey;
+          prev = !next;
+          skip = true;
+        }
+        if (next || prev) {
           if (!skip && (!searchFocused || e.metaKey)) {
             return true;
           }
 
-          var next = e.keyCode == 40,
-              currentSelected = !skip && $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.active a.im_dialog')[0],
+          var currentSelected = !skip && $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.active a.im_dialog')[0],
               currentSelectedWrap = currentSelected && currentSelected.parentNode,
               nextDialogWrap;
 
@@ -191,7 +339,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (skip) {
             if (nextDialogWrap) {
-              $(nextDialogWrap).find('a')[0].click();
+              $(nextDialogWrap).find('a').trigger('mousedown');
             }
           } else {
             if (currentSelectedWrap && nextDialogWrap) {
@@ -241,11 +389,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           dialogsColWrap = $('.im_dialogs_col_wrap')[0],
           scrollableWrap = $('.im_dialogs_scrollable_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
-          panelWrapSelector = Config.Navigator.mobile && attrs.modal
+          panelWrapSelector = Config.Mobile && attrs.modal
                               ? '.mobile_modal_body .im_dialogs_panel'
                               : '.im_dialogs_panel',
           panelWrap = $(panelWrapSelector)[0],
-          footer = $('.im_page_footer')[0],
+          footer = $('.footer_wrap')[0],
           hasTabs = false,
           moreNotified = false;
 
@@ -311,7 +459,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           $(element).css({
             height: $($window).height() -
                     (panelWrap ? panelWrap.offsetHeight : 58) -
-                    (Config.Navigator.mobile ? 46 : 200)
+                    (Config.Mobile ? 46 : 200)
           });
           updateScroller();
           return;
@@ -321,7 +469,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           headWrap = $('.tg_page_head')[0];
         }
         if (!footer || !footer.offsetHeight) {
-          footer = $('.im_page_footer')[0];
+          footer = $('.footer_wrap')[0];
         }
 
         if (!dialogsColWrap || !dialogsColWrap.offsetHeight) {
@@ -329,7 +477,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         $(element).css({
           height: $($window).height() -
-                  footer.offsetHeight -
+                  (footer ? footer.offsetHeight : 0)  -
                   (headWrap ? headWrap.offsetHeight : 44) -
                   (panelWrap ? panelWrap.offsetHeight : 58) -
                   parseInt($(dialogsColWrap).css('paddingBottom') || 0)
@@ -367,7 +515,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height() -
                   (panelWrap && panelWrap.offsetHeight || 0) -
                   (searchWrap && searchWrap.offsetHeight || 0) -
-                  (Config.Navigator.mobile ? 64 : 200)
+                  (Config.Mobile ? 64 : 200)
         });
         $(contactsWrap).nanoScroller();
       }
@@ -401,7 +549,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           height: $($window).height()
                     - (panelWrap && panelWrap.offsetHeight || 0)
                     - (searchWrap && searchWrap.offsetHeight || 0)
-                    - (Config.Navigator.mobile ? 46 + 18 : 200)
+                    - (Config.Mobile ? 46 + 18 : 200)
         });
         $(countriesWrap).nanoScroller();
       }
@@ -430,7 +578,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
-          footer = $('.im_page_footer')[0],
+          footer = $('.footer_wrap')[0],
           sendForm = $('.im_send_form', element)[0],
           moreNotified = false,
           lessNotified = false;
@@ -505,28 +653,40 @@ angular.module('myApp.directives', ['myApp.filters'])
       function changeScroll () {
         var unreadSplit, focusMessage;
 
-        if (focusMessage = $('.im_message_focus', scrollableWrap)[0]) {
-          scrollableWrap.scrollTop = Math.max(0, focusMessage.offsetTop - Math.floor(scrollableWrap.clientHeight / 2) + 26);
+        // console.trace('change scroll');
+        if (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0]) {
+          var ch = scrollableWrap.clientHeight,
+              st = scrollableWrap.scrollTop,
+              ot = focusMessage.offsetTop,
+              h = focusMessage.clientHeight;
+          if (!st || st + ch < ot || st > ot + h) {
+            scrollableWrap.scrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
+          }
           atBottom = false;
-        } else if (unreadSplit = $('.im_message_unread_split', scrollableWrap)[0]) {
+        } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
+          // console.log('change scroll unread', unreadSplit.offsetTop);
           scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
+          // console.log('change scroll bottom');
           scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
         updateScroller();
         $timeout(function () {
           $(scrollableWrap).trigger('scroll');
+          scrollTopInitial = scrollableWrap.scrollTop;
         });
       };
 
       $scope.$on('ui_history_change', function () {
+        var pr = parseInt($(scrollableWrap).css('paddingRight'))
         $(scrollableWrap).addClass('im_history_to_bottom');
-        $(scrollable).css({bottom: 0});
+        scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
+        $(scrollable).css({bottom: 0, marginLeft: -Math.ceil(pr / 2)});
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: ''});
+          $(scrollable).css({bottom: '', marginLeft: ''});
           updateSizes(true);
           moreNotified = false;
           lessNotified = false;
@@ -559,7 +719,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         var upd = function () {
             $(scrollableWrap).removeClass('im_history_to_bottom');
             $(scrollable).css({bottom: '', marginLeft: ''});
-            scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            if (scrollTopInitial >= 0) {
+              changeScroll();
+            } else {
+              scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
+            }
 
             updateBottomizer();
             moreNotified = false;
@@ -583,6 +747,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           atBottom = false;
           updateBottomizer();
           lessNotified = false;
+
+          if (scrollTopInitial >= 0) {
+            changeScroll();
+          }
 
           $timeout(function () {
             if (scrollableWrap.scrollHeight != sh) {
@@ -621,20 +789,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         // updateSizes();
       });
 
-      var atBottom = true;
+      var atBottom = true,
+          scrollTopInitial = -1;
       $(scrollableWrap).on('scroll', function (e) {
         if (!element.is(':visible') ||
             $(scrollableWrap).hasClass('im_history_to_bottom') ||
             curAnimation) {
           return;
         }
-        atBottom = scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
+        var st = scrollableWrap.scrollTop;
+        atBottom = st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight;
+        if (scrollTopInitial >= 0 && scrollTopInitial != st) {
+          scrollTopInitial = -1;
+        }
 
-        if (!moreNotified && scrollableWrap.scrollTop <= 300) {
+        if (!moreNotified && st <= 300) {
           moreNotified = true;
           $scope.$emit('history_need_more');
         }
-        else if (!lessNotified && scrollableWrap.scrollTop >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
+        else if (!lessNotified && st >= scrollableWrap.scrollHeight - scrollableWrap.clientHeight - 300) {
           lessNotified = true;
           $scope.$emit('history_need_less');
         }
@@ -654,9 +827,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           headWrap = $('.tg_page_head')[0];
         }
         if (!footer || !footer.offsetHeight) {
-          footer = $('.im_page_footer')[0];
+          footer = $('.footer_wrap')[0];
         }
-        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - footer.offsetHeight;
+        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (footer ? footer.offsetHeight : 0);
         $(historyWrap).css({
           height: historyH
         });
@@ -679,7 +852,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var marginTop = scrollableWrap.offsetHeight
                         - historyMessagesEl.offsetHeight
                         - 20
-                        - (Config.Navigator.mobile ? 0 : 49);
+                        - (Config.Mobile ? 0 : 49);
 
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
           $(historyMessagesEl).css({marginTop: marginTop});
@@ -695,7 +868,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService) {
+  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService, $interpolate) {
 
     return {
       link: link,
@@ -719,7 +892,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (richTextarea) {
         editorElement = richTextarea;
         $(richTextarea).addClass('form-control');
-        $(richTextarea).attr('placeholder', $(messageField).attr('placeholder'));
+        $(richTextarea).attr('placeholder', $interpolate($(messageField).attr('placeholder'))($scope));
 
         var updatePromise;
         $(richTextarea)
@@ -743,7 +916,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             var self = this;
             $scope.$apply(function () {
               $scope.draftMessage.files = Array.prototype.slice.call(self.files);
-              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input');
+              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input') || Config.Mobile;
               setTimeout(function () {
                 try {
                   self.value = '';
@@ -1049,12 +1222,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadFullPhoto', function(MtpApiFileManager) {
+  .directive('myLoadFullPhoto', function(MtpApiFileManager, _) {
 
     return {
       link: link,
       transclude: true,
-      templateUrl: 'partials/full_photo.html',
+      templateUrl: templateUrl('full_photo'),
       scope: {
         fullPhoto: '=',
         thumbLocation: '='
@@ -1114,9 +1287,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.progress.enabled = false;
 
           if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-            $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to display this image.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+            $scope.error = {html: _('error_browser_no_local_file_system_image_md', {
+              'moz-link': '<a href="{0}" target="_blank">{1}</a>',
+              'chrome-link': '<a href="{0}" target="_blank">{1}</a>',
+              'telegram-link': '<a href="{0}" target="_blank">{1}</a>'
+            })};
           } else {
-            $scope.error = {text: 'Download failed', error: e};
+            $scope.error = {text: _('error_image_download_failed'), error: e};
           }
         }, function (progress) {
           $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
@@ -1128,12 +1305,12 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myLoadVideo', function($sce, MtpApiFileManager) {
+  .directive('myLoadVideo', function($sce, MtpApiFileManager, _) {
 
     return {
       link: link,
       transclude: true,
-      templateUrl: 'partials/full_video.html',
+      templateUrl: templateUrl('full_video'),
       scope: {
         video: '='
       }
@@ -1174,9 +1351,13 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
-          $scope.error = {html: 'Your browser doesn\'t support <a href="https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem" target="_blank">LocalFileSystem</a> feature which is needed to play this video.<br/>Please, install <a href="http://google.com/chrome" target="_blank">Google Chrome</a> or use <a href="https://telegram.org/" target="_blank">mobile app</a> instead.'};
+          $scope.error = {html: _('error_browser_no_local_file_system_video_md', {
+              'moz-link': '<a href="{0}" target="_blank">{1}</a>',
+              'chrome-link': '<a href="{0}" target="_blank">{1}</a>',
+              'telegram-link': '<a href="{0}" target="_blank">{1}</a>'
+            })};
         } else {
-          $scope.error = {text: 'Video download failed', error: e};
+          $scope.error = {text: _('error_video_download_failed'), error: e};
         }
 
       }, function (progress) {
@@ -1196,7 +1377,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     return {
       link: link,
-      templateUrl: 'partials/full_gif.html',
+      templateUrl: templateUrl('full_gif'),
       scope: {
         document: '='
       }
@@ -1314,27 +1495,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioAutoplay', function() {
-
-    return {
-      link: link,
-      scope: {
-        audio: '='
-      }
-    };
-
-    function link ($scope, element, attrs) {
-      $scope.$watch('audio.autoplay', function (autoplay) {
-        if (autoplay) {
-          element.autoplay = true;
-          element[0].play();
-        } else {
-          element.autoplay = false;
-        }
-      });
-    }
-  })
-
   .directive('myFocused', function(){
     return {
       link: function($scope, element, attrs) {
@@ -1393,7 +1553,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
-        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Navigator.mobile ? 0 : 36)});
+        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Mobile ? 0 : 36)});
       });
     };
 
@@ -1445,7 +1605,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
-      console.log(dT(), 'bg', attrs.myCustomBackground);
       $('html').css({background: attrs.myCustomBackground});
 
       $scope.$on('$destroy', function () {
@@ -1497,8 +1656,8 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link($scope, element, attrs) {
 
       var updateMargin = function () {
-        if (Config.Navigator.mobile &&
-            $(element[0].parentNode.parentNode.parentNode).hasClass('page_modal')) {
+        if (Config.Mobile &&
+            $(element[0].parentNode.parentNode.parentNode).hasClass('mobile_modal')) {
           return;
         }
         var height = element[0].parentNode.offsetHeight,
@@ -1603,14 +1762,25 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
 
-    var statusFilter = $filter('userStatus');
+    var statusFilter = $filter('userStatus'),
+        ind = 0,
+        statuses = {};
+
+    setInterval(updateAll, 90000);
 
     return {
       link: link
     };
 
+    function updateAll () {
+      angular.forEach(statuses, function (update) {
+        update();
+      });
+    }
+
     function link($scope, element, attrs) {
       var userID,
+          curInd = ind++,
           update = function () {
             var user = AppUsersManager.getUser(userID);
             element
@@ -1627,6 +1797,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           update();
         }
       });
+      statuses[curInd] = update;
+      $scope.$on('$destroy', function () {
+        delete statuses[curInd];
+      });
     }
   })
 
@@ -1638,7 +1812,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope: {
         userID: '=myUserPhotolink'
       },
-      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus" ng-show="user.status._ == \'userStatusOnline\'"></i>'
+      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus || false" ng-show="user.status._ == \'userStatusOnline\'"></i>'
     };
 
     function link($scope, element, attrs) {
@@ -1658,5 +1832,85 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(element[0].firstChild).addClass(attrs.imgClass)
       }
 
+    }
+  })
+
+  .directive('myAudioPlayer', function ($sce, $timeout, $q, FileManager, MtpApiFileManager) {
+
+    var currentPlayer = false;
+
+    return {
+      link: link,
+      scope: {
+        audio: '='
+      },
+      templateUrl: templateUrl('audio_player')
+    };
+
+    function downloadAudio (audio) {
+      var inputFileLocation = {
+            _: audio._ == 'document' ? 'inputDocumentFileLocation' : 'inputAudioFileLocation',
+            id: audio.id,
+            access_hash: audio.access_hash
+          };
+
+      audio.progress = {enabled: true, percent: 1, total: audio.size};
+
+      var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {mime: 'audio/ogg'});
+
+      audio.progress.cancel = downloadPromise.cancel;
+
+      return downloadPromise.then(function (url) {
+        delete audio.progress;
+        audio.rawUrl = url;
+        audio.url = $sce.trustAsResourceUrl(url);
+      }, function (e) {
+        console.log('audio download failed', e);
+        audio.progress.enabled = false;
+      }, function (progress) {
+        console.log('audio dl progress', progress);
+        audio.progress.done = progress.done;
+        audio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+      });
+    }
+
+    function checkPlayer (newPlayer) {
+      if (newPlayer === currentPlayer) {
+        return false;
+      }
+      if (currentPlayer) {
+        currentPlayer.pause();
+      }
+      currentPlayer = newPlayer;
+    }
+
+    function link($scope, element, attrs) {
+      $scope.mediaPlayer = {};
+
+      $scope.download = function () {
+        ($scope.audio.rawUrl ? $q.when() : downloadAudio($scope.audio)).then(
+          function () {
+            FileManager.download($scope.audio.rawUrl, $scope.audio.mime_type || 'audio/ogg', $scope.audio.file_name || 'audio.ogg');
+          }
+        );
+      };
+
+      $scope.togglePlay = function () {
+        if ($scope.audio.url) {
+          checkPlayer($scope.mediaPlayer.player);
+          $scope.mediaPlayer.player.playPause();
+        }
+        else if ($scope.audio.progress && $scope.audio.progress.enabled) {
+          $scope.audio.progress.cancel();
+        }
+        else {
+          downloadAudio($scope.audio).then(function () {
+            onContentLoaded(function () {
+              checkPlayer($scope.mediaPlayer.player);
+              $scope.mediaPlayer.player.play();
+            })
+          })
+        }
+      };
     }
   })

@@ -1,0 +1,70 @@
+<div class="confirm_modal_wrap" my-modal-position>
+
+  <a class="modal-close-button" ng-click="$dismiss()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="confirm_modal_description" ng-switch="type">
+      <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout"></span>
+      <span ng-switch-when="WEBOGRAM_UPDATED_RELOAD" my-i18n="confirm_modal_update_reload"></span>
+      <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_history_flush"></span>
+      <span ng-switch-when="TERMINATE_SESSIONS" my-i18n="confirm_modal_terminate_sessions"></span>
+      <span ng-switch-when="HTTPS_MIXED_FAIL" my-i18n="confirm_modal_mixed_content_fail_http_redirect_md">
+        <my-i18n-param name="moz-link"><a href="http://mzl.la/13jCUSU" target="_blank">{0}</a></my-i18n-param>
+        <my-i18n-param name="issue-link"><a href="https://github.com/zhukov/webogram/issues/237" target="_blank">{0} &raquo;</a></my-i18n-param>
+      </span>
+
+      <span ng-switch-when="FILES_CLIPBOARD_PASTE">
+        <ng-pluralize count="files.length"
+                     when="confirm_modal_clipboard_X_files_send">
+        </ng-pluralize>
+      </span>
+      <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send"></span>
+      <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete"></span>
+      <span ng-switch-when="CONTACTS_IMPORT_PERFORM" my-i18n="confirm_modal_contacts_import"></span>
+      <div ng-switch-when="LOGIN_PHONE_CORRECT">
+        <my-i18n msgid="confirm_modal_login_phone_correct"></my-i18n>
+        <div class="confirm_phone_number">
+          <span ng-bind="country_code"></span> <span ng-bind="phone_number"></span>
+        </div>
+      </div>
+      <my-i18n>
+        <span ng-switch-when="FORWARD_PEER" my-i18n-format="confirm_modal_forward_to_peer"></span>
+        <span ng-switch-when="SHARE_CONTACT_PEER" my-i18n-format="confirm_modal_send_to_peer"></span>
+        <span ng-switch-when="EXT_SHARE_PEER" my-i18n-format="confirm_modal_share_file_peer"></span>
+        <my-i18n-param name="peer">
+          <strong ng-switch="peer_id > 0">
+            <span ng-switch-when="true" ng-bind-html="peer_data.rFullName"></span>
+            <span ng-switch-default ng-bind-html="peer_data.rTitle"></span>
+          </strong>
+        </my-i18n-param>
+      </my-i18n>
+      <div ng-switch-when="APPLY_LANG_WITH_RELOAD" my-i18n="confirm_modal_apply_lang_with_reload_md"></div>
+      <span ng-switch-default ng-switch="message.length > 0">
+        <span ng-switch-when="true" ng-bind="message"></span>
+        <span ng-switch-default my-i18n="confirm_modal_are_u_sure"></span>
+      </span>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <a class="btn btn-link" ng-click="$dismiss()" ng-switch="type">
+      <span ng-switch-default my-i18n="modal_cancel"></span>
+    </a>
+    <button type="button" class="btn btn-primary" ng-switch="type" ng-click="$close()" my-focused>
+      <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout_submit"></span>
+      <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_history_flush_submit"></span>
+      <span ng-switch-when="FILES_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_files_send_submit"></span>
+      <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send_submit"></span>
+      <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete_submit"></span>
+      <span ng-switch-when="FORWARD_PEER" my-i18n="confirm_modal_forward_message_submit"></span>
+      <span ng-switch-when="PHOTO_SHARE_PEER" my-i18n="confirm_modal_share_photo_submit"></span>
+      <span ng-switch-when="VIDEO_SHARE_PEER" my-i18n="confirm_modal_share_video_submit"></span>
+      <span ng-switch-when="SHARE_CONTACT_PEER" my-i18n="confirm_modal_share_contact_submit"></span>
+      <span ng-switch-when="EXT_SHARE_PEER" my-i18n="confirm_modal_share_file_submit"></span>
+      <span ng-switch-default my-i18n="modal_ok"></span>
+    </button>
+  </div>
+
+</div>

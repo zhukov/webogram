@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" style="display:block; overflow: auto; background: #f8f8f8;">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Telegram Web</title>
+
+  <!-- build:css css/app.css -->
+  <link rel="stylesheet" href="vendor/angular/angular-csp.css"/>
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.css"/>
+  <link rel="stylesheet" href="css/app.css"/>
+  <!-- endbuild -->
+
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+</head>
+<body class="non_osx is_1x">
+
+
+  <div class="tg_page_head" style="clear: both;">
+    <div class="navbar navbar-static-top  navbar-inverse navbar_peer_not_selected" role="navigation">
+      <div class="container">
+
+        <div class="navbar-header pull-left">
+          <a class="navbar-brand" href="index.html"><span class="tg_head_logo"></span></a>
+        </div>
+
+        <div class="navbar-menu pull-right">
+
+          <ul class="nav navbar-nav navbar-right" style="margin: 0;">
+            <li ng-if="!isLoggedIn"><a href="https://github.com/zhukov/webogram" target="_blank">About</a></li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <div class="welcome_form" style="padding-bottom: 50px; clear: both;">
+    <img class="welcome_logo" src="img/decentralization.png"/>
+
+    <h3 class="welcome_header"><strong>Telegram</strong> Web</h3>
+
+    <!-- <div class="welcome_text">
+      <p>This is an unofficial web-client for the <strong>Telegram Messenger</strong>.</p>
+      <p>It's still an <strong>alpha-version</strong> and may not be 200% reliable</p>
+    </div> -->
+
+    <div class="bad_browser_wrap">
+      
+      <h2>Your browser is outdated!</h2>
+
+      <div class="bad_browser_text">
+        <p>
+          Don't take this personally, but your browser is too old to run <strong>Telegram Web</strong>.<br/>
+          We require HTML5 support for the MTProto secure messaging protocol to work.
+        </p>
+        <p>
+          Unfortunately, your current browser doesn't support HTML5.<br/>
+          Please download a modern browser and come back soon!
+        </p>
+      </div>
+
+
+      <a class="btn btn-primary btn-lg pull-right" href="//firefox.com" target="_blank">Download Mozilla Firefox</a>
+      <a class="btn btn-primary btn-lg" href="//google.com/chrome" target="_blank">Download Google Chrome</a>
+
+    </div>
+
+  </div>
+
+  <div class="welcome_footer">
+    <div class="welcome_cards_wrap clearfix">
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-4 col-sm-4" style="width: 33.33333333%; float: left;">
+            <div class="welcome_footer_card_wrap row">
+              <div class="welcome_footer_card welcome_footer_card_messaging"></div>
+              <h4>Fast messaging</h4>
+              <div class="welcome_footer_card_lead">Send messages with rich emoji support right from your desktop or laptop computer</div>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-sm-4" style="width: 33.33333333%; float: left;">
+            <div class="welcome_footer_card_wrap">
+              <div class="welcome_footer_card welcome_footer_card_filesharing"></div>
+              <h4>Easy file sharing</h4>
+              <div class="welcome_footer_card_lead">Share files of any type using drag-and-drop or the attachment icon</div>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-sm-4" style="width: 33.33333333%; float: left;">
+            <div class="welcome_footer_card_wrap">
+              <div class="welcome_footer_card welcome_footer_card_powerful"></div>
+              <h4>Powerful tools</h4>
+              <div class="welcome_footer_card_lead">Browse shared media and files by type \n and set custom notifications</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+  
+
+</body>
+</html>
