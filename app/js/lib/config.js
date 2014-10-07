@@ -125,6 +125,7 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
         callback = keys.pop(),
         result = [],
         single = keys.length == 1,
+        value,
         allFound = true,
         prefix = storageGetPrefix(),
         i, key;
@@ -135,7 +136,11 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
         result.push(cache[key]);
       }
       else if (useLs) {
-        var value = localStorage.getItem(key);
+        try {
+          value = localStorage.getItem(key);
+        } catch (e) {
+          useLs = false;
+        }
         try {
           value = (value === undefined || value === null) ? false : JSON.parse(value);
         } catch (e) {
@@ -181,7 +186,11 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
         cache[key] = value;
         value = JSON.stringify(value);
         if (useLs) {
-          localStorage.setItem(key, value);
+          try {
+            localStorage.setItem(key, value);
+          } catch (e) {
+            useLs = false;
+          }
         } else {
           keyValues[key] = value;
         }
@@ -211,7 +220,11 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
       key = keys[i] = prefix + keys[i];
       delete cache[key];
       if (useLs) {
-        localStorage.removeItem(key);
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          useLs = false;
+        }
       }
     }
     if (useCs) {
