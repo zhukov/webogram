@@ -19,7 +19,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       {id: 2, host: '149.154.167.51', port: 80},
       {id: 3, host: '174.140.142.6', port: 80},
       {id: 4, host: '149.154.167.91', port: 80},
-      {id: 5, host: '149.154.171.5',   port: 80},
+      {id: 5, host: '149.154.171.5',   port: 80}
     ];
 
   var chosenServers = {};
