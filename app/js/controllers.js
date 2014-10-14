@@ -2119,6 +2119,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
+    $scope.changeUsername = function () {
+      $modal.open({
+        templateUrl: templateUrl('username_edit_modal'),
+        controller: 'UsernameEditModalController',
+        windowClass: 'username_edit_modal_window mobile_modal'
+      });
+    };
+
     $scope.terminateSessions = function () {
       ErrorService.confirm({type: 'TERMINATE_SESSIONS'}).then(function () {
         MtpApiManager.invokeApi('auth.resetAuthorizations', {});

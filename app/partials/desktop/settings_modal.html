@@ -42,6 +42,9 @@
                 <a ng-click="editProfile()" my-i18n="settings_modal_edit_profile"></a>
               </li>
               <li>
+                <a ng-click="changeUsername()" my-i18n="settings_modal_edit_username"></a>
+              </li>
+              <li>
                 <a ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
               </li>
             </ul>
@@ -52,10 +55,22 @@
 
     </div>
 
-    <div class="modal_section" ng-if="profile.phone">
-      <h3 class="modal_section_header" my-i18n="settings_modal_phone"></h3>
+    <div class="modal_section">
+      <h3 class="modal_section_header" my-i18n="user_modal_info"></h3>
       <div class="modal_section_body">
-        <p><span ng-bind="profile.phone | phoneNumber"></span></p>
+
+        <dl ng-if="profile.phone">
+          <dt><my-i18n msgid="user_modal_phone"></my-i18n>:</dt>
+          <dd ng-bind="profile.phone | phoneNumber"></dd>
+        </dl>
+        <dl>
+          <dt><my-i18n msgid="user_modal_username"></my-i18n>:</dt>
+          <dd ng-switch="profile.username.length > 0">
+            <a class="settings_modal_username_link" ng-switch-when="true" href="" ng-click="changeUsername()" ng-bind="'@' + profile.username"></a>
+            <a ng-switch-default href="" ng-click="changeUsername()" my-i18n="settings_modal_empty_username_set"></a>
+          </dd>
+        </dl>
+
       </div>
     </div>
 
@@ -64,10 +79,6 @@
       <div class="modal_section_body">
 
         <div class="tg_form_group">
-          <!--label my-i18n="settings_modal_language"></label>
-          <select class="tg_select" ng-model="i18n.locale">
-            <option value="{{lang}}" ng-selected="lang == i18n.locale" ng-repeat="(lang, name) in i18n.supported" ng-bind="name"></option>
-          </select-->
 
           <a class="tg_checkbox" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
             <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>

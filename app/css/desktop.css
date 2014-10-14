@@ -545,7 +545,19 @@ div.im_panel_own_photo {
 }
 .user_modal_status {
   color: #999;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
+}
+.modal_section_body dt {
+  font-weight: normal;
+  display: inline-block;
+  width: 80px;
+}
+.modal_section_body dd {
+  display: inline-block;
+}
+.settings_modal_username_link,
+.settings_modal_username_link:hover {
+  color: inherit;
 }
 
 .user_modal_main_btn {

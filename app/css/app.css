@@ -473,7 +473,8 @@ input[type="number"] {
 .modal_section_body {
   padding: 14px 14px;
 }
-.modal_section_body p {
+.modal_section_body p,
+.modal_section_body dl {
   margin: 5px 0;
 }
 .modal_section:last-child .modal_section_body {
