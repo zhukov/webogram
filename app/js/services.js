@@ -3321,7 +3321,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     // console.log(4, text, html);
     if (!options.noLinks) {
       var youtubeMatches = text.match(youtubeRegex),
-          videoID = youtubeMatches && youtubeMatches[1];
+          videoID = youtubeMatches && youtubeMatches[youtubeMatches.length-1];
 
       if (videoID) {
         var tag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
