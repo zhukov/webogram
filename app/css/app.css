@@ -1469,25 +1469,33 @@ img.im_message_document_thumb {
 .audio_player_button {
   width: 38px;
   height: 38px;
+  padding-left: 12px;
+  padding-right: 12px;
   border-radius: 3px;
   margin-right: 12px;
 }
 .audio_player_btn_icon {
   display: block;
-  width: 13px;
-  height: 18px;
-  background: url(../img/icons/IconsetW.png) -15px -898px no-repeat;
+  width: 14px;
+  height: 17px;
+  background: url(../img/icons/IconsetW.png) -15px -897px no-repeat;
   background-size: 42px 971px;
 }
 .is_1x .audio_player_btn_icon {
   background-image: url(../img/icons/IconsetW_1x.png);
+  background-position: -15px -898px;
 }
-.audio_player_btn_icon_pause {
-  background-position: -15px -924px;
+.audio_player_btn_icon_pause,
+.is_1x .audio_player_btn_icon_pause,
+.audio_player_btn_icon_cancel,
+.is_1x .audio_player_btn_icon_cancel {
+  width: 13px;
+  height: 15px;
+  background-position: -15px -923px;
 }
-.audio_player_btn_icon_cancel {
-  background-position: -15px -924px;
-  /*background-position: -15px -948px;*/
+.is_1x .audio_player_btn_icon_pause,
+.is_1x .audio_player_btn_icon_cancel {
+  background-position: -15px -925px;
 }
 .audio_player_title_wrap {
   overflow: hidden;
