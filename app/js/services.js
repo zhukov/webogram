@@ -3182,7 +3182,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{3,20})', 'i');
-  var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|(\/(\?#|#))?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
+  var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
 
   return {
     wrapRichText: wrapRichText,
@@ -3321,7 +3321,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     // console.log(4, text, html);
     if (!options.noLinks) {
       var youtubeMatches = text.match(youtubeRegex),
-          videoID = youtubeMatches && youtubeMatches[youtubeMatches.length-1];
+          videoID = youtubeMatches && youtubeMatches[1];
 
       if (videoID) {
         var tag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
