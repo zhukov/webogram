@@ -84,6 +84,11 @@
       <div class="mobile_modal_section_value" ng-bind="user.phone | phoneNumber"></div>
     </div>
 
+    <div class="mobile_modal_section" ng-if="user.username">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_username"></h4>
+      <div class="mobile_modal_section_value" ng-bind="'@' + user.username"></div>
+    </div>
+
   </div>
 
 </div>
