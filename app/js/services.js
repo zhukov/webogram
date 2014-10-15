@@ -52,7 +52,7 @@ angular.module('myApp.services', ['myApp.i18n'])
       return false;
     }
 
-    return (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '');
+    return (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '') + ' ' + (user.username || '');
   }
 
   function getContacts (query) {
@@ -1268,6 +1268,9 @@ angular.module('myApp.services', ['myApp.i18n'])
   }
 
   function sendText(peerID, text) {
+    if (!angular.isString(text) || !text.length) {
+      return;
+    }
     var messageID = tempID--,
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
@@ -3947,6 +3950,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     };
 
     $modal.open({
+      controller: 'ChangelogModalController',
       templateUrl: templateUrl('changelog_modal'),
       scope: $scope,
       windowClass: 'changelog_modal_window mobile_modal'

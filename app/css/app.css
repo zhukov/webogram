@@ -461,6 +461,12 @@ input[type="number"] {
 .modal_simple_form .form-group {
   margin-bottom: 13px;
 }
+.modal_simple_form_description {
+  color: #777;
+  line-height: 160%;
+  margin: 10px 0 0;
+  text-align: justify;
+}
 
 .modal_section_header {
   font-size: 12px;
@@ -473,7 +479,8 @@ input[type="number"] {
 .modal_section_body {
   padding: 14px 14px;
 }
-.modal_section_body p {
+.modal_section_body p,
+.modal_section_body dl {
   margin: 5px 0;
 }
 .modal_section:last-child .modal_section_body {
@@ -2110,6 +2117,10 @@ img.img_fullsize {
 
 .settings_modal_wrap .im_attach_input {
   z-index: 999;
+}
+.settings_modal_username_link,
+.settings_modal_username_link:hover {
+  color: inherit;
 }
 .settings_external_service {
   line-height: 0;

@@ -70,11 +70,11 @@ fileLocationUnavailable#7c596b46 volume_id:long local_id:int secret:long = FileL
 fileLocation#53d69076 dc_id:int volume_id:long local_id:int secret:long = FileLocation;
 
 userEmpty#200250ba id:int = User;
-userSelf#720535ec id:int first_name:string last_name:string phone:string photo:UserProfilePhoto status:UserStatus inactive:Bool = User;
-userContact#f2fb8319 id:int first_name:string last_name:string access_hash:long phone:string photo:UserProfilePhoto status:UserStatus = User;
-userRequest#22e8ceb0 id:int first_name:string last_name:string access_hash:long phone:string photo:UserProfilePhoto status:UserStatus = User;
-userForeign#5214c89d id:int first_name:string last_name:string access_hash:long photo:UserProfilePhoto status:UserStatus = User;
-userDeleted#b29ad7cc id:int first_name:string last_name:string = User;
+userSelf#7007b451 id:int first_name:string last_name:string username:string phone:string photo:UserProfilePhoto status:UserStatus inactive:Bool = User;
+userContact#cab35e18 id:int first_name:string last_name:string username:string access_hash:long phone:string photo:UserProfilePhoto status:UserStatus = User;
+userRequest#d9ccc4ef id:int first_name:string last_name:string username:string access_hash:long phone:string photo:UserProfilePhoto status:UserStatus = User;
+userForeign#75cf7a8 id:int first_name:string last_name:string username:string access_hash:long photo:UserProfilePhoto status:UserStatus = User;
+userDeleted#d6016d7a id:int first_name:string last_name:string username:string = User;
 
 userProfilePhotoEmpty#4f11bae1 = UserProfilePhoto;
 userProfilePhoto#d559d8c8 photo_id:long photo_small:FileLocation photo_big:FileLocation = UserProfilePhoto;
@@ -166,8 +166,6 @@ importedContact#d0028438 user_id:int client_id:long = ImportedContact;
 
 contactBlocked#561bc879 user_id:int date:int = ContactBlocked;
 
-contactFound#ea879f95 user_id:int = ContactFound;
-
 contactSuggested#3de191a1 user_id:int mutual_contacts:int = ContactSuggested;
 
 contactStatus#aa77b873 user_id:int expires:int = ContactStatus;
@@ -191,8 +189,6 @@ contacts.importedContacts#ad524315 imported:Vector<ImportedContact> retry_contac
 
 contacts.blocked#1c138d15 blocked:Vector<ContactBlocked> users:Vector<User> = contacts.Blocked;
 contacts.blockedSlice#900802a1 count:int blocked:Vector<ContactBlocked> users:Vector<User> = contacts.Blocked;
-
-contacts.found#566000e results:Vector<ContactFound> users:Vector<User> = contacts.Found;
 
 contacts.suggested#5649dcc5 results:Vector<ContactSuggested> users:Vector<User> = contacts.Suggested;
 
@@ -235,7 +231,7 @@ updateUserTyping#5c486927 user_id:int action:SendMessageAction = Update;
 updateChatUserTyping#9a65ea1f chat_id:int user_id:int action:SendMessageAction = Update;
 updateChatParticipants#7761198 participants:ChatParticipants = Update;
 updateUserStatus#1bfbd823 user_id:int status:UserStatus = Update;
-updateUserName#da22d9ad user_id:int first_name:string last_name:string = Update;
+updateUserName#a7332b73 user_id:int first_name:string last_name:string username:string = Update;
 updateUserPhoto#95313b0c user_id:int date:int photo:UserProfilePhoto previous:Bool = Update;
 updateContactRegistered#2575bbb9 user_id:int date:int = Update;
 updateContactLink#51a48a9a user_id:int my_link:contacts.MyLink foreign_link:contacts.ForeignLink = Update;
@@ -389,11 +385,17 @@ sendMessageUploadDocumentAction#8faee98e = SendMessageAction;
 sendMessageGeoLocationAction#176f8ba1 = SendMessageAction;
 sendMessageChooseContactAction#628cbc6f = SendMessageAction;
 
+contactFound#ea879f95 user_id:int = ContactFound;
+
+contacts.found#566000e results:Vector<ContactFound> users:Vector<User> = contacts.Found;
+
+updateServiceNotification#382dd3e4 type:string message:string media:MessageMedia popup:Bool = Update;
+
 ---functions---
 
-invokeAfterMsg#cb9f372d msg_id:long query:!X = X;
+invokeAfterMsg#cb9f372d {X:Type} msg_id:long query:!X = X;
 
-invokeAfterMsgs#3dc4b4f0 msg_ids:Vector<long> query:!X = X;
+invokeAfterMsgs#3dc4b4f0 {X:Type} msg_ids:Vector<long> query:!X = X;
 
 auth.checkPhone#6fe51dfb phone_number:string = auth.CheckedPhone;
 auth.sendCode#768d5f4d phone_number:string sms_type:int api_id:int api_hash:string lang_code:string = auth.SentCode;
@@ -422,7 +424,6 @@ users.getFullUser#ca30a5b1 id:InputUser = UserFull;
 contacts.getStatuses#c4a353ee = Vector<ContactStatus>;
 contacts.getContacts#22c6aa08 hash:string = contacts.Contacts;
 contacts.importContacts#da30b32d contacts:Vector<InputContact> replace:Bool = contacts.ImportedContacts;
-contacts.search#11f812d8 q:string limit:int = contacts.Found;
 contacts.getSuggested#cd773428 limit:int = contacts.Suggested;
 contacts.deleteContact#8e953744 id:InputUser = contacts.Link;
 contacts.deleteContacts#59ab389e id:Vector<InputUser> = Bool;
@@ -499,7 +500,7 @@ messages.receivedQueue#55a5bb66 max_qts:int = Vector<long>;
 
 upload.saveBigFilePart#de7b673d file_id:long file_part:int file_total_parts:int bytes:bytes = Bool;
 
-initConnection#69796de9 api_id:int device_model:string system_version:string app_version:string lang_code:string query:!X = X;
+initConnection#69796de9 {X:Type} api_id:int device_model:string system_version:string app_version:string lang_code:string query:!X = X;
 
 help.getSupport#9cdf08cd = help.Support;
 
@@ -507,4 +508,9 @@ auth.sendSms#da9f3e8 phone_number:string phone_code_hash:string = Bool;
 
 messages.readMessageContents#354b5bc2 id:Vector<int> = Vector<int>;
 
-invokeWithLayer17#50858a19 query:!X = X;
+account.checkUsername#2714d86c username:string = Bool;
+account.updateUsername#3e0bdd7c username:string = User;
+
+contacts.search#11f812d8 q:string limit:int = contacts.Found;
+
+invokeWithLayer18#1c900537 {X:Type} query:!X = X;

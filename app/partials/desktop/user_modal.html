@@ -50,10 +50,19 @@
 
     </div>
 
-    <div class="modal_section" ng-if="user.phone">
-      <h3 class="modal_section_header" my-i18n="user_modal_phone"></h3>
+    <div class="modal_section" ng-if="user.phone || user.username">
+      <h3 class="modal_section_header" my-i18n="user_modal_info"></h3>
       <div class="modal_section_body">
-        <p><span ng-bind="user.phone | phoneNumber"></span></p>
+
+        <dl ng-if="user.phone">
+          <dt><my-i18n msgid="user_modal_phone"></my-i18n>:</dt>
+          <dd ng-bind="user.phone | phoneNumber"></dd>
+        </dl>
+        <dl ng-if="user.username">
+          <dt><my-i18n msgid="user_modal_username"></my-i18n>:</dt>
+          <dd ng-bind="'@' + user.username"></dd>
+        </dl>
+
       </div>
     </div>
 

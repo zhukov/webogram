@@ -44,6 +44,7 @@
 			buttonPosition: 'after'
 		}
 	};
+	var defaultRecentEmojis = ':joy:,:kissing_heart:,:heart:,:heart_eyes:,:blush:,:grin:,:+1:,:relaxed:,:pensive:,:smile:,:sob:,:kiss:,:unamused:,:flushed:,:stuck_out_tongue_winking_eye:,:see_no_evil:,:wink:,:smiley:,:cry:,:stuck_out_tongue_closed_eyes:,:scream:,:rage:,:smirk:,:disappointed:,:sweat_smile:,:kissing_closed_eyes:,:speak_no_evil:,:relieved:,:grinning:,:yum:,:laughing:,:ok_hand:,:neutral_face:,:confused:'.split(',');
 	/*! MODIFICATION END */
 
 	$.fn.emojiarea = function(options) {
@@ -173,7 +174,7 @@
 		 */
 	util.emojiInserted = function (emojiKey, menu) {
 		ConfigStorage.get('emojis_recent', function (curEmojis) {
-			curEmojis = curEmojis || [];
+			curEmojis = curEmojis || defaultRecentEmojis || [];
 
 			var pos = curEmojis.indexOf(emojiKey);
 			if (!pos) {
@@ -188,10 +189,6 @@
 			}
 
 			ConfigStorage.set({emojis_recent: curEmojis});
-
-			if (menu) {
-				menu.updateRecentTab(curEmojis);
-			}
 		})
 	};
 	/*! MODIFICATION END */
@@ -468,8 +465,6 @@
 		this.$menu = $('<div>');
 		this.$menu.addClass('emoji-menu');
 		this.$menu.hide();
-		/* MODIFICATION: Following line was added by Igor Zhukov, in order to store emoji tab visibility */
-		this.hasRecent = true;
 
 		/*! MODIFICATION START
 			Following code was modified by Igor Zhukov, in order to add scrollbars and tail to EmojiMenu
@@ -559,10 +554,6 @@
 
 		/* MODIFICATION: Following line was modified by Andre Staltz, in order to select a default category. */
 		this.selectCategory(0);
-		/* MODIFICATION: Following 3 lines was added by Igor Zhukov, in order to update emoji tab visibility */
-		ConfigStorage.get('emojis_recent', function (curEmojis) {
-			self.updateRecentTab(curEmojis);
-		});
 	};
 
 	/*! MODIFICATION START
@@ -628,6 +619,7 @@
 			updateItems();
 		} else {
 			ConfigStorage.get('emojis_recent', function (curEmojis) {
+				curEmojis = curEmojis || defaultRecentEmojis || [];
 				var key, i;
 				for (i = 0; i < curEmojis.length; i++) {
 					key = curEmojis[i]
@@ -639,25 +631,6 @@
 			});
 		}
 	};
-
-	/*! MODIFICATION START
-			 This function was added by Igor Zhukov to update recent emojis tab state.
-			 */
-	EmojiMenu.prototype.updateRecentTab = function(curEmojis) {
-		if (this.hasRecent != (curEmojis.length > 1)) {
-			var tabEl = this.$categoryTabs.find('.emoji-menu-tab').eq(0);
-			if (this.hasRecent) {
-				tabEl.hide();
-				if (!this.currentCategory) {
-					this.selectCategory(1);
-				}
-			} else {
-				tabEl.show();
-			}
-			this.hasRecent = !this.hasRecent;
-		}
-	};
-	/*! MODIFICATION END */
 
 	EmojiMenu.prototype.reposition = function() {
 		var $button = this.emojiarea.$button;

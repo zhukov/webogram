@@ -18,6 +18,9 @@
               <a ng-click="editProfile()" my-i18n="settings_modal_edit_profile"></a>
             </li>
             <li>
+              <a ng-click="changeUsername()" my-i18n="settings_modal_edit_username"></a>
+            </li>
+            <li>
               <a ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
             </li>
           </ul>
@@ -112,8 +115,16 @@
     </div>
 
     <div class="mobile_modal_section" ng-if="profile.phone">
-      <h4 class="mobile_modal_section_header" my-i18n="settings_modal_phone"></h4>
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_phone"></h4>
       <div class="mobile_modal_section_value" ng-bind="profile.phone | phoneNumber"></div>
+    </div>
+
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_username"></h4>
+      <div class="mobile_modal_section_value" ng-click="changeUsername()" ng-switch="profile.username.length > 0">
+        <a class="settings_modal_username_link" ng-switch-when="true" href="" ng-click="changeUsername()" ng-bind="'@' + profile.username"></a>
+        <a ng-switch-default href="" ng-click="changeUsername()" my-i18n="settings_modal_empty_username_set"></a>
+      </div>
     </div>
 
     <div class="mobile_modal_section">

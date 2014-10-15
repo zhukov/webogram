@@ -439,6 +439,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.dialogs = [];
     $scope.contacts = [];
+    $scope.foundUsers = [];
     $scope.contactsLoaded = false;
     if ($scope.search === undefined) {
       $scope.search = {};
@@ -636,6 +637,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       getDialogs(force).then(function (dialogsResult) {
         $scope.dialogs = [];
         $scope.contacts = [];
+        $scope.foundUsers = [];
 
         if (dialogsResult.dialogs.length) {
           offset += dialogsResult.dialogs.length;
@@ -678,7 +680,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             $scope.contacts.push({
               userID: userID,
               user: AppUsersManager.getUser(userID),
-              userPhoto: AppUsersManager.getUserPhoto(userID, 'User'),
               peerString: AppUsersManager.getUserString(userID)
             });
           }
@@ -689,8 +690,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else if (!$scope.search.query) {
           $scope.isEmpty.contacts = true;
         }
+        $scope.$broadcast('ui_dialogs_append');
       });
-      $scope.$broadcast('ui_dialogs_append');
+
+      if ($scope.search.query && $scope.search.query.length >= 5) {
+        MtpApiManager.invokeApi('contacts.search', {q: $scope.search.query, limit: 10}).then(function (result) {
+          console.log($scope.search.query, result);
+          AppUsersManager.saveApiUsers(result.users);
+          if (curJump != jump) return;
+          $scope.foundUsers = [];
+          angular.forEach(result.results, function(contactFound) {
+            var userID = contactFound.user_id;
+            if (peersInDialogs[userID] === undefined) {
+              $scope.foundUsers.push({
+                userID: userID,
+                user: AppUsersManager.getUser(userID),
+                peerString: AppUsersManager.getUserString(userID)
+              });
+            }
+          });
+        }, function (error) {
+          if (error.code == 400) {
+            error.handled = true;
+          }
+        });
+      }
     }
 
     function showMoreDialogs () {
@@ -2119,6 +2143,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
+    $scope.changeUsername = function () {
+      $modal.open({
+        templateUrl: templateUrl('username_edit_modal'),
+        controller: 'UsernameEditModalController',
+        windowClass: 'username_edit_modal_window mobile_modal'
+      });
+    };
+
     $scope.terminateSessions = function () {
       ErrorService.confirm({type: 'TERMINATE_SESSIONS'}).then(function () {
         MtpApiManager.invokeApi('auth.resetAuthorizations', {});
@@ -2206,7 +2238,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ProfileEditModalController', function ($rootScope, $scope, $timeout, $modal, $modalInstance, AppUsersManager, AppChatsManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager) {
+  .controller('ChangelogModalController', function ($scope, $modal) {
+    $scope.changeUsername = function () {
+      $modal.open({
+        templateUrl: templateUrl('username_edit_modal'),
+        controller: 'UsernameEditModalController',
+        windowClass: 'username_edit_modal_window mobile_modal'
+      });
+    };
+  })
+
+  .controller('ProfileEditModalController', function ($scope,  $modalInstance, AppUsersManager, MtpApiManager) {
 
     $scope.profile = {};
     $scope.error = {};
@@ -2246,6 +2288,76 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         delete $scope.profile.updating;
       });
     }
+  })
+
+  .controller('UsernameEditModalController', function ($scope,  $modalInstance, AppUsersManager, MtpApiManager) {
+
+    $scope.profile = {};
+    $scope.error = {};
+
+    MtpApiManager.getUserID().then(function (id) {
+      $scope.profile = angular.copy(AppUsersManager.getUser(id));
+    });
+
+    $scope.updateUsername = function () {
+      $scope.profile.updating = true;
+
+      MtpApiManager.invokeApi('account.updateUsername', {
+        username: $scope.profile.username || ''
+      }).then(function (user) {
+        $scope.checked = {};
+        AppUsersManager.saveApiUser(user);
+        $modalInstance.close();
+      }, function (error) {
+        switch (error.type) {
+          case 'USERNAME_INVALID':
+            $scope.checked = {error: true};
+            error.handled = true;
+            break;
+
+          case 'USERNAME_OCCUPIED':
+            $scope.checked = {error: true};
+            error.handled = true;
+            break;
+
+          case 'USERNAME_NOT_MODIFIED':
+            error.handled = true;
+            $modalInstance.close();
+            break;
+        }
+      })['finally'](function () {
+        delete $scope.profile.updating;
+      });
+    }
+
+    $scope.$watch('profile.username', function (newVal) {
+      if (!newVal.length) {
+        $scope.checked = {};
+        return;
+      }
+      MtpApiManager.invokeApi('account.checkUsername', {
+        username: newVal || ''
+      }).then(function (valid) {
+        if ($scope.profile.username != newVal) {
+          return;
+        }
+        if (valid) {
+          $scope.checked = {success: true};
+        } else {
+          $scope.checked = {error: true};
+        }
+      }, function (error) {
+        if ($scope.profile.username != newVal) {
+          return;
+        }
+        switch (error.type) {
+          case 'USERNAME_INVALID':
+            $scope.checked = {error: true};
+            error.handled = true;
+            break;
+        }
+      });
+    })
   })
 
   .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager, ErrorService) {
