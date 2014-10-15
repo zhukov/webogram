@@ -414,13 +414,10 @@ a.footer_lang_link.active:active {
   }
 }
 
-.im_history_selectable .icon-select-tick,
-.im_content_message_select_area:hover .icon-select-tick {
-  display: inline-block;
-}
 .im_message_selected .icon-select-tick,
 .im_history_selectable .im_message_outer_wrap:hover .icon-select-tick,
 .im_content_message_select_area:hover .icon-select-tick {
+  display: inline-block;
   background-position: -9px -481px;
   opacity: 0.5;
 }
