@@ -31,7 +31,7 @@
     <form class="modal_simple_form" ng-submit="updateUsername()" my-vertical-position="0.3">
 
       <div class="form-group import_modal_field_wrap" ng-class="{'has-error': checked.error, 'has-feedback': checked.feedback.length > 0, 'has-success': checked.success}">
-        <input class="form-control input-md" my-focused type="text" placeholder="{{'username_edit_placeholder' | i18n}}" ng-model="profile.username"  name="username" ng-model-options="{debounce: 600}"/>
+        <input class="form-control input-md" my-focused type="text" placeholder="{{'username_edit_placeholder' | i18n}}" ng-model="profile.username"  name="username" ng-model-options="{updateOn: 'default blur', debounce: {default: 600, blur: 0}}"/>
         <span ng-if="checked.error" class="glyphicon form-control-feedback" ng-class="{'glyphicon-remove': checked.error}"></span>
       </div>
 
