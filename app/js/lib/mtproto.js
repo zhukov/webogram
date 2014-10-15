@@ -197,10 +197,16 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       resultArray = resultArray.buffer;
     }
 
-    return $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray, {
-      responseType: 'arraybuffer',
-      transformRequest: null
-    }).then(
+    var requestPromise;
+    try {
+      requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray, {
+        responseType: 'arraybuffer',
+        transformRequest: null
+      });
+    } catch (e) {
+      requestPromise = $q.reject(e);
+    }
+    return requestPromise.then(
       function (result) {
         if (!result.data || !result.data.byteLength) {
           return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
@@ -1119,10 +1125,16 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         resultArray = resultArray.buffer;
       }
 
-      return $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, {
-        responseType: 'arraybuffer',
-        transformRequest: null
-      }).then(
+      var requestPromise;
+      try {
+        requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, {
+          responseType: 'arraybuffer',
+          transformRequest: null
+        });
+      } catch (e) {
+        requestPromise = $q.reject(e);
+      }
+      return requestPromise.then(
         function (result) {
           if (!result.data || !result.data.byteLength) {
             return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
