@@ -239,6 +239,9 @@ angular.module('izhukov.utils', [])
           createObjectStore = function (db) {
             db.createObjectStore(dbStoreName);
           };
+      if (!request) {
+        throw new Exception();
+      }
     } catch (error) {
       storageIsAvailable = false;
       return $q.reject(error);
