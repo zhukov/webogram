@@ -59,7 +59,7 @@
 
 	"username_edit_modal_title": "Change username",
 	"username_edit_placeholder": "Username",
-	"username_edit_description_md": "Choose a username so that other people can find you on **Telegram** and message you without knowing your phone number.\n\nYou can use a-z, 0-9 and underscores.",
+	"username_edit_description_md": "You can choose a username on **Telegram**. If you do, other people will be able to find you by this username and contact you without knowing your phone number.\n\nYou can use a-z, 0-9 and underscores. Minimum length is 5 characters.",
 	"username_edit_submit": "Save",
 	"username_edit_submit_active": "Saving...",
 
@@ -214,7 +214,8 @@
 	"error_modal_photo_too_small_description": "The photo you provided is too small.",
 	"error_modal_no_phone_user_description_md": "Sorry, there is no **Telegram** account with the phone number you provided.",
 	"error_modal_no_phone_users_description_md": "Sorry, there are no **Telegram** accounts with the phone numbers you provided.",
-	"error_modal_phonebook_required_description": "Telegram needs access to phonebook to import contacts.",
+	"error_modal_username_invalid_description": "Sorry, this username is not allowed.",
+	 "error_modal_username_occupied_description": "Sorry, this username is already taken.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",
 	"error_modal_unauthorized_description": "This action requires authorization access. Please {login-link: log in}.",

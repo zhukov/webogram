@@ -607,7 +607,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var animated = transform ? true : false,
+      var animated = transform && false ? true : false,
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {

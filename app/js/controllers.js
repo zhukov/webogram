@@ -2309,21 +2309,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppUsersManager.saveApiUser(user);
         $modalInstance.close();
       }, function (error) {
-        switch (error.type) {
-          case 'USERNAME_INVALID':
-            $scope.checked = {error: true};
-            error.handled = true;
-            break;
-
-          case 'USERNAME_OCCUPIED':
-            $scope.checked = {error: true};
-            error.handled = true;
-            break;
-
-          case 'USERNAME_NOT_MODIFIED':
-            error.handled = true;
-            $modalInstance.close();
-            break;
+        if (error.type == 'USERNAME_NOT_MODIFIED') {
+          error.handled = true;
+          $modalInstance.close();
         }
       })['finally'](function () {
         delete $scope.profile.updating;
