@@ -59,7 +59,7 @@
 
 	"username_edit_modal_title": "Change username",
 	"username_edit_placeholder": "Username",
-	"username_edit_description_md": "Username lets other people find you and have a chat in\n**Telegram** without exposing your phone number.\n\nYou can only use symbols like a-z and 0-9.",
+	"username_edit_description_md": "Choose a username so that other people can find you on **Telegram** and message you without knowing your phone number.\n\nYou can use a-z, 0-9 and underscores.",
 	"username_edit_submit": "Save",
 	"username_edit_submit_active": "Saving...",
 
@@ -228,6 +228,7 @@
 	"head_new_contact": "New Contact",
 	"head_contacts": "Contacts",
 	"head_contacts_title": "Contacts",
+	"im_found_title": "Global search",
 	"head_settings": "Settings",
 	"head_log_out": "Log Out",
 	"head_edit_messages": "Edit messages",

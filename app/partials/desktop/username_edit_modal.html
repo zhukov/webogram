@@ -8,13 +8,9 @@
 
       <h4 my-i18n="username_edit_modal_title"></h4>
 
-      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': error.field == 'username', 'has-feedback': error.field == 'username', 'has-success': error.field == 'username'}">
-        <label class="control-label" ng-bind="error.feedback"></label>
-        <input class="form-control input-sm" my-focused type="text" placeholder="{{'username_edit_placeholder' | i18n}}" ng-model="profile.username"  name="username"/>
-        <span class="glyphicon glyphicon-remove form-control-feedback"></span>
-      </div>
-
-      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': error.field == 'username'}">
+      <div class="form-group import_modal_field_wrap" ng-class="{'has-error': checked.error, 'has-feedback': checked.feedback.length > 0, 'has-success': checked.success}">
+        <input class="form-control input-md" my-focused type="text" placeholder="{{'username_edit_placeholder' | i18n}}" ng-model="profile.username"  name="username" ng-model-options="{debounce: 600}"/>
+        <span ng-if="checked.error" class="glyphicon form-control-feedback" ng-class="{'glyphicon-remove': checked.error}"></span>
       </div>
 
       <div class="modal_simple_form_description" my-i18n="username_edit_description_md"></div>

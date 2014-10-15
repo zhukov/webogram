@@ -555,10 +555,6 @@ div.im_panel_own_photo {
 .modal_section_body dd {
   display: inline-block;
 }
-.settings_modal_username_link,
-.settings_modal_username_link:hover {
-  color: inherit;
-}
 
 .user_modal_main_btn {
   border: 0;
