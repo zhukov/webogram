@@ -694,26 +694,28 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
 
       if ($scope.search.query && $scope.search.query.length >= 5) {
-        MtpApiManager.invokeApi('contacts.search', {q: $scope.search.query, limit: 10}).then(function (result) {
-          console.log($scope.search.query, result);
-          AppUsersManager.saveApiUsers(result.users);
+        $timeout(function() {
           if (curJump != jump) return;
-          $scope.foundUsers = [];
-          angular.forEach(result.results, function(contactFound) {
-            var userID = contactFound.user_id;
-            if (peersInDialogs[userID] === undefined) {
-              $scope.foundUsers.push({
-                userID: userID,
-                user: AppUsersManager.getUser(userID),
-                peerString: AppUsersManager.getUserString(userID)
-              });
+          MtpApiManager.invokeApi('contacts.search', {q: $scope.search.query, limit: 10}).then(function (result) {
+            AppUsersManager.saveApiUsers(result.users);
+            if (curJump != jump) return;
+            $scope.foundUsers = [];
+            angular.forEach(result.results, function(contactFound) {
+              var userID = contactFound.user_id;
+              if (peersInDialogs[userID] === undefined) {
+                $scope.foundUsers.push({
+                  userID: userID,
+                  user: AppUsersManager.getUser(userID),
+                  peerString: AppUsersManager.getUserString(userID)
+                });
+              }
+            });
+          }, function (error) {
+            if (error.code == 400) {
+              error.handled = true;
             }
           });
-        }, function (error) {
-          if (error.code == 400) {
-            error.handled = true;
-          }
-        });
+        }, 500);
       }
     }
 
