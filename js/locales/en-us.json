@@ -341,8 +341,7 @@
 	"phonebook_modal_submit": "Import contacts",
 
 	"welcome_header_md": "**Telegram** Web",
-	"welcome_text_1_md": "This is an unofficial web-client for the **Telegram Messenger**.",
-	"welcome_text_2_md": "It's still an **alpha-version** and may not be 200% reliable",
+	"welcome_text_1_md": "The official **web client** for Telegram.",
 	"welcome_start_messaging": "Start Messaging",
 	"welcome_fast_messaging_header": "Fast messaging",
 	"welcome_fast_messaging_text": "Send messages with rich emoji support right from your desktop or laptop computer",
