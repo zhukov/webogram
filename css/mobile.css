@@ -181,6 +181,7 @@ html {
 }
 .navbar-quick-media-back h4 {
   margin: 9px 0 12px 0;
+  line-height: 120%;
 }
 .navbar-quick-profile-back h4,
 .navbar-quick-group-back h4 {
@@ -285,7 +286,9 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 
-
+.welcome_text {
+  line-height: 150%;
+}
 .login_form_wrap {
   border-radius: 0;
   max-width: auto;
@@ -882,6 +885,7 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 
 .mobile_modal_section {
+  display: block;
   border-bottom: 1px solid #e0e0e0;
   padding: 15px 0;
 }

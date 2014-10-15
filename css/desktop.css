@@ -414,13 +414,10 @@ a.footer_lang_link.active:active {
   }
 }
 
-.im_history_selectable .icon-select-tick,
-.im_content_message_select_area:hover .icon-select-tick {
-  display: inline-block;
-}
 .im_message_selected .icon-select-tick,
 .im_history_selectable .im_message_outer_wrap:hover .icon-select-tick,
 .im_content_message_select_area:hover .icon-select-tick {
+  display: inline-block;
   background-position: -9px -481px;
   opacity: 0.5;
 }
@@ -545,7 +542,15 @@ div.im_panel_own_photo {
 }
 .user_modal_status {
   color: #999;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
+}
+.modal_section_body dt {
+  font-weight: normal;
+  display: inline-block;
+  width: 80px;
+}
+.modal_section_body dd {
+  display: inline-block;
 }
 
 .user_modal_main_btn {
