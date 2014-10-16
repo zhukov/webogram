@@ -1,13 +1,13 @@
 [![Stories in Ready](https://badge.waffle.io/zhukov/webogram.png?label=ready&title=Ready)](https://waffle.io/zhukov/webogram)
-## [Webogram](http://zhukov.github.io/webogram) – UNOFFICIAL Telegram Web App
+## [Webogram](http://zhukov.github.io/webogram) – official Telegram Web App
 
 Telegram offers great [apps for mobile communication](https://www.telegram.org). It is based on the [MTProto protocol](https://core.telegram.org/mtproto) and has an [Open API](http://core.telegram.org/api). I personally like Telegram for its speed and cloud-support (that makes a web app possible, unlike in the case of WA and others).
 
-MTProto data can be carried over HTTP, but no official web-version for Telegram exists for the time being. So this project is my take at creating one.
+MTProto data can be carried over HTTP, and this project is my take at creating web-version for Telegram.
 
 
 > **Disclaimer**:
-> This is an alpha version of the Telegram **UNOFFICIAL** web application. It may have undetected security issues, and there is definitely a load of bugs to fix, features to add and so on. So if you want 200% secure and fully functional communication, don't use this yet! You can always find Telegram official mobile applications here: https://telegram.org
+> This is an alpha version of the Telegram official web application. It may have undetected security issues, and there is definitely a load of bugs to fix, features to add and so on. So if you want 200% secure and fully functional communication, don't use this yet! You can always find Telegram official applications here: https://telegram.org
 
 That said, I'm using this app myself and I'd like to share its sources, so anyone can contribute to the development. Any help is welcome!
 
