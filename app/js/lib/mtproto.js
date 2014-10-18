@@ -863,7 +863,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     };
 
     var self = this;
-    this.sendEncryptedRequest(pingMessage).then(function (result) {
+    this.sendEncryptedRequest(pingMessage, {timeout: 15000}).then(function (result) {
       delete $rootScope.offlineConnecting;
       self.toggleOffline(false);
     }, function () {
@@ -895,18 +895,18 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
 
       this.checkConnectionPromise = $timeout(this.checkConnection.bind(this), parseInt(this.checkConnectionPeriod * 1000));
-      this.checkConnectionPeriod = Math.min(60, (1 + this.checkConnectionPeriod) * 1.5);
+      this.checkConnectionPeriod = Math.min(30, (1 + this.checkConnectionPeriod) * 1.5);
 
       this.onOnlineCb = this.checkConnection.bind(this);
 
-      $(document.body).on('online', this.onOnlineCb);
+      $(document.body).on('online focus', this.onOnlineCb);
     } else {
       delete this.longPollPending;
       this.checkLongPoll();
       this.sheduleRequest();
 
       if (this.onOnlineCb) {
-        $(document.body).off('online', this.onOnlineCb);
+        $(document.body).off('online focus', this.onOnlineCb);
       }
       $timeout.cancel(this.checkConnectionPromise);
     }
@@ -1095,8 +1095,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     });
   };
 
-  MtpNetworker.prototype.sendEncryptedRequest = function (message) {
+  MtpNetworker.prototype.sendEncryptedRequest = function (message, options) {
     var self = this;
+    options = options || {};
     // console.log(dT(), 'Send encrypted'/*, message*/);
     // console.trace();
     var data = new TLSerialization({startMaxLength: message.body.length + 64});
@@ -1127,10 +1128,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       var requestPromise;
       try {
-        requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, {
+        options = angular.copy(options || {}, {
           responseType: 'arraybuffer',
           transformRequest: null
         });
+        requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
