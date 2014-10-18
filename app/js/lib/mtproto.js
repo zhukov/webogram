@@ -546,7 +546,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 })
 
-.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpTimeManager, MtpSecureRandom, Storage, CryptoWorker, $http, $q, $timeout, $interval, $rootScope) {
+.factory('MtpNetworkerFactory', function (MtpDcConfigurator, MtpTimeManager, MtpSecureRandom, Storage, CryptoWorker, AppRuntimeManager, $http, $q, $timeout, $interval, $rootScope) {
 
   var updatesProcessor,
       iii = 0,
@@ -1128,7 +1128,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       var requestPromise;
       try {
-        options = angular.copy(options || {}, {
+        options = angular.extend(options || {}, {
           responseType: 'arraybuffer',
           transformRequest: null
         });
@@ -1144,6 +1144,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           return result;
         },
         function (error) {
+          if (error.status == 404 &&
+              (error.data || '').indexOf('nginx/0.3.33') != -1) {
+            Storage.remove(
+              'dc' + self.dcID + '_server_salt',
+              'dc' + self.dcID + '_auth_key'
+            ).then(function () {
+              AppRuntimeManager.reload();
+            });
+          }
           if (!error.message && !error.type) {
             error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
           }
