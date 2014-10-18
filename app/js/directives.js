@@ -900,9 +900,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           .on('keyup', function (e) {
             updateHeight();
 
-            $scope.$apply(function () {
-              $scope.draftMessage.text = richTextarea.textContent;
-            });
+            if (!sendAwaiting) {
+              $scope.$apply(function () {
+                $scope.draftMessage.text = richTextarea.textContent;
+              });
+            }
 
             $timeout.cancel(updatePromise);
             updatePromise = $timeout(updateValue, 1000);
@@ -1032,10 +1034,19 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$on('ui_history_change', focusField);
       }
 
-      $scope.$on('ui_message_send', focusField);
-
       $scope.$on('ui_peer_draft', updateRichTextarea);
-      $scope.$on('ui_message_before_send', updateValue);
+
+      var sendAwaiting = false;
+      $scope.$on('ui_message_before_send', function () {
+        sendAwaiting = true;
+        $timeout.cancel(updatePromise);
+        updateValue();
+      });
+      $scope.$on('ui_message_send', function () {
+        sendAwaiting = false;
+        focusField();
+      });
+
 
       function focusField () {
         onContentLoaded(function () {

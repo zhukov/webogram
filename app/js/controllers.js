@@ -1390,31 +1390,29 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $timeout(function () {
         var text = $scope.draftMessage.text;
 
-        if (!angular.isString(text) || !text.length) {
-          return false;
+        if (angular.isString(text) && text.length > 0) {
+          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
+            var utfChar = $.emojiarea.reverseIcons[name];
+            if (utfChar !== undefined) {
+              return utfChar;
+            }
+            return all;
+          });
+
+          var timeout = 0;
+          do {
+
+            (function (peerID, curText, curTimeout) {
+              setTimeout(function () {
+                AppMessagesManager.sendText(peerID, curText);
+              }, curTimeout)
+            })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
+
+            text = text.substr(4096);
+            timeout += 100;
+
+          } while (text.length);
         }
-
-        text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
-          var utfChar = $.emojiarea.reverseIcons[name];
-          if (utfChar !== undefined) {
-            return utfChar;
-          }
-          return all;
-        });
-
-        var timeout = 0;
-        do {
-
-          (function (peerID, curText, curTimeout) {
-            setTimeout(function () {
-              AppMessagesManager.sendText(peerID, curText);
-            }, curTimeout)
-          })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
-
-          text = text.substr(4096);
-          timeout += 100;
-
-        } while (text.length);
 
         resetDraft();
         $scope.$broadcast('ui_message_send');
