@@ -418,11 +418,14 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         errorHandler = function (error) {
           deferred.reject(error);
           errorHandler = angular.noop;
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
+          if (cacheFileWriter && 
+              (!error || error.type != 'DOWNLOAD_CANCELED')) {
+            cacheFileWriter.truncate(0);
+          }
         };
 
 
-    fileStorage.getFile(fileName).then(function (blob) {
+    fileStorage.getFile(fileName, size).then(function (blob) {
       if (toFileEntry) {
         FileManager.copy(blob, toFileEntry).then(function () {
           deferred.resolve();
@@ -436,9 +439,16 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       fileWriterPromise.then(function (fileWriter) {
         cacheFileWriter = fileWriter;
         var limit = 524288,
+            offset,
+            startOffset = 0,
             writeFilePromise = $q.when(),
             writeFileDeferred;
-        for (var offset = 0; offset < size; offset += limit) {
+        if (fileWriter.length) {
+          startOffset = fileWriter.length;
+          fileWriter.seek(startOffset);
+          deferred.notify({done: startOffset, total: size});
+        }
+        for (offset = startOffset; offset < size; offset += limit) {
           writeFileDeferred = $q.defer();
           (function (isFinal, offset, writeFileDeferred, writeFilePromise) {
             return downloadRequest(dcID, function () {
@@ -479,7 +489,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           writeFilePromise = writeFileDeferred.promise;
         }
       });
-    })
+    });
 
     deferred.promise.cancel = function () {
       if (!canceled && !resolved) {
