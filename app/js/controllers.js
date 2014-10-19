@@ -1377,12 +1377,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
     $scope.$on('ui_typing', onTyping);
 
-    $scope.draftMessage = {text: ''};
+    $scope.draftMessage = {text: '', send: sendMessage};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
-
-
-    $scope.sendMessage = sendMessage;
 
     function sendMessage (e) {
       $scope.$broadcast('ui_message_before_send');

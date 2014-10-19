@@ -954,7 +954,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (submit) {
             $timeout.cancel(updatePromise);
             updateValue();
-            $(element).trigger('submit');
+            $scope.draftMessage.send();
             $(element).trigger('message_send');
             resetAfterSubmit();
             return cancelEvent(e);
@@ -966,7 +966,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $(submitBtn).on('mousedown touchstart', function (e) {
         $timeout.cancel(updatePromise);
         updateValue();
-        $(element).trigger('submit');
+        $scope.draftMessage.send();
         $(element).trigger('message_send');
         resetAfterSubmit();
         return cancelEvent(e);
