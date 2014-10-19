@@ -21,7 +21,7 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
   return gulp.src(['app/index.html', 'app/badbrowser.html'])
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.ngmin(), $.uglify({outSourceMap: false})],
+      js: ['concat', $.ngAnnotate(), $.uglify({outSourceMap: false})],
       css: [$.minifyCss(), 'concat']
     }))
     .pipe(gulp.dest('dist'));
