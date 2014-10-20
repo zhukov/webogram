@@ -48,6 +48,7 @@ Config.I18n = {
     ,"es-es"
     ,"de-de"
     ,"it-it"
+    ,"pt-br"
     // ,"ru-ru"
   ], // To be copied to package.json
   languages: {
@@ -55,14 +56,16 @@ Config.I18n = {
     'de-de': 'Deutsch',
     'es-es': 'Español',
     'it-it': 'Italiano',
-    'ru-ru': 'Русский'
+    'ru-ru': 'Русский',
+    'pt-br': 'Português Brasileiro'
   },
   aliases: {
     'en': 'en-us',
     'de': 'de-de',
     'es': 'es-es',
     'it': 'it-it',
-    'ru': 'ru-ru'
+    'ru': 'ru-ru',
+    'pt': 'pt-br'
   },
   messages: {},
   fallback_messages: {}
