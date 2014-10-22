@@ -184,9 +184,10 @@ angular.module('myApp.services', ['myApp.i18n'])
     return user;
   }
 
-  function openUser (userID, accessHash) {
+  function openUser (userID, override) {
     var scope = $rootScope.$new();
     scope.userID = userID;
+    scope.override = override || {};
 
     var modalInstance = $modal.open({
       templateUrl: templateUrl('user_modal'),

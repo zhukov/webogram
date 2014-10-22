@@ -1767,7 +1767,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (element[0].tagName == 'A') {
         element.on('click', function () {
-          $rootScope.openUser(userID);
+          $rootScope.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
       if (attrs.color && $scope.$eval(attrs.color)) {
@@ -1840,7 +1840,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (element[0].tagName == 'A') {
         element.on('click', function (e) {
-          $rootScope.openUser($scope.userID);
+          $rootScope.openUser($scope.userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
 
