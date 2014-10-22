@@ -59,7 +59,7 @@
         <div class="im_dialogs_contacts_wrap" ng-show="!search.messages &amp;&amp; foundUsers.length > 0">
           <h5 my-i18n="im_found_title"></h5>
           <ul class="nav nav-pills nav-stacked">
-            <li class="im_dialog_wrap" ng-repeat="foundUser in foundUsers | orderBy:'user.sortName' track by foundUser.userID" ng-class="{active: curDialog.peerID == foundUser.userID}">
+            <li class="im_dialog_wrap" ng-repeat="foundUser in foundUsers track by foundUser.userID" ng-class="{active: curDialog.peerID == foundUser.userID}">
               <a class="im_dialog" ng-mousedown="dialogSelect(foundUser.peerString)">
                 <div class="im_dialog_photo pull-left" my-user-photolink="foundUser.userID" img-class="im_dialog_photo"></div>
                 <div class="im_dialog_message_wrap">
