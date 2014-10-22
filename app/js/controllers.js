@@ -513,7 +513,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('dialog_flush', function (e, dialog) {
       for (var i = 0; i < $scope.dialogs.length; i++) {
         if ($scope.dialogs[i].peerID == dialog.peerID) {
-          $scope.dialogs[i].deleted = true;
+          $scope.dialogs.splice(i, 1);
           break;
         }
       }
