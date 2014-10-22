@@ -204,7 +204,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         transformRequest: null
       });
     } catch (e) {
-      requestPromise = $q.reject(e);
+      requestPromise = $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
     }
     return requestPromise.then(
       function (result) {

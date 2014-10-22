@@ -108,7 +108,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
           if (!options.noErrorBox) {
             error.input = method;
-            error.stack = error.stack || (new Error()).stack;
+            error.stack = error.originalError && error.originalError.stack || error.stack || (new Error()).stack;
             setTimeout(function () {
               if (!error.handled) {
                 ErrorService.show({error: error});
