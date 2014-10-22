@@ -80,6 +80,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (nearestDcResult.nearest_dc != nearestDcResult.this_dc) {
           MtpApiManager.getNetworker(nearestDcResult.nearest_dc, {createNetworker: true});
         }
+      }, function (error) {
+        switch (error.type) {
+          case 'NETWORK_BAD_REQUEST':
+            if (location.protocol == 'https:') {
+              ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
+                location = location.toString().replace(/^https:/, 'http:');
+              });
+              error.handled = true;
+            }
+            break;
+        }
       });
     }
 
