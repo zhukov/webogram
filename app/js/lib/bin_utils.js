@@ -112,11 +112,13 @@ function bytesXor (bytes1, bytes2) {
 }
 
 function bytesToWords (bytes) {
-  var len = bytes.length,
-      words = [];
-
-  for (var i = 0; i < len; i++) {
-      words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8);
+  var len = bytes.byteLength || bytes.length,
+      words = [], i;
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
+  for (i = 0; i < len; i++) {
+    words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8);
   }
 
   return new CryptoJS.lib.WordArray.init(words, len);
@@ -128,7 +130,7 @@ function bytesFromWords (wordArray) {
       bytes = [];
 
   for (var i = 0; i < sigBytes; i++) {
-      bytes.push((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff);
+    bytes.push((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff);
   }
 
   return bytes;
@@ -154,13 +156,23 @@ function bytesToArrayBuffer (b) {
   return (new Uint8Array(b)).buffer;
 }
 
+function bufferConcat(buffer1, buffer2) {
+  var l1 = buffer1.byteLength || buffer1.length,
+      l2 = buffer2.byteLength || buffer2.length;
+  var tmp = new Uint8Array(l1 + l2);
+  tmp.set(buffer1 instanceof ArrayBuffer ? new Uint8Array(buffer1) : buffer1, 0);
+  tmp.set(buffer2 instanceof ArrayBuffer ? new Uint8Array(buffer2) : buffer2, l1);
+
+  return tmp.buffer;
+}
+
 function bytesFromArrayBuffer (buffer) {
   var len = buffer.byteLength,
       byteView = new Uint8Array(buffer),
       bytes = [];
 
   for (var i = 0; i < len; ++i) {
-      bytes[i] = byteView[i];
+    bytes[i] = byteView[i];
   }
 
   return bytes;
@@ -228,14 +240,19 @@ function rsaEncrypt (publicKey, bytes) {
 }
 
 function aesEncrypt (bytes, keyBytes, ivBytes) {
-  // console.log('AES encrypt start', bytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+  var len = bytes.byteLength || bytes.length;
+  console.log(dT(), 'AES encrypt start', len/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
 
-  var needPadding = 16 - (bytes.length % 16);
+  var needPadding = 16 - (len % 16);
   if (needPadding > 0 && needPadding < 16) {
     var padding = new Array(needPadding);
     (new SecureRandom()).nextBytes(padding);
 
-    bytes = bytes.concat(padding);
+    if (bytes instanceof ArrayBuffer) {
+      bytes = bufferConcat(bytes, padding);
+    } else {
+      bytes = bytes.concat(padding);
+    }
   }
 
   var encryptedWords = CryptoJS.AES.encrypt(bytesToWords(bytes), bytesToWords(keyBytes), {
@@ -246,7 +263,7 @@ function aesEncrypt (bytes, keyBytes, ivBytes) {
 
   var encryptedBytes = bytesFromWords(encryptedWords);
 
-  // console.log('AES encrypt finish');
+  console.log(dT(), 'AES encrypt finish');
 
   return encryptedBytes;
 }

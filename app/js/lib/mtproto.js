@@ -738,7 +738,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         message = {
       msg_id: messageID,
       seq_no: seqNo,
-      body: serializer.getBytes(),
+      body: serializer.getBytes(true),
       isAPI: true
     };
 
@@ -954,7 +954,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       if (!value || value >= currentTime) {
         if (message = self.sentMessages[messageID]) {
           messages.push(message);
-          messagesByteLen += message.body.length + 32;
+          messagesByteLen += (message.body.byteLength || message.body.length) + 32;
           if (message.isAPI) {
             hasApiCall = true;
           }
@@ -1009,7 +1009,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         inner: innerMessages
       }
 
-      message = angular.extend({body: container.getBytes()}, containerSentMessage);
+      message = angular.extend({body: container.getBytes(true)}, containerSentMessage);
 
       this.sentMessages[message.msg_id] = containerSentMessage;
 
@@ -1076,10 +1076,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
     var self = this;
 
+    console.log(dT(), 'Start encrypt', bytes.byteLength);
     return CryptoWorker.sha1Hash(bytes).then(function (bytesHash) {
+      console.log(dT(), 'after hash');
       var msgKey = bytesHash.slice(-16);
       return self.getMsgKeyIv(msgKey, true).then(function (keyIv) {
+        console.log(dT(), 'after msg key iv');
         return CryptoWorker.aesEncrypt(bytes, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
+          console.log(dT(), 'Finish encrypt');
           return {
             bytes: encryptedBytes,
             msgKey: msgKey
@@ -1111,7 +1115,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     data.storeInt(message.body.length, 'message_data_length');
     data.storeRawBytes(message.body, 'message_data');
 
-    return this.getEncryptedMessage(data.getBytes()).then(function (encryptedResult) {
+    return this.getEncryptedMessage(data.getBuffer()).then(function (encryptedResult) {
       // console.log(dT(), 'Got encrypted out message'/*, encryptedResult*/);
       var request = new TLSerialization({startMaxLength: encryptedResult.bytes.length + 256});
       request.storeIntBytes(self.authKeyID, 64, 'auth_key_id');

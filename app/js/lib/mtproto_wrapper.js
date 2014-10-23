@@ -558,7 +558,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 file_id: fileID,
                 file_part: part,
                 file_total_parts: totalParts,
-                bytes: bytesFromArrayBuffer(e.target.result)
+                bytes: e.target.result
               }, {
                 startMaxLength: partSize + 256,
                 fileUpload: true
