@@ -196,9 +196,10 @@ function uintToInt (val) {
 }
 
 function sha1Hash (bytes) {
-  // console.log('SHA-1 hash start');
-  var hashBytes = sha1.hash(bytes, true);
-  // console.log('SHA-1 hash finish');
+  this.rushaInstance = this.rushaInstance || new Rusha(1024 * 1024);
+  // console.log(dT(), 'SHA-1 hash start', bytes.byteLength || bytes.length);
+  var hashBytes = bytesFromArrayBuffer(rushaInstance.rawDigest(bytes).buffer);
+  // console.log(dT(), 'SHA-1 hash finish');
 
   return hashBytes;
 }

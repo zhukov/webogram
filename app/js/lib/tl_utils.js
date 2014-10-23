@@ -36,7 +36,16 @@ TLSerialization.prototype.getBuffer = function () {
   return this.getArray().buffer;
 };
 
-TLSerialization.prototype.getBytes = function () {
+TLSerialization.prototype.getBytes = function (typed) {
+  if (typed) {
+    var resultBuffer = new ArrayBuffer(this.offset);
+    var resultArray  = new Uint8Array(resultBuffer);
+
+    resultArray.set(this.byteView.subarray(0, this.offset));
+
+    return resultArray;
+  }
+
   var bytes = [];
   for (var i = 0; i < this.offset; i++) {
     bytes.push(this.byteView[i]);
@@ -141,9 +150,8 @@ TLSerialization.prototype.storeString = function (s, field) {
 TLSerialization.prototype.storeBytes = function (bytes, field) {
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 
-  this.checkLength(bytes.length + 8);
-
-  var len = bytes.length;
+  var len = bytes.byteLength || bytes.length;
+  this.checkLength(len + 8);
   if (len <= 253) {
     this.byteView[this.offset++] = len;
   } else {
@@ -152,9 +160,8 @@ TLSerialization.prototype.storeBytes = function (bytes, field) {
     this.byteView[this.offset++] = (len & 0xFF00) >> 8;
     this.byteView[this.offset++] = (len & 0xFF0000) >> 16;
   }
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 
   // Padding
   while (this.offset % 4) {
@@ -177,14 +184,13 @@ TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
 };
 
 TLSerialization.prototype.storeRawBytes = function (bytes, field) {
-  var len = bytes.length;
+  var len = bytes.byteLength || bytes.length;
 
   this.debug && console.log('>>>', bytesToHex(bytes), (field || ''));
   this.checkLength(len);
 
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 };
 
 
