@@ -486,7 +486,9 @@ angular.module('izhukov.utils', [])
 
   var worker = window.Worker && new Worker('js/lib/crypto_worker.js') || false,
       taskID = 0,
-      awaiting = {};
+      awaiting = {},
+      webCrypto = window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle) || window.msCrypto && window.msCrypto.subtle,
+      useSha1Crypto = webCrypto && webCrypto.digest !== undefined;
 
   if (worker) {
     worker.onmessage = function (e) {
@@ -521,6 +523,22 @@ angular.module('izhukov.utils', [])
 
   return {
     sha1Hash: function (bytes) {
+      if (useSha1Crypto) {
+        var deferred = $q.defer(),
+            buffer = bytes instanceof ArrayBuffer
+              ? bytes
+              : bytesToArrayBuffer(bytes);
+
+        webCrypto.digest({name: 'SHA-1'}, buffer).then(function (digest) {
+          deferred.resolve(bytesFromArrayBuffer(digest));
+        }, function  (e) {
+          console.error('Crypto digest error', e);
+          useSha1Crypto = false;
+          deferred.resolve(sha1Hash(bytes));
+        });
+
+        return deferred.promise;
+      }
       if (worker && false) { // due overhead for data transfer
         return performTaskWorker ('sha1-hash', {bytes: bytes});
       }
