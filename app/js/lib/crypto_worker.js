@@ -29,15 +29,15 @@ onmessage = function (e) {
       break;
 
     case 'sha1-hash':
-      result = sha1Hash(e.data.bytes);
+      result = sha1HashSync(e.data.bytes);
       break;
 
     case 'aes-encrypt':
-      result = aesEncrypt(e.data.bytes, e.data.keyBytes, e.data.ivBytes);
+      result = aesEncryptSync(e.data.bytes, e.data.keyBytes, e.data.ivBytes);
       break;
 
     case 'aes-decrypt':
-      result = aesDecrypt(e.data.encryptedBytes, e.data.keyBytes, e.data.ivBytes);
+      result = aesDecryptSync(e.data.encryptedBytes, e.data.keyBytes, e.data.ivBytes);
       break;
 
     default:

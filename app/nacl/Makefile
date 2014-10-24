@@ -48,16 +48,7 @@ clean:
 
 mtproto_crypto.bc: mtproto_crypto.cc aes_core.c aes_ige.c aes_misc.c
 	$(PNACL_CXX) -o $@ $^ -O2 $(CXXFLAGS) $(LDFLAGS)
+	# $(PNACL_CXX) -g -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 mtproto_crypto.pexe: mtproto_crypto.bc
 	$(PNACL_FINALIZE) -o $@ $<
-
-
-#
-# Makefile target to run the SDK's simple HTTP server and serve this example.
-#
-HTTPD_PY := python $(NACL_SDK_ROOT)/tools/httpd.py
-
-.PHONY: serve
-serve: all
-	$(HTTPD_PY) -C $(CURDIR)

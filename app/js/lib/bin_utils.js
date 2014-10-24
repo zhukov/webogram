@@ -112,11 +112,11 @@ function bytesXor (bytes1, bytes2) {
 }
 
 function bytesToWords (bytes) {
-  var len = bytes.byteLength || bytes.length,
-      words = [], i;
   if (bytes instanceof ArrayBuffer) {
     bytes = new Uint8Array(bytes);
   }
+  var len = bytes.length,
+      words = [], i;
   for (i = 0; i < len; i++) {
     words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8);
   }
@@ -154,6 +154,24 @@ function bytesFromLeemonBigInt (bigInt, len) {
 
 function bytesToArrayBuffer (b) {
   return (new Uint8Array(b)).buffer;
+}
+
+function convertToArrayBuffer(bytes) {
+  // Be careful with converting subarrays!!
+  if (bytes instanceof ArrayBuffer) {
+    return bytes;
+  }
+  if (bytes.buffer !== undefined) {
+    return bytes.buffer;
+  }
+  return bytesToArrayBuffer(bytes);
+}
+
+function convertToUint8Array(bytes) {
+  if (bytes.buffer !== undefined) {
+    return bytes;
+  }
+  return new Uint8Array(bytes);
 }
 
 function bytesFromArrayBuffer (buffer) {
@@ -207,25 +225,24 @@ function uintToInt (val) {
   return val;
 }
 
-function sha1Hash (bytes) {
+function sha1HashSync (bytes) {
   this.rushaInstance = this.rushaInstance || new Rusha(1024 * 1024);
+
   // console.log(dT(), 'SHA-1 hash start', bytes.byteLength || bytes.length);
-  var hashBytes = bytesFromArrayBuffer(rushaInstance.rawDigest(bytes).buffer);
+  var hashBytes = rushaInstance.rawDigest(bytes).buffer;
   // console.log(dT(), 'SHA-1 hash finish');
 
   return hashBytes;
 }
 
+function sha1BytesSync (bytes) {
+  return bytesFromArrayBuffer(sha1HashSync(bytes));
+}
+
 
 
 function rsaEncrypt (publicKey, bytes) {
-  var needPadding = 255 - bytes.length;
-  if (needPadding > 0) {
-    var padding = new Array(needPadding);
-    (new SecureRandom()).nextBytes(padding);
-
-    bytes = bytes.concat(padding);
-  }
+  bytes = addPadding(bytes, 255);
 
   // console.log('RSA encrypt start');
   var N = new BigInteger(publicKey.modulus, 16),
@@ -233,18 +250,16 @@ function rsaEncrypt (publicKey, bytes) {
       X = new BigInteger(bytes),
       encryptedBigInt = X.modPowInt(E, N),
       encryptedBytes  = bytesFromBigInt(encryptedBigInt, 256);
-
   // console.log('RSA encrypt finish');
 
   return encryptedBytes;
 }
 
-function aesEncrypt (bytes, keyBytes, ivBytes) {
+function addPadding(bytes, blockSize) {
+  blockSize = blockSize || 16;
   var len = bytes.byteLength || bytes.length;
-  console.log(dT(), 'AES encrypt start', len/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
-
-  var needPadding = 16 - (len % 16);
-  if (needPadding > 0 && needPadding < 16) {
+  var needPadding = blockSize - (len % blockSize);
+  if (needPadding > 0 && needPadding < blockSize) {
     var padding = new Array(needPadding);
     (new SecureRandom()).nextBytes(padding);
 
@@ -255,6 +270,15 @@ function aesEncrypt (bytes, keyBytes, ivBytes) {
     }
   }
 
+  return bytes;
+}
+
+function aesEncryptSync (bytes, keyBytes, ivBytes) {
+  var len = bytes.byteLength || bytes.length;
+
+  // console.log(dT(), 'AES encrypt start', len/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+  bytes = addPadding(bytes);
+
   var encryptedWords = CryptoJS.AES.encrypt(bytesToWords(bytes), bytesToWords(keyBytes), {
     iv: bytesToWords(ivBytes),
     padding: CryptoJS.pad.NoPadding,
@@ -262,15 +286,14 @@ function aesEncrypt (bytes, keyBytes, ivBytes) {
   }).ciphertext;
 
   var encryptedBytes = bytesFromWords(encryptedWords);
-
-  console.log(dT(), 'AES encrypt finish');
+  // console.log(dT(), 'AES encrypt finish');
 
   return encryptedBytes;
 }
 
-function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
-  // console.log('AES decrypt start', encryptedBytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+function aesDecryptSync (encryptedBytes, keyBytes, ivBytes) {
 
+  // console.log(dT(), 'AES decrypt start', encryptedBytes.length);
   var decryptedWords = CryptoJS.AES.decrypt({ciphertext: bytesToWords(encryptedBytes)}, bytesToWords(keyBytes), {
     iv: bytesToWords(ivBytes),
     padding: CryptoJS.pad.NoPadding,
@@ -278,8 +301,7 @@ function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
   });
 
   var bytes = bytesFromWords(decryptedWords);
-
-  // console.log('AES decrypt finish');
+  // console.log(dT(), 'AES decrypt finish');
 
   return bytes;
 }

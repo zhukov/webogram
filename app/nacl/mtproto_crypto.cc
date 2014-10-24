@@ -61,11 +61,6 @@ class MtprotoCryptoInstance : public pp::Instance {
   /// @param[in] var_message The message posted by the browser.
   virtual void HandleMessage(const pp::Var& var_message) {
 
-    // if (1) {
-    //   PostMessage(var_message);
-    //   return;
-    // }
-
     if (!var_message.is_dictionary()) {
       return;
     }
@@ -80,7 +75,7 @@ class MtprotoCryptoInstance : public pp::Instance {
 
     int32_t intTaskID = varTaskID.AsInt();
     std::string strTask = varTask.AsString();
-    pp::Var varResult;// = pp::Var::Var();
+    pp::Var varResult;
 
     if (strTask == "aes-encrypt") {
       pp::Var varData = request.Get(pp::Var::Var("bytes"));
@@ -95,21 +90,42 @@ class MtprotoCryptoInstance : public pp::Instance {
       pp::VarArrayBuffer abKey = pp::VarArrayBuffer::VarArrayBuffer(varKey);
       pp::VarArrayBuffer abIv = pp::VarArrayBuffer::VarArrayBuffer(varIv);
 
-      int length = abData.ByteLength();
       char* what = static_cast<char*>(abData.Map());
       char* keyBuff = static_cast<char*>(abKey.Map());
       char* ivBuff = static_cast<char*>(abIv.Map());
+      int length = abData.ByteLength();
 
       AES_KEY akey;
       AES_set_encrypt_key((const unsigned char *) keyBuff, 32 * 8, &akey);
+      AES_ige_encrypt((const unsigned char *)what, (unsigned char *)what, length, &akey, (unsigned char *)ivBuff, AES_ENCRYPT);
+
+      varResult = abData;
+
+    }
+    else if (strTask == "aes-decrypt") {
+      pp::Var varData = request.Get(pp::Var::Var("encryptedBytes"));
+      pp::Var varKey = request.Get(pp::Var::Var("keyBytes"));
+      pp::Var varIv = request.Get(pp::Var::Var("ivBytes"));
+
+      if (!varData.is_array_buffer() || !varKey.is_array_buffer() || !varIv.is_array_buffer()) {
+        return;
+      }
+
+      pp::VarArrayBuffer abData = pp::VarArrayBuffer::VarArrayBuffer(varData);
+      pp::VarArrayBuffer abKey = pp::VarArrayBuffer::VarArrayBuffer(varKey);
+      pp::VarArrayBuffer abIv = pp::VarArrayBuffer::VarArrayBuffer(varIv);
+
+      char* what = static_cast<char*>(abData.Map());
+      char* keyBuff = static_cast<char*>(abKey.Map());
+      char* ivBuff = static_cast<char*>(abIv.Map());
+      int length = abData.ByteLength();
+
+      AES_KEY akey;
+      AES_set_decrypt_key((const unsigned char *) keyBuff, 32 * 8, &akey);
       AES_ige_encrypt((const unsigned char *)what, (unsigned char *)what, length, &akey, (unsigned char *)ivBuff, AES_DECRYPT);
 
-      // varResult = pp::Var::Var(what);
-      // varResult = pp::VarArrayBuffer::VarArrayBuffer(pp::Var::Var(what));
-      abData.Unmap();
       varResult = abData;
-      // varResult = pp::VarArrayBuffer::VarArrayBuffer();
-      // pp::VarArrayBuffer varResult(what);
+
     } else {
       varResult = pp::Var::Var();
     }
@@ -119,13 +135,6 @@ class MtprotoCryptoInstance : public pp::Instance {
     response.Set(pp::Var::Var("result"), varResult);
 
     PostMessage(response);
-
-    // std::string message = var_message.AsString();
-    // pp::Var var_reply;
-    // if (message == kHelloString) {
-    //   var_reply = pp::Var(kReplyString);
-    //   PostMessage(var_reply);
-    // }
   }
 };
 

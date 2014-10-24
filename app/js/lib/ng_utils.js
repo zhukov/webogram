@@ -500,18 +500,16 @@ angular.module('izhukov.utils', [])
       };
 
   if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
-    var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
+    var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf?'+Math.random()+'" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
     listener.addEventListener('load', function (e) {
       aesNaClEmbed = listener.firstChild;
-      console.warn('NaCl ready', aesNaClEmbed);
+      console.log(dT(), 'NaCl ready');
     }, true);
     listener.addEventListener('message', function (e) {
-      console.log(e.data.result);
-      console.log(bytesFromArrayBuffer(e.data.result));
       finalizeTask(e.data.taskID, e.data.result);
     }, true);
     listener.addEventListener('error', function (e) {
-      console.error(e);
+      console.error('NaCl error', e);
     }, true);
   }
 
@@ -543,57 +541,49 @@ angular.module('izhukov.utils', [])
   return {
     sha1Hash: function (bytes) {
       if (useSha1Crypto) {
+        // We don't use buffer since typedArray.subarray(...).buffer gives the whole buffer and not sliced one. webCrypto.digest supports typed array
         var deferred = $q.defer(),
-            buffer = bytes instanceof ArrayBuffer
-              ? bytes
-              : bytesToArrayBuffer(bytes);
-
-        webCrypto.digest({name: 'SHA-1'}, buffer).then(function (digest) {
-          deferred.resolve(bytesFromArrayBuffer(digest));
+            bytesTyped = Array.isArray(bytes) ? convertToUint8Array(bytes) : bytes;
+        // console.log(dT(), 'Native sha1 start');
+        webCrypto.digest({name: 'SHA-1'}, bytesTyped).then(function (digest) {
+          // console.log(dT(), 'Native sha1 done');
+          deferred.resolve(digest);
         }, function  (e) {
           console.error('Crypto digest error', e);
           useSha1Crypto = false;
-          deferred.resolve(sha1Hash(bytes));
+          deferred.resolve(sha1HashSync(bytes));
         });
 
         return deferred.promise;
       }
-      if (worker && false) { // due overhead for data transfer
-        return performTaskWorker ('sha1-hash', {bytes: bytes});
-      }
       return $timeout(function () {
-        return sha1Hash(bytes);
+        return sha1HashSync(bytes);
       });
     },
     aesEncrypt: function (bytes, keyBytes, ivBytes) {
       if (aesNaClEmbed) {
+        // aesEncryptSync(bytes, keyBytes, ivBytes);
         return performTaskWorker('aes-encrypt', {
-          bytes: bytes,
-          keyBytes: bytesToArrayBuffer(keyBytes),
-          ivBytes: bytesToArrayBuffer(ivBytes)
-        }, aesNaClEmbed);
-      }
-      if (worker && false) { // due overhead for data transfer
-        return performTaskWorker('aes-encrypt', {
-          bytes: bytes,
-          keyBytes: keyBytes,
-          ivBytes: ivBytes
+          bytes: addPadding(convertToArrayBuffer(bytes)),
+          keyBytes: convertToArrayBuffer(keyBytes),
+          ivBytes: convertToArrayBuffer(ivBytes)
         }, aesNaClEmbed);
       }
       return $timeout(function () {
-        return aesEncrypt(bytes, keyBytes, ivBytes);
+        return convertToArrayBuffer(aesEncryptSync(bytes, keyBytes, ivBytes));
       });
     },
     aesDecrypt: function (encryptedBytes, keyBytes, ivBytes) {
-      if (worker && false) { // due overhead for data transfer
+      if (aesNaClEmbed) {
+        // aesDecryptSync(encryptedBytes, keyBytes, ivBytes);
         return performTaskWorker('aes-decrypt', {
-          encryptedBytes: encryptedBytes,
-          keyBytes: keyBytes,
-          ivBytes: ivBytes
-        });
+          encryptedBytes: addPadding(convertToArrayBuffer(encryptedBytes)),
+          keyBytes: convertToArrayBuffer(keyBytes),
+          ivBytes: convertToArrayBuffer(ivBytes)
+        }, aesNaClEmbed);
       }
       return $timeout(function () {
-        return aesDecrypt(encryptedBytes, keyBytes, ivBytes);
+        return convertToArrayBuffer(aesDecryptSync(encryptedBytes, keyBytes, ivBytes));
       });
     },
     factorize: function (bytes) {

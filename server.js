@@ -89,7 +89,8 @@ StaticServlet.MimeMap = {
   'svg':  'image/svg+xml',
   'wav':  'audio/wav',
   'ico':  'image/vnd.microsoft.icon',
-  'pexe': 'application/x-pnacl'
+  'pexe': 'application/x-pnacl',
+  'bc': 'application/x-pnacl'
 };
 
 StaticServlet.prototype.handleRequest = function(req, res) {

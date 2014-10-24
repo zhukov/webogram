@@ -82,7 +82,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       var buffer = RSAPublicKey.getBuffer();
 
-      var fingerprintBytes = sha1Hash(buffer).slice(-8);
+      var fingerprintBytes = sha1BytesSync(buffer).slice(-8);
       fingerprintBytes.reverse();
 
       publicKeysParsed[bytesToHex(fingerprintBytes)] = {
@@ -169,7 +169,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 .factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpTimeManager, CryptoWorker, $http, $q, $timeout) {
 
   var chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/),
-      chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false;
+      chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false,
+      xhrSendBuffer = !('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30);
+
+  delete $http.defaults.headers.post['Content-Type'];
+  delete $http.defaults.headers.common['Accept'];
 
   function mtpSendPlainRequest (dcID, requestBuffer) {
     var requestLength = requestBuffer.byteLength,
@@ -190,16 +194,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     resultArray.set(headerArray);
     resultArray.set(requestArray, headerArray.length);
 
-    delete $http.defaults.headers.post['Content-Type'];
-    delete $http.defaults.headers.common['Accept'];
-
-    if (!('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30)) {
-      resultArray = resultArray.buffer;
-    }
-
-    var requestPromise;
+    var requestData = xhrSendBuffer ? resultBuffer : resultArray,
+        requestPromise;
     try {
-      requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', resultArray, {
+      requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', requestData, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
@@ -305,7 +303,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       new_nonce: auth.newNonce
     }, 'P_Q_inner_data', 'DECRYPTED_DATA');
 
-    var dataWithHash = sha1Hash(data.getBuffer()).concat(data.getBytes());
+    var dataWithHash = sha1BytesSync(data.getBuffer()).concat(data.getBytes());
 
     var request = new TLSerialization({mtproto: true});
     request.storeMethod('req_DH_params', {
@@ -337,7 +335,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
 
       if (response._ == 'server_DH_params_fail') {
-        var newNonceHash = sha1Hash(auth.newNonce).slice(-16)
+        var newNonceHash = sha1BytesSync(auth.newNonce).slice(-16);
         if (!bytesCmp (newNonceHash, response.new_nonce_hash)) {
           deferred.reject(new Error('server_DH_params_fail new_nonce_hash mismatch'));
           return false;
@@ -362,10 +360,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   function mtpDecryptServerDhDataAnswer (auth, encryptedAnswer) {
     auth.localTime = tsNow();
 
-    auth.tmpAesKey = sha1Hash(auth.newNonce.concat(auth.serverNonce)).concat(sha1Hash(auth.serverNonce.concat(auth.newNonce)).slice(0, 12));
-    auth.tmpAesIv = sha1Hash(auth.serverNonce.concat(auth.newNonce)).slice(12).concat(sha1Hash([].concat(auth.newNonce, auth.newNonce)), auth.newNonce.slice(0, 4));
+    auth.tmpAesKey = sha1BytesSync(auth.newNonce.concat(auth.serverNonce)).concat(sha1BytesSync(auth.serverNonce.concat(auth.newNonce)).slice(0, 12));
+    auth.tmpAesIv = sha1BytesSync(auth.serverNonce.concat(auth.newNonce)).slice(12).concat(sha1BytesSync([].concat(auth.newNonce, auth.newNonce)), auth.newNonce.slice(0, 4));
 
-    var answerWithHash = aesDecrypt(encryptedAnswer, auth.tmpAesKey, auth.tmpAesIv);
+    var answerWithHash = aesDecryptSync(encryptedAnswer, auth.tmpAesKey, auth.tmpAesIv);
 
     var hash = answerWithHash.slice(0, 20);
     var answerWithPadding = answerWithHash.slice(20);
@@ -395,7 +393,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     var offset = deserializer.getOffset();
 
-    if (!bytesCmp(hash, sha1Hash(answerWithPadding.slice(0, offset)))) {
+    if (!bytesCmp(hash, sha1BytesSync(answerWithPadding.slice(0, offset)))) {
       throw new Error('server_DH_inner_data SHA1-hash mismatch');
     }
 
@@ -420,9 +418,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         g_b: gB,
       }, 'Client_DH_Inner_Data');
 
-      var dataWithHash = sha1Hash(data.getBuffer()).concat(data.getBytes());
+      var dataWithHash = sha1BytesSync(data.getBuffer()).concat(data.getBytes());
 
-      var encryptedData = aesEncrypt(dataWithHash, auth.tmpAesKey, auth.tmpAesIv);
+      var encryptedData = aesEncryptSync(dataWithHash, auth.tmpAesKey, auth.tmpAesIv);
 
       var request = new TLSerialization({mtproto: true});
       request.storeMethod('set_client_DH_params', {
@@ -451,14 +449,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         }
 
         CryptoWorker.modPow(auth.gA, auth.b, auth.dhPrime).then(function (authKey) {
-          var authKeyHash = sha1Hash(authKey),
+          var authKeyHash = sha1BytesSync(authKey),
               authKeyAux  = authKeyHash.slice(0, 8),
               authKeyID   = authKeyHash.slice(-8);
 
           console.log(dT(), 'Got Set_client_DH_params_answer', response._);
           switch (response._) {
             case 'dh_gen_ok':
-              var newNonceHash1 = sha1Hash(auth.newNonce.concat([1], authKeyAux)).slice(-16);
+              var newNonceHash1 = sha1BytesSync(auth.newNonce.concat([1], authKeyAux)).slice(-16);
 
               if (!bytesCmp(newNonceHash1, response.new_nonce_hash1)) {
                 deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash1 mismatch'));
@@ -476,7 +474,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               break;
 
             case 'dh_gen_retry':
-              var newNonceHash2 = sha1Hash(auth.newNonce.concat([2], authKeyAux)).slice(-16);
+              var newNonceHash2 = sha1BytesSync(auth.newNonce.concat([2], authKeyAux)).slice(-16);
               if (!bytesCmp(newNonceHash2, response.new_nonce_hash2)) {
                 deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash2 mismatch'));
                 return false;
@@ -485,7 +483,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               return mtpSendSetClientDhParams(auth);
 
             case 'dh_gen_fail':
-              var newNonceHash3 = sha1Hash(auth.newNonce.concat([3], authKeyAux)).slice(-16);
+              var newNonceHash3 = sha1BytesSync(auth.newNonce.concat([3], authKeyAux)).slice(-16);
               if (!bytesCmp(newNonceHash3, response.new_nonce_hash3)) {
                 deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash3 mismatch'));
                 return false;
@@ -553,7 +551,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       offline,
       offlineInited = false,
       chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/),
-      chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false;
+      chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false,
+      xhrSendBuffer = !('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30);
+
+  delete $http.defaults.headers.post['Content-Type'];
+  delete $http.defaults.headers.common['Accept'];
 
   $rootScope.retryOnline = function () {
     $(document.body).trigger('online');
@@ -566,7 +568,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     this.iii = iii++;
 
     this.authKey = authKey;
-    this.authKeyID = sha1Hash(authKey).slice(-8);
+    this.authKeyUint8 = convertToUint8Array(authKey);
+    this.authKeyBuffer = convertToArrayBuffer(authKey);
+    this.authKeyID = sha1BytesSync(authKey).slice(-8);
 
     this.serverSalt = serverSalt;
 
@@ -827,19 +831,47 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 
   MtpNetworker.prototype.getMsgKeyIv = function (msgKey, isOut) {
-    var authKey = this.authKey,
-        x = isOut ? 0 : 8;
+    var authKey = this.authKeyUint8,
+        x = isOut ? 0 : 8,
+        sha1aText = new Uint8Array(48),
+        sha1bText = new Uint8Array(48),
+        sha1cText = new Uint8Array(48),
+        sha1dText = new Uint8Array(48),
+        promises = {};
 
-    var promises = {
-      sha1a: CryptoWorker.sha1Hash(msgKey.concat(authKey.slice(x, x + 32))),
-      sha1b: CryptoWorker.sha1Hash(authKey.slice(32 + x, 48 + x).concat(msgKey, authKey.slice(48 + x, 64 + x))),
-      sha1c: CryptoWorker.sha1Hash(authKey.slice(64 + x, 96 + x).concat(msgKey)),
-      sha1d: CryptoWorker.sha1Hash(msgKey.concat(authKey.slice(96 + x, 128 + x)))
-    };
+    sha1aText.set(msgKey, 0);
+    sha1aText.set(authKey.subarray(x, x + 32), 16);
+    promises.sha1a = CryptoWorker.sha1Hash(sha1aText);
+
+    sha1bText.set(authKey.subarray(x + 32, x + 48), 0);
+    sha1bText.set(msgKey, 16);
+    sha1bText.set(authKey.subarray(x + 48, x + 64), 32);
+    promises.sha1b = CryptoWorker.sha1Hash(sha1bText);
+
+    sha1cText.set(authKey.subarray(x + 64, x + 96), 0);
+    sha1cText.set(msgKey, 32);
+    promises.sha1c = CryptoWorker.sha1Hash(sha1cText);
+
+    sha1dText.set(msgKey, 0);
+    sha1dText.set(authKey.subarray(x + 96, x + 128), 16);
+    promises.sha1d = CryptoWorker.sha1Hash(sha1dText);
 
     return $q.all(promises).then(function (result) {
-      var aesKey = result.sha1a.slice(0, 8).concat(result.sha1b.slice(8, 20), result.sha1c.slice(4, 16));
-      var aesIv  = result.sha1a.slice(8, 20).concat(result.sha1b.slice(0, 8), result.sha1c.slice(16, 20), result.sha1d.slice(0, 8));
+      var aesKey = new Uint8Array(32),
+          aesIv = new Uint8Array(32);
+          sha1a = new Uint8Array(result.sha1a),
+          sha1b = new Uint8Array(result.sha1b),
+          sha1c = new Uint8Array(result.sha1c),
+          sha1d = new Uint8Array(result.sha1d);
+
+      aesKey.set(sha1a.subarray(0, 8));
+      aesKey.set(sha1b.subarray(8, 20), 8);
+      aesKey.set(sha1c.subarray(4, 16), 20);
+
+      aesIv.set(sha1a.subarray(8, 20));
+      aesIv.set(sha1b.subarray(0, 8), 12);
+      aesIv.set(sha1c.subarray(16, 20), 20);
+      aesIv.set(sha1d.subarray(0, 8), 24);
 
       return [aesKey, aesIv];
     });
@@ -1076,14 +1108,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
     var self = this;
 
-    console.log(dT(), 'Start encrypt', bytes.byteLength);
+    // console.log(dT(), 'Start encrypt', bytes.byteLength);
     return CryptoWorker.sha1Hash(bytes).then(function (bytesHash) {
-      console.log(dT(), 'after hash');
-      var msgKey = bytesHash.slice(-16);
+      // console.log(dT(), 'after hash');
+      var msgKey = new Uint8Array(bytesHash).subarray(4, 20);
       return self.getMsgKeyIv(msgKey, true).then(function (keyIv) {
-        console.log(dT(), 'after msg key iv');
+        // console.log(dT(), 'after msg key iv');
         return CryptoWorker.aesEncrypt(bytes, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
-          console.log(dT(), 'Finish encrypt');
+          // console.log(dT(), 'Finish encrypt');
           return {
             bytes: encryptedBytes,
             msgKey: msgKey
@@ -1117,18 +1149,12 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     return this.getEncryptedMessage(data.getBuffer()).then(function (encryptedResult) {
       // console.log(dT(), 'Got encrypted out message'/*, encryptedResult*/);
-      var request = new TLSerialization({startMaxLength: encryptedResult.bytes.length + 256});
+      var request = new TLSerialization({startMaxLength: encryptedResult.bytes.byteLength + 256});
       request.storeIntBytes(self.authKeyID, 64, 'auth_key_id');
       request.storeIntBytes(encryptedResult.msgKey, 128, 'msg_key');
       request.storeRawBytes(encryptedResult.bytes, 'encrypted_data');
 
-      delete $http.defaults.headers.post['Content-Type'];
-      delete $http.defaults.headers.common['Accept'];
-
-      var resultArray = request.getArray();
-      if (!('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30)) {
-        resultArray = resultArray.buffer;
-      }
+      var requestData = xhrSendBuffer ? request.getBuffer() : request.getArray();
 
       var requestPromise;
       try {
@@ -1136,7 +1162,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', resultArray, options);
+        requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
@@ -1172,32 +1198,29 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     var deserializer = new TLDeserialization(responseBuffer);
 
-    var authKeyID = deserializer.fetchIntBytes(64, 'auth_key_id');
+    var authKeyID = deserializer.fetchIntBytes(64, false, 'auth_key_id');
     if (!bytesCmp(authKeyID, this.authKeyID)) {
       throw new Error('Invalid server auth_key_id: ' + bytesToHex(authKeyID));
     }
-    var msgKey = deserializer.fetchIntBytes(128, 'msg_key');
-
-    var dataLength = responseBuffer.byteLength - deserializer.getOffset();
-    var encryptedData = deserializer.fetchRawBytes(dataLength, 'encrypted_data');
+    var msgKey = deserializer.fetchIntBytes(128, true, 'msg_key'),
+        encryptedData = deserializer.fetchRawBytes(responseBuffer.byteLength - deserializer.getOffset(), true, 'encrypted_data');
 
     return this.getDecryptedMessage(msgKey, encryptedData).then(function (dataWithPadding) {
-      var buffer = bytesToArrayBuffer(dataWithPadding);
+      var deserializer = new TLDeserialization(dataWithPadding, {mtproto: true});
 
-      var deserializer = new TLDeserialization(buffer, {mtproto: true});
-
-      var salt = deserializer.fetchIntBytes(64, 'salt');
-      var sessionID = deserializer.fetchIntBytes(64, 'session_id');
+      var salt = deserializer.fetchIntBytes(64, false, 'salt');
+      var sessionID = deserializer.fetchIntBytes(64, false, 'session_id');
       var messageID = deserializer.fetchLong('message_id');
 
       var seqNo = deserializer.fetchInt('seq_no');
 
-      var messageBody = deserializer.fetchRawBytes(false, 'message_data');
+      var messageBody = deserializer.fetchRawBytes(false, true, 'message_data');
 
-      var offset = deserializer.getOffset();
+      var hashData = convertToUint8Array(dataWithPadding).subarray(0, deserializer.getOffset());
 
-      return CryptoWorker.sha1Hash(dataWithPadding.slice(0, offset)).then(function (dataHashed) {
-        if (!bytesCmp(msgKey, dataHashed.slice(-16))) {
+      return CryptoWorker.sha1Hash(hashData).then(function (dataHash) {
+        if (!bytesCmp(msgKey, bytesFromArrayBuffer(dataHash).slice(-16))) {
+          console.warn(msgKey, bytesFromArrayBuffer(dataHash));
           throw new Error('server msgKey mismatch');
         }
 
