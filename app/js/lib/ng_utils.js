@@ -587,6 +587,9 @@ angular.module('izhukov.utils', [])
       });
     },
     factorize: function (bytes) {
+      if (aesNaClEmbed && bytes.length <= 8) {
+        return performTaskWorker('factorize', {bytes: bytes}, aesNaClEmbed);
+      }
       if (worker) {
         return performTaskWorker('factorize', {bytes: bytes});
       }

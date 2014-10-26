@@ -321,7 +321,7 @@ function pqPrimeFactorization (pqBytes) {
   var what = new BigInteger(pqBytes), 
       result = false;
 
-  console.log('PQ start', pqBytes, what.toString(16), what.bitLength());
+  // console.log(dT(), 'PQ start', pqBytes, what.toString(16), what.bitLength());
 
   try {
     result = pqPrimeLeemon(str2bigInt(what.toString(16), 16, Math.ceil(64 / bpe) + 1))
@@ -346,7 +346,7 @@ function pqPrimeFactorization (pqBytes) {
     // console.timeEnd('pq BigInt');
   }
 
-  console.log('PQ finish');
+  // console.log(dT(), 'PQ finish');
 
   return result;
 }

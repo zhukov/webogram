@@ -30,12 +30,26 @@
 #include "ppapi/cpp/var_dictionary.h"
 #include "ppapi/cpp/var_array_buffer.h"
 #include "aes.h"
+#include <inttypes.h>
+#include <stdio.h>
 
-namespace {
-const char* const kDataKeyString = "bytes";
-const char* const kKeyKeyString = "keyBytes";
-const char* const kIvKeyString = "ivBytes";
-} // namespace
+
+uint64_t gcd(uint64_t a, uint64_t b) {
+  while (a != 0 && b != 0) {
+    while ((b & 1) == 0) {
+      b >>= 1;
+    }
+    while ((a & 1) == 0) {
+      a >>= 1;
+    }
+    if (a > b) {
+      a -= b;
+    } else {
+      b -= a;
+    }
+  }
+  return b == 0 ? a : b;
+}
 
 /// The Instance class.  One of these exists for each instance of your NaCl
 /// module on the web page.  The browser will ask the Module object to create
@@ -126,7 +140,94 @@ class MtprotoCryptoInstance : public pp::Instance {
 
       varResult = abData;
 
-    } else {
+    }
+    else if (strTask == "factorize") {
+
+      pp::Var varBytes = request.Get(pp::Var::Var("bytes"));
+      if (!varBytes.is_array()) {
+        return;
+      }
+
+      pp::VarArray aBytes = pp::VarArray::VarArray(varBytes);
+      int length = aBytes.GetLength();
+      if (length > 8) {
+        return;
+      }
+
+      uint64_t what = 0;
+      for (int i = 0; i < length; i++) {
+        what += (uint64_t) aBytes.Get(length - i - 1).AsInt() << (i * 8);
+      }
+
+      int it = 0, i, j;
+      uint64_t g = 0;
+      for (i = 0; i < 3 || it < 1000; i++) {
+        int q = ((lrand48() & 15) + 17) % what;
+        uint64_t x = (long long)lrand48() % (what - 1) + 1, y = x;
+        int lim = 1 << (i + 18), j;
+        for(j = 1; j < lim; j++) {
+          ++it;
+          uint64_t a = x, b = x, c = q;
+          while (b) {
+            if (b & 1) {
+              c += a;
+              if (c >= what) {
+                c -= what;
+              }
+            }
+            a += a;
+            if (a >= what) {
+              a -= what;
+            }
+            b >>= 1;
+          }
+          x = c;
+          uint64_t z = x < y ? what + x - y : x - y;
+          g = gcd(z, what);
+          if (g != 1) {
+            break;
+          }
+          if (!(j & (j - 1))) {
+            y = x;
+          }
+        }
+        if (g > 1 && g < what) {
+          break;
+        }
+      }
+      uint64_t p = what / g;
+      pp::VarArray pBytesArray = pp::VarArray::VarArray();
+      int index = 0;
+      for (int i = 0; i < 8; i++) {
+        unsigned char byte = p >> ((8 - i - 1) * 8) & 0xFF;
+        if (byte > 0 || index > 0) {
+          pBytesArray.Set(index, pp::Var::Var((int)byte));
+          index++;
+        }
+      }
+
+      index = 0;
+      pp::VarArray gBytesArray = pp::VarArray::VarArray();
+      for (i = 0; i < 8; i++) {
+        unsigned char byte = g >> ((8 - i - 1) * 8) & 0xFF;
+        if (byte > 0 || index > 0) {
+          gBytesArray.Set(index, pp::Var::Var((int)byte));
+          index++;
+        }
+      }
+
+      pp::VarArray varResultArray = pp::VarArray::VarArray();
+      if (p < g) {
+        varResultArray.Set(0, pBytesArray);
+        varResultArray.Set(1, gBytesArray);
+      } else {
+        varResultArray.Set(1, pBytesArray);
+        varResultArray.Set(0, gBytesArray);
+      }
+
+      varResult = varResultArray;
+    }
+    else {
       varResult = pp::Var::Var();
     }
 
