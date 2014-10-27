@@ -868,7 +868,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService, $interpolate) {
+  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, ErrorService) {
 
     return {
       link: link,
@@ -1055,10 +1055,12 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function onPastedImageEvent (e) {
-        var element = e && e.target;
-        var src;
-        if (element && (src = element.src) && src.indexOf('data') === 0) {
-          element.parentNode.removeChild(element);
+        var element = (e.originalEvent || e).target,
+            src = (element || {}).src || '',
+            remove = false;
+
+        if (src.substr(0, 5) == 'data:') {
+          remove = true;
           src = src.substr(5).split(';');
           var contentType = src[0];
           var base64 = atob(src[1].split(',')[1]);
@@ -1074,6 +1076,15 @@ angular.module('myApp.directives', ['myApp.filters'])
             $scope.draftMessage.files = [blob];
             $scope.draftMessage.isMedia = true;
           });
+          setZeroTimeout(function () {
+            element.parentNode.removeChild(element);
+          })
+        }
+        else if (src && !src.match(/img\/blank\.gif/)) {
+          var replacementNode = document.createTextNode(' ' + src + ' ');
+          setTimeout(function () {
+            element.parentNode.replaceChild(replacementNode, element);
+          }, 100);
         }
       };
 
