@@ -33,7 +33,7 @@ angular.module('izhukov.utils', [])
 
 })
 
-.service('FileManager', function ($window, $q) {
+.service('FileManager', function ($window, $q, $timeout) {
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
