@@ -402,10 +402,8 @@ TLDeserialization.prototype.fetchBytes = function (field) {
               (this.byteView[this.offset++] << 16);
   }
 
-  var bytes = [];
-  for (var i = 0; i < len; i++) {
-    bytes.push(this.byteView[this.offset++]);
-  }
+  var bytes = this.byteView.subarray(this.offset, this.offset + len);
+  this.offset += len;
 
   // Padding
   while (this.offset % 4) {

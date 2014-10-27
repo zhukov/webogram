@@ -161,7 +161,8 @@ function convertToArrayBuffer(bytes) {
   if (bytes instanceof ArrayBuffer) {
     return bytes;
   }
-  if (bytes.buffer !== undefined) {
+  if (bytes.buffer !== undefined &&
+      bytes.buffer.byteLength == bytes.length * bytes.BYTES_PER_ELEMENT) {
     return bytes.buffer;
   }
   return bytesToArrayBuffer(bytes);

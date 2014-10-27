@@ -464,7 +464,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 fileDownload: true,
                 createNetworker: true
               });
-            }, 6).then(function (result) {
+            }, 2).then(function (result) {
               writeFilePromise.then(function () {
                 if (canceled) {
                   return $q.when();

@@ -10,17 +10,27 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 .factory('MtpDcConfigurator', function () {
   var dcOptions = Config.Modes.test
     ? [
-      {id: 1, host: '173.240.5.253', port: 80},
-      {id: 2, host: '149.154.167.40', port: 80},
-      {id: 3, host: '174.140.142.5', port: 80}
+      {id: 1, url: 'http://173.240.5.253'},
+      {id: 2, url: 'http://149.154.167.40'},
+      {id: 3, url: 'http://174.140.142.5'}
+    ]
+    : (location.protocol == 'https:'
+    ? [
+      {id: 1, url: 'https://pluto.web.telegram.org'},
+      {id: 2, url: 'https://venus.web.telegram.org'},
+      {id: 3, url: 'https://aurora.web.telegram.org'},
+      {id: 4, url: 'https://vesta.web.telegram.org'},
+      {id: 5, url: 'https://flora.web.telegram.org'}
     ]
     : [
-      {id: 1, host: '173.240.5.1',   port: 80},
-      {id: 2, host: '149.154.167.51', port: 80},
-      {id: 3, host: '174.140.142.6', port: 80},
-      {id: 4, host: '149.154.167.91', port: 80},
-      {id: 5, host: '149.154.171.5',   port: 80}
-    ];
+      {id: 1, url: 'http://173.240.5.1'},
+      {id: 2, url: 'http://149.154.167.51'},
+      {id: 3, url: 'http://174.140.142.6'},
+      {id: 4, url: 'http://149.154.167.91'},
+      {id: 5, url: 'http://149.154.171.5'}
+    ]);
+
+    var sslSubdomains = 'pluto,venus,aurora,vesta,flora';
 
   var chosenServers = {};
 
@@ -31,7 +41,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       for (i = 0; i < dcOptions.length; i++) {
         dcOption = dcOptions[i];
         if (dcOption.id == dcID) {
-          chosenServer = dcOption.host + ':' + dcOption.port;
+          chosenServer = dcOption.url;
         }
       }
       chosenServers[dcID] = chosenServer;
@@ -197,7 +207,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var requestData = xhrSendBuffer ? resultBuffer : resultArray,
         requestPromise;
     try {
-      requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(dcID) + '/apiw1', requestData, {
+      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID) + '/apiw1', requestData, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
@@ -791,7 +801,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       longPoll: true
     }).then(function () {
       delete self.longPollPending;
-      $timeout(self.checkLongPoll.bind(self), 0);
+      setZeroTimeout(self.checkLongPoll.bind(self));
     }, function () {
       console.log('Long-poll failed');
     });
@@ -948,7 +958,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 
   MtpNetworker.prototype.performSheduledRequest = function() {
-    // console.trace('sheduled', this.dcID, this.iii);
+    // console.log(dT(), 'sheduled', this.dcID, this.iii);
     if (this.offline) {
       console.log(dT(), 'Cancel sheduled');
       return false;
@@ -1126,7 +1136,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 
   MtpNetworker.prototype.getDecryptedMessage = function (msgKey, encryptedData) {
+    // console.log(dT(), 'get decrypted start');
     return this.getMsgKeyIv(msgKey, false).then(function (keyIv) {
+      // console.log(dT(), 'after msg key iv');
       return CryptoWorker.aesDecrypt(encryptedData, keyIv[0], keyIv[1]);
     });
   };
@@ -1162,7 +1174,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post('http://' + MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', requestData, options);
+        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
@@ -1206,6 +1218,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         encryptedData = deserializer.fetchRawBytes(responseBuffer.byteLength - deserializer.getOffset(), true, 'encrypted_data');
 
     return this.getDecryptedMessage(msgKey, encryptedData).then(function (dataWithPadding) {
+      // console.log(dT(), 'after decrypt');
       var deserializer = new TLDeserialization(dataWithPadding, {mtproto: true});
 
       var salt = deserializer.fetchIntBytes(64, false, 'salt');
@@ -1216,6 +1229,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       var messageBody = deserializer.fetchRawBytes(false, true, 'message_data');
 
+      // console.log(dT(), 'before hash');
       var hashData = convertToUint8Array(dataWithPadding).subarray(0, deserializer.getOffset());
 
       return CryptoWorker.sha1Hash(hashData).then(function (dataHash) {
@@ -1223,6 +1237,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           console.warn(msgKey, bytesFromArrayBuffer(dataHash));
           throw new Error('server msgKey mismatch');
         }
+        // console.log(dT(), 'after hash check');
 
         var buffer = bytesToArrayBuffer(messageBody);
         var deserializerOptions = {
@@ -1243,7 +1258,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               }
               if (this.offset != offset + result.bytes) {
                 console.warn(dT(), 'set offset', this.offset, offset, result.bytes);
-                console.log(dT(), result);
+                // console.log(dT(), result);
                 this.offset = offset + result.bytes;
               }
               // console.log(dT(), 'override message', result);
@@ -1262,6 +1277,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         var deserializer = new TLDeserialization(buffer, deserializerOptions);
 
         var response = deserializer.fetchObject('', 'INPUT');
+        // console.log(dT(), 'after fetch');
 
         return {
           response: response,
@@ -1294,12 +1310,16 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       return false;
     }
 
-    // console.log('shedule req', delay);
+    // console.log(dT(), 'shedule req', delay);
     // console.trace();
 
     $timeout.cancel(this.nextReqPromise);
+    if (delay > 0) {
+      this.nextReqPromise = $timeout(this.performSheduledRequest.bind(this), delay || 0);
+    } else {
+      setZeroTimeout(this.performSheduledRequest.bind(this))
+    }
 
-    this.nextReqPromise = $timeout(this.performSheduledRequest.bind(this), delay || 0);
     this.nextReq = nextReq;
   };
 

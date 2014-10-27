@@ -33,7 +33,7 @@ angular.module('izhukov.utils', [])
 
 })
 
-.service('FileManager', function ($window, $timeout, $q) {
+.service('FileManager', function ($window, $q) {
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
@@ -98,10 +98,10 @@ angular.module('izhukov.utils', [])
     else {
       try {
         var blob = blobConstruct([bytesToArrayBuffer(bytes)]);
+        fileWriter.write(blob);
       } catch (e) {
         deferred.reject(e);
       }
-      fileWriter.write(blob);
     }
 
     return deferred.promise;
@@ -150,7 +150,7 @@ angular.module('izhukov.utils', [])
               return false;
             }
             blobParts.push(blob);
-            $timeout(function () {
+            setZeroTimeout(function () {
               if (fakeFileWriter.onwriteend) {
                 fakeFileWriter.onwriteend();
               }
@@ -493,7 +493,7 @@ angular.module('izhukov.utils', [])
       finalizeTask = function (taskID, result) {
         var deferred = awaiting[taskID];
         if (deferred !== undefined) {
-          console.log(dT(), 'CW done');
+          // console.log(dT(), 'CW done');
           deferred.resolve(result);
           delete awaiting[taskID];
         }
@@ -524,7 +524,7 @@ angular.module('izhukov.utils', [])
   }
 
   function performTaskWorker (task, params, embed) {
-    console.log(dT(), 'CW start', task);
+    // console.log(dT(), 'CW start', task);
     var deferred = $q.defer();
 
     awaiting[taskID] = deferred;
@@ -562,7 +562,6 @@ angular.module('izhukov.utils', [])
     },
     aesEncrypt: function (bytes, keyBytes, ivBytes) {
       if (aesNaClEmbed) {
-        // aesEncryptSync(bytes, keyBytes, ivBytes);
         return performTaskWorker('aes-encrypt', {
           bytes: addPadding(convertToArrayBuffer(bytes)),
           keyBytes: convertToArrayBuffer(keyBytes),
@@ -575,7 +574,6 @@ angular.module('izhukov.utils', [])
     },
     aesDecrypt: function (encryptedBytes, keyBytes, ivBytes) {
       if (aesNaClEmbed) {
-        // aesDecryptSync(encryptedBytes, keyBytes, ivBytes);
         return performTaskWorker('aes-decrypt', {
           encryptedBytes: addPadding(convertToArrayBuffer(encryptedBytes)),
           keyBytes: convertToArrayBuffer(keyBytes),
