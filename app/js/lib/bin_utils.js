@@ -561,13 +561,15 @@ function pqPrimeLeemon (what) {
 
 function bytesModPow (x, y, m) {
   try {
-    var xBigInt = str2bigInt(x, 64),
-        yBigInt = str2bigInt(y, 64),
+    var xBigInt = str2bigInt(bytesToHex(x), 16),
+        yBigInt = str2bigInt(bytesToHex(y), 16),
         mBigInt = str2bigInt(bytesToHex(m), 16, 2),
         resBigInt = powMod(xBigInt, yBigInt, mBigInt);
 
     return bytesFromHex(bigInt2str(resBigInt, 16));
-  } catch (e) {}
+  } catch (e) {
+    console.error('mod pow error', e);
+  }
 
   return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)));
 }
