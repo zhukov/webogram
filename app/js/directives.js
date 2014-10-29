@@ -1531,8 +1531,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       var realImageWidth, realImageHeight;
       AppDocsManager.downloadDoc($scope.document.id).then(function (url) {
         var image = new Image();
+        var limit = 100; // 2 sec
         var checkSizes = function (e) {
-          if (!image.height || !image.width) {
+          if ((!image.height || !image.width) && --limit) {
             return;
           }
           realImageWidth = image.width;
