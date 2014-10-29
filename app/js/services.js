@@ -9,7 +9,7 @@
 
 /* Services */
 
-angular.module('myApp.services', ['myApp.i18n'])
+angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage, _) {
   var users = {},
@@ -603,115 +603,6 @@ angular.module('myApp.services', ['myApp.i18n'])
         ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
         : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
     }
-  }
-})
-
-.service('SearchIndexManager', function () {
-  var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-      trimRe = /^\s+|\s$/g,
-      accentsReplace = {
-        a: /[åáâäà]/g,
-        e: /[éêëè]/g,
-        i: /[íîïì]/g,
-        o: /[óôöò]/g,
-        u: /[úûüù]/g,
-        c: /ç/g,
-        ss: /ß/g
-      }
-
-  return {
-    createIndex: createIndex,
-    indexObject: indexObject,
-    cleanSearchText: cleanSearchText,
-    search: search
-  };
-
-  function createIndex () {
-    return {
-      shortIndexes: {},
-      fullTexts: {}
-    }
-  }
-
-  function cleanSearchText (text) {
-    text = text.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
-
-    for (var key in accentsReplace) {
-      if (accentsReplace.hasOwnProperty(key)) {
-        text = text.replace(accentsReplace[key], key);
-      }
-    }
-
-    return text;
-  }
-
-  function indexObject (id, searchText, searchIndex) {
-    if (searchIndex.fullTexts[id] !== undefined) {
-      return false;
-    }
-
-    searchText = cleanSearchText(searchText);
-
-    if (!searchText.length) {
-      return false;
-    }
-
-    var shortIndexes = searchIndex.shortIndexes;
-
-    searchIndex.fullTexts[id] = searchText;
-
-    angular.forEach(searchText.split(' '), function(searchWord) {
-      var len = Math.min(searchWord.length, 3),
-          wordPart, i;
-      for (i = 1; i <= len; i++) {
-        wordPart = searchWord.substr(0, i);
-        if (shortIndexes[wordPart] === undefined) {
-          shortIndexes[wordPart] = [id];
-        } else {
-          shortIndexes[wordPart].push(id);
-        }
-      }
-    });
-  }
-
-  function search (query, searchIndex) {
-    var shortIndexes = searchIndex.shortIndexes,
-        fullTexts = searchIndex.fullTexts;
-
-    query = cleanSearchText(query);
-
-    var queryWords = query.split(' '),
-        foundObjs = false,
-        newFoundObjs, i, j, searchText, found;
-
-    for (i = 0; i < queryWords.length; i++) {
-      newFoundObjs = shortIndexes[queryWords[i].substr(0, 3)];
-      if (!newFoundObjs) {
-        foundObjs = [];
-        break;
-      }
-      if (foundObjs === false || foundObjs.length > newFoundObjs.length) {
-        foundObjs = newFoundObjs;
-      }
-    }
-
-    newFoundObjs = {};
-
-    for (j = 0; j < foundObjs.length; j++) {
-      found = true;
-      searchText = fullTexts[foundObjs[j]];
-      for (i = 0; i < queryWords.length; i++) {
-        if (searchText.indexOf(queryWords[i]) == -1) {
-          found = false;
-          break;
-        }
-      }
-      if (found) {
-        newFoundObjs[foundObjs[j]] = true;
-      }
-    }
-
-    return newFoundObjs;
   }
 })
 
@@ -2389,21 +2280,9 @@ angular.module('myApp.services', ['myApp.i18n'])
     full.height = fullHeight;
 
     if (fullPhotoSize && fullPhotoSize._ != 'photoSizeEmpty') {
-      if ((fullPhotoSize.w / fullPhotoSize.h) > (fullWidth / fullHeight)) {
-        full.height = parseInt(fullPhotoSize.h * fullWidth / fullPhotoSize.w);
-      }
-      else {
-        full.width = parseInt(fullPhotoSize.w * fullHeight / fullPhotoSize.h);
-        if (full.width > fullWidth) {
-          full.height = parseInt(full.height * fullWidth / full.width);
-          full.width = fullWidth;
-        }
-      }
-
-      if (!Config.Mobile && full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
-        full.width = fullPhotoSize.w;
-        full.height = fullPhotoSize.h;
-      }
+      var wh = calcImageInBox(fullPhotoSize.w, fullPhotoSize.h, fullWidth, fullHeight, Config.Mobile);
+      full.width = wh.w;
+      full.height = wh.h;
 
       full.modalWidth = Math.max(full.width, Math.min(400, fullWidth));
 
@@ -2464,7 +2343,7 @@ angular.module('myApp.services', ['myApp.i18n'])
         mime: mimeType,
         toFileEntry: writableFileEntry
       }).then(function (url) {
-        console.log('file save done');
+        // console.log('file save done');
       }, function (e) {
         console.log('photo download failed', e);
       });
@@ -2563,16 +2442,10 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     if (!video.w || !video.h) {
       full.height = full.width = Math.min(fullWidth, fullHeight);
-    }
-    else if (video.w > video.h) {
-      full.height = parseInt(video.h * fullWidth / video.w);
-    }
-    else {
-      full.width = parseInt(video.w * fullHeight / video.h);
-      if (full.width > fullWidth) {
-        full.height = parseInt(full.height * fullWidth / full.width);
-        full.width = fullWidth;
-      }
+    } else {
+      var wh = calcImageInBox(video.w, video.h, fullWidth, fullHeight);
+      full.width = wh.w;
+      full.height = wh.h;
     }
 
     video.full = full;
@@ -2669,7 +2542,7 @@ angular.module('myApp.services', ['myApp.i18n'])
   }
 })
 
-.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
+.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, $q, MtpApiFileManager, FileManager) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2737,7 +2610,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     return docsForHistory[docID] = doc;
   }
 
-  function downloadDoc (docID, action) {
+  function updateDocDownloaded (docID) {
     var doc = docs[docID],
         historyDoc = docsForHistory[docID] || doc || {},
         inputFileLocation = {
@@ -2746,68 +2619,90 @@ angular.module('myApp.services', ['myApp.i18n'])
           access_hash: doc.access_hash
         };
 
-    function updateDownloadProgress (progress) {
+    if (historyDoc.downloaded === undefined) {
+      MtpApiFileManager.getDownloadedFile(inputFileLocation, doc.size).then(function () {
+        historyDoc.downloaded = true;
+      }, function () {
+        historyDoc.downloaded = false;
+      });
+    }
+  }
+
+  function downloadDoc (docID, toFileEntry) {
+    var doc = docs[docID],
+        historyDoc = docsForHistory[docID] || doc || {},
+        inputFileLocation = {
+          _: 'inputDocumentFileLocation',
+          id: docID,
+          access_hash: doc.access_hash
+        };
+
+    historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
+
+    var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
+      mime: doc.mime_type,
+      toFileEntry: toFileEntry
+    });
+
+    downloadPromise.then(function (url) {
+      delete historyDoc.progress;
+      historyDoc.url = url;
+      historyDoc.downloaded = true;
+      console.log('file save done');
+    }, function (e) {
+      console.log('document download failed', e);
+      historyDoc.progress.enabled = false;
+    }, function (progress) {
       console.log('dl progress', progress);
       historyDoc.progress.done = progress.done;
       historyDoc.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
-    }
+    });
+
+    historyDoc.progress.cancel = downloadPromise.cancel;
+
+    return downloadPromise;
+  }
+
+  function openDoc (docID, messageID) {
+    var scope = $rootScope.$new(true);
+    scope.docID = docID;
+    scope.messageID = messageID;
+
+    var modalInstance = $modal.open({
+      templateUrl: templateUrl('document_modal'),
+      controller: 'DocumentModalController',
+      scope: scope,
+      windowClass: 'document_modal_window'
+    });
+  }
+
+  function saveDocFile (docID) {
+    var doc = docs[docID],
+        historyDoc = docsForHistory[docID] || doc || {};
 
     var ext = (doc.file_name.split('.', 2) || [])[1] || '';
     FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
       if (!writableFileEntry) {
         return;
       }
-
-      historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
-
-      var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
-        mime: doc.mime_type,
-        toFileEntry: writableFileEntry
-      });
-
-      downloadPromise.then(function (url) {
-        delete historyDoc.progress;
+      downloadDoc(docID, writableFileEntry).then(function () {
         console.log('file save done');
-      }, function (e) {
-        console.log('document download failed', e);
-        historyDoc.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyDoc.progress.cancel = downloadPromise.cancel;
+      });
     }, function () {
-      historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
-
-      var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {mime: doc.mime_type});
-
-      downloadPromise.then(function (url) {
-        delete historyDoc.progress;
-
-        historyDoc.url = url;
-
-        switch (action) {
-          case 1:
-            window.open(url, '_blank');
-            break;
-
-          default:
-            FileManager.download(url, doc.mime_type, doc.file_name);
-        }
-      }, function (e) {
-        console.log('document download failed', e);
-        historyDoc.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyDoc.progress.cancel = downloadPromise.cancel;
+      downloadDoc(docID).then(function (url) {
+        FileManager.download(url, doc.mime_type, doc.file_name);
+      });
     });
   }
-
-  $rootScope.downloadDoc = downloadDoc;
 
   return {
     saveDoc: saveDoc,
     wrapForHistory: wrapForHistory,
-    downloadDoc: downloadDoc
+    updateDocDownloaded: updateDocDownloaded,
+    downloadDoc: downloadDoc,
+    openDoc: openDoc,
+    saveDocFile: saveDocFile
   }
 })
 
@@ -2876,27 +2771,6 @@ angular.module('myApp.services', ['myApp.i18n'])
     openAudio: openAudio
   }
 })
-
-.service('ExternalResourcesManager', function ($q, $http) {
-  var urlPromises = {};
-
-  function downloadImage (url) {
-    if (urlPromises[url] !== undefined) {
-      return urlPromises[url];
-    }
-
-    return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
-      .then(function (response) {
-        window.URL = window.URL || window.webkitURL;
-        return window.URL.createObjectURL(response.data);
-      });
-  }
-
-  return {
-    downloadImage: downloadImage
-  }
-})
-
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
 
@@ -3193,16 +3067,6 @@ angular.module('myApp.services', ['myApp.i18n'])
     wrapPlainText: wrapPlainText
   };
 
-  function encodeEntities(value) {
-    return value.
-      replace(/&/g, '&amp;').
-      replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
-        return '&#' + value.charCodeAt(0) + ';';
-      }).
-      replace(/</g, '&lt;').
-      replace(/>/g, '&gt;');
-  }
-
   function getEmojiSpritesheetCoords(emojiCode) {
     var i, row, column, totalColumns;
     for (var cat = 0; cat < Config.EmojiCategories.length; cat++) {
@@ -3375,58 +3239,6 @@ angular.module('myApp.services', ['myApp.i18n'])
     return text.join('');
   }
 
-})
-
-
-.service('IdleManager', function ($rootScope, $window, $timeout) {
-
-  $rootScope.idle = {isIDLE: false};
-
-  var toPromise, started = false;
-
-  return {
-    start: start
-  };
-
-  function start () {
-    if (!started) {
-      started = true;
-      $($window).on('blur focus keydown mousedown touchstart', onEvent);
-
-      setTimeout(function () {
-        onEvent({type: 'blur'});
-      }, 0);
-    }
-  }
-
-  function onEvent (e) {
-    // console.log('event', e.type);
-    if (e.type == 'mousemove') {
-      $($window).off('mousemove', onEvent);
-    }
-    var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
-
-    $timeout.cancel(toPromise);
-    if (!isIDLE) {
-      // console.log('update timeout');
-      toPromise = $timeout(function () {
-        onEvent({type: 'timeout'});
-      }, 30000);
-    }
-
-    if ($rootScope.idle.isIDLE == isIDLE) {
-      return;
-    }
-
-    // console.log('IDLE changed', isIDLE);
-    $rootScope.$apply(function () {
-      $rootScope.idle.isIDLE = isIDLE;
-    });
-
-    if (isIDLE && e.type == 'timeout') {
-      $($window).on('mousemove', onEvent);
-    }
-  }
 })
 
 .service('StatusManager', function ($timeout, $rootScope, MtpApiManager, IdleManager) {

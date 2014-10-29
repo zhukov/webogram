@@ -383,6 +383,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     });
   }
 
+  function getDownloadedFile(location, size) {
+    var fileStorage = getFileStorage(),
+        fileName = getFileName(location);
+
+    return fileStorage.getFile(fileName, size);
+  }
+
   function downloadFile (dcID, location, size, options) {
     if (!FileManager.isAvailable()) {
       return $q.reject({type: 'BROWSER_BLOB_NOT_SUPPORTED'});
@@ -598,6 +605,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   return {
     getCachedFile: getCachedFile,
+    getDownloadedFile: getDownloadedFile,
     downloadFile: downloadFile,
     downloadSmallFile: downloadSmallFile,
     saveSmallFile: saveSmallFile,

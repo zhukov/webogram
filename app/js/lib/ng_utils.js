@@ -33,7 +33,7 @@ angular.module('izhukov.utils', [])
 
 })
 
-.service('FileManager', function ($window, $q) {
+.service('FileManager', function ($window, $q, $timeout) {
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
@@ -608,6 +608,186 @@ angular.module('izhukov.utils', [])
       });
     },
   };
+})
+
+.service('SearchIndexManager', function () {
+  var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
+      trimRe = /^\s+|\s$/g,
+      accentsReplace = {
+        a: /[åáâäà]/g,
+        e: /[éêëè]/g,
+        i: /[íîïì]/g,
+        o: /[óôöò]/g,
+        u: /[úûüù]/g,
+        c: /ç/g,
+        ss: /ß/g
+      }
+
+  return {
+    createIndex: createIndex,
+    indexObject: indexObject,
+    cleanSearchText: cleanSearchText,
+    search: search
+  };
+
+  function createIndex () {
+    return {
+      shortIndexes: {},
+      fullTexts: {}
+    }
+  }
+
+  function cleanSearchText (text) {
+    text = text.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    for (var key in accentsReplace) {
+      if (accentsReplace.hasOwnProperty(key)) {
+        text = text.replace(accentsReplace[key], key);
+      }
+    }
+
+    return text;
+  }
+
+  function indexObject (id, searchText, searchIndex) {
+    if (searchIndex.fullTexts[id] !== undefined) {
+      return false;
+    }
+
+    searchText = cleanSearchText(searchText);
+
+    if (!searchText.length) {
+      return false;
+    }
+
+    var shortIndexes = searchIndex.shortIndexes;
+
+    searchIndex.fullTexts[id] = searchText;
+
+    angular.forEach(searchText.split(' '), function(searchWord) {
+      var len = Math.min(searchWord.length, 3),
+          wordPart, i;
+      for (i = 1; i <= len; i++) {
+        wordPart = searchWord.substr(0, i);
+        if (shortIndexes[wordPart] === undefined) {
+          shortIndexes[wordPart] = [id];
+        } else {
+          shortIndexes[wordPart].push(id);
+        }
+      }
+    });
+  }
+
+  function search (query, searchIndex) {
+    var shortIndexes = searchIndex.shortIndexes,
+        fullTexts = searchIndex.fullTexts;
+
+    query = cleanSearchText(query);
+
+    var queryWords = query.split(' '),
+        foundObjs = false,
+        newFoundObjs, i, j, searchText, found;
+
+    for (i = 0; i < queryWords.length; i++) {
+      newFoundObjs = shortIndexes[queryWords[i].substr(0, 3)];
+      if (!newFoundObjs) {
+        foundObjs = [];
+        break;
+      }
+      if (foundObjs === false || foundObjs.length > newFoundObjs.length) {
+        foundObjs = newFoundObjs;
+      }
+    }
+
+    newFoundObjs = {};
+
+    for (j = 0; j < foundObjs.length; j++) {
+      found = true;
+      searchText = fullTexts[foundObjs[j]];
+      for (i = 0; i < queryWords.length; i++) {
+        if (searchText.indexOf(queryWords[i]) == -1) {
+          found = false;
+          break;
+        }
+      }
+      if (found) {
+        newFoundObjs[foundObjs[j]] = true;
+      }
+    }
+
+    return newFoundObjs;
+  }
+})
+
+.service('ExternalResourcesManager', function ($q, $http) {
+  var urlPromises = {};
+
+  function downloadImage (url) {
+    if (urlPromises[url] !== undefined) {
+      return urlPromises[url];
+    }
+
+    return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
+      .then(function (response) {
+        window.URL = window.URL || window.webkitURL;
+        return window.URL.createObjectURL(response.data);
+      });
+  }
+
+  return {
+    downloadImage: downloadImage
+  }
+})
+
+.service('IdleManager', function ($rootScope, $window, $timeout) {
+
+  $rootScope.idle = {isIDLE: false};
+
+  var toPromise, started = false;
+
+  return {
+    start: start
+  };
+
+  function start () {
+    if (!started) {
+      started = true;
+      $($window).on('blur focus keydown mousedown touchstart', onEvent);
+
+      setTimeout(function () {
+        onEvent({type: 'blur'});
+      }, 0);
+    }
+  }
+
+  function onEvent (e) {
+    // console.log('event', e.type);
+    if (e.type == 'mousemove') {
+      $($window).off('mousemove', onEvent);
+    }
+    var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
+
+    $timeout.cancel(toPromise);
+    if (!isIDLE) {
+      // console.log('update timeout');
+      toPromise = $timeout(function () {
+        onEvent({type: 'timeout'});
+      }, 30000);
+    }
+
+    if ($rootScope.idle.isIDLE == isIDLE) {
+      return;
+    }
+
+    // console.log('IDLE changed', isIDLE);
+    $rootScope.$apply(function () {
+      $rootScope.idle.isIDLE = isIDLE;
+    });
+
+    if (isIDLE && e.type == 'timeout') {
+      $($window).on('mousemove', onEvent);
+    }
+  }
 })
 
 .service('AppRuntimeManager', function ($window) {

@@ -1765,6 +1765,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   })
 
   .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppVideoManager, AppPeersManager, ErrorService) {
+
     $scope.video = AppVideoManager.wrapForFull($scope.videoID);
 
     $scope.progress = {enabled: false};
@@ -1790,6 +1791,38 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.download = function () {
       $rootScope.downloadVideo($scope.videoID)
+    };
+
+    $scope.$on('history_delete', function (e, historyUpdate) {
+      if (historyUpdate.msgs[$scope.messageID]) {
+        $modalInstance.dismiss();
+      }
+    });
+  })
+
+  .controller('DocumentModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppDocsManager, AppPeersManager, ErrorService) {
+
+    $scope.document = AppDocsManager.wrapForHistory($scope.docID);
+
+    $scope.forward = function () {
+      var messageID = $scope.messageID;
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        });
+      });
+    };
+
+    $scope['delete'] = function () {
+      var messageID = $scope.messageID;
+      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
+        AppMessagesManager.deleteMessages([messageID]);
+      });
+    };
+
+    $scope.download = function () {
+      AppDocsManager.saveDocFile($scope.docID);
     };
 
     $scope.$on('history_delete', function (e, historyUpdate) {

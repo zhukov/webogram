@@ -12,7 +12,7 @@
       </div>
 
       <p class="media_modal_info">
-        <span class="media_modal_author" ng-bind-html="::photo.fromUser.rFullName"></span>, <span ng-bind="photo.date | dateOrTime"></span>
+        <a class="media_modal_author" my-user-link="photo.user_id"></a>, <span ng-bind="photo.date | dateOrTime"></span>
       </p>
     </div>
 

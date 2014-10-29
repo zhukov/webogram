@@ -535,9 +535,7 @@ img.im_message_video_thumb,
   color: #93a2ae;
 }
 
-.im_message_out .icon-document,
-.im_message_out .icon-photo,
-.im_message_out .icon-video {
+.im_message_out .icon-document {
   background-color: #dae6f0;
   background-position: -2px -542px;
 }

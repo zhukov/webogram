@@ -325,6 +325,7 @@
 
 	"message_attach_document_open": "Open",
 	"message_attach_document_download": "Download",
+	"message_attach_document_save": "Save File",
 
 	"message_attach_video_video": "Video",
 	"message_attach_video_download": "Download",

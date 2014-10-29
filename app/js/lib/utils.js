@@ -114,3 +114,35 @@ function templateUrl (tplName) {
   return 'partials/' + (Config.Mobile ? 'mobile' : 'desktop') + '/' + tplName + '.html';
 }
 
+function encodeEntities(value) {
+  return value.
+    replace(/&/g, '&amp;').
+    replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
+      return '&#' + value.charCodeAt(0) + ';';
+    }).
+    replace(/</g, '&lt;').
+    replace(/>/g, '&gt;');
+}
+
+function calcImageInBox(imageW, imageH, boxW, boxH, noZooom) {
+  var boxedImageW = boxW;
+  var boxedImageH = boxH;
+
+  if ((imageW / imageH) > (boxW / boxH)) {
+    boxedImageH = parseInt(imageH * boxW / imageW);
+  }
+  else {
+    boxedImageW = parseInt(imageW * boxH / imageH);
+    if (boxedImageW > boxW) {
+      boxedImageH = parseInt(boxedImageH * boxW / boxedImageW);
+      boxedImageW = boxW;
+    }
+  }
+
+  if (noZooom && boxedImageW >= imageW && boxedImageH >= imageH) {
+    boxedImageW = imageW;
+    boxedImageH = imageH;
+  }
+
+  return {w: boxedImageW, h: boxedImageH};
+}

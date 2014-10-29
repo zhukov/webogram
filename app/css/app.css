@@ -79,7 +79,7 @@ input[type="number"] {
 }
 .btn-success {
   color: #ffffff;
-  background-color: #6AC065;
+  background-color: #6ec26d;
 }
 
 .btn-success:hover,
@@ -94,7 +94,7 @@ input[type="number"] {
 .btn-success:active,
 .btn-success.active,
 .open .dropdown-toggle.btn-success {
-  background: #5aaf54;
+  background: #66b864;
   background-image: none;
 }
 
@@ -425,7 +425,7 @@ input[type="number"] {
 .modal-close-button i {
   display: inline-block;
   background: url(../img/icons/IconsetW.png) -15px -320px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   width: 12px;
   height: 12px;
   margin: 21px;
@@ -910,7 +910,7 @@ img.welcome_logo {
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -938,7 +938,7 @@ img.welcome_logo {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.6;
 }
 .is_1x .im_dialogs_search_clear {
@@ -1070,7 +1070,7 @@ a.im_dialog_selected .im_dialog_message_text {
 }
 
 .im_dialog_badge {
-  background: #75BB72;
+  background: #6ec26d;
   border-radius: 2px;
   font-size: 10px;
   padding: 3px 4px;
@@ -1144,7 +1144,7 @@ a.im_dialog_selected .im_dialog_date {
   margin-left: 6px;
 
   background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
 }
 .is_1x .icon-caret {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1302,7 +1302,7 @@ div.im_message_video_thumb {
   height: 42px;
 
   background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   z-index: 1;
 }
 .is_1x .icon-videoplay {
@@ -1329,7 +1329,7 @@ div.im_message_video_thumb {
   height: 19px;
 
   background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
 }
 .is_1x .icon-geo-point {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1373,39 +1373,44 @@ div.im_message_video_thumb {
 .im_message_document,
 .im_message_upload_file {
   margin-top: 3px;
-  border-radius: 3px;
-  display: inline-block;
-  width: 340px;
+  /*border-radius: 3px;*/
+  /*display: inline-block;*/
+  width: 342px;
 }
 .im_message_audio {
   margin-top: 3px;
 }
-.icon-document,
-.icon-photo,
-.icon-video {
+.im_message_file_button {
   display: block;
+  background: rgba(218,228,234,0.50);
   float: left;
-  width: 38px;
-  height: 38px;
-  vertical-align: text-top;
-
-  background: #F2F2F2 url(../img/icons/IconsetW.png) -2px -229px no-repeat;
-  background-size: 42px 971px;
-  border-radius: 3px;
+  width: 42px;
+  height: 42px;
+  border-radius: 0;
   margin-right: 10px;
 }
-.is_1x .icon-document,
-.is_1x .icon-photo,
-.is_1x .icon-video {
+.im_message_file_button_icon {
+  display: inline-block;
+  line-height: 0;
+  /*#dae4ea 50%*/
+  background: url(../img/icons/IconsetW.png) -15px -953px no-repeat;
+  background-size: 42px 1171px;
+  width: 12px;
+  height: 20px;
+  margin: 11px 15px;
+}
+.is_1x .im_message_file_button_icon {
   background-image: url(../img/icons/IconsetW_1x.png);
+}
+.im_message_file_button_dl_doc .im_message_file_button_icon {
+  background-position: -13px -983px;
+  width: 16px;
+  height: 18px;
+  margin: 12px 13px;
 }
 
 .im_message_selected .icon-document,
-.im_message_selected .icon-photo,
-.im_message_selected .icon-video,
-.im_history_selectable .im_message_outer_wrap:hover .icon-document,
-.im_history_selectable .im_message_outer_wrap:hover .icon-photo,
-.im_history_selectable .im_message_outer_wrap:hover .icon-video {
+.im_history_selectable .im_message_outer_wrap:hover .icon-document {
   background-color: #dae6f0;
   background-position: -2px -542px;
 }
@@ -1479,7 +1484,7 @@ img.im_message_document_thumb {
   width: 14px;
   height: 17px;
   background: url(../img/icons/IconsetW.png) -15px -897px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
 }
 .is_1x .audio_player_btn_icon {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1759,7 +1764,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1787,7 +1792,7 @@ textarea.im_message_field {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -10px -4px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
@@ -1836,7 +1841,7 @@ textarea.im_message_field {
   height: 21px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -9px -132px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -1852,7 +1857,7 @@ textarea.im_message_field {
 
 
 .icon-online {
-  background: #6DBF69;
+  background: #6ec26d;
   border: 1px solid #FFF;
   display: block;
   width: 11px;
@@ -1868,13 +1873,41 @@ textarea.im_message_field {
 .media_modal_wrap .modal-body {
   padding: 19px 18px 17px;
 }
-a.img_fullsize {
+a.img_fullsize,
+.img_fullsize_wrap {
   display: block;
   text-align: center;
 }
 img.img_fullsize {
   margin: 0 auto;
 }
+.document_modal_image_wrap {
+  overflow: auto;
+}
+.document_fullsize_wrap {
+  display: none;
+  cursor: zoom-in;
+  text-align: center;
+}
+.document_fullsize_zoomed {
+  cursor: zoom-out;
+}
+.document_fullsize_img {
+  /*max-width: 100%;*/
+  -webkit-user-select: none;
+}
+.document_fullsize_zoomed .document_fullsize_img {
+  /*min-width: 100%;*/
+  -webkit-user-select: none;
+  image-rendering: optimizeSpeed;             /* FUCK SMOOTHING, GIVE ME SPEED  */
+  image-rendering: -moz-crisp-edges;          /* Firefox                        */
+  image-rendering: -o-crisp-edges;            /* Opera                          */
+  image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+  image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+
+}
+
 .media_modal_info {
   color: #999;
   margin: 20px 0 0;
@@ -1886,7 +1919,11 @@ img.img_fullsize {
   margin-left: 15px;
 }
 .media_modal_author {
+  color: inherit;
   font-weight: bold;
+}
+.media_modal_author:hover {
+  color: inherit;
 }
 .non_osx .media_modal_author {
   font-size: 12px;
@@ -1914,7 +1951,7 @@ img.img_fullsize {
   overflow: auto;
   line-height: 17px;
 
-  border: 1px solid #d9dbde;
+  border: 1px solid #d2dbe3;
   border-radius: 2px;
   -webkit-box-shadow: none;
   box-shadow: none;
@@ -2179,7 +2216,7 @@ a:hover .icon-twitter {
   font-size: 12px;
   line-height: normal;
   background: url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   border: 1px solid #d9dbde;
   border-radius: 3px;
   padding: 6px 15px 6px 30px;
@@ -2198,7 +2235,7 @@ a:hover .icon-twitter {
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.6;
 }
 .is_1x .contacts_modal_search_clear {
@@ -2314,7 +2351,7 @@ img.chat_modal_participant_photo {
   width: 25px;
   height: 25px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.5;
 }
 .is_1x .icon-contact-tick {
@@ -2395,7 +2432,7 @@ img.chat_modal_participant_photo {
   height: 26px;
   margin: 13px 0 0 40px;
   background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
 }
 .is_1x .icon-select-tick {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -2514,7 +2551,7 @@ ce671b orange
   font-size: 12px;
   line-height: normal;
   background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
   padding: 6px 20px 6px 30px;
@@ -2537,7 +2574,7 @@ ce671b orange
   height: 13px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.6;
 }
 .is_1x .countries_modal_search_clear {

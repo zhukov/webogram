@@ -182,9 +182,25 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_video')
     };
   })
-  .directive('myMessageDocument', function() {
+  .directive('myMessageDocument', function(AppDocsManager) {
     return {
-      templateUrl: templateUrl('message_attach_document')
+      scope: {
+        'document': '=myMessageDocument',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_document'),
+      link: function ($scope, element, attrs) {
+        AppDocsManager.updateDocDownloaded($scope.document.id);
+        $scope.docSave = function () {
+          AppDocsManager.saveDocFile($scope.document.id);
+        };
+        $scope.docOpen = function () {
+          if (!$scope.document.withPreview) {
+            return $scope.download();
+          }
+          AppDocsManager.openDoc($scope.document.id, $scope.messageId);
+        };
+      }
     };
   })
   .directive('myMessageAudio', function() {
@@ -1395,7 +1411,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadGif', function($rootScope, MtpApiFileManager) {
+  .directive('myLoadGif', function($rootScope, MtpApiFileManager, AppDocsManager) {
 
     return {
       link: link,
@@ -1417,11 +1433,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.isActive = false;
       $scope.document.url = MtpApiFileManager.getCachedFile(inputFileLocation);
 
-      /*return $scope.document.progress = {enabled: true, percent: 30, total: $scope.document.size};*/
-
       $scope.toggle = function (e) {
         if (checkClick(e, true)) {
-          $rootScope.downloadDoc($scope.document.id);
+          AppDocsManager.saveDocFile($scope.document.id);
           return false;
         }
 
@@ -1461,6 +1475,102 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.document.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
         })
       }
+    }
+  })
+
+  .directive('myLoadDocument', function($rootScope, MtpApiFileManager, AppDocsManager) {
+
+    return {
+      link: link,
+      templateUrl: templateUrl('full_document'),
+      scope: {
+        document: '=myLoadDocument'
+      }
+    };
+
+    function updateModalWidth(element, width) {
+      while (element && !$(element).hasClass('modal-dialog')) {
+        element = element.parentNode;
+      }
+      if (element) {
+        $(element).width(width + (Config.Mobile ? 0 : 36));
+      }
+    }
+
+    function link ($scope, element, attrs) {
+      var loaderWrap = $('.document_fullsize_with_progress_wrap', element);
+      var fullSizeWrap = $('.document_fullsize_wrap', element);
+      var fullSizeImage = $('.document_fullsize_img', element);
+
+      var fullWidth = $(window).width() - (Config.Mobile ? 20 : 36);
+      var fullHeight = $(window).height() - 150;
+
+      $scope.imageWidth = fullWidth;
+      $scope.imageHeight = fullHeight;
+
+      var thumbPhotoSize = $scope.document.thumb;
+
+      if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+        var wh = calcImageInBox(thumbPhotoSize.width, thumbPhotoSize.height, fullWidth, fullHeight);
+        $scope.imageWidth = wh.w;
+        $scope.imageHeight = wh.h;
+
+        $scope.thumbSrc = MtpApiFileManager.getCachedFile(thumbPhotoSize.location);
+      }
+
+      $scope.frameWidth = Math.max($scope.imageWidth, Math.min(600, fullWidth))
+      $scope.frameHeight = $scope.imageHeight;
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      });
+
+      updateModalWidth(element[0], $scope.frameWidth);
+
+      var checkSizesInt;
+      var realImageWidth, realImageHeight;
+      AppDocsManager.downloadDoc($scope.document.id).then(function (url) {
+        var image = new Image();
+        var checkSizes = function (e) {
+          if (!image.height || !image.width) {
+            return;
+          }
+          realImageWidth = image.width;
+          realImageHeight = image.height;
+          clearInterval(checkSizesInt);
+          
+          var defaultWh = calcImageInBox(image.width, image.height, fullWidth, fullHeight, true);
+          var zoomedWh = {w: realImageWidth, h: realImageHeight};
+          if (defaultWh.w >= zoomedWh.w && defaultWh.h >= zoomedWh.h) {
+            zoomedWh.w *= 4;
+            zoomedWh.h *= 4;
+          }
+
+          var zoomed = true;
+          $scope.toggleZoom = function () {
+            zoomed = !zoomed;
+            var imageWidth = (zoomed ? zoomedWh : defaultWh).w;
+            var imageHeight = (zoomed ? zoomedWh : defaultWh).h;
+            fullSizeImage.css({
+              width: imageWidth,
+              height: imageHeight,
+              marginTop: $scope.frameHeight > imageHeight ? Math.floor(($scope.frameHeight - imageHeight) / 2) : 0
+            });
+            fullSizeWrap.toggleClass('document_fullsize_zoomed', zoomed);
+          };
+
+          $scope.toggleZoom(false);
+
+          fullSizeImage.attr('src', url);
+          loaderWrap.hide();
+          fullSizeWrap.css({width: $scope.frameWidth, height: $scope.frameHeight}).show();
+
+        };
+        checkSizesInt = setInterval(checkSizes, 20);
+        image.onload = checkSizes;
+        image.src = url;
+        setZeroTimeout(checkSizes);
+      });
     }
   })
 
@@ -1730,8 +1840,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       var updateMargin = function () {
         var height = element[0].offsetHeight,
             fullHeight = height - (height && usePadding ? 2 * prevMargin : 0),
-            contHeight = $($window).height(),
             ratio = attrs.myVerticalPosition && parseFloat(attrs.myVerticalPosition) || 0.5,
+            contHeight = attrs.contHeight ? $scope.$eval(attrs.contHeight) : $($window).height(),
             margin = fullHeight < contHeight ? parseInt((contHeight - fullHeight) * ratio) : '',
             styles = usePadding
               ? {paddingTop: margin, paddingBottom: margin}
@@ -1747,9 +1857,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         prevMargin = margin;
       };
 
+      $($window).on('resize', updateMargin);
+
       onContentLoaded(updateMargin);
 
-      $($window).on('resize', updateMargin);
 
       $scope.$on('ui_height', function () {
         onContentLoaded(updateMargin);
