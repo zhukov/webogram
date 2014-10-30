@@ -30,8 +30,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       {id: 5, url: 'http://149.154.171.5'}
     ]);
 
-    var sslSubdomains = 'pluto,venus,aurora,vesta,flora';
-
   var chosenServers = {};
 
   function chooseServer(dcID) {
