@@ -484,12 +484,12 @@ angular.module('izhukov.utils', [])
 
 .service('CryptoWorker', function ($timeout, $q) {
 
-  var worker = window.Worker && new Worker('js/lib/crypto_worker.js') || false,
+  var webWorker = false,
+      naClEmbed = false,
       taskID = 0,
       awaiting = {},
       webCrypto = window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle) || window.msCrypto && window.msCrypto.subtle,
       useSha1Crypto = webCrypto && webCrypto.digest !== undefined,
-      aesNaClEmbed = false,
       finalizeTask = function (taskID, result) {
         var deferred = awaiting[taskID];
         if (deferred !== undefined) {
@@ -502,7 +502,7 @@ angular.module('izhukov.utils', [])
   if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
     var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf?'+Math.random()+'" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
     listener.addEventListener('load', function (e) {
-      aesNaClEmbed = listener.firstChild;
+      naClEmbed = listener.firstChild;
       console.log(dT(), 'NaCl ready');
     }, true);
     listener.addEventListener('message', function (e) {
@@ -513,13 +513,18 @@ angular.module('izhukov.utils', [])
     }, true);
   }
 
-  if (worker) {
-    worker.onmessage = function (e) {
-      finalizeTask(e.data.taskID, e.data.result);
+  if (window.Worker) {
+    var tmpWorker = new Worker('js/lib/crypto_worker.js');
+    tmpWorker.onmessage = function (e) {
+      if (!webWorker) {
+        webWorker = tmpWorker;
+      } else {
+        finalizeTask(e.data.taskID, e.data.result);
+      }
     };
-    worker.onerror = function(error) {
+    tmpWorker.onerror = function(error) {
       console.error('CW error', error, error.stack);
-      worker = false;
+      webWorker = false;
     };
   }
 
@@ -531,7 +536,7 @@ angular.module('izhukov.utils', [])
 
     params.task = task;
     params.taskID = taskID;
-    (embed || worker).postMessage(params);
+    (embed || webWorker).postMessage(params);
 
     taskID++;
 
@@ -561,34 +566,35 @@ angular.module('izhukov.utils', [])
       });
     },
     aesEncrypt: function (bytes, keyBytes, ivBytes) {
-      if (aesNaClEmbed) {
+      if (naClEmbed) {
         return performTaskWorker('aes-encrypt', {
           bytes: addPadding(convertToArrayBuffer(bytes)),
           keyBytes: convertToArrayBuffer(keyBytes),
           ivBytes: convertToArrayBuffer(ivBytes)
-        }, aesNaClEmbed);
+        }, naClEmbed);
       }
       return $timeout(function () {
         return convertToArrayBuffer(aesEncryptSync(bytes, keyBytes, ivBytes));
       });
     },
     aesDecrypt: function (encryptedBytes, keyBytes, ivBytes) {
-      if (aesNaClEmbed) {
+      if (naClEmbed) {
         return performTaskWorker('aes-decrypt', {
           encryptedBytes: addPadding(convertToArrayBuffer(encryptedBytes)),
           keyBytes: convertToArrayBuffer(keyBytes),
           ivBytes: convertToArrayBuffer(ivBytes)
-        }, aesNaClEmbed);
+        }, naClEmbed);
       }
       return $timeout(function () {
         return convertToArrayBuffer(aesDecryptSync(encryptedBytes, keyBytes, ivBytes));
       });
     },
     factorize: function (bytes) {
-      if (aesNaClEmbed && bytes.length <= 8) {
-        return performTaskWorker('factorize', {bytes: bytes}, aesNaClEmbed);
+      bytes = convertToByteArray(bytes);
+      if (naClEmbed && bytes.length <= 8) {
+        return performTaskWorker('factorize', {bytes: bytes}, naClEmbed);
       }
-      if (worker) {
+      if (webWorker) {
         return performTaskWorker('factorize', {bytes: bytes});
       }
       return $timeout(function () {
@@ -596,7 +602,7 @@ angular.module('izhukov.utils', [])
       });
     },
     modPow: function (x, y, m) {
-      if (worker) {
+      if (webWorker) {
         return performTaskWorker('mod-pow', {
           x: x,
           y: y,

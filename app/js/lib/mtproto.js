@@ -988,13 +988,32 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         currentTime = tsNow(),
         hasApiCall = false,
         hasHttpWait = false,
+        lengthOverflow = false,
+        singlesCount = 0,
         self = this;
 
     angular.forEach(this.pendingMessages, function (value, messageID) {
       if (!value || value >= currentTime) {
         if (message = self.sentMessages[messageID]) {
+          var messageByteLength = (message.body.byteLength || message.body.length) + 32;
+          if (!message.notContentRelated &&
+              lengthOverflow) {
+            return;
+          }
+          if (!message.notContentRelated &&
+              messagesByteLen &&
+              messagesByteLen + messageByteLength > 655360) { // 640 Kb
+            lengthOverflow = true;
+            return;
+          }
+          if (message.singleInRequest) {
+            singlesCount++;
+            if (singlesCount > 1) {
+              return;
+            }
+          }
           messages.push(message);
-          messagesByteLen += (message.body.byteLength || message.body.length) + 32;
+          messagesByteLen += messageByteLength;
           if (message.isAPI) {
             hasApiCall = true;
           }
@@ -1111,6 +1130,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       self.toggleOffline(true);
     });
+
+    if (lengthOverflow || singlesCount > 1) {
+      this.sheduleRequest()
+    }
   };
 
   MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
