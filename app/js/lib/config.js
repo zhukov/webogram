@@ -67,7 +67,7 @@ Config.I18n = {
     'es': 'es-es',
     'it': 'it-it',
     'ru': 'ru-ru'
-    'pl': 'pl-pl'
+    ,'pl': 'pl-pl'
   },
   messages: {},
   fallback_messages: {}
