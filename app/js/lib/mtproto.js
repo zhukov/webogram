@@ -151,7 +151,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     lastMessageID = messageID;
 
-    // console.log('generated msg id', messageID);
+    // console.log('generated msg id', messageID, timeOffset);
 
     return longFromInts(messageID[0], messageID[1]);
   };
@@ -1321,10 +1321,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     this.nextReq = nextReq;
   };
 
-  MtpNetworker.prototype.onSessionCreate = function (sessionID, messageID) {
-    // console.log(dT(), 'New session created', bytesToHex(sessionID));
-  };
-
   MtpNetworker.prototype.ackMessage = function (msgID) {
     // console.log('ack message', msgID);
     this.pendingAcks.push(msgID);
@@ -1445,7 +1441,13 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
         this.processMessageAck(message.first_msg_id);
         this.applyServerSalt(message.server_salt);
-        this.onSessionCreate(sessionID, messageID);
+
+        var self = this;
+        Storage.get('dc').then(function (baseDcID) {
+          if (baseDcID == self.dcID && !self.upload && updatesProcessor) {
+            updatesProcessor(message);
+          }
+        });
         break;
 
       case 'msgs_ack':

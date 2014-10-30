@@ -2936,6 +2936,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     switch (updateMessage._) {
       case 'updatesTooLong':
+      case 'new_session_created':
         forceGetDifference();
         break;
 
@@ -3133,7 +3134,9 @@ angular.module('myApp.services', ['myApp.i18n'])
       curState.seq = stateResult.seq;
       curState.pts = stateResult.pts;
       curState.date = stateResult.date;
-      isSynchronizing = false;
+      setTimeout(function () {
+        isSynchronizing = false;
+      }, 1000);
     })
   }
 
