@@ -54,7 +54,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     if (cache[dcID] !== undefined) {
-      return $q.when(cache[dcID]);
+      return {then: function (cb) {
+        cb(cache[dcID]);
+      }};
     }
 
     var akk = 'dc' + dcID + '_auth_key',
@@ -120,24 +122,17 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         dcID,
         networkerPromise;
 
-    if (dcID = options.dcID) {
-      networkerPromise = mtpGetNetworker(dcID, options);
-    } else {
-      networkerPromise = Storage.get('dc').then(function (baseDcID) {
-        return mtpGetNetworker(dcID = baseDcID || 2, options);
-      });
+    var cachedNetworker;
+    var stack = (new Error()).stack;
+    if (!stack) {
+      try {window.unexistingFunction();} catch (e) {
+        stack = e.stack || '';
+      }
     }
-
-    var cachedNetworker,
-        stack = false;
-
-    networkerPromise.then(function (networker) {
+    var performRequest = function (networker) {
       return (cachedNetworker = networker).wrapApiCall(method, params, options).then(
         function (result) {
           deferred.resolve(result);
-          // $timeout(function () {
-          //   deferred.resolve(result);
-          // }, 1000);
         },
         function (error) {
           console.error(dT(), 'Error', error.code, error.type, baseDcID, dcID);
@@ -168,12 +163,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             cachedExportPromise[dcID].then(function () {
               (cachedNetworker = networker).wrapApiCall(method, params, options).then(function (result) {
                 deferred.resolve(result);
-              }, function (error) {
-                rejectPromise(error);
-              });
-            }, function (error) {
-              rejectPromise(error);
-            });
+              }, rejectPromise);
+            }, rejectPromise);
           }
           else if (error.code == 303) {
             var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_|USER_MIGRATE_)(\d+)/)[2];
@@ -187,9 +178,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
               mtpGetNetworker(newDcID, options).then(function (networker) {
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
-                }, function (error) {
-                  rejectPromise(error);
-                });
+                }, rejectPromise);
               });
             }
           }
@@ -197,14 +186,14 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             rejectPromise(error);
           }
         });
-    }, function (error) {
-      rejectPromise(error);
-    });
+    };
 
-    if (!(stack = (stack || (new Error()).stack))) {
-      try {window.unexistingFunction();} catch (e) {
-        stack = e.stack || '';
-      }
+    if (dcID = (options.dcID || baseDcID)) {
+      mtpGetNetworker(dcID, options).then(performRequest, rejectPromise);
+    } else {
+      Storage.get('dc').then(function (baseDcID) {
+        mtpGetNetworker(dcID = baseDcID || 2, options).then(performRequest, rejectPromise);
+      });
     }
 
     return deferred.promise;

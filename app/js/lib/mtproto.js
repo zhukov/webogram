@@ -1258,7 +1258,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           console.warn(msgKey, bytesFromArrayBuffer(dataHash));
           throw new Error('server msgKey mismatch');
         }
-        // console.log(dT(), 'after hash check');
 
         var buffer = bytesToArrayBuffer(messageBody);
         var deserializerOptions = {
@@ -1296,9 +1295,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           }
         };
         var deserializer = new TLDeserialization(buffer, deserializerOptions);
-
         var response = deserializer.fetchObject('', 'INPUT');
-        // console.log(dT(), 'after fetch');
 
         return {
           response: response,
