@@ -46,3 +46,5 @@ onmessage = function (e) {
 
   postMessage({taskID: taskID, result: result});
 }
+
+postMessage('ready');

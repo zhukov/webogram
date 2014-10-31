@@ -9,28 +9,32 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 .factory('MtpDcConfigurator', function () {
   var dcOptions = Config.Modes.test
+    ? (location.protocol == 'https:'
     ? [
-      {id: 1, url: 'http://173.240.5.253'},
-      {id: 2, url: 'http://149.154.167.40'},
-      {id: 3, url: 'http://174.140.142.5'}
-    ]
-    : (location.protocol == 'https:'
-    ? [
-      {id: 1, url: 'https://pluto.web.telegram.org'},
-      {id: 2, url: 'https://venus.web.telegram.org'},
-      {id: 3, url: 'https://aurora.web.telegram.org'},
-      {id: 4, url: 'https://vesta.web.telegram.org'},
-      {id: 5, url: 'https://flora.web.telegram.org'}
+      {id: 1, url: 'https://pluto.web.telegram.org/apiw_test1'},
+      {id: 2, url: 'https://venus.web.telegram.org/apiw_test1'},
+      {id: 3, url: 'https://aurora.web.telegram.org/apiw_test1'}
     ]
     : [
-      {id: 1, url: 'http://173.240.5.1'},
-      {id: 2, url: 'http://149.154.167.51'},
-      {id: 3, url: 'http://174.140.142.6'},
-      {id: 4, url: 'http://149.154.167.91'},
-      {id: 5, url: 'http://149.154.171.5'}
+      {id: 1, url: 'http://173.240.5.253/apiw1'},
+      {id: 2, url: 'http://149.154.167.40/apiw1'},
+      {id: 3, url: 'http://174.140.142.5/apiw1'}
+    ])
+    : (location.protocol == 'https:'
+    ? [
+      {id: 1, url: 'https://pluto.web.telegram.org/apiw1'},
+      {id: 2, url: 'https://venus.web.telegram.org/apiw1'},
+      {id: 3, url: 'https://aurora.web.telegram.org/apiw1'},
+      {id: 4, url: 'https://vesta.web.telegram.org/apiw1'},
+      {id: 5, url: 'https://flora.web.telegram.org/apiw1'}
+    ]
+    : [
+      {id: 1, url: 'http://173.240.5.1/apiw1'},
+      {id: 2, url: 'http://149.154.167.51/apiw1'},
+      {id: 3, url: 'http://174.140.142.6/apiw1'},
+      {id: 4, url: 'http://149.154.167.91/apiw1'},
+      {id: 5, url: 'http://149.154.171.5/apiw1'}
     ]);
-
-    var sslSubdomains = 'pluto,venus,aurora,vesta,flora';
 
   var chosenServers = {};
 
@@ -153,7 +157,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     lastMessageID = messageID;
 
-    // console.log('generated msg id', messageID);
+    // console.log('generated msg id', messageID, timeOffset);
 
     return longFromInts(messageID[0], messageID[1]);
   };
@@ -207,7 +211,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var requestData = xhrSendBuffer ? resultBuffer : resultArray,
         requestPromise;
     try {
-      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID) + '/apiw1', requestData, {
+      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID), requestData, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
@@ -990,13 +994,32 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         currentTime = tsNow(),
         hasApiCall = false,
         hasHttpWait = false,
+        lengthOverflow = false,
+        singlesCount = 0,
         self = this;
 
     angular.forEach(this.pendingMessages, function (value, messageID) {
       if (!value || value >= currentTime) {
         if (message = self.sentMessages[messageID]) {
+          var messageByteLength = (message.body.byteLength || message.body.length) + 32;
+          if (!message.notContentRelated &&
+              lengthOverflow) {
+            return;
+          }
+          if (!message.notContentRelated &&
+              messagesByteLen &&
+              messagesByteLen + messageByteLength > 655360) { // 640 Kb
+            lengthOverflow = true;
+            return;
+          }
+          if (message.singleInRequest) {
+            singlesCount++;
+            if (singlesCount > 1) {
+              return;
+            }
+          }
           messages.push(message);
-          messagesByteLen += (message.body.byteLength || message.body.length) + 32;
+          messagesByteLen += messageByteLength;
           if (message.isAPI) {
             hasApiCall = true;
           }
@@ -1113,6 +1136,10 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       self.toggleOffline(true);
     });
+
+    if (lengthOverflow || singlesCount > 1) {
+      this.sheduleRequest()
+    }
   };
 
   MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
@@ -1174,7 +1201,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', requestData, options);
+        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID), requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
@@ -1237,7 +1264,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           console.warn(msgKey, bytesFromArrayBuffer(dataHash));
           throw new Error('server msgKey mismatch');
         }
-        // console.log(dT(), 'after hash check');
 
         var buffer = bytesToArrayBuffer(messageBody);
         var deserializerOptions = {
@@ -1275,9 +1301,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           }
         };
         var deserializer = new TLDeserialization(buffer, deserializerOptions);
-
         var response = deserializer.fetchObject('', 'INPUT');
-        // console.log(dT(), 'after fetch');
 
         return {
           response: response,
@@ -1321,10 +1345,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     }
 
     this.nextReq = nextReq;
-  };
-
-  MtpNetworker.prototype.onSessionCreate = function (sessionID, messageID) {
-    // console.log(dT(), 'New session created', bytesToHex(sessionID));
   };
 
   MtpNetworker.prototype.ackMessage = function (msgID) {
@@ -1447,7 +1467,13 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
         this.processMessageAck(message.first_msg_id);
         this.applyServerSalt(message.server_salt);
-        this.onSessionCreate(sessionID, messageID);
+
+        var self = this;
+        Storage.get('dc').then(function (baseDcID) {
+          if (baseDcID == self.dcID && !self.upload && updatesProcessor) {
+            updatesProcessor(message);
+          }
+        });
         break;
 
       case 'msgs_ack':

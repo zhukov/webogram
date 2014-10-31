@@ -148,6 +148,9 @@ TLSerialization.prototype.storeString = function (s, field) {
 
 
 TLSerialization.prototype.storeBytes = function (bytes, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 
   var len = bytes.byteLength || bytes.length;
@@ -160,6 +163,7 @@ TLSerialization.prototype.storeBytes = function (bytes, field) {
     this.byteView[this.offset++] = (len & 0xFF00) >> 8;
     this.byteView[this.offset++] = (len & 0xFF0000) >> 16;
   }
+
   this.byteView.set(bytes, this.offset);
   this.offset += len;
 

@@ -467,7 +467,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         peersInDialogs = {},
         contactsShown;
 
-    MtpApiManager.invokeApi('account.updateStatus', {offline: false});
     $scope.$on('dialogs_need_more', function () {
       // console.log('on need more');
       showMoreDialogs();
@@ -629,7 +628,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (error.code == 401) {
           MtpApiManager.logOut()['finally'](function () {
-            $location.url('/login');
+            location.hash = '/login';
+            AppRuntimeManager.reload();
           });
           error.handled = true;
         }

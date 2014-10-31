@@ -401,7 +401,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           phones: []
         };
 
-        if (this.result.tel !== undefined) {
+        if (this.result.tel != undefined) {
           for (var i = 0; i < this.result.tel.length; i++) {
             contact.phones.push(this.result.tel[i].value);
           }
@@ -741,7 +741,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       offset: offset || 0,
       limit: limit || 0,
       max_id: maxID || 0
-    }).then(function (historyResult) {
+    }, {noErrorBox: true}).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
       AppChatsManager.saveApiChats(historyResult.chats);
       saveMessages(historyResult.messages);
@@ -2810,6 +2810,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     switch (updateMessage._) {
       case 'updatesTooLong':
+      case 'new_session_created':
         forceGetDifference();
         break;
 
@@ -3003,11 +3004,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function attach () {
     MtpNetworkerFactory.setUpdatesProcessor(processUpdateMessage);
-    MtpApiManager.invokeApi('updates.getState', {noErrorBox: true}).then(function (stateResult) {
+    MtpApiManager.invokeApi('updates.getState', {}, {noErrorBox: true}).then(function (stateResult) {
       curState.seq = stateResult.seq;
       curState.pts = stateResult.pts;
       curState.date = stateResult.date;
-      isSynchronizing = false;
+      setTimeout(function () {
+        isSynchronizing = false;
+      }, 1000);
     })
   }
 

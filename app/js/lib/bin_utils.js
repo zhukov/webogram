@@ -175,6 +175,18 @@ function convertToUint8Array(bytes) {
   return new Uint8Array(bytes);
 }
 
+function convertToByteArray(bytes) {
+  if (Array.isArray(bytes)) {
+    return bytes;
+  }
+  bytes = convertToUint8Array(bytes);
+  var newBytes = [];
+  for (var i = 0, len = bytes.length; i < len; i++) {
+    newBytes.push(bytes[i]);
+  }
+  return newBytes;
+}
+
 function bytesFromArrayBuffer (buffer) {
   var len = buffer.byteLength,
       byteView = new Uint8Array(buffer),
