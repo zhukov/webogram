@@ -9,25 +9,31 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 .factory('MtpDcConfigurator', function () {
   var dcOptions = Config.Modes.test
+    ? (location.protocol == 'https:'
     ? [
-      {id: 1, url: 'http://173.240.5.253'},
-      {id: 2, url: 'http://149.154.167.40'},
-      {id: 3, url: 'http://174.140.142.5'}
-    ]
-    : (location.protocol == 'https:'
-    ? [
-      {id: 1, url: 'https://pluto.web.telegram.org'},
-      {id: 2, url: 'https://venus.web.telegram.org'},
-      {id: 3, url: 'https://aurora.web.telegram.org'},
-      {id: 4, url: 'https://vesta.web.telegram.org'},
-      {id: 5, url: 'https://flora.web.telegram.org'}
+      {id: 1, url: 'https://pluto.web.telegram.org/apiw_test1'},
+      {id: 2, url: 'https://venus.web.telegram.org/apiw_test1'},
+      {id: 3, url: 'https://aurora.web.telegram.org/apiw_test1'}
     ]
     : [
-      {id: 1, url: 'http://173.240.5.1'},
-      {id: 2, url: 'http://149.154.167.51'},
-      {id: 3, url: 'http://174.140.142.6'},
-      {id: 4, url: 'http://149.154.167.91'},
-      {id: 5, url: 'http://149.154.171.5'}
+      {id: 1, url: 'http://173.240.5.253/apiw1'},
+      {id: 2, url: 'http://149.154.167.40/apiw1'},
+      {id: 3, url: 'http://174.140.142.5/apiw1'}
+    ])
+    : (location.protocol == 'https:'
+    ? [
+      {id: 1, url: 'https://pluto.web.telegram.org/apiw1'},
+      {id: 2, url: 'https://venus.web.telegram.org/apiw1'},
+      {id: 3, url: 'https://aurora.web.telegram.org/apiw1'},
+      {id: 4, url: 'https://vesta.web.telegram.org/apiw1'},
+      {id: 5, url: 'https://flora.web.telegram.org/apiw1'}
+    ]
+    : [
+      {id: 1, url: 'http://173.240.5.1/apiw1'},
+      {id: 2, url: 'http://149.154.167.51/apiw1'},
+      {id: 3, url: 'http://174.140.142.6/apiw1'},
+      {id: 4, url: 'http://149.154.167.91/apiw1'},
+      {id: 5, url: 'http://149.154.171.5/apiw1'}
     ]);
 
   var chosenServers = {};
@@ -205,7 +211,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var requestData = xhrSendBuffer ? resultBuffer : resultArray,
         requestPromise;
     try {
-      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID) + '/apiw1', requestData, {
+      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID), requestData, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
@@ -1195,7 +1201,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID) + '/apiw1', requestData, options);
+        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID), requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
