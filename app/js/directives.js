@@ -203,11 +203,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
   })
-  .directive('myMessageAudio', function() {
-    return {
-      templateUrl: templateUrl('message_attach_audio')
-    };
-  })
   .directive('myMessageMap', function() {
     return {
       templateUrl: templateUrl('message_attach_map')
