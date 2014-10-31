@@ -401,7 +401,7 @@ angular.module('myApp.services', ['myApp.i18n'])
           phones: []
         };
 
-        if (this.result.tel !== undefined) {
+        if (this.result.tel != undefined) {
           for (var i = 0; i < this.result.tel.length; i++) {
             contact.phones.push(this.result.tel[i].value);
           }
