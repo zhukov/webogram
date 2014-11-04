@@ -21,8 +21,9 @@
 	  <div ng-switch-when="true" class="progress tg_down_progress">
 	    <div class="progress-bar progress-bar-success" ng-style="{width: audio.progress.percent + '%'}"></div>
 	  </div>
-	  <div ng-switch-default class="progress tg_play_progress">
-	    <div class="progress-bar progress-bar-success" ng-style="{width: mediaPlayer.player.currentTime / (mediaPlayer.player.duration || audio.duration) * 100 + '%'}"></div>
+	  <div ng-switch-default>
+	  	<div class="audio_player_seek_slider" my-slider slider-model="mediaPlayer.player.currentTime" slider-min="0" slider-max="mediaPlayer.player.duration || audio.duration" slider-onchange="seek(value)"></div>
+	  	<div class="audio_player_volume_slider" my-slider slider-model="mediaPlayer.player.volume" slider-min="0" slider-max="1" slider-onchange="setVolume(value)"></div>
 	  </div>
 	</div>
 	<audio ng-if="audio.url" media-player="mediaPlayer.player">

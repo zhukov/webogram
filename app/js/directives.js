@@ -2046,5 +2046,88 @@ angular.module('myApp.directives', ['myApp.filters'])
           })
         }
       };
+
+      $scope.seek = function (position) {
+        $scope.mediaPlayer.player.seek(position);
+      };
+      $scope.setVolume = function (volume) {
+        $scope.mediaPlayer.player.setVolume(volume);
+      };
     }
+  })
+
+  .directive('mySlider', function ($window) {
+    return {
+      link: link,
+      templateUrl: templateUrl('slider')
+    };
+
+    function link ($scope, element, attrs) {
+      var wrap = $('.tg_slider_wrap', element);
+      var fill = $('.tg_slider_track_fill', element);
+      var thumb = $('.tg_slider_thumb', element);
+      var width = wrap.width();
+      var thumbWidth = Math.ceil(thumb.width());
+      var model = attrs.sliderModel;
+      var sliderCallback = attrs.sliderOnchange;
+      var minValue = $scope.$eval(attrs.sliderMin) || 0.0;
+      var maxValue = $scope.$eval(attrs.sliderMax) || 1.0;
+      var lastUpdValue = false;
+      var lastMinPageX = false;
+      
+      var onMouseMove = function (e) {
+        var offsetX = e.pageX - lastMinPageX;
+        offsetX = Math.min(width, Math.max(0 , offsetX));
+        // console.log('mmove', lastMinPageX, e.pageX, offsetX);
+        lastUpdValue = minValue + offsetX / width * (maxValue - minValue);
+        if (sliderCallback) {
+          $scope.$eval(sliderCallback, {value: lastUpdValue});
+        } else {
+          $scope.$eval(model + '=' + lastUpdValue);
+        }
+
+        thumb.css('left', Math.max(0, offsetX - thumbWidth));
+        fill.css('width', offsetX);
+
+        return cancelEvent(e);
+      };
+      var stopMouseTrack = function () {
+        $($window).off('mousemove', onMouseMove);
+        $($window).off('mouseup', stopMouseTrack);
+      };
+
+      $scope.$watch(model, function (newVal) {
+        if (newVal != lastUpdValue) {
+          var offsetX = width * (newVal - minValue) / (maxValue - minValue);
+          offsetX = Math.min(width, Math.max(0 , offsetX));
+          thumb.css('left', Math.max(0, offsetX - thumbWidth));
+          fill.css('width', offsetX);
+          lastUpdValue = false;
+        }
+      });
+
+      element.on('dragstart selectstart', cancelEvent);
+
+      element.on('mousedown', function (e) {
+        stopMouseTrack();
+
+        lastMinPageX = e.pageX - e.offsetX;
+        // console.log('mdown', lastMinPageX, e.pageX, e.offsetX);
+        lastUpdValue = minValue + e.offsetX / width * (maxValue - minValue);
+        if (sliderCallback) {
+          $scope.$eval(sliderCallback, {value: lastUpdValue});
+        } else {
+          $scope.$eval(model + '=' + lastUpdValue);
+        }
+
+        thumb.css('left', e.offsetX);
+        fill.css('width', e.offsetX);
+
+        $($window).on('mousemove', onMouseMove);
+        $($window).on('mouseup', stopMouseTrack);
+
+        return cancelEvent(e);
+      });
+    }
+
   })

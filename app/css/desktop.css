@@ -792,6 +792,12 @@ div.im_panel_own_photo {
   display: none;
 }
 
+.settings_volume_slider {
+  width: 100%;
+  max-width: 362px;
+  display: inline-block;
+}
+
 
 .im_message_selected .im_message_outer_wrap,
 .im_message_focus .im_message_outer_wrap {
