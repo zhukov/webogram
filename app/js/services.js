@@ -2323,8 +2323,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         ext = 'jpg',
         mimeType = 'image/jpeg',
         fileName = 'photo' + photoID + '.' + ext,
-        fullWidth = $(window).width() - 36,
-        fullHeight = $($window).height() - 150,
+        fullWidth = Math.max(screen.width || 0, $(window).width() - 36, 800),
+        fullHeight = Math.max(screen.height || 0, $($window).height() - 150, 800),
         fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
         inputFileLocation = {
           _: 'inputFileLocation',
