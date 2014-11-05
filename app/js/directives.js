@@ -1981,33 +1981,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('audio_player')
     };
 
-    function downloadAudio (audio) {
-      var inputFileLocation = {
-            _: audio._ == 'document' ? 'inputDocumentFileLocation' : 'inputAudioFileLocation',
-            id: audio.id,
-            access_hash: audio.access_hash
-          };
-
-      audio.progress = {enabled: true, percent: 1, total: audio.size};
-
-      var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {mime: 'audio/ogg'});
-
-      audio.progress.cancel = downloadPromise.cancel;
-
-      return downloadPromise.then(function (url) {
-        delete audio.progress;
-        audio.rawUrl = url;
-        audio.url = $sce.trustAsResourceUrl(url);
-      }, function (e) {
-        console.log('audio download failed', e);
-        audio.progress.enabled = false;
-      }, function (progress) {
-        console.log('audio dl progress', progress);
-        audio.progress.done = progress.done;
-        audio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      });
-    }
-
     function checkPlayer (newPlayer) {
       if (newPlayer === currentPlayer) {
         return false;
@@ -2019,14 +1992,20 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function link($scope, element, attrs) {
+      if ($scope.audio._ == 'audio') {
+        AppAudioManager.updateAudioDownloaded($scope.audio.id);
+      } else {
+        AppDocsManager.updateDocDownloaded($scope.audio.id);
+      }
+
       $scope.mediaPlayer = {};
 
       $scope.download = function () {
-        ($scope.audio.rawUrl ? $q.when() : downloadAudio($scope.audio)).then(
-          function () {
-            FileManager.download($scope.audio.rawUrl, $scope.audio.mime_type || 'audio/ogg', $scope.audio.file_name || 'audio.ogg');
-          }
-        );
+        if ($scope.audio._ == 'audio') {
+          AppAudioManager.saveAudioFile($scope.audio.id);
+        } else {
+          AppDocsManager.saveDocFile($scope.audio.id);
+        }
       };
 
       $scope.togglePlay = function () {
@@ -2038,7 +2017,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.audio.progress.cancel();
         }
         else {
-          downloadAudio($scope.audio).then(function () {
+          var downloadPromise;
+          if ($scope.audio._ == 'audio') {
+            downloadPromise = AppAudioManager.downloadDoc($scope.audio.id);
+          } else {
+            downloadPromise = AppDocsManager.downloadDoc($scope.audio.id);
+          }
+
+          downloadPromise.then(function () {
             onContentLoaded(function () {
               checkPlayer($scope.mediaPlayer.player);
               $scope.mediaPlayer.player.play();

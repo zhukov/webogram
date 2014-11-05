@@ -2706,7 +2706,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppAudioManager', function ($rootScope, $modal, $window, $timeout, $sce, MtpApiFileManager) {
+.service('AppAudioManager', function ($rootScope, $modal, $window, $timeout, $sce, MtpApiFileManager, FileManager) {
   var audios = {};
   var audiosForHistory = {};
 
@@ -2724,51 +2724,84 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return audiosForHistory[audioID] = audio;
   }
 
-  function openAudio (audioID, accessHash) {
+  function updateAudioDownloaded (audioID) {
     var audio = audios[audioID],
         historyAudio = audiosForHistory[audioID] || audio || {},
         inputFileLocation = {
           _: 'inputAudioFileLocation',
           id: audioID,
-          access_hash: accessHash || audio.access_hash
+          access_hash: audio.access_hash
+        };
+
+    if (historyAudio.downloaded === undefined) {
+      MtpApiFileManager.getDownloadedFile(inputFileLocation, audio.size).then(function () {
+        historyAudio.downloaded = true;
+      }, function () {
+        historyAudio.downloaded = false;
+      });
+    }
+  }
+
+  function downloadAudio (audioID, toFileEntry) {
+    var audio = audios[audioID],
+        historyAudio = audiosForHistory[audioID] || audio || {},
+        inputFileLocation = {
+          _: 'inputAudioFileLocation',
+          id: audioID,
+          access_hash: audio.access_hash
         };
 
     historyAudio.progress = {enabled: true, percent: 1, total: audio.size};
 
-    function updateDownloadProgress (progress) {
+    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {
+      mime: audio.mime_type || 'audio/ogg',
+      toFileEntry: toFileEntry
+    });
+
+    downloadPromise.then(function (url) {
+      delete historyAudio.progress;
+      historyAudio.url = url;
+      historyAudio.downloaded = true;
+      console.log('audio save done');
+    }, function (e) {
+      console.log('audio download failed', e);
+      historyAudio.progress.enabled = false;
+    }, function (progress) {
       console.log('dl progress', progress);
       historyAudio.progress.done = progress.done;
       historyAudio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
-    }
-
-    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {mime: 'audio/ogg'});
-
-    downloadPromise.then(function (url) {
-      delete historyAudio.progress;
-      historyAudio.url = $sce.trustAsResourceUrl(url);
-      historyAudio.autoplay = true;
-      $timeout(function () {
-        console.log('disable autoplay');
-        delete historyAudio.autoplay;
-        $rootScope.$broadcast('history_update');
-      }, 1000);
-    }, function (e) {
-      console.log('audio download failed', e);
-      historyAudio.progress.enabled = false;
-    }, updateDownloadProgress);
+    });
 
     historyAudio.progress.cancel = downloadPromise.cancel;
 
     return downloadPromise;
   }
 
-  $rootScope.openAudio = openAudio;
+  function saveAudioFile (audioID) {
+    var audio = audios[audioID],
+        historyAudio = audiosForHistory[audioID] || audio || {};
+
+    FileManager.chooseSave(audio.file_name, 'ogg', audio.mime_type || 'audio/ogg').then(function (writableFileEntry) {
+      if (!writableFileEntry) {
+        return;
+      }
+      downloadAudio(audioID, writableFileEntry).then(function () {
+        console.log('file save done');
+      });
+    }, function () {
+      downloadAudio(audioID).then(function (url) {
+        FileManager.download(url, audio.mime_type, audio.file_name);
+      });
+    });
+  }
 
   return {
     saveAudio: saveAudio,
     wrapForHistory: wrapForHistory,
-    openAudio: openAudio
+    updateAudioDownloaded: updateAudioDownloaded,
+    downloadAudio: downloadAudio,
+    saveAudioFile: saveAudioFile
   }
 })
 
