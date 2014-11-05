@@ -329,6 +329,7 @@
 
 	"message_attach_video_video": "Video",
 	"message_attach_video_download": "Download",
+	"message_attach_video_save": "Save File",
 	"message_attach_video_play": "Play video",
 
 	"conversation_select_modal_title": "Select conversation",

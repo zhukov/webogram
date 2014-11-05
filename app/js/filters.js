@@ -56,7 +56,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
     var cachedDates = {},
         dateFilter = $filter('date');
 
-    return function (timestamp) {
+    return function (timestamp, extended) {
 
       if (cachedDates[timestamp]) {
         return cachedDates[timestamp];
@@ -67,11 +67,12 @@ angular.module('myApp.filters', ['myApp.i18n'])
           format = 'shortTime';
 
       if (diff > 518400000) { // 6 days
-        format = 'shortDate';
+        format = extended ? 'mediumDate' : 'shortDate';
       }
       else if (diff > 43200000) { // 12 hours
-        format = 'EEE';
+        format = extended ? 'EEEE' : 'EEE';
       }
+
       return cachedDates[timestamp] = dateFilter(ticks, format);
     }
   })
@@ -120,6 +121,14 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   }])
 
+  .filter('durationRemains', function($filter) {
+    var durationFilter = $filter('duration');
+
+    return function (done, total) {
+      return '-' + durationFilter(total - done);
+    }
+  })
+
   .filter('phoneNumber', [function() {
     return function (phoneRaw) {
       var nbsp = ' ';
@@ -140,13 +149,13 @@ angular.module('myApp.filters', ['myApp.i18n'])
         return size + ' b';
       }
       else if (size < 1048576) {
-        return (Math.round(size / 1024 * 10) / 10) + ' Kb';
+        return Math.round(size / 1024) + ' Kb';
       }
       var mbs = size / 1048576;
       if (progressing) {
         mbs = mbs.toFixed(1);
       } else {
-        mbs = (Math.round(mbs * 100) / 100);
+        mbs = (Math.round(mbs * 10) / 10);
       }
       return mbs + ' Mb';
     }
@@ -192,14 +201,14 @@ angular.module('myApp.filters', ['myApp.i18n'])
       if (diff < 60000) {
         return _('relative_time_just_now');
       }
-      if (diff < 3000000) {
-        var minutes = Math.ceil(diff / 60000);
+      if (diff < 3600000) {
+        var minutes = Math.floor(diff / 60000);
         return langMinutesPluralize(minutes);
       }
-      if (diff < 10000000) {
-        var hours = Math.ceil(diff / 3600000);
+      if (diff < 86400000) {
+        var hours = Math.floor(diff / 3600000);
         return langHoursPluralize(hours);
       }
-      return dateOrTimeFilter(timestamp);
+      return dateOrTimeFilter(timestamp, true);
     }
   })

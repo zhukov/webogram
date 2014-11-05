@@ -1328,12 +1328,12 @@ div.im_message_video_thumb {
   z-index: 1;
 }
 
+.im_message_video,
 .im_message_document,
-.im_message_upload_file {
+.im_message_upload_file,
+.im_message_audio {
   margin-top: 3px;
-  /*border-radius: 3px;*/
-  /*display: inline-block;*/
-  width: 342px;
+  width: 317px;
 }
 .im_message_audio {
   margin-top: 3px;
@@ -1365,6 +1365,29 @@ div.im_message_video_thumb {
   width: 16px;
   height: 18px;
   margin: 12px 13px;
+}
+.im_message_file_button_dl_audio {
+  background: #6490b1;
+  border-radius: 2px;
+}
+.im_message_file_button_dl_audio .im_message_file_button_icon {
+  display: block;
+  width: 15px;
+  height: 18px;
+  background: url(../img/icons/IconsetW.png) -15px -897px no-repeat;
+  background-size: 42px 1171px;
+  margin: 12px 13.5px;
+}
+.is_1x .im_message_file_button_dl_audio .im_message_file_button_icon {
+  background-image: url(../img/icons/IconsetW_1x.png);
+  background-position: -15px -899px;
+}
+.im_message_file_button_dl_audio .audio_player_btn_icon_pause,
+.is_1x .im_message_file_button_dl_audio .audio_player_btn_icon_pause {
+  width: 12px;
+  height: 16px;
+  background-position: -15px -927px;
+  margin: 13px 15px;
 }
 
 .im_message_selected .icon-document,
@@ -1403,11 +1426,11 @@ img.im_message_document_thumb {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 290px;
+  width: 265px;
   padding: 0 0 1px;
 }
 .im_message_document_actions {
-  width: 290px;
+  width: 265px;
 }
 
 
@@ -1415,7 +1438,7 @@ img.im_message_document_thumb {
   color: #3a6d99;
   display: inline-block;
   font-weight: bold;
-  max-width: 200px;
+  max-width: 170px;
   overflow: hidden;
   vertical-align: text-top;
   white-space: nowrap;
@@ -1424,41 +1447,11 @@ img.im_message_document_thumb {
 .im_message_document_size {
   color: #999;
   padding-left: 2px;
+  vertical-align: text-top;
 }
 .im_message_document_actions a,
 .audio_player_actions a {
   margin-right: 10px;
-}
-.audio_player_button {
-  width: 42px;
-  height: 42px;
-  padding-left: 14px;
-  padding-right: 14px;
-  border-radius: 2px;
-  margin-right: 12px;
-}
-.audio_player_btn_icon {
-  display: block;
-  width: 14px;
-  height: 17px;
-  background: url(../img/icons/IconsetW.png) -15px -897px no-repeat;
-  background-size: 42px 1171px;
-}
-.is_1x .audio_player_btn_icon {
-  background-image: url(../img/icons/IconsetW_1x.png);
-  background-position: -15px -898px;
-}
-.audio_player_btn_icon_pause,
-.is_1x .audio_player_btn_icon_pause,
-.audio_player_btn_icon_cancel,
-.is_1x .audio_player_btn_icon_cancel {
-  width: 13px;
-  height: 15px;
-  background-position: -15px -923px;
-}
-.is_1x .audio_player_btn_icon_pause,
-.is_1x .audio_player_btn_icon_cancel {
-  background-position: -15px -925px;
 }
 .audio_player_title_wrap {
   overflow: hidden;
@@ -1467,11 +1460,12 @@ img.im_message_document_thumb {
   padding: 1px 0 1px;
   line-height: 16px;
   height: 19px;
+  width: 200px;
 }
 .audio_player_title {
   display: inline-block;
   font-weight: bold;
-  max-width: 200px;
+  max-width: 85px;
   overflow: hidden;
   vertical-align: text-top;
   white-space: nowrap;
@@ -1487,10 +1481,14 @@ img.im_message_document_thumb {
   color: #999;
   padding-left: 2px;
 }
+.audio_player_actions {
+  margin-top: 3px;
+}
+
 .audio_player_seek_slider {
   float: left;
-  margin-right: 17px;
-  width: 236px;
+  margin-right: 15px;
+  width: 200px;
 }
 .audio_player_seek_slider .tg_slider_wrap {
   height: 16px;
@@ -1508,6 +1506,7 @@ img.im_message_document_thumb {
   margin: 6px 0;
   background: rgba(218,228,234,0.50);
   height: 4px;
+  border-radius: 0;
 }
 .audio_player_seek_slider .tg_slider_track_fill {
   background: #6490b1;
@@ -1546,49 +1545,56 @@ img.im_message_document_thumb {
   width: 0;
 }
 
-.im_message_upload_progress_wrap,
-.im_message_download_progress_wrap {
-  margin-top: 5px;
-  width: 290px;
-}
 .audio_player_progress_wrap {
-  margin-top: 4px;
-  /*max-width: 290px;*/
-  width: 303px;
   overflow: hidden;
 }
 .audio_player_progress_wrap .tg_down_progress {
   margin-top: 5px;
 }
 
+
+
+
+.im_message_upload_progress_wrap,
+.im_message_download_progress_wrap {
+  margin-top: 5px;
+  width: 200px;
+}
+
 .im_message_document_thumbed .im_message_document_name_wrap,
 .im_message_document_thumbed .im_message_upload_progress_wrap,
 .im_message_document_thumbed .im_message_download_progress_wrap,
 .im_message_document_thumbed .im_message_document_actions {
-  width: 230px;
+  width: 207px;
 }
 .im_message_document_thumbed .im_message_document_name {
-  max-width: 150px;
+  max-width: 110px;
 }
 .im_message_video .im_message_document_name_wrap,
 .im_message_video .im_message_download_progress_wrap,
 .im_message_video .im_message_document_actions {
-  width: 150px;
+  width: 152px;
 }
 .im_message_video .im_message_document_name_wrap {
   margin-top: 5px;
 }
 
+.im_message_cancelable_progress_wrap,
+.im_message_playback_progress_wrap {
+  margin-top: 4px;
+  /*width: 265px;*/
+}
 .im_message_media_progress_cancel {
-  font-size: 11px;
-  margin-left: 10px;
+  margin-left: 15px;
   line-height: 100%;
+  width: 50px;
+  display: block;
+  overflow: hidden;
 }
 
 .tg_up_progress,
-.tg_down_progress,
-.tg_play_progress {
-  height: 5px;
+.tg_down_progress {
+  height: 4px;
   margin: 0;
   padding: 0;
   background: rgba(218,228,234,0.50);
@@ -1598,25 +1604,14 @@ img.im_message_document_thumb {
   box-shadow: none;
 }
 .tg_up_progress .progress-bar,
-.tg_down_progress .progress-bar,
-.tg_play_progress .progress-bar {
-  height: 5px;
-  line-height: 5px;
+.tg_down_progress .progress-bar {
+  height: 4px;
+  line-height: 4px;
   background: #6B9ABD;
   border-radius: 0;
   overflow: hidden;
   -webkit-box-shadow: none;
   box-shadow: none;
-}
-.tg_play_progress {
-  background: rgba(218,228,234,0.50);
-  border-radius: 1px;
-}
-.tg_play_progress .progress-bar {
-  background: #628fb2;
-  border-radius: 1px;
-  -webkit-transition: none;
-  transition: none;
 }
 
 
@@ -2757,4 +2752,9 @@ ce671b orange
   font-size: 14px;
   line-height: 160%;
   margin: 25px 0 30px;
+}
+
+#nacl_listener {
+  position: absolute;
+  left: -10000px;
 }

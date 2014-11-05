@@ -196,7 +196,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       windowClass: 'user_modal_window mobile_modal'
     });
   };
-  $rootScope.openUser = openUser;
 
   function importContact (phone, firstName, lastName) {
     return MtpApiManager.invokeApi('contacts.importContacts', {
@@ -527,9 +526,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       windowClass: 'chat_modal_window mobile_modal'
     });
   }
-
-  $rootScope.openChat = openChat;
-
 
   return {
     saveApiChats: saveApiChats,
@@ -1276,7 +1272,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       fileName = 'video.mp4';
     } else if (file.type.substr(0, 6) == 'audio/') {
       attachType = 'audio';
-      fileName = 'audio.' + file.type.split('/')[1] || 'mp3';
+      fileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
     } else {
       attachType = 'document';
       fileName = 'document.' + file.type.split('/')[1];
@@ -2291,7 +2287,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     photo.full = full;
-    photo.fromUser = AppUsersManager.getUser(photo.user_id);
 
     return photo;
   }
@@ -2334,19 +2329,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         };
 
     FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
+      if (writableFileEntry) {
+        MtpApiFileManager.downloadFile(
+          fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
+          mime: mimeType,
+          toFileEntry: writableFileEntry
+        }).then(function (url) {
+          // console.log('file save done');
+        }, function (e) {
+          console.log('photo download failed', e);
+        });
       }
-      
-      MtpApiFileManager.downloadFile(
-        fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
-        mime: mimeType,
-        toFileEntry: writableFileEntry
-      }).then(function (url) {
-        // console.log('file save done');
-      }, function (e) {
-        console.log('photo download failed', e);
-      });
     }, function () {
       MtpApiFileManager.downloadFile(
         fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {mime: mimeType}
@@ -2359,7 +2352,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   };
 
   $rootScope.openPhoto = openPhoto;
-
 
   return {
     savePhoto: savePhoto,
@@ -2374,7 +2366,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('AppVideoManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
+.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
   var videos = {},
       videosForHistory = {},
       windowW = $(window).width(),
@@ -2399,8 +2391,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     var video = angular.copy(videos[videoID]),
-        width = Math.min(windowW - 80, Config.Mobile ? 210 : 200),
-        height = Math.min(windowH - 100, Config.Mobile ? 210 : 200),
+        width = Math.min(windowW - 80, Config.Mobile ? 210 : 150),
+        height = Math.min(windowH - 100, Config.Mobile ? 210 : 150),
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',
@@ -2452,7 +2444,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     video.fullThumb = angular.copy(video.thumb);
     video.fullThumb.width = full.width;
     video.fullThumb.height = full.height;
-    video.fromUser = AppUsersManager.getUser(video.user_id);
 
     return video;
   }
@@ -2462,7 +2453,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     scope.videoID = videoID;
     scope.messageID = messageID;
 
-    var modalInstance = $modal.open({
+    return $modal.open({
       templateUrl: templateUrl('video_modal'),
       controller: 'VideoModalController',
       scope: scope,
@@ -2470,79 +2461,93 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function downloadVideo (videoID, accessHash, popup) {
+  function updateVideoDownloaded (videoID) {
     var video = videos[videoID],
         historyVideo = videosForHistory[videoID] || video || {},
         inputFileLocation = {
           _: 'inputVideoFileLocation',
           id: videoID,
-          access_hash: accessHash || video.access_hash
+          access_hash: video.access_hash
         };
 
-    historyVideo.progress = {enabled: true, percent: 1, total: video.size};
+    // historyVideo.progress = {enabled: true, percent: 10, total: video.size};
 
-    function updateDownloadProgress (progress) {
+    if (historyVideo.downloaded === undefined) {
+      MtpApiFileManager.getDownloadedFile(inputFileLocation, video.size).then(function () {
+        historyVideo.downloaded = true;
+      }, function () {
+        historyVideo.downloaded = false;
+      });
+    }
+  }
+
+  function downloadVideo (videoID, toFileEntry) {
+    var video = videos[videoID],
+        historyVideo = videosForHistory[videoID] || video || {},
+        inputFileLocation = {
+          _: 'inputVideoFileLocation',
+          id: videoID,
+          access_hash: video.access_hash
+        };
+
+    historyVideo.progress = {enabled: !historyVideo.downloaded, percent: 1, total: video.size};
+
+    var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
+      mime: video.mime_type || 'video/ogg',
+      toFileEntry: toFileEntry
+    });
+
+    downloadPromise.then(function (url) {
+      delete historyVideo.progress;
+      historyVideo.url = $sce.trustAsResourceUrl(url);
+      historyVideo.downloaded = true;
+      console.log('video save done');
+    }, function (e) {
+      console.log('video download failed', e);
+      historyVideo.progress.enabled = false;
+    }, function (progress) {
       console.log('dl progress', progress);
+      historyVideo.progress.enabled = true;
       historyVideo.progress.done = progress.done;
       historyVideo.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
-    }
-
-    var ext = 'mp4',
-        mimeType = 'video/mpeg4',
-        fileName = 'video' + videoID + '.' + ext;
-
-    FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
-      }
-
-      var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
-        mime: mimeType,
-        toFileEntry: writableFileEntry
-      });
-      downloadPromise.then(function (url) {
-        delete historyVideo.progress;
-        console.log('file save done');
-      }, function (e) {
-        console.log('video download failed', e);
-        historyVideo.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyVideo.progress.cancel = downloadPromise.cancel;
-    }, function () {
-      var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {mime: mimeType});
-
-      downloadPromise.then(function (url) {
-        delete historyVideo.progress;
-
-        if (popup) {
-          window.open(url, '_blank');
-          return
-        }
-
-        FileManager.download(url, mimeType, fileName);
-      }, function (e) {
-        console.log('video download failed', e);
-        historyVideo.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyVideo.progress.cancel = downloadPromise.cancel;
     });
-  };
 
-  $rootScope.openVideo = openVideo;
-  $rootScope.downloadVideo = downloadVideo;
+    historyVideo.progress.cancel = downloadPromise.cancel;
+
+    return downloadPromise;
+  }
+
+  function saveVideoFile (videoID) {
+    var video = videos[videoID],
+        mimeType = video.mime_type || 'video/mpeg4',
+        fileExt = mimeType.split('.')[1] || 'mp4',
+        fileName = 't_video' + videoID + '.' + fileExt,
+        historyVideo = videosForHistory[videoID] || video || {};
+
+    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
+      if (writableFileEntry) {
+        downloadVideo(videoID, writableFileEntry);
+      }
+    }, function () {
+      downloadVideo(videoID).then(function (url) {
+        FileManager.download(url, mimeType, fileName);
+      });
+    });
+  }
 
   return {
     saveVideo: saveVideo,
     wrapForHistory: wrapForHistory,
     wrapForFull: wrapForFull,
-    openVideo: openVideo
+    openVideo: openVideo,
+    updateVideoDownloaded: updateVideoDownloaded,
+    downloadVideo: downloadVideo,
+    saveVideoFile: saveVideoFile
   }
 })
 
-.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, $q, MtpApiFileManager, FileManager) {
+.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $timeout, $q, MtpApiFileManager, FileManager) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2619,6 +2624,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: doc.access_hash
         };
 
+    // historyDoc.progress = {enabled: true, percent: 10, total: doc.size};
+
     if (historyDoc.downloaded === undefined) {
       MtpApiFileManager.getDownloadedFile(inputFileLocation, doc.size).then(function () {
         historyDoc.downloaded = true;
@@ -2637,7 +2644,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: doc.access_hash
         };
 
-    historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
+    historyDoc.progress = {enabled: !historyDoc.downloaded, percent: 1, total: doc.size};
 
     var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
       mime: doc.mime_type,
@@ -2646,7 +2653,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     downloadPromise.then(function (url) {
       delete historyDoc.progress;
-      historyDoc.url = url;
+      historyDoc.url = $sce.trustAsResourceUrl(url);
       historyDoc.downloaded = true;
       console.log('file save done');
     }, function (e) {
@@ -2654,6 +2661,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       historyDoc.progress.enabled = false;
     }, function (progress) {
       console.log('dl progress', progress);
+      historyDoc.progress.enabled = true;
       historyDoc.progress.done = progress.done;
       historyDoc.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
@@ -2683,12 +2691,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var ext = (doc.file_name.split('.', 2) || [])[1] || '';
     FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
+      if (writableFileEntry) {
+        downloadDoc(docID, writableFileEntry);
       }
-      downloadDoc(docID, writableFileEntry).then(function () {
-        console.log('file save done');
-      });
     }, function () {
       downloadDoc(docID).then(function (url) {
         FileManager.download(url, doc.mime_type, doc.file_name);
@@ -2706,7 +2711,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppAudioManager', function ($rootScope, $modal, $window, $timeout, $sce, MtpApiFileManager, FileManager) {
+.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
   var audios = {};
   var audiosForHistory = {};
 
@@ -2733,6 +2738,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: audio.access_hash
         };
 
+    // historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 10, total: audio.size};
+
     if (historyAudio.downloaded === undefined) {
       MtpApiFileManager.getDownloadedFile(inputFileLocation, audio.size).then(function () {
         historyAudio.downloaded = true;
@@ -2751,7 +2758,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: audio.access_hash
         };
 
-    historyAudio.progress = {enabled: true, percent: 1, total: audio.size};
+    historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 1, total: audio.size};
 
     var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {
       mime: audio.mime_type || 'audio/ogg',
@@ -2760,7 +2767,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     downloadPromise.then(function (url) {
       delete historyAudio.progress;
-      historyAudio.url = url;
+      historyAudio.url = $sce.trustAsResourceUrl(url);
       historyAudio.downloaded = true;
       console.log('audio save done');
     }, function (e) {
@@ -2768,6 +2775,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       historyAudio.progress.enabled = false;
     }, function (progress) {
       console.log('dl progress', progress);
+      historyAudio.progress.enabled = true;
       historyAudio.progress.done = progress.done;
       historyAudio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
@@ -2780,18 +2788,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function saveAudioFile (audioID) {
     var audio = audios[audioID],
+        mimeType = audio.mime_type || 'audio/ogg',
+        fileExt = mimeType.split('.')[1] || 'ogg',
+        fileName = 't_audio' + audioID + '.' + fileExt,
         historyAudio = audiosForHistory[audioID] || audio || {};
 
-    FileManager.chooseSave(audio.file_name, 'ogg', audio.mime_type || 'audio/ogg').then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
+    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
+      if (writableFileEntry) {
+        downloadAudio(audioID, writableFileEntry);
       }
-      downloadAudio(audioID, writableFileEntry).then(function () {
-        console.log('file save done');
-      });
     }, function () {
       downloadAudio(audioID).then(function (url) {
-        FileManager.download(url, audio.mime_type, audio.file_name);
+        FileManager.download(url, mimeType, fileName);
       });
     });
   }

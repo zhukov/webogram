@@ -316,7 +316,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -400,9 +400,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.showPeerInfo = function () {
       if ($scope.curDialog.peerID > 0) {
-        $rootScope.openUser($scope.curDialog.peerID)
+        AppUsersManager.openUser($scope.curDialog.peerID)
       } else if ($scope.curDialog.peerID < 0) {
-        $rootScope.openChat(-$scope.curDialog.peerID)
+        AppChatsManager.openChat(-$scope.curDialog.peerID)
       }
     };
 
@@ -2120,7 +2120,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     });
 
-    $scope.notify = {};
+    $scope.notify = {volume: 0.5};
     $scope.send = {};
 
     $scope.$watch('photo.file', onPhotoSelected);
@@ -2210,31 +2210,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (settings[1]) {
         $scope.notify.volume = 0;
       } else if (settings[3] !== false) {
-        $scope.notify.volume = settings[3] > 0 && Math.ceil(settings[3] * 10) || 0;
+        $scope.notify.volume = settings[3] > 0 && settings[3] <= 1.0 ? settings[3] : 0;
       } else {
-        $scope.notify.volume = 5;
+        $scope.notify.volume = 0.5;
       }
 
       $scope.notify.canVibrate = NotificationsManager.getVibrateSupport();
       $scope.notify.vibrate = !settings[4];
 
       $scope.notify.volumeOf4 = function () {
-        return 1 + Math.ceil(($scope.notify.volume - 1) / 3.3);
+        return 1 + Math.ceil(($scope.notify.volume - 0.1) / 0.33);
       };
 
       $scope.toggleSound = function () {
         if ($scope.notify.volume) {
           $scope.notify.volume = 0;
         } else {
-          $scope.notify.volume = 5;
+          $scope.notify.volume = 0.5;
         }
       }
 
       var testSoundPromise;
       $scope.$watch('notify.volume', function (newValue, oldValue) {
         if (newValue !== oldValue) {
-          var storeVolume = newValue / 10;
-          Storage.set({notify_volume: storeVolume});
+          Storage.set({notify_volume: newValue});
           Storage.remove('notify_nosound');
           NotificationsManager.clear();
 
@@ -2242,7 +2241,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             $timeout.cancel(testSoundPromise);
           }
           testSoundPromise = $timeout(function () {
-            NotificationsManager.testSound(storeVolume);
+            NotificationsManager.testSound(newValue);
           }, 500);
         }
       });

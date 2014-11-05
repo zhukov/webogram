@@ -32,7 +32,7 @@
         <a ng-switch-default href="" ng-click="docSave()" my-i18n="message_attach_document_download"></a>
         <a ng-if="::document.withPreview" href="" ng-click="docOpen()" my-i18n="message_attach_document_open"></a>
       </div>
-      <div class="clearfix cancelable_progress_wrap" ng-if="document.progress.enabled">
+      <div class="clearfix im_message_cancelable_progress_wrap" ng-if="document.progress.enabled">
         <a class="im_message_media_progress_cancel pull-right" ng-click="document.progress.cancel()" my-i18n="modal_cancel"></a>
         <div class="im_message_download_progress_wrap">
           <div class="progress tg_down_progress">

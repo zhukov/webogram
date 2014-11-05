@@ -177,9 +177,22 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_photo')
     };
   })
-  .directive('myMessageVideo', function() {
+  .directive('myMessageVideo', function(AppVideoManager) {
     return {
-      templateUrl: templateUrl('message_attach_video')
+      scope: {
+        'video': '=myMessageVideo',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_video'),
+      link: function ($scope, element, attrs) {
+        AppVideoManager.updateVideoDownloaded($scope.video.id);
+        $scope.videoSave = function () {
+          AppVideoManager.saveVideoFile($scope.video.id);
+        };
+        $scope.videoOpen = function () {
+          AppVideoManager.openVideo($scope.video.id, $scope.messageId);
+        };
+      }
     };
   })
   .directive('myMessageDocument', function(AppDocsManager) {
@@ -1338,7 +1351,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myLoadVideo', function($sce, MtpApiFileManager, _) {
+  .directive('myLoadVideo', function($sce, AppVideoManager, _) {
 
     return {
       link: link,
@@ -1351,37 +1364,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
-      $scope.progress = {enabled: true, percent: 1};
-      $scope.player = {};
+      var downloadPromise = AppVideoManager.downloadVideo($scope.video.id);
 
-      var inputLocation = {
-        _: 'inputVideoFileLocation',
-        id: $scope.video.id,
-        access_hash: $scope.video.access_hash
-      };
-
-      var hasQt = false, i;
-      if (navigator.plugins) {
-        for (i = 0; i < navigator.plugins.length; i++) {
-          if (navigator.plugins[i].name.indexOf('QuickTime') >= 0) {
-            hasQt = true;
-          }
-        }
-      }
-
-      var downloadPromise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, {mime: 'video/mp4'});
-
-      downloadPromise.then(function (url) {
-        $scope.progress.enabled = false;
-        // $scope.progress = {enabled: true, percent: 50};
-        $scope.player.hasQuicktime = hasQt;
-        $scope.player.quicktime = false;
-        $scope.player.src = $sce.trustAsResourceUrl(url);
+      downloadPromise.then(function () {
         $scope.$emit('ui_height');
       }, function (e) {
         console.log('Download video failed', e, $scope.video);
-        $scope.progress.enabled = false;
-        $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
           $scope.error = {html: _('error_browser_no_local_file_system_video_md', {
@@ -1393,8 +1381,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.error = {text: _('error_video_download_failed'), error: e};
         }
 
-      }, function (progress) {
-        $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
 
       $scope.$emit('ui_height');
@@ -1406,7 +1392,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadGif', function($rootScope, MtpApiFileManager, AppDocsManager) {
+  .directive('myLoadGif', function(AppDocsManager) {
 
     return {
       link: link,
@@ -1418,15 +1404,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
-      var downloadPromise = false,
-          inputFileLocation = {
-            _: 'inputDocumentFileLocation',
-            id: $scope.document.id,
-            access_hash: $scope.document.access_hash
-          };
+      var downloadPromise = false;
 
       $scope.isActive = false;
-      $scope.document.url = MtpApiFileManager.getCachedFile(inputFileLocation);
 
       $scope.toggle = function (e) {
         if (checkClick(e, true)) {
@@ -1446,34 +1426,17 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        $scope.document.progress = {enabled: true, percent: 1, total: $scope.document.size};
+        downloadPromise = AppDocsManager.downloadDoc($scope.document.id);
 
-        downloadPromise = MtpApiFileManager.downloadFile(
-          $scope.document.dc_id,
-          inputFileLocation,
-          $scope.document.size,
-          null,
-          {mime: $scope.document.mime_type}
-        );
-
-        downloadPromise.then(function (url) {
-          $scope.document.url = url;
+        downloadPromise.then(function () {
           $scope.isActive = true;
-          delete $scope.document.progress;
-          console.log('file save done');
           $scope.$emit('ui_height');
-        }, function () {
-          $scope.document.progress.enabled = false;
-        }, function (progress) {
-          console.log('dl progress', progress);
-          $scope.document.progress.done = progress.done;
-          $scope.document.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
         })
       }
     }
   })
 
-  .directive('myLoadDocument', function($rootScope, MtpApiFileManager, AppDocsManager) {
+  .directive('myLoadDocument', function(MtpApiFileManager, AppDocsManager) {
 
     return {
       link: link,
@@ -1869,7 +1832,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myUserLink', function ($timeout, $rootScope, AppUsersManager) {
+  .directive('myUserLink', function ($timeout, AppUsersManager) {
 
     return {
       link: link
@@ -1885,7 +1848,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (element[0].tagName == 'A') {
         element.on('click', function () {
-          $rootScope.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
+          AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
       if (attrs.color && $scope.$eval(attrs.color)) {
@@ -1939,7 +1902,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myUserPhotolink', function ($rootScope, AppUsersManager) {
+  .directive('myUserPhotolink', function (AppUsersManager) {
 
     return {
       link: link,
@@ -1958,7 +1921,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (element[0].tagName == 'A') {
         element.on('click', function (e) {
-          $rootScope.openUser($scope.userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
+          AppUsersManager.openUser($scope.userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
 
@@ -1969,9 +1932,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($sce, $timeout, $q, FileManager, MtpApiFileManager) {
+  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager) {
 
     var currentPlayer = false;
+    var audioVolume = 0.5;
+
+    Storage.get('audio_volume').then(function (newAudioVolume) {
+      if (newAudioVolume >= 0.0 && newAudioVolume <= 1.0) {
+        audioVolume = newAudioVolume;
+      }
+    });
 
     return {
       link: link,
@@ -2014,12 +1984,12 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.mediaPlayer.player.playPause();
         }
         else if ($scope.audio.progress && $scope.audio.progress.enabled) {
-          $scope.audio.progress.cancel();
+          return;
         }
         else {
           var downloadPromise;
           if ($scope.audio._ == 'audio') {
-            downloadPromise = AppAudioManager.downloadDoc($scope.audio.id);
+            downloadPromise = AppAudioManager.downloadAudio($scope.audio.id);
           } else {
             downloadPromise = AppDocsManager.downloadDoc($scope.audio.id);
           }
@@ -2027,6 +1997,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           downloadPromise.then(function () {
             onContentLoaded(function () {
               checkPlayer($scope.mediaPlayer.player);
+              $scope.mediaPlayer.player.setVolume(audioVolume);
               $scope.mediaPlayer.player.play();
             })
           })
@@ -2034,10 +2005,18 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       $scope.seek = function (position) {
-        $scope.mediaPlayer.player.seek(position);
+        if ($scope.mediaPlayer && $scope.mediaPlayer.player) {
+          $scope.mediaPlayer.player.seek(position);
+        } else {
+          $scope.togglePlay();
+        }
       };
       $scope.setVolume = function (volume) {
-        $scope.mediaPlayer.player.setVolume(volume);
+        audioVolume = volume;
+        Storage.set({audio_volume: volume});
+        if ($scope.mediaPlayer && $scope.mediaPlayer.player) {
+          $scope.mediaPlayer.player.setVolume(volume);
+        }
       };
     }
   })
@@ -2060,7 +2039,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var maxValue = $scope.$eval(attrs.sliderMax) || 1.0;
       var lastUpdValue = false;
       var lastMinPageX = false;
-      
+
       var onMouseMove = function (e) {
         var offsetX = e.pageX - lastMinPageX;
         offsetX = Math.min(width, Math.max(0 , offsetX));
@@ -2084,10 +2063,16 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$watch(model, function (newVal) {
         if (newVal != lastUpdValue) {
-          var offsetX = width * (newVal - minValue) / (maxValue - minValue);
-          offsetX = Math.min(width, Math.max(0 , offsetX));
-          thumb.css('left', Math.max(0, offsetX - thumbWidth));
-          fill.css('width', offsetX);
+          var percent = Math.max(0, (newVal - minValue) / (maxValue - minValue));
+          if (width) {
+            var offsetX = width * percent;
+            offsetX = Math.min(width, Math.max(0 , offsetX));
+            thumb.css('left', Math.max(0, offsetX - thumbWidth));
+            fill.css('width', offsetX);
+          } else {
+            thumb.css('left', percent * 100 + '%');
+            fill.css('width', percent * 100 + '%');
+          }
           lastUpdValue = false;
         }
       });
@@ -2095,6 +2080,13 @@ angular.module('myApp.directives', ['myApp.filters'])
       element.on('dragstart selectstart', cancelEvent);
 
       element.on('mousedown', function (e) {
+        if (!width) {
+          width = wrap.width();
+          if (!width) {
+            console.error('empty width');
+            return cancelEvent(e);
+          }
+        }
         stopMouseTrack();
 
         lastMinPageX = e.pageX - e.offsetX;
