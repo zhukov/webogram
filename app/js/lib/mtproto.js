@@ -9,7 +9,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 .factory('MtpDcConfigurator', function () {
   var dcOptions = Config.Modes.test
-    ? (location.protocol == 'https:'
+    ? (Config.Modes.ssl
     ? [
       {id: 1, url: 'https://pluto.web.telegram.org/apiw_test1'},
       {id: 2, url: 'https://venus.web.telegram.org/apiw_test1'},
@@ -20,7 +20,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       {id: 2, url: 'http://149.154.167.40/apiw1'},
       {id: 3, url: 'http://174.140.142.5/apiw1'}
     ])
-    : (location.protocol == 'https:'
+    : (Config.Modes.ssl
     ? [
       {id: 1, url: 'https://pluto.web.telegram.org/apiw1'},
       {id: 2, url: 'https://venus.web.telegram.org/apiw1'},
