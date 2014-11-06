@@ -128,7 +128,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   };
 })
 
-.service('MtpSecureRandom', function () {
+.service('MtpSecureRandom', function ($window) {
+  $($window).on('click keydown', rng_seed_time);
   return new SecureRandom();
 })
 
@@ -234,8 +235,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         } catch (e) {
           return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
         }
-
-        rng_seed_time();
 
         return deserializer;
       },
