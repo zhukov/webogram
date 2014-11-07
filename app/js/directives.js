@@ -1968,6 +1968,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         AppDocsManager.updateDocDownloaded($scope.audio.id);
       }
 
+      $scope.volume = audioVolume;
       $scope.mediaPlayer = {};
 
       $scope.download = function () {
@@ -2035,10 +2036,21 @@ angular.module('myApp.directives', ['myApp.filters'])
       var thumbWidth = Math.ceil(thumb.width());
       var model = attrs.sliderModel;
       var sliderCallback = attrs.sliderOnchange;
-      var minValue = $scope.$eval(attrs.sliderMin) || 0.0;
-      var maxValue = $scope.$eval(attrs.sliderMax) || 1.0;
+      var minValue = 0.0;
+      var maxValue = 1.0;
       var lastUpdValue = false;
       var lastMinPageX = false;
+
+      if (attrs.sliderMin) {
+        $scope.$watch(attrs.sliderMin, function (newMinValue) {
+          minValue = newMinValue || 0.0;
+        });
+      }
+      if (attrs.sliderMax) {
+        $scope.$watch(attrs.sliderMax, function (newMaxValue) {
+          maxValue = newMaxValue || 1.0;
+        });
+      }
 
       var onMouseMove = function (e) {
         var offsetX = e.pageX - lastMinPageX;
@@ -2062,10 +2074,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       $scope.$watch(model, function (newVal) {
-        if (newVal != lastUpdValue) {
+        if (newVal != lastUpdValue && newVal !== undefined) {
           var percent = Math.max(0, (newVal - minValue) / (maxValue - minValue));
           if (width) {
-            var offsetX = width * percent;
+            var offsetX = Math.ceil(width * percent);
             offsetX = Math.min(width, Math.max(0 , offsetX));
             thumb.css('left', Math.max(0, offsetX - thumbWidth));
             fill.css('width', offsetX);
@@ -2098,7 +2110,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$eval(model + '=' + lastUpdValue);
         }
 
-        thumb.css('left', e.offsetX);
+        thumb.css('left', Math.max(0, e.offsetX - thumbWidth));
         fill.css('width', e.offsetX);
 
         $($window).on('mousemove', onMouseMove);
