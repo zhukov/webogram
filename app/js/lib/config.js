@@ -133,7 +133,7 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
 
     for (i = 0; i < keys.length; i++) {
       key = keys[i] = prefix + keys[i];
-      if (cache[key] !== undefined) {
+      if (key.substr(0, 3) != 'xt_' && cache[key] !== undefined) {
         result.push(cache[key]);
       }
       else if (useLs) {

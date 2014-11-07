@@ -563,6 +563,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       iii = 0,
       offline,
       offlineInited = false,
+      akStopped = false,
       chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/),
       chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false,
       xhrSendBuffer = !('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30);
@@ -771,7 +772,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   MtpNetworker.prototype.checkLongPoll = function(force) {
     var isClean = this.cleanupSent();
     // console.log('Check lp', this.longPollPending, tsNow(), this.dcID, isClean);
-    if (this.longPollPending && tsNow() < this.longPollPending || this.offline) {
+    if (this.longPollPending && tsNow() < this.longPollPending ||
+        this.offline ||
+        akStopped) {
       return false;
     }
     var self = this;
@@ -962,7 +965,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
   MtpNetworker.prototype.performSheduledRequest = function() {
     // console.log(dT(), 'sheduled', this.dcID, this.iii);
-    if (this.offline) {
+    if (this.offline || akStopped) {
       console.log(dT(), 'Cancel sheduled');
       return false;
     }
@@ -1558,13 +1561,26 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     }
   };
 
+  function startAll() {
+    if (akStopped) {
+      akStopped = false;
+      updatesProcessor({_: 'new_session_created'});
+    }
+  }
+
+  function stopAll() {
+    akStopped = true;
+  }
+
   return {
     getNetworker: function (dcID, authKey, serverSalt, options) {
       return new MtpNetworker(dcID, authKey, serverSalt, options);
     },
     setUpdatesProcessor: function (callback) {
       updatesProcessor = callback;
-    }
+    },
+    stopAll: stopAll,
+    startAll: startAll
   };
 
 })

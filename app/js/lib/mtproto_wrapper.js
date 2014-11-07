@@ -7,11 +7,13 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, ErrorService, $q) {
+.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, ErrorService, $q) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
       baseDcID = false;
+
+  MtpSingleInstanceService.start();
 
   Storage.get('dc').then(function (dcID) {
     if (dcID) {
@@ -610,3 +612,80 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     uploadFile: uploadFile
   };
 })
+
+.service('MtpSingleInstanceService', function ($rootScope, $interval, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
+
+  var instanceID = nextRandomInt(0xFFFFFFFF);
+  var started = false;
+  var masterInstance  = false;
+  var startTime       = tsNow();
+  var errorShowTime = 0;
+
+  function start() {
+    if (!started) {
+      started = true;
+
+      IdleManager.start();
+
+      startTime = tsNow();
+      $rootScope.$watch('idle.isIDLE', checkInstance);
+      $interval(checkInstance, 5000);
+      checkInstance();
+
+      try {
+        $($window).on('beforeunload', clearInstance);
+      } catch (e) {};
+    }
+  }
+
+  function clearInstance () {
+    Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance');
+  }
+
+  function checkInstance() {
+    var time = tsNow();
+    var idle = $rootScope.idle && $rootScope.idle.isIDLE;
+    var newInstance = {id: instanceID, idle: idle, time: time};
+
+    Storage.get('xt_instance', 'xt_idle_instance').then(function (result) {
+      var curInstance = result[0],
+          idleInstance = result[1];
+
+      if (!curInstance ||
+          curInstance.time < time - 60000 ||
+          curInstance.id == instanceID ||
+          curInstance.idle ||
+          !idle) {
+
+        if (idleInstance) {
+          if (idleInstance.id == instanceID) {
+            Storage.remove('xt_idle_instance');
+          }
+          else if (idleInstance.time > time - 10000 &&
+                   time > errorShowTime) {
+
+            ErrorService.show({error: {type: 'MULTIPLE_TABS_OPEN'}});
+            errorShowTime += tsNow() + 60000;
+          }
+        }
+        Storage.set({xt_instance: newInstance});
+        if (!masterInstance) {
+          MtpNetworkerFactory.startAll();
+        }
+        masterInstance = true;
+      } else {
+        Storage.set({xt_idle_instance: newInstance});
+        if (masterInstance) {
+          MtpNetworkerFactory.stopAll();
+        }
+        masterInstance = false;
+
+      }
+    });
+  }
+
+  return {
+    start: start
+  }
+})
+

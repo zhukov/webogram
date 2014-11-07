@@ -808,6 +808,11 @@ angular.module('izhukov.utils', [])
         chrome.runtime.reload();
       };
     },
+    close: function () {
+      try {
+        $window.close();
+      } catch (e) {}
+    },
     focus: function () {
       if (window.navigator.mozApps && document.hidden) {
         // Get app instance and launch it to bring app to foreground

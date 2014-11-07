@@ -3463,7 +3463,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 
     try {
-      $($window).on('beforeunload', notificationsClear);
+      if ('onbeforeunload' in window) {
+        $($window).on('beforeunload', notificationsClear);
+      }
     } catch (e) {}
   }
 
