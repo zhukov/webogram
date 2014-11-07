@@ -225,7 +225,7 @@
 	"error_modal_flood_description": "You are performing too many actions. Please try again later.",
 	"error_modal_internal_description": "Internal server error occured. Please try again later.",
 	"error_modal_tech_details": "Technical details here",
-	"error_modal_multiple_open_tabs": "Telegram Web doesn't support working in multiple tabs. Please close other app instances.",
+	"error_modal_multiple_open_tabs": "Please close other Telegram app tabs.",
 
 
 	"head_new_group": "New Group",

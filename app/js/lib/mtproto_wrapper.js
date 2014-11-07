@@ -613,7 +613,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   };
 })
 
-.service('MtpSingleInstanceService', function ($rootScope, $interval, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
+.service('MtpSingleInstanceService', function (_, $rootScope, $interval, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
 
   var instanceID = nextRandomInt(0xFFFFFFFF);
   var started = false;
@@ -664,7 +664,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           else if (idleInstance.time > time - 10000 &&
                    time > errorShowTime) {
 
-            ErrorService.show({error: {type: 'MULTIPLE_TABS_OPEN'}});
+            ErrorService.alert(_('error_modal_warning_title'), _('error_modal_multiple_open_tabs'));
             errorShowTime += tsNow() + 60000;
           }
         }
