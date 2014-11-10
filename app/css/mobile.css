@@ -1118,3 +1118,8 @@ a.mobile_modal_action .tg_checkbox_label {
 .countries_scrollable_wrap a.countries_modal_country {
   padding: 8px 8px;
 }
+
+.import_modal_phonebook_wrap {
+  margin-top: 40px;
+  text-align: center;
+}
