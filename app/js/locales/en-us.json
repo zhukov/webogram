@@ -216,6 +216,7 @@
 	"error_modal_no_phone_user_description_md": "Sorry, there is no **Telegram** account with the phone number you provided.",
 	"error_modal_no_phone_users_description_md": "Sorry, there are no **Telegram** accounts with the phone numbers you provided.",
 	"error_modal_username_invalid_description": "Sorry, this username is not allowed.",
+	"error_modal_phonebook_required_description": "Telegram needs access to phonebook to import contacts.",
 	 "error_modal_username_occupied_description": "Sorry, this username is already taken.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",
