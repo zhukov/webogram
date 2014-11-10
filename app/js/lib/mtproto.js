@@ -8,44 +8,41 @@
 angular.module('izhukov.mtproto', ['izhukov.utils'])
 
 .factory('MtpDcConfigurator', function () {
+  var sslSubdomains = ['pluto', 'venus', 'aurora', 'vesta', 'flora'];
+
   var dcOptions = Config.Modes.test
-    ? (Config.Modes.ssl
     ? [
-      {id: 1, url: 'https://pluto.web.telegram.org/apiw_test1'},
-      {id: 2, url: 'https://venus.web.telegram.org/apiw_test1'},
-      {id: 3, url: 'https://aurora.web.telegram.org/apiw_test1'}
+      {id: 1, host: '173.240.5.253', port: 80},
+      {id: 2, host: '149.154.167.40', port: 80},
+      {id: 3, host: '174.140.142.5', port: 80}
     ]
     : [
-      {id: 1, url: 'http://173.240.5.253/apiw1'},
-      {id: 2, url: 'http://149.154.167.40/apiw1'},
-      {id: 3, url: 'http://174.140.142.5/apiw1'}
-    ])
-    : (Config.Modes.ssl
-    ? [
-      {id: 1, url: 'https://pluto.web.telegram.org/apiw1'},
-      {id: 2, url: 'https://venus.web.telegram.org/apiw1'},
-      {id: 3, url: 'https://aurora.web.telegram.org/apiw1'},
-      {id: 4, url: 'https://vesta.web.telegram.org/apiw1'},
-      {id: 5, url: 'https://flora.web.telegram.org/apiw1'}
-    ]
-    : [
-      {id: 1, url: 'http://173.240.5.1/apiw1'},
-      {id: 2, url: 'http://149.154.167.51/apiw1'},
-      {id: 3, url: 'http://174.140.142.6/apiw1'},
-      {id: 4, url: 'http://149.154.167.91/apiw1'},
-      {id: 5, url: 'http://149.154.171.5/apiw1'}
-    ]);
+      {id: 1, host: '173.240.5.1',   port: 80},
+      {id: 2, host: '149.154.167.51', port: 80},
+      {id: 3, host: '174.140.142.6', port: 80},
+      {id: 4, host: '149.154.167.91', port: 80},
+      {id: 5, host: '149.154.171.5',   port: 80}
+    ];
 
   var chosenServers = {};
 
-  function chooseServer(dcID) {
+  function chooseServer(dcID, upload) {
     if (chosenServers[dcID] === undefined) {
       var chosenServer = false,
           i, dcOption;
+
+      if (Config.Modes.ssl) {
+        var subdomain = sslSubdomains[dcID - 1] + (upload ? '-1' : '');
+        var path = Config.Modes.test ? 'apiw_test1' : 'apiw1';
+        chosenServer = 'https://' + subdomain + '.web.telegram.org/' + path;
+        return chosenServer;
+      }
+
       for (i = 0; i < dcOptions.length; i++) {
         dcOption = dcOptions[i];
         if (dcOption.id == dcID) {
-          chosenServer = dcOption.url;
+          chosenServer = 'http://' + dcOption.host + (dcOption.port != 80 ? ':' + dcOption.port : '') + '/apiw1';
+          break;
         }
       }
       chosenServers[dcID] = chosenServer;
@@ -1203,7 +1200,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID), requestData, options);
+        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID, self.upload), requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
