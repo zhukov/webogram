@@ -36,7 +36,16 @@ TLSerialization.prototype.getBuffer = function () {
   return this.getArray().buffer;
 };
 
-TLSerialization.prototype.getBytes = function () {
+TLSerialization.prototype.getBytes = function (typed) {
+  if (typed) {
+    var resultBuffer = new ArrayBuffer(this.offset);
+    var resultArray  = new Uint8Array(resultBuffer);
+
+    resultArray.set(this.byteView.subarray(0, this.offset));
+
+    return resultArray;
+  }
+
   var bytes = [];
   for (var i = 0; i < this.offset; i++) {
     bytes.push(this.byteView[i]);
@@ -139,11 +148,13 @@ TLSerialization.prototype.storeString = function (s, field) {
 
 
 TLSerialization.prototype.storeBytes = function (bytes, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 
-  this.checkLength(bytes.length + 8);
-
-  var len = bytes.length;
+  var len = bytes.byteLength || bytes.length;
+  this.checkLength(len + 8);
   if (len <= 253) {
     this.byteView[this.offset++] = len;
   } else {
@@ -152,9 +163,9 @@ TLSerialization.prototype.storeBytes = function (bytes, field) {
     this.byteView[this.offset++] = (len & 0xFF00) >> 8;
     this.byteView[this.offset++] = (len & 0xFF0000) >> 16;
   }
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 
   // Padding
   while (this.offset % 4) {
@@ -163,6 +174,9 @@ TLSerialization.prototype.storeBytes = function (bytes, field) {
 }
 
 TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   var len = bytes.length;
   if ((bits % 32) || (len * 8) != bits) {
     throw new Error('Invalid bits: ' + bits + ', ' + bytes.length);
@@ -171,20 +185,21 @@ TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':int' + bits);
   this.checkLength(len);
 
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 };
 
 TLSerialization.prototype.storeRawBytes = function (bytes, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   var len = bytes.length;
 
   this.debug && console.log('>>>', bytesToHex(bytes), (field || ''));
   this.checkLength(len);
 
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 };
 
 
@@ -391,10 +406,8 @@ TLDeserialization.prototype.fetchBytes = function (field) {
               (this.byteView[this.offset++] << 16);
   }
 
-  var bytes = [];
-  for (var i = 0; i < len; i++) {
-    bytes.push(this.byteView[this.offset++]);
-  }
+  var bytes = this.byteView.subarray(this.offset, this.offset + len);
+  this.offset += len;
 
   // Padding
   while (this.offset % 4) {
@@ -406,12 +419,18 @@ TLDeserialization.prototype.fetchBytes = function (field) {
   return bytes;
 }
 
-TLDeserialization.prototype.fetchIntBytes = function (bits, field) {
+TLDeserialization.prototype.fetchIntBytes = function (bits, typed, field) {
   if (bits % 32) {
     throw new Error('Invalid bits: ' + bits);
   }
 
   var len = bits / 8;
+  if (typed) {
+    var result = this.byteView.subarray(this.offset, this.offset + len);
+    this.offset += len;
+    return result;
+  }
+
   var bytes = [];
   for (var i = 0; i < len; i++) {
     bytes.push(this.byteView[this.offset++]);
@@ -423,9 +442,16 @@ TLDeserialization.prototype.fetchIntBytes = function (bits, field) {
 };
 
 
-TLDeserialization.prototype.fetchRawBytes = function (len, field) {
+TLDeserialization.prototype.fetchRawBytes = function (len, typed, field) {
   if (len === false) {
     len = this.readInt((field || '') + '_length');
+  }
+
+  if (typed) {
+    var bytes = new Uint8Array(len);
+    bytes.set(this.byteView.subarray(this.offset, this.offset + len));
+    this.offset += len;
+    return bytes;
   }
 
   var bytes = [];
@@ -442,9 +468,9 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
   switch (type) {
     case 'int':    return this.fetchInt(field);
     case 'long':   return this.fetchLong(field);
-    case 'int128': return this.fetchIntBytes(128, field);
-    case 'int256': return this.fetchIntBytes(256, field);
-    case 'int512': return this.fetchIntBytes(512, field);
+    case 'int128': return this.fetchIntBytes(128, false, field);
+    case 'int256': return this.fetchIntBytes(256, false, field);
+    case 'int512': return this.fetchIntBytes(512, false, field);
     case 'string': return this.fetchString(field);
     case 'bytes':  return this.fetchBytes(field);
     case 'double': return this.fetchDouble(field);

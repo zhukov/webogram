@@ -12,7 +12,7 @@
       </div>
 
       <p class="media_modal_info">
-        <span class="media_modal_author" ng-bind-html="video.fromUser.rFullName"></span>, <span ng-bind="video.date | dateOrTime"></span>
+        <a class="media_modal_author" my-user-link="video.user_id"></a>, <span ng-bind="video.date | dateOrTime"></span>
       </p>
     </div>
 

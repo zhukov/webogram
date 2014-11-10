@@ -96,3 +96,36 @@ if (!Function.prototype.bind) {
     return fBound;
   };
 }
+
+/* setZeroTimeout polyfill, from http://dbaron.org/log/20100309-faster-timeouts */
+(function(global) {
+  var timeouts = [];
+  var messageName = 'zero-timeout-message';
+
+  function setZeroTimeout(fn) {
+    timeouts.push(fn);
+    global.postMessage(messageName, '*');
+  }
+
+  function handleMessage(event) {
+    if (event.source == global && event.data == messageName) {
+      event.stopPropagation();
+      if (timeouts.length > 0) {
+        var fn = timeouts.shift();
+        fn();
+      }
+    }
+  }
+
+  global.addEventListener('message', handleMessage, true);
+
+  var originalSetTimeout = global.setTimeout;
+  global.setTimeout = function (callback, delay) {
+    if (!delay || delay <= 5) {
+      return setZeroTimeout(callback);
+    }
+    return originalSetTimeout(callback, delay);
+  };
+
+  global.setZeroTimeout = setZeroTimeout;
+})(this);

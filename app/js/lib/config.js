@@ -27,6 +27,7 @@ Config.App = {
 Config.Modes = {
   test: location.search.indexOf('test=1') > 0,
   debug: location.search.indexOf('debug=1') > 0,
+  ssl: location.search.indexOf('ssl=1') > 0 || location.protocol == 'https:',
   packed: location.protocol == 'app:' || location.protocol == 'chrome-extension:',
   ios_standalone: window.navigator.standalone && navigator.userAgent.match(/iOS|iPhone|iPad/),
   chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false
@@ -132,7 +133,7 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
 
     for (i = 0; i < keys.length; i++) {
       key = keys[i] = prefix + keys[i];
-      if (cache[key] !== undefined) {
+      if (key.substr(0, 3) != 'xt_' && cache[key] !== undefined) {
         result.push(cache[key]);
       }
       else if (useLs) {

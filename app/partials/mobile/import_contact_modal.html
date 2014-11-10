@@ -28,7 +28,7 @@
 
   <div class="modal-body">
 
-    <form class="modal_simple_form" ng-submit="doImport()" my-vertical-position="0.3">
+    <form class="modal_simple_form" ng-submit="doImport()" my-vertical-position="0.2">
 
       <div class="form-group">
         <input class="form-control input-lg" my-focused type="text" placeholder="{{'contact_import_modal_phone' | i18n}}" ng-model="importContact.phone"/>
@@ -39,13 +39,12 @@
       <div class="form-group">
         <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name"/>
       </div>
+      
+      <div class="import_modal_phonebook_wrap" ng-if="phonebookAvailable">
+        <a class="btn btn-link" ng-click="importPhonebook()" my-i18n="contact_import_modal_phonebook"></a>
+      </div>
 
     </form>
 
   </div>
-
-  <div class="modal-footer" ng-if="phonebookAvailable">
-    <a class="btn btn-link" ng-click="importPhonebook()" my-i18n="contact_import_modal_phonebook"></a>
-  </div>
-
 </div>

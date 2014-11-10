@@ -33,7 +33,7 @@ angular.module('izhukov.utils', [])
 
 })
 
-.service('FileManager', function ($window, $timeout, $q) {
+.service('FileManager', function ($window, $q, $timeout) {
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
@@ -98,10 +98,10 @@ angular.module('izhukov.utils', [])
     else {
       try {
         var blob = blobConstruct([bytesToArrayBuffer(bytes)]);
+        fileWriter.write(blob);
       } catch (e) {
         deferred.reject(e);
       }
-      fileWriter.write(blob);
     }
 
     return deferred.promise;
@@ -150,7 +150,7 @@ angular.module('izhukov.utils', [])
               return false;
             }
             blobParts.push(blob);
-            $timeout(function () {
+            setZeroTimeout(function () {
               if (fakeFileWriter.onwriteend) {
                 fakeFileWriter.onwriteend();
               }
@@ -484,35 +484,59 @@ angular.module('izhukov.utils', [])
 
 .service('CryptoWorker', function ($timeout, $q) {
 
-  var worker = window.Worker && new Worker('js/lib/crypto_worker.js') || false,
+  var webWorker = false,
+      naClEmbed = false,
       taskID = 0,
-      awaiting = {};
+      awaiting = {},
+      webCrypto = window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle) || window.msCrypto && window.msCrypto.subtle,
+      useSha1Crypto = webCrypto && webCrypto.digest !== undefined,
+      finalizeTask = function (taskID, result) {
+        var deferred = awaiting[taskID];
+        if (deferred !== undefined) {
+          // console.log(dT(), 'CW done');
+          deferred.resolve(result);
+          delete awaiting[taskID];
+        }
+      };
 
-  if (worker) {
-    worker.onmessage = function (e) {
-      var deferred = awaiting[e.data.taskID];
-      if (deferred !== undefined) {
-        console.log(dT(), 'CW done');
-        deferred.resolve(e.data.result);
-        delete awaiting[e.data.taskID];
+  if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
+    var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf?'+Math.random()+'" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
+    listener.addEventListener('load', function (e) {
+      naClEmbed = listener.firstChild;
+      console.log(dT(), 'NaCl ready');
+    }, true);
+    listener.addEventListener('message', function (e) {
+      finalizeTask(e.data.taskID, e.data.result);
+    }, true);
+    listener.addEventListener('error', function (e) {
+      console.error('NaCl error', e);
+    }, true);
+  }
+
+  if (window.Worker) {
+    var tmpWorker = new Worker('js/lib/crypto_worker.js');
+    tmpWorker.onmessage = function (e) {
+      if (!webWorker) {
+        webWorker = tmpWorker;
+      } else {
+        finalizeTask(e.data.taskID, e.data.result);
       }
     };
-
-    worker.onerror = function(error) {
+    tmpWorker.onerror = function(error) {
       console.error('CW error', error, error.stack);
-      worker = false;
+      webWorker = false;
     };
   }
 
-  function performTaskWorker (task, params) {
-    console.log(dT(), 'CW start', task);
+  function performTaskWorker (task, params, embed) {
+    // console.log(dT(), 'CW start', task);
     var deferred = $q.defer();
 
     awaiting[taskID] = deferred;
 
     params.task = task;
     params.taskID = taskID;
-    worker.postMessage(params);
+    (embed || webWorker).postMessage(params);
 
     taskID++;
 
@@ -521,39 +545,56 @@ angular.module('izhukov.utils', [])
 
   return {
     sha1Hash: function (bytes) {
-      if (worker && false) { // due overhead for data transfer
-        return performTaskWorker ('sha1-hash', {bytes: bytes});
+      if (useSha1Crypto) {
+        // We don't use buffer since typedArray.subarray(...).buffer gives the whole buffer and not sliced one. webCrypto.digest supports typed array
+        var deferred = $q.defer(),
+            bytesTyped = Array.isArray(bytes) ? convertToUint8Array(bytes) : bytes;
+        // console.log(dT(), 'Native sha1 start');
+        webCrypto.digest({name: 'SHA-1'}, bytesTyped).then(function (digest) {
+          // console.log(dT(), 'Native sha1 done');
+          deferred.resolve(digest);
+        }, function  (e) {
+          console.error('Crypto digest error', e);
+          useSha1Crypto = false;
+          deferred.resolve(sha1HashSync(bytes));
+        });
+
+        return deferred.promise;
       }
       return $timeout(function () {
-        return sha1Hash(bytes);
+        return sha1HashSync(bytes);
       });
     },
     aesEncrypt: function (bytes, keyBytes, ivBytes) {
-      if (worker && false) { // due overhead for data transfer
+      if (naClEmbed) {
         return performTaskWorker('aes-encrypt', {
-          bytes: bytes,
-          keyBytes: keyBytes,
-          ivBytes: ivBytes
-        });
+          bytes: addPadding(convertToArrayBuffer(bytes)),
+          keyBytes: convertToArrayBuffer(keyBytes),
+          ivBytes: convertToArrayBuffer(ivBytes)
+        }, naClEmbed);
       }
       return $timeout(function () {
-        return aesEncrypt(bytes, keyBytes, ivBytes);
+        return convertToArrayBuffer(aesEncryptSync(bytes, keyBytes, ivBytes));
       });
     },
     aesDecrypt: function (encryptedBytes, keyBytes, ivBytes) {
-      if (worker && false) { // due overhead for data transfer
+      if (naClEmbed) {
         return performTaskWorker('aes-decrypt', {
-          encryptedBytes: encryptedBytes,
-          keyBytes: keyBytes,
-          ivBytes: ivBytes
-        });
+          encryptedBytes: addPadding(convertToArrayBuffer(encryptedBytes)),
+          keyBytes: convertToArrayBuffer(keyBytes),
+          ivBytes: convertToArrayBuffer(ivBytes)
+        }, naClEmbed);
       }
       return $timeout(function () {
-        return aesDecrypt(encryptedBytes, keyBytes, ivBytes);
+        return convertToArrayBuffer(aesDecryptSync(encryptedBytes, keyBytes, ivBytes));
       });
     },
     factorize: function (bytes) {
-      if (worker) {
+      bytes = convertToByteArray(bytes);
+      if (naClEmbed && bytes.length <= 8) {
+        return performTaskWorker('factorize', {bytes: bytes}, naClEmbed);
+      }
+      if (webWorker) {
         return performTaskWorker('factorize', {bytes: bytes});
       }
       return $timeout(function () {
@@ -561,7 +602,7 @@ angular.module('izhukov.utils', [])
       });
     },
     modPow: function (x, y, m) {
-      if (worker) {
+      if (webWorker) {
         return performTaskWorker('mod-pow', {
           x: x,
           y: y,
@@ -575,6 +616,197 @@ angular.module('izhukov.utils', [])
   };
 })
 
+.service('SearchIndexManager', function () {
+  var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
+      trimRe = /^\s+|\s$/g,
+      accentsReplace = {
+        a: /[åáâäà]/g,
+        e: /[éêëè]/g,
+        i: /[íîïì]/g,
+        o: /[óôöò]/g,
+        u: /[úûüù]/g,
+        c: /ç/g,
+        ss: /ß/g
+      }
+
+  return {
+    createIndex: createIndex,
+    indexObject: indexObject,
+    cleanSearchText: cleanSearchText,
+    search: search
+  };
+
+  function createIndex () {
+    return {
+      shortIndexes: {},
+      fullTexts: {}
+    }
+  }
+
+  function cleanSearchText (text) {
+    text = text.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
+
+    for (var key in accentsReplace) {
+      if (accentsReplace.hasOwnProperty(key)) {
+        text = text.replace(accentsReplace[key], key);
+      }
+    }
+
+    return text;
+  }
+
+  function indexObject (id, searchText, searchIndex) {
+    if (searchIndex.fullTexts[id] !== undefined) {
+      return false;
+    }
+
+    searchText = cleanSearchText(searchText);
+
+    if (!searchText.length) {
+      return false;
+    }
+
+    var shortIndexes = searchIndex.shortIndexes;
+
+    searchIndex.fullTexts[id] = searchText;
+
+    angular.forEach(searchText.split(' '), function(searchWord) {
+      var len = Math.min(searchWord.length, 3),
+          wordPart, i;
+      for (i = 1; i <= len; i++) {
+        wordPart = searchWord.substr(0, i);
+        if (shortIndexes[wordPart] === undefined) {
+          shortIndexes[wordPart] = [id];
+        } else {
+          shortIndexes[wordPart].push(id);
+        }
+      }
+    });
+  }
+
+  function search (query, searchIndex) {
+    var shortIndexes = searchIndex.shortIndexes,
+        fullTexts = searchIndex.fullTexts;
+
+    query = cleanSearchText(query);
+
+    var queryWords = query.split(' '),
+        foundObjs = false,
+        newFoundObjs, i, j, searchText, found;
+
+    for (i = 0; i < queryWords.length; i++) {
+      newFoundObjs = shortIndexes[queryWords[i].substr(0, 3)];
+      if (!newFoundObjs) {
+        foundObjs = [];
+        break;
+      }
+      if (foundObjs === false || foundObjs.length > newFoundObjs.length) {
+        foundObjs = newFoundObjs;
+      }
+    }
+
+    newFoundObjs = {};
+
+    for (j = 0; j < foundObjs.length; j++) {
+      found = true;
+      searchText = fullTexts[foundObjs[j]];
+      for (i = 0; i < queryWords.length; i++) {
+        if (searchText.indexOf(queryWords[i]) == -1) {
+          found = false;
+          break;
+        }
+      }
+      if (found) {
+        newFoundObjs[foundObjs[j]] = true;
+      }
+    }
+
+    return newFoundObjs;
+  }
+})
+
+.service('ExternalResourcesManager', function ($q, $http) {
+  var urlPromises = {};
+  var twitterAttached = false;
+
+  function downloadImage (url) {
+    if (urlPromises[url] !== undefined) {
+      return urlPromises[url];
+    }
+
+    return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
+      .then(function (response) {
+        window.URL = window.URL || window.webkitURL;
+        return window.URL.createObjectURL(response.data);
+      });
+  }
+
+  function attachTwitterScript () {
+    twitterAttached = true;
+
+    $('<script>').appendTo('body')
+    // .on('load', function() {
+    // })
+    .attr('src', '//platform.twitter.com/widgets.js');
+  }
+
+  return {
+    downloadImage: downloadImage,
+    attachTwitterScript: attachTwitterScript
+  }
+})
+
+.service('IdleManager', function ($rootScope, $window, $timeout) {
+
+  $rootScope.idle = {isIDLE: false};
+
+  var toPromise, started = false;
+
+  return {
+    start: start
+  };
+
+  function start () {
+    if (!started) {
+      started = true;
+      $($window).on('blur focus keydown mousedown touchstart', onEvent);
+
+      setTimeout(function () {
+        onEvent({type: 'blur'});
+      }, 0);
+    }
+  }
+
+  function onEvent (e) {
+    // console.log('event', e.type);
+    if (e.type == 'mousemove') {
+      $($window).off('mousemove', onEvent);
+    }
+    var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
+
+    $timeout.cancel(toPromise);
+    if (!isIDLE) {
+      // console.log('update timeout');
+      toPromise = $timeout(function () {
+        onEvent({type: 'timeout'});
+      }, 30000);
+    }
+
+    if ($rootScope.idle.isIDLE == isIDLE) {
+      return;
+    }
+
+    // console.log('IDLE changed', isIDLE);
+    $rootScope.$apply(function () {
+      $rootScope.idle.isIDLE = isIDLE;
+    });
+
+    if (isIDLE && e.type == 'timeout') {
+      $($window).on('mousemove', onEvent);
+    }
+  }
+})
+
 .service('AppRuntimeManager', function ($window) {
 
   return {
@@ -586,6 +818,11 @@ angular.module('izhukov.utils', [])
       if ($window.chrome && chrome.runtime && chrome.runtime.reload) {
         chrome.runtime.reload();
       };
+    },
+    close: function () {
+      try {
+        $window.close();
+      } catch (e) {}
     },
     focus: function () {
       if (window.navigator.mozApps && document.hidden) {

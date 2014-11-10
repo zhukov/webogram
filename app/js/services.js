@@ -9,7 +9,7 @@
 
 /* Services */
 
-angular.module('myApp.services', ['myApp.i18n'])
+angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage, _) {
   var users = {},
@@ -196,7 +196,6 @@ angular.module('myApp.services', ['myApp.i18n'])
       windowClass: 'user_modal_window mobile_modal'
     });
   };
-  $rootScope.openUser = openUser;
 
   function importContact (phone, firstName, lastName) {
     return MtpApiManager.invokeApi('contacts.importContacts', {
@@ -401,7 +400,7 @@ angular.module('myApp.services', ['myApp.i18n'])
           phones: []
         };
 
-        if (this.result.tel !== undefined) {
+        if (this.result.tel != undefined) {
           for (var i = 0; i < this.result.tel.length; i++) {
             contact.phones.push(this.result.tel[i].value);
           }
@@ -528,9 +527,6 @@ angular.module('myApp.services', ['myApp.i18n'])
     });
   }
 
-  $rootScope.openChat = openChat;
-
-
   return {
     saveApiChats: saveApiChats,
     saveApiChat: saveApiChat,
@@ -603,115 +599,6 @@ angular.module('myApp.services', ['myApp.i18n'])
         ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
         : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
     }
-  }
-})
-
-.service('SearchIndexManager', function () {
-  var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-      trimRe = /^\s+|\s$/g,
-      accentsReplace = {
-        a: /[åáâäà]/g,
-        e: /[éêëè]/g,
-        i: /[íîïì]/g,
-        o: /[óôöò]/g,
-        u: /[úûüù]/g,
-        c: /ç/g,
-        ss: /ß/g
-      }
-
-  return {
-    createIndex: createIndex,
-    indexObject: indexObject,
-    cleanSearchText: cleanSearchText,
-    search: search
-  };
-
-  function createIndex () {
-    return {
-      shortIndexes: {},
-      fullTexts: {}
-    }
-  }
-
-  function cleanSearchText (text) {
-    text = text.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
-
-    for (var key in accentsReplace) {
-      if (accentsReplace.hasOwnProperty(key)) {
-        text = text.replace(accentsReplace[key], key);
-      }
-    }
-
-    return text;
-  }
-
-  function indexObject (id, searchText, searchIndex) {
-    if (searchIndex.fullTexts[id] !== undefined) {
-      return false;
-    }
-
-    searchText = cleanSearchText(searchText);
-
-    if (!searchText.length) {
-      return false;
-    }
-
-    var shortIndexes = searchIndex.shortIndexes;
-
-    searchIndex.fullTexts[id] = searchText;
-
-    angular.forEach(searchText.split(' '), function(searchWord) {
-      var len = Math.min(searchWord.length, 3),
-          wordPart, i;
-      for (i = 1; i <= len; i++) {
-        wordPart = searchWord.substr(0, i);
-        if (shortIndexes[wordPart] === undefined) {
-          shortIndexes[wordPart] = [id];
-        } else {
-          shortIndexes[wordPart].push(id);
-        }
-      }
-    });
-  }
-
-  function search (query, searchIndex) {
-    var shortIndexes = searchIndex.shortIndexes,
-        fullTexts = searchIndex.fullTexts;
-
-    query = cleanSearchText(query);
-
-    var queryWords = query.split(' '),
-        foundObjs = false,
-        newFoundObjs, i, j, searchText, found;
-
-    for (i = 0; i < queryWords.length; i++) {
-      newFoundObjs = shortIndexes[queryWords[i].substr(0, 3)];
-      if (!newFoundObjs) {
-        foundObjs = [];
-        break;
-      }
-      if (foundObjs === false || foundObjs.length > newFoundObjs.length) {
-        foundObjs = newFoundObjs;
-      }
-    }
-
-    newFoundObjs = {};
-
-    for (j = 0; j < foundObjs.length; j++) {
-      found = true;
-      searchText = fullTexts[foundObjs[j]];
-      for (i = 0; i < queryWords.length; i++) {
-        if (searchText.indexOf(queryWords[i]) == -1) {
-          found = false;
-          break;
-        }
-      }
-      if (found) {
-        newFoundObjs[foundObjs[j]] = true;
-      }
-    }
-
-    return newFoundObjs;
   }
 })
 
@@ -850,7 +737,7 @@ angular.module('myApp.services', ['myApp.i18n'])
       offset: offset || 0,
       limit: limit || 0,
       max_id: maxID || 0
-    }).then(function (historyResult) {
+    }, {noErrorBox: true}).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
       AppChatsManager.saveApiChats(historyResult.chats);
       saveMessages(historyResult.messages);
@@ -1385,7 +1272,7 @@ angular.module('myApp.services', ['myApp.i18n'])
       fileName = 'video.mp4';
     } else if (file.type.substr(0, 6) == 'audio/') {
       attachType = 'audio';
-      fileName = 'audio.' + file.type.split('/')[1] || 'mp3';
+      fileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
     } else {
       attachType = 'document';
       fileName = 'document.' + file.type.split('/')[1];
@@ -2389,21 +2276,9 @@ angular.module('myApp.services', ['myApp.i18n'])
     full.height = fullHeight;
 
     if (fullPhotoSize && fullPhotoSize._ != 'photoSizeEmpty') {
-      if ((fullPhotoSize.w / fullPhotoSize.h) > (fullWidth / fullHeight)) {
-        full.height = parseInt(fullPhotoSize.h * fullWidth / fullPhotoSize.w);
-      }
-      else {
-        full.width = parseInt(fullPhotoSize.w * fullHeight / fullPhotoSize.h);
-        if (full.width > fullWidth) {
-          full.height = parseInt(full.height * fullWidth / full.width);
-          full.width = fullWidth;
-        }
-      }
-
-      if (!Config.Mobile && full.width >= fullPhotoSize.w && full.height >= fullPhotoSize.h) {
-        full.width = fullPhotoSize.w;
-        full.height = fullPhotoSize.h;
-      }
+      var wh = calcImageInBox(fullPhotoSize.w, fullPhotoSize.h, fullWidth, fullHeight, Config.Mobile);
+      full.width = wh.w;
+      full.height = wh.h;
 
       full.modalWidth = Math.max(full.width, Math.min(400, fullWidth));
 
@@ -2412,7 +2287,6 @@ angular.module('myApp.services', ['myApp.i18n'])
     }
 
     photo.full = full;
-    photo.fromUser = AppUsersManager.getUser(photo.user_id);
 
     return photo;
   }
@@ -2444,8 +2318,8 @@ angular.module('myApp.services', ['myApp.i18n'])
         ext = 'jpg',
         mimeType = 'image/jpeg',
         fileName = 'photo' + photoID + '.' + ext,
-        fullWidth = $(window).width() - 36,
-        fullHeight = $($window).height() - 150,
+        fullWidth = Math.max(screen.width || 0, $(window).width() - 36, 800),
+        fullHeight = Math.max(screen.height || 0, $($window).height() - 150, 800),
         fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight),
         inputFileLocation = {
           _: 'inputFileLocation',
@@ -2455,19 +2329,17 @@ angular.module('myApp.services', ['myApp.i18n'])
         };
 
     FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
+      if (writableFileEntry) {
+        MtpApiFileManager.downloadFile(
+          fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
+          mime: mimeType,
+          toFileEntry: writableFileEntry
+        }).then(function (url) {
+          // console.log('file save done');
+        }, function (e) {
+          console.log('photo download failed', e);
+        });
       }
-      
-      MtpApiFileManager.downloadFile(
-        fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
-        mime: mimeType,
-        toFileEntry: writableFileEntry
-      }).then(function (url) {
-        console.log('file save done');
-      }, function (e) {
-        console.log('photo download failed', e);
-      });
     }, function () {
       MtpApiFileManager.downloadFile(
         fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {mime: mimeType}
@@ -2480,7 +2352,6 @@ angular.module('myApp.services', ['myApp.i18n'])
   };
 
   $rootScope.openPhoto = openPhoto;
-
 
   return {
     savePhoto: savePhoto,
@@ -2495,7 +2366,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 })
 
 
-.service('AppVideoManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
+.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
   var videos = {},
       videosForHistory = {},
       windowW = $(window).width(),
@@ -2520,8 +2391,8 @@ angular.module('myApp.services', ['myApp.i18n'])
     }
 
     var video = angular.copy(videos[videoID]),
-        width = Math.min(windowW - 80, Config.Mobile ? 210 : 200),
-        height = Math.min(windowH - 100, Config.Mobile ? 210 : 200),
+        width = Math.min(windowW - 80, Config.Mobile ? 210 : 150),
+        height = Math.min(windowH - 100, Config.Mobile ? 210 : 150),
         thumbPhotoSize = video.thumb,
         thumb = {
           placeholder: 'img/placeholders/VideoThumbConversation.gif',
@@ -2563,23 +2434,16 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     if (!video.w || !video.h) {
       full.height = full.width = Math.min(fullWidth, fullHeight);
-    }
-    else if (video.w > video.h) {
-      full.height = parseInt(video.h * fullWidth / video.w);
-    }
-    else {
-      full.width = parseInt(video.w * fullHeight / video.h);
-      if (full.width > fullWidth) {
-        full.height = parseInt(full.height * fullWidth / full.width);
-        full.width = fullWidth;
-      }
+    } else {
+      var wh = calcImageInBox(video.w, video.h, fullWidth, fullHeight);
+      full.width = wh.w;
+      full.height = wh.h;
     }
 
     video.full = full;
     video.fullThumb = angular.copy(video.thumb);
     video.fullThumb.width = full.width;
     video.fullThumb.height = full.height;
-    video.fromUser = AppUsersManager.getUser(video.user_id);
 
     return video;
   }
@@ -2589,7 +2453,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     scope.videoID = videoID;
     scope.messageID = messageID;
 
-    var modalInstance = $modal.open({
+    return $modal.open({
       templateUrl: templateUrl('video_modal'),
       controller: 'VideoModalController',
       scope: scope,
@@ -2597,79 +2461,93 @@ angular.module('myApp.services', ['myApp.i18n'])
     });
   }
 
-  function downloadVideo (videoID, accessHash, popup) {
+  function updateVideoDownloaded (videoID) {
     var video = videos[videoID],
         historyVideo = videosForHistory[videoID] || video || {},
         inputFileLocation = {
           _: 'inputVideoFileLocation',
           id: videoID,
-          access_hash: accessHash || video.access_hash
+          access_hash: video.access_hash
         };
 
-    historyVideo.progress = {enabled: true, percent: 1, total: video.size};
+    // historyVideo.progress = {enabled: true, percent: 10, total: video.size};
 
-    function updateDownloadProgress (progress) {
+    if (historyVideo.downloaded === undefined) {
+      MtpApiFileManager.getDownloadedFile(inputFileLocation, video.size).then(function () {
+        historyVideo.downloaded = true;
+      }, function () {
+        historyVideo.downloaded = false;
+      });
+    }
+  }
+
+  function downloadVideo (videoID, toFileEntry) {
+    var video = videos[videoID],
+        historyVideo = videosForHistory[videoID] || video || {},
+        inputFileLocation = {
+          _: 'inputVideoFileLocation',
+          id: videoID,
+          access_hash: video.access_hash
+        };
+
+    historyVideo.progress = {enabled: !historyVideo.downloaded, percent: 1, total: video.size};
+
+    var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
+      mime: video.mime_type || 'video/ogg',
+      toFileEntry: toFileEntry
+    });
+
+    downloadPromise.then(function (url) {
+      delete historyVideo.progress;
+      historyVideo.url = $sce.trustAsResourceUrl(url);
+      historyVideo.downloaded = true;
+      console.log('video save done');
+    }, function (e) {
+      console.log('video download failed', e);
+      historyVideo.progress.enabled = false;
+    }, function (progress) {
       console.log('dl progress', progress);
+      historyVideo.progress.enabled = true;
       historyVideo.progress.done = progress.done;
       historyVideo.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
-    }
-
-    var ext = 'mp4',
-        mimeType = 'video/mpeg4',
-        fileName = 'video' + videoID + '.' + ext;
-
-    FileManager.chooseSave(fileName, ext, mimeType).then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
-      }
-
-      var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
-        mime: mimeType,
-        toFileEntry: writableFileEntry
-      });
-      downloadPromise.then(function (url) {
-        delete historyVideo.progress;
-        console.log('file save done');
-      }, function (e) {
-        console.log('video download failed', e);
-        historyVideo.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyVideo.progress.cancel = downloadPromise.cancel;
-    }, function () {
-      var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {mime: mimeType});
-
-      downloadPromise.then(function (url) {
-        delete historyVideo.progress;
-
-        if (popup) {
-          window.open(url, '_blank');
-          return
-        }
-
-        FileManager.download(url, mimeType, fileName);
-      }, function (e) {
-        console.log('video download failed', e);
-        historyVideo.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyVideo.progress.cancel = downloadPromise.cancel;
     });
-  };
 
-  $rootScope.openVideo = openVideo;
-  $rootScope.downloadVideo = downloadVideo;
+    historyVideo.progress.cancel = downloadPromise.cancel;
+
+    return downloadPromise;
+  }
+
+  function saveVideoFile (videoID) {
+    var video = videos[videoID],
+        mimeType = video.mime_type || 'video/mpeg4',
+        fileExt = mimeType.split('.')[1] || 'mp4',
+        fileName = 't_video' + videoID + '.' + fileExt,
+        historyVideo = videosForHistory[videoID] || video || {};
+
+    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
+      if (writableFileEntry) {
+        downloadVideo(videoID, writableFileEntry);
+      }
+    }, function () {
+      downloadVideo(videoID).then(function (url) {
+        FileManager.download(url, mimeType, fileName);
+      });
+    });
+  }
 
   return {
     saveVideo: saveVideo,
     wrapForHistory: wrapForHistory,
     wrapForFull: wrapForFull,
-    openVideo: openVideo
+    openVideo: openVideo,
+    updateVideoDownloaded: updateVideoDownloaded,
+    downloadVideo: downloadVideo,
+    saveVideoFile: saveVideoFile
   }
 })
 
-.service('AppDocsManager', function ($rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
+.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $timeout, $q, MtpApiFileManager, FileManager) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2737,7 +2615,7 @@ angular.module('myApp.services', ['myApp.i18n'])
     return docsForHistory[docID] = doc;
   }
 
-  function downloadDoc (docID, action) {
+  function updateDocDownloaded (docID) {
     var doc = docs[docID],
         historyDoc = docsForHistory[docID] || doc || {},
         inputFileLocation = {
@@ -2746,72 +2624,94 @@ angular.module('myApp.services', ['myApp.i18n'])
           access_hash: doc.access_hash
         };
 
-    function updateDownloadProgress (progress) {
+    // historyDoc.progress = {enabled: true, percent: 10, total: doc.size};
+
+    if (historyDoc.downloaded === undefined) {
+      MtpApiFileManager.getDownloadedFile(inputFileLocation, doc.size).then(function () {
+        historyDoc.downloaded = true;
+      }, function () {
+        historyDoc.downloaded = false;
+      });
+    }
+  }
+
+  function downloadDoc (docID, toFileEntry) {
+    var doc = docs[docID],
+        historyDoc = docsForHistory[docID] || doc || {},
+        inputFileLocation = {
+          _: 'inputDocumentFileLocation',
+          id: docID,
+          access_hash: doc.access_hash
+        };
+
+    historyDoc.progress = {enabled: !historyDoc.downloaded, percent: 1, total: doc.size};
+
+    var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
+      mime: doc.mime_type,
+      toFileEntry: toFileEntry
+    });
+
+    downloadPromise.then(function (url) {
+      delete historyDoc.progress;
+      historyDoc.url = $sce.trustAsResourceUrl(url);
+      historyDoc.downloaded = true;
+      console.log('file save done');
+    }, function (e) {
+      console.log('document download failed', e);
+      historyDoc.progress.enabled = false;
+    }, function (progress) {
       console.log('dl progress', progress);
+      historyDoc.progress.enabled = true;
       historyDoc.progress.done = progress.done;
       historyDoc.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       $rootScope.$broadcast('history_update');
-    }
+    });
 
-    var ext = (doc.file_name.split('.', 2) || [])[1] || '';
-    FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
-      if (!writableFileEntry) {
-        return;
-      }
+    historyDoc.progress.cancel = downloadPromise.cancel;
 
-      historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
+    return downloadPromise;
+  }
 
-      var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
-        mime: doc.mime_type,
-        toFileEntry: writableFileEntry
-      });
+  function openDoc (docID, messageID) {
+    var scope = $rootScope.$new(true);
+    scope.docID = docID;
+    scope.messageID = messageID;
 
-      downloadPromise.then(function (url) {
-        delete historyDoc.progress;
-        console.log('file save done');
-      }, function (e) {
-        console.log('document download failed', e);
-        historyDoc.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyDoc.progress.cancel = downloadPromise.cancel;
-    }, function () {
-      historyDoc.progress = {enabled: true, percent: 1, total: doc.size};
-
-      var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {mime: doc.mime_type});
-
-      downloadPromise.then(function (url) {
-        delete historyDoc.progress;
-
-        historyDoc.url = url;
-
-        switch (action) {
-          case 1:
-            window.open(url, '_blank');
-            break;
-
-          default:
-            FileManager.download(url, doc.mime_type, doc.file_name);
-        }
-      }, function (e) {
-        console.log('document download failed', e);
-        historyDoc.progress.enabled = false;
-      }, updateDownloadProgress);
-
-      historyDoc.progress.cancel = downloadPromise.cancel;
+    var modalInstance = $modal.open({
+      templateUrl: templateUrl('document_modal'),
+      controller: 'DocumentModalController',
+      scope: scope,
+      windowClass: 'document_modal_window'
     });
   }
 
-  $rootScope.downloadDoc = downloadDoc;
+  function saveDocFile (docID) {
+    var doc = docs[docID],
+        historyDoc = docsForHistory[docID] || doc || {};
+
+    var ext = (doc.file_name.split('.', 2) || [])[1] || '';
+    FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
+      if (writableFileEntry) {
+        downloadDoc(docID, writableFileEntry);
+      }
+    }, function () {
+      downloadDoc(docID).then(function (url) {
+        FileManager.download(url, doc.mime_type, doc.file_name);
+      });
+    });
+  }
 
   return {
     saveDoc: saveDoc,
     wrapForHistory: wrapForHistory,
-    downloadDoc: downloadDoc
+    updateDocDownloaded: updateDocDownloaded,
+    downloadDoc: downloadDoc,
+    openDoc: openDoc,
+    saveDocFile: saveDocFile
   }
 })
 
-.service('AppAudioManager', function ($rootScope, $modal, $window, $timeout, $sce, MtpApiFileManager) {
+.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
   var audios = {};
   var audiosForHistory = {};
 
@@ -2829,74 +2729,89 @@ angular.module('myApp.services', ['myApp.i18n'])
     return audiosForHistory[audioID] = audio;
   }
 
-  function openAudio (audioID, accessHash) {
+  function updateAudioDownloaded (audioID) {
     var audio = audios[audioID],
         historyAudio = audiosForHistory[audioID] || audio || {},
         inputFileLocation = {
           _: 'inputAudioFileLocation',
           id: audioID,
-          access_hash: accessHash || audio.access_hash
+          access_hash: audio.access_hash
         };
 
-    historyAudio.progress = {enabled: true, percent: 1, total: audio.size};
+    // historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 10, total: audio.size};
 
-    function updateDownloadProgress (progress) {
-      console.log('dl progress', progress);
-      historyAudio.progress.done = progress.done;
-      historyAudio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      $rootScope.$broadcast('history_update');
+    if (historyAudio.downloaded === undefined) {
+      MtpApiFileManager.getDownloadedFile(inputFileLocation, audio.size).then(function () {
+        historyAudio.downloaded = true;
+      }, function () {
+        historyAudio.downloaded = false;
+      });
     }
+  }
 
-    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {mime: 'audio/ogg'});
+  function downloadAudio (audioID, toFileEntry) {
+    var audio = audios[audioID],
+        historyAudio = audiosForHistory[audioID] || audio || {},
+        inputFileLocation = {
+          _: 'inputAudioFileLocation',
+          id: audioID,
+          access_hash: audio.access_hash
+        };
+
+    historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 1, total: audio.size};
+
+    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {
+      mime: audio.mime_type || 'audio/ogg',
+      toFileEntry: toFileEntry
+    });
 
     downloadPromise.then(function (url) {
       delete historyAudio.progress;
       historyAudio.url = $sce.trustAsResourceUrl(url);
-      historyAudio.autoplay = true;
-      $timeout(function () {
-        console.log('disable autoplay');
-        delete historyAudio.autoplay;
-        $rootScope.$broadcast('history_update');
-      }, 1000);
+      historyAudio.downloaded = true;
+      console.log('audio save done');
     }, function (e) {
       console.log('audio download failed', e);
       historyAudio.progress.enabled = false;
-    }, updateDownloadProgress);
+    }, function (progress) {
+      console.log('dl progress', progress);
+      historyAudio.progress.enabled = true;
+      historyAudio.progress.done = progress.done;
+      historyAudio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+      $rootScope.$broadcast('history_update');
+    });
 
     historyAudio.progress.cancel = downloadPromise.cancel;
 
     return downloadPromise;
   }
 
-  $rootScope.openAudio = openAudio;
+  function saveAudioFile (audioID) {
+    var audio = audios[audioID],
+        mimeType = audio.mime_type || 'audio/ogg',
+        fileExt = mimeType.split('.')[1] || 'ogg',
+        fileName = 't_audio' + audioID + '.' + fileExt,
+        historyAudio = audiosForHistory[audioID] || audio || {};
+
+    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
+      if (writableFileEntry) {
+        downloadAudio(audioID, writableFileEntry);
+      }
+    }, function () {
+      downloadAudio(audioID).then(function (url) {
+        FileManager.download(url, mimeType, fileName);
+      });
+    });
+  }
 
   return {
     saveAudio: saveAudio,
     wrapForHistory: wrapForHistory,
-    openAudio: openAudio
+    updateAudioDownloaded: updateAudioDownloaded,
+    downloadAudio: downloadAudio,
+    saveAudioFile: saveAudioFile
   }
 })
-
-.service('ExternalResourcesManager', function ($q, $http) {
-  var urlPromises = {};
-
-  function downloadImage (url) {
-    if (urlPromises[url] !== undefined) {
-      return urlPromises[url];
-    }
-
-    return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
-      .then(function (response) {
-        window.URL = window.URL || window.webkitURL;
-        return window.URL.createObjectURL(response.data);
-      });
-  }
-
-  return {
-    downloadImage: downloadImage
-  }
-})
-
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
 
@@ -2936,6 +2851,7 @@ angular.module('myApp.services', ['myApp.i18n'])
 
     switch (updateMessage._) {
       case 'updatesTooLong':
+      case 'new_session_created':
         forceGetDifference();
         break;
 
@@ -3129,11 +3045,13 @@ angular.module('myApp.services', ['myApp.i18n'])
 
   function attach () {
     MtpNetworkerFactory.setUpdatesProcessor(processUpdateMessage);
-    MtpApiManager.invokeApi('updates.getState', {noErrorBox: true}).then(function (stateResult) {
+    MtpApiManager.invokeApi('updates.getState', {}, {noErrorBox: true}).then(function (stateResult) {
       curState.seq = stateResult.seq;
       curState.pts = stateResult.pts;
       curState.date = stateResult.date;
-      isSynchronizing = false;
+      setTimeout(function () {
+        isSynchronizing = false;
+      }, 1000);
     })
   }
 
@@ -3144,7 +3062,7 @@ angular.module('myApp.services', ['myApp.i18n'])
   }
 })
 
-.service('RichTextProcessor', function ($sce, $sanitize) {
+.service('RichTextProcessor', function ($sce, $sanitize, ExternalResourcesManager) {
 
   var emojiUtf = [],
       emojiMap = {},
@@ -3187,21 +3105,14 @@ angular.module('myApp.services', ['myApp.i18n'])
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{3,20})', 'i');
   var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
+  var instagramRegex = /https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
+  var vineRegex = /https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
+  var twitterRegex = /https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
 
   return {
     wrapRichText: wrapRichText,
     wrapPlainText: wrapPlainText
   };
-
-  function encodeEntities(value) {
-    return value.
-      replace(/&/g, '&amp;').
-      replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
-        return '&#' + value.charCodeAt(0) + ';';
-      }).
-      replace(/</g, '&lt;').
-      replace(/>/g, '&gt;');
-  }
 
   function getEmojiSpritesheetCoords(emojiCode) {
     var i, row, column, totalColumns;
@@ -3323,15 +3234,30 @@ angular.module('myApp.services', ['myApp.i18n'])
     }
 
     // console.log(4, text, html);
-    if (!options.noLinks) {
-      var youtubeMatches = text.match(youtubeRegex),
-          videoID = youtubeMatches && youtubeMatches[1];
+    if (!options.noLinks && !Config.Navigator.mobile) {
+      var embedUrlMatches,
+          embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
 
-      if (videoID) {
-        var tag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
-        text = text + '<div class="im_message_iframe_video"><' + tag + ' type="text/html" frameborder="0" ' +
-              'src="http://www.youtube.com/embed/' + videoID +
-              '?autoplay=0&amp;controls=2"></' + tag + '></div>'
+      if (embedUrlMatches = text.match(youtubeRegex)) {
+        var videoID = embedUrlMatches[1]
+        text = text + '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+              'src="//www.youtube.com/embed/' + videoID +
+              '?autoplay=0&amp;controls=2"></' + embedTag + '></div>'
+      }
+      else if (embedUrlMatches = text.match(instagramRegex)) {
+        var instaID = embedUrlMatches[1];
+        text = text + '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+              'src="//instagram.com/p/' + instaID +
+              '/embed/"></' + embedTag + '></div>';
+      }
+      else if (embedUrlMatches = text.match(vineRegex)) {
+        var vineID = embedUrlMatches[1];
+        text = text + '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+              'src="//vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
+      }
+      else if (embedUrlMatches = !Config.Modes.chrome_packed && text.match(twitterRegex)) {
+        text = text + '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedUrlMatches[0] + '"></a></blockquote></div>';
+        onContentLoaded(ExternalResourcesManager.attachTwitterScript);
       }
     }
 
@@ -3375,58 +3301,6 @@ angular.module('myApp.services', ['myApp.i18n'])
     return text.join('');
   }
 
-})
-
-
-.service('IdleManager', function ($rootScope, $window, $timeout) {
-
-  $rootScope.idle = {isIDLE: false};
-
-  var toPromise, started = false;
-
-  return {
-    start: start
-  };
-
-  function start () {
-    if (!started) {
-      started = true;
-      $($window).on('blur focus keydown mousedown touchstart', onEvent);
-
-      setTimeout(function () {
-        onEvent({type: 'blur'});
-      }, 0);
-    }
-  }
-
-  function onEvent (e) {
-    // console.log('event', e.type);
-    if (e.type == 'mousemove') {
-      $($window).off('mousemove', onEvent);
-    }
-    var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
-
-    $timeout.cancel(toPromise);
-    if (!isIDLE) {
-      // console.log('update timeout');
-      toPromise = $timeout(function () {
-        onEvent({type: 'timeout'});
-      }, 30000);
-    }
-
-    if ($rootScope.idle.isIDLE == isIDLE) {
-      return;
-    }
-
-    // console.log('IDLE changed', isIDLE);
-    $rootScope.$apply(function () {
-      $rootScope.idle.isIDLE = isIDLE;
-    });
-
-    if (isIDLE && e.type == 'timeout') {
-      $($window).on('mousemove', onEvent);
-    }
-  }
 })
 
 .service('StatusManager', function ($timeout, $rootScope, MtpApiManager, IdleManager) {
@@ -3607,7 +3481,9 @@ angular.module('myApp.services', ['myApp.i18n'])
 
 
     try {
-      $($window).on('beforeunload', notificationsClear);
+      if ('onbeforeunload' in window) {
+        $($window).on('beforeunload', notificationsClear);
+      }
     } catch (e) {}
   }
 
