@@ -1293,20 +1293,31 @@ div.im_message_video_thumb {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
 
-.im_message_iframe_video {
-    position: relative;
-    padding-bottom: 56.25%; /* 16/9 ratio */
-    height: 0;
-    overflow: hidden;
-    margin-top: 5px;
+.im_message_media_embed {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  margin-top: 5px;
 }
-.im_message_iframe_video iframe,
-.im_message_iframe_video webview {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+.im_message_video_embed {
+  padding-bottom: 56.25%; /* 16/9 ratio */
+}
+.im_message_insta_embed {
+  padding-bottom: 122%;
+}
+.im_message_vine_embed {
+  padding-bottom: 100%;
+}
+.im_message_media_embed iframe,
+.im_message_media_embed webview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.im_message_twitter_embed > blockquote {
+  visibility: hidden;
 }
 
 .im_message_gif_wrap {

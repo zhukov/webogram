@@ -251,7 +251,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   function downloadCheck(dcID) {
     var downloadPull = downloadPulls[dcID];
-    var downloadLimit = dcID == 'upload' ? 17 : 5;
+    var downloadLimit = dcID == 'upload' ? 11 : 5;
 
     if (downloadActives[dcID] >= downloadLimit || !downloadPull || !downloadPull.length) {
       return false;

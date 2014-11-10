@@ -727,6 +727,7 @@ angular.module('izhukov.utils', [])
 
 .service('ExternalResourcesManager', function ($q, $http) {
   var urlPromises = {};
+  var twitterAttached = false;
 
   function downloadImage (url) {
     if (urlPromises[url] !== undefined) {
@@ -740,8 +741,18 @@ angular.module('izhukov.utils', [])
       });
   }
 
+  function attachTwitterScript () {
+    twitterAttached = true;
+
+    $('<script>').appendTo('body')
+    // .on('load', function() {
+    // })
+    .attr('src', '//platform.twitter.com/widgets.js');
+  }
+
   return {
-    downloadImage: downloadImage
+    downloadImage: downloadImage,
+    attachTwitterScript: attachTwitterScript
   }
 })
 

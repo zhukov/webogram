@@ -3062,7 +3062,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('RichTextProcessor', function ($sce, $sanitize) {
+.service('RichTextProcessor', function ($sce, $sanitize, ExternalResourcesManager) {
 
   var emojiUtf = [],
       emojiMap = {},
@@ -3105,6 +3105,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{3,20})', 'i');
   var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
+  var instagramRegex = /https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
+  var vineRegex = /https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
+  var twitterRegex = /https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
 
   return {
     wrapRichText: wrapRichText,
@@ -3231,15 +3234,30 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     // console.log(4, text, html);
-    if (!options.noLinks) {
-      var youtubeMatches = text.match(youtubeRegex),
-          videoID = youtubeMatches && youtubeMatches[1];
+    if (!options.noLinks && !Config.Navigator.mobile) {
+      var embedUrlMatches,
+          embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
 
-      if (videoID) {
-        var tag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
-        text = text + '<div class="im_message_iframe_video"><' + tag + ' type="text/html" frameborder="0" ' +
-              'src="http://www.youtube.com/embed/' + videoID +
-              '?autoplay=0&amp;controls=2"></' + tag + '></div>'
+      if (embedUrlMatches = text.match(youtubeRegex)) {
+        var videoID = embedUrlMatches[1]
+        text = text + '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+              'src="//www.youtube.com/embed/' + videoID +
+              '?autoplay=0&amp;controls=2"></' + embedTag + '></div>'
+      }
+      else if (embedUrlMatches = text.match(instagramRegex)) {
+        var instaID = embedUrlMatches[1];
+        text = text + '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+              'src="//instagram.com/p/' + instaID +
+              '/embed/"></' + embedTag + '></div>';
+      }
+      else if (embedUrlMatches = text.match(vineRegex)) {
+        var vineID = embedUrlMatches[1];
+        text = text + '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+              'src="//vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
+      }
+      else if (embedUrlMatches = !Config.Modes.chrome_packed && text.match(twitterRegex)) {
+        text = text + '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedUrlMatches[0] + '"></a></blockquote></div>';
+        onContentLoaded(ExternalResourcesManager.attachTwitterScript);
       }
     }
 
