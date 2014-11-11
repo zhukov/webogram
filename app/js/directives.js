@@ -166,6 +166,87 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     }
   })
+  .directive('myExternalEmbed', function () {
+
+    var twitterAttached = false;
+    var twitterPendingWidgets = [];
+    var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+
+    function attachTwitterScript () {
+      twitterAttached = true;
+
+      $('<script>').appendTo('body').attr('src', '//platform.twitter.com/widgets.js');
+    }
+
+    function link ($scope, element, attrs) {
+      var embedData = $scope.$eval(attrs.myExternalEmbed);
+      if (!embedData) {
+        return;
+      }
+      var html = '';
+      var callback = false;
+      var needTwitter = false;
+      switch (embedData[0]) {
+        case 'youtube':
+          var videoID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="//www.youtube.com/embed/' + videoID +
+                '?autoplay=0&amp;controls=2"></' + embedTag + '></div>';
+          break;
+
+        case 'instagram':
+          var instaID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="//instagram.com/p/' + instaID +
+                '/embed/"></' + embedTag + '></div>';
+          break;
+
+        case 'vine':
+          var vineID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="//vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
+          break;
+
+        case 'twitter':
+          html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
+
+          callback = function () {
+            if (!twitterAttached) {
+              twitterAttached = true;
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  twttr.events.bind('loaded', function (event) {
+                    console.log('loaded');
+                    for (var i = 0; i < twitterPendingWidgets.length; i++) {
+                      twitterPendingWidgets[i].$emit('ui_height');
+                    }
+                    twitterPendingWidgets = [];
+                  });
+                })
+                .attr('src', '//platform.twitter.com/widgets.js');
+            }
+            else if (window.twttr) {
+              twttr.widgets.load(element[0]);
+            }
+            twitterPendingWidgets.push($scope);
+          };
+          break;
+      }
+
+      if (html) {
+        element[0].innerHTML = html;
+        if (callback) {
+          callback();
+        }
+      }
+    }
+
+    return {
+      link: link
+    };
+
+  })
 
   .directive('myServiceMessage', function() {
     return {

@@ -61,6 +61,7 @@
         </div>
 
         <div class="im_message_text" ng-if="::historyMessage.message.length || false" ng-bind-html="::historyMessage.richMessage"></div>
+        <div class="im_message_external_embed_wrap" ng-if="::historyMessage.richUrlEmbed || false" my-external-embed="historyMessage.richUrlEmbed"></div>
       </div>
 
     </div>

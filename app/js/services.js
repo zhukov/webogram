@@ -1721,6 +1721,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (message.message && message.message.length) {
       message.richMessage = RichTextProcessor.wrapRichText(message.message);
+      if (!Config.Navigator.mobile) {
+        message.richUrlEmbed = RichTextProcessor.extractExternalEmbed(message.message);
+      }
     }
 
     return messagesForHistory[msgID] = message;
@@ -3062,7 +3065,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('RichTextProcessor', function ($sce, $sanitize, ExternalResourcesManager) {
+.service('RichTextProcessor', function ($sce, $sanitize) {
 
   var emojiUtf = [],
       emojiMap = {},
@@ -3111,7 +3114,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   return {
     wrapRichText: wrapRichText,
-    wrapPlainText: wrapPlainText
+    wrapPlainText: wrapPlainText,
+    extractExternalEmbed: extractExternalEmbed
   };
 
   function getEmojiSpritesheetCoords(emojiCode) {
@@ -3233,35 +3237,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                           '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
     }
 
-    // console.log(4, text, html);
-    if (!options.noLinks && !Config.Navigator.mobile) {
-      var embedUrlMatches,
-          embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+    return $sce.trustAs('html', text);
+  }
 
-      if (embedUrlMatches = text.match(youtubeRegex)) {
-        var videoID = embedUrlMatches[1]
-        text = text + '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-              'src="//www.youtube.com/embed/' + videoID +
-              '?autoplay=0&amp;controls=2"></' + embedTag + '></div>'
-      }
-      else if (embedUrlMatches = text.match(instagramRegex)) {
-        var instaID = embedUrlMatches[1];
-        text = text + '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-              'src="//instagram.com/p/' + instaID +
-              '/embed/"></' + embedTag + '></div>';
-      }
-      else if (embedUrlMatches = text.match(vineRegex)) {
-        var vineID = embedUrlMatches[1];
-        text = text + '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-              'src="//vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
-      }
-      else if (embedUrlMatches = !Config.Modes.chrome_packed && text.match(twitterRegex)) {
-        text = text + '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedUrlMatches[0] + '"></a></blockquote></div>';
-        onContentLoaded(ExternalResourcesManager.attachTwitterScript);
-      }
+  function extractExternalEmbed (text) {
+    var embedUrlMatches,
+        result;
+
+    if (embedUrlMatches = text.match(youtubeRegex)) {
+      return ['youtube', embedUrlMatches[1]];
+    }
+    else if (embedUrlMatches = text.match(instagramRegex)) {
+      return ['instagram', embedUrlMatches[1]];
+    }
+    else if (embedUrlMatches = text.match(vineRegex)) {
+      return ['vine', embedUrlMatches[1]];
+    }
+    else if (embedUrlMatches = !Config.Modes.chrome_packed && text.match(twitterRegex)) {
+      return ['twitter', embedUrlMatches[0]];
     }
 
-    return $sce.trustAs('html', text);
+    return false;
   }
 
   function wrapPlainText (text, options) {
