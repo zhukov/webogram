@@ -2018,7 +2018,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     var audioVolume = 0.5;
 
     Storage.get('audio_volume').then(function (newAudioVolume) {
-      if (newAudioVolume >= 0.0 && newAudioVolume <= 1.0) {
+      if (newAudioVolume > 0 && newAudioVolume <= 1.0) {
         audioVolume = newAudioVolume;
       }
     });

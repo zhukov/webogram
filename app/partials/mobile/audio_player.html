@@ -34,6 +34,6 @@
 	  </div>
 	</div>
 	<audio ng-if="audio.url" media-player="mediaPlayer.player">
-	  <source ng-src="{{::audio.url}}" type="audio/ogg" volume="{{::volume}}" />
+	  <source ng-src="{{::audio.url}}" type="{{audio.mime_type || 'audio/ogg'}}" volume="{{::volume}}" />
 	</audio>
 </div>
