@@ -179,7 +179,7 @@ a.footer_lang_link.active:active {
 .im_history_col .nano > .nano-pane,
 .contacts_modal_col .nano > .nano-pane,
 .im_dialogs_modal_col .nano > .nano-pane {
-  background : rgba(3,36,64,0.08);
+  background : rgba(216,223,225,0.45); /*45% d8dfe5*/
   width      : 9px;
   right: 0;
   top: 0;
@@ -218,7 +218,7 @@ a.footer_lang_link.active:active {
 .im_history_col .nano > .nano-pane > .nano-slider,
 .contacts_modal_col .nano > .nano-pane > .nano-slider,
 .im_dialogs_modal_col .nano > .nano-pane > .nano-slider {
-  background : rgba(3,46,79,0.22);
+  background : rgba(137,160,179,0.50); /*50% 89a0b3*/
   margin: 0;
   -moz-border-radius    : 2px;
   -webkit-border-radius : 2px;
@@ -324,7 +324,7 @@ a.footer_lang_link.active:active {
 }
 
 .icon-message-status {
-  background: #43A4DB;
+  background: #6ba2cb;
   border: 0;
   display: block;
   width: 10px;
@@ -381,6 +381,7 @@ a.footer_lang_link.active:active {
   font-size: 13px;
   line-height: 17px;
   min-width: 60px;
+  border-radius: 2px;
 }
 
 .im_message_selected .im_message_date,
@@ -393,7 +394,7 @@ a.footer_lang_link.active:active {
 .im_history_selectable .im_message_outer_wrap:hover .im_message_audio_duration,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_audio_size,
 .im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_date {
-  color: #68839c;
+  color: #899daf;
 }
 
 .im_content_message_select_area {
@@ -492,7 +493,7 @@ a.footer_lang_link.active:active {
 .im_panel_own_photo {
   width: 50px;
   height: 50px;
-  border-radius: 3px;
+  border-radius: 0;
   overflow: hidden;
 }
 div.im_panel_peer_photo {
@@ -505,7 +506,7 @@ div.im_panel_own_photo {
 }
 
 .im_panel_peer_online {
-  background: #6DBF69;
+  background: #6ec26d;
   border: 1px solid #FFF;
   display: block;
   width: 11px;
@@ -515,6 +516,10 @@ div.im_panel_own_photo {
   position: absolute;
   margin-top: -7px;
   margin-left: 43px;
+}
+.emoji-wysiwyg-editor,
+.im_message_field {
+  border-radius: 0;
 }
 
 /* Peer modals */
@@ -547,7 +552,7 @@ div.im_panel_own_photo {
 .modal_section_body dt {
   font-weight: normal;
   display: inline-block;
-  width: 80px;
+  width: 100px;
 }
 .modal_section_body dd {
   display: inline-block;
@@ -785,6 +790,12 @@ div.im_panel_own_photo {
 .icon-volume-outer2 .icon-volume-inner4,
 .icon-volume-outer3 .icon-volume-inner4 {
   display: none;
+}
+
+.settings_volume_slider {
+  width: 100%;
+  max-width: 362px;
+  display: inline-block;
 }
 
 

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sun Oct 19 2014 12:06:12 GMT+0200 (CEST)
+# Time: Tue Nov 11 2014 19:24:43 GMT+0300 (MSK)
 
 
 CACHE:
@@ -31,6 +31,8 @@ img/logo_dogogram.png
 img/logo_share.png
 img/sound_a.wav
 js/app.js
+nacl/mtproto_crypto.nmf
+nacl/mtproto_crypto.pexe
 img/changelog/card_wecandoit.png
 img/changelog/search.png
 img/icons/AboutLogos_1x.png
@@ -76,6 +78,7 @@ vendor/closure/long.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
+vendor/rusha/rusha.js
 vendor/angular/i18n/angular-locale_de-de.js
 vendor/angular/i18n/angular-locale_en-us.js
 vendor/angular/i18n/angular-locale_es-es.js

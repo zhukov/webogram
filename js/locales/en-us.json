@@ -195,6 +195,7 @@
 	"message_service_left_group": "left group",
 	"message_service_unsupported_action": "Unsupported action {action}",
 
+	"error_modal_warning_title": "Warning",
 	"error_modal_bad_request_title": "Error",
 	"error_modal_unauthorized_title": "Unauthorized",
 	"error_modal_forbidden_title": "Access denied",
@@ -215,6 +216,7 @@
 	"error_modal_no_phone_user_description_md": "Sorry, there is no **Telegram** account with the phone number you provided.",
 	"error_modal_no_phone_users_description_md": "Sorry, there are no **Telegram** accounts with the phone numbers you provided.",
 	"error_modal_username_invalid_description": "Sorry, this username is not allowed.",
+	"error_modal_phonebook_required_description": "Telegram needs access to phonebook to import contacts.",
 	 "error_modal_username_occupied_description": "Sorry, this username is already taken.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",
@@ -224,6 +226,8 @@
 	"error_modal_flood_description": "You are performing too many actions. Please try again later.",
 	"error_modal_internal_description": "Internal server error occured. Please try again later.",
 	"error_modal_tech_details": "Technical details here",
+	"error_modal_multiple_open_tabs": "Please close other Telegram app tabs.",
+
 
 	"head_new_group": "New Group",
 	"head_new_contact": "New Contact",
@@ -325,9 +329,11 @@
 
 	"message_attach_document_open": "Open",
 	"message_attach_document_download": "Download",
+	"message_attach_document_save": "Save File",
 
 	"message_attach_video_video": "Video",
 	"message_attach_video_download": "Download",
+	"message_attach_video_save": "Save File",
 	"message_attach_video_play": "Play video",
 
 	"conversation_select_modal_title": "Select conversation",

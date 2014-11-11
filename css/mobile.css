@@ -130,7 +130,7 @@ html {
   vertical-align: text-top;
 
   background: url(../img/icons/IconsetW.png) -15px -835px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.8;
 }
 .is_1x .icon-back {
@@ -535,9 +535,7 @@ img.im_message_video_thumb,
   color: #93a2ae;
 }
 
-.im_message_out .icon-document,
-.im_message_out .icon-photo,
-.im_message_out .icon-video {
+.im_message_out .icon-document {
   background-color: #dae6f0;
   background-position: -2px -542px;
 }
@@ -961,7 +959,7 @@ a.mobile_modal_action .tg_checkbox_label {
 .im_submit:active,
 .im_submit:hover {
   background: url(../img/icons/IconsetW.png) 2px -860px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   color: transparent;
   box-shadow: none;
 }
@@ -985,7 +983,7 @@ a.mobile_modal_action .tg_checkbox_label {
   height: 23px;
   vertical-align: text-top;
   background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
   opacity: 0.8;
 }
 .is_1x .icon-paperclip {
@@ -1022,7 +1020,7 @@ a.mobile_modal_action .tg_checkbox_label {
   opacity: 1;
   margin: 0;
   background: url(../img/icons/IconsetW.png) -10px -771px no-repeat;
-  background-size: 42px 971px;
+  background-size: 42px 1171px;
 }
 .is_1x .icon-emoji {
   background-image: url(../img/icons/IconsetW_1x.png);
@@ -1119,4 +1117,9 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .countries_scrollable_wrap a.countries_modal_country {
   padding: 8px 8px;
+}
+
+.import_modal_phonebook_wrap {
+  margin-top: 40px;
+  text-align: center;
 }

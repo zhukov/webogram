@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.3.2 - messaging web application for MTProto
+ * Webogram v0.3.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -11,7 +11,8 @@ importScripts(
   '../../vendor/jsbn/jsbn_combined.js',
   '../../vendor/leemon_bigint/bigint.js',
   '../../vendor/closure/long.js',
-  '../../vendor/cryptoJS/crypto.js'
+  '../../vendor/cryptoJS/crypto.js',
+  '../../vendor/rusha/rusha.js'
 );
 
 onmessage = function (e) {
@@ -28,15 +29,15 @@ onmessage = function (e) {
       break;
 
     case 'sha1-hash':
-      result = sha1Hash(e.data.bytes);
+      result = sha1HashSync(e.data.bytes);
       break;
 
     case 'aes-encrypt':
-      result = aesEncrypt(e.data.bytes, e.data.keyBytes, e.data.ivBytes);
+      result = aesEncryptSync(e.data.bytes, e.data.keyBytes, e.data.ivBytes);
       break;
 
     case 'aes-decrypt':
-      result = aesDecrypt(e.data.encryptedBytes, e.data.keyBytes, e.data.ivBytes);
+      result = aesDecryptSync(e.data.encryptedBytes, e.data.keyBytes, e.data.ivBytes);
       break;
 
     default:
@@ -45,3 +46,5 @@ onmessage = function (e) {
 
   postMessage({taskID: taskID, result: result});
 }
+
+postMessage('ready');
