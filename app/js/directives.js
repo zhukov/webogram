@@ -209,7 +209,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         };
         $scope.docOpen = function () {
           if (!$scope.document.withPreview) {
-            return $scope.download();
+            return $scope.docSave();
           }
           AppDocsManager.openDoc($scope.document.id, $scope.messageId);
         };
