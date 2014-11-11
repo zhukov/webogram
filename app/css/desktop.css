@@ -552,7 +552,7 @@ div.im_panel_own_photo {
 .modal_section_body dt {
   font-weight: normal;
   display: inline-block;
-  width: 80px;
+  width: 100px;
 }
 .modal_section_body dd {
   display: inline-block;
