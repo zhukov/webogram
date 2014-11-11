@@ -500,7 +500,7 @@ angular.module('izhukov.utils', [])
       };
 
   if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
-    var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf?'+Math.random()+'" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
+    var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
     listener.addEventListener('load', function (e) {
       naClEmbed = listener.firstChild;
       console.log(dT(), 'NaCl ready');

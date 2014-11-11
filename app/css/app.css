@@ -617,7 +617,7 @@ a.tg_radio_on:hover i.icon-radio {
   height: 12px;
   border-radius: 6px;
   margin-top: 4px;
-  overflow: hidden;
+  /*overflow: hidden;*/
   z-index: 3;
 }
 

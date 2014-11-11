@@ -2182,6 +2182,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         stopMouseTrack();
 
+        e = e.originalEvent || e;
+
+        if (e.offsetX == undefined) {
+          e.offsetX = e.layerX;
+        }
         lastMinPageX = e.pageX - e.offsetX;
         // console.log('mdown', lastMinPageX, e.pageX, e.offsetX);
         lastUpdValue = minValue + e.offsetX / width * (maxValue - minValue);
