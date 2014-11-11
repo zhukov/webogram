@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Wed Nov 12 2014 00:17:25 GMT+0300 (MSK)
+# Time: Wed Nov 12 2014 00:27:47 GMT+0300 (MSK)
 
 
 CACHE:
@@ -75,8 +75,8 @@ js/locales/es-es.json
 js/locales/it-it.json
 js/locales/ru-ru.json
 vendor/closure/long.js
-vendor/jsbn/jsbn_combined.js
 vendor/cryptoJS/crypto.js
+vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/rusha/rusha.js
 vendor/angular/i18n/angular-locale_de-de.js
