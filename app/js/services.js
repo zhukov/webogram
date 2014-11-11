@@ -115,7 +115,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (angular.isObject(id)) {
       return id;
     }
-    return users[id] || {id: id, deleted: true};
+    return users[id] || {id: id, deleted: true, num: 1};
   }
 
   function hasUser(id) {

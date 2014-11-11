@@ -217,7 +217,6 @@ angular.module('myApp.directives', ['myApp.filters'])
                 .appendTo('body')
                 .on('load', function () {
                   twttr.events.bind('loaded', function (event) {
-                    console.log('loaded');
                     for (var i = 0; i < twitterPendingWidgets.length; i++) {
                       twitterPendingWidgets[i].$emit('ui_height');
                     }
