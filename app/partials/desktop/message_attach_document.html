@@ -23,7 +23,7 @@
 
     <div class="im_message_document_info">
       <div class="im_message_document_name_wrap">
-        <span class="im_message_document_name" ng-bind="::document.file_name"></span>
+        <a href="" ng-click="docOpen()" class="im_message_document_name" ng-bind="::document.file_name"></a>
         <span class="im_message_document_size" ng-if="!document.progress.enabled" ng-bind="::document.size | formatSize"></span>
         <span class="im_message_document_size" ng-if="document.progress.enabled" ng-bind="document.progress | formatSizeProgress"></span>
       </div>
