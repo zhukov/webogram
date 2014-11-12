@@ -169,14 +169,11 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myExternalEmbed', function () {
 
     var twitterAttached = false;
+    var facebookAttached = false;
+    var gplusAttached = false;
     var twitterPendingWidgets = [];
+    var facebookPendingWidgets = [];
     var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
-
-    function attachTwitterScript () {
-      twitterAttached = true;
-
-      $('<script>').appendTo('body').attr('src', '//platform.twitter.com/widgets.js');
-    }
 
     function link ($scope, element, attrs) {
       var embedData = $scope.$eval(attrs.myExternalEmbed);
@@ -191,7 +188,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           var videoID = embedData[1];
           html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
                 'src="//www.youtube.com/embed/' + videoID +
-                '?autoplay=0&amp;controls=2"></' + embedTag + '></div>';
+                '?autoplay=0&amp;controls=2" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
+          break;
+
+        case 'vimeo':
+          var videoID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="//player.vimeo.com/video/' + videoID +
+                '?title=0&amp;byline=0&amp;portrait=0" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
           break;
 
         case 'instagram':
@@ -229,6 +233,56 @@ angular.module('myApp.directives', ['myApp.filters'])
               twttr.widgets.load(element[0]);
             }
             twitterPendingWidgets.push($scope);
+          };
+          break;
+
+        case 'facebook':
+          html = '<div class="im_message_facebook_embed"><div class="fb-post" data-href="' + embedData[1] + '" data-width="300"></div></div>';
+
+          callback = function () {
+            if (!facebookAttached) {
+              facebookAttached = true;
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  FB.Event.subscribe('xfbml.render', function (event) {
+                    for (var i = 0; i < facebookPendingWidgets.length; i++) {
+                      facebookPendingWidgets[i].$emit('ui_height');
+                    }
+                    facebookPendingWidgets = [];
+                  });
+                })
+                .attr('src', '//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=254098051407226&version=v2.0');
+            }
+
+            else if (window.FB) {
+              FB.XFBML.parse(element[0]);
+            }
+            facebookPendingWidgets.push($scope);
+          };
+          break;
+
+        case 'gplus':
+          html = '<div class="im_message_gplus_embed"><div class="g-post" data-href="' + embedData[1] + '"></div></div>';
+
+          callback = function () {
+            if (!gplusAttached) {
+              gplusAttached = true;
+
+              window.___gcfg = {"parsetags": "explicit"};
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  gapi.post.go();
+                })
+                .attr('src', 'https://apis.google.com/js/plusone.js');
+            }
+            else if (window.gapi) {
+              gapi.post.go(element[0]);
+            }
+            element.one('load', function () {
+              $scope.$emit('ui_height');
+            });
           };
           break;
       }
