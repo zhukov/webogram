@@ -488,7 +488,7 @@ angular.module('izhukov.utils', [])
       naClEmbed = false,
       taskID = 0,
       awaiting = {},
-      webCrypto = window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle) || window.msCrypto && window.msCrypto.subtle,
+      webCrypto = window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle)/* || window.msCrypto && window.msCrypto.subtle*/,
       useSha1Crypto = webCrypto && webCrypto.digest !== undefined,
       finalizeTask = function (taskID, result) {
         var deferred = awaiting[taskID];
