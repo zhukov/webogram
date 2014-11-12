@@ -1862,7 +1862,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         userFullResult.user.first_name = $scope.override.first_name;
         userFullResult.user.last_name = $scope.override.last_name;
       }
-      AppUsersManager.saveApiUser(userFullResult.user);
+      AppUsersManager.saveApiUser(userFullResult.user, true);
       AppPhotosManager.savePhoto(userFullResult.profile_photo);
       if (userFullResult.profile_photo._ != 'photoEmpty') {
         $scope.userPhoto.id = userFullResult.profile_photo.id;

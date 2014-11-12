@@ -77,8 +77,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     angular.forEach(apiUsers, saveApiUser);
   };
 
-  function saveApiUser (apiUser) {
-    if (!angular.isObject(apiUser)) {
+  function saveApiUser (apiUser, noReplace) {
+    if (!angular.isObject(apiUser) ||
+        noReplace && angular.isObject(users[apiUser.id]) && users[apiUser.id].first_name) {
       return;
     }
 
