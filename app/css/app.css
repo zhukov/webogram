@@ -1963,12 +1963,14 @@ img.img_fullsize {
 }
 
 .emoji-wysiwyg-editor {
+  box-sizing: content-box;
   font-size: 12px;
   margin-bottom: 10px;
   padding: 6px;
-  min-height: 50px;
+  min-height: 34px;
   height: auto;
-  max-height: 300px;
+  width: auto;
+  max-height: 284px;
   overflow: auto;
   line-height: 17px;
 

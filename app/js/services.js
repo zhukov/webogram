@@ -602,7 +602,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService,Storage, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService,Storage, FileManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -1883,8 +1883,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     notification.tag = peerString;
 
     if (notificationPhoto.location && !notificationPhoto.location.empty) {
-      MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (url) {
-        notification.image = url;
+      MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (blob) {
+        notification.image = FileManager.getUrl(blob, 'image/jpeg');
 
         if (message.unread) {
           NotificationsManager.notify(notification);
@@ -2337,7 +2337,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {
           mime: mimeType,
           toFileEntry: writableFileEntry
-        }).then(function (url) {
+        }).then(function () {
           // console.log('file save done');
         }, function (e) {
           console.log('photo download failed', e);
@@ -2346,8 +2346,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }, function () {
       MtpApiFileManager.downloadFile(
         fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {mime: mimeType}
-      ).then(function (url) {
-        FileManager.download(url, mimeType, fileName);
+      ).then(function (blob) {
+        FileManager.download(blob, mimeType, fileName);
       }, function (e) {
         console.log('photo download failed', e);
       });
@@ -2487,6 +2487,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function downloadVideo (videoID, toFileEntry) {
     var video = videos[videoID],
         historyVideo = videosForHistory[videoID] || video || {},
+        mimeType = video.mime_type || 'video/ogg',
         inputFileLocation = {
           _: 'inputVideoFileLocation',
           id: videoID,
@@ -2496,11 +2497,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     historyVideo.progress = {enabled: !historyVideo.downloaded, percent: 1, total: video.size};
 
     var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
-      mime: video.mime_type || 'video/ogg',
+      mime: mimeType,
       toFileEntry: toFileEntry
     });
 
-    downloadPromise.then(function (url) {
+    downloadPromise.then(function (blob) {
+      var url = FileManager.getUrl(blob, mimeType);
       delete historyVideo.progress;
       historyVideo.url = $sce.trustAsResourceUrl(url);
       historyVideo.downloaded = true;
@@ -2533,8 +2535,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         downloadVideo(videoID, writableFileEntry);
       }
     }, function () {
-      downloadVideo(videoID).then(function (url) {
-        FileManager.download(url, mimeType, fileName);
+      downloadVideo(videoID).then(function (blob) {
+        FileManager.download(blob, mimeType, fileName);
       });
     });
   }
@@ -2606,7 +2608,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     doc.thumb = thumb;
 
     doc.canDownload = !(window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry);
-    doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/|application\/pdf)/) ? 1 : 0;
+    doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/)/) ? 1 : 0;
 
     if (isGif && doc.thumb) {
       doc.isSpecial = 'gif';
@@ -2654,7 +2656,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       toFileEntry: toFileEntry
     });
 
-    downloadPromise.then(function (url) {
+    downloadPromise.then(function (blob) {
+      var url = FileManager.getUrl(blob, doc.mime_type);
       delete historyDoc.progress;
       historyDoc.url = $sce.trustAsResourceUrl(url);
       historyDoc.downloaded = true;
@@ -2698,8 +2701,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         downloadDoc(docID, writableFileEntry);
       }
     }, function () {
-      downloadDoc(docID).then(function (url) {
-        FileManager.download(url, doc.mime_type, doc.file_name);
+      downloadDoc(docID).then(function (blob) {
+        FileManager.download(blob, doc.mime_type, doc.file_name);
       });
     });
   }
@@ -2755,6 +2758,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function downloadAudio (audioID, toFileEntry) {
     var audio = audios[audioID],
         historyAudio = audiosForHistory[audioID] || audio || {},
+        mimeType = audio.mime_type || 'audio/ogg',
         inputFileLocation = {
           _: 'inputAudioFileLocation',
           id: audioID,
@@ -2764,11 +2768,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 1, total: audio.size};
 
     var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {
-      mime: audio.mime_type || 'audio/ogg',
+      mime: mimeType,
       toFileEntry: toFileEntry
     });
 
-    downloadPromise.then(function (url) {
+    downloadPromise.then(function (blob) {
+      var url = FileManager.getUrl(blob, mimeType);
       delete historyAudio.progress;
       historyAudio.url = $sce.trustAsResourceUrl(url);
       historyAudio.downloaded = true;
@@ -2801,8 +2806,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         downloadAudio(audioID, writableFileEntry);
       }
     }, function () {
-      downloadAudio(audioID).then(function (url) {
-        FileManager.download(url, mimeType, fileName);
+      downloadAudio(audioID).then(function (blob) {
+        FileManager.download(blob, mimeType, fileName);
       });
     });
   }

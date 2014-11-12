@@ -1791,7 +1791,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.download = function () {
-      $rootScope.downloadVideo($scope.videoID)
+      AppVideoManager.saveVideoFile($scope.videoID);
     };
 
     $scope.$on('history_delete', function (e, historyUpdate) {

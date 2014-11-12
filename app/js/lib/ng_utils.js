@@ -182,11 +182,13 @@ angular.module('izhukov.utils', [])
     return 'data:' + mimeType + ';base64,' + bytesToBase64(fileData);
   }
 
-  function downloadFile (url, mimeType, fileName) {
-    // if (Config.Mobile) {
-    //   window.open(url, '_blank');
-    //   return;
-    // }
+  function downloadFile (blob, mimeType, fileName) {
+    if (window.navigator && navigator.msSaveBlob !== undefined) {
+      window.navigator.msSaveBlob(blob, fileName);
+    }
+
+    var url = getUrl(blob, mimeType);
+
     var anchor = $('<a>Download</a>')
               .css({position: 'absolute', top: 1, left: 1})
               .attr('href', url)
@@ -194,8 +196,14 @@ angular.module('izhukov.utils', [])
               .attr('download', fileName)
               .appendTo('body');
 
-    anchor[0].dataset.downloadurl = [mimeType, fileName, url].join(':');
-    anchor[0].click();
+    if (anchor[0].dataset) {
+      anchor[0].dataset.downloadurl = [mimeType, fileName, url].join(':');
+    }
+    try {
+      anchor[0].click();
+    } catch (e) {
+      window.open(url, '_blank');
+    }
     $timeout(function () {
       anchor.remove();
     }, 100);

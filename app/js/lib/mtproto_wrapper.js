@@ -328,7 +328,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
     if (!cachedSavePromises[fileName]) {
       cachedSavePromises[fileName] = getFileStorage().saveFile(fileName, bytes).then(function (blob) {
-        return cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType);
+        return cachedDownloads[fileName] = blob;
       });
     }
     return cachedSavePromises[fileName];
@@ -350,7 +350,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     var fileStorage = getFileStorage();
 
     return cachedDownloadPromises[fileName] = fileStorage.getFile(fileName).then(function (blob) {
-      return cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType);
+      return cachedDownloads[fileName] = blob;
     }, function () {
       var downloadPromise = downloadRequest(location.dc_id, function () {
         // console.log('next small promise');
@@ -368,7 +368,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       return fileStorage.getFileWriter(fileName, mimeType).then(function (fileWriter) {
         return downloadPromise.then(function (result) {
           return FileManager.write(fileWriter, result.bytes).then(function () {
-            return cachedDownloads[fileName] = FileManager.getUrl(fileWriter.finalize(), mimeType);
+            return cachedDownloads[fileName] = fileWriter.finalize();
           });
         });
       });
@@ -400,10 +400,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
     if (cachedPromise) {
       if (toFileEntry) {
-        return cachedPromise.then(function (url) {
-          return fileStorage.getFile(fileName).then(function (blob) {
-            return FileManager.copy(blob, toFileEntry);
-          });
+        return cachedPromise.then(function (blob) {
+          return FileManager.copy(blob, toFileEntry);
         })
       }
       return cachedPromise;
@@ -430,7 +428,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           deferred.resolve();
         }, errorHandler);
       } else {
-        deferred.resolve(cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType));
+        deferred.resolve(cachedDownloads[fileName] = blob);
       }
     }, function () {
       var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
@@ -476,7 +474,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                     if (toFileEntry) {
                       deferred.resolve();
                     } else {
-                      deferred.resolve(cachedDownloads[fileName] = FileManager.getUrl(fileWriter.finalize(), mimeType));
+                      deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
                     }
                   } else {
                     deferred.notify({done: offset + limit, total: size});
