@@ -1580,12 +1580,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       var promise = index >= list.length ? loadMore() : $q.when();
       promise.then(function () {
-        if (curJump != jump) {
+        if (curJump != jump || !hasMore) {
           return;
         }
 
-        $scope.messageID = list[index];
-        $scope.photoID = AppMessagesManager.getMessage($scope.messageID).media.photo.id;
+        var messageID = list[index];
+        var message = AppMessagesManager.getMessage(messageID);
+        if (!message ||
+            !message.media ||
+            !message.media.photo ||
+            !message.media.photo.id) {
+          console.error('Invalid photo message', index, list, messageID, message);
+          return;
+        }
+
+        $scope.messageID = messageID;
+        $scope.photoID = message.media.photo.id;
         $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
 
         updatePrevNext();
@@ -1652,6 +1662,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         list = newList;
       }
     });
+
+    loadMore();
 
   })
 
