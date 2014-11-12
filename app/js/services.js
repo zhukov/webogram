@@ -3498,7 +3498,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function notify (data) {
-    console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
+    // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
 
     // FFOS Notification blob src bug workaround
     if (Config.Navigator.ffos) {
@@ -3546,8 +3546,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       else if (window.external && window.external.msIsSiteMode()) {
         window.external.msSiteModeClearIconOverlay();
-        console.log('notify', data.image, data.title);
-        window.external.msSiteModeSetIconOverlay('img/icons/icon16.png', data.title + (data.message ? ' ' + data.message : ''));
+        window.external.msSiteModeSetIconOverlay('img/icons/icon16.png', data.title);
         window.external.msSiteModeActivate();
         notification = {
           index: idx
