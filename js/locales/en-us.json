@@ -204,6 +204,7 @@
 	"error_modal_flood_title": "Too fast",
 	"error_modal_internal_title": "Server error",
 	"error_modal_alert": "Alert",
+	"error_modal_media_not_supported_title": "Unsupported media",
 
 	"error_modal_network_description": "Please check your internet connection.",
 	"error_modal_firstname_invali_description": "The first name you entered is invalid.",
@@ -218,6 +219,7 @@
 	"error_modal_username_invalid_description": "Sorry, this username is not allowed.",
 	"error_modal_phonebook_required_description": "Telegram needs access to phonebook to import contacts.",
 	 "error_modal_username_occupied_description": "Sorry, this username is already taken.",
+	 "error_modal_media_not_supported_description": "Your browser cannot play this media file. Try downloading the file and opening it in a standalone player.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",
 	"error_modal_unauthorized_description": "This action requires authorization access. Please {login-link: log in}.",
