@@ -3353,9 +3353,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
 
-  var notificationsUiSupport = ('Notification' in window) ||
-                               ('mozNotification' in navigator) ||
-                               window.external && window.external.msIsSiteMode();
+  var notificationsMsSiteMode = false;
+  try {
+    if (window.external && window.external.msIsSiteMode()) {
+      notificationsMsSiteMode = true;
+    }
+  } catch (e) {};
+
+  var notificationsUiSupport = notificationsMsSiteMode ||
+                               ('Notification' in window) ||
+                               ('mozNotification' in navigator);
   var notificationsShown = {};
   var notificationIndex = 0;
   var notificationsCount = 0;
@@ -3510,17 +3517,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     notificationsCount++;
 
-    if (!notificationsUiSupport ||
-        'Notification' in window && Notification.permission !== 'granted') {
-      return false;
-    }
-
     Storage.get('notify_nosound', 'notify_volume').then(function (settings) {
       if (!settings[0] && settings[1] === false || settings[1] > 0) {
         playSound(settings[1] || 0.5);
       }
     })
 
+    if (!notificationsUiSupport ||
+        'Notification' in window && Notification.permission !== 'granted') {
+      return false;
+    }
 
     Storage.get('notify_nodesktop', 'notify_novibrate').then(function (settings) {
       if (settings[0]) {
@@ -3544,7 +3550,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       else if ('mozNotification' in navigator) {
         notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
       }
-      else if (window.external && window.external.msIsSiteMode()) {
+      else if (notificationsMsSiteMode) {
         window.external.msSiteModeClearIconOverlay();
         window.external.msSiteModeSetIconOverlay('img/icons/icon16.png', data.title);
         window.external.msSiteModeActivate();
@@ -3596,8 +3602,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (notification.close) {
           notification.close();
         }
-        else if (notification.index == notificationIndex &&
-                window.external && window.external.msIsSiteMode()) {
+        else if (notificationsMsSiteMode &&
+                 notification.index == notificationIndex) {
           window.external.msSiteModeClearIconOverlay();
         }
       } catch (e) {}
@@ -3606,7 +3612,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function notificationsClear() {
-    if (window.external && window.external.msIsSiteMode()) {
+    if (notificationsMsSiteMode) {
       window.external.msSiteModeClearIconOverlay();
     } else {
       angular.forEach(notificationsShown, function (notification) {
