@@ -31,17 +31,26 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function mtpLogOut () {
-    return mtpInvokeApi('auth.logOut').then(function () {
-      Storage.remove('dc', 'user_auth');
-
-      baseDcID = false;
-    }, function (error) {
-      Storage.remove('dc', 'user_auth');
-      if (error && error.code != 401) {
-        Storage.remove('dc' + baseDcID + '_auth_key');
+    var storageKeys = [];
+    for (var dcID = 1; dcID <= 5; dcID++) {
+      storageKeys.push('dc' + dcID + '_auth_key');
+    }
+    return Storage.get.apply(Storage, storageKeys).then(function (storageResult) {
+      var logoutPromises = [];
+      for (var i = 0; i < storageResult.length; i++) {
+        if (storageResult[i]) {
+          logoutPromises.push(mtpInvokeApi('auth.logOut', {}, {dcID: i + 1}));
+        }
       }
-      baseDcID = false;
-      error.handled = true;
+      return $q.all(logoutPromises).then(function () {
+        Storage.remove('dc', 'user_auth');
+        baseDcID = false;
+      }, function (error) {
+        Storage.remove.apply(storageKeys);
+        Storage.remove('dc', 'user_auth');
+        baseDcID = false;
+        error.handled = true;
+      });
     });
   }
 
