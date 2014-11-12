@@ -1818,6 +1818,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function notifyAboutMessage (message) {
+    console.warn('notify about message');
     var peerID = getMessagePeer(message);
     var fromUser = AppUsersManager.getUser(message.from_id);
     var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
@@ -3352,7 +3353,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
 
-  var notificationsUiSupport = ('Notification' in window) || ('mozNotification' in navigator);
+  var notificationsUiSupport = ('Notification' in window) ||
+                               ('mozNotification' in navigator) ||
+                               window.external && window.external.msIsSiteMode();
   var notificationsShown = {};
   var notificationIndex = 0;
   var notificationsCount = 0;
@@ -3495,7 +3498,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function notify (data) {
-    // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
+    console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
 
     // FFOS Notification blob src bug workaround
     if (Config.Navigator.ffos) {
@@ -3541,6 +3544,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       else if ('mozNotification' in navigator) {
         notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
       }
+      else if (window.external && window.external.msIsSiteMode()) {
+        window.external.msSiteModeClearIconOverlay();
+        console.log('notify', data.image, data.title);
+        window.external.msSiteModeSetIconOverlay('img/icons/icon16.png', data.title + (data.message ? ' ' + data.message : ''));
+        window.external.msSiteModeActivate();
+        notification = {
+          index: idx
+        };
+      }
       else {
         return;
       }
@@ -3585,19 +3597,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (notification.close) {
           notification.close();
         }
+        else if (notification.index == notificationIndex &&
+                window.external && window.external.msIsSiteMode()) {
+          window.external.msSiteModeClearIconOverlay();
+        }
       } catch (e) {}
       delete notificationsCount[key];
     }
   }
 
   function notificationsClear() {
-    angular.forEach(notificationsShown, function (notification) {
-      try {
-        if (notification.close) {
-          notification.close()
-        }
-      } catch (e) {}
-    });
+    if (window.external && window.external.msIsSiteMode()) {
+      window.external.msSiteModeClearIconOverlay();
+    } else {
+      angular.forEach(notificationsShown, function (notification) {
+        try {
+          if (notification.close) {
+            notification.close()
+          }
+        } catch (e) {}
+      });
+    }
     notificationsShown = {};
     notificationsCount = 0;
   }
