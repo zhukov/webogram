@@ -1427,11 +1427,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var jump = 0;
       $scope.$watchCollection('fullPhoto.location', function () {
-        var cachedSrc = MtpApiFileManager.getCachedFile($scope.thumbLocation),
+        var cachedBlob = MtpApiFileManager.getCachedFile($scope.thumbLocation),
             curJump = ++jump;
 
-        if (cachedSrc) {
-          imgElement.src = cachedSrc;
+        if (cachedBlob) {
+          imgElement.src = FileManager.getUrl(cachedBlob, 'image/jpeg');
           resize();
         } else {
           imgElement.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
@@ -1636,7 +1636,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.imageWidth = wh.w;
         $scope.imageHeight = wh.h;
 
-        $scope.thumbSrc = MtpApiFileManager.getCachedFile(thumbPhotoSize.location);
+        var cachedBlob = MtpApiFileManager.getCachedFile(thumbPhotoSize.location);
+        if (cachedBlob) {
+          $scope.thumbSrc = FileManager.getUrl(cachedBlob, 'image/jpeg');
+        }
       }
 
       $scope.frameWidth = Math.max($scope.imageWidth, Math.min(600, fullWidth))
