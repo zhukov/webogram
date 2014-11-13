@@ -185,27 +185,38 @@ angular.module('izhukov.utils', [])
   function downloadFile (blob, mimeType, fileName) {
     if (window.navigator && navigator.msSaveBlob !== undefined) {
       window.navigator.msSaveBlob(blob, fileName);
+      return false;
     }
 
     var url = getUrl(blob, mimeType);
 
-    var anchor = $('<a>Download</a>')
-              .css({position: 'absolute', top: 1, left: 1})
-              .attr('href', url)
-              .attr('target', '_blank')
-              .attr('download', fileName)
-              .appendTo('body');
-
-    if (anchor[0].dataset) {
-      anchor[0].dataset.downloadurl = [mimeType, fileName, url].join(':');
+    var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+    anchor.href = url;
+    anchor.target  = '_blank';
+    anchor.download = fileName;
+    if (anchor.dataset) {
+      anchor.dataset.downloadurl = ["video/quicktime", fileName, url].join(':');
     }
+    $(anchor).css({position: 'absolute', top: 1, left: 1}).appendTo('body');
+
     try {
-      anchor[0].click();
+      var clickEvent = document.createEvent('MouseEvents');
+      clickEvent.initMouseEvent(
+        'click', true, false, window, 0, 0, 0, 0, 0
+        , false, false, false, false, 0, null
+      );
+      anchor.dispatchEvent(clickEvent);
     } catch (e) {
-      window.open(url, '_blank');
+      console.error('Download click error', e);
+      try {
+        console.error('Download click error', e);
+        anchor[0].click();
+      } catch (e) {
+        window.open(url, '_blank');
+      }
     }
     $timeout(function () {
-      anchor.remove();
+      $(anchor).remove();
     }, 100);
   }
 
