@@ -1040,8 +1040,8 @@ a.mobile_modal_action .tg_checkbox_label {
   border-radius: 4px;
 }
 .emoji-wysiwyg-editor {
-  min-height: 32px;
-  max-height: 150px;
+  min-height: 18px;
+  max-height: 136px;
   margin-bottom: 0;
   font-size: 15px;
 }
