@@ -187,28 +187,28 @@ angular.module('myApp.directives', ['myApp.filters'])
         case 'youtube':
           var videoID = embedData[1];
           html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="//www.youtube.com/embed/' + videoID +
+                'src="https://www.youtube.com/embed/' + videoID +
                 '?autoplay=0&amp;controls=2" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
           break;
 
         case 'vimeo':
           var videoID = embedData[1];
           html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="//player.vimeo.com/video/' + videoID +
+                'src="https://player.vimeo.com/video/' + videoID +
                 '?title=0&amp;byline=0&amp;portrait=0" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
           break;
 
         case 'instagram':
           var instaID = embedData[1];
           html = '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="//instagram.com/p/' + instaID +
+                'src="https://instagram.com/p/' + instaID +
                 '/embed/"></' + embedTag + '></div>';
           break;
 
         case 'vine':
           var vineID = embedData[1];
           html = '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="//vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
+                'src="https://vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
           break;
 
         case 'twitter':
@@ -227,7 +227,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                     twitterPendingWidgets = [];
                   });
                 })
-                .attr('src', '//platform.twitter.com/widgets.js');
+                .attr('src', 'https://platform.twitter.com/widgets.js');
             }
             else if (window.twttr) {
               twttr.widgets.load(element[0]);
@@ -252,7 +252,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                     facebookPendingWidgets = [];
                   });
                 })
-                .attr('src', '//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=254098051407226&version=v2.0');
+                .attr('src', 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&appId=254098051407226&version=v2.0');
             }
 
             else if (window.FB) {
