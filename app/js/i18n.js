@@ -22,8 +22,10 @@ angular.module('myApp.i18n', ['izhukov.utils'])
     }
 
     function parseMarkdownString(msgstr, msgid) {
-      msgstr = msgstr.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\n/g, "<br/>");
+      msgstr = msgstr
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n|&#10;/g, "<br/>");
+
       return msgstr;
     }
 

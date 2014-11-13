@@ -34,7 +34,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       if (location.protocol == 'http:' &&
-          (location.host == 'zhukov.github.io' || location.host == 'web.telegram.org')) {
+          Config.App.domains.indexOf(location.hostname) != -1) {
         location = 'https://web.telegram.org';
       }
     });
@@ -300,7 +300,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     ChangelogNotifyService.checkUpdate();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -428,6 +428,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     ChangelogNotifyService.checkUpdate();
+    HttpsMigrateService.start();
   })
 
   .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, PhonebookContactsService, ErrorService) {

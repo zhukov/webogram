@@ -3813,12 +3813,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     },
     selectContact: function (options) {
       return select (false, options);
-    },
+    }
   }
 })
 
 
-.service('ChangelogNotifyService', function (Storage, $rootScope, $http, $modal) {
+.service('ChangelogNotifyService', function (Storage, $rootScope, $modal) {
 
   function versionCompare (ver1, ver2) {
     if (typeof ver1 !== 'string') {
@@ -3880,5 +3880,45 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   return {
     checkUpdate: checkUpdate,
     showChangelog: showChangelog
+  }
+})
+
+.service('HttpsMigrateService', function (ErrorService, Storage) {
+
+  var started = false;
+
+  function check () {
+    Storage.get('https_dismiss').then(function (ts) {
+      if (!ts || tsNow() > ts + 43200000) {
+        ErrorService.confirm({
+          type: 'MIGRATE_TO_HTTPS'
+        }).then(function () {
+          var popup;
+          try {
+            popup = window.open('https://web.telegram.org', '_blank');
+          } catch (e) {}
+          if (!popup) {
+            location = 'https://web.telegram.org';
+          }
+        }, function () {
+          Storage.set({https_dismiss: tsNow()});
+        });
+      }
+    });
+  }
+
+  function start () {
+    if (started ||
+        location.protocol != 'http:' ||
+        Config.App.domains.indexOf(location.hostname) == -1) {
+      return;
+    }
+    started = true;
+    setTimeout(check, 120000);
+  }
+
+  return {
+    start: start,
+    check: check
   }
 })
