@@ -1,13 +1,9 @@
 [![Stories in Ready](https://badge.waffle.io/zhukov/webogram.png?label=ready&title=Ready)](https://waffle.io/zhukov/webogram)
-## [Webogram](http://zhukov.github.io/webogram) – UNOFFICIAL Telegram Web App
+## [Webogram](https://web.telegram.org) – Telegram Web App
 
-Telegram offers great [apps for mobile communication](https://www.telegram.org). It is based on the [MTProto protocol](https://core.telegram.org/mtproto) and has an [Open API](http://core.telegram.org/api). I personally like Telegram for its speed and cloud-support (that makes a web app possible, unlike in the case of WA and others).
+Telegram offers great [apps for mobile communication](https://www.telegram.org). It is based on the [MTProto protocol](https://core.telegram.org/mtproto) and has an [Open API](https://core.telegram.org/api). I personally like Telegram for its speed and cloud-support (that makes a web app possible, unlike in the case of WA and others).
 
-MTProto data can be carried over HTTP, but no official web-version for Telegram exists for the time being. So this project is my take at creating one.
-
-
-> **Disclaimer**:
-> This is an alpha version of the Telegram **UNOFFICIAL** web application. It may have undetected security issues, and there is definitely a load of bugs to fix, features to add and so on. So if you want 200% secure and fully functional communication, don't use this yet! You can always find Telegram official mobile applications here: https://telegram.org
+MTProto data can be carried over HTTP (SSL is also supported), so this project is my take at creating one.
 
 That said, I'm using this app myself and I'd like to share its sources, so anyone can contribute to the development. Any help is welcome!
 
@@ -23,34 +19,10 @@ Here are some screenshots of the interface:
 ![Mobile screenshot 3](/app/img/screenshot3.png)
 
 
-### Implemented functionality list
-
-* Sign in by phone number + SMS code, or phone call
-* View list of existings chats (up-posting) with infinite scrolling
-* View messages history for each chat/group (bottom-posting) with infinite scrolling
-* View brief profile info
-* Create new group
-* View/edit group info
-* View/edit group participants
-* View media in messages: photo, video
-* Download documents from messages
-* Emoji display in all browsers (Chrome, non-OSX ones)
-* Emoji keyboard, recent emojis
-* Send plain-text messages to user or group
-* Send files (photos or documents) via attach icon or drag'n'drop
-* Desktop notifications
-* Settings
-* Edit profile/userpic
-* Contacts view, search
-* Contacts add/edit
-* Edit, delete, forward messsages
-* Search messages
-* Registration
-
-
 ### Unsupported at the moment
 
 * Secret chats
+* Black list and blocking user
 * ...
 
 
@@ -59,16 +31,16 @@ Here are some screenshots of the interface:
 
 | Description        | URL           | Type  |
 | ------------- |-------------| -----:|
-| Online Web-version (hosted on Telegram servers)      | http://web.telegram.org/ | hosted
-| Online Web-version (hosted on GitHub pages)      | http://zhukov.github.io/webogram | hosted
+| Online Web-version (hosted on Telegram servers)      | https://web.telegram.org/ | hosted
+| Online Web-version (hosted on GitHub pages)      | https://zhukov.github.io/webogram | hosted
 | Chrome Web Store      | [https://chrome.google.com/webstore/detail/telegram/ clhhggbfdinjmjhajaheehoeibfljjno](https://chrome.google.com/webstore/detail/telegram/clhhggbfdinjmjhajaheehoeibfljjno) |   packed
 | Firefox & FirefoxOS Marketplace | https://marketplace.firefox.com/app/telegram |    packed
 
 
 
-**Hosted version**: the app is downloaded via HTTP as a usual website.
+**Hosted version**: the app is downloaded via HTTPS as a usual website. Will be available offline due to application cache.
 
-**Packed version**: the app is downloaded at once in a package via HTTPS. This is a more secure way to use app, but the package is updated less frequently than the Web-version.
+**Packed version**: the app is downloaded at once in a package via HTTPS. The package is updated less frequently than the Web-version.
 
 All of the apps above are submitted and maintained by [@zhukov](https://github.com/zhukov), so feel free to use them and report bugs [here](https://github.com/zhukov/webogram/issues). Please do not report bugs which reproduce only in different locations.
 
@@ -125,7 +97,7 @@ Go to our [issue tracker](https://github.com/zhukov/webogram/issues) and check i
 
 ### Localization
 
-If you don't see your native language available for Webogram and you can help with translation, please join the [Telegram Web project on Transifex](https://www.transifex.com/projects/p/telegram-web/).
+If you don't see your native language available for Webogram and you can help with translation, please consult the [Telegram Translations Manual](core.telegram.org/translating_telegram).
 
 To test your translation live, use [Localization guide](/app/js/locales/README.md).
 
