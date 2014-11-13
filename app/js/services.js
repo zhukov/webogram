@@ -3121,6 +3121,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var twitterRegex = /https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
   var facebookRegex = /https?:\/\/(?:www\.)?facebook\.com\/.+?\/posts\/\d+/i;
   var gplusRegex = /https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
+  var soundcloudRegex = /https?:\/\/(soundcloud.com|snd.sc)\/[a-zA-Z0-9\-\_]+\/[a-zA-Z0-9\-\_]+/i;
 
   return {
     wrapRichText: wrapRichText,
@@ -3265,6 +3266,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     else if (embedUrlMatches = text.match(vineRegex)) {
       return ['vine', embedUrlMatches[1]];
+    }
+    else if (embedUrlMatches = text.match(soundcloudRegex)) {
+      return ['soundcloud', embedUrlMatches[0]];
     }
 
     if (!Config.Modes.chrome_packed) { // Need external JS
