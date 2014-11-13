@@ -2391,11 +2391,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     })
   })
 
-  .controller('ContactsModalController', function ($scope, $modal, $modalInstance, AppUsersManager, ErrorService) {
+  .controller('ContactsModalController', function ($scope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
 
     $scope.contacts = [];
+    $scope.foundUsers = [];
     $scope.search = {};
     $scope.slice = {limit: 20, limitDelta: 20};
+
+    var jump = 0;
 
     resetSelected();
     $scope.disabledContacts = {};
@@ -2421,7 +2424,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     function updateContacts (query) {
+      var curJump = ++jump;
+      var doneIDs = [];
       AppUsersManager.getContacts(query).then(function (contactsList) {
+        if (curJump != jump) return;
         $scope.contacts = [];
         $scope.slice.limit = 20;
 
@@ -2431,11 +2437,36 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             user: AppUsersManager.getUser(userID),
             userPhoto: AppUsersManager.getUserPhoto(userID, 'User')
           }
+          doneIDs.push(userID);
           $scope.contacts.push(contact);
         });
         $scope.contactsEmpty = query ? false : !$scope.contacts.length;
         $scope.$broadcast('contacts_change');
       });
+
+      if (query && query.length >= 5) {
+        $timeout(function() {
+          if (curJump != jump) return;
+          MtpApiManager.invokeApi('contacts.search', {q: query, limit: 10}).then(function (result) {
+            AppUsersManager.saveApiUsers(result.users);
+            if (curJump != jump) return;
+            angular.forEach(result.results, function(contactFound) {
+              var userID = contactFound.user_id;
+              if (doneIDs.indexOf(userID) != -1) return;
+              $scope.contacts.push({
+                userID: userID,
+                user: AppUsersManager.getUser(userID),
+                peerString: AppUsersManager.getUserString(userID),
+                found: true
+              });
+            });
+          }, function (error) {
+            if (error.code == 400) {
+              error.handled = true;
+            }
+          });
+        }, 500);
+      }
     };
 
     $scope.$watch('search.query', updateContacts);
