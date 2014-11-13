@@ -33,6 +33,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $location.url('/im');
         return;
       }
+      if (location.protocol == 'http:' &&
+          (location.host == 'zhukov.github.io' || location.host == 'web.telegram.org')) {
+        location = 'https://web.telegram.org';
+      }
     });
     var options = {dcID: 2, createNetworker: true},
         countryChanged = false,
@@ -79,17 +83,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         if (nearestDcResult.nearest_dc != nearestDcResult.this_dc) {
           MtpApiManager.getNetworker(nearestDcResult.nearest_dc, {createNetworker: true});
-        }
-      }, function (error) {
-        switch (error.type) {
-          case 'NETWORK_BAD_REQUEST':
-            if (location.protocol == 'https:') {
-              ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
-                location = location.toString().replace(/^https:/, 'http:');
-              });
-              error.handled = true;
-            }
-            break;
         }
       });
     }
@@ -218,15 +211,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.progress.enabled = false;
           console.log('sendCode error', error);
           switch (error.type) {
-            case 'NETWORK_BAD_REQUEST':
-              if (location.protocol == 'https:') {
-                ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
-                  location = location.toString().replace(/^https:/, 'http:');
-                });
-                error.handled = true;
-              }
-              break;
-
             case 'PHONE_NUMBER_INVALID':
               $scope.error = {field: 'phone'};
               error.handled = true;
@@ -617,15 +601,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         return result;
       }, function (error) {
-        if (error.type == 'NETWORK_BAD_REQUEST') {
-          if (location.protocol == 'https:') {
-            ErrorService.confirm({type: 'HTTPS_MIXED_FAIL'}).then(function () {
-              location = location.toString().replace(/^https:/, 'http:');
-            });
-            error.handled = true;
-          }
-        }
-
         if (error.code == 401) {
           MtpApiManager.logOut()['finally'](function () {
             location.hash = '/login';
