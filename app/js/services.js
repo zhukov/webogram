@@ -3922,3 +3922,69 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     check: check
   }
 })
+
+
+.service('LayoutSwitchService', function (ErrorService, Storage, AppRuntimeManager, $window) {
+
+  var started = false;
+  var resizeLayoutSplit = 480;
+  var layoutSplitMaxMobile = 600;
+  var layoutSplitMinMobile = 500;
+  var confirmShown = false;
+
+  function switchLayout(mobile) {
+    Storage.set({
+      current_layout: mobile ? 'mobile' : 'desktop',
+      layout_confirmed: {width: $(window).width(), mobile: mobile}
+    }).then(function () {
+      AppRuntimeManager.reload();
+    });
+  }
+
+  function layoutCheck (e) {
+    if (confirmShown) {
+      return;
+    }
+    var width = $(window).width();
+    if (!e && Config.Mobile && width <= 800) {
+      return;
+    }
+    var newMobile = width < 480;
+    if (newMobile != Config.Mobile) {
+      Storage.get('layout_confirmed').then(function (result) {
+        if (result &&
+            (result.mobile
+              ? width <= result.width
+              : width >= result.width
+            )
+        ) {
+          return false;
+        }
+        confirmShown = true;
+        ErrorService.confirm({
+          type: newMobile ? 'SWITCH_MOBILE_VERSION' : 'SWITCH_DESKTOP_VERSION'
+        }).then(function () {
+          Storage.remove('layout_confirmed');
+          switchLayout(newMobile);
+        }, function () {
+          Storage.set({layout_confirmed: {width: width, mobile: Config.Mobile}});
+          confirmShown = false;
+        });
+      });
+    }
+  }
+
+  function start () {
+    if (started || Config.Navigator.mobile) {
+      return;
+    }
+    started = true;
+    layoutCheck();
+    $($window).on('resize', layoutCheck);
+  }
+
+  return {
+    start: start,
+    switchLayout: switchLayout
+  }
+})

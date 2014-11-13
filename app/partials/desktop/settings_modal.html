@@ -71,6 +71,15 @@
           </dd>
         </dl>
 
+        <dl class="settings_modal_language" ng-controller="AppLangSelectController">
+          <dt><my-i18n msgid="settings_modal_language"></my-i18n>:</dt>
+          <dd>
+            <select class="form-control settings_modal_language_select" ng-change="localeSelect()" ng-model="form.locale">
+              <option ng-repeat="locale in ::supportedLocales" value="{{locale}}" ng-bind="langNames[locale]" ng-selected="locale == curLocale"></option>
+            </select>
+          </dd>
+        </dl>
+
       </div>
     </div>
 

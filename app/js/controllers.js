@@ -11,7 +11,7 @@
 
 angular.module('myApp.controllers', ['myApp.i18n'])
 
-  .controller('AppWelcomeController', function($scope, $location, MtpApiManager, ErrorService, ChangelogNotifyService) {
+  .controller('AppWelcomeController', function($scope, $location, MtpApiManager, ErrorService, ChangelogNotifyService, LayoutSwitchService) {
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
@@ -21,9 +21,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
     ChangelogNotifyService.checkUpdate();
+    LayoutSwitchService.start();
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager, _) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, _) {
 
     $modalStack.dismissAll();
     IdleManager.start();
@@ -298,9 +299,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     ChangelogNotifyService.checkUpdate();
+    LayoutSwitchService.start();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -429,6 +431,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     ChangelogNotifyService.checkUpdate();
     HttpsMigrateService.start();
+    LayoutSwitchService.start();
   })
 
   .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, PhonebookContactsService, ErrorService) {
@@ -1480,6 +1483,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         });
       }
     };
+  })
+
+  .controller('AppFooterController', function ($scope, LayoutSwitchService) {
+    $scope.switchLayout = function (mobile) {
+      LayoutSwitchService.switchLayout(mobile);
+    }
   })
 
   .controller('PhotoModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {

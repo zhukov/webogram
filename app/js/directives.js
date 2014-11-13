@@ -26,6 +26,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myFooter', function() {
+    return {
+      restrict: 'AE',
+      templateUrl: templateUrl('footer')
+    };
+  })
+
   .directive('myDialog', function() {
     return {
       restrict: 'AE',
