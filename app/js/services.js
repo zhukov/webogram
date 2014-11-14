@@ -3932,9 +3932,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 .service('LayoutSwitchService', function (ErrorService, Storage, AppRuntimeManager, $window) {
 
   var started = false;
-  var resizeLayoutSplit = 480;
-  var layoutSplitMaxMobile = 600;
-  var layoutSplitMinMobile = 500;
   var confirmShown = false;
 
   function switchLayout(mobile) {
@@ -3954,7 +3951,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (!e && Config.Mobile && width <= 800) {
       return;
     }
-    var newMobile = width < 480;
+    var newMobile = width < 600;
     if (newMobile != Config.Mobile) {
       Storage.get('layout_confirmed').then(function (result) {
         if (result &&
