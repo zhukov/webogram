@@ -119,7 +119,6 @@
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
 	"confirm_modal_terminate_sessions": "Are you sure you want to log out all devices except for the current one?",
-	"confirm_modal_mixed_content_fail_http_redirect_md": "Your browser {moz-link: does not support} mixed content which is neccessary for MTProto support on https. {issue-link: Learn more}\n\n Would you like to use http-version instead?",
 	"confirm_modal_clipboard_file_send": "Are you sure to send file(s) from clipboard?",
 	"confirm_modal_clipboard_X_files_send": "{'one': 'Are you sure to send file from clipboard?', 'other': 'Are you sure to send {} files from clipboard?'}",
 	"confirm_modal_message_delete": "Are you sure you want to delete the message?",
@@ -128,7 +127,10 @@
 	"confirm_modal_forward_to_peer": "Forward to {peer}?",
 	"confirm_modal_send_to_peer": "Send to {peer}?",
 	"confirm_modal_share_file_peer": "Share with {peer}?",
-	"confirm_modal_apply_lang_with_reload_md": "Language preference was saved.\nReload the App now?",
+	"confirm_modal_apply_lang_with_reload_md": "Reload the App to apply language?",
+	"confirm_modal_migrate_to_https_md": "Telegram Web now supports additional SSL encryption. Would you like to switch to HTTPS?\nThe HTTP version will be disabled soon.",
+	"confirm_modal_resize_desktop_md": "Would you like to switch to desktop version?",
+	"confirm_modal_resize_mobile_md": "Would you like to switch to mobile version?",
 	"confirm_modal_are_u_sure": "Are you sure?",
 
 	"confirm_modal_logout_submit": "Log Out",
@@ -254,6 +256,9 @@
 	"head_waiting_for_network": "Waiting for network",
 	"head_retry": "Retry",
 	"head_connecting": "Connecting",
+
+	"footer_twitter": "Twitter",
+
 
 	"im_new_group": "New Group",
 	"im_new_contact": "New Contact",

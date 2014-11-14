@@ -114,6 +114,7 @@ html {
 
 .tg_page_head .navbar-quick-nav {
   display: block;
+  float: none;
   margin: 0;
 }
 .tg_page_head .navbar-quick-nav li {
@@ -379,6 +380,10 @@ html {
   background: #e4ecf2;
 }
 .im_message_document {
+  width: auto;
+  max-width: 250px;
+}
+.im_message_video {
   width: auto;
   max-width: 250px;
 }
@@ -798,7 +803,7 @@ a.im_message_fwd_author {
   box-shadow: none;
 }
 .mobile_modal .modal-dialog {
-  margin: 0;
+  margin: 0 auto;
 }
 .mobile_modal .modal-content .modal-body {
   padding-left: 0;
@@ -1040,8 +1045,8 @@ a.mobile_modal_action .tg_checkbox_label {
   border-radius: 4px;
 }
 .emoji-wysiwyg-editor {
-  min-height: 32px;
-  max-height: 150px;
+  min-height: 18px;
+  max-height: 136px;
   margin-bottom: 0;
   font-size: 15px;
 }

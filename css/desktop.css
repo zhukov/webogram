@@ -1,3 +1,17 @@
+.navbar-nav > li {
+  float: left;
+}
+.tg_page_head .navbar > .container .navbar-brand {
+  margin-right: 0;
+}
+.navbar-header {
+  float: left;
+}
+.navbar-right {
+  float: right;
+  margin: 0;
+}
+
 /** initial setup **/
 .nano {
   position : relative;
@@ -117,10 +131,16 @@ a.footer_lang_link {
 a.footer_lang_link.active {
   font-weight: bold;
 }
+a.footer_link {
+  color: #9cacb9;
+  padding: 0 3px;
+}
 .footer_brand:hover,
 .footer_brand:active,
 a.footer_lang_link.active:hover,
-a.footer_lang_link.active:active {
+a.footer_lang_link.active:active,
+a.footer_link.active:hover,
+a.footer_link.active:active {
   color: #8499aa;
   text-decoration: none;
 }
@@ -750,6 +770,18 @@ div.im_panel_own_photo {
 .settings_user_phone,
 .settings_version {
   color: #999;
+}
+.modal_section_body dl.settings_modal_language {
+  margin: 3px 0;
+}
+.modal_section_body dl.settings_modal_language dt {
+  padding-top: 2px;
+}
+.settings_modal_language_select {
+  font-size: 12px;
+  height: 21px;
+  line-height: 21px;
+  padding: 0;
 }
 .icon-volume-outer {
   display: inline-block;
