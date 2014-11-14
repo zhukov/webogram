@@ -1308,6 +1308,9 @@ div.im_message_video_thumb {
 .im_message_vine_embed {
   padding-bottom: 100%;
 }
+.im_message_soundcloud_embed {
+  padding-bottom: 56.25%; /* 16/9 ratio */
+}
 .im_message_media_embed iframe,
 .im_message_media_embed webview {
   position: absolute;

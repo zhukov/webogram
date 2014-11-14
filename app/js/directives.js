@@ -218,6 +218,13 @@ angular.module('myApp.directives', ['myApp.filters'])
                 'src="https://vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
           break;
 
+        case 'soundcloud':
+          var soundcloudUrl = embedData[1];
+          html = '<div class="im_message_media_embed im_message_soundcloud_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://w.soundcloud.com/player/?url=' + encodeEntities(encodeURIComponent(soundcloudUrl)) +
+                '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
+          break;
+
         case 'twitter':
           html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
 
