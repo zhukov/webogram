@@ -55,11 +55,11 @@ Here again see the [angular docs](https://docs.angularjs.org/guide/i18n).
 Such strings will have the word _pluralize_ in their key.
 
 And finally: strings which keys have a `_md` suffix get parsed by a simple markdown parser that places everything between `**`s in `<strong/>` tags and replaces newlines with `<br/>` e.g.:
-> "welcome_text_1_md": "This is an unofficial web-client for the **Telegram Messenger**.",
+> "welcome_text_1_md": "This is a web-client for the **Telegram Messenger**.",
 
 becomes
 ```html
-This is an unofficial web-client for the <strong>Telegram Messenger</strong>.
+This is a web-client for the <strong>Telegram Messenger</strong>.
 ```
 
 Including html markup in the messages directly isn't supported and any contained markup will be escaped before inserting.
