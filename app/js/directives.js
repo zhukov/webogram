@@ -214,8 +214,8 @@ angular.module('myApp.directives', ['myApp.filters'])
         case 'soundcloud':
           var soundcloudUrl = embedData[1];
           html = '<div class="im_message_media_embed im_message_soundcloud_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="https://w.soundcloud.com/player/?url=' + soundcloudUrl +
-                '&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=true"></' + embedTag + '></div>';
+                'src="https://w.soundcloud.com/player/?url=' + encodeEntities(encodeURIComponent(soundcloudUrl)) +
+                '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
           break;
 
         case 'twitter':

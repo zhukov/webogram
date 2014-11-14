@@ -3114,14 +3114,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   var regExp = new RegExp('((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{3,20})', 'i');
-  var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|.be|be.com|.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
+  var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
   var vimeoRegex = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
   var instagramRegex = /https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
   var vineRegex = /https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
   var twitterRegex = /https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
   var facebookRegex = /https?:\/\/(?:www\.)?facebook\.com\/.+?\/posts\/\d+/i;
   var gplusRegex = /https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
-  var soundcloudRegex = /https?:\/\/(soundcloud.com|snd.sc)\/[a-zA-Z0-9\-\_]+\/[a-zA-Z0-9\-\_]+/i;
+  var soundcloudRegex = /https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
 
   return {
     wrapRichText: wrapRichText,
@@ -3268,7 +3268,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return ['vine', embedUrlMatches[1]];
     }
     else if (embedUrlMatches = text.match(soundcloudRegex)) {
-      return ['soundcloud', embedUrlMatches[0]];
+      if (embedUrlMatches[1] != 'explore') {
+        return ['soundcloud', embedUrlMatches[0]];
+      }
     }
 
     if (!Config.Modes.chrome_packed) { // Need external JS
