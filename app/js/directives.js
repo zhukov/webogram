@@ -2274,10 +2274,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      var onMouseMove = function (e) {
-        var offsetX = e.pageX - lastMinPageX;
+      var onSliderMove = function (e) {
+        e = e.originalEvent || e;
+
+        var offsetX = (e.touches && e.touches[0] ? e.touches[0].pageX : e.pageX) - lastMinPageX;
         offsetX = Math.min(width, Math.max(0 , offsetX));
-        // console.log('mmove', lastMinPageX, e.pageX, offsetX);
+        // console.log(e.type, lastMinPageX, e.pageX, offsetX);
         lastUpdValue = minValue + offsetX / width * (maxValue - minValue);
         if (sliderCallback) {
           $scope.$eval(sliderCallback, {value: lastUpdValue});
@@ -2290,9 +2292,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         return cancelEvent(e);
       };
-      var stopMouseTrack = function () {
-        $($window).off('mousemove', onMouseMove);
-        $($window).off('mouseup', stopMouseTrack);
+      var stopSliderTrack = function () {
+        $($window).off('mousemove touchmove', onSliderMove);
+        $($window).off('mouseup touchend touchcancel touchleave', stopSliderTrack);
       };
 
       $scope.$watch(model, function (newVal) {
@@ -2313,7 +2315,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       element.on('dragstart selectstart', cancelEvent);
 
-      element.on('mousedown', function (e) {
+      element.on('mousedown touchstart', function (e) {
         if (!width) {
           width = wrap.width();
           if (!width) {
@@ -2321,27 +2323,40 @@ angular.module('myApp.directives', ['myApp.filters'])
             return cancelEvent(e);
           }
         }
-        stopMouseTrack();
+        stopSliderTrack();
 
         e = e.originalEvent || e;
 
-        if (e.offsetX == undefined) {
-          e.offsetX = e.layerX;
+        var offsetX;
+        if (e.touches && e.touches[0]) {
+          lastMinPageX = element.position().left;
+          offsetX = e.touches[0].pageX - lastMinPageX;
         }
-        lastMinPageX = e.pageX - e.offsetX;
-        // console.log('mdown', lastMinPageX, e.pageX, e.offsetX);
-        lastUpdValue = minValue + e.offsetX / width * (maxValue - minValue);
+        else if (e.offsetX !== undefined) {
+          offsetX = e.offsetX;
+          lastMinPageX = e.pageX - offsetX;
+        }
+        else if (e.layerX !== undefined) {
+          offsetX = e.layerX;
+          lastMinPageX = e.pageX - offsetX;
+        }
+        else {
+          return cancelEvent(e);
+        }
+
+        // console.log(e.type, e, lastMinPageX, e.pageX, offsetX);
+        lastUpdValue = minValue + offsetX / width * (maxValue - minValue);
         if (sliderCallback) {
           $scope.$eval(sliderCallback, {value: lastUpdValue});
         } else {
           $scope.$eval(model + '=' + lastUpdValue);
         }
 
-        thumb.css('left', Math.max(0, e.offsetX - thumbWidth));
-        fill.css('width', e.offsetX);
+        thumb.css('left', Math.max(0, offsetX - thumbWidth));
+        fill.css('width', offsetX);
 
-        $($window).on('mousemove', onMouseMove);
-        $($window).on('mouseup', stopMouseTrack);
+        $($window).on('mousemove touchmove', onSliderMove);
+        $($window).on('mouseup touchend touchcancel touchleave', stopSliderTrack);
 
         return cancelEvent(e);
       });
