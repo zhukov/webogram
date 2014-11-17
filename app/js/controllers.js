@@ -612,8 +612,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }, function (error) {
         if (error.code == 401) {
           MtpApiManager.logOut()['finally'](function () {
-            location.hash = '/login';
-            AppRuntimeManager.reload();
+            if (location.protocol == 'http:' &&
+                Config.App.domains.indexOf(location.hostname) != -1) {
+              location = 'https://web.telegram.org/#/login';
+            } else {
+              location.hash = '/login';
+              AppRuntimeManager.reload();
+            }
           });
           error.handled = true;
         }
