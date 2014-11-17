@@ -15,9 +15,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im');
-      } else {
-        $scope.showWelcome = true;
+        return;
       }
+      if (location.protocol == 'http:' &&
+          Config.App.domains.indexOf(location.hostname) != -1) {
+        location = 'https://web.telegram.org';
+        return;
+      }
+      $scope.showWelcome = true;
     });
 
     ChangelogNotifyService.checkUpdate();
@@ -36,7 +41,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (location.protocol == 'http:' &&
           Config.App.domains.indexOf(location.hostname) != -1) {
-        location = 'https://web.telegram.org';
+        location = 'https://web.telegram.org/#/login';
       }
     });
     var options = {dcID: 2, createNetworker: true},
