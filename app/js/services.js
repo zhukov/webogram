@@ -3956,8 +3956,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       Storage.get('layout_confirmed').then(function (result) {
         if (result &&
             (result.mobile
-              ? width <= result.width
-              : width >= result.width
+              ? width == result.width
+              : width == result.width
             )
         ) {
           return false;
