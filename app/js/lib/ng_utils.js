@@ -507,7 +507,7 @@ angular.module('izhukov.utils', [])
       naClEmbed = false,
       taskID = 0,
       awaiting = {},
-      webCrypto = window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle)/* || window.msCrypto && window.msCrypto.subtle*/,
+      webCrypto = Config.Modes.webcrypto && window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle)/* || window.msCrypto && window.msCrypto.subtle*/,
       useSha1Crypto = webCrypto && webCrypto.digest !== undefined,
       finalizeTask = function (taskID, result) {
         var deferred = awaiting[taskID];
@@ -518,7 +518,8 @@ angular.module('izhukov.utils', [])
         }
       };
 
-  if (navigator.mimeTypes &&
+  if (Config.Modes.nacl && 
+      navigator.mimeTypes &&
       navigator.mimeTypes['application/x-pnacl'] !== undefined) {
     var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
     listener.addEventListener('load', function (e) {
