@@ -1264,11 +1264,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         var cData = (e.originalEvent || e).clipboardData,
             items = cData && cData.items || [],
             files = [],
-            i;
+            file, i;
 
         for (i = 0; i < items.length; i++) {
           if (items[i].kind == 'file') {
-            files.push(items[i].getAsFile());
+            file = items[i].getAsFile();
+            files.push(file);
           }
         }
 
