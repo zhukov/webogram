@@ -1260,27 +1260,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        attachType, fileName;
+        attachType, apiFileName, realFileName;
 
     if (!options.isMedia) {
       attachType = 'document';
-      fileName = 'document.' + file.type.split('/')[1];
+      apiFileName = 'document.' + file.type.split('/')[1];
     } else if (['image/jpeg', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
       attachType = 'photo';
-      fileName = 'photo.' + file.type.split('/')[1];
+      apiFileName = 'photo.' + file.type.split('/')[1];
     } else if (file.type.substr(0, 6) == 'video/') {
       attachType = 'video';
-      fileName = 'video.mp4';
+      apiFileName = 'video.mp4';
     } else if (file.type.substr(0, 6) == 'audio/') {
       attachType = 'audio';
-      fileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
+      apiFileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
     } else {
       attachType = 'document';
-      fileName = 'document.' + file.type.split('/')[1];
-    }
-
-    if (!file.name) {
-      file.name = fileName;
+      apiFileName = 'document.' + file.type.split('/')[1];
     }
 
     if (historyStorage === undefined) {
@@ -1291,7 +1287,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var media = {
         _: 'messageMediaPending',
         type: attachType,
-        file_name: file.name,
+        file_name: file.name || apiFileName,
         size: file.size,
         progress: {percent: 1, total: file.size}
       };
@@ -1333,6 +1329,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               uploadPromise = MtpApiFileManager.uploadFile(file);
 
           uploadPromise.then(function (inputFile) {
+            inputFile.name = apiFileName;
             uploaded = true;
             var inputMedia;
             switch (attachType) {
