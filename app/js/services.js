@@ -3393,35 +3393,34 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var titleBackup = document.title,
       titlePromise;
 
-    $rootScope.$watch('idle.isIDLE', function (newVal) {
+  $rootScope.$watch('idle.isIDLE', function (newVal) {
+    if (!newVal) {
+      notificationsClear();
+    }
+    if (!Config.Navigator.mobile) {
+      $interval.cancel(titlePromise);
       if (!newVal) {
-        notificationsClear();
-      }
-      if (!Config.Navigator.mobile) {
-        $interval.cancel(titlePromise);
-        if (!newVal) {
-          document.title = titleBackup;
-          $('link[rel="icon"]:first').replaceWith(faviconBackupEl);
-        } else {
-          titleBackup = document.title;
+        document.title = titleBackup;
+        $('link[rel="icon"]:first').replaceWith(faviconBackupEl);
+      } else {
+        titleBackup = document.title;
 
-          titlePromise = $interval(function () {
-            var time = tsNow();
-            if (!notificationsCount || time % 2000 > 1000) {
-              document.title = titleBackup;
-              var curFav = $('link[rel="icon"]:first');
-              if (curFav.attr('href').indexOf('favicon_unread') != -1) {
-                curFav.replaceWith(faviconBackupEl);
-              }
-            } else {
-              document.title = langNotificationsPluralize(notificationsCount);
-              $('link[rel="icon"]:first').replaceWith(faviconNewEl);
+        titlePromise = $interval(function () {
+          var time = tsNow();
+          if (!notificationsCount || time % 2000 > 1000) {
+            document.title = titleBackup;
+            var curFav = $('link[rel="icon"]:first');
+            if (curFav.attr('href').indexOf('favicon_unread') != -1) {
+              curFav.replaceWith(faviconBackupEl);
             }
-          }, 1000);
-        }
+          } else {
+            document.title = langNotificationsPluralize(notificationsCount);
+            $('link[rel="icon"]:first').replaceWith(faviconNewEl);
+          }
+        }, 1000);
       }
-    });
-  }
+    }
+  });
 
   $rootScope.$on('apiUpdate', function (e, update) {
     // console.log('on apiUpdate', update);
