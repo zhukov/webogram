@@ -50,7 +50,7 @@ angular.module('izhukov.utils', [])
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
   var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1 &&
-                         !navigator.userAgent.indexOf('Chrome') == -1;
+                         navigator.userAgent.indexOf('Chrome') == -1;
 
   var blobSupported = true;
 
