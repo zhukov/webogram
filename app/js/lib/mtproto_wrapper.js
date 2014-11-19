@@ -629,7 +629,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   var errorShowTime = 0;
 
   function start() {
-    if (!started) {
+    if (!started && !Config.Navigator.mobile) {
       started = true;
 
       IdleManager.start();
