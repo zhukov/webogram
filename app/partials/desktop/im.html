@@ -6,8 +6,8 @@
 
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}">
       <div class="im_dialogs_panel">
-        <div class="dropdown im_dialogs_panel_dropdown pull-right">
-          <a class="dropdown-toggle">
+        <div class="dropdown im_dialogs_panel_dropdown pull-right" dropdown>
+          <a class="dropdown-toggle" dropdown-toggle>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -122,8 +122,8 @@
                 <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()" my-i18n="im_info"></a>
                 <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()" my-i18n="im_edit"></a>
 
-                <div class="dropdown im_history_panel_media_dropdown pull-right">
-                  <a class="dropdown-toggle"><my-i18n msgid="im_media"></my-i18n><i class="icon icon-caret"></i></a>
+                <div class="dropdown im_history_panel_media_dropdown pull-right" dropdown>
+                  <a class="dropdown-toggle" dropdown-toggle><my-i18n msgid="im_media"></my-i18n><i class="icon icon-caret"></i></a>
                   <ul class="dropdown-menu">
                     <li><a ng-click="toggleMedia('photos')" my-i18n="im_media_photos"></a></li>
                     <li><a ng-click="toggleMedia('video')" my-i18n="im_media_video"></a></li>
