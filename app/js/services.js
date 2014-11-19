@@ -97,7 +97,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_name_deleted');
     }
     apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
-    apiUser.sortStatus = apiUser.status && (apiUser.status.expires || apiUser.status.was_online) || 0;
+    apiUser.sortStatus = getUserStatusForSort(apiUser.status);
 
 
     if (users[apiUser.id] === undefined) {
@@ -111,6 +111,26 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       safeReplaceObject(cachedPhotoLocations[apiUser.id], apiUser && apiUser.photo && apiUser.photo.photo_small || {empty: true});
     }
   };
+
+  function getUserStatusForSort(status) {
+    if (status) {
+      var expires = status.expires || status.was_online;
+      if (expires) {
+        return expires;
+      }
+      var timeNow = tsNow(true) + serverTimeOffset;
+      switch (status._) {
+        case 'userStatusRecently':
+          return tsNow(true) + serverTimeOffset - 86400 * 3;
+        case 'userStatusLastWeek':
+          return tsNow(true) + serverTimeOffset - 86400 * 7;
+          case 'userStatusLastMonth':
+          return tsNow(true) + serverTimeOffset - 86400 * 30;
+      }
+    }
+
+    return 0;
+  }
 
   function getUser (id) {
     if (angular.isObject(id)) {
@@ -163,9 +183,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function updateUsersStatuses () {
     var timestampNow = tsNow(true) + serverTimeOffset;
     angular.forEach(users, function (user) {
-      if (user.status && user.status._ == 'userStatusOnline' &&
+      if (user.status &&
+          user.status._ == 'userStatusOnline' &&
           user.status.expires < timestampNow) {
-        user.status = {_: 'userStatusOffline', was_online: user.status.expires};
+        user.status = user.status.wasStatus || 
+                      {_: 'userStatusOffline', was_online: user.status.expires};
+        delete user.status.wasStatus;
         $rootScope.$broadcast('user_update', user.id);
       }
     });
@@ -173,8 +196,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function forceUserOnline (id) {
     var user = getUser(id);
-    if (user && (!user.status || user.status._ != 'userStatusOnline')) {
-      user.status = {_: 'userStatusOnline', expires: tsNow(true) + serverTimeOffset + 60};
+    if (user &&
+        user.status &&
+        user.status._ != 'userStatusOnline' &&
+        user.status._ != 'userStatusEmpty') {
+
+      var wasStatus;
+      if (user.status._ != 'userStatusOffline') {
+        delete user.status.wasStatus;
+        wasStatus != angular.copy(user.status);
+      }
+      user.status = {
+        _: 'userStatusOnline',
+        expires: tsNow(true) + serverTimeOffset + 60,
+        wasStatus: wasStatus
+      };
       $rootScope.$broadcast('user_update', id);
     }
   }
@@ -305,7 +341,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             user = users[userID];
         if (user) {
           user.status = update.status;
-          user.sortStatus = update.status && (update.status.expires || update.status.was_online) || 0;
+          user.sortStatus = getUserStatusForSort(update.status);
           $rootScope.$broadcast('user_update', userID);
         }
         break;

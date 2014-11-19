@@ -732,7 +732,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var serializer = new TLSerialization(options);
 
     if (!this.connectionInited) {
-      serializer.storeInt(0x1c900537, 'invokeWithLayer18');
+      serializer.storeInt(0xda9b0d0d, 'invokeWithLayer');
+      serializer.storeInt(Config.Schema.API.layer, 'layer');
       serializer.storeInt(0x69796de9, 'initConnection');
       serializer.storeInt(Config.App.id, 'api_id');
       serializer.storeString(navigator.userAgent || 'Unknown UserAgent', 'device_model');

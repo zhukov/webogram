@@ -32,14 +32,27 @@ angular.module('myApp.filters', ['myApp.i18n'])
   .filter('userStatus', function($filter, _) {
     var relativeTimeFilter = $filter('relativeTime');
     return function (user) {
-      if (!user || !user.status || user.status._ == 'userStatusEmpty') {
-        return _('user_status_offline');
-      }
-      if (user.status._ == 'userStatusOnline') {
-        return _('user_status_online');
-      }
+      var statusType = user && user.status && user.status._ || 'userStatusEmpty';
+      switch (statusType) {
+        case 'userStatusOnline':
+          return _('user_status_online');
 
-      return _('user_status_last_seen', relativeTimeFilter(user.status.was_online));
+        case 'userStatusOffline':
+          return _('user_status_last_seen', relativeTimeFilter(user.status.was_online));
+
+        case 'userStatusRecently':
+          return _('user_status_recently');
+
+        case 'userStatusLastWeek':
+          return _('user_status_last_week');
+
+        case 'userStatusLastMonth':
+          return _('user_status_last_month');
+
+        case 'userStatusEmpty':
+        default:
+          return _('user_status_long_ago');
+      }
     }
   })
 

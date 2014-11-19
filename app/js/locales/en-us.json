@@ -90,9 +90,12 @@
 
 	"user_name_deleted": "DELETED",
 	"user_first_name_deleted": "DELETED",
-	"user_status_offline": "offline",
 	"user_status_online": "online",
 	"user_status_last_seen": "last seen {0}",
+	"user_status_recently": "last seen recently",
+	"user_status_last_week": "last seen within a week",
+	"user_status_last_month": "last seen within a month",
+	"user_status_long_ago": "last seen a long time ago",
 	"chat_title_deleted": "DELETED",
 	"format_size_progress_mulitple": "{done} of {total} {parts}",
 	"format_size_progress": "{done} of {total}",
