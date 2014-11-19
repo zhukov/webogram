@@ -49,7 +49,8 @@ angular.module('izhukov.utils', [])
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
-  var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1;
+  var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1 &&
+                         !navigator.userAgent.indexOf('Chrome') == -1;
 
   var blobSupported = true;
 
@@ -199,7 +200,7 @@ angular.module('izhukov.utils', [])
   }
 
   function getFileCorrectUrl(blob, mimeType) {
-    if (buggyUnknownBlob) {
+    if (buggyUnknownBlob && blob instanceof Blob) {
       var mimeType = blob.type || blob.mimeType || mimeType || '';
       if (!mimeType.match(/image\/(jpeg|gif|png|bmp)|video\/quicktime/)) {
         return getDataUrl(blob);
