@@ -2500,9 +2500,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
 
     downloadPromise.then(function (blob) {
-      var url = FileManager.getUrl(blob, mimeType);
+      FileManager.getFileCorrectUrl(blob, mimeType).then(function (url) {
+        historyVideo.url = $sce.trustAsResourceUrl(url);
+      });
+
       delete historyVideo.progress;
-      historyVideo.url = $sce.trustAsResourceUrl(url);
       historyVideo.downloaded = true;
       console.log('video save done');
     }, function (e) {
@@ -2655,9 +2657,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
 
     downloadPromise.then(function (blob) {
-      var url = FileManager.getUrl(blob, doc.mime_type);
+      FileManager.getFileCorrectUrl(blob, doc.mime_type).then(function (url) {
+        historyDoc.url = $sce.trustAsResourceUrl(url);
+      })
       delete historyDoc.progress;
-      historyDoc.url = $sce.trustAsResourceUrl(url);
       historyDoc.downloaded = true;
       console.log('file save done');
     }, function (e) {
@@ -2771,9 +2774,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
 
     downloadPromise.then(function (blob) {
-      var url = FileManager.getUrl(blob, mimeType);
+      FileManager.getFileCorrectUrl(blob, mimeType).then(function (url) {
+        historyAudio.url = $sce.trustAsResourceUrl(url);
+      });
       delete historyAudio.progress;
-      historyAudio.url = $sce.trustAsResourceUrl(url);
       historyAudio.downloaded = true;
       console.log('audio save done');
     }, function (e) {

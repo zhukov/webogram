@@ -33,10 +33,23 @@ angular.module('izhukov.utils', [])
 
 })
 
-.service('FileManager', function ($window, $q, $timeout) {
+.service('qSync', function () {
+
+  return {
+    when: function (result) {
+      return {then: function (cb) {
+        return cb(result);
+      }};
+    }
+  }
+
+})
+
+.service('FileManager', function ($window, $q, $timeout, qSync) {
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
+  var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1;
 
   var blobSupported = true;
 
@@ -59,20 +72,6 @@ angular.module('izhukov.utils', [])
         fileWriter.truncate(0);
       });
     });
-  }
-
-  function blobConstruct (blobParts, mimeType) {
-    var blob;
-    try {
-      blob = new Blob(blobParts, {type: mimeType});
-    } catch (e) {
-      var bb = new BlobBuilder;
-      angular.forEach(blobParts, function(blobPart) {
-        bb.append(blobPart);
-      });
-      blob = bb.getBlob(mimeType);
-    }
-    return blob;
   }
 
   function fileWriteData(fileWriter, bytes) {
@@ -182,42 +181,68 @@ angular.module('izhukov.utils', [])
     return 'data:' + mimeType + ';base64,' + bytesToBase64(fileData);
   }
 
+  function getDataUrl(blob) {
+    var deferred;
+    try {
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        deferred.resolve(reader.result);
+      }
+      reader.readAsDataURL(blob);
+    } catch (e) {
+      return $q.reject(e);
+    }
+
+    deferred = $q.defer();
+
+    return deferred.promise;
+  }
+
+  function getFileCorrectUrl(blob, mimeType) {
+    if (buggyUnknownBlob) {
+      var mimeType = blob.type || blob.mimeType || mimeType || '';
+      if (!mimeType.match(/image\/(jpeg|gif|png|bmp)|video\/quicktime/)) {
+        return getDataUrl(blob);
+      }
+    }
+    return qSync.when(getUrl(blob, mimeType));
+  }
+
   function downloadFile (blob, mimeType, fileName) {
     if (window.navigator && navigator.msSaveBlob !== undefined) {
       window.navigator.msSaveBlob(blob, fileName);
       return false;
     }
-
-    var url = getUrl(blob, mimeType);
-
-    var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
-    anchor.href = url;
-    anchor.target  = '_blank';
-    anchor.download = fileName;
-    if (anchor.dataset) {
-      anchor.dataset.downloadurl = ["video/quicktime", fileName, url].join(':');
-    }
-    $(anchor).css({position: 'absolute', top: 1, left: 1}).appendTo('body');
-
-    try {
-      var clickEvent = document.createEvent('MouseEvents');
-      clickEvent.initMouseEvent(
-        'click', true, false, window, 0, 0, 0, 0, 0
-        , false, false, false, false, 0, null
-      );
-      anchor.dispatchEvent(clickEvent);
-    } catch (e) {
-      console.error('Download click error', e);
-      try {
-        console.error('Download click error', e);
-        anchor[0].click();
-      } catch (e) {
-        window.open(url, '_blank');
+    getFileCorrectUrl(blob, mimeType).then(function (url) {
+      var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+      anchor.href = url;
+      anchor.target  = '_blank';
+      anchor.download = fileName;
+      if (anchor.dataset) {
+        anchor.dataset.downloadurl = ["video/quicktime", fileName, url].join(':');
       }
-    }
-    $timeout(function () {
-      $(anchor).remove();
-    }, 100);
+      $(anchor).css({position: 'absolute', top: 1, left: 1}).appendTo('body');
+
+      try {
+        var clickEvent = document.createEvent('MouseEvents');
+        clickEvent.initMouseEvent(
+          'click', true, false, window, 0, 0, 0, 0, 0
+          , false, false, false, false, 0, null
+        );
+        anchor.dispatchEvent(clickEvent);
+      } catch (e) {
+        console.error('Download click error', e);
+        try {
+          console.error('Download click error', e);
+          anchor[0].click();
+        } catch (e) {
+          window.open(url, '_blank');
+        }
+      }
+      $timeout(function () {
+        $(anchor).remove();
+      }, 100);
+    });
   }
 
   return {
@@ -228,6 +253,8 @@ angular.module('izhukov.utils', [])
     getFakeFileWriter: getFakeFileWriter,
     chooseSave: chooseSaveFile,
     getUrl: getUrl,
+    getDataUrl: getDataUrl,
+    getFileCorrectUrl: getFileCorrectUrl,
     download: downloadFile
   };
 })
@@ -237,11 +264,15 @@ angular.module('izhukov.utils', [])
   $window.indexedDB = $window.indexedDB || $window.webkitIndexedDB || $window.mozIndexedDB || $window.OIndexedDB || $window.msIndexedDB;
   $window.IDBTransaction = $window.IDBTransaction || $window.webkitIDBTransaction || $window.OIDBTransaction || $window.msIDBTransaction;
 
-  var dbName = 'cachedFiles',
-      dbStoreName = 'files',
-      dbVersion = 1,
-      openDbPromise,
-      storageIsAvailable = $window.indexedDB !== undefined && $window.IDBTransaction !== undefined;
+  var dbName = 'cachedFiles';
+  var dbStoreName = 'files';
+  var dbVersion = 1;
+  var openDbPromise;
+  var storageIsAvailable = $window.indexedDB !== undefined &&
+                           $window.IDBTransaction !== undefined &&
+                           navigator.userAgent.indexOf('Safari') == -1;
+                           // As of Safari 8.0 IndexedDB is REALLY slow, no point in it
+  var storeBlobsAvailable = storageIsAvailable || false;
 
   function isAvailable () {
     return storageIsAvailable;
@@ -307,14 +338,23 @@ angular.module('izhukov.utils', [])
 
   function saveFile (fileName, blob) {
     return openDatabase().then(function (db) {
+      if (!storeBlobsAvailable) {
+        return saveFileBase64(db, fileName, blob);
+      }
+
       try {
-        var deferred = $q.defer(),
-            objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
+        var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
             request = objectStore.put(blob, fileName);
       } catch (error) {
+        if (storeBlobsAvailable) {
+          storeBlobsAvailable = false;
+          return saveFileBase64(db, fileName, blob);
+        }
         storageIsAvailable = false;
         return $q.reject(error);
       }
+
+      var deferred = $q.defer();
 
       request.onsuccess = function (event) {
         deferred.resolve(blob);
@@ -328,6 +368,38 @@ angular.module('izhukov.utils', [])
     });
   };
 
+  function saveFileBase64(db, fileName, blob) {
+    try {
+      var reader = new FileReader();
+      reader.readAsDataURL(blob); 
+    } catch (e) {
+      storageIsAvailable = false;
+      return $q.reject();
+    }
+
+    var deferred = $q.defer();
+
+    reader.onloadend = function() {
+      try {
+        var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
+            request = objectStore.put(reader.result, fileName);
+      } catch (error) {
+        storageIsAvailable = false;
+        deferred.reject(error);
+        return;
+      };
+      request.onsuccess = function (event) {
+        deferred.resolve(blob);
+      };
+
+      request.onerror = function (error) {
+        deferred.reject(error);
+      };
+    }
+
+    return deferred.promise;
+  }
+
   function getFile (fileName) {
     return openDatabase().then(function (db) {
       var deferred = $q.defer(),
@@ -335,10 +407,14 @@ angular.module('izhukov.utils', [])
           request = objectStore.get(fileName);
 
       request.onsuccess = function (event) {
-        if (event.target.result === undefined) {
+        var result = event.target.result;
+        if (result === undefined) {
           deferred.reject();
+        } else if (typeof result === 'string' &&
+                   result.substr(0, 5) === 'data:') {
+          deferred.resolve(dataUrlToBlob(result));
         } else {
-          deferred.resolve(event.target.result);
+          deferred.resolve(result);
         }
       };
 

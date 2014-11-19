@@ -1233,17 +1233,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (src.substr(0, 5) == 'data:') {
           remove = true;
-          src = src.substr(5).split(';');
-          var contentType = src[0];
-          var base64 = atob(src[1].split(',')[1]);
-          var array = new Uint8Array(base64.length);
-
-          for (var i = 0; i < base64.length; i++) {
-            array[i] = base64.charCodeAt(i);
-          }
-
-          var blob = new Blob([array], {type: contentType});
-
+          var blob = dataUrlToBlob(src);
           ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
             $scope.draftMessage.files = [blob];
             $scope.draftMessage.isMedia = true;
