@@ -669,7 +669,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           else if (idleInstance.time > time - 10000 &&
                    time > errorShowTime) {
 
-            ErrorService.alert(_('error_modal_warning_title'), _('error_modal_multiple_open_tabs'));
+            ErrorService.alert(
+              _('error_modal_warning_title_raw'),
+              _('error_modal_multiple_open_tabs_raw')
+            );
             errorShowTime += tsNow() + 60000;
           }
         }
