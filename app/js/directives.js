@@ -1128,7 +1128,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             updateValue();
             $scope.draftMessage.send();
             $(element).trigger('message_send');
-            resetAfterSubmit();
+            resetTyping();
             return cancelEvent(e);
           }
         }
@@ -1140,7 +1140,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateValue();
         $scope.draftMessage.send();
         $(element).trigger('message_send');
-        resetAfterSubmit();
+        resetTyping();
         return cancelEvent(e);
       });
 
@@ -1158,7 +1158,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      function resetAfterSubmit () {
+      function resetTyping () {
         lastTyping = 0;
         lastLength = 0;
       };
@@ -1169,6 +1169,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           var html = $('<div>').text($scope.draftMessage.text || '').html();
           html = html.replace(/\n/g, '<br/>');
           $(richTextarea).html(html);
+          lastLength = html.length;
           updateHeight();
         }
       }
@@ -1206,6 +1207,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$on('ui_history_change', focusField);
       }
 
+      $scope.$on('ui_peer_change', resetTyping);
       $scope.$on('ui_peer_draft', updateRichTextarea);
 
       var sendAwaiting = false;
