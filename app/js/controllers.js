@@ -1846,6 +1846,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.user = AppUsersManager.getUser($scope.userID);
     $scope.userPhoto = AppUsersManager.getUserPhoto($scope.userID, 'User');
+    $scope.blocked = false;
 
     $scope.settings = {notifications: true};
 
@@ -1862,6 +1863,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (userFullResult.profile_photo._ != 'photoEmpty') {
         $scope.userPhoto.id = userFullResult.profile_photo.id;
       }
+      $scope.blocked = userFullResult.blocked;
 
       NotificationsManager.savePeerSettings($scope.userID, userFullResult.notify_settings);
       NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
@@ -1919,6 +1921,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.deleteContact = function () {
       AppUsersManager.deleteContacts([$scope.userID]).then(function () {
         $scope.user = AppUsersManager.getUser($scope.userID);
+      });
+    };
+
+    $scope.toggleBlock = function (block) {
+      MtpApiManager.invokeApi(block ? 'contacts.block' : 'contacts.unblock', {
+        id: AppUsersManager.getUserInput($scope.userID)
+      }).then(function () {
+        $scope.blocked = block;
       });
     };
 

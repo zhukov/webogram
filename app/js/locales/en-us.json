@@ -69,6 +69,8 @@
 	"user_modal_delete_contact": "Delete contact",
 	"user_modal_add_contact": "Add to contacts",
 	"user_modal_share_contact": "Share contact",
+	"user_modal_block_user": "Block user",
+	"user_modal_unblock_user": "Unblock user",
 	"user_modal_delete_chat": "Delete chat",
 	"user_modal_info": "Info",
 	"user_modal_phone": "Phone",
