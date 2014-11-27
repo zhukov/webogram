@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Thu Nov 20 2014 01:17:11 GMT+0300 (MSK)
+# Time: Thu Nov 27 2014 17:55:38 GMT+0000 (GMT)
 
 
 CACHE:
@@ -47,8 +47,8 @@ img/icons/IconsetW.png
 img/icons/IconsetW_1x.png
 img/icons/MobileIcons_1x.png
 img/icons/MobileIcons_2x.png
-img/icons/PhotoControls.png
-img/icons/PhotoControls_1x.png
+img/icons/PhotoIcons.png
+img/icons/PhotoIcons_1x.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
@@ -73,6 +73,8 @@ js/locales/de-de.json
 js/locales/en-us.json
 js/locales/es-es.json
 js/locales/it-it.json
+js/locales/nl-nl.json
+js/locales/pt-br.json
 js/locales/ru-ru.json
 vendor/closure/long.js
 vendor/cryptoJS/crypto.js
@@ -83,6 +85,8 @@ vendor/angular/i18n/angular-locale_de-de.js
 vendor/angular/i18n/angular-locale_en-us.js
 vendor/angular/i18n/angular-locale_es-es.js
 vendor/angular/i18n/angular-locale_it-it.js
+vendor/angular/i18n/angular-locale_nl-nl.js
+vendor/angular/i18n/angular-locale_pt-br.js
 vendor/angular/i18n/angular-locale_ru-ru.js
 
 

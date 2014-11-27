@@ -69,6 +69,8 @@
 	"user_modal_delete_contact": "Delete contact",
 	"user_modal_add_contact": "Add to contacts",
 	"user_modal_share_contact": "Share contact",
+	"user_modal_block_user": "Block user",
+	"user_modal_unblock_user": "Unblock user",
 	"user_modal_delete_chat": "Delete chat",
 	"user_modal_info": "Info",
 	"user_modal_phone": "Phone",
@@ -77,6 +79,9 @@
 	"user_modal_notifications": "Notifications",
 	"user_modal_contact_info": "Contact info",
 
+	"media_modal_photo": "Photo",
+	"media_modal_photo_index": "Photo {pos} of {count}",
+	"media_modal_video": "Video",
 	"media_modal_forward": "Forward",
 	"media_modal_download": "Download",
 	"media_modal_delete": "Delete",
