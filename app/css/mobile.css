@@ -1166,6 +1166,9 @@ a.mobile_modal_action .tg_checkbox_label {
   font-size: 13px;
   height: 46px;
 }
+.media_modal_top_actions .navbar-quick-media-back:hover {
+  text-decoration: none;
+}
 .media_modal_top_actions .navbar-quick-media-back .icon-back {
   position: absolute;
   margin-left: -18px;

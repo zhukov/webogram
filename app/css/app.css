@@ -1870,6 +1870,9 @@ img.img_fullsize {
   -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
 
 }
+.video_full_player video {
+  background: #000;
+}
 
 .media_modal_info {
   color: #999;

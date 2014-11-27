@@ -28,6 +28,22 @@
     },
     "push": {
       "description": "Required for notifications"
+    },
+    "device-storage:music": {
+      "description": "Required for voice notes download",
+      "access": "createonly"
+    },
+    "device-storage:pictures": {
+    "description": "Required for photos download",
+      "access": "createonly"
+    },
+    "device-storage:sdcard": {
+    "description": "Required for documents download",
+      "access": "createonly"
+    },
+    "device-storage:videos": {
+    "description": "Required for videos download",
+      "access": "createonly"
     }
   },
   "activities": {

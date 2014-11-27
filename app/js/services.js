@@ -2573,7 +2573,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function saveVideoFile (videoID) {
     var video = videos[videoID],
-        mimeType = video.mime_type || 'video/mpeg4',
+        mimeType = video.mime_type || 'video/mp4',
         fileExt = mimeType.split('.')[1] || 'mp4',
         fileName = 't_video' + videoID + '.' + fileExt,
         historyVideo = videosForHistory[videoID] || video || {};

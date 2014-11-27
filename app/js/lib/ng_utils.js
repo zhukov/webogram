@@ -214,6 +214,26 @@ angular.module('izhukov.utils', [])
       window.navigator.msSaveBlob(blob, fileName);
       return false;
     }
+
+    if (window.navigator && navigator.getDeviceStorage) {
+      var storageName = 'sdcard';
+      switch (mimeType.split('/')[0]) {
+        case 'video': storageName = 'videos'; break;
+        case 'audio': storageName = 'music'; break;
+        case 'image': storageName = 'pictures'; break;
+      }
+      var deviceStorage = navigator.getDeviceStorage(storageName);
+
+      var request = deviceStorage.addNamed(blob, fileName);
+
+      request.onsuccess = function () {
+        console.log('Device storage save result', this.result);
+      };
+      request.onerror = function () {
+      };
+      return;
+    }
+
     getFileCorrectUrl(blob, mimeType).then(function (url) {
       var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
       anchor.href = url;
