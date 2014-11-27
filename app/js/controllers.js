@@ -1533,13 +1533,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: messageID});
     };
 
-
-    if (Config.Mobile) {
-      $scope.canForward = true;
-      $scope.canDelete = true;
-      return;
-    }
-
     $scope['delete'] = function () {
       var messageID = $scope.messageID;
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {

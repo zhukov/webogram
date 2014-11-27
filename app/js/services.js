@@ -2309,9 +2309,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function wrapForFull (photoID) {
     var photo = wrapForHistory(photoID);
-    var fullWidth = $(window).width() - (Config.Mobile ? 20 : 32);
-    var fullHeight = $($window).height() - (Config.Mobile ? 150 : 116);
-    if (fullWidth > 800) {
+    var fullWidth = $(window).width() - (Config.Mobile ? 0 : 32);
+    var fullHeight = $($window).height() - (Config.Mobile ? 0 : 116);
+    if (!Config.Mobile && fullWidth > 800) {
       fullWidth -= 208;
     }
     var fullPhotoSize = choosePhotoSize(photo, fullWidth, fullHeight);
@@ -2354,7 +2354,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var modalInstance = $modal.open({
       templateUrl: templateUrl('photo_modal'),
-      windowTemplateUrl: !Config.Mobile && templateUrl('media_modal_layout') || undefined,
+      windowTemplateUrl: templateUrl('media_modal_layout'),
       controller: scope.userID ? 'UserpicModalController' : 'PhotoModalController',
       scope: scope,
       windowClass: 'photo_modal_window'
@@ -2471,8 +2471,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function wrapForFull (videoID) {
     var video = wrapForHistory(videoID),
-        fullWidth = Math.min($(window).width() - 60, 542),
-        fullHeight = $($window).height() - 150,
+        fullWidth = Math.min($(window).width() - (Config.Mobile ? 0 : 60), 542),
+        fullHeight = $($window).height() - (Config.Mobile ? 92 : 150),
         fullPhotoSize = video,
         full = {
           placeholder: 'img/placeholders/VideoThumbModal.gif',
@@ -2503,7 +2503,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     return $modal.open({
       templateUrl: templateUrl('video_modal'),
-      windowTemplateUrl: !Config.Mobile && templateUrl('media_modal_layout') || undefined,
+      windowTemplateUrl: templateUrl('media_modal_layout'),
       controller: 'VideoModalController',
       scope: scope,
       windowClass: 'video_modal_window'
@@ -2655,8 +2655,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     doc.thumb = thumb;
 
-    doc.canDownload = !(window.chrome && chrome.fileSystem && chrome.fileSystem.chooseEntry);
-    doc.withPreview = doc.canDownload && doc.mime_type.match(/^(image\/)/) ? 1 : 0;
+    doc.withPreview = !Config.Mobile && doc.mime_type.match(/^(image\/)/) ? 1 : 0;
 
     if (isGif && doc.thumb) {
       doc.isSpecial = 'gif';
@@ -2734,7 +2733,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var modalInstance = $modal.open({
       templateUrl: templateUrl('document_modal'),
-      windowTemplateUrl: !Config.Mobile && templateUrl('media_modal_layout') || undefined,
+      windowTemplateUrl: templateUrl('media_modal_layout'),
       controller: 'DocumentModalController',
       scope: scope,
       windowClass: 'document_modal_window'

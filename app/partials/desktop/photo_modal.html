@@ -28,9 +28,13 @@
       <span ng-switch-default class="media_modal_date" ng-bind="photo.date | dateOrTime :true"></span>
     </div>
 
-    <div class="media_modal_title_wrap" ng-if="count > 1 &amp;&amp; pos > 0" my-i18n="media_modal_photo">
-      <my-i18n-param name="pos" ng-bind="pos"></my-i18n-param>
-      <my-i18n-param name="count" ng-bind="count"></my-i18n-param>
+
+    <div class="media_modal_title_wrap" ng-switch="count > 1 &amp;&amp; pos > 0">
+      <my-i18n ng-switch-when="true" msgid="media_modal_photo_index">
+        <my-i18n-param name="pos" ng-bind="pos"></my-i18n-param>
+        <my-i18n-param name="count" ng-bind="count"></my-i18n-param>
+      </my-i18n>
+      <my-i18n ng-switch-default msgid="media_modal_photo">
     </div>
   </div>
 </div>
