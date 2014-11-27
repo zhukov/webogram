@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.3.5 - messaging web application for MTProto
+ * Webogram v0.3.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -139,10 +139,10 @@ function calcImageInBox(imageW, imageH, boxW, boxH, noZooom) {
     }
   }
 
-  if (Config.Navigator.retina) {
-    imageW = Math.floor(imageW / 2);
-    imageH = Math.floor(imageH / 2);
-  }
+  // if (Config.Navigator.retina) {
+  //   imageW = Math.floor(imageW / 2);
+  //   imageH = Math.floor(imageH / 2);
+  // }
 
   if (noZooom && boxedImageW >= imageW && boxedImageH >= imageH) {
     boxedImageW = imageW;
