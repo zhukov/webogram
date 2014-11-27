@@ -1510,12 +1510,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       AppPhotosManager.downloadPhoto($scope.photoID);
     };
 
-    if (!$scope.messageID || Config.Mobile) {
-      $scope.nav.next = function () {
-        $modalInstance.close();
-      }
-    }
-
     if (!$scope.messageID) {
       return;
     }
@@ -1529,6 +1523,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $rootScope.$broadcast('history_focus', {peerString: peerString});
         });
       });
+    };
+
+    $scope.goToMessage = function () {
+      var messageID = $scope.messageID;
+      var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage(messageID));
+      var peerString = AppPeersManager.getPeerString(peerID);
+      $modalInstance.dismiss();
+      $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: messageID});
     };
 
 
@@ -1550,21 +1552,24 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         inputQuery = '',
         inputFilter = {_: 'inputMessagesFilterPhotos'},
         list = [$scope.messageID],
+        preloaded = {},
         maxID = $scope.messageID,
         hasMore = true;
+
+    preloaded[$scope.messageID] = true;
 
     updatePrevNext();
 
     AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, 0, 1000).then(function (searchCachedResult) {
-      // console.log(dT(), 'search cache', searchCachedResult);
       if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
         list = searchCachedResult.history;
         maxID = list[list.length - 1];
 
         updatePrevNext();
+        preloadPhotos(+1);
       }
-      // console.log(dT(), list, maxID);
-    });
+      loadMore();
+    }, loadMore);
 
 
     var jump = 0;
@@ -1575,7 +1580,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       var promise = index >= list.length ? loadMore() : $q.when();
       promise.then(function () {
-        if (curJump != jump || !hasMore) {
+        if (curJump != jump) {
           return;
         }
 
@@ -1593,9 +1598,32 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.photoID = message.media.photo.id;
         $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
 
+        preloaded[$scope.messageID] = true;
+
         updatePrevNext();
+
+        if (sign > 0 && hasMore && list.indexOf(messageID) + 1 >= list.length) {
+          loadMore();
+        } else {
+          preloadPhotos(sign);
+        }
       });
     };
+
+    function preloadPhotos (sign) {
+      // var preloadOffsets = sign < 0 ? [-1,-2,1,-3,2] : [1,2,-1,3,-2];
+      var preloadOffsets = sign < 0 ? [-1,-2] : [1,2];
+      var index = list.indexOf($scope.messageID);
+      angular.forEach(preloadOffsets, function (offset) {
+        var messageID = list[index + offset];
+        if (messageID !== undefined && preloaded[messageID] === undefined) {
+          preloaded[messageID] = true;
+          var message = AppMessagesManager.getMessage(messageID);
+          var photoID = message.media.photo.id;
+          AppPhotosManager.preloadPhoto(photoID);
+        }
+      })
+    }
 
     var loadingPromise = false;
     function loadMore () {
@@ -1610,13 +1638,27 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           hasMore = false;
         }
 
-        updatePrevNext();
+        updatePrevNext(searchResult.count);
         loadingPromise = false;
+
+        if (searchResult.history.length) {
+          return $q.reject();
+        }
+
+        preloadPhotos(+1);
       });
     };
 
-    function updatePrevNext () {
+    function updatePrevNext (count) {
       var index = list.indexOf($scope.messageID);
+      if (hasMore) {
+        if (count) {
+          $scope.count = Math.max(count, list.length);
+        }
+      } else {
+        $scope.count = list.length;
+      }
+      $scope.pos = $scope.count - index;
       $scope.nav.hasNext = index > 0;
       $scope.nav.hasPrev = hasMore || index < list.length - 1;
       $scope.canForward = $scope.canDelete = $scope.messageID > 0;
@@ -1657,8 +1699,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         list = newList;
       }
     });
-
-    loadMore();
 
   })
 

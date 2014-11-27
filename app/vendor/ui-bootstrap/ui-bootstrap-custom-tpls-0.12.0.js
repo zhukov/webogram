@@ -776,8 +776,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
       restrict: 'EA',
       scope: {
         index: '@',
-        animate: '=',
-        nav: '='
+        animate: '='
       },
       replace: true,
       transclude: true,
@@ -956,8 +955,7 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
           'window-class': modal.windowClass,
           'size': modal.size,
           'index': openedWindows.length() - 1,
-          'animate': 'animate',
-          'nav': 'nav'
+          'animate': 'animate'
         }).html(modal.content);
 
         var modalDomEl = $compile(angularDomEl)(modal.scope);
@@ -1225,10 +1223,7 @@ angular.module("template/modal/backdrop.html", []).run(["$templateCache", functi
 angular.module("template/modal/window.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/modal/window.html",
     "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\n" +
-    "  <div class=\"modal_prev_wrap hidden-xs hidden-sm\" ng-show=\"nav.hasPrev\" ng-click=\"nav.prev($event)\">\n" +
-    "    <div class=\"modal_prev\"></div>\n" +
-    "  </div>\n" +
-    "  <div class=\"modal_close_wrap hidden-xs hidden-sm\" ng-click=\"close($event)\">\n" +
+    "  <div class=\"modal_close_wrap\" ng-click=\"close($event)\">\n" +
     "    <div class=\"modal_close\"></div>\n" +
     "  </div>\n" +
     "    <div class=\"modal-dialog\" ng-class=\"{'modal-sm': size == 'sm', 'modal-lg': size == 'lg'}\"><div class=\"modal-content\" modal-transclude></div></div>\n" +

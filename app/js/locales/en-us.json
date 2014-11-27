@@ -79,6 +79,7 @@
 	"user_modal_notifications": "Notifications",
 	"user_modal_contact_info": "Contact info",
 
+	"media_modal_photo": "Photo {pos} of {count}",
 	"media_modal_forward": "Forward",
 	"media_modal_download": "Download",
 	"media_modal_delete": "Delete",

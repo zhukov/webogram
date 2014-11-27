@@ -290,8 +290,9 @@ input[type="number"] {
 }
 
 .modal-backdrop {
-  background: #111111;
-  opacity: 0.25 !important;
+  background: rgba(26, 26, 26, 0.7);
+  opacity: 1 !important;
+  /*opacity: 0.25 !important;*/
 }
 
 .modal.fade .modal-dialog {
@@ -318,68 +319,9 @@ input[type="number"] {
 }
 .modal-content {
   border: 0;
-  border-radius: 4px;
+  border-radius: 0;
   -webkit-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
-}
-.modal_close_wrap {
-  cursor: pointer;
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 100%;
-}
-.modal_close {
-  background: url(../img/icons/PhotoControls.png) 0 -53px no-repeat;
-  background-size: 33px 86px;
-  width: 33px;
-  height: 33px;
-  float: right;
-  margin: 60px 30px 0 0;
-  opacity: 0.6;
-  pointer-events: none;
-
-  -webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;
-}
-.modal_close_wrap:hover .modal_close {
-  opacity: 0.85;
-}
-
-
-.modal_prev_wrap {
-  cursor: pointer;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
-}
-.modal_prev {
-  background: url(../img/icons/PhotoControls.png) 0 0 no-repeat;
-  background-size: 33px 86px;
-  width: 33px;
-  height: 33px;
-  float: left;
-  margin: 60px 0 0 30px;
-  opacity: 0.6;
-  pointer-events: none;
-
-  -webkit-transition    : .2s;
-  -moz-transition       : .2s;
-  -o-transition         : .2s;
-  transition            : .2s;
-}
-.modal_prev_wrap:hover .modal_prev {
-  opacity: 0.85;
-}
-
-.is_1x .modal_close,
-.is_1x .modal_prev {
-  background-image: url(../img/icons/PhotoControls_1x.png);
 }
 
 .text-invisible {
@@ -1894,9 +1836,6 @@ textarea.im_message_field {
 }
 
 
-.media_modal_wrap .modal-body {
-  padding: 19px 18px 17px;
-}
 a.img_fullsize,
 .img_fullsize_wrap {
   display: block;
@@ -2158,7 +2097,11 @@ img.img_fullsize {
 }
 
 
-
+.photo_modal_window,
+.video_modal_window,
+.document_modal_window {
+  display: block;
+}
 .photo_modal_error {
   color: #999;
   position: absolute;

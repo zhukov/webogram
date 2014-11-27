@@ -66,14 +66,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
   })
 
   .filter('dateOrTime', function($filter) {
-    var cachedDates = {},
-        dateFilter = $filter('date');
+    var dateFilter = $filter('date');
 
     return function (timestamp, extended) {
-
-      if (cachedDates[timestamp]) {
-        return cachedDates[timestamp];
-      }
 
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks),
@@ -86,7 +81,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
         format = extended ? 'EEEE' : 'EEE';
       }
 
-      return cachedDates[timestamp] = dateFilter(ticks, format);
+      return dateFilter(ticks, format);
     }
   })
 

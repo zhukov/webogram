@@ -1429,7 +1429,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                             .add($(imgElement)),
           resize = function () {
             resizeElements.css({width: $scope.fullPhoto.width, height: $scope.fullPhoto.height});
-            $scope.$emit('ui_height');
+            $scope.$emit('ui_height', true);
           };
 
       var jump = 0;
@@ -1621,7 +1621,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         element = element.parentNode;
       }
       if (element) {
-        $(element).width(width + (Config.Mobile ? 0 : 36));
+        $(element).width(width + (Config.Mobile ? 0 : 32));
       }
     }
 
@@ -1630,8 +1630,11 @@ angular.module('myApp.directives', ['myApp.filters'])
       var fullSizeWrap = $('.document_fullsize_wrap', element);
       var fullSizeImage = $('.document_fullsize_img', element);
 
-      var fullWidth = $(window).width() - (Config.Mobile ? 20 : 36);
+      var fullWidth = $(window).width() - (Config.Mobile ? 20 : 32);
       var fullHeight = $(window).height() - 150;
+      if (fullWidth > 800) {
+        fullWidth -= 208;
+      }
 
       $scope.imageWidth = fullWidth;
       $scope.imageHeight = fullHeight;
@@ -1823,7 +1826,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
-        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Mobile ? 0 : 36)});
+        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Mobile ? 0 : 32)});
       });
     };
 
@@ -1931,7 +1934,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         var height = element[0].parentNode.offsetHeight,
-            contHeight = element[0].parentNode.parentNode.parentNode.offsetHeight;
+            modal = element[0].parentNode.parentNode.parentNode,
+            bottomPanel = $('.media_modal_bottom_panel_wrap', modal)[0],
+            contHeight = modal.offsetHeight - (bottomPanel && bottomPanel.offsetHeight || 0);
 
         if (height < contHeight) {
           $(element[0].parentNode).css('marginTop', (contHeight - height) / 2);
@@ -1950,8 +1955,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $($window).on('resize', updateMargin);
 
-      $scope.$on('ui_height', function () {
-        onContentLoaded(updateMargin);
+      $scope.$on('ui_height', function (e, sync) {
+        if (sync) {
+          updateMargin();
+        } else {
+          onContentLoaded(updateMargin);
+        }
       });
 
     };
@@ -2013,20 +2022,33 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link($scope, element, attrs) {
-      var userID = $scope.$eval(attrs.myUserLink),
-          user = AppUsersManager.getUser(userID);
 
-      element.html(
-        (user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'] || '').valueOf()
-      );
+      var userID;
+      var update = function () {
+        var user = AppUsersManager.getUser(userID);
+
+        element.html(
+          (user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'] || '').valueOf()
+        );
+        if (attrs.color && $scope.$eval(attrs.color)) {
+          element.addClass('user_color_' + user.num);
+        }
+      };
 
       if (element[0].tagName == 'A') {
         element.on('click', function () {
           AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
-      if (attrs.color && $scope.$eval(attrs.color)) {
-        element.addClass('user_color_' + user.num);
+
+      if (attrs.userWatch) {
+        $scope.$watch(attrs.myUserLink, function (newUserID) {
+          userID = newUserID;
+          update();
+        });
+      } else {
+        userID = $scope.$eval(attrs.myUserLink);
+        update();
       }
     }
   })

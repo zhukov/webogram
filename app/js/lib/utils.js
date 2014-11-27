@@ -139,6 +139,11 @@ function calcImageInBox(imageW, imageH, boxW, boxH, noZooom) {
     }
   }
 
+  if (Config.Navigator.retina) {
+    imageW = Math.floor(imageW / 2);
+    imageH = Math.floor(imageH / 2);
+  }
+
   if (noZooom && boxedImageW >= imageW && boxedImageH >= imageH) {
     boxedImageW = imageW;
     boxedImageH = imageH;
