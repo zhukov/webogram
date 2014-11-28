@@ -27,7 +27,7 @@
 
           <button ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length" class="btn btn-primary chat_modal_invite_btn" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></button>
           <button ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left" class="btn btn-primary chat_modal_main_btn" ng-click="returnToGroup()" my-i18n="group_modal_return"></button>
-          <button ng-if="chatFull.chat._ == 'chatForbidden'" class="btn btn-danger chat_modal_delete_btn" ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></button>
+          <button ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.left" class="btn btn-danger chat_modal_delete_btn" ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></button>
 
           <span ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; !photo.updating" class="btn btn-primary chat_modal_main_btn" >
             <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />

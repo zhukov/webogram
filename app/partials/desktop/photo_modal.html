@@ -1,10 +1,10 @@
-<div class="modal_prev_wrap" ng-show="nav.hasPrev" ng-click="nav.prev($event)">
+<div class="modal_prev_wrap" ng-class="{modal_prev_active_wrap: nav.hasPrev}" ng-click="nav.prev($event)">
   <div class="modal_prev"></div>
 </div>
-<div class="modal_next_wrap" ng-show="nav.hasNext" ng-click="nav.next($event)">
+<div class="modal_next_wrap" ng-class="{modal_next_active_wrap: nav.hasNext}" ng-click="nav.next($event)">
   <div class="modal_next"></div>
 </div>
-<div class="modal_close_wrap" ng-class="{modal_close_wrap_wnext: nav.hasNext}" ng-click="$close()">
+<div class="modal_close_wrap modal_close_wrap_wnext" ng-click="$close()">
   <div class="modal_close"></div>
 </div>
 
