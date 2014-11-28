@@ -1014,7 +1014,6 @@ div.im_panel_own_photo {
 .modal_prev_wrap,
 .modal_next_wrap {
   display: none;
-  cursor: pointer;
   position: fixed;
   top: 0;
   left: 0;
@@ -1025,13 +1024,17 @@ div.im_panel_own_photo {
   left: auto;
   right: 0;
 }
+.modal_prev_active_wrap,
+.modal_next_active_wrap {
+  cursor: pointer;
+}
 .modal_prev,
 .modal_next {
   background: url(../img/icons/PhotoIcons.png) -12px -41px no-repeat;
   background-size: 40px 200px;
   width: 16px;
   height: 24px;
-  opacity: 0.5;
+  opacity: 0.3;
   position: absolute;
   top: 50%;
   pointer-events: none;
@@ -1046,12 +1049,17 @@ div.im_panel_own_photo {
   margin: 0 0 0 50px;
   background-position: -14px -75px;
 }
-.modal_prev_wrap:hover,
-.modal_next_wrap:hover {
+.modal_prev_active_wrap .modal_prev,
+.modal_next_active_wrap .modal_next {
+  opacity: 0.5;
+}
+
+.modal_prev_active_wrap:hover,
+.modal_next_active_wrap:hover {
   background-color: rgba(0,0,0,0.2);
 }
-.modal_prev_wrap:hover .modal_prev,
-.modal_next_wrap:hover .modal_next {
+.modal_prev_active_wrap:hover .modal_prev,
+.modal_next_active_wrap:hover .modal_next {
   opacity: 1;
 }
 
@@ -1087,7 +1095,8 @@ div.im_panel_own_photo {
   max-width: 300px;
   margin: 0 auto;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: bold;
   line-height: 16px;
   padding: 24px 0;
   overflow: hidden;
@@ -1099,12 +1108,12 @@ div.im_panel_own_photo {
   padding: 24px 20px;
 }
 .media_modal_author {
-  font-size: 14px;
+  font-size: 13px;
   margin-right: 4px;
 }
 .media_modal_date,
 a.media_modal_date:hover {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.4);
 }
 
