@@ -1909,6 +1909,7 @@ img.img_fullsize {
 
 .emoji-wysiwyg-editor {
   box-sizing: content-box;
+  -moz-box-sizing: content-box;
   font-size: 12px;
   margin-bottom: 10px;
   padding: 6px;
