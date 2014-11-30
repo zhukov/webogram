@@ -10,7 +10,7 @@
 
 <div class="media_modal_bottom_panel_wrap">
   <div class="media_modal_bottom_panel">
-    <div class="media_modal_bottom_actions pull-right">
+    <div class="media_modal_bottom_actions">
       <a class="media_modal_action_btn" ng-click="download()" title="{{'media_modal_download' | i18n}}">
         <i class="media_modal_action_btn_download"></i>
       </a>
@@ -22,7 +22,7 @@
       </a>
     </div>
 
-    <div class="media_modal_info_wrap pull-left" ng-switch="messageID > 0">
+    <div class="media_modal_info_wrap" ng-switch="messageID > 0">
       <a class="media_modal_author" my-user-link="photo.user_id" user-watch="true"></a>
       <a ng-switch-when="true" ng-click="goToMessage()" class="media_modal_date" ng-bind="photo.date | dateOrTime :true"></a>
       <span ng-switch-default class="media_modal_date" ng-bind="photo.date | dateOrTime :true"></span>
@@ -45,7 +45,7 @@
 
       <div class="modal-body">
 
-        <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="$close()"></div>
+        <div class="photo_modal_image_wrap" my-load-full-photo full-photo="photo.full" thumb-location="photo.thumb.location" ng-click="nav.next()"></div>
 
       </div>
 
