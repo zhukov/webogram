@@ -62,7 +62,7 @@ Config.I18n = {
     'es-es': 'Español',
     'it-it': 'Italiano',
     'ru-ru': 'Русский',
-    'nl-nl': 'Dutch',
+    'nl-nl': 'Nederlands',
     'pt-br': 'Português (Brazil)'
   },
   aliases: {
