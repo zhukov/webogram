@@ -1089,6 +1089,7 @@ div.im_panel_own_photo {
   max-width: 1000px;
   margin: 0 auto;
   color: rgba(255, 255, 255, 0.6);
+  position: relative;
 }
 
 .media_modal_title_wrap {
@@ -1106,6 +1107,8 @@ div.im_panel_own_photo {
 .media_modal_info_wrap {
   line-height: 16px;
   padding: 24px 20px;
+  position: absolute;
+  left: 0;
 }
 .media_modal_author {
   font-size: 13px;
@@ -1130,6 +1133,8 @@ a.media_modal_date:hover {
 }
 .media_modal_bottom_actions {
   width: 204px;
+  position: absolute;
+  right: 0;
 }
 .media_modal_action_btn {
   float: left;
