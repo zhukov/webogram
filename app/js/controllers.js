@@ -2060,7 +2060,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         angular.forEach(userIDs, function (userID) {
           MtpApiManager.invokeApi('messages.addChatUser', {
             chat_id: $scope.chatID,
-            user_id: {_: 'inputUserContact', user_id: userID},
+            user_id: AppUsersManager.getUserInput(userID),
             fwd_limit: 100
           }).then(function (addResult) {
             ApiUpdatesManager.processUpdateMessage({
@@ -2614,7 +2614,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.group.creating = true;
       var inputUsers = [];
       angular.forEach($scope.userIDs, function(userID) {
-        inputUsers.push({_: 'inputUserContact', user_id: userID});
+        inputUsers.push(AppUsersManager.getUserInput(userID));
       });
       return MtpApiManager.invokeApi('messages.createChat', {
         title: $scope.group.name,
