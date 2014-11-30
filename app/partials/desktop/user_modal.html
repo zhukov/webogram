@@ -36,14 +36,14 @@
               <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
                 <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
               </li>
+              <li ng-if="user.phone.length > 0">
+                <a ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
+              </li>
               <li ng-if="user._ != 'userSelf'">
                 <a ng-click="toggleBlock(!blocked)" ng-switch="blocked">
                   <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
                   <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>
                 </a>
-              </li>
-              <li ng-if="user.phone.length > 0">
-                <a ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
               </li>
               <li>
                 <a ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
