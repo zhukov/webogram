@@ -387,6 +387,16 @@ html {
   width: auto;
   max-width: 250px;
 }
+.im_message_contact {
+  width: 200px;
+}
+.im_message_contact_name,
+.im_message_contact_phone {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 150px;
+}
 .im_message_document {
   position: relative;
 }
