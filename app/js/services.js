@@ -3317,7 +3317,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     else if (embedUrlMatches = text.match(soundcloudRegex)) {
       var badFolders = 'explore,upload,pages,terms-of-use,mobile,jobs,imprint'.split(',');
-      if (badFolders.indexOf(embedUrlMatches[1]) != -1) {
+      if (badFolders.indexOf(embedUrlMatches[1]) == -1) {
         return ['soundcloud', embedUrlMatches[0]];
       }
     }
