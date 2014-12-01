@@ -2023,12 +2023,16 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
 
+      var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
+      var short = attrs.short && $scope.$eval(attrs.short);
+
       var userID;
       var update = function () {
         var user = AppUsersManager.getUser(userID);
+        var key = short ? 'rFirstName' : 'rFullName';
 
         element.html(
-          (user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'] || '').valueOf()
+          (override[key] || user[key] || '').valueOf()
         );
         if (attrs.color && $scope.$eval(attrs.color)) {
           element.addClass('user_color_' + user.num);
@@ -2037,7 +2041,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (element[0].tagName == 'A') {
         element.on('click', function () {
-          AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
+          AppUsersManager.openUser(userID, override);
         });
       }
 
@@ -2102,22 +2106,22 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     return {
       link: link,
-      scope: {
-        userID: '=myUserPhotolink'
-      },
       template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus || false" ng-show="user.status._ == \'userStatusOnline\'"></i>'
     };
 
     function link($scope, element, attrs) {
-      $scope.photo = AppUsersManager.getUserPhoto($scope.userID, 'User');
+
+      var userID = $scope.$eval(attrs.myUserPhotolink);
+
+      $scope.photo = AppUsersManager.getUserPhoto(userID, 'User');
 
       if ($scope.showStatus = attrs.status && $scope.$eval(attrs.status)) {
-        $scope.user = AppUsersManager.getUser($scope.userID);
+        $scope.user = AppUsersManager.getUser(userID);
       }
 
       if (element[0].tagName == 'A') {
         element.on('click', function (e) {
-          AppUsersManager.openUser($scope.userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
+          AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
 

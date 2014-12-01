@@ -1886,10 +1886,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     MtpApiManager.invokeApi('users.getFullUser', {
       id: AppUsersManager.getUserInput($scope.userID)
     }).then(function (userFullResult) {
-      if ($scope.override && $scope.override.phone_number && !userFullResult.user.phone) {
+      if ($scope.override && $scope.override.phone_number) {
         userFullResult.user.phone = $scope.override.phone_number;
-        userFullResult.user.first_name = $scope.override.first_name;
-        userFullResult.user.last_name = $scope.override.last_name;
+        if ($scope.override.first_name || $scope.override.last_name) {
+          userFullResult.user.first_name = $scope.override.first_name;
+          userFullResult.user.last_name = $scope.override.last_name;
+        }
         AppUsersManager.saveApiUser(userFullResult.user);
       } else {
         AppUsersManager.saveApiUser(userFullResult.user, true);

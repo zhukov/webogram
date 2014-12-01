@@ -1144,6 +1144,10 @@ a.im_message_contact_photo {
 .im_message_contact_name {
   font-weight: bold;
 }
+.im_message_contact_name,
+.im_message_contact_phone {
+  white-space: nowrap;
+}
 a.im_message_photo_thumb,
 a.im_message_video_thumb {
   display: block;
