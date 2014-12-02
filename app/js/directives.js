@@ -482,6 +482,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           skip = true;
         }
         if (next || prev) {
+          // restore previous message to fix typo
+          if (prev && document.activeElement.className.indexOf('emoji-wysiwyg-editor') > -1 && window.getSelection().baseOffset === 0) {
+            angular.element($('.im_history_col_wrap')).scope().fixLastMessage();
+          }
+
           if (!skip && (!searchFocused || e.metaKey)) {
             return true;
           }
@@ -1674,7 +1679,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           realImageWidth = image.width;
           realImageHeight = image.height;
           clearInterval(checkSizesInt);
-          
+
           var defaultWh = calcImageInBox(image.width, image.height, fullWidth, fullHeight, true);
           var zoomedWh = {w: realImageWidth, h: realImageHeight};
           if (defaultWh.w >= zoomedWh.w && defaultWh.h >= zoomedWh.h) {
