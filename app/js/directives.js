@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.3.1 - messaging web application for MTProto
+ * Webogram v0.3.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -23,6 +23,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       restrict: 'AE',
       templateUrl: templateUrl('lang_footer')
+    };
+  })
+
+  .directive('myFooter', function() {
+    return {
+      restrict: 'AE',
+      templateUrl: templateUrl('footer')
     };
   })
 
@@ -166,6 +173,147 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     }
   })
+  .directive('myExternalEmbed', function () {
+
+    var twitterAttached = false;
+    var facebookAttached = false;
+    var gplusAttached = false;
+    var twitterPendingWidgets = [];
+    var facebookPendingWidgets = [];
+    var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+
+    function link ($scope, element, attrs) {
+      var embedData = $scope.$eval(attrs.myExternalEmbed);
+      if (!embedData) {
+        return;
+      }
+      var html = '';
+      var callback = false;
+      var needTwitter = false;
+      switch (embedData[0]) {
+        case 'youtube':
+          var videoID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://www.youtube.com/embed/' + videoID +
+                '?autoplay=0&amp;controls=2" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
+          break;
+
+        case 'vimeo':
+          var videoID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://player.vimeo.com/video/' + videoID +
+                '?title=0&amp;byline=0&amp;portrait=0" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
+          break;
+
+        case 'instagram':
+          var instaID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://instagram.com/p/' + instaID +
+                '/embed/"></' + embedTag + '></div>';
+          break;
+
+        case 'vine':
+          var vineID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
+          break;
+
+        case 'soundcloud':
+          var soundcloudUrl = embedData[1];
+          html = '<div class="im_message_media_embed im_message_soundcloud_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://w.soundcloud.com/player/?url=' + encodeEntities(encodeURIComponent(soundcloudUrl)) +
+                '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
+          break;
+
+        case 'twitter':
+          html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
+
+          callback = function () {
+            if (!twitterAttached) {
+              twitterAttached = true;
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  twttr.events.bind('loaded', function (event) {
+                    for (var i = 0; i < twitterPendingWidgets.length; i++) {
+                      twitterPendingWidgets[i].$emit('ui_height');
+                    }
+                    twitterPendingWidgets = [];
+                  });
+                })
+                .attr('src', 'https://platform.twitter.com/widgets.js');
+            }
+            else if (window.twttr) {
+              twttr.widgets.load(element[0]);
+            }
+            twitterPendingWidgets.push($scope);
+          };
+          break;
+
+        case 'facebook':
+          html = '<div class="im_message_facebook_embed"><div class="fb-post" data-href="' + embedData[1] + '" data-width="300"></div></div>';
+
+          callback = function () {
+            if (!facebookAttached) {
+              facebookAttached = true;
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  FB.Event.subscribe('xfbml.render', function (event) {
+                    for (var i = 0; i < facebookPendingWidgets.length; i++) {
+                      facebookPendingWidgets[i].$emit('ui_height');
+                    }
+                    facebookPendingWidgets = [];
+                  });
+                })
+                .attr('src', 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&appId=254098051407226&version=v2.0');
+            }
+
+            else if (window.FB) {
+              FB.XFBML.parse(element[0]);
+            }
+            facebookPendingWidgets.push($scope);
+          };
+          break;
+
+        case 'gplus':
+          html = '<div class="im_message_gplus_embed"><div class="g-post" data-href="' + embedData[1] + '"></div></div>';
+
+          callback = function () {
+            if (!gplusAttached) {
+              gplusAttached = true;
+
+              window.___gcfg = {"parsetags": "explicit"};
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  gapi.post.go();
+                })
+                .attr('src', 'https://apis.google.com/js/plusone.js');
+            }
+            else if (window.gapi) {
+              gapi.post.go(element[0]);
+            }
+            element.one('load', function () {
+              $scope.$emit('ui_height');
+            });
+          };
+          break;
+      }
+
+      if (html) {
+        element[0].innerHTML = html;
+        if (callback) {
+          callback();
+        }
+      }
+    }
+
+    return {
+      link: link
+    };
+
+  })
 
   .directive('myServiceMessage', function() {
     return {
@@ -177,19 +325,43 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_photo')
     };
   })
-  .directive('myMessageVideo', function() {
+  .directive('myMessageVideo', function(AppVideoManager) {
     return {
-      templateUrl: templateUrl('message_attach_video')
+      scope: {
+        'video': '=myMessageVideo',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_video'),
+      link: function ($scope, element, attrs) {
+        AppVideoManager.updateVideoDownloaded($scope.video.id);
+        $scope.videoSave = function () {
+          AppVideoManager.saveVideoFile($scope.video.id);
+        };
+        $scope.videoOpen = function () {
+          AppVideoManager.openVideo($scope.video.id, $scope.messageId);
+        };
+      }
     };
   })
-  .directive('myMessageDocument', function() {
+  .directive('myMessageDocument', function(AppDocsManager) {
     return {
-      templateUrl: templateUrl('message_attach_document')
-    };
-  })
-  .directive('myMessageAudio', function() {
-    return {
-      templateUrl: templateUrl('message_attach_audio')
+      scope: {
+        'document': '=myMessageDocument',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_document'),
+      link: function ($scope, element, attrs) {
+        AppDocsManager.updateDocDownloaded($scope.document.id);
+        $scope.docSave = function () {
+          AppDocsManager.saveDocFile($scope.document.id);
+        };
+        $scope.docOpen = function () {
+          if (!$scope.document.withPreview) {
+            return $scope.docSave();
+          }
+          AppDocsManager.openDoc($scope.document.id, $scope.messageId);
+        };
+      }
     };
   })
   .directive('myMessageMap', function() {
@@ -607,7 +779,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      var animated = transform ? true : false,
+      var animated = transform && false ? true : false,
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {
@@ -868,7 +1040,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, Storage, ErrorService, $interpolate) {
+  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, ErrorService) {
 
     return {
       link: link,
@@ -900,9 +1072,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           .on('keyup', function (e) {
             updateHeight();
 
-            $scope.$apply(function () {
-              $scope.draftMessage.text = richTextarea.textContent;
-            });
+            if (!sendAwaiting) {
+              $scope.$apply(function () {
+                $scope.draftMessage.text = richTextarea.textContent;
+              });
+            }
 
             $timeout.cancel(updatePromise);
             updatePromise = $timeout(updateValue, 1000);
@@ -952,9 +1126,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (submit) {
             $timeout.cancel(updatePromise);
             updateValue();
-            $(element).trigger('submit');
+            $scope.draftMessage.send();
             $(element).trigger('message_send');
-            resetAfterSubmit();
+            resetTyping();
             return cancelEvent(e);
           }
         }
@@ -964,9 +1138,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       $(submitBtn).on('mousedown touchstart', function (e) {
         $timeout.cancel(updatePromise);
         updateValue();
-        $(element).trigger('submit');
+        $scope.draftMessage.send();
         $(element).trigger('message_send');
-        resetAfterSubmit();
+        resetTyping();
         return cancelEvent(e);
       });
 
@@ -984,7 +1158,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      function resetAfterSubmit () {
+      function resetTyping () {
         lastTyping = 0;
         lastLength = 0;
       };
@@ -995,6 +1169,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           var html = $('<div>').text($scope.draftMessage.text || '').html();
           html = html.replace(/\n/g, '<br/>');
           $(richTextarea).html(html);
+          lastLength = html.length;
           updateHeight();
         }
       }
@@ -1032,10 +1207,20 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$on('ui_history_change', focusField);
       }
 
-      $scope.$on('ui_message_send', focusField);
-
+      $scope.$on('ui_peer_change', resetTyping);
       $scope.$on('ui_peer_draft', updateRichTextarea);
-      $scope.$on('ui_message_before_send', updateValue);
+
+      var sendAwaiting = false;
+      $scope.$on('ui_message_before_send', function () {
+        sendAwaiting = true;
+        $timeout.cancel(updatePromise);
+        updateValue();
+      });
+      $scope.$on('ui_message_send', function () {
+        sendAwaiting = false;
+        focusField();
+      });
+
 
       function focusField () {
         onContentLoaded(function () {
@@ -1044,25 +1229,26 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function onPastedImageEvent (e) {
-        var element = e && e.target;
-        var src;
-        if (element && (src = element.src) && src.indexOf('data') === 0) {
-          element.parentNode.removeChild(element);
-          src = src.substr(5).split(';');
-          var contentType = src[0];
-          var base64 = atob(src[1].split(',')[1]);
-          var array = new Uint8Array(base64.length);
+        var element = (e.originalEvent || e).target,
+            src = (element || {}).src || '',
+            remove = false;
 
-          for (var i = 0; i < base64.length; i++) {
-            array[i] = base64.charCodeAt(i);
-          }
-
-          var blob = new Blob([array], {type: contentType});
-
+        if (src.substr(0, 5) == 'data:') {
+          remove = true;
+          var blob = dataUrlToBlob(src);
           ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
             $scope.draftMessage.files = [blob];
             $scope.draftMessage.isMedia = true;
           });
+          setZeroTimeout(function () {
+            element.parentNode.removeChild(element);
+          })
+        }
+        else if (src && !src.match(/img\/blank\.gif/)) {
+          var replacementNode = document.createTextNode(' ' + src + ' ');
+          setTimeout(function () {
+            element.parentNode.replaceChild(replacementNode, element);
+          }, 100);
         }
       };
 
@@ -1070,11 +1256,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         var cData = (e.originalEvent || e).clipboardData,
             items = cData && cData.items || [],
             files = [],
-            i;
+            file, i;
 
         for (i = 0; i < items.length; i++) {
           if (items[i].kind == 'file') {
-            files.push(items[i].getAsFile());
+            file = items[i].getAsFile();
+            files.push(file);
           }
         }
 
@@ -1144,7 +1331,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myLoadThumb', function(MtpApiFileManager) {
+  .directive('myLoadThumb', function(MtpApiFileManager, FileManager) {
 
     return {
       link: link,
@@ -1156,15 +1343,15 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var counter = 0;
 
-      var cachedSrc = MtpApiFileManager.getCachedFile(
+      var cachedBlob = MtpApiFileManager.getCachedFile(
         $scope.thumb &&
         $scope.thumb.location &&
         !$scope.thumb.location.empty &&
         $scope.thumb.location
       );
 
-      if (cachedSrc) {
-        element.attr('src', cachedSrc);
+      if (cachedBlob) {
+        element.attr('src', FileManager.getUrl(cachedBlob, 'image/jpeg'));
       }
       if ($scope.thumb && $scope.thumb.width && $scope.thumb.height) {
         element.attr('width', $scope.thumb.width);
@@ -1185,9 +1372,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        var cachedSrc = MtpApiFileManager.getCachedFile(newLocation);
-        if (cachedSrc) {
-          element.attr('src', cachedSrc);
+        var cachedBlob = MtpApiFileManager.getCachedFile(newLocation);
+        if (cachedBlob) {
+          element.attr('src', FileManager.getUrl(cachedBlob, 'image/jpeg'));
           cleanup();
           return;
         }
@@ -1196,9 +1383,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           element.attr('src', $scope.thumb.placeholder || 'img/blank.gif');
         }
 
-        MtpApiFileManager.downloadSmallFile($scope.thumb.location).then(function (url) {
+        MtpApiFileManager.downloadSmallFile($scope.thumb.location).then(function (blob) {
           if (counterSaved == counter) {
-            element.attr('src', url);
+            element.attr('src', FileManager.getUrl(blob, 'image/jpeg'));
             cleanup();
           }
         }, function (e) {
@@ -1222,7 +1409,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadFullPhoto', function(MtpApiFileManager, _) {
+  .directive('myLoadFullPhoto', function(MtpApiFileManager, FileManager, _) {
 
     return {
       link: link,
@@ -1242,16 +1429,16 @@ angular.module('myApp.directives', ['myApp.filters'])
                             .add($(imgElement)),
           resize = function () {
             resizeElements.css({width: $scope.fullPhoto.width, height: $scope.fullPhoto.height});
-            $scope.$emit('ui_height');
+            $scope.$emit('ui_height', true);
           };
 
       var jump = 0;
       $scope.$watchCollection('fullPhoto.location', function () {
-        var cachedSrc = MtpApiFileManager.getCachedFile($scope.thumbLocation),
+        var cachedBlob = MtpApiFileManager.getCachedFile($scope.thumbLocation),
             curJump = ++jump;
 
-        if (cachedSrc) {
-          imgElement.src = cachedSrc;
+        if (cachedBlob) {
+          imgElement.src = FileManager.getUrl(cachedBlob, 'image/jpeg');
           resize();
         } else {
           imgElement.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
@@ -1276,10 +1463,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         $scope.progress = {enabled: true, percent: 0};
 
-        apiPromise.then(function (url) {
+        apiPromise.then(function (blob) {
           if (curJump == jump) {
             $scope.progress.enabled = false;
-            imgElement.src = url;
+            imgElement.src = FileManager.getUrl(blob, 'image/jpeg');
             resize();
           }
         }, function (e) {
@@ -1305,7 +1492,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myLoadVideo', function($sce, MtpApiFileManager, _) {
+  .directive('myLoadVideo', function($sce, AppVideoManager, ErrorService, _) {
 
     return {
       link: link,
@@ -1318,37 +1505,41 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
-      $scope.progress = {enabled: true, percent: 1};
-      $scope.player = {};
+      var downloadPromise = AppVideoManager.downloadVideo($scope.video.id);
 
-      var inputLocation = {
-        _: 'inputVideoFileLocation',
-        id: $scope.video.id,
-        access_hash: $scope.video.access_hash
-      };
-
-      var hasQt = false, i;
-      if (navigator.plugins) {
-        for (i = 0; i < navigator.plugins.length; i++) {
-          if (navigator.plugins[i].name.indexOf('QuickTime') >= 0) {
-            hasQt = true;
-          }
-        }
-      }
-
-      var downloadPromise = MtpApiFileManager.downloadFile($scope.video.dc_id, inputLocation, $scope.video.size, {mime: 'video/mp4'});
-
-      downloadPromise.then(function (url) {
-        $scope.progress.enabled = false;
-        // $scope.progress = {enabled: true, percent: 50};
-        $scope.player.hasQuicktime = hasQt;
-        $scope.player.quicktime = false;
-        $scope.player.src = $sce.trustAsResourceUrl(url);
+      downloadPromise.then(function () {
         $scope.$emit('ui_height');
+        onContentLoaded(function () {
+          var videoEl = $('video', element)[0];
+          if (videoEl) {
+            var errorAlready = false;
+            var onVideoError = function (event) {
+              if (errorAlready) {
+                return;
+              }
+              if (!event.target ||
+                  !event.target.error ||
+                  event.target.error.code == event.target.error.MEDIA_ERR_DECODE ||
+                  event.target.error.code == event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+                errorAlready = true;
+                ErrorService.show({
+                  error: {
+                    type: 'MEDIA_TYPE_NOT_SUPPORTED',
+                    originalError: event.target && event.target.error
+                  }
+                });
+              }
+            };
+
+            videoEl.addEventListener('error', onVideoError, true);
+            $(videoEl).on('$destroy', function () {
+              errorAlready = true;
+              videoEl.removeEventListener('error', onVideoError);
+            });
+          }
+        });
       }, function (e) {
         console.log('Download video failed', e, $scope.video);
-        $scope.progress.enabled = false;
-        $scope.player.src = '';
 
         if (e && e.type == 'FS_BROWSER_UNSUPPORTED') {
           $scope.error = {html: _('error_browser_no_local_file_system_video_md', {
@@ -1360,8 +1551,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.error = {text: _('error_video_download_failed'), error: e};
         }
 
-      }, function (progress) {
-        $scope.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
       });
 
       $scope.$emit('ui_height');
@@ -1373,7 +1562,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadGif', function(MtpApiFileManager) {
+  .directive('myLoadGif', function(AppDocsManager) {
 
     return {
       link: link,
@@ -1385,19 +1574,16 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
-      var downloadPromise = false,
-          inputFileLocation = {
-            _: 'inputDocumentFileLocation',
-            id: $scope.document.id,
-            access_hash: $scope.document.access_hash
-          };
+      var downloadPromise = false;
 
       $scope.isActive = false;
-      $scope.document.url = MtpApiFileManager.getCachedFile(inputFileLocation);
 
-      /*return $scope.document.progress = {enabled: true, percent: 30, total: $scope.document.size};*/
+      $scope.toggle = function (e) {
+        if (checkClick(e, true)) {
+          AppDocsManager.saveDocFile($scope.document.id);
+          return false;
+        }
 
-      $scope.toggle = function () {
         if ($scope.document.url) {
           $scope.isActive = !$scope.isActive;
           $scope.$emit('ui_height');
@@ -1410,30 +1596,117 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
 
-        $scope.document.progress = {enabled: true, percent: 1, total: $scope.document.size};
+        downloadPromise = AppDocsManager.downloadDoc($scope.document.id);
 
-        downloadPromise = MtpApiFileManager.downloadFile(
-          $scope.document.dc_id,
-          inputFileLocation,
-          $scope.document.size,
-          null,
-          {mime: $scope.document.mime_type}
-        );
-
-        downloadPromise.then(function (url) {
-          $scope.document.url = url;
+        downloadPromise.then(function () {
           $scope.isActive = true;
-          delete $scope.document.progress;
-          console.log('file save done');
           $scope.$emit('ui_height');
-        }, function () {
-          $scope.document.progress.enabled = false;
-        }, function (progress) {
-          console.log('dl progress', progress);
-          $scope.document.progress.done = progress.done;
-          $scope.document.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
         })
       }
+    }
+  })
+
+  .directive('myLoadDocument', function(MtpApiFileManager, AppDocsManager, FileManager) {
+
+    return {
+      link: link,
+      templateUrl: templateUrl('full_document'),
+      scope: {
+        document: '=myLoadDocument'
+      }
+    };
+
+    function updateModalWidth(element, width) {
+      while (element && !$(element).hasClass('modal-dialog')) {
+        element = element.parentNode;
+      }
+      if (element) {
+        $(element).width(width + (Config.Mobile ? 0 : 32));
+      }
+    }
+
+    function link ($scope, element, attrs) {
+      var loaderWrap = $('.document_fullsize_with_progress_wrap', element);
+      var fullSizeWrap = $('.document_fullsize_wrap', element);
+      var fullSizeImage = $('.document_fullsize_img', element);
+
+      var fullWidth = $(window).width() - (Config.Mobile ? 20 : 32);
+      var fullHeight = $(window).height() - 150;
+      if (fullWidth > 800) {
+        fullWidth -= 208;
+      }
+
+      $scope.imageWidth = fullWidth;
+      $scope.imageHeight = fullHeight;
+
+      var thumbPhotoSize = $scope.document.thumb;
+
+      if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+        var wh = calcImageInBox(thumbPhotoSize.width, thumbPhotoSize.height, fullWidth, fullHeight);
+        $scope.imageWidth = wh.w;
+        $scope.imageHeight = wh.h;
+
+        var cachedBlob = MtpApiFileManager.getCachedFile(thumbPhotoSize.location);
+        if (cachedBlob) {
+          $scope.thumbSrc = FileManager.getUrl(cachedBlob, 'image/jpeg');
+        }
+      }
+
+      $scope.frameWidth = Math.max($scope.imageWidth, Math.min(600, fullWidth))
+      $scope.frameHeight = $scope.imageHeight;
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      });
+
+      updateModalWidth(element[0], $scope.frameWidth);
+
+      var checkSizesInt;
+      var realImageWidth, realImageHeight;
+      AppDocsManager.downloadDoc($scope.document.id).then(function (blob) {
+        var url = FileManager.getUrl(blob, $scope.document.mime_type);
+        var image = new Image();
+        var limit = 100; // 2 sec
+        var checkSizes = function (e) {
+          if ((!image.height || !image.width) && --limit) {
+            return;
+          }
+          realImageWidth = image.width;
+          realImageHeight = image.height;
+          clearInterval(checkSizesInt);
+          
+          var defaultWh = calcImageInBox(image.width, image.height, fullWidth, fullHeight, true);
+          var zoomedWh = {w: realImageWidth, h: realImageHeight};
+          if (defaultWh.w >= zoomedWh.w && defaultWh.h >= zoomedWh.h) {
+            zoomedWh.w *= 4;
+            zoomedWh.h *= 4;
+          }
+
+          var zoomed = true;
+          $scope.toggleZoom = function () {
+            zoomed = !zoomed;
+            var imageWidth = (zoomed ? zoomedWh : defaultWh).w;
+            var imageHeight = (zoomed ? zoomedWh : defaultWh).h;
+            fullSizeImage.css({
+              width: imageWidth,
+              height: imageHeight,
+              marginTop: $scope.frameHeight > imageHeight ? Math.floor(($scope.frameHeight - imageHeight) / 2) : 0
+            });
+            fullSizeWrap.toggleClass('document_fullsize_zoomed', zoomed);
+          };
+
+          $scope.toggleZoom(false);
+
+          fullSizeImage.attr('src', url);
+          loaderWrap.hide();
+          fullSizeWrap.css({width: $scope.frameWidth, height: $scope.frameHeight}).show();
+
+        };
+        checkSizesInt = setInterval(checkSizes, 20);
+        image.onload = checkSizes;
+        image.src = url;
+        setZeroTimeout(checkSizes);
+      });
     }
   })
 
@@ -1553,7 +1826,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
       attrs.$observe('myModalWidth', function (newW) {
-        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Mobile ? 0 : 36)});
+        $(element[0].parentNode.parentNode).css({width: parseInt(newW) + (Config.Mobile ? 0 : 32)});
       });
     };
 
@@ -1661,7 +1934,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         var height = element[0].parentNode.offsetHeight,
-            contHeight = element[0].parentNode.parentNode.parentNode.offsetHeight;
+            modal = element[0].parentNode.parentNode.parentNode,
+            bottomPanel = $('.media_modal_bottom_panel_wrap', modal)[0],
+            contHeight = modal.offsetHeight - (bottomPanel && bottomPanel.offsetHeight || 0);
 
         if (height < contHeight) {
           $(element[0].parentNode).css('marginTop', (contHeight - height) / 2);
@@ -1680,8 +1955,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $($window).on('resize', updateMargin);
 
-      $scope.$on('ui_height', function () {
-        onContentLoaded(updateMargin);
+      $scope.$on('ui_height', function (e, sync) {
+        if (sync) {
+          updateMargin();
+        } else {
+          onContentLoaded(updateMargin);
+        }
       });
 
     };
@@ -1703,8 +1982,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       var updateMargin = function () {
         var height = element[0].offsetHeight,
             fullHeight = height - (height && usePadding ? 2 * prevMargin : 0),
-            contHeight = $($window).height(),
             ratio = attrs.myVerticalPosition && parseFloat(attrs.myVerticalPosition) || 0.5,
+            contHeight = attrs.contHeight ? $scope.$eval(attrs.contHeight) : $($window).height(),
             margin = fullHeight < contHeight ? parseInt((contHeight - fullHeight) * ratio) : '',
             styles = usePadding
               ? {paddingTop: margin, paddingBottom: margin}
@@ -1720,9 +1999,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         prevMargin = margin;
       };
 
+      $($window).on('resize', updateMargin);
+
       onContentLoaded(updateMargin);
 
-      $($window).on('resize', updateMargin);
 
       $scope.$on('ui_height', function () {
         onContentLoaded(updateMargin);
@@ -1735,27 +2015,44 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myUserLink', function ($timeout, $rootScope, AppUsersManager) {
+  .directive('myUserLink', function ($timeout, AppUsersManager) {
 
     return {
       link: link
     };
 
     function link($scope, element, attrs) {
-      var userID = $scope.$eval(attrs.myUserLink),
-          user = AppUsersManager.getUser(userID);
 
-      element.html(
-        (user[attrs.short && $scope.$eval(attrs.short) ? 'rFirstName' : 'rFullName'] || '').valueOf()
-      );
+      var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
+      var short = attrs.short && $scope.$eval(attrs.short);
+
+      var userID;
+      var update = function () {
+        var user = AppUsersManager.getUser(userID);
+        var key = short ? 'rFirstName' : 'rFullName';
+
+        element.html(
+          (override[key] || user[key] || '').valueOf()
+        );
+        if (attrs.color && $scope.$eval(attrs.color)) {
+          element.addClass('user_color_' + user.num);
+        }
+      };
 
       if (element[0].tagName == 'A') {
         element.on('click', function () {
-          $rootScope.openUser(userID);
+          AppUsersManager.openUser(userID, override);
         });
       }
-      if (attrs.color && $scope.$eval(attrs.color)) {
-        element.addClass('user_color_' + user.num);
+
+      if (attrs.userWatch) {
+        $scope.$watch(attrs.myUserLink, function (newUserID) {
+          userID = newUserID;
+          update();
+        });
+      } else {
+        userID = $scope.$eval(attrs.myUserLink);
+        update();
       }
     }
   })
@@ -1805,26 +2102,26 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myUserPhotolink', function ($rootScope, AppUsersManager) {
+  .directive('myUserPhotolink', function (AppUsersManager) {
 
     return {
       link: link,
-      scope: {
-        userID: '=myUserPhotolink'
-      },
       template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus || false" ng-show="user.status._ == \'userStatusOnline\'"></i>'
     };
 
     function link($scope, element, attrs) {
-      $scope.photo = AppUsersManager.getUserPhoto($scope.userID, 'User');
+
+      var userID = $scope.$eval(attrs.myUserPhotolink);
+
+      $scope.photo = AppUsersManager.getUserPhoto(userID, 'User');
 
       if ($scope.showStatus = attrs.status && $scope.$eval(attrs.status)) {
-        $scope.user = AppUsersManager.getUser($scope.userID);
+        $scope.user = AppUsersManager.getUser(userID);
       }
 
       if (element[0].tagName == 'A') {
         element.on('click', function (e) {
-          $rootScope.openUser($scope.userID);
+          AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
         });
       }
 
@@ -1835,9 +2132,30 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($sce, $timeout, $q, FileManager, MtpApiFileManager) {
+  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager, ErrorService) {
 
     var currentPlayer = false;
+    var audioVolume = 0.5;
+
+    Storage.get('audio_volume').then(function (newAudioVolume) {
+      if (newAudioVolume > 0 && newAudioVolume <= 1.0) {
+        audioVolume = newAudioVolume;
+      }
+    });
+
+    var onAudioError = function (event) {
+      if (!event.target ||
+          !event.target.error ||
+          event.target.error.code == event.target.error.MEDIA_ERR_DECODE ||
+          event.target.error.code == event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        ErrorService.show({
+          error: {
+            type: 'MEDIA_TYPE_NOT_SUPPORTED',
+            originalError: event.target && event.target.error
+          }
+        });
+      }
+    };
 
     return {
       link: link,
@@ -1846,33 +2164,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       },
       templateUrl: templateUrl('audio_player')
     };
-
-    function downloadAudio (audio) {
-      var inputFileLocation = {
-            _: audio._ == 'document' ? 'inputDocumentFileLocation' : 'inputAudioFileLocation',
-            id: audio.id,
-            access_hash: audio.access_hash
-          };
-
-      audio.progress = {enabled: true, percent: 1, total: audio.size};
-
-      var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {mime: 'audio/ogg'});
-
-      audio.progress.cancel = downloadPromise.cancel;
-
-      return downloadPromise.then(function (url) {
-        delete audio.progress;
-        audio.rawUrl = url;
-        audio.url = $sce.trustAsResourceUrl(url);
-      }, function (e) {
-        console.log('audio download failed', e);
-        audio.progress.enabled = false;
-      }, function (progress) {
-        console.log('audio dl progress', progress);
-        audio.progress.done = progress.done;
-        audio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      });
-    }
 
     function checkPlayer (newPlayer) {
       if (newPlayer === currentPlayer) {
@@ -1885,14 +2176,21 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function link($scope, element, attrs) {
+      if ($scope.audio._ == 'audio') {
+        AppAudioManager.updateAudioDownloaded($scope.audio.id);
+      } else {
+        AppDocsManager.updateDocDownloaded($scope.audio.id);
+      }
+
+      $scope.volume = audioVolume;
       $scope.mediaPlayer = {};
 
       $scope.download = function () {
-        ($scope.audio.rawUrl ? $q.when() : downloadAudio($scope.audio)).then(
-          function () {
-            FileManager.download($scope.audio.rawUrl, $scope.audio.mime_type || 'audio/ogg', $scope.audio.file_name || 'audio.ogg');
-          }
-        );
+        if ($scope.audio._ == 'audio') {
+          AppAudioManager.saveAudioFile($scope.audio.id);
+        } else {
+          AppDocsManager.saveDocFile($scope.audio.id);
+        }
       };
 
       $scope.togglePlay = function () {
@@ -1901,16 +2199,186 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.mediaPlayer.player.playPause();
         }
         else if ($scope.audio.progress && $scope.audio.progress.enabled) {
-          $scope.audio.progress.cancel();
+          return;
         }
         else {
-          downloadAudio($scope.audio).then(function () {
+          var downloadPromise;
+          if ($scope.audio._ == 'audio') {
+            downloadPromise = AppAudioManager.downloadAudio($scope.audio.id);
+          } else {
+            downloadPromise = AppDocsManager.downloadDoc($scope.audio.id);
+          }
+
+          downloadPromise.then(function () {
             onContentLoaded(function () {
+              var audioEl = $('audio', element)[0];
+              if (audioEl) {
+                var errorAlready = false;
+                var onAudioError = function (event) {
+                  if (errorAlready) {
+                    return;
+                  }
+                  if (!event.target ||
+                      !event.target.error ||
+                      event.target.error.code == event.target.error.MEDIA_ERR_DECODE ||
+                      event.target.error.code == event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+                    errorAlready = true;
+                    ErrorService.show({
+                      error: {
+                        type: 'MEDIA_TYPE_NOT_SUPPORTED',
+                        originalError: event.target && event.target.error
+                      }
+                    });
+                  }
+                };
+
+                audioEl.addEventListener('error', onAudioError, true);
+                $(audioEl).on('$destroy', function () {
+                  errorAlready = true;
+                  audioEl.removeEventListener('error', onAudioError);
+                });
+              }
               checkPlayer($scope.mediaPlayer.player);
+              $scope.mediaPlayer.player.setVolume(audioVolume);
               $scope.mediaPlayer.player.play();
             })
           })
         }
       };
+
+      $scope.seek = function (position) {
+        if ($scope.mediaPlayer && $scope.mediaPlayer.player) {
+          $scope.mediaPlayer.player.seek(position);
+        } else {
+          $scope.togglePlay();
+        }
+      };
+      $scope.setVolume = function (volume) {
+        audioVolume = volume;
+        Storage.set({audio_volume: volume});
+        if ($scope.mediaPlayer && $scope.mediaPlayer.player) {
+          $scope.mediaPlayer.player.setVolume(volume);
+        }
+      };
     }
+  })
+
+  .directive('mySlider', function ($window) {
+    return {
+      link: link,
+      templateUrl: templateUrl('slider')
+    };
+
+    function link ($scope, element, attrs) {
+      var wrap = $('.tg_slider_wrap', element);
+      var fill = $('.tg_slider_track_fill', element);
+      var thumb = $('.tg_slider_thumb', element);
+      var width = wrap.width();
+      var thumbWidth = Math.ceil(thumb.width());
+      var model = attrs.sliderModel;
+      var sliderCallback = attrs.sliderOnchange;
+      var minValue = 0.0;
+      var maxValue = 1.0;
+      var lastUpdValue = false;
+      var lastMinPageX = false;
+
+      if (attrs.sliderMin) {
+        $scope.$watch(attrs.sliderMin, function (newMinValue) {
+          minValue = newMinValue || 0.0;
+        });
+      }
+      if (attrs.sliderMax) {
+        $scope.$watch(attrs.sliderMax, function (newMaxValue) {
+          maxValue = newMaxValue || 1.0;
+        });
+      }
+
+      var onSliderMove = function (e) {
+        e = e.originalEvent || e;
+
+        var offsetX = (e.touches && e.touches[0] ? e.touches[0].pageX : e.pageX) - lastMinPageX;
+        offsetX = Math.min(width, Math.max(0 , offsetX));
+        // console.log(e.type, lastMinPageX, e.pageX, offsetX);
+        lastUpdValue = minValue + offsetX / width * (maxValue - minValue);
+        if (sliderCallback) {
+          $scope.$eval(sliderCallback, {value: lastUpdValue});
+        } else {
+          $scope.$eval(model + '=' + lastUpdValue);
+        }
+
+        thumb.css('left', Math.max(0, offsetX - thumbWidth));
+        fill.css('width', offsetX);
+
+        return cancelEvent(e);
+      };
+      var stopSliderTrack = function () {
+        $($window).off('mousemove touchmove', onSliderMove);
+        $($window).off('mouseup touchend touchcancel touchleave', stopSliderTrack);
+      };
+
+      $scope.$watch(model, function (newVal) {
+        if (newVal != lastUpdValue && newVal !== undefined) {
+          var percent = Math.max(0, (newVal - minValue) / (maxValue - minValue));
+          if (width) {
+            var offsetX = Math.ceil(width * percent);
+            offsetX = Math.min(width, Math.max(0 , offsetX));
+            thumb.css('left', Math.max(0, offsetX - thumbWidth));
+            fill.css('width', offsetX);
+          } else {
+            thumb.css('left', percent * 100 + '%');
+            fill.css('width', percent * 100 + '%');
+          }
+          lastUpdValue = false;
+        }
+      });
+
+      element.on('dragstart selectstart', cancelEvent);
+
+      element.on('mousedown touchstart', function (e) {
+        if (!width) {
+          width = wrap.width();
+          if (!width) {
+            console.error('empty width');
+            return cancelEvent(e);
+          }
+        }
+        stopSliderTrack();
+
+        e = e.originalEvent || e;
+
+        var offsetX;
+        if (e.touches && e.touches[0]) {
+          lastMinPageX = element.position().left;
+          offsetX = e.touches[0].pageX - lastMinPageX;
+        }
+        else if (e.offsetX !== undefined) {
+          offsetX = e.offsetX;
+          lastMinPageX = e.pageX - offsetX;
+        }
+        else if (e.layerX !== undefined) {
+          offsetX = e.layerX;
+          lastMinPageX = e.pageX - offsetX;
+        }
+        else {
+          return cancelEvent(e);
+        }
+
+        // console.log(e.type, e, lastMinPageX, e.pageX, offsetX);
+        lastUpdValue = minValue + offsetX / width * (maxValue - minValue);
+        if (sliderCallback) {
+          $scope.$eval(sliderCallback, {value: lastUpdValue});
+        } else {
+          $scope.$eval(model + '=' + lastUpdValue);
+        }
+
+        thumb.css('left', Math.max(0, offsetX - thumbWidth));
+        fill.css('width', offsetX);
+
+        $($window).on('mousemove touchmove', onSliderMove);
+        $($window).on('mouseup touchend touchcancel touchleave', stopSliderTrack);
+
+        return cancelEvent(e);
+      });
+    }
+
   })

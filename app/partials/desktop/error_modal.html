@@ -5,6 +5,7 @@
   <div class="modal-body">
 
     <h4 ng-if="error" class="modal_simple_header" ng-switch="error.type">
+      <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_title"></span>
       <span ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400" my-i18n="error_modal_bad_request_title"></span>
         <span ng-switch-when="401" my-i18n="error_modal_unauthorized_title"></span>
@@ -33,6 +34,10 @@
       <span ng-switch-when="USER_NOT_USING_TELEGRAM" my-i18n="error_modal_no_phone_user_description_md"></span>
       <span ng-switch-when="USERS_NOT_USING_TELEGRAM" my-i18n="error_modal_no_phone_users_description_md"></span>
       <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED" my-i18n="error_modal_phonebook_required_description"></span>
+      <span ng-switch-when="USERNAME_INVALID" my-i18n="error_modal_username_invalid_description"></span>
+      <span ng-switch-when="USERNAME_OCCUPIED" my-i18n="error_modal_username_occupied_description"></span>
+      <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_description"></span>
+
 
       <div ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400" my-i18n="error_modal_bad_request_description"></span>
@@ -50,7 +55,7 @@
     <div ng-if="error" class="error_modal_details" ng-switch="error.detailsShown">
       <textarea ng-switch-when="true" rows="3" onclick="this.select()">Method: {{error.input || 'N/A'}}
 Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}
-Stack: {{error.stack}}</textarea>
+Stack: {{error.originalError.stack || error.stack}}</textarea>
       <div ng-switch-default>
         <a href="" ng-click="error.detailsShown = true" my-i18n="error_modal_tech_details"></a>
       </div>

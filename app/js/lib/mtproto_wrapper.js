@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.3.1 - messaging web application for MTProto
+ * Webogram v0.3.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -7,11 +7,13 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, ErrorService, $q) {
+.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, ErrorService, qSync, $q) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
       baseDcID = false;
+
+  MtpSingleInstanceService.start();
 
   Storage.get('dc').then(function (dcID) {
     if (dcID) {
@@ -29,17 +31,26 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function mtpLogOut () {
-    return mtpInvokeApi('auth.logOut').then(function () {
-      Storage.remove('dc', 'user_auth');
-
-      baseDcID = false;
-    }, function (error) {
-      Storage.remove('dc', 'user_auth');
-      if (error && error.code != 401) {
-        Storage.remove('dc' + baseDcID + '_auth_key');
+    var storageKeys = [];
+    for (var dcID = 1; dcID <= 5; dcID++) {
+      storageKeys.push('dc' + dcID + '_auth_key');
+    }
+    return Storage.get.apply(Storage, storageKeys).then(function (storageResult) {
+      var logoutPromises = [];
+      for (var i = 0; i < storageResult.length; i++) {
+        if (storageResult[i]) {
+          logoutPromises.push(mtpInvokeApi('auth.logOut', {}, {dcID: i + 1}));
+        }
       }
-      baseDcID = false;
-      error.handled = true;
+      return $q.all(logoutPromises).then(function () {
+        Storage.remove('dc', 'user_auth');
+        baseDcID = false;
+      }, function (error) {
+        Storage.remove.apply(storageKeys);
+        Storage.remove('dc', 'user_auth');
+        baseDcID = false;
+        error.handled = true;
+      });
     });
   }
 
@@ -54,7 +65,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     if (cache[dcID] !== undefined) {
-      return $q.when(cache[dcID]);
+      return qSync.when(cache[dcID]);
     }
 
     var akk = 'dc' + dcID + '_auth_key',
@@ -108,7 +119,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
           if (!options.noErrorBox) {
             error.input = method;
-            error.stack = error.stack || (new Error()).stack;
+            error.stack = error.originalError && error.originalError.stack || error.stack || (new Error()).stack;
             setTimeout(function () {
               if (!error.handled) {
                 ErrorService.show({error: error});
@@ -120,24 +131,17 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         dcID,
         networkerPromise;
 
-    if (dcID = options.dcID) {
-      networkerPromise = mtpGetNetworker(dcID, options);
-    } else {
-      networkerPromise = Storage.get('dc').then(function (baseDcID) {
-        return mtpGetNetworker(dcID = baseDcID || 2, options);
-      });
+    var cachedNetworker;
+    var stack = (new Error()).stack;
+    if (!stack) {
+      try {window.unexistingFunction();} catch (e) {
+        stack = e.stack || '';
+      }
     }
-
-    var cachedNetworker,
-        stack = false;
-
-    networkerPromise.then(function (networker) {
+    var performRequest = function (networker) {
       return (cachedNetworker = networker).wrapApiCall(method, params, options).then(
         function (result) {
           deferred.resolve(result);
-          // $timeout(function () {
-          //   deferred.resolve(result);
-          // }, 1000);
         },
         function (error) {
           console.error(dT(), 'Error', error.code, error.type, baseDcID, dcID);
@@ -168,12 +172,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             cachedExportPromise[dcID].then(function () {
               (cachedNetworker = networker).wrapApiCall(method, params, options).then(function (result) {
                 deferred.resolve(result);
-              }, function (error) {
-                rejectPromise(error);
-              });
-            }, function (error) {
-              rejectPromise(error);
-            });
+              }, rejectPromise);
+            }, rejectPromise);
           }
           else if (error.code == 303) {
             var newDcID = error.type.match(/^(PHONE_MIGRATE_|NETWORK_MIGRATE_|USER_MIGRATE_)(\d+)/)[2];
@@ -187,9 +187,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
               mtpGetNetworker(newDcID, options).then(function (networker) {
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
-                }, function (error) {
-                  rejectPromise(error);
-                });
+                }, rejectPromise);
               });
             }
           }
@@ -197,14 +195,14 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             rejectPromise(error);
           }
         });
-    }, function (error) {
-      rejectPromise(error);
-    });
+    };
 
-    if (!(stack = (stack || (new Error()).stack))) {
-      try {window.unexistingFunction();} catch (e) {
-        stack = e.stack || '';
-      }
+    if (dcID = (options.dcID || baseDcID)) {
+      mtpGetNetworker(dcID, options).then(performRequest, rejectPromise);
+    } else {
+      Storage.get('dc').then(function (baseDcID) {
+        mtpGetNetworker(dcID = baseDcID || 2, options).then(performRequest, rejectPromise);
+      });
     }
 
     return deferred.promise;
@@ -234,14 +232,12 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   var cachedFs = false;
   var cachedFsPromise = false;
-  var apiUploadPromise = $q.when();
   var cachedSavePromises = {};
   var cachedDownloadPromises = {};
   var cachedDownloads = {};
 
   var downloadPulls = {};
   var downloadActives = {};
-  var downloadLimit = 5;
 
   function downloadRequest(dcID, cb, activeDelta) {
     if (downloadPulls[dcID] === undefined) {
@@ -251,7 +247,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     var downloadPull = downloadPulls[dcID];
     var deferred = $q.defer();
     downloadPull.push({cb: cb, deferred: deferred, activeDelta: activeDelta});
-    downloadCheck(dcID);
+    setZeroTimeout(function () {
+      downloadCheck(dcID);
+    });
 
     return deferred.promise;
   };
@@ -260,6 +258,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   function downloadCheck(dcID) {
     var downloadPull = downloadPulls[dcID];
+    var downloadLimit = dcID == 'upload' ? 11 : 5;
 
     if (downloadActives[dcID] >= downloadLimit || !downloadPull || !downloadPull.length) {
       return false;
@@ -336,7 +335,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
     if (!cachedSavePromises[fileName]) {
       cachedSavePromises[fileName] = getFileStorage().saveFile(fileName, bytes).then(function (blob) {
-        return cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType);
+        return cachedDownloads[fileName] = blob;
       });
     }
     return cachedSavePromises[fileName];
@@ -358,7 +357,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     var fileStorage = getFileStorage();
 
     return cachedDownloadPromises[fileName] = fileStorage.getFile(fileName).then(function (blob) {
-      return cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType);
+      return cachedDownloads[fileName] = blob;
     }, function () {
       var downloadPromise = downloadRequest(location.dc_id, function () {
         // console.log('next small promise');
@@ -376,11 +375,18 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       return fileStorage.getFileWriter(fileName, mimeType).then(function (fileWriter) {
         return downloadPromise.then(function (result) {
           return FileManager.write(fileWriter, result.bytes).then(function () {
-            return cachedDownloads[fileName] = FileManager.getUrl(fileWriter.finalize(), mimeType);
+            return cachedDownloads[fileName] = fileWriter.finalize();
           });
         });
       });
     });
+  }
+
+  function getDownloadedFile(location, size) {
+    var fileStorage = getFileStorage(),
+        fileName = getFileName(location);
+
+    return fileStorage.getFile(fileName, size);
   }
 
   function downloadFile (dcID, location, size, options) {
@@ -401,10 +407,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
     if (cachedPromise) {
       if (toFileEntry) {
-        return cachedPromise.then(function (url) {
-          return fileStorage.getFile(fileName).then(function (blob) {
-            return FileManager.copy(blob, toFileEntry);
-          });
+        return cachedPromise.then(function (blob) {
+          return FileManager.copy(blob, toFileEntry);
         })
       }
       return cachedPromise;
@@ -418,17 +422,20 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         errorHandler = function (error) {
           deferred.reject(error);
           errorHandler = angular.noop;
-          if (cacheFileWriter) cacheFileWriter.truncate(0);
+          if (cacheFileWriter && 
+              (!error || error.type != 'DOWNLOAD_CANCELED')) {
+            cacheFileWriter.truncate(0);
+          }
         };
 
 
-    fileStorage.getFile(fileName).then(function (blob) {
+    fileStorage.getFile(fileName, size).then(function (blob) {
       if (toFileEntry) {
         FileManager.copy(blob, toFileEntry).then(function () {
           deferred.resolve();
         }, errorHandler);
       } else {
-        deferred.resolve(cachedDownloads[fileName] = FileManager.getUrl(blob, mimeType));
+        deferred.resolve(cachedDownloads[fileName] = blob);
       }
     }, function () {
       var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
@@ -436,9 +443,16 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       fileWriterPromise.then(function (fileWriter) {
         cacheFileWriter = fileWriter;
         var limit = 524288,
+            offset,
+            startOffset = 0,
             writeFilePromise = $q.when(),
             writeFileDeferred;
-        for (var offset = 0; offset < size; offset += limit) {
+        if (fileWriter.length) {
+          startOffset = fileWriter.length;
+          fileWriter.seek(startOffset);
+          deferred.notify({done: startOffset, total: size});
+        }
+        for (offset = startOffset; offset < size; offset += limit) {
           writeFileDeferred = $q.defer();
           (function (isFinal, offset, writeFileDeferred, writeFilePromise) {
             return downloadRequest(dcID, function () {
@@ -454,7 +468,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 fileDownload: true,
                 createNetworker: true
               });
-            }, 6).then(function (result) {
+            }, 2).then(function (result) {
               writeFilePromise.then(function () {
                 if (canceled) {
                   return $q.when();
@@ -467,7 +481,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                     if (toFileEntry) {
                       deferred.resolve();
                     } else {
-                      deferred.resolve(cachedDownloads[fileName] = FileManager.getUrl(fileWriter.finalize(), mimeType));
+                      deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
                     }
                   } else {
                     deferred.notify({done: offset + limit, total: size});
@@ -479,7 +493,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           writeFilePromise = writeFileDeferred.promise;
         }
       });
-    })
+    });
 
     deferred.promise.cancel = function () {
       if (!canceled && !resolved) {
@@ -497,15 +511,23 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function uploadFile (file) {
-    var fileSize = file.size,
-        // partSize = fileSize > 102400 ? 65536 : 4096,
-        // partSize = fileSize > 102400 ? 524288 : 4096,
-        partSize = fileSize > 102400 ? 524288 : 32768,
-        isBigFile = fileSize >= 10485760,
-        totalParts = Math.ceil(fileSize / partSize),
-        canceled = false,
-        resolved = false,
-        doneParts = 0;
+    var fileSize    = file.size,
+        isBigFile   = fileSize >= 10485760,
+        canceled    = false,
+        resolved    = false,
+        doneParts   = 0,
+        partSize    = 262144, // 256 Kb
+        activeDelta = 2;
+
+    if (fileSize > 67108864) {
+      partSize = 524288;
+      activeDelta = 4;
+    }
+    else if (fileSize < 102400) {
+      partSize = 32768;
+      activeDelta = 1;
+    }
+    var totalParts = Math.ceil(fileSize / partSize);
 
     if (totalParts > 1500) {
       return $q.reject({type: 'FILE_TOO_BIG'});
@@ -516,6 +538,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         errorHandler = function (error) {
           // console.error('Up Error', error);
           deferred.reject(error);
+          canceled = true;
           errorHandler = angular.noop;
         },
         part = 0,
@@ -529,35 +552,34 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         };
 
 
-    var fileReadPromise = $q.when();
-
     for (offset = 0; offset < fileSize; offset += partSize) {
       (function (offset, part) {
-        fileReadPromise = fileReadPromise.then(function () {
-          var fileReadDeferred = $q.defer();
+        downloadRequest('upload', function () {
+          var uploadDeferred = $q.defer();
 
           var reader = new FileReader();
           var blob = file.slice(offset, offset + partSize);
 
           reader.onloadend = function (e) {
-            if (canceled || e.target.readyState != FileReader.DONE) {
+            if (canceled) {
+              uploadDeferred.reject();
               return;
             }
-            var apiCurPromise = apiUploadPromise = apiUploadPromise.then(function () {
-              return MtpApiManager.invokeApi(isBigFile ? 'upload.saveBigFilePart' : 'upload.saveFilePart', {
-                file_id: fileID,
-                file_part: part,
-                file_total_parts: totalParts,
-                bytes: bytesFromArrayBuffer(e.target.result)
-              }, {
-                startMaxLength: partSize + 256,
-                fileUpload: true
-              });
-            }, errorHandler);
-
-            apiCurPromise.then(function (result) {
+            if (e.target.readyState != FileReader.DONE) {
+              return;
+            }
+            MtpApiManager.invokeApi(isBigFile ? 'upload.saveBigFilePart' : 'upload.saveFilePart', {
+              file_id: fileID,
+              file_part: part,
+              file_total_parts: totalParts,
+              bytes: e.target.result
+            }, {
+              startMaxLength: partSize + 256,
+              fileUpload: true,
+              singleInRequest: true
+            }).then(function (result) {
               doneParts++;
-              fileReadDeferred.resolve();
+              uploadDeferred.resolve();
               if (doneParts >= totalParts) {
                 deferred.resolve(resultInputFile);
                 resolved = true;
@@ -570,8 +592,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
           reader.readAsArrayBuffer(blob);
 
-          return fileReadDeferred.promise;
-        });
+          return uploadDeferred.promise;
+        }, activeDelta);
       })(offset, part++);
     }
 
@@ -588,9 +610,90 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   return {
     getCachedFile: getCachedFile,
+    getDownloadedFile: getDownloadedFile,
     downloadFile: downloadFile,
     downloadSmallFile: downloadSmallFile,
     saveSmallFile: saveSmallFile,
     uploadFile: uploadFile
   };
 })
+
+.service('MtpSingleInstanceService', function (_, $rootScope, $interval, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
+
+  var instanceID = nextRandomInt(0xFFFFFFFF);
+  var started = false;
+  var masterInstance  = false;
+  var startTime       = tsNow();
+  var errorShowTime = 0;
+
+  function start() {
+    if (!started && !Config.Navigator.mobile && !Config.Modes.packed) {
+      started = true;
+
+      IdleManager.start();
+
+      startTime = tsNow();
+      $rootScope.$watch('idle.isIDLE', checkInstance);
+      $interval(checkInstance, 5000);
+      checkInstance();
+
+      try {
+        $($window).on('beforeunload', clearInstance);
+      } catch (e) {};
+    }
+  }
+
+  function clearInstance () {
+    Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance');
+  }
+
+  function checkInstance() {
+    var time = tsNow();
+    var idle = $rootScope.idle && $rootScope.idle.isIDLE;
+    var newInstance = {id: instanceID, idle: idle, time: time};
+
+    Storage.get('xt_instance', 'xt_idle_instance').then(function (result) {
+      var curInstance = result[0],
+          idleInstance = result[1];
+
+      if (!curInstance ||
+          curInstance.time < time - 60000 ||
+          curInstance.id == instanceID ||
+          curInstance.idle ||
+          !idle) {
+
+        if (idleInstance) {
+          if (idleInstance.id == instanceID) {
+            Storage.remove('xt_idle_instance');
+          }
+          else if (idleInstance.time > time - 10000 &&
+                   time > errorShowTime) {
+
+            ErrorService.alert(
+              _('error_modal_warning_title_raw'),
+              _('error_modal_multiple_open_tabs_raw')
+            );
+            errorShowTime += tsNow() + 60000;
+          }
+        }
+        Storage.set({xt_instance: newInstance});
+        if (!masterInstance) {
+          MtpNetworkerFactory.startAll();
+        }
+        masterInstance = true;
+      } else {
+        Storage.set({xt_idle_instance: newInstance});
+        if (masterInstance) {
+          MtpNetworkerFactory.stopAll();
+        }
+        masterInstance = false;
+
+      }
+    });
+  }
+
+  return {
+    start: start
+  }
+})
+

@@ -41,17 +41,11 @@
           <h5 my-i18n="im_contacts_title"></h5>
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
-              <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
-                <div class="im_dialog_photo pull-left">
-                  <img
-                    class="im_dialog_photo"
-                    my-load-thumb
-                    thumb="contact.userPhoto"
-                  />
-                </div>
+              <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
+                <div class="im_dialog_photo pull-left" my-user-photolink="contact.userID" img-class="im_dialog_photo"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
+                    <span class="im_dialog_user" my-user-link="contact.userID"></span>
                   </div>
                   <div class="im_dialog_message">
                     <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
@@ -61,6 +55,27 @@
             </li>
           </ul>
         </div>
+
+        <div class="im_dialogs_contacts_wrap" ng-show="!search.messages &amp;&amp; foundUsers.length > 0">
+          <h5 my-i18n="im_found_title"></h5>
+          <ul class="nav nav-pills nav-stacked">
+            <li class="im_dialog_wrap" ng-repeat="foundUser in foundUsers track by foundUser.userID" ng-class="{active: curDialog.peerID == foundUser.userID}">
+              <a class="im_dialog" ng-mousedown="dialogSelect(foundUser.peerString)">
+                <div class="im_dialog_photo pull-left" my-user-photolink="foundUser.userID" img-class="im_dialog_photo"></div>
+                <div class="im_dialog_message_wrap">
+                  <div class="im_dialog_peer">
+                    <span class="im_dialog_user" my-user-link="foundUser.userID"></span>
+                  </div>
+                  <div class="im_dialog_message" ng-switch="foundUser.user.username.length > 0">
+                    <span ng-switch-when="true" class="im_dialog_message_text" ng-bind="::'@' + foundUser.user.username"></span>
+                    <span ng-switch-default class="im_dialog_message_text" my-user-status="::foundUser.userID"></span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+
       </div>
     </div>
 
@@ -109,7 +124,7 @@
               <div class="im_send_form_wrap1">
 
                 <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
-                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}" ng-submit="sendMessage($event)">
+                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_field_wrap">
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>

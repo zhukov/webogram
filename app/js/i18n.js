@@ -21,19 +21,11 @@ angular.module('myApp.i18n', ['izhukov.utils'])
       });
     }
 
-    function encodeEntities(value) {
-      return value.
-        replace(/&/g, '&amp;').
-        replace(/([^\#-~| |!\n\*])/g, function (value) { // non-alphanumeric
-          return '&#' + value.charCodeAt(0) + ';';
-        }).
-        replace(/</g, '&lt;').
-        replace(/>/g, '&gt;');
-    }
-
     function parseMarkdownString(msgstr, msgid) {
-      msgstr = msgstr.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\n/g, "<br/>");
+      msgstr = msgstr
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n|&#10;/g, "<br/>");
+
       return msgstr;
     }
 

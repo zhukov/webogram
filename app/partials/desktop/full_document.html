@@ -1,0 +1,21 @@
+<div class="document_modal_image_wrap">
+  <div class="img_fullsize_with_progress_wrap document_fullsize_with_progress_wrap" ng-style="{width: frameWidth + 'px', height: frameHeight + 'px'}">
+    <div class="img_fullsize_progress_overlay">
+      <div class="img_fullsize_progress_wrap" ng-style="{width: frameWidth + 'px', height: frameHeight + 'px'}">
+        <div class="img_fullsize_progress progress tg_progress">
+          <div class="progress-bar progress-bar-success" style="width: {{document.progress.percent}}%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="img_fullsize_wrap" ng-if="thumbSrc.length > 0">
+      <img
+        class="img_fullsize"
+        ng-src="{{thumbSrc}}"
+        ng-style="{width: imageWidth + 'px', height: imageHeight + 'px'}"
+      />
+    </div>
+  </div>
+  <div class="document_fullsize_wrap" ng-click="toggleZoom(!zoomed)">
+    <img class="document_fullsize_img" />
+  </div>
+</div>

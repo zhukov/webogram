@@ -6,8 +6,8 @@
 
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}">
       <div class="im_dialogs_panel">
-        <div class="dropdown im_dialogs_panel_dropdown pull-right">
-          <a class="dropdown-toggle">
+        <div class="dropdown im_dialogs_panel_dropdown pull-right" dropdown>
+          <a class="dropdown-toggle" dropdown-toggle>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -57,19 +57,33 @@
               <ul class="nav nav-pills nav-stacked">
                 <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
                   <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
-                    <div class="im_dialog_photo pull-left">
-                      <img
-                        class="im_dialog_photo"
-                        my-load-thumb
-                        thumb="contact.userPhoto"
-                      />
-                    </div>
+                    <div class="im_dialog_photo pull-left" my-user-photolink="contact.userID" img-class="im_dialog_photo"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" ng-bind-html="contact.user.rFullName"></span>
+                        <span class="im_dialog_user" my-user-link="contact.userID"></span>
                       </div>
                       <div class="im_dialog_message">
                         <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="im_dialogs_contacts_wrap" ng-show="!search.messages &amp;&amp; foundUsers.length > 0">
+              <h5 my-i18n="im_found_title"></h5>
+              <ul class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" ng-repeat="foundUser in foundUsers track by foundUser.userID" ng-class="{active: curDialog.peerID == foundUser.userID}">
+                  <a class="im_dialog" ng-mousedown="dialogSelect(foundUser.peerString)">
+                    <div class="im_dialog_photo pull-left" my-user-photolink="foundUser.userID" img-class="im_dialog_photo"></div>
+                    <div class="im_dialog_message_wrap">
+                      <div class="im_dialog_peer">
+                        <span class="im_dialog_user" my-user-link="foundUser.userID"></span>
+                      </div>
+                      <div class="im_dialog_message" ng-switch="foundUser.user.username.length > 0">
+                        <span ng-switch-when="true" class="im_dialog_message_text" ng-bind="::'@' + foundUser.user.username"></span>
+                        <span ng-switch-default class="im_dialog_message_text" my-user-status="::foundUser.userID"></span>
                       </div>
                     </div>
                   </a>
@@ -108,8 +122,8 @@
                 <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()" my-i18n="im_info"></a>
                 <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()" my-i18n="im_edit"></a>
 
-                <div class="dropdown im_history_panel_media_dropdown pull-right">
-                  <a class="dropdown-toggle"><my-i18n msgid="im_media"></my-i18n><i class="icon icon-caret"></i></a>
+                <div class="dropdown im_history_panel_media_dropdown pull-right" dropdown>
+                  <a class="dropdown-toggle" dropdown-toggle><my-i18n msgid="im_media"></my-i18n><i class="icon icon-caret"></i></a>
                   <ul class="dropdown-menu">
                     <li><a ng-click="toggleMedia('photos')" my-i18n="im_media_photos"></a></li>
                     <li><a ng-click="toggleMedia('video')" my-i18n="im_media_video"></a></li>
@@ -229,7 +243,7 @@
                       thumb="ownPhoto"
                     />
                   </div>
-                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}" ng-submit="sendMessage($event)">
+                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_field_wrap">
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
@@ -271,4 +285,4 @@
 
 </div>
 
-<div my-lang-footer></div>
+<div my-footer></div>

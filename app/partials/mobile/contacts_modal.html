@@ -18,8 +18,8 @@
             </li>
           </ul>
 
-          <div ng-switch-default class="navbar-toggle-wrap dropdown" ng-show="!action">
-            <a class="dropdown-toggle navbar-toggle">
+          <div ng-switch-default class="navbar-toggle-wrap dropdown" ng-show="!action" dropdown>
+            <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
@@ -81,8 +81,10 @@
 
             <div class="contacts_modal_contact_photo pull-left" my-user-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
             <div class="contacts_modal_contact_name" ng-bind-html="contact.user.rFullName"></div>
-            <div class="contacts_modal_contact_status" my-user-status="::contact.userID"></div>
-
+            <div class="contacts_modal_contact_status" ng-switch="contact.found">
+              <span ng-switch-when="true" ng-bind="'@' + contact.user.username"></span>
+              <span ng-switch-default my-user-status="::contact.userID"></span>
+            </div>
           </a>
         </li>
 

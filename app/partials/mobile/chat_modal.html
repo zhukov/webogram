@@ -4,20 +4,20 @@
     <div class="navbar navbar-static-top navbar-inverse">
       <div class="container">
 
-        <div class="navbar-toggle-wrap dropdown" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
-          <a class="dropdown-toggle navbar-toggle">
+        <div class="navbar-toggle-wrap dropdown" dropdown>
+          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
           <ul class="dropdown-menu">
-            <li ng-if="chatFull.thumb.location">
+            <li ng-if="chatFull.thumb.location" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
               <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
             </li>
-            <li>
+            <li ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
               <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
             </li>
-            <li>
+            <li ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
               <a ng-click="leaveGroup()" my-i18n="group_modal_menu_leave_group"></a>
             </li>
             <li>

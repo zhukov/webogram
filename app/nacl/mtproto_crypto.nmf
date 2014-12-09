@@ -1,0 +1,10 @@
+{
+  "program": {
+    "portable": {
+      "pnacl-translate": {
+        "url": "mtproto_crypto.pexe?67",
+        "optlevel": 2
+      }
+    }
+  }
+}

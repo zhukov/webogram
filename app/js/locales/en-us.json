@@ -30,6 +30,8 @@
 	"settings_modal_set_photo": "Set profile photo",
 	"settings_modal_photo_updating": "Updating",
 	"settings_modal_edit_profile": "Edit profile",
+	"settings_modal_edit_username": "Change username",
+	"settings_modal_empty_username_set": "Set username",
 	"settings_modal_terminate_sessions": "Terminate all sessions",
 	"settings_modal_settings": "Settings",
 	"settings_modal_notification_alert": "Notification alerts",
@@ -41,7 +43,6 @@
 	"settings_modal_enter_send_description_md": "**Enter** - send message, **Shift + Enter** - new line",
 	"settings_modal_ctrl_enter_send_description_md": "**Ctrl + Enter** - send message, **Enter** - new line",
 	"settings_modal_send_on_enter": "Send on Enter",
-	"settings_modal_phone": "Phone",
 	"settings_modal_about": "About",
 	"settings_modal_source_code_github": "Source code on GitHub",
 	"settings_modal_follow_us_twitter": "Follow us on Twitter!",
@@ -55,18 +56,32 @@
 	"profile_edit_submit": "Save",
 	"profile_edit_submit_active": "Saving...",
 
+
+	"username_edit_modal_title": "Change username",
+	"username_edit_placeholder": "Username",
+	"username_edit_description_md": "You can choose a username on **Telegram**. If you do, other people will be able to find you by this username and contact you without knowing your phone number.\n\nYou can use a-z, 0-9 and underscores. Minimum length is 5 characters.",
+	"username_edit_submit": "Save",
+	"username_edit_submit_active": "Saving...",
+
 	"user_modal_menu_more": "More",
 	"user_modal_send_message": "Send message",
 	"user_modal_edit_contact": "Edit contact",
 	"user_modal_delete_contact": "Delete contact",
 	"user_modal_add_contact": "Add to contacts",
 	"user_modal_share_contact": "Share contact",
+	"user_modal_block_user": "Block user",
+	"user_modal_unblock_user": "Unblock user",
 	"user_modal_delete_chat": "Delete chat",
+	"user_modal_info": "Info",
 	"user_modal_phone": "Phone",
+	"user_modal_username": "Username",
 	"user_modal_settings": "Settings",
 	"user_modal_notifications": "Notifications",
 	"user_modal_contact_info": "Contact info",
 
+	"media_modal_photo": "Photo",
+	"media_modal_photo_index": "Photo {pos} of {count}",
+	"media_modal_video": "Video",
 	"media_modal_forward": "Forward",
 	"media_modal_download": "Download",
 	"media_modal_delete": "Delete",
@@ -80,9 +95,12 @@
 
 	"user_name_deleted": "DELETED",
 	"user_first_name_deleted": "DELETED",
-	"user_status_offline": "offline",
 	"user_status_online": "online",
 	"user_status_last_seen": "last seen {0}",
+	"user_status_recently": "last seen recently",
+	"user_status_last_week": "last seen within a week",
+	"user_status_last_month": "last seen within a month",
+	"user_status_long_ago": "last seen a long time ago",
 	"chat_title_deleted": "DELETED",
 	"format_size_progress_mulitple": "{done} of {total} {parts}",
 	"format_size_progress": "{done} of {total}",
@@ -109,7 +127,6 @@
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
 	"confirm_modal_terminate_sessions": "Are you sure you want to log out all devices except for the current one?",
-	"confirm_modal_mixed_content_fail_http_redirect_md": "Your browser {moz-link: does not support} mixed content which is neccessary for MTProto support on https. {issue-link: Learn more}\n\n Would you like to use http-version instead?",
 	"confirm_modal_clipboard_file_send": "Are you sure to send file(s) from clipboard?",
 	"confirm_modal_clipboard_X_files_send": "{'one': 'Are you sure to send file from clipboard?', 'other': 'Are you sure to send {} files from clipboard?'}",
 	"confirm_modal_message_delete": "Are you sure you want to delete the message?",
@@ -118,7 +135,10 @@
 	"confirm_modal_forward_to_peer": "Forward to {peer}?",
 	"confirm_modal_send_to_peer": "Send to {peer}?",
 	"confirm_modal_share_file_peer": "Share with {peer}?",
-	"confirm_modal_apply_lang_with_reload_md": "Language preference was saved.\nReload the App now?",
+	"confirm_modal_apply_lang_with_reload_md": "Reload the App to apply language?",
+	"confirm_modal_migrate_to_https_md": "Telegram Web now supports additional SSL encryption. Would you like to switch to HTTPS?\nThe HTTP version will be disabled soon.",
+	"confirm_modal_resize_desktop_md": "Would you like to switch to desktop version?",
+	"confirm_modal_resize_mobile_md": "Would you like to switch to mobile version?",
 	"confirm_modal_are_u_sure": "Are you sure?",
 
 	"confirm_modal_logout_submit": "Log Out",
@@ -185,6 +205,7 @@
 	"message_service_left_group": "left group",
 	"message_service_unsupported_action": "Unsupported action {action}",
 
+	"error_modal_warning_title": "Warning",
 	"error_modal_bad_request_title": "Error",
 	"error_modal_unauthorized_title": "Unauthorized",
 	"error_modal_forbidden_title": "Access denied",
@@ -193,6 +214,7 @@
 	"error_modal_flood_title": "Too fast",
 	"error_modal_internal_title": "Server error",
 	"error_modal_alert": "Alert",
+	"error_modal_media_not_supported_title": "Unsupported media",
 
 	"error_modal_network_description": "Please check your internet connection.",
 	"error_modal_firstname_invali_description": "The first name you entered is invalid.",
@@ -204,7 +226,10 @@
 	"error_modal_photo_too_small_description": "The photo you provided is too small.",
 	"error_modal_no_phone_user_description_md": "Sorry, there is no **Telegram** account with the phone number you provided.",
 	"error_modal_no_phone_users_description_md": "Sorry, there are no **Telegram** accounts with the phone numbers you provided.",
+	"error_modal_username_invalid_description": "Sorry, this username is not allowed.",
 	"error_modal_phonebook_required_description": "Telegram needs access to phonebook to import contacts.",
+	 "error_modal_username_occupied_description": "Sorry, this username is already taken.",
+	 "error_modal_media_not_supported_description": "Your browser cannot play this media file. Try downloading the file and opening it in a standalone player.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",
 	"error_modal_unauthorized_description": "This action requires authorization access. Please {login-link: log in}.",
@@ -213,11 +238,14 @@
 	"error_modal_flood_description": "You are performing too many actions. Please try again later.",
 	"error_modal_internal_description": "Internal server error occured. Please try again later.",
 	"error_modal_tech_details": "Technical details here",
+	"error_modal_multiple_open_tabs": "Please close other Telegram app tabs.",
+
 
 	"head_new_group": "New Group",
 	"head_new_contact": "New Contact",
 	"head_contacts": "Contacts",
 	"head_contacts_title": "Contacts",
+	"im_found_title": "Global search",
 	"head_settings": "Settings",
 	"head_log_out": "Log Out",
 	"head_edit_messages": "Edit messages",
@@ -236,6 +264,9 @@
 	"head_waiting_for_network": "Waiting for network",
 	"head_retry": "Retry",
 	"head_connecting": "Connecting",
+
+	"footer_twitter": "Twitter",
+
 
 	"im_new_group": "New Group",
 	"im_new_contact": "New Contact",
@@ -313,9 +344,11 @@
 
 	"message_attach_document_open": "Open",
 	"message_attach_document_download": "Download",
+	"message_attach_document_save": "Save File",
 
 	"message_attach_video_video": "Video",
 	"message_attach_video_download": "Download",
+	"message_attach_video_save": "Save File",
 	"message_attach_video_play": "Play video",
 
 	"conversation_select_modal_title": "Select conversation",
@@ -329,8 +362,7 @@
 	"phonebook_modal_submit": "Import contacts",
 
 	"welcome_header_md": "**Telegram** Web",
-	"welcome_text_1_md": "This is an unofficial web-client for the **Telegram Messenger**.",
-	"welcome_text_2_md": "It's still an **alpha-version** and may not be 200% reliable",
+	"welcome_text_1_md": "The official **web client** for Telegram.",
 	"welcome_start_messaging": "Start Messaging",
 	"welcome_fast_messaging_header": "Fast messaging",
 	"welcome_fast_messaging_text": "Send messages with rich emoji support right from your desktop or laptop computer",

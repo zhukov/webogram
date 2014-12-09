@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.3.1",
+  "version": "0.3.6",
   "main": "app/index.html",
   "single-instance": true,
   "dom_storage_quota": 40,
@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/zhukov/webogram/issues"
   },
-  "locales": ["en-us", "es-es", "de-de", "it-it", "ru-ru"],
+  "locales": ["en-us", "es-es", "de-de", "it-it", "ru-ru", "nl-nl", "pt-br"],
   "homepage": "http://zhukov.github.io/webogram",
   "devDependencies": {
     "gulp": "~3.5.5",
@@ -49,6 +49,6 @@
     "event-stream": "^3.1.0",
     "gulp-zip": "^0.1.2",
     "gulp-manifest": "0.0.3",
-    "gulp-ngmin": "~0.1.2"
+    "gulp-ng-annotate": "~0.3.3"
   }
 }

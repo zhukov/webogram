@@ -21,8 +21,8 @@
         <div class="user_modal_actions_wrap clearfix">
           <button class="btn btn-primary user_modal_main_btn" ng-click="goToHistory()" my-i18n="user_modal_send_message"></button>
 
-          <div class="dropdown user_modal_other_btn">
-            <button class="btn btn-link dropdown-toggle">
+          <div class="dropdown user_modal_other_btn" dropdown>
+            <button class="btn btn-link dropdown-toggle" dropdown-toggle>
               <my-i18n msgid="user_modal_menu_more"></my-i18n>
               <i class="icon icon-caret"></i>
             </button>
@@ -39,6 +39,12 @@
               <li ng-if="user.phone.length > 0">
                 <a ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
               </li>
+              <li ng-if="user._ != 'userSelf'">
+                <a ng-click="toggleBlock(!blocked)" ng-switch="blocked">
+                  <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
+                  <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>
+                </a>
+              </li>
               <li>
                 <a ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
               </li>
@@ -50,10 +56,19 @@
 
     </div>
 
-    <div class="modal_section" ng-if="user.phone">
-      <h3 class="modal_section_header" my-i18n="user_modal_phone"></h3>
+    <div class="modal_section" ng-if="user.phone || user.username">
+      <h3 class="modal_section_header" my-i18n="user_modal_info"></h3>
       <div class="modal_section_body">
-        <p><span ng-bind="user.phone | phoneNumber"></span></p>
+
+        <dl ng-if="user.phone">
+          <dt><my-i18n msgid="user_modal_phone"></my-i18n>:</dt>
+          <dd ng-bind="user.phone | phoneNumber"></dd>
+        </dl>
+        <dl ng-if="user.username">
+          <dt><my-i18n msgid="user_modal_username"></my-i18n>:</dt>
+          <dd ng-bind="'@' + user.username"></dd>
+        </dl>
+
       </div>
     </div>
 
