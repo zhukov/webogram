@@ -1744,7 +1744,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
       element.html(isAnimationSupported(element[0])
-        ? '<div class="loading_dots"><span></span><span></span><span></span></div>'
+        ? '<div class="loading_dots"><i></i><i></i><i></i></div>'
         : '...'
       );
     }
@@ -2132,6 +2132,108 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myPeerPhotolink', function (AppPeersManager, AppUsersManager, AppChatsManager, MtpApiFileManager, FileManager) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+
+      element.addClass('peer_photo_init');
+
+      var peerID, peer, peerPhoto;
+      var imgEl = $('<img class="' + (attrs.imgClass || '') + '">');
+      var initEl = $('<span class="peer_initials ' + (attrs.imgClass || '') + '"></span>');
+      var jump = 0;
+      var prevClass = false;
+
+      var setPeerID = function (newPeerID) {
+        if (peerID == newPeerID) {
+          return false;
+        }
+        peerID = newPeerID;
+        peer = AppPeersManager.getPeer(peerID);
+
+        var newClass = 'user_bgcolor_' + (peer.num || 1);
+        if (newClass != prevClass) {
+          if (prevClass) {
+            initEl.removeClass(prevClass);
+          }
+          initEl.addClass(newClass);
+        }
+
+        updatePeerPhoto();
+
+        return true;
+      }
+
+      var updatePeerPhoto = function () {
+        peerPhoto = peer.photo && angular.copy(peer.photo.photo_small);
+
+        var hasPhoto = peerPhoto !== undefined;
+
+        if (hasPhoto) {
+          var cachedBlob = MtpApiFileManager.getCachedFile(peer.photo.photo_small);
+          if (cachedBlob) {
+            initEl.remove();
+            imgEl.prependTo(element).attr('src', FileManager.getUrl(cachedBlob, 'image/jpeg'));
+            return;
+          }
+        }
+
+        initEl.text(peer.initials).prependTo(element);
+        imgEl.remove();
+
+
+        if (hasPhoto) {
+          var curJump = ++jump;
+
+          MtpApiFileManager.downloadSmallFile(peer.photo.photo_small).then(function (blob) {
+            if (curJump != jump) {
+              return;
+            }
+            initEl.remove();
+            imgEl.prependTo(element).attr('src', FileManager.getUrl(blob, 'image/jpeg'));
+
+          }, function (e) {
+            console.log('Download image failed', e, peer.photo.photo_small, element[0]);
+          });
+        }
+      };
+
+      if (element[0].tagName == 'A' && !attrs.noOpen) {
+        element.on('click', function (e) {
+          if (peerID > 0) {
+            AppUsersManager.openUser(peerID, attrs.userOverride && $eval(attrs.userOverride));
+          } else {
+            AppChatsManager.openChat(-peerID);
+          }
+        });
+      }
+
+      $scope.$watch(attrs.myPeerPhotolink, setPeerID);
+
+      if (attrs.watch) {
+        $scope.$on('user_update', function (e, updUserID) {
+          if (peerID == updUserID) {
+            if (!angular.equals(peer.photo && peer.photo.photo_small, peerPhoto)) {
+              updatePeerPhoto();
+            }
+          }
+        });
+        $scope.$on('chat_update', function (e, updChatID) {
+          if (peerID == -updChatID) {
+            if (!angular.equals(peer.photo && peer.photo.photo_small, peerPhoto)) {
+              updatePeerPhoto();
+            }
+          }
+        });
+      }
+
+    }
+  })
+
   .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager, ErrorService) {
 
     var currentPlayer = false;
@@ -2381,4 +2483,43 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
 
+  })
+
+  .directive('myLabeledInput', function () {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      var input = $('.md-input:first', element);
+      var label = $('.md-input-label:first', element);
+      var isDisabled = input[0] && input[0].tagName == 'SPAN';
+      var focused = false;
+      var updateHasValueClass = function () {
+        if (isDisabled) {
+          element.toggleClass('md-input-has-value', input.html().length > 0);
+        } else {
+          element.toggleClass('md-input-has-value', focused || input.val().length > 0);
+        }
+      };
+
+      updateHasValueClass();
+      onContentLoaded(function () {
+        updateHasValueClass();
+        setZeroTimeout(function () {
+          element.addClass('md-input-animated');
+        });
+      });
+
+      if (!isDisabled) {
+        input.on('blur focus', function (e) {
+          focused = e.type == 'focus';
+          element.toggleClass('md-input-focused', focused);
+          updateHasValueClass();
+        });
+      }
+
+
+    };
   })

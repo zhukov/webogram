@@ -1,4 +1,4 @@
-<div class="settings_modal_wrap modal_content_wrap">
+<div class="settings_modal_wrap">
 
   <div class="tg_page_head tg_modal_head">
     <div class="navbar navbar-static-top navbar-inverse">
@@ -49,7 +49,7 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(photo.id, -profile.id)" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !photo.id}">
+      <a href="" ng-click="openPhoto(user.photo.photo_id, {u: profile.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !user.photo.id}">
         <img
           class="mobile_user_modal_image"
           my-load-thumb

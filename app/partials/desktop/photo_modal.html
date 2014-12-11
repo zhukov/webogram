@@ -22,10 +22,15 @@
       </a>
     </div>
 
-    <div class="media_modal_info_wrap" ng-switch="messageID > 0">
-      <a class="media_modal_author" my-user-link="photo.user_id" user-watch="true"></a>
-      <a ng-switch-when="true" ng-click="goToMessage()" class="media_modal_date" ng-bind="photo.date | dateOrTime :true"></a>
-      <span ng-switch-default class="media_modal_date" ng-bind="photo.date | dateOrTime :true"></span>
+    <div class="media_modal_info_wrap pull-left" ng-switch="messageID > 0">
+      <a class="media_modal_author_photo pull-left" my-peer-photolink="photo.user_id" img-class="media_modal_author_photo" watch="true"></a>
+      <div class="media_modal_author_name">
+        <a class="media_modal_author" my-user-link="photo.user_id" user-watch="true"></a>
+      </div>
+      <div class="media_modal_date">
+        <a ng-switch-when="true" class="media_modal_date" ng-click="goToMessage()" ng-bind="photo.date | dateOrTime :true"></a>
+        <span ng-switch-default ng-bind="photo.date | dateOrTime :true"></span>
+      </div>
     </div>
 
 

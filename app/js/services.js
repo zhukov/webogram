@@ -96,7 +96,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_first_name_deleted');
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_name_deleted');
     }
+
     apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
+
+    var nameWords = apiUser.sortName.split(' ');
+    var firstWord = nameWords.shift();
+    var lastWord = nameWords.pop();
+    apiUser.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
+
     apiUser.sortStatus = getUserStatusForSort(apiUser.status);
 
 
@@ -323,7 +330,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return $modal.open({
       templateUrl: templateUrl('import_contact_modal'),
       controller: 'ImportContactModalController',
-      windowClass: 'import_contact_modal_window mobile_modal'
+      windowClass: 'md_simple_modal_window mobile_modal'
     }).result.then(function (foundUserID) {
       if (!foundUserID) {
         return $q.reject();
@@ -474,7 +481,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 })
 
-.service('AppChatsManager', function ($rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
+.service('AppChatsManager', function ($rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor, SearchIndexManager) {
   var chats = {},
       cachedPhotoLocations = {};
 
@@ -487,10 +494,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return;
     }
     apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
+
+    var titleWords = SearchIndexManager.cleanSearchText(apiChat.title || '').split(' ');
+    var firstWord = titleWords.shift();
+    var lastWord = titleWords.pop();
+    apiChat.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
+
+    apiChat.num = (Math.abs(apiChat.id) % 4) + 1;
+
     if (chats[apiChat.id] === undefined) {
       chats[apiChat.id] = apiChat;
     } else {
       safeReplaceObject(chats[apiChat.id], apiChat);
+      $rootScope.$broadcast('chat_update', apiChat.id);
     }
 
     if (cachedPhotoLocations[apiChat.id] !== undefined) {
@@ -514,7 +530,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return {
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar'+((Math.abs(id) % 4) + 1)+'@2x.png',
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + chat.num + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
@@ -533,8 +549,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       MtpApiManager.getUserID().then(function (myID) {
         angular.forEach(chatFull.participants.participants, function(participant){
           participant.user = AppUsersManager.getUser(participant.user_id);
-          participant.inviter = AppUsersManager.getUser(participant.inviter_id);
-          participant.canKick = myID != participant.user_id && (myID == chatFull.participants.admin_id || myID == participant.inviter_id);
+          participant.canLeave = myID == participant.user_id;
+          participant.canKick = !participant.canLeave && (myID == chatFull.participants.admin_id || myID == participant.inviter_id);
         });
       });
     }
@@ -542,8 +558,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     chatFull.thumb = {
       placeholder: 'img/placeholders/GroupAvatar'+((Math.abs(id) % 4) + 1)+'@2x.png',
       location: chat && chat.photo && chat.photo.photo_small,
-      width: 120,
-      height: 120,
+      width: 72,
+      height: 72,
       size: 0
     };
     chatFull.peerString = getChatString(id);
@@ -1654,6 +1670,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return false;
   }
 
+  function onStatedMessage (statedMessage) {
+    ApiUpdatesManager.processUpdateMessage({
+      _: 'updates',
+      users: statedMessage.users,
+      chats: statedMessage.chats,
+      seq: statedMessage.seq,
+      updates: [{
+        _: 'updateNewMessage',
+        message: statedMessage.message,
+        pts: statedMessage.pts
+      }]
+    });
+  }
+
   function getMessagePeer (message) {
     var toID = message.to_id && AppPeersManager.getPeerID(message.to_id) || 0;
 
@@ -1939,12 +1969,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       console.log(dT(), 'Received activity', source.name, source.data);
 
       if (source.name === 'share' && source.data.blobs.length > 0) {
-        PeersSelectService.selectPeer({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          angular.forEach(source.data.blobs, function (blob) {
-            sendFile(peerID, blob, {isMedia: true});
-          });
-          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
+          angular.forEach(peerStrings, function (peerString) {
+            var peerID = AppPeersManager.getPeerID(peerString);
+            angular.forEach(source.data.blobs, function (blob) {
+              sendFile(peerID, blob, {isMedia: true});
+            });
+          })
+          if (peerStrings.length == 1) {
+            $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
+          }
         });
       }
     });
@@ -2171,6 +2205,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     sendFile: sendFile,
     sendOther: sendOther,
     forwardMessages: forwardMessages,
+    onStatedMessage: onStatedMessage,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
@@ -2338,7 +2373,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return photo;
   }
 
-  function openPhoto (photoID, peerListID) {
+  function openPhoto (photoID, list) {
     if (!photoID || photoID === '0') {
       return false;
     }
@@ -2346,16 +2381,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var scope = $rootScope.$new(true);
 
     scope.photoID = photoID;
-    if (peerListID < 0) {
-      scope.userID = -peerListID;
-    } else{
-      scope.messageID = peerListID;
+
+    var controller = 'PhotoModalController';
+    if (list && list.p > 0) {
+      controller = 'UserpicModalController';
+      scope.userID = list.p;
+    }
+    else if (list && list.p < 0) {
+      controller = 'ChatpicModalController';
+      scope.chatID = -list.p;
+    }
+    else if (list && list.m > 0) {
+      scope.messageID = list.m;
     }
 
     var modalInstance = $modal.open({
       templateUrl: templateUrl('photo_modal'),
       windowTemplateUrl: templateUrl('media_modal_layout'),
-      controller: scope.userID ? 'UserpicModalController' : 'PhotoModalController',
+      controller: controller,
       scope: scope,
       windowClass: 'photo_modal_window'
     });
@@ -2406,6 +2449,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     preloadPhoto: preloadPhoto,
     getUserPhotos: getUserPhotos,
     getPhoto: getPhoto,
+    choosePhotoSize: choosePhotoSize,
     wrapForHistory: wrapForHistory,
     wrapForFull: wrapForFull,
     openPhoto: openPhoto,
@@ -3756,7 +3800,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var shownBoxes = 0;
 
   function show (params, options) {
-    if (shownBoxes >= 2) {
+    if (shownBoxes >= 1) {
       console.log('Skip error box, too many open', shownBoxes, params, options);
       return false;
     }
@@ -3824,6 +3868,28 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function selectPeer (options) {
     var scope = $rootScope.$new();
+    scope.multiSelect = false;
+    if (options) {
+      angular.extend(scope, options);
+    }
+
+    return $modal.open({
+      templateUrl: templateUrl('peer_select'),
+      controller: 'PeerSelectController',
+      scope: scope,
+      windowClass: 'peer_select_window mobile_modal'
+    }).result;
+  }
+
+  function selectPeers (options) {
+    if (Config.Mobile) {
+      return selectPeer(options).then(function (peerString) {
+        return [peerString];
+      });
+    }
+
+    var scope = $rootScope.$new();
+    scope.multiSelect = true;
     if (options) {
       angular.extend(scope, options);
     }
@@ -3838,7 +3904,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 
   return {
-    selectPeer: selectPeer
+    selectPeer: selectPeer,
+    selectPeers: selectPeers
   }
 })
 
@@ -3877,32 +3944,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('ChangelogNotifyService', function (Storage, $rootScope, $modal) {
 
-  function versionCompare (ver1, ver2) {
-    if (typeof ver1 !== 'string') {
-      ver1 = '';
-    }
-    if (typeof ver2 !== 'string') {
-      ver2 = '';
-    }
-    ver1 = ver1.replace(/^\s+|\s+$/g, '').split('.');
-    ver2 = ver2.replace(/^\s+|\s+$/g, '').split('.');
-
-    var a = Math.max(ver1.length, ver2.length), i;
-
-    for (i = 0; i < a; i++) {
-      if (ver1[i] == ver2[i]) {
-        continue;
-      }
-      if (ver1[i] > ver2[i]) {
-        return 1;
-      } else {
-        return -1;
-      }
-    }
-
-    return 0;
-  }
-
   function checkUpdate () {
     Storage.get('last_version').then(function (lastVersion) {
       if (lastVersion != Config.App.version) {
@@ -3916,15 +3957,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function showChangelog (lastVersion) {
     var $scope = $rootScope.$new();
-
     $scope.lastVersion = lastVersion;
-    $scope.canShowVersion = function (curVersion) {
-      if ($scope.lastVersion === false || $scope.lastVersion === undefined) {
-        return true;
-      }
-
-      return versionCompare(curVersion, lastVersion) >= 0;
-    };
 
     $modal.open({
       controller: 'ChangelogModalController',

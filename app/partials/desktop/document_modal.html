@@ -16,9 +16,15 @@
       </a>
     </div>
 
-    <div class="media_modal_info_wrap pull-left">
-      <a class="media_modal_author" my-user-link="document.user_id" user-watch="true"></a>
-      <span class="media_modal_date" ng-bind="document.date | dateOrTime :true"></span>
+    <div class="media_modal_info_wrap pull-left" ng-switch="messageID > 0">
+      <a class="media_modal_author_photo pull-left" my-peer-photolink="document.user_id" img-class="media_modal_author_photo" watch="true"></a>
+      <div class="media_modal_author_name">
+        <a class="media_modal_author" my-user-link="document.user_id" user-watch="true"></a>
+      </div>
+      <div class="media_modal_date">
+        <a ng-switch-when="true" class="media_modal_date" ng-click="goToMessage()" ng-bind="document.date | dateOrTime :true"></a>
+        <span ng-switch-default ng-bind="document.date | dateOrTime :true"></span>
+      </div>
     </div>
 
     <div class="media_modal_title_wrap" ng-bind="document.file_name"></div>

@@ -1,90 +1,100 @@
-<div class="user_modal_wrap" my-modal-position>
+<div class="user_modal_wrap md_modal_wrap" my-modal-position>
 
-  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+        <a class="md_modal_action" ng-if="user._ == 'userContact'" ng-click="importContact(true)" my-i18n="modal_edit"></a>
+      </div>
+      <div class="md_modal_title" my-i18n="user_modal_contact_info"></div>
+    </div>
 
-  <div class="modal-body">
+    <div class="peer_modal_profile_wrap clearfix">
+      <div class="peer_modal_photo_wrap pull-left">
+        <a ng-click="openPhoto(user.photo.photo_id, {p: user.id})" class="peer_modal_photo" ng-class="{disabled: !user.photo.photo_id}" ng-disabled="!user.photo.photo_id" my-peer-photolink="::user.id" img-class="peer_modal_photo" no-open="true"></a>
+      </div>
+      <div class="peer_modal_profile">
+        <div class="peer_modal_profile_name" ng-bind-html="user.rFullName"></div>
+        <div class="peer_modal_profile_description" my-user-status="::user.id"></div>
+      </div>
+    </div>
+  </div>
 
-    <div class="user_modal_photo_profile_wrap">
-
-      <a href="" ng-click="openPhoto(userPhoto.id, -user.id)" class="user_modal_image_wrap pull-left" ng-class="{disabled: !userPhoto.id}">
-        <img
-          class="user_modal_image"
-          my-load-thumb
-          thumb="userPhoto"
-        />
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <a class="md_modal_split_action" href="" ng-click="goToHistory()" title="{{'user_modal_send_message' | i18n}}">
+        <i class="md_modal_split_action_msg"></i>
       </a>
+    </div>
+  </div>
 
-      <div class="user_modal_info_wrap clearfix">
-        <h4 class="user_modal_header" ng-bind="user | userName"></h4>
-        <p class="user_modal_status" ng-if="user.status" my-user-status="::user.id"></p>
 
-        <div class="user_modal_actions_wrap clearfix">
-          <button class="btn btn-primary user_modal_main_btn" ng-click="goToHistory()" my-i18n="user_modal_send_message"></button>
+  <div class="md_modal_body">
+    
+    <div class="md_modal_sections">
+    
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username">
+        <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
 
-          <div class="dropdown user_modal_other_btn" dropdown>
-            <button class="btn btn-link dropdown-toggle" dropdown-toggle>
-              <my-i18n msgid="user_modal_menu_more"></my-i18n>
-              <i class="icon icon-caret"></i>
-            </button>
-            <ul class="dropdown-menu">
-              <li ng-if="user._ == 'userContact'">
-                <a ng-click="importContact(true)" my-i18n="user_modal_edit_contact"></a>
-              </li>
-              <li ng-if="user._ == 'userContact'">
-                <a ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
-              </li>
-              <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
-                <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
-              </li>
-              <li ng-if="user.phone.length > 0">
-                <a ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
-              </li>
-              <li ng-if="user._ != 'userSelf'">
-                <a ng-click="toggleBlock(!blocked)" ng-switch="blocked">
-                  <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
-                  <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>
-                </a>
-              </li>
-              <li>
-                <a ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
-              </li>
-            </ul>
+        <div class="md_modal_section_param_wrap" ng-if="user.phone">
+          <div class="md_modal_section_param_value" ng-bind="user.phone | phoneNumber"></div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_phone"></div>
+        </div>
+
+        <div class="md_modal_section_param_wrap" ng-if="user.username">
+          <div class="md_modal_section_param_value">
+            <a class="user_modal_username_link" ng-click="changeUsername()" ng-bind="'@' + user.username"></a>
           </div>
-
+          <div class="md_modal_section_param_name" my-i18n="user_modal_username"></div>
         </div>
       </div>
 
-    </div>
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_toggle">
+        <i class="md_modal_section_icon md_modal_section_icon_notification"></i>
 
-    <div class="modal_section" ng-if="user.phone || user.username">
-      <h3 class="modal_section_header" my-i18n="user_modal_info"></h3>
-      <div class="modal_section_body">
-
-        <dl ng-if="user.phone">
-          <dt><my-i18n msgid="user_modal_phone"></my-i18n>:</dt>
-          <dd ng-bind="user.phone | phoneNumber"></dd>
-        </dl>
-        <dl ng-if="user.username">
-          <dt><my-i18n msgid="user_modal_username"></my-i18n>:</dt>
-          <dd ng-bind="'@' + user.username"></dd>
-        </dl>
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="user_modal_notifications"></span>
+        </a>
 
       </div>
-    </div>
 
-    <div class="modal_section">
-      <h3 class="modal_section_header" my-i18n="user_modal_settings"></h3>
-      <div class="modal_section_body">
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-init="f.showMoreActions = !user.phone.length">
+        <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
-        <div class="tg_form_group">
-          <a class="tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
-            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
-            <span class="tg_checkbox_label" my-i18n="user_modal_notifications"></span>
+        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
+          <a class="md_modal_section_link" ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0">
+          <a class="md_modal_section_link" ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; user._ == 'userContact'">
+          <a class="md_modal_section_link" ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
+        </div>
+
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; user._ != 'userSelf'">
+          <a class="md_modal_section_link" ng-click="toggleBlock(!blocked)" ng-switch="blocked">
+            <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
+            <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>
           </a>
         </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions">
+          <a class="md_modal_section_link" ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="!f.showMoreActions">
+          <a class="md_modal_section_link" ng-click="f.showMoreActions = true" my-i18n="modal_more"></a>
+        </div>
+
       </div>
+
     </div>
 
   </div>
 
 </div>
+

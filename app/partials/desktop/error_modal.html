@@ -1,10 +1,8 @@
-<div class="error_modal_wrap" my-modal-position>
+<div class="error_modal_wrap md_simple_modal_wrap" my-modal-position>
 
-  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+  <div class="md_simple_modal_body">
 
-  <div class="modal-body">
-
-    <h4 ng-if="error" class="modal_simple_header" ng-switch="error.type">
+    <h4 ng-if="error" class="md_simple_header" ng-switch="error.type">
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_title"></span>
       <span ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400" my-i18n="error_modal_bad_request_title"></span>
@@ -16,7 +14,7 @@
         <span ng-switch-default my-i18n="error_modal_internal_title"></span>
       </span>
     </h4>
-    <h4 ng-if="!error" class="modal_simple_header" ng-switch="title.length > 0">
+    <h4 ng-if="!error" class="md_simple_header" ng-switch="title.length > 0">
       <span ng-switch-when="true" ng-bind="title"></span>
       <span ng-switch-default my-i18n="error_modal_alert"></span>
     </h4>
@@ -57,12 +55,18 @@
 Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}
 Stack: {{error.originalError.stack || error.stack}}</textarea>
       <div ng-switch-default>
-        <a href="" ng-click="error.detailsShown = true" my-i18n="error_modal_tech_details"></a>
+        <a class="error_modal_details_link" href="" ng-click="error.detailsShown = true" my-i18n="error_modal_tech_details"></a>
       </div>
     </div>
 
     <div ng-if="!error" class="error_modal_description" ng-bind="description"></div>
 
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()">
+      <span my-i18n="modal_ok"></span>
+    </button>
   </div>
 
 </div>

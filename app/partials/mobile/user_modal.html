@@ -49,7 +49,7 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(userPhoto.id, -user.id)" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !userPhoto.id}">
+      <a href="" ng-click="openPhoto(user.photo.photo_id, {u: user.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !user.photo.photo_id}">
         <img
           class="mobile_user_modal_image"
           my-load-thumb
