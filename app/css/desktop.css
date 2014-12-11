@@ -1131,6 +1131,8 @@ div.im_dialog_photo {
   line-height: 16px;
   padding: 15px 16px;
   width: 200px;
+  position: absolute;
+  left: 0;
 }
 .media_modal_author_photo {
   width: 32px;
@@ -1175,7 +1177,6 @@ div.media_modal_date {
   padding: 0;
 }
 .media_modal_bottom_actions {
-  width: 204px;
   position: absolute;
   right: 0;
 }
