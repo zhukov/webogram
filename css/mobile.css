@@ -510,13 +510,13 @@ img.im_message_video_thumb,
   max-width: 100%;
 }
 .im_message_out.im_content_message_wrap {
-  padding-left: 60px;
+  padding-left: 80px;
   padding-right: 0;
   float: right;
 }
 .im_message_in.im_content_message_wrap {
   padding-left: 0;
-  padding-right: 42px;
+  padding-right: 60px;
 }
 .im_history_messages_group .im_message_in.im_content_message_wrap,
 .im_history_messages_group .im_grouped_short .im_message_in.im_content_message_wrap,
@@ -534,16 +534,25 @@ img.im_message_video_thumb,
 .im_message_meta {
   float: none;
   position: absolute;
-  bottom: 6px;
-  right: -12px;
+  bottom: 5px;
+  left: 100%;
+  white-space: nowrap;
+  margin-left: -60px;
+  width: 60px;
+  padding: 0 0 0 8px;
+  overflow: hidden;
 }
 .im_message_date {
-  font-size: 12px;
-  padding-left: 4px;
+  font-size: 10px;
+  /*font-size: 12px;*/
+  padding: 0;
 }
 .im_message_out .im_message_meta {
-  right: auto;
-  left: -12px;
+  width: 80px;
+  left: 0;
+  text-align: right;
+  margin-left: 0;
+  padding: 0 8px 0 0;
 }
 
 .im_message_out .im_message_fwd_date {
@@ -627,7 +636,7 @@ a.im_message_from_photo {
   vertical-align: text-top;
   margin-right: 2px;
   opacity: 1;
-  margin-top: 5px;
+  margin-top: 6px;
 }
 .im_message_out .icon-message-status-tick,
 .is_1x .im_message_out .icon-message-status-tick {
@@ -739,14 +748,6 @@ a.im_dialog_selected .im_dialog_date {
   color: #b3b3b3;
   font-size: 12px;
   margin-right: 3px;
-}
-.im_dialog_badge {
-  background: #64c270;
-  font-size: 11px;
-  padding: 5px;
-  border-radius: 10px;
-  min-width: 21px;
-  text-align: center;
 }
 .im_dialog_unread,
 .active .im_dialog_unread,

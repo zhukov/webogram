@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Mon Dec 01 2014 08:16:37 GMT-0800 (PST)
+# Time: Wed Dec 10 2014 23:57:59 GMT-0800 (PST)
 
 
 CACHE:
@@ -11,6 +11,8 @@ css/desktop.css
 css/mobile.css
 img/T_LogoM.png
 img/T_LogoM_1x.png
+img/Telegram72.png
+img/Telegram72_2x.png
 img/WebIntro1.png
 img/WebIntro1_1x.png
 img/WebIntro2.png
@@ -49,6 +51,8 @@ img/icons/MobileIcons_1x.png
 img/icons/MobileIcons_2x.png
 img/icons/PhotoIcons.png
 img/icons/PhotoIcons_1x.png
+img/icons/ProfileIcons.png
+img/icons/ProfileIcons_2x.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png

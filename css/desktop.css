@@ -159,12 +159,15 @@ a.footer_link.active:active {
   padding-bottom: 10px;
 }
 .im_dialogs_scrollable_wrap {
-  padding: 0 19px 0 12px;
+  padding: 0 7px 0 0;
 
   /* Hardware acceleration in Safari */
   -webkit-transform: translateZ(0);
   -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
+}
+.im_dialogs_modal_col_wrap .im_dialogs_scrollable_wrap {
+  padding: 0;
 }
 .im_dialogs_col .nano > .nano-pane {
   background : rgba(0,0,0,0.0);
@@ -213,22 +216,13 @@ a.footer_link.active:active {
   transition            : none;
 }
 .contacts_modal_col .nano > .nano-pane {
-  width: 6px;
-  right: 7px;
+  width: 5px;
+  right: 4px;
 }
 
 .im_dialogs_modal_col .nano > .nano-pane {
   width: 6px;
   right: 2px;
-}
-.im_dialogs_modal_col .im_dialogs_scrollable_wrap {
-  padding: 0 12px 0 12px;
-}
-.contacts_modal_col {
-  margin-right: -17px;
-}
-.contacts_scrollable_wrap {
-  padding: 0 17px 0 0;
 }
 
 .im_history_col .nano > .nano-pane {
@@ -323,38 +317,25 @@ a.footer_link.active:active {
 
 /* Contacts modal */
 .contacts_modal_window .modal-dialog {
-  max-width: 456px;
+  max-width: 420px;
 }
-.contacts_modal_header {
-  padding: 6px 0 18px;
+.contacts_modal_search {
+  padding: 15px 12px 12px;
+  position: relative;
 }
-.contacts_modal_edit_wrap {
-  position: absolute;
-  margin-top: -1px;
+.contacts_modal_members_list a.contacts_modal_contact {
+  padding: 8px 16px;
 }
-.contacts_modal_edit_link {
-  font-size: 14px;
-  padding: 5px 7px;
+.contacts_modal_members_list .active a.contacts_modal_contact,
+.contacts_modal_members_list .active a.contacts_modal_contact:hover {
+  background: #6490b1;
+  color: #FFF;
 }
-.contacts_modal_title {
-  font-size: 14px;
-  margin: 0;
-  text-align: center;
-  font-weight: bold;
+.contacts_modal_members_list .active a.contacts_modal_contact .md_modal_list_peer_description,
+.contacts_modal_members_list .active a.contacts_modal_contact:hover .md_modal_list_peer_description {
+  color: #FFF;
 }
 
-.icon-message-status {
-  background: #6ba2cb;
-  border: 0;
-  display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 7px;
-  position: absolute;
-  margin-left: -26px;
-  margin-top: 13px;
-  opacity: 0;
-}
 .im_message_unread .icon-message-status {
   opacity: 1.0;
 }
@@ -448,10 +429,33 @@ a.footer_link.active:active {
 
 /* Dialogs modal */
 .peer_select_window .modal-dialog {
-  max-width: 506px;
+  max-width: 420px;
 }
-.peer_select_modal_wrap .modal-body {
-  padding: 0 2px 14px;
+.peer_select_window .im_dialogs_panel {
+  padding-top: 15px;
+}
+.peer_select_modal_footer {
+  box-shadow: 0 -1px 0px rgba(0,0,0,0.05);
+  padding: 15px 10px 15px;
+}
+.peer_select_modal_recipients_wrap {
+  padding: 6px 0 0 10px;
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.peer_select_modal_recipients_empty,
+.peer_select_modal_recipients_name {
+  color: #999;
+}
+.peer_select_modal_recipient {
+  display: inline-block;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
 }
 
 
@@ -513,10 +517,12 @@ a.footer_link.active:active {
 .im_panel_own_photo {
   width: 50px;
   height: 50px;
-  border-radius: 0;
+  line-height: 50px;
+  border-radius: 25px;
   overflow: hidden;
 }
-div.im_panel_peer_photo {
+div.im_panel_peer_photo,
+a.im_panel_peer_photo {
   cursor: pointer;
   margin-left: 12px;
   height: 55px;
@@ -534,8 +540,8 @@ div.im_panel_own_photo {
   border-radius: 6px;
   overflow: hidden;
   position: absolute;
-  margin-top: -7px;
-  margin-left: 43px;
+  margin-top: -12px;
+  margin-left: 36px;
 }
 .emoji-wysiwyg-editor,
 .im_message_field {
@@ -544,7 +550,7 @@ div.im_panel_own_photo {
 
 /* Peer modals */
 .user_modal_window .modal-dialog {
-  max-width: 506px;
+  max-width: 480px;
 }
 .user_modal_photo_profile_wrap {
   padding: 13px 12px;
@@ -610,9 +616,8 @@ div.im_panel_own_photo {
 
 
 .chat_modal_window .modal-dialog {
-  max-width: 506px;
+  max-width: 480px;
 }
-
 .chat_modal_header {
   font-weight: bold;
   margin: 0 0 10px;
@@ -698,7 +703,7 @@ div.im_panel_own_photo {
 }
 
 .settings_modal_window .modal-dialog {
-  max-width: 482px;
+  max-width: 480px;
 }
 .settings_modal_settings {
   padding: 4px 0;
@@ -951,13 +956,35 @@ div.im_panel_own_photo {
   margin-bottom: 0;
 }
 
-
-
 .im_dialogs_panel_dropdown.open .dropdown-toggle {
   background: #6690b0;
 }
 .im_dialogs_panel_dropdown.open .dropdown-toggle .icon-bar {
   background: #fff;
+}
+.im_dialogs_scrollable_wrap a.im_dialog {
+  padding: 8px 16px;
+}
+.im_dialogs_scrollable_wrap .active a.im_dialog {
+  margin-right: -2px;
+  padding-right: 18px;
+}
+.im_dialog_photo {
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  border-radius: 50%;
+}
+div.im_dialog_photo {
+  margin-right: 12px;
+}
+.im_dialog_message {
+  margin-top: 4px;
+}
+.active .im_dialog_date,
+.active a.im_dialog:hover .im_dialog_date,
+.active a.im_dialog_selected .im_dialog_date {
+  color: #FFF;
 }
 
 /* Import contact modal */
@@ -972,10 +999,6 @@ div.im_panel_own_photo {
 
 .countries_modal_col {
   max-height: 350px;
-}
-
-.changelog_modal_window .modal-dialog {
-  max-width: 506px;
 }
 
 
@@ -1106,18 +1129,40 @@ div.im_panel_own_photo {
 }
 .media_modal_info_wrap {
   line-height: 16px;
-  padding: 24px 20px;
+  padding: 15px 16px;
+  width: 200px;
   position: absolute;
   left: 0;
 }
-.media_modal_author {
+.media_modal_author_photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.media_modal_author_photo .peer_initials {
+  line-height: 32px;  
+}
+a.media_modal_author_photo {
+  margin: 1px 10px 1px 0;
+}
+div.media_modal_author_name {
   font-size: 13px;
-  margin-right: 4px;
+  margin-top: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .media_modal_date,
 a.media_modal_date:hover {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.4);
+}
+div.media_modal_date {
+  margin-top: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .photo_modal_window,
@@ -1132,7 +1177,6 @@ a.media_modal_date:hover {
   padding: 0;
 }
 .media_modal_bottom_actions {
-  width: 204px;
   position: absolute;
   right: 0;
 }
@@ -1177,6 +1221,3 @@ a.media_modal_date:hover {
   height: 18px;
   margin: 23px 27px;
 }
-
-
-
