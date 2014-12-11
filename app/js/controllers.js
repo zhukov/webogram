@@ -19,7 +19,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (location.protocol == 'http:' &&
           Config.App.domains.indexOf(location.hostname) != -1) {
-        location = 'https://web.telegram.org';
+        location = 'https://' + location.hostname + '/#/login';
         return;
       }
       $scope.showWelcome = true;
@@ -41,7 +41,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (location.protocol == 'http:' &&
           Config.App.domains.indexOf(location.hostname) != -1) {
-        location = 'https://web.telegram.org/#/login';
+        location = 'https://' + location.hostname + '/#/login';
       }
     });
     var options = {dcID: 2, createNetworker: true},
@@ -614,7 +614,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           MtpApiManager.logOut()['finally'](function () {
             if (location.protocol == 'http:' &&
                 Config.App.domains.indexOf(location.hostname) != -1) {
-              location = 'https://web.telegram.org/#/login';
+              location = 'https://' + location.hostname + '/#/login';
             } else {
               location.hash = '/login';
               AppRuntimeManager.reload();
