@@ -1237,8 +1237,7 @@ a.im_dialog_selected .im_dialog_date {
 .im_message_fwd_photo {
   width: 34px;
   height: 34px;
-
-  border-radius: 2px;
+  border-radius: 50%;
   overflow: hidden;
 }
 .im_message_from_photo .peer_initials,

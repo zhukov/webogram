@@ -628,11 +628,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (attrs.modal) {
-          $(element).css({
-            height: $($window).height() -
-                    (panelWrap ? panelWrap.offsetHeight : 58) -
-                    (Config.Mobile ? 46 : 200)
-          });
+          var height = $($window).height() -
+                        (panelWrap ? panelWrap.offsetHeight : 58) -
+                        (Config.Mobile ? 46 : 200);
+          height = Math.min(350, height);
+          $(element).css({height: height});
           updateScroller();
           return;
         }
