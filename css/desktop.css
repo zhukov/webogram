@@ -336,6 +336,19 @@ a.footer_link.active:active {
   color: #FFF;
 }
 
+.icon-message-status {
+  pointer-events: none;
+  background: #6ba2cb;
+  border: 0;
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 7px;
+  position: absolute;
+  margin-left: -26px;
+  margin-top: 13px;
+  opacity: 0;
+}
 .im_message_unread .icon-message-status {
   opacity: 1.0;
 }
@@ -458,6 +471,11 @@ a.footer_link.active:active {
   vertical-align: bottom;
 }
 
+@media (max-height: 600px) {
+  .footer_wrap {
+    display: none;
+  }
+}
 
 @media (max-width: 900px) {
 
