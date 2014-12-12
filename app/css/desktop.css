@@ -543,7 +543,7 @@ div.im_panel_peer_photo,
 a.im_panel_peer_photo {
   cursor: pointer;
   margin-left: 12px;
-  height: 55px;
+  height: 50px;
 }
 div.im_panel_own_photo {
   margin-right: 12px;
