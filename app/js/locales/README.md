@@ -81,7 +81,7 @@ This maps a `navigator.language == 'en'` to `en-us` as locale to use.
 
 ## Using the i18n module while developing
 
-All the i18n functionality is located in the `myApp.i18n` module in `js/i18n.js` and exposed via various ways whereby all the localization is done by the `_` service.
+All the i18n functionality is located in the `myApp.i18n` module in `js/lib/i18n.js` and exposed via various ways whereby all the localization is done by the `_` service.
 It takes a message key and optional parameters for that key and returns the localized string with parameters incorporated.
 
 When adding new messages the key for that messages should be prefixed with the view name it appears in. If the message (should) contain(s) markdown-like markup (see above) it should additionally have a `_md` suffix.
