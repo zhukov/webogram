@@ -1467,7 +1467,7 @@ div.im_message_video_thumb {
   background-position: -2px -542px;
 }
 
-.im_history_selectable a[ng-click] {
+.im_history_selectable a {
   pointer-events: none;
 }
 
