@@ -22,7 +22,7 @@ Here are some screenshots of the interface:
 ### Unsupported at the moment
 
 * Secret chats
-* Black list and blocking user
+* Black list
 * ...
 
 

@@ -32,8 +32,10 @@
     <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController" my-dialogs>
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
-          <input my-focused class="form-control im_dialogs_search_field" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
-          <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+          <input my-focused class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+          <a class="im_dialogs_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+            <i class="im_dialogs_search_clear"></i>
+          </a>
         </div>
       </div>
       <div my-dialogs-list-mobile modal="true" class="im_dialogs_modal_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">

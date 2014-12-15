@@ -545,8 +545,15 @@ a.im_panel_peer_photo {
   margin-left: 12px;
   height: 55px;
 }
-div.im_panel_own_photo {
+a.im_panel_own_photo {
+  display: block;
   margin-right: 12px;
+}
+a.im_panel_own_photo .peer_initials,
+div.im_panel_peer_photo .peer_initials,
+a.im_panel_peer_photo .peer_initials {
+  font-size: 18px;
+  line-height: 50px;
 }
 
 .im_panel_peer_online {
@@ -996,6 +1003,11 @@ div.im_panel_own_photo {
 div.im_dialog_photo {
   margin-right: 12px;
 }
+div.im_dialog_photo .peer_initials {
+  line-height: 48px;
+  font-size: 18px;
+}
+
 .im_dialog_message {
   margin-top: 4px;
 }
@@ -1159,7 +1171,7 @@ div.im_dialog_photo {
   overflow: hidden;
 }
 .media_modal_author_photo .peer_initials {
-  line-height: 32px;  
+  line-height: 32px;
 }
 a.media_modal_author_photo {
   margin: 1px 10px 1px 0;

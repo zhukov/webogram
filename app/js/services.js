@@ -11,8 +11,9 @@
 
 angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage, _) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiFileManager, MtpApiManager, RichTextProcessor, SearchIndexManager, ErrorService, Storage, _) {
   var users = {},
+      usernames = {},
       cachedPhotoLocations = {},
       contactsFillPromise,
       contactsList,
@@ -73,6 +74,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   };
 
+  function userNameClean (username) {
+    return username && username.toLowerCase() || '';
+  }
+
+  function resolveUsername (username) {
+    var searchUserName = userNameClean(username);
+    var foundUserID = usernames[searchUserName];
+    if (foundUserID &&
+        userNameClean(users[foundUserID].username) == searchUserName) {
+      return qSync.when(foundUserID);
+    }
+    return MtpApiManager.invokeApi('contacts.resolveUsername', {username: username}).then(function (resolveResult) {
+      saveApiUser(resolveResult);
+      return resolveResult.id;
+    });
+  }
+
   function saveApiUsers (apiUsers) {
     angular.forEach(apiUsers, saveApiUser);
   };
@@ -83,11 +101,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return;
     }
 
+    var userID = apiUser.id;
+
     if (apiUser.phone) {
       apiUser.rPhone = $filter('phoneNumber')(apiUser.phone);
     }
 
-    apiUser.num = (Math.abs(apiUser.id) % 8) + 1;
+    apiUser.num = (Math.abs(userID) % 8) + 1;
 
     if (apiUser.first_name) {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
@@ -95,6 +115,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     } else {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_first_name_deleted');
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_name_deleted');
+    }
+
+    if (apiUser.username) {
+      usernames[userNameClean(apiUser.username)] = userID;
     }
 
     apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
@@ -107,15 +131,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     apiUser.sortStatus = getUserStatusForSort(apiUser.status);
 
 
-    if (users[apiUser.id] === undefined) {
-      users[apiUser.id] = apiUser;
+    var result = users[userID];
+    if (result === undefined) {
+      result = users[userID] = apiUser;
     } else {
-      safeReplaceObject(users[apiUser.id], apiUser);
+      safeReplaceObject(result, apiUser);
     }
-    $rootScope.$broadcast('user_update', apiUser.id);
+    $rootScope.$broadcast('user_update', userID);
 
-    if (cachedPhotoLocations[apiUser.id] !== undefined) {
-      safeReplaceObject(cachedPhotoLocations[apiUser.id], apiUser && apiUser.photo && apiUser.photo.photo_small || {empty: true});
+    if (cachedPhotoLocations[userID] !== undefined) {
+      safeReplaceObject(cachedPhotoLocations[userID], apiUser && apiUser.photo && apiUser.photo.photo_small || {empty: true});
     }
   };
 
@@ -193,7 +218,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (user.status &&
           user.status._ == 'userStatusOnline' &&
           user.status.expires < timestampNow) {
-        user.status = user.status.wasStatus || 
+        user.status = user.status.wasStatus ||
                       {_: 'userStatusOffline', was_online: user.status.expires};
         delete user.status.wasStatus;
         $rootScope.$broadcast('user_update', user.id);
@@ -392,6 +417,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     deleteContacts: deleteContacts,
     wrapForFull: wrapForFull,
     openUser: openUser,
+    resolveUsername: resolveUsername,
     openImportContact: openImportContact
   }
 })
@@ -500,7 +526,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var lastWord = titleWords.pop();
     apiChat.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
 
-    apiChat.num = (Math.abs(apiChat.id) % 4) + 1;
+    apiChat.num = (Math.abs(apiChat.id >> 1) % (Config.Mobile ? 4 : 8)) + 1;
 
     if (chats[apiChat.id] === undefined) {
       chats[apiChat.id] = apiChat;
@@ -592,7 +618,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppPeersManager', function (AppUsersManager, AppChatsManager) {
+.service('AppPeersManager', function (AppUsersManager, AppChatsManager, MtpApiManager) {
   return {
     getInputPeer: function (peerString) {
       var isUser = peerString.charAt(0) == 'u',
@@ -3177,7 +3203,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     emojiUtf.push(emojiData[emojiCode][0]);
     emojiMap[emojiData[emojiCode][0]] = emojiCode;
   }
-  
+
   var regexAlphaChars = "a-z" +
                         "\\u00c0-\\u00d6\\u00d8-\\u00f6\\u00f8-\\u00ff" + // Latin-1
                         "\\u0100-\\u024f" + // Latin Extended A and B
@@ -4075,3 +4101,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     switchLayout: switchLayout
   }
 })
+
+
+// .service('LocationParamsService', function ($routeParams) {
+
+//   var started = false;
+//   function start () {
+//     if (started) {
+//       return;
+//     }
+//     started = true;
+//     navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
+//   };
+
+//   return {
+//     start: start
+//   };
+// })

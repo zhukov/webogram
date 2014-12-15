@@ -233,7 +233,7 @@
                   <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true">
                     <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
                   </a>
-                  <div class="pull-left im_panel_own_photo" my-peer-photolink="ownID" img-class="im_panel_own_photo" watch="true"></div>
+                  <a class="pull-left im_panel_own_photo" my-peer-photolink="ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
 
                   <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 

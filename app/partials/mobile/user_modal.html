@@ -79,7 +79,7 @@
       </a>
     </div>
 
-    <div class="mobile_modal_section">
+    <div class="mobile_modal_section" ng-if="user.phone.length > 0">
       <h4 class="mobile_modal_section_header" my-i18n="user_modal_phone"></h4>
       <div class="mobile_modal_section_value" ng-bind="user.phone | phoneNumber"></div>
     </div>

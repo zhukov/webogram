@@ -129,7 +129,7 @@ angular.module('myApp.directives')
         if (!atBottom && !options.my) {
           return;
         }
-        
+
         var pr = parseInt($(scrollableWrap).css('paddingRight'))
         $(scrollableWrap).addClass('im_history_to_bottom');
         $(scrollable).css({bottom: 0, marginLeft: -Math.ceil(pr / 2)});

@@ -307,7 +307,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -316,7 +316,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (peerData.peerString == $scope.curDialog.peer && peerData.messageID == $scope.curDialog.messageID) {
         $scope.$broadcast(peerData.messageID ? 'ui_history_change_scroll' : 'ui_history_focus');
       } else {
-        $location.url('/im?p=' + peerData.peerString + (peerData.messageID ? '&m=' + peerData.messageID : ''));
+        var peerID = AppPeersManager.getPeerID(peerData.peerString);
+        var peer = peerData.peerString;
+        if (peerID > 0) {
+          var username = AppUsersManager.getUser(peerID).username;
+          if (username) {
+            peer = '@' + username;
+          }
+        }
+        $location.url('/im?p=' + peer + (peerData.messageID ? '&m=' + peerData.messageID : ''));
       }
     });
 
@@ -428,10 +436,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       } else {
         lastSearch = false;
       }
-      $scope.curDialog = {
-        peer: $routeParams.p || false,
-        messageID: $routeParams.m || false
-      };
+      if ($routeParams.p && $routeParams.p.charAt(0) == '@') {
+        if ($scope.curDialog === undefined) {
+          $scope.curDialog = {};
+        }
+        AppUsersManager.resolveUsername($routeParams.p.substr(1)).then(function (userID) {
+          $scope.curDialog = {
+            peer: AppUsersManager.getUserString(userID),
+            messageID: $routeParams.m || false
+          };
+        });
+      } else {
+        $scope.curDialog = {
+          peer: $routeParams.p || false,
+          messageID: $routeParams.m || false
+        };
+      }
     }
 
     ChangelogNotifyService.checkUpdate();
