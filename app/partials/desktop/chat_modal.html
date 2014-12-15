@@ -69,12 +69,12 @@
         </div>
 
       </div>
-      
+
     </div>
 
-    <div ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+    <div ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; chatFull.participants.participants.length > 0">
 
-      <div class="md_modal_section_splitter" ng-if="chatFull.participants.participants.length > 0"></div>
+      <div class="md_modal_section_splitter"></div>
 
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_peers">
         <i class="md_modal_section_icon md_modal_section_icon_people"></i>

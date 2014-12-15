@@ -182,7 +182,7 @@ a.footer_link.active:active {
   transition            : none;
 }
 .im_dialogs_col .nano > .nano-pane > .nano-slider {
-  background: #A5B1B9;
+  background: rgba(30, 85,127 , 0.3);
   margin: 0 5px;
   -moz-border-radius    : 0;
   -webkit-border-radius : 0;
