@@ -3045,6 +3045,12 @@ div.peer_modal_photo {
   background-position: -10px -250px;
 }
 
+.is_1x .md_modal_split_action_camera,
+.is_1x .md_modal_split_action_twitter,
+.is_1x .md_modal_split_action_msg {
+  background-image: url(../img/icons/ProfileIcons.png);
+}
+
 .md_modal_sections {
   padding-top: 17px
 }
@@ -3079,6 +3085,9 @@ div.peer_modal_photo {
   background: url(../img/icons/ProfileIcons_2x.png) 0 0 no-repeat;
   background-size: 40px 360px;
   position: absolute;
+}
+.is_1x .md_modal_section_icon {
+  background-image: url(../img/icons/ProfileIcons.png);
 }
 .md_modal_iconed_section_toggle .md_modal_section_icon {
   margin-top: 8px;
