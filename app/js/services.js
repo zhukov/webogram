@@ -4026,6 +4026,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function start () {
     if (started ||
         location.protocol != 'http:' ||
+        Config.Modes.http ||
         Config.App.domains.indexOf(location.hostname) == -1) {
       return;
     }

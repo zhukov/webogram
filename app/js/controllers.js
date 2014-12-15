@@ -18,6 +18,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       if (location.protocol == 'http:' &&
+          !Config.Modes.http &&
           Config.App.domains.indexOf(location.hostname) != -1) {
         location.protocol = 'https:';
         return;
@@ -40,6 +41,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       if (location.protocol == 'http:' &&
+          !Config.Modes.http &&
           Config.App.domains.indexOf(location.hostname) != -1) {
         location.protocol = 'https:';
       }
@@ -633,6 +635,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (error.code == 401) {
           MtpApiManager.logOut()['finally'](function () {
             if (location.protocol == 'http:' &&
+                !Config.Modes.http &&
                 Config.App.domains.indexOf(location.hostname) != -1) {
               location.protocol = 'https:';
             } else {
