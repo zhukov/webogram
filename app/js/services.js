@@ -3233,7 +3233,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                         "\\uffa1-\\uffdc";                  // half width Hangul (Korean)
 
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
-  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_\\.]{5,32})|((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
+  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
 
   var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
   var vimeoRegex = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
@@ -4182,8 +4182,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     started = true;
     try {
       navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
+      navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
     } catch (e) {}
-    navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
 
     $rootScope.$on('$routeUpdate', checkTgAddr);
     checkTgAddr();
