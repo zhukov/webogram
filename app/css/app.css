@@ -2953,6 +2953,7 @@ a.md_modal_action:active {
   text-decoration: none;
 }
 .md_modal_title {
+  font-weight: bold;
   padding: 18px 0 5px;
   font-size: 13px;
 }
