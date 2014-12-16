@@ -4111,7 +4111,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                   location.protocol == 'https:' && location.hostname != 'web.telegram.org';
 
   function sendAsyncRequest (canRedirect) {
-    canRedirect = false;
     if (disabled) {
       return false;
     }
