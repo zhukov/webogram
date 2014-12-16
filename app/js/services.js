@@ -4182,6 +4182,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     started = true;
     try {
       navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
+    } catch (e) {}
+    try {
       navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
     } catch (e) {}
 
