@@ -988,28 +988,30 @@ a.im_panel_peer_photo .peer_initials {
   background: #fff;
 }
 .im_dialogs_scrollable_wrap a.im_dialog {
-  padding: 8px 16px;
+  padding: 7px 16px;
 }
 .im_dialogs_scrollable_wrap .active a.im_dialog {
   margin-right: -2px;
   padding-right: 18px;
 }
 .im_dialog_photo {
-  width: 48px;
-  height: 48px;
-  line-height: 48px;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
   border-radius: 50%;
 }
 div.im_dialog_photo {
   margin-right: 12px;
 }
 div.im_dialog_photo .peer_initials {
-  line-height: 48px;
+  line-height: 50px;
   font-size: 18px;
 }
-
-.im_dialog_message {
+.im_dialog_peer {
   margin-top: 4px;
+}
+.im_dialog_message {
+  margin-top: 5px;
 }
 .active .im_dialog_date,
 .active a.im_dialog:hover .im_dialog_date,
