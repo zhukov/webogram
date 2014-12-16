@@ -24,7 +24,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   });
 
   function telegramMeNotify (newValue) {
-    if (telegramMeNotified != newValue) {
+    if (telegramMeNotified !== newValue) {
       telegramMeNotified = newValue;
       TelegramMeWebService.setAuthorized(telegramMeNotified);
     }
