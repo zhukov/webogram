@@ -7,11 +7,13 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, ErrorService, qSync, $q) {
+.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, ErrorService, qSync, $q, TelegramMeWebService) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
       baseDcID = false;
+
+  var telegramMeNotified;
 
   MtpSingleInstanceService.start();
 
@@ -21,11 +23,19 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
   });
 
+  function telegramMeNotify (newValue) {
+    if (telegramMeNotified != newValue) {
+      telegramMeNotified = newValue;
+      TelegramMeWebService.setAuthorized(telegramMeNotified);
+    }
+  }
+
   function mtpSetUserAuth (dcID, userAuth) {
     Storage.set({
       dc: dcID,
       user_auth: angular.extend({dcID: dcID}, userAuth)
     });
+    telegramMeNotify(true);
 
     baseDcID = dcID;
   }
@@ -45,11 +55,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       return $q.all(logoutPromises).then(function () {
         Storage.remove('dc', 'user_auth');
         baseDcID = false;
+        telegramMeNotify(false);
       }, function (error) {
         Storage.remove.apply(storageKeys);
         Storage.remove('dc', 'user_auth');
         baseDcID = false;
         error.handled = true;
+        telegramMeNotify(false);
       });
     });
   }
@@ -147,6 +159,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           console.error(dT(), 'Error', error.code, error.type, baseDcID, dcID);
           if (error.code == 401 && baseDcID == dcID) {
             Storage.remove('dc', 'user_auth');
+            telegramMeNotify(false);
             rejectPromise(error);
           }
           else if (error.code == 401 && baseDcID && dcID != baseDcID) {
@@ -210,6 +223,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   function mtpGetUserID () {
     return Storage.get('user_auth').then(function (auth) {
+      telegramMeNotify(auth && auth.id > 0 || false);
       return auth.id || 0;
     });
   }
@@ -422,7 +436,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         errorHandler = function (error) {
           deferred.reject(error);
           errorHandler = angular.noop;
-          if (cacheFileWriter && 
+          if (cacheFileWriter &&
               (!error || error.type != 'DOWNLOAD_CANCELED')) {
             cacheFileWriter.truncate(0);
           }

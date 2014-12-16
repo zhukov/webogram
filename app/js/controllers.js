@@ -309,7 +309,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -459,6 +459,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     ChangelogNotifyService.checkUpdate();
     HttpsMigrateService.start();
     LayoutSwitchService.start();
+    LocationParamsService.start();
   })
 
   .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, PhonebookContactsService, ErrorService) {

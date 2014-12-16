@@ -4103,19 +4103,74 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
+.service('TelegramMeWebService', function (Storage) {
 
-// .service('LocationParamsService', function ($routeParams) {
+  var disabled =  Config.Modes.test ||
+                  Config.App.domains.indexOf(location.hostname) == -1 ||
+                  location.protocol != 'http:' && location.protocol != 'https:' ||
+                  location.protocol == 'https:' && location.hostname != 'web.telegram.org';
 
-//   var started = false;
-//   function start () {
-//     if (started) {
-//       return;
-//     }
-//     started = true;
-//     navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
-//   };
+  function sendAsyncRequest (canRedirect) {
+    canRedirect = false;
+    if (disabled) {
+      return false;
+    }
+    Storage.get('tgme_sync').then(function (curValue) {
+      var ts = tsNow(true);
+      if (curValue &&
+          curValue.canRedirect == canRedirect &&
+          curValue.ts + 86400 > ts) {
+        return false;
+      }
+      Storage.set({tgme_sync: {canRedirect: canRedirect, ts: ts}});
 
-//   return {
-//     start: start
-//   };
-// })
+      var script = $('<script>').appendTo('body')
+      .on('load error', function() {
+        script.remove();
+      })
+      .attr('src', '//telegram.me/_websync_?authed=' + (canRedirect ? '1' : '0'));
+    });
+  };
+
+  return {
+    setAuthorized: sendAsyncRequest
+  };
+
+})
+
+
+.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager) {
+
+  function checkTgAddr () {
+    if (!$routeParams.tgaddr) {
+      return;
+    }
+    var matches = $routeParams.tgaddr.match(/^(web\+)?tg:(\/\/)?resolve\?domain=(.+)$/);
+    if (matches && matches[3]) {
+      AppUsersManager.resolveUsername(matches[3]).then(function (userID) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: AppUsersManager.getUserString(userID)
+        });
+      });
+    }
+  }
+
+  var started = !('registerProtocolHandler' in navigator);
+  function start () {
+    if (started) {
+      return;
+    }
+    started = true;
+    try {
+      navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
+    } catch (e) {}
+    navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
+
+    $rootScope.$on('$routeUpdate', checkTgAddr);
+    checkTgAddr();
+  };
+
+  return {
+    start: start
+  };
+})
