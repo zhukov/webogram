@@ -20,7 +20,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (location.protocol == 'http:' &&
           !Config.Modes.http &&
           Config.App.domains.indexOf(location.hostname) != -1) {
-        location.protocol = 'https:';
+        location.href = location.href.replace(/^http:/, 'https:');
         return;
       }
       $scope.showWelcome = true;
@@ -43,7 +43,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (location.protocol == 'http:' &&
           !Config.Modes.http &&
           Config.App.domains.indexOf(location.hostname) != -1) {
-        location.protocol = 'https:';
+        location.href = location.href.replace(/^http:/, 'https:');
       }
     });
     var options = {dcID: 2, createNetworker: true},
@@ -638,7 +638,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             if (location.protocol == 'http:' &&
                 !Config.Modes.http &&
                 Config.App.domains.indexOf(location.hostname) != -1) {
-              location.protocol = 'https:';
+              location.href = location.href.replace(/^http:/, 'https:');
             } else {
               location.hash = '/login';
               AppRuntimeManager.reload();
