@@ -31,11 +31,20 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.8')">
+        <div class="md_modal_section_version">0.3.8</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Telegram.me/username links supported</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.7')">
         <div class="md_modal_section_version">0.3.7</div>
         <div class="md_modal_section_description changelog_version_changes">
           <ul class="list-unstyled changelog_version_changes_list">
-            <li>[Desktop] [Beta] New material design for modal windows</li>
+            <li>[Desktop] New material design for modal windows</li>
             <li>[Desktop] Forward messages to multiple recipients</li>
           </ul>
         </div>
@@ -132,7 +141,7 @@
           </ul>
         </div>
       </div>
-      
+
     </div>
 
 
