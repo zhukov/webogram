@@ -1099,7 +1099,7 @@ a.im_dialog_selected .im_dialog_message_text {
   height: 8px;
   border-radius: 5px;
   overflow: hidden;
-  margin: 10px 0 0;
+  margin: 12px 0 0;
 }
 
 a.im_dialog:hover .im_dialog_unread,
@@ -1235,19 +1235,19 @@ a.im_dialog_selected .im_dialog_date {
 .im_message_from_photo,
 .im_message_contact_photo,
 .im_message_fwd_photo {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   overflow: hidden;
 }
 .im_message_from_photo .peer_initials,
 .im_message_contact_photo .peer_initials,
 .im_message_fwd_photo .peer_initials {
-  line-height: 34px;
+  line-height: 36px;
 }
 a.im_message_from_photo,
 a.im_message_contact_photo {
-  margin: 1px 12px 0 0;
+  margin: 0 12px 0 0;
 }
 .non_osx .im_message_contact_name {
   font-size: 12px;
