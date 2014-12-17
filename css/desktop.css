@@ -558,11 +558,11 @@ a.im_panel_peer_photo .peer_initials {
 
 .im_panel_peer_online {
   background: #6ec26d;
-  border: 1px solid #FFF;
+  border: 2px solid #FFF;
   display: block;
-  width: 11px;
-  height: 11px;
-  border-radius: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
   overflow: hidden;
   position: absolute;
   margin-top: -12px;
@@ -995,20 +995,17 @@ a.im_panel_peer_photo .peer_initials {
   padding-right: 18px;
 }
 .im_dialog_photo {
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
   border-radius: 50%;
 }
 div.im_dialog_photo {
   margin-right: 12px;
 }
 div.im_dialog_photo .peer_initials {
-  line-height: 50px;
+  line-height: 48px;
   font-size: 18px;
-}
-.im_dialog_peer {
-  margin-top: 4px;
 }
 .im_dialog_message {
   margin-top: 5px;
