@@ -1212,8 +1212,8 @@ a.im_dialog_selected .im_dialog_date {
 
 
 .im_message_unread_split {
-  background: #f4f4f4;
-  color: #777;
+  background: #f0f4f7;
+  color: #8096a8;
   text-align: center;
   padding: 4px 10px;
   margin: 10px 0;
@@ -2906,7 +2906,7 @@ a.peer_photo_init:focus {
   display: inline-block;
   border: 0;
   outline: 0;
-  font-size: 12px;
+  font-size: 13px;
   padding: 3px 0;
   margin: 3px 0 0;
   width: 100%;
@@ -2941,8 +2941,11 @@ a.peer_photo_init:focus {
 a.md_modal_action {
   display: block;
   float: right;
-  color: #FFF;
+  color: #dde8f1;
   padding: 19px 15px 5px;
+}
+a.md_modal_action:hover {
+  color: #FFF;
 }
 a.md_modal_action_close {
   padding-right: 22px;
@@ -2978,11 +2981,12 @@ div.peer_modal_photo {
   font-size: 22px;
 }
 .peer_modal_profile_name {
-  font-size: 17px;
+  font-size: 14px;
   padding: 15px 0 9px;
+  font-weight: bold;
 }
 .peer_modal_profile_description {
-  color: #beddf5;
+  color: #ccdeed;
 }
 
 .md_modal_split_actions_wrap {
