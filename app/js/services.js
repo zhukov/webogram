@@ -1236,6 +1236,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (apiMessage.media && apiMessage.media._ == 'messageMediaAudio') {
         AppAudioManager.saveAudio(apiMessage.media.audio);
       }
+      if (apiMessage.media && apiMessage.media._ == 'messageMediaUnsupported') {
+        delete apiMessage.media.bytes;
+      }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
         AppPhotosManager.savePhoto(apiMessage.action.photo);
       }
