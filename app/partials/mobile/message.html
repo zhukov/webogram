@@ -47,6 +47,11 @@
           <div ng-switch-when="messageMediaGeo"       my-message-map></div>
           <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>
           <div ng-switch-when="messageMediaPending"   my-message-pending></div>
+          <div ng-switch-when="messageMediaUnsupported">
+            <div class="im_message_text">
+              The message is not supported on your version of Telegram Web. Update the app to view: <a href="https://web.telegram.org">web.telegram.org</a>.
+            </div>
+          </div>
 
         </div>
 
