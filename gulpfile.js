@@ -48,6 +48,8 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
+    // gulp.src(['app/fonts/*'])
+    //   .pipe(gulp.dest('dist/fonts')),
     gulp.src(['app/js/lib/polyfill.js', 'app/js/lib/bin_utils.js'])
       .pipe(gulp.dest('dist/js/lib')),
     gulp.src('app/vendor/closure/long.js')
