@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sat Dec 20 2014 09:14:11 GMT-0800 (PST)
+# Time: Sun Dec 28 2014 15:47:58 GMT+0100 (CET)
 
 
 CACHE:
@@ -43,6 +43,8 @@ img/icons/Checks1_1x.png
 img/icons/Checks1_2x.png
 img/icons/Checks2_1x.png
 img/icons/Checks2_2x.png
+img/icons/General.png
+img/icons/General_1x.png
 img/icons/IconsetSmiles.png
 img/icons/IconsetSmiles_1x.png
 img/icons/IconsetW.png
@@ -81,8 +83,8 @@ js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
 vendor/closure/long.js
-vendor/jsbn/jsbn_combined.js
 vendor/cryptoJS/crypto.js
+vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/rusha/rusha.js
 vendor/angular/i18n/angular-locale_de-de.js

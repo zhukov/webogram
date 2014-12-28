@@ -3,6 +3,7 @@ html {
 }
 
 
+
 .dropdown-menu {
   border-radius: 0;
 }
@@ -12,6 +13,89 @@ html {
 }
 .dropdown-menu .divider {
   margin: 0;
+}
+
+.tg_page_head .navbar-quick-nav,
+.tg_page_head .navbar-toggle {
+  display: none;
+}
+.tg_page_head .container {
+  display: block;
+  width: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+.tg_page_head .container .navbar-header {
+  margin: 0;
+}
+.tg_page_head .navbar-inverse {
+  border: 0;
+
+  -webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.11);
+  -moz-box-shadow:    0px 1px 1px rgba(0, 0, 0, 0.11);
+  box-shadow:         0px 1px 1px rgba(0, 0, 0, 0.11);
+
+  margin: 0;
+}
+.ios_standalone .tg_page_head .navbar > .container {
+  margin-top: 20px;
+}
+.ios_standalone .modal.mobile_modal {
+  border-top: 20px solid #497495;
+}
+.tg_page_head .navbar > .container .navbar-brand {
+  padding: 8px 15px;
+  opacity: 0.9;
+  margin-left: 0;
+  margin-right: 20px;
+  -webkit-transition: opacity swing .9s;
+  display: block;
+  line-height: 0;
+  height: auto;
+}
+.tg_page_head .navbar > .container .navbar-brand:hover {
+  opacity: 1;
+}
+.tg_head_logo {
+  background: url(../img/T_LogoM.png) 0 0 no-repeat;
+  background-size: 143px 30px;
+  display: inline-block;
+  width: 143px;
+  height: 30px;
+  vertical-align: text-top;
+}
+.is_1x .tg_head_logo {
+  background-image: url(../img/T_LogoM_1x.png);
+}
+
+.tg_page_head .navbar-menu .navbar-nav.navbar-right {
+  margin-right: 0;
+}
+
+
+.tg_page_head .navbar-inverse .navbar-nav > li > a {
+  padding-top: 13px;
+  padding-bottom: 13px;
+  color: #b9cfe3;
+  font-size: 13px;
+}
+.tg_page_head .navbar-inverse .navbar-nav > li > a:hover {
+  color: #FFF;
+}
+.tg_page_head .navbar-inverse .navbar-toggle {
+  border-color: #497495;
+  outline: 0;
+  border: 0;
+}
+.tg_page_head .navbar-inverse .navbar-collapse,
+.tg_page_head .navbar-inverse .navbar-form {
+  border-color: #497495;
+}
+
+.tg_page_head .navbar-inverse .navbar-toggle:hover,
+.tg_page_head .navbar-inverse .navbar-toggle:active,
+.tg_page_head .navbar-inverse .navbar-toggle:focus {
+  background-color: rgba(255,255,255,0.1);
 }
 
 
@@ -505,8 +589,7 @@ img.im_message_video_thumb,
   font-size: 15px;
   float: left;
   position: relative;
-  margin-left: 0;
-  margin-right: 0;
+  margin: 8px 0 8px;
   max-width: 100%;
 }
 .im_message_out.im_content_message_wrap {
@@ -727,8 +810,11 @@ a.im_message_from_photo {
 .im_dialog_photo {
   width: 54px;
   height: 54px;
-  border-radius: 27px;
-  margin-right: 12px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+div.im_dialog_photo {
+  margin: 0 12px 0 0;
 }
 
 .im_dialog_peer,
@@ -984,6 +1070,9 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 
 .im_attach {
+  cursor: pointer;
+  display: block;
+  overflow: hidden;
   position: absolute;
   right: 0;
   top: 0;
