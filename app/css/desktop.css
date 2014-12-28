@@ -18,6 +18,7 @@
 
 .tg_head_btn {
   display: block;
+  font-weight: bold;
   padding: 16px 19px;
   color: #b9cfe3;
   font-size: 13px;
@@ -139,7 +140,13 @@
   background: url(../img/icons/General.png) no-repeat -10px -193px;
   background-size: 40px 678px;
 }
-
+.is_1x .icon-new-group,
+.is_1x .icon-contacts,
+.is_1x .icon-settings,
+.is_1x .icon-faq,
+.is_1x .icon-about {
+  background-image: url(../img/icons/General_1x.png);
+}
 
 .tg_head_connecting_text {
   color: #b9cfe3;
@@ -154,6 +161,9 @@
 }
 .tg_head_peer_dropdown {
   float: right;
+}
+.tg_head_peer_status {
+  font-weight: normal;
 }
 .tg_head_peer_dropdown .dropdown-menu {
   max-width: 100%;
@@ -230,6 +240,12 @@
   background-size: 40px 678px;
   margin-right: 12px;
   vertical-align: top;
+}
+.is_1x .icon-filter-photos,
+.is_1x .icon-filter-video,
+.is_1x .icon-filter-documents,
+.is_1x .icon-filter-audio {
+  background-image: url(../img/icons/General_1x.png);
 }
 .icon-filter-photos {
   width: 18px;
@@ -839,7 +855,7 @@ a.im_panel_peer_photo .peer_initials {
   opacity: 0.8;
 }
 .is_1x .icon-emoji {
-  background-image: url(../img/icons/IconsetW_1x.png);
+  background-image: url(../img/icons/General_1x.png);
 }
 .im_emoji_btn:hover .icon-emoji {
   opacity: 1;
@@ -896,7 +912,7 @@ a.im_panel_peer_photo .peer_initials {
   margin: 0;
 }
 .is_1x .icon-paperclip {
-  background-image: url(../img/icons/IconsetW_1x.png);
+  background-image: url(../img/icons/General_1x.png);
 }
 .im_attach:hover .icon-paperclip {
   opacity: 1;
@@ -929,7 +945,7 @@ a.im_panel_peer_photo .peer_initials {
   opacity: 0.8;
 }
 .is_1x .icon-camera {
-  background-image: url(../img/icons/IconsetW_1x.png);
+  background-image: url(../img/icons/General_1x.png);
 }
 .im_media_attach:hover .icon-camera {
   opacity: 1;

@@ -4,7 +4,7 @@
 
   <div class="im_page_split clearfix">
 
-    <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}">
+    <div class="im_dialogs_col_wrap noselect" ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}">
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
           <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
@@ -86,7 +86,7 @@
       </div>
     </div>
 
-    <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
+    <div class="im_history_col_wrap noselect" ng-controller="AppImHistoryController">
 
       <div ng-show="state.notSelected" ng-switch="isEmpty.contacts &amp;&amp; isEmpty.dialogs">
         <div ng-switch-when="true" class="im_history_no_dialogs_wrap">

@@ -23,6 +23,12 @@ h1, h2, h3, h4, h5 {
   -ms-user-select: none;
   user-select: none;
 }
+.hasselect {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
 a {
   cursor: pointer;
 }
@@ -1075,7 +1081,6 @@ a.im_dialog_selected .im_dialog_date {
 
 .im_history_scrollable_wrap {
   outline: none ! important;
-  -webkit-user-select: text;
   position: relative;
 }
 .im_history_to_bottom {
@@ -1598,6 +1603,14 @@ div.im_message_author,
 div.im_message_body {
   display: block;
   overflow: hidden;
+}
+
+.im_message_meta,
+.im_message_body {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 a.im_message_fwd_photo {

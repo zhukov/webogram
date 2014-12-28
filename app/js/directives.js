@@ -647,12 +647,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!dialogsColWrap || !dialogsColWrap.offsetHeight) {
           dialogsColWrap = $('.im_dialogs_col_wrap')[0];
         }
+        var footerHeight = footer ? footer.offsetHeight : 0;
+        if (footerHeight) {
+          footerHeight++; // Border bottom
+        }
         $(element).css({
           height: $($window).height() -
-                  (footer ? footer.offsetHeight : 0)  -
-                  (headWrap ? headWrap.offsetHeight : 44) -
+                  footerHeight -
+                  (headWrap ? headWrap.offsetHeight : 48) -
                   (panelWrap ? panelWrap.offsetHeight : 58) -
-                  parseInt($(dialogsColWrap).css('paddingBottom') || 0)
+                  parseInt($(dialogsColWrap).css('paddingBottom') || 0) -
+                  1 // border bottom
         });
 
         updateScroller();
@@ -1000,7 +1005,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!footer || !footer.offsetHeight) {
           footer = $('.footer_wrap')[0];
         }
-        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (footer ? footer.offsetHeight : 0);
+        var footerHeight = footer ? footer.offsetHeight : 0;
+        if (footerHeight) {
+          footerHeight++; // Border bottom
+        }
+        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 48) - footerHeight;
         $(historyWrap).css({
           height: historyH
         });
