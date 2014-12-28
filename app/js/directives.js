@@ -656,8 +656,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                   footerHeight -
                   (headWrap ? headWrap.offsetHeight : 48) -
                   (panelWrap ? panelWrap.offsetHeight : 58) -
-                  parseInt($(dialogsColWrap).css('paddingBottom') || 0) -
-                  1 // border bottom
+                  parseInt($(dialogsColWrap).css('paddingBottom') || 0)
         });
 
         updateScroller();
