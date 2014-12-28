@@ -6,19 +6,6 @@
 
     <div class="im_dialogs_col_wrap" ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}">
       <div class="im_dialogs_panel">
-        <div class="dropdown im_dialogs_panel_dropdown pull-right" dropdown>
-          <a class="dropdown-toggle" dropdown-toggle>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a ng-click="openGroup()" my-i18n="im_new_group"></a></li>
-            <li><a ng-click="importContact()" my-i18n="im_new_contact"></a></li>
-            <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" my-i18n="im_contacts"></a></li>
-            <li><a ng-click="openSettings()" my-i18n="im_settings"></a></li>
-          </ul>
-        </div>
         <div class="im_dialogs_search">
           <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
           <a class="im_dialogs_search_clear" ng-click="searchClear()" ng-show="search.query.length">
@@ -117,57 +104,6 @@
       <div ng-show="state.loaded">
         <div my-history class="im_history_col">
 
-          <div class="im_history_panel_wrap">
-
-            <div class="im_history_panel clearfix" ng-controller="AppImPanelController">
-              <div class="im_history_panel_title">
-
-                <a class="im_history_panel_info_link pull-right" ng-click="showPeerInfo()" my-i18n="im_info"></a>
-                <a class="im_history_panel_edit_link pull-right" ng-click="toggleEdit()" my-i18n="im_edit"></a>
-
-                <div class="dropdown im_history_panel_media_dropdown pull-right" dropdown>
-                  <a class="dropdown-toggle" dropdown-toggle><my-i18n msgid="im_media"></my-i18n><i class="icon icon-caret"></i></a>
-                  <ul class="dropdown-menu">
-                    <li><a ng-click="toggleMedia('photos')" my-i18n="im_media_photos"></a></li>
-                    <li><a ng-click="toggleMedia('video')" my-i18n="im_media_video"></a></li>
-                    <li><a ng-click="toggleMedia('documents')" my-i18n="im_media_documents"></a></li>
-                    <li><a ng-click="toggleMedia('audio')" my-i18n="im_media_audio"></a></li>
-                  </ul>
-                </div>
-                <a ng-show="historyFilter.mediaType.length || skippedHistory" class="im_history_panel_return_link pull-right" ng-click="returnToRecent()" ng-switch="skippedHistory">
-                  <span ng-switch-when="true" my-i18n="im_show_recent_messages"></span>
-                  <span ng-switch-default my-i18n="im_show_all_messages"></span>
-                  <strong class="im_history_panel_return_count" ng-show="missedCount > 0" ng-bind="'+' + missedCount"></strong>
-                </a>
-
-                <div ng-switch="historyFilter.mediaType">
-                  <h4 ng-switch-when="photos" my-i18n="im_media_photos"></h4>
-                  <h4 ng-switch-when="video" my-i18n="im_media_video"></h4>
-                  <h4 ng-switch-when="documents" my-i18n="im_media_documents"></h4>
-                  <h4 ng-switch-when="audio" my-i18n="im_media_audio"></h4>
-
-                  <h4 ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
-                    <div ng-switch-when="true">
-                      <span ng-bind-html="historyPeer.data.rFullName"></span>
-                      <small class="im_peer_online" my-user-status="historyPeer.id"></small>
-                    </div>
-                    <div ng-switch-default>
-                      <span ng-bind-html="historyPeer.data.rTitle"></span>
-                      <small class="im_chat_users">
-                        <ng-pluralize count="historyPeer.data.participants_count"
-                                         when="im_pluralize_participants">
-                        </ng-pluralize>
-                      </small>
-                    </div>
-                  </h4>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
           <div class="im_history_wrap nano">
 
             <div class="im_history_scrollable_wrap nano-content">
@@ -238,27 +174,26 @@
                   <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_field_wrap">
+                      <div class="im_emoji_btn pull-right" title="{{'im_emoji_btn_title' | i18n}}">
+                        <i class="icon icon-emoji"></i>
+                      </div>
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
                       <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline"></textarea>
                     </div>
 
-                    <div class="im_media_attach pull-right">
-                      <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
-                      <i class="icon icon-camera"></i>
-                    </div>
+                    <div class="clearfix">
+                      <div class="im_attach pull-left">
+                        <input type="file" class="im_attach_input" size="28" multiple="true" title="{{'im_attach_file_title' | i18n}}" />
+                        <i class="icon icon-paperclip"></i>
+                      </div>
 
-                    <div class="im_attach pull-right">
-                      <input type="file" class="im_attach_input" size="28" multiple="true" title="{{'im_attach_file_title' | i18n}}" />
-                      <i class="icon icon-paperclip"></i>
-                    </div>
+                      <div class="im_media_attach pull-left">
+                        <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
+                        <i class="icon icon-camera"></i>
+                      </div>
 
-                    <div class="im_emoji_btn pull-right" title="{{'im_emoji_btn_title' | i18n}}">
-                      <i class="icon icon-emoji"></i>
+                      <button type="submit" class="btn btn-md im_submit" my-i18n="im_submit_message"></button>
                     </div>
-
-                    <button type="submit" class="btn btn-success im_submit">
-                      <span class="im_submit_text" my-i18n="im_submit_message"></span>
-                    </button>
                   </form>
                 </div>
 
@@ -277,4 +212,4 @@
 
 </div>
 
-<div my-footer></div>
+<div class="footer_wrap footer_empty"></div>

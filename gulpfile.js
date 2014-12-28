@@ -4,6 +4,9 @@ var pj = require('./package.json');
 var $ = require('gulp-load-plugins')();
 var concat = require('gulp-concat');
 var path = require('path');
+var http = require('http');
+var livereload = require('gulp-livereload');
+var st = require('st');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -201,6 +204,28 @@ gulp.task('package-dev', function() {
       .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, '/*PRODUCTION_ONLY_END'))
       .pipe(gulp.dest('dist_package'))
     );
+});
+
+gulp.task('watchcss', function() {
+  gulp.src('app/css/*.css')
+    .pipe(livereload());
+});
+
+gulp.task('watchhtml', function() {
+  gulp.src('app/partials/**/*.html')
+    .pipe(livereload());
+});
+
+gulp.task('watch', ['server'], function() {
+  livereload.listen({ basePath: 'app' });
+  gulp.watch('app/css/*.css', ['watchcss']);
+  gulp.watch('app/partials/**/*.html', ['watchhtml']);
+});
+
+gulp.task('server', function(done) {
+  http.createServer(
+    st({ path: __dirname, index: 'index.html', cache: false })
+  ).listen(8000, done);
 });
 
 

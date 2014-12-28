@@ -392,7 +392,7 @@ angular.module('izhukov.utils', [])
   function saveFileBase64(db, fileName, blob) {
     try {
       var reader = new FileReader();
-      reader.readAsDataURL(blob); 
+      reader.readAsDataURL(blob);
     } catch (e) {
       storageIsAvailable = false;
       return $q.reject();
@@ -615,7 +615,7 @@ angular.module('izhukov.utils', [])
         }
       };
 
-  if (Config.Modes.nacl && 
+  if (Config.Modes.nacl &&
       navigator.mimeTypes &&
       navigator.mimeTypes['application/x-pnacl'] !== undefined) {
     var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf" type="application/x-pnacl" /></div>').appendTo($('body'))[0];

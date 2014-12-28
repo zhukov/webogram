@@ -746,7 +746,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           historyEl = $('.im_history', element)[0],
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
-          panelWrap = $('.im_history_panel_wrap', element)[0],
           bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
@@ -1001,7 +1000,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!footer || !footer.offsetHeight) {
           footer = $('.footer_wrap')[0];
         }
-        var historyH = $($window).height() - panelWrap.offsetHeight - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (footer ? footer.offsetHeight : 0);
+        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 44) - (footer ? footer.offsetHeight : 0);
         $(historyWrap).css({
           height: historyH
         });
