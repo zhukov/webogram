@@ -4,11 +4,14 @@ var pj = require('./package.json');
 var $ = require('gulp-load-plugins')();
 var concat = require('gulp-concat');
 var path = require('path');
+var http = require('http');
+var livereload = require('gulp-livereload');
+var st = require('st');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
 gulp.task('templates', function() {
-  return gulp.src('app/partials/*.html')
+  return gulp.src('app/partials/**/*.html')
     .pipe($.angularTemplatecache('templates.js', {
       root: 'partials',
       module: 'myApp.templates',
@@ -18,10 +21,10 @@ gulp.task('templates', function() {
 });
 
 gulp.task('usemin', ['templates', 'enable-production'], function() {
-  return gulp.src('app/index.html')
+  return gulp.src(['app/index.html', 'app/badbrowser.html'])
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.ngmin(), $.uglify({outSourceMap: true})],
+      js: ['concat', $.ngAnnotate(), $.uglify({outSourceMap: false})],
       css: [$.minifyCss(), 'concat']
     }))
     .pipe(gulp.dest('dist'));
@@ -45,24 +48,46 @@ gulp.task('copy', function() {
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
-    gulp.src('app/vendor/console-polyfill/console-polyfill.js')
-      .pipe(gulp.dest('dist/vendor/console-polyfill')),
-    gulp.src('app/js/lib/mtproto.js')
+    // gulp.src(['app/fonts/*'])
+    //   .pipe(gulp.dest('dist/fonts')),
+    gulp.src(['app/js/lib/polyfill.js', 'app/js/lib/bin_utils.js'])
       .pipe(gulp.dest('dist/js/lib')),
     gulp.src('app/vendor/closure/long.js')
       .pipe(gulp.dest('dist/vendor/closure')),
+    gulp.src(['app/css/desktop.css', 'app/css/mobile.css'])
+      .pipe(gulp.dest('dist/css')),
     gulp.src('app/vendor/jsbn/jsbn_combined.js')
       .pipe(gulp.dest('dist/vendor/jsbn')),
+    gulp.src('app/vendor/leemon_bigint/bigint.js')
+      .pipe(gulp.dest('dist/vendor/leemon_bigint')),
+    gulp.src('app/vendor/rusha/rusha.js')
+      .pipe(gulp.dest('dist/vendor/rusha')),
     gulp.src('app/vendor/cryptoJS/crypto.js')
       .pipe(gulp.dest('dist/vendor/cryptoJS')),
-    gulp.src('app/vendor/bootstrap/fonts/*')
-      .pipe(gulp.dest('dist/fonts')),
+    gulp.src(['app/nacl/mtproto_crypto.pexe', 'app/nacl/mtproto_crypto.nmf'])
+      .pipe(gulp.dest('dist/nacl/')),
     gulp.src('app/js/background.js')
       .pipe(gulp.dest('dist/js'))
   );
 });
 
-gulp.task('compress-dist', ['add-csp'], function() {
+gulp.task('copy-locales', function() {
+  var langpackSrc = [],
+      ngSrc = [];
+
+  pj.locales.forEach(function (locale) {
+    langpackSrc.push('app/js/locales/' + locale + '.json');
+    ngSrc.push('app/vendor/angular/i18n/angular-locale_' + locale + '.js');
+  });
+  return es.concat(
+    gulp.src(langpackSrc)
+      .pipe(gulp.dest('dist/js/locales/')),
+    gulp.src(ngSrc)
+      .pipe(gulp.dest('dist/vendor/angular/i18n/'))
+  );
+});
+
+gulp.task('compress-dist', ['build'], function() {
   return gulp.src('**/*', {cwd:  path.join(process.cwd(), '/dist')})
     .pipe($.zip('webogram_v' + pj.version + '.zip'))
     .pipe(gulp.dest('releases'));
@@ -72,27 +97,15 @@ gulp.task('cleanup-dist', ['compress-dist'], function() {
   return gulp.src(['releases/**/*', '!releases/*.zip']).pipe($.clean());
 });
 
-gulp.task('add-csp', ['build'], function() {
-  return gulp.src('dist/index.html')
-    .pipe($.replace(/<html(.*?)>/, '<html$1 ng-csp="">'))
-    .pipe(gulp.dest('dist'));
-});
-
 gulp.task('update-version-manifests', function() {
  return gulp.src(['app/manifest.webapp', 'app/manifest.json'])
     .pipe($.replace(/"version": ".*",/, '"version": "' + pj.version + '",'))
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('update-version-settings', function() {
- return gulp.src('app/partials/settings_modal.html')
-    .pipe($.replace(/\bv[\d\.]+\b/, 'v' + pj.version))
-    .pipe(gulp.dest('app/partials'));
-});
-
-gulp.task('update-version-mtproto', function() {
- return gulp.src('app/js/lib/mtproto.js')
-    .pipe($.replace(/'.+?', 'app_version'/, '\'' + pj.version  + '\', \'app_version\''))
+gulp.task('update-version-config', function() {
+ return gulp.src('app/js/lib/config.js')
+    .pipe($.replace(/version: '.*?'/, 'version: \'' + pj.version  + '\''))
     .pipe(gulp.dest('app/js/lib'));
 });
 
@@ -163,16 +176,70 @@ gulp.task('add-appcache-manifest', function() {
   );
 });
 
+gulp.task('package-dev', function() {
+  return es.concat(
+    gulp.src('app/partials/*.html')
+     .pipe($.angularTemplatecache('templates.js', {
+       root: 'partials',
+       module: 'myApp.templates',
+       standalone: true
+     }))
+     .pipe(gulp.dest('dist_package/js')),
+
+    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json'])
+     .pipe(gulp.dest('dist_package')),
+    gulp.src(['app/css/**/*'])
+     .pipe(gulp.dest('dist_package/css')),
+    gulp.src(['app/img/**/*'])
+     .pipe(gulp.dest('dist_package/img')),
+    gulp.src('app/vendor/**/*')
+     .pipe(gulp.dest('dist_package/vendor')),
+
+    gulp.src('app/**/*.html')
+      .pipe($.replace(/PRODUCTION_ONLY_BEGIN/g, 'PRODUCTION_ONLY_BEGIN-->'))
+      .pipe($.replace(/PRODUCTION_ONLY_END/, '<!--PRODUCTION_ONLY_END'))
+      .pipe(gulp.dest('dist_package')),
+
+    gulp.src('app/**/*.js')
+      .pipe($.ngmin())
+      .pipe($.replace(/PRODUCTION_ONLY_BEGIN(\*\/)?/g, 'PRODUCTION_ONLY_BEGIN*/'))
+      .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, '/*PRODUCTION_ONLY_END'))
+      .pipe(gulp.dest('dist_package'))
+    );
+});
+
+gulp.task('watchcss', function() {
+  gulp.src('app/css/*.css')
+    .pipe(livereload());
+});
+
+gulp.task('watchhtml', function() {
+  gulp.src('app/partials/**/*.html')
+    .pipe(livereload());
+});
+
+gulp.task('watch', ['server'], function() {
+  livereload.listen({ basePath: 'app' });
+  gulp.watch('app/css/*.css', ['watchcss']);
+  gulp.watch('app/partials/**/*.html', ['watchhtml']);
+});
+
+gulp.task('server', function(done) {
+  http.createServer(
+    st({ path: __dirname, index: 'index.html', cache: false })
+  ).listen(8000, done);
+});
+
 
 gulp.task('clean', function() {
   return gulp.src(['dist/*', 'app/js/templates.js', '!dist/.git']).pipe($.clean());
 });
 
-gulp.task('bump', ['update-version-manifests', 'update-version-settings', 'update-version-mtproto'], function () {
+gulp.task('bump', ['update-version-manifests', 'update-version-config'], function () {
   gulp.start('update-version-comments');
 });
 
-gulp.task('build', ['usemin', 'copy', 'copy-images'], function () {
+gulp.task('build', ['usemin', 'copy', 'copy-locales', 'copy-images'], function () {
   gulp.start('disable-production');
 });
 gulp.task('package', ['cleanup-dist']);

@@ -1,12 +1,12 @@
 {
-  "name": "webogram",
-  "version": "0.1.1",
-  "description": "Telegram UNOFFICIAL Web App",
+  "name": "Telegram",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.3.8",
   "main": "app/index.html",
   "single-instance": true,
   "dom_storage_quota": 40,
   "window": {
-    "title": "Webogram",
+    "title": "Telegram",
     "icon": "app/img/icons/icon128.png",
     "toolbar": false,
     "frame": true,
@@ -30,24 +30,36 @@
   "bugs": {
     "url": "https://github.com/zhukov/webogram/issues"
   },
+  "locales": [
+    "en-us",
+    "es-es",
+    "de-de",
+    "it-it",
+    "ru-ru",
+    "nl-nl",
+    "pt-br"
+  ],
   "homepage": "http://zhukov.github.io/webogram",
   "devDependencies": {
+    "event-stream": "^3.1.0",
     "gulp": "~3.5.5",
     "gulp-angular-templatecache": "^1.1.0",
-    "gulp-load-plugins": "^0.4.0",
-    "gulp-usemin": "^0.3.3",
-    "gulp-uglify": "^0.2.1",
-    "gulp-rev": "^0.3.0",
-    "gulp-minify-css": "^0.3.0",
-    "gulp-minify-html": "^0.1.1",
-    "gulp-imagemin": "^0.1.5",
     "gulp-clean": "^0.2.4",
-    "gulp-replace": "^0.2.0",
     "gulp-concat": "^2.1.7",
     "gulp-grep-stream": "0.0.2",
-    "event-stream": "^3.1.0",
-    "gulp-zip": "^0.1.2",
+    "gulp-imagemin": "^0.1.5",
+    "gulp-livereload": "^3.0.2",
+    "gulp-load-plugins": "^0.4.0",
     "gulp-manifest": "0.0.3",
-    "gulp-ngmin": "~0.1.2"
+    "gulp-minify-css": "^0.3.0",
+    "gulp-minify-html": "^0.1.1",
+    "gulp-ng-annotate": "~0.3.3",
+    "gulp-replace": "^0.2.0",
+    "gulp-rev": "^1.1.0",
+    "gulp-uglify": "^1.0.2",
+    "gulp-usemin": "^0.3.8",
+    "gulp-zip": "^0.1.2",
+    "http": "0.0.0",
+    "st": "^0.5.2"
   }
 }

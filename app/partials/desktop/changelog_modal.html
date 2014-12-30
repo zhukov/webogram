@@ -1,0 +1,156 @@
+<div class="changelog_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+      </div>
+      <div class="md_modal_title" my-i18n="head_about"></div>
+    </div>
+
+    <div class="peer_modal_profile_wrap clearfix">
+      <div class="peer_modal_photo_wrap pull-left">
+        <div class="peer_modal_photo telegram_modal_logo"></div>
+      </div>
+      <div class="peer_modal_profile">
+        <div class="peer_modal_profile_name">Telegram Web</div>
+        <div class="peer_modal_profile_description">Version {{currentVersion}}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <a href="https://twitter.com/telegram_web" target="_blank" class="md_modal_split_action">
+        <i class="md_modal_split_action_twitter"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="md_modal_sections">
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.8')">
+        <div class="md_modal_section_version">0.3.8</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Telegram.me links open right in Telegram Web when authorized</li>
+            <li>@username mentions in messages are clickable and open a conversation with the user</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.7')">
+        <div class="md_modal_section_version">0.3.7</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>[Desktop] New material design for modal windows</li>
+            <li>[Desktop] Forward messages to multiple recipients</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.6')">
+        <div class="md_modal_section_version">0.3.6</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>New viewer for photos, videos, documents.</li>
+            <li>[FirefoxOS] Improved media downloads.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.5')">
+        <div class="md_modal_section_version">0.3.5</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added embedded Soundcloud tracks and playlists.</li>
+            <li>Added global user search to contacts list.</li>
+            <li>Added switch to mobile version on window resize.</li>
+            <li>Migrate to HTTPS notification</li>
+            <li>Bugfixes.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.4')">
+        <div class="md_modal_section_version">0.3.4</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added embedded Facebook posts and Vimeo videos.</li>
+            <li>Improved IE10+ support: downloading files and style fixes.</li>
+            <li>Added unsupported media playback warning.</li>
+            <li>Bugfixes.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.3')">
+        <div class="md_modal_section_version">0.3.3</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added Native Client module: dramatically improved encryption speed; Download and upload speed is now as high as in native applications.</li>
+            <li>HTTPS. We recommend you to use <a href="https://web.telegram.org" target="_blank">https://web.telegram.org</a>.</li>
+            <li>Added multiple open tabs warning. Please note, that only one tab with Telegram Web will work.</li>
+            <li>Added embedded Instagram, Twitter, Vine, YouTube links.</li>
+            <li>Jump to selected spot when playing back audio.</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.2')">
+        <div class="md_modal_section_version">0.3.2</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Usernames support: <a href="" ng-click="changeUsername()">Choose a username right now!</a></li>
+            <li>Search can now find public users by username.</li>
+            <li>Most popular emoticons shown in 'recent' when empty</li>
+            <li>[ChromeApp] Added saving window position and size</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.1')">
+        <div class="md_modal_section_version">0.3.1</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>New languages: Spanish, German and Italian are now available </li>
+            <li>New custom-made audio player</li>
+            <li>Bad browser page for IE 6-9</li>
+            <li>Perfomance improvements and bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.0')">
+        <div class="md_modal_section_version">0.3.0</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Log in codes may be received in other Telegram apps</li>
+            <li>Partner's online status updates automatically</li>
+            <li>Added support for non-english hashtags in messages</li>
+            <li>Fixed invalid scrollbar width bug</li>
+            <li>[Desktop] Added automatic country code detection</li>
+            <li>[FirefoxOS] Improved PUSH-notifications for &lt;= 1.1</li>
+            <li>[FirefoxOS] Fixed emoji in notifications</li>
+            <li>[FirefoxOS] Fixed attachment bug for &lt;= 1.1</li>
+            <li>[FirefoxOS] Added phonebook permissions handling</li>
+            <li>[FirefoxOS] Added ability to share Gallery photos in Telegram</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="changelog_footer_wrap clearfix">
+      <a class="changelog_github_link" href="https://github.com/zhukov/webogram" target="_blank">GitHub</a>
+      <a ng-show="changelogHidden" class="changelog_more_link" href="" ng-click="showAllVersions()">View Previous Updates</a>
+    </div>
+
+  </div>
+
+</div>

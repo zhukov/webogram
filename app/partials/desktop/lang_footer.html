@@ -1,0 +1,6 @@
+<div class="footer_wrap" ng-controller="AppLangSelectController">
+	<span ng-repeat="locale in ::supportedLocales">
+	  <a class="footer_lang_link" ng-class="{active: curLocale == locale, disabled: curLocale == locale}" ng-disabled="curLocale == locale" ng-click="localeSelect(locale)" ng-bind="langNames[locale]"></a>
+	  <span ng-if="!$last" class="footer_link_divider"></span>
+	</span>
+</div>

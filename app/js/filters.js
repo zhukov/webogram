@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.1.1 - messaging web application for MTProto
+ * Webogram v0.3.8 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -9,73 +9,115 @@
 
 /* Filters */
 
-angular.module('myApp.filters', [])
+angular.module('myApp.filters', ['myApp.i18n'])
 
-  .filter('userName', [function() {
+  .filter('userName', function(_) {
     return function (user) {
       if (!user || !user.first_name && !user.last_name) {
-        return 'DELETED';
+        return _('user_name_deleted');
       }
       return user.first_name + ' ' + user.last_name;
     }
-  }])
+  })
 
-  .filter('userFirstName', [function() {
+  .filter('userFirstName', function(_) {
     return function (user) {
       if (!user || !user.first_name && !user.last_name) {
-        return 'DELETED';
+        return _('user_first_name_deleted');
       }
       return user.first_name || user.last_name;
     }
-  }])
+  })
 
-  .filter('userStatus', ['$filter', function($filter) {
+  .filter('userStatus', function($filter, _) {
+    var relativeTimeFilter = $filter('relativeTime');
     return function (user) {
-      if (!user || !user.status || user.status._ == 'userStatusEmpty') {
-        return 'offline';
-      }
-      if (user.status._ == 'userStatusOnline') {
-        return 'online';
-      }
+      var statusType = user && user.status && user.status._ || 'userStatusEmpty';
+      switch (statusType) {
+        case 'userStatusOnline':
+          return _('user_status_online');
 
-      return 'last seen ' + $filter('relativeTime')(user.status.was_online);
+        case 'userStatusOffline':
+          return _('user_status_last_seen', relativeTimeFilter(user.status.was_online));
+
+        case 'userStatusRecently':
+          return _('user_status_recently');
+
+        case 'userStatusLastWeek':
+          return _('user_status_last_week');
+
+        case 'userStatusLastMonth':
+          return _('user_status_last_month');
+
+        case 'userStatusEmpty':
+        default:
+          return _('user_status_long_ago');
+      }
     }
-  }])
+  })
 
-  .filter('chatTitle', [function() {
+  .filter('chatTitle', function(_) {
     return function (chat) {
       if (!chat || !chat.title) {
-        return 'DELETED';
+        return _('chat_title_deleted');
       }
       return chat.title;
     }
-  }])
+  })
 
-  .filter('dateOrTime', ['$filter', function($filter) {
-    var cachedDates = {};
+  .filter('dateOrTime', function($filter) {
+    var dateFilter = $filter('date');
+
+    return function (timestamp, extended) {
+
+      var ticks = timestamp * 1000,
+          diff = Math.abs(tsNow() - ticks),
+          format = 'shortTime';
+
+      if (diff > 518400000) { // 6 days
+        format = extended ? 'mediumDate' : 'shortDate';
+      }
+      else if (diff > 43200000) { // 12 hours
+        format = extended ? 'EEEE' : 'EEE';
+      }
+
+      return dateFilter(ticks, format);
+    }
+  })
+
+  .filter('time', function($filter) {
+    var cachedDates = {},
+        dateFilter = $filter('date'),
+        format = Config.Mobile ? 'shortTime' : 'mediumTime';
 
     return function (timestamp) {
-
       if (cachedDates[timestamp]) {
         return cachedDates[timestamp];
       }
 
-      var ticks = timestamp * 1000,
-          diff = Math.abs(tsNow() - ticks),
-          format = 'HH:mm';
-
-      if (diff > 518400000) { // 6 days
-        format = 'shortDate';
-      }
-      else if (diff > 43200000) { // 12 hours
-        format = 'EEE';
-      }
-      return cachedDates[timestamp] = $filter('date')(ticks, format);
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, format);
     }
-  }])
+  })
+
+  .filter('myDate', function($filter) {
+    var cachedDates = {},
+        dateFilter = $filter('date');
+
+    return function (timestamp) {
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp];
+      }
+
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, 'fullDate');
+    }
+  })
 
   .filter('duration', [function() {
     return function (duration) {
+      duration = parseInt(duration);
+      if (isNaN(duration)) {
+        duration = 0;
+      }
       var secs = duration % 60,
           mins = Math.floor((duration - secs) / 60.0);
 
@@ -86,6 +128,14 @@ angular.module('myApp.filters', [])
       return mins + ':' + secs;
     }
   }])
+
+  .filter('durationRemains', function($filter) {
+    var durationFilter = $filter('duration');
+
+    return function (done, total) {
+      return '-' + durationFilter(total - done);
+    }
+  })
 
   .filter('phoneNumber', [function() {
     return function (phoneRaw) {
@@ -99,7 +149,7 @@ angular.module('myApp.filters', [])
   }])
 
   .filter('formatSize', [function () {
-    return function (size) {
+    return function (size, progressing) {
       if (!size) {
         return '0';
       }
@@ -107,26 +157,32 @@ angular.module('myApp.filters', [])
         return size + ' b';
       }
       else if (size < 1048576) {
-        return (Math.round(size / 1024 * 10) / 10) + ' Kb';
+        return Math.round(size / 1024) + ' Kb';
       }
-
-      return (Math.round(size / 1048576 * 100) / 100) + ' Mb';
+      var mbs = size / 1048576;
+      if (progressing) {
+        mbs = mbs.toFixed(1);
+      } else {
+        mbs = (Math.round(mbs * 10) / 10);
+      }
+      return mbs + ' Mb';
     }
   }])
 
-  .filter('formatSizeProgress', ['$filter', function ($filter) {
+  .filter('formatSizeProgress', function ($filter, _) {
+    var formatSizeFilter = $filter('formatSize');
     return function (progress) {
-      var done = $filter('formatSize')(progress.done),
+      var done = formatSizeFilter(progress.done, true),
           doneParts = done.split(' '),
-          total = $filter('formatSize')(progress.total),
+          total = formatSizeFilter(progress.total),
           totalParts = total.split(' ');
 
       if (totalParts[1] === doneParts[1]) {
-        return doneParts[0] + ' of ' + totalParts[0] + ' ' + (doneParts[1] || '');
+        return _('format_size_progress_mulitple', {done: doneParts[0], total: totalParts[0], parts: (doneParts[1] || '')});
       }
-      return done + ' of ' + total;
+      return _('format_size_progress', {done: done, total: total});
     }
-  }])
+  })
 
   .filter('nl2br', [function () {
     return function (text) {
@@ -134,26 +190,33 @@ angular.module('myApp.filters', [])
     }
   }])
 
-  .filter('richText', ['$filter', function ($filter) {
+  .filter('richText', function ($filter) {
+    var linkyFilter = $filter('linky');
     return function (text) {
-      return $filter('linky')(text, '_blank').replace(/\n|&#10;/g, '<br/>');
+      return linkyFilter(text, '_blank').replace(/\n|&#10;/g, '<br/>');
     }
-  }])
+  })
 
-  .filter('relativeTime', ['$filter', function($filter) {
+  .filter('relativeTime', function($filter, _) {
+    var langMinutesPluralize = _.pluralize('relative_time_pluralize_minutes_ago'),
+        langHoursPluralize = _.pluralize('relative_time_pluralize_hours_ago'),
+        dateOrTimeFilter = $filter('dateOrTime');
+
     return function (timestamp) {
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks);
 
       if (diff < 60000) {
-        return 'just now';
+        return _('relative_time_just_now');
       }
-      if (diff < 3000000) {
-        return Math.ceil(diff / 60000) + ' minutes ago';
+      if (diff < 3600000) {
+        var minutes = Math.floor(diff / 60000);
+        return langMinutesPluralize(minutes);
       }
-      if (diff < 10000000) {
-        return Math.ceil(diff / 3600000) + ' hours ago';
+      if (diff < 86400000) {
+        var hours = Math.floor(diff / 3600000);
+        return langHoursPluralize(hours);
       }
-      return $filter('dateOrTime')(timestamp);
+      return dateOrTimeFilter(timestamp, true);
     }
-  }])
+  })

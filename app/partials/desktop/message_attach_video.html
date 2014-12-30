@@ -1,0 +1,34 @@
+<div class="im_message_video im_message_document_thumbed">
+  <a class="im_message_video_thumb" ng-click="videoOpen()" ng-style="::{width: video.thumb.width + 'px'}">
+    <span class="im_message_video_duration" ng-bind="::video.duration | duration"></span>
+    <i class="icon icon-videoplay"></i>
+    <img
+      class="im_message_video_thumb"
+      my-load-thumb
+      thumb="video.thumb"
+    />
+  </a>
+
+  <div class="im_message_document_info">
+    <div class="im_message_document_name_wrap">
+      <span class="im_message_document_name" my-i18n="message_attach_video_video"></span>
+      <span class="im_message_document_size" ng-if="!video.progress.enabled" ng-bind="::video.size | formatSize"></span>
+      <span class="im_message_document_size" ng-if="video.progress.enabled" ng-bind="video.progress | formatSizeProgress"></span>
+    </div>
+    <div class="im_message_document_actions" ng-if="!video.progress.enabled">
+      <a href="" ng-click="videoSave()" ng-switch="video.downloaded">
+        <span ng-switch-when="true" my-i18n="message_attach_video_save"></span>
+        <span ng-switch-default my-i18n="message_attach_video_download"></span>
+      </a>
+      <a href="" ng-click="videoOpen()" my-i18n="message_attach_video_play"></a>
+    </div>
+    <div class="clearfix im_message_cancelable_progress_wrap" ng-if="video.progress.enabled">
+      <a class="im_message_media_progress_cancel pull-right" ng-click="video.progress.cancel()" my-i18n="modal_cancel"></a>
+      <div class="im_message_download_progress_wrap">
+        <div class="progress tg_down_progress">
+          <div class="progress-bar progress-bar-success" ng-style="{width: video.progress.percent + '%'}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

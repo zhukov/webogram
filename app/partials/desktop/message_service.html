@@ -1,0 +1,23 @@
+<span ng-switch="::historyMessage.action._">
+  <my-i18n>
+    <span ng-switch-when="messageActionChatCreate" my-i18n-format="message_service_created_group"></span>
+    <span ng-switch-when="messageActionChatEditTitle" my-i18n-format="message_service_changed_group_name"></span>
+    <my-i18n-param name="group-name">&laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;</my-i18n-param>
+  </my-i18n>
+  <span ng-switch-when="messageActionChatEditPhoto" my-i18n="message_service_changed_group_photo"></span>
+  <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="message_service_removed_group_photo"></span>
+  <span ng-switch-when="messageActionChatAddUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
+    <span ng-switch-when="true" my-i18n="message_service_invited_user">
+      <my-i18n-param name="user"><a my-user-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
+    </span>
+    <span ng-switch-default my-i18n="message_service_returned_to_group"></span>
+  </span>
+  <span ng-switch-when="messageActionChatDeleteUser" ng-switch="::historyMessage.from_id != historyMessage.action.user_id">
+    <span ng-switch-when="true" my-i18n="message_service_kicked_user">
+      <my-i18n-param name="user"><a my-user-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
+    </span>
+    <span ng-switch-default my-i18n="message_service_left_group"></span>
+  </span>
+
+  <span ng-switch-default ng-bind="'message_service_unsupported_action' | i18n:historyMessage.action._"></span>
+</span>
