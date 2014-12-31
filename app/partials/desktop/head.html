@@ -40,13 +40,7 @@
 
       <div ng-switch-default class="tg_head_main_peer_wrap">
 
-        <div class="tg_head_peer_dropdown tg_head_peer_more_dropdown dropdown" dropdown>
-          <a class="tg_head_btn dropdown-toggle" dropdown-toggle my-i18n="head_peer_more"></a>
-          <ul class="dropdown-menu">
-            <li><a ng-click="toggleEdit()" my-i18n="head_edit_messages"></a></li>
-            <li><a ng-click="selectedFlush()" my-i18n="head_clear_all"></a></li>
-          </ul>
-        </div>
+        <a class="tg_head_btn tg_head_msgs_edit_btn" my-i18n="im_edit" ng-click="toggleEdit()"></a>
 
         <div class="tg_head_peer_dropdown tg_head_peer_media_dropdown dropdown" dropdown>
           <a class="tg_head_btn dropdown-toggle" dropdown-toggle my-i18n="im_media"></a>

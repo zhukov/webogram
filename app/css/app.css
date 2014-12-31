@@ -8,8 +8,11 @@ html {
 body {
   color: #000;
   background: none;
-  font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Tahoma, sans-serif;
+  font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
   overflow: visible;
+}
+body.non_osx {
+  font: 13px/18px Tahoma, sans-serif, Arial, Helvetica;
 }
 h1, h2, h3, h4, h5 {
   color: #222;
