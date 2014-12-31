@@ -162,6 +162,9 @@
 .tg_head_peer_dropdown {
   float: right;
 }
+.tg_head_msgs_edit_btn {
+  float: right;
+}
 .tg_head_peer_status {
   font-weight: normal;
 }
@@ -182,10 +185,11 @@
 }
 
 .tg_head_peer_dropdown .dropdown-menu > li > a {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 15px;
   padding: 11px 18px 11px 18px;
   color: #52719a;
+  font-weight: bold;
 }
 .tg_head_peer_dropdown .dropdown-menu > li > a:hover {
   background: #f3f6fa;
@@ -632,6 +636,7 @@ a.footer_link.active:active {
   min-width: 0;
   width: auto;
   padding: 0;
+  font-weight: bold;
 }
 .im_submit:hover {
   color: #2c78b6;
@@ -1406,8 +1411,16 @@ div.im_dialog_photo .peer_initials {
   transition: margin-top linear 0.2s;
 }
 
+.countries_modal_search {
+  padding: 12px 12px 12px;
+  margin: 0;
+  position: relative;
+}
 .countries_modal_col {
   max-height: 350px;
+}
+.countries_modal_wrap .md_modal_body {
+  padding-bottom: 15px;
 }
 
 

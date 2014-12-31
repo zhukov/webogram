@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
