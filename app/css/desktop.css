@@ -189,7 +189,6 @@
   line-height: 15px;
   padding: 11px 18px 11px 18px;
   color: #52719a;
-  font-weight: bold;
 }
 .tg_head_peer_dropdown .dropdown-menu > li > a:hover {
   background: #f3f6fa;
@@ -571,7 +570,7 @@ a.footer_link.active:active {
 
 .icon-message-status {
   pointer-events: none;
-  background: #6ba2cb;
+  background: #4eabf1;
   border: 0;
   display: block;
   width: 10px;
@@ -627,7 +626,7 @@ a.footer_link.active:active {
 }
 
 .im_submit {
-  color: #4e92ca;
+  color: #499dd9;
   font-size: 13px;
   line-height: 18px;
   height: 18px;
@@ -639,7 +638,7 @@ a.footer_link.active:active {
   font-weight: bold;
 }
 .im_submit:hover {
-  color: #2c78b6;
+  color: #3589c5;
   background: inherit;
 }
 

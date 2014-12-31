@@ -46,7 +46,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         location.href = location.href.replace(/^http:/, 'https:');
         return;
       }
-      TelegramMeWebService.setAuthorized(true);
+      TelegramMeWebService.setAuthorized(false);
     });
 
     var options = {dcID: 2, createNetworker: true},
