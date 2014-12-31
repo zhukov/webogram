@@ -31,6 +31,15 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.9')">
+        <div class="md_modal_section_version">0.3.9</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>[Desktop] Material design completed</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.3.8')">
         <div class="md_modal_section_version">0.3.8</div>
         <div class="md_modal_section_description changelog_version_changes">
