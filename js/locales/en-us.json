@@ -350,9 +350,9 @@
 	"login_signing_up": "Signing up",
 	"login_sign_up": "Sign up",
 	"login_about_title": "About",
-	"login_about_desc1_md": "Telegram web-client is free, fast and secure way to enjoy most of the **Telegram** features right from your **web-browser**.",
-	"login_about_desc2_md": "It is always synced to to the **Telegram app** on your mobile device, which makes it a pretty useful tool for messaging and sharing files.",
-	"login_about_desc3_md": "We designed this product not because we were told to, but because we wanted it for ourselves. Our {source-link: source code} is open, so everyone can make a contribution.",
+	"login_about_desc1_md": "The Telegram web-client is a free, fast and secure way to enjoy most of **Telegram**'s features right in your **web-browser**.",
+	"login_about_desc2_md": "It is always synced with the **Telegram app** on your mobile device, which makes it a perfect tool for messaging and file sharing.",
+	"login_about_desc3_md": "Our {source-link: source code} is open, so everyone can make a contribution.",
 	"login_about_intro": "Welcome to the official Telegram web-client.",
 	"login_about_learn": "Learn more",
 
