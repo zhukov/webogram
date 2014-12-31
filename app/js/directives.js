@@ -2531,3 +2531,41 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     };
   })
+
+  .directive('mySubmitOnEnter', function () {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      element.on('keydown', function (event) {
+        if (event.keyCode == 13) {
+          element.trigger('submit');
+        }
+      });
+    };
+  })
+
+  .directive('myScrollToOn', function () {
+
+    return {
+      link: function($scope, element, attrs) {
+        var ev = attrs.myScrollToOn;
+        var doScroll = function () {
+          onContentLoaded(function () {
+            console.log(111,element, element.offset().top);
+            $('html, body').animate({
+              scrollTop: element.offset().top
+            }, 200);
+          });
+        };
+        if (ev == '$init') {
+          doScroll();
+        } else {
+          $scope.$on(ev, doScroll);
+        }
+      }
+    };
+
+  })

@@ -31,15 +31,15 @@
     <form class="modal_simple_form" ng-submit="doImport()" my-vertical-position="0.2">
 
       <div class="form-group">
-        <input class="form-control input-lg" my-focused type="text" placeholder="{{'contact_import_modal_phone' | i18n}}" ng-model="importContact.phone"/>
+        <input class="form-control input-lg" my-focused type="text" placeholder="{{'contact_import_modal_phone' | i18n}}" ng-model="importContact.phone" my-submit-on-enter/>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name" my-submit-on-enter/>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name" my-submit-on-enter/>
       </div>
-      
+
       <div class="import_modal_phonebook_wrap" ng-if="phonebookAvailable">
         <a class="btn btn-link" ng-click="importPhonebook()" my-i18n="contact_import_modal_phonebook"></a>
       </div>

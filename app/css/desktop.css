@@ -1411,8 +1411,16 @@ div.im_dialog_photo .peer_initials {
   transition: margin-top linear 0.2s;
 }
 
+.countries_modal_search {
+  padding: 12px 12px 12px;
+  margin: 0;
+  position: relative;
+}
 .countries_modal_col {
   max-height: 350px;
+}
+.countries_modal_wrap .md_modal_body {
+  padding-bottom: 15px;
 }
 
 

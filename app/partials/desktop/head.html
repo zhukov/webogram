@@ -11,14 +11,14 @@
           </div><span class="tg_head_logo_text" my-i18n="head_telegram"></span>
         </a>
 
-        <ul class="dropdown-menu" ng-switch="isLoggedIn">
-          <li ng-switch-when="true"><a ng-click="openGroup()">
+        <ul class="dropdown-menu">
+          <li><a ng-click="openGroup()">
             <i class="icon icon-new-group"></i><span my-i18n="im_new_group"></span>
           </a></li>
-          <li ng-switch-when="true" ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
+          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
             <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
           </a></li>
-          <li ng-switch-when="true"><a ng-click="openSettings()">
+          <li><a ng-click="openSettings()">
             <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
           </a></li>
           <li><a href="https://telegram.org/faq" target="_blank">
@@ -38,7 +38,7 @@
         <span ng-switch-when="true" class="tg_head_connecting_text"><my-i18n msgid="head_connecting"></my-i18n><span my-loading-dots></span></span>
       </div>
 
-      <div ng-switch-default class="tg_head_main_peer_wrap">
+      <div ng-switch-default ng-if="!!historyPeer.id" class="tg_head_main_peer_wrap">
 
         <a class="tg_head_btn tg_head_msgs_edit_btn" my-i18n="im_edit" ng-click="toggleEdit()"></a>
 

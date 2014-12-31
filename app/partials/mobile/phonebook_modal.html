@@ -36,7 +36,9 @@
 
     <div class="contacts_modal_search">
       <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
-      <a class="contacts_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+      <a class="contacts_modal_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
     </div>
 
 

@@ -27,7 +27,9 @@
 
     <div class="countries_modal_search">
       <input class="form-control countries_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
-      <a class="countries_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+      <a class="countries_modal_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
     </div>
 
     <div class="countries_modal_col countries_wrap countries_scrollable_wrap mobile_scrollable_wrap" my-countries-list-mobile my-infinite-scroller-mobile>

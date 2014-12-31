@@ -45,29 +45,12 @@ html {
 }
 .tg_page_head .navbar > .container .navbar-brand {
   padding: 8px 15px;
-  opacity: 0.9;
   margin-left: 0;
   margin-right: 20px;
-  -webkit-transition: opacity swing .9s;
   display: block;
   line-height: 0;
   height: auto;
 }
-.tg_page_head .navbar > .container .navbar-brand:hover {
-  opacity: 1;
-}
-.tg_head_logo {
-  background: url(../img/T_LogoM.png) 0 0 no-repeat;
-  background-size: 143px 30px;
-  display: inline-block;
-  width: 143px;
-  height: 30px;
-  vertical-align: text-top;
-}
-.is_1x .tg_head_logo {
-  background-image: url(../img/T_LogoM_1x.png);
-}
-
 .tg_page_head .navbar-menu .navbar-nav.navbar-right {
   margin-right: 0;
 }
@@ -294,7 +277,7 @@ html {
   float: left;
   margin: 0;
 }
-.navbar_offline .tg_head_logo {
+.navbar_offline .tg_logo_wrap {
   display: none;
 }
 .navbar-offline > li > a {
@@ -371,22 +354,36 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 
-.welcome_text {
-  line-height: 150%;
+.login_head_bg {
+  display: none;
+}
+.login_page {
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+.login_head_wrap {
+  height: 75px;
+  background: #537c9a;
 }
 .login_form_wrap {
   border-radius: 0;
-  max-width: auto;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
   box-shadow: none;
-  -webkit-box-shadow: none;
-  margin: 30px auto 20px;
+  padding: 44px 40px 44px;
 }
-.login_form_wrap .btn-primary {
-  padding: 12px 13px;
+.login_footer_about_wrap {
+  border-radius: 0;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  box-shadow: none;
+  padding: 44px 40px 44px;
 }
-.login_phone_country,
-.login_phone_number {
-  height: 42px;
+
+.icon-next-submit {
+  margin-top: -3px;
 }
 
 .im_dialogs_empty_header {

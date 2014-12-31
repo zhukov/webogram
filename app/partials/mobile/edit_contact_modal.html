@@ -34,10 +34,10 @@
         <span class="form-control uneditable_input input-lg disabled" disabled my-focused type="text" ng-bind="importContact.phone | phoneNumber"></span>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name" my-submit-on-enter/>
       </div>
       <div class="form-group">
-        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name"/>
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name" my-submit-on-enter/>
       </div>
 
     </form>

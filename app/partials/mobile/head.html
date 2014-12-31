@@ -16,14 +16,14 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </a>
-        <ul ng-if="!curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
+        <ul ng-if="!curDialog.peer" class="dropdown-menu">
           <li><a ng-click="openGroup()" my-i18n="head_new_group"></a></li>
           <li><a ng-click="importContact()" my-i18n="head_new_contact"></a></li>
           <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" my-i18n="head_contacts"></a></li>
           <li><a ng-click="openSettings()" my-i18n="head_settings"></a></li>
           <li><a ng-click="logOut()" my-i18n="head_log_out"></a></li>
         </ul>
-        <ul ng-if="curDialog.peer &amp;&amp; isLoggedIn" class="dropdown-menu">
+        <ul ng-if="curDialog.peer" class="dropdown-menu">
           <li><a ng-click="toggleEdit()" my-i18n="head_edit_messages"></a></li>
           <li ng-if="!historyFilter.mediaType" class="divider"></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
@@ -31,18 +31,17 @@
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
         </ul>
-        <ul ng-if="!isLoggedIn" class="dropdown-menu">
-          <li><a href="https://telegram.org" target="_blank" my-i18n="head_about"></a></li>
-        </ul>
       </div>
 
-      <a ng-if="isLoggedIn" class="navbar-search-wrap" ng-click="toggleSearch()">
+      <a class="navbar-search-wrap" ng-click="toggleSearch()">
         <i class="icon-search"></i>
       </a>
 
       <div class="navbar-header">
 
-        <a class="navbar-brand" href="{{isLoggedIn ? '#/im' : '#/'}}"><span class="tg_head_logo"></span></a>
+        <a class="navbar-brand tg_logo_wrap" href="#/im"><i class="icon icon-tg-logo"></i><i class="icon icon-tg-title"></i></a>
+
+        <span class="tg_head_logo"></span></a>
 
         <div ng-show="curDialog.peer" ng-switch="curDialog.peer &amp;&amp; historyFilter.mediaType.length > 0">
           <ul ng-switch-when="true" class="nav navbar-nav navbar-quick-nav">

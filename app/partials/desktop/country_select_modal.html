@@ -1,12 +1,22 @@
-<div class="countries_modal_wrap" my-modal-position>
+<div class="countries_modal_wrap md_modal_wrap" my-modal-position>
 
-  <div class="modal-body">
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()" my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title" my-i18n="country_select_modal_title"></div>
+  </div>
 
-    <h4 class="modal_simple_header" my-i18n="country_select_modal_title"></h4>
+  <div class="md_modal_body">
 
     <div class="countries_modal_search">
       <input class="form-control countries_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
-      <a class="countries_modal_search_clear" ng-click="search.query = ''" ng-show="search.query.length"></a>
+      <a class="countries_modal_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
+
     </div>
 
     <div class="countries_modal_col" my-countries-list>
@@ -30,10 +40,6 @@
 
     </div>
 
-  </div>
-
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" ng-click="$dismiss()" my-i18n="modal_done"></button>
   </div>
 
 </div>

@@ -23,14 +23,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         location.href = location.href.replace(/^http:/, 'https:');
         return;
       }
-      $scope.showWelcome = true;
+      $location.url('/login');
     });
 
     ChangelogNotifyService.checkUpdate();
     LayoutSwitchService.start();
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, _) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
 
     $modalStack.dismissAll();
     IdleManager.start();
@@ -44,8 +44,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           !Config.Modes.http &&
           Config.App.domains.indexOf(location.hostname) != -1) {
         location.href = location.href.replace(/^http:/, 'https:');
+        return;
       }
+      TelegramMeWebService.setAuthorized(true);
     });
+
     var options = {dcID: 2, createNetworker: true},
         countryChanged = false,
         selectedCountry = false;
@@ -53,6 +56,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.credentials = {phone_country: '', phone_country_name: '', phone_number: '', phone_full: ''};
     $scope.progress = {};
     $scope.callPending = {};
+    $scope.about = {};
 
     $scope.chooseCountry = function () {
       var modal = $modal.open({
@@ -208,6 +212,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.credentials.viaApp = sentCode._ == 'auth.sentAppCode';
           $scope.callPending.remaining = sentCode.send_call_timeout || 60;
           $scope.error = {};
+          $scope.about = {};
 
           callCheck();
 
@@ -279,6 +284,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           error.handled = true;
           $scope.credentials.phone_code_valid = true;
           $scope.credentials.phone_unoccupied = true;
+          $scope.about = {};
           return;
         } else if (error.code == 400 && error.type == 'PHONE_NUMBER_OCCUPIED') {
           error.handled = true;
