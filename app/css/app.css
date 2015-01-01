@@ -225,6 +225,7 @@ input[type="number"] {
 
 .md-input {
   color: #000;
+  background: #FFF;
   display: inline-block;
   border: 0;
   outline: 0;
