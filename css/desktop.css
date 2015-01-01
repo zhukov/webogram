@@ -619,10 +619,8 @@ a.footer_link.active:active {
 .im_edit_flush_link {
   float: right;
 }
-.im_edit_flush_link:hover,
-.im_edit_cancel_link:hover {
-  background: #f2f6fa;
-  text-decoration: none;
+.im_edit_selected_actions {
+  text-transform: uppercase;
 }
 
 .im_submit {
