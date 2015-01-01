@@ -4139,7 +4139,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     Storage.get('tgme_sync').then(function (curValue) {
       var ts = tsNow(true);
-      if (curValue &&
+      if (canRedirect &&
+          curValue &&
           curValue.canRedirect == canRedirect &&
           curValue.ts + 86400 > ts) {
         return false;
