@@ -148,11 +148,11 @@
 
             <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
               <div class="im_edit_panel_border"></div>
-              <a class="im_edit_flush_link" ng-click="selectedFlush()" ng-switch="historyPeer.id > 0">
+              <a class="btn btn-md im_edit_flush_link" ng-click="selectedFlush()" ng-switch="historyPeer.id > 0">
                 <span ng-switch-when="true" my-i18n="im_delete_chat"></span>
                 <span ng-switch-default my-i18n="im_clear_history"></span>
               </a>
-              <a class="im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
+              <a class="btn btn-md im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
               <div class="im_edit_selected_actions" my-i18n>
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
                 <a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete"></a>
