@@ -36,7 +36,7 @@
   padding: 17px 20px 15px 22px;
   display: block;
   font-size: 14px;
-  line-height: 14px;
+  line-height: 16px;
   vertical-align: top;
 }
 .tg_head_logo_dropdown .dropdown-toggle:hover,
@@ -55,6 +55,10 @@
 }
 .tg_head_logo_dropdown .icon-hamburger-wrap {
   margin: 0 40px 0 0;
+  vertical-align: top;
+}
+.tg_head_logo_dropdown .icon-tg-title {
+  vertical-align: top;
 }
 .icon-hamburger-wrap .icon-bar {
   background: #fff;
