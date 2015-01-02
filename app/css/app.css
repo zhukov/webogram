@@ -1955,6 +1955,11 @@ img.img_fullsize {
 
   -webkit-user-select: text;
   word-wrap: break-word;
+
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 .emoji-wysiwyg-editor img {
   width: 20px;
