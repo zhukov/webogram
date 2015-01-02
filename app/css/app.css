@@ -2363,17 +2363,6 @@ img.chat_modal_participant_photo {
 
 
 /* Messages edit panel */
-.im_edit_panel_border {
-  display: block;
-  margin: 0 0 34px 3px;
-  border-bottom: 1px solid #EEE;
-}
-.im_panel_to_top .im_edit_panel_wrap {
-  background: #FFF;
-  position: absolute;
-  width: 100%;
-}
-
 .im_edit_selected_actions {
   text-align: center;
 }

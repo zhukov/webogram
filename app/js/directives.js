@@ -1034,7 +1034,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var marginTop = scrollableWrap.offsetHeight
                         - historyMessagesEl.offsetHeight
                         - 20
-                        - (Config.Mobile ? 0 : 49);
+                        - (Config.Mobile ? 0 : 39);
 
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
           $(historyMessagesEl).css({marginTop: marginTop});

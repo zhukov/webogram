@@ -535,8 +535,8 @@ a.footer_link.active:active {
 .im_history_typing_wrap {
   line-height: 18px;
   width: 100%;
-  height: 49px;
-  padding: 13px 0 18px;
+  height: 39px;
+  padding: 13px 0 8px;
   overflow: hidden;
   -webkit-user-select: none;
 }
@@ -607,8 +607,13 @@ a.footer_link.active:active {
 }
 
 .im_edit_panel_wrap {
-  padding: 15px 0 38px;
+  padding: 0px 0 38px;
   margin: 0 24px 0 12px;
+}
+.im_edit_panel_border {
+  display: block;
+  margin: 0 0 49px 3px;
+  border-bottom: 1px solid #EEE;
 }
 .im_edit_flush_link,
 .im_edit_cancel_link {
