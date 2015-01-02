@@ -807,7 +807,7 @@ a.footer_link.active:active {
   width: 52px;
   height: 52px;
   line-height: 52px;
-  border-radius: 24px;
+  border-radius: 50%;
   overflow: hidden;
 }
 div.im_panel_peer_photo,
