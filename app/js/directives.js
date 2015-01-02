@@ -459,6 +459,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           else if (searchField.value) {
             $(searchClear).trigger('click');
           }
+          else {
+            $scope.$emit('esc_no_more');
+          }
           return cancelEvent(e);
         }
 

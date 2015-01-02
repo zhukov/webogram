@@ -336,6 +336,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     });
 
+    $scope.$on('esc_no_more', function () {
+      $location.url('/im');
+    });
+
 
     $scope.isLoggedIn = true;
     $scope.isEmpty = {};
@@ -1145,6 +1149,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function showEmptyHistory () {
+      safeReplaceObject($scope.historyPeer, {});
       safeReplaceObject($scope.state, {notSelected: true});
       peerHistory = false;
       hasMore = false;
