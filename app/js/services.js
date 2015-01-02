@@ -2719,7 +2719,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var doc = angular.copy(docs[docID]),
         isGif = doc.mime_type == 'image/gif',
-        isSticker = doc.mime_type == 'image/webp' || doc.mime_type.substr(0, 6) == 'image/' && doc.sticker,
+        isSticker = doc.mime_type.substr(0, 6) == 'image/' && doc.sticker,
         thumbPhotoSize = doc.thumb,
         width, height;
 
@@ -2736,7 +2736,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         location: {
           _: 'inputDocumentFileLocation',
           id: doc.id,
-          access_hash: doc.access_hash
+          access_hash: doc.access_hash,
+          dc_id: doc.dc_id
         },
         w: doc.w,
         h: doc.h,

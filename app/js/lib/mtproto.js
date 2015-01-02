@@ -12,7 +12,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
   var dcOptions = Config.Modes.test
     ? [
-      {id: 1, host: '173.240.5.253', port: 80},
+      {id: 1, host: '149.154.175.10', port: 80},
       {id: 2, host: '149.154.167.40', port: 80},
       {id: 3, host: '174.140.142.5', port: 80}
     ]

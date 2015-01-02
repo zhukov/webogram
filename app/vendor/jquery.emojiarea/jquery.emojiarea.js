@@ -206,7 +206,7 @@
 			ConfigStorage.set({emojis_recent: curEmojis});
 
 			if (quickSelect) {
-				quickSelect.load(0);
+				quickSelect.changed = true;
 			}
 		})
 	};
@@ -709,16 +709,25 @@
 
 	var EmojiQuickSelectArea = function(emojiarea, $items) {
 		var self = this;
+		var $body = $(document.body);
 
 		this.emojiarea = emojiarea;
+		this.changed = false;
 		this.$items = $items;
 
 		this.load(0);
 		this.$items.on('click', 'a', function(e) {
 			var emoji = $('.label', $(this)).text();
 			self.onItemSelected(emoji);
+			self.changed = true;
 			e.stopPropagation();
 			return false;
+		});
+		$body.on('message_send', function(e) {
+			if (self.changed) {
+				self.load(0);
+				self.changed = false;
+			}
 		});
 	};
 

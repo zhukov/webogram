@@ -662,6 +662,7 @@ a.footer_link.active:active {
 .im_emoji_quick_select_area a {
   display: inline-block;
   padding: 5px;
+  outline: 0;
 }
 
 .im_emoji_quick_select_area a:hover {
