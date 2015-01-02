@@ -211,11 +211,14 @@ html {
 .tg_page_head .navbar > .container .navbar-brand {
   display: none;
 }
-.tg_page_head .navbar {
-  min-height: 46px;
-}
 .tg_page_head .navbar_peer_not_selected > .container .navbar-brand {
   display: block;
+}
+.tg_page_head .navbar_offline > .container .navbar-brand.tg_logo_wrap {
+  display: none;
+}
+.tg_page_head .navbar {
+  min-height: 46px;
 }
 
 .tg_page_head .navbar-inverse .navbar-quick-nav > li > a {
@@ -277,16 +280,12 @@ html {
   float: left;
   margin: 0;
 }
-.navbar_offline .tg_logo_wrap {
-  display: none;
-}
 .navbar-offline > li > a {
   padding-right: 0;
   padding-left: 0;
 }
 .navbar-offline-text {
   color: #FFF;
-  padding-left: 0px;
   font-size: 15px;
 }
 .tg_page_head .navbar-inverse .navbar-offline > li > a {

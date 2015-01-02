@@ -187,6 +187,7 @@
 	"conversation_media_photo": "Photo",
 	"conversation_media_video": "Video",
 	"conversation_media_document": "Document",
+	"conversation_media_sticker": "Sticker",
 	"conversation_media_audio": "Audio",
 	"conversation_media_location": "Location",
 	"conversation_media_contact": "Contact",

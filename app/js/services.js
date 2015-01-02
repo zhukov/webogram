@@ -1436,7 +1436,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
               case 'document':
               default:
-                inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, file_name: file.name, mime_type: file.type};
+                inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, mime_type: file.type, attributes: [
+                  {_: 'documentAttributeFilename', file_name: file.name}
+                ]};
             }
             MtpApiManager.invokeApi('messages.sendMedia', {
               peer: inputPeer,
@@ -1930,7 +1932,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       switch (message.media._) {
         case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo_raw'); break;
         case 'messageMediaVideo': notificationMessage = _('conversation_media_video_raw'); break;
-        case 'messageMediaDocument': notificationMessage = message.media.document.file_name || _('conversation_media_document_raw'); break;
+        case 'messageMediaDocument':
+          if (message.media.document.sticker) {
+            notificationMessage = _('conversation_media_sticker');
+          } else {
+            notificationMessage = message.media.document.file_name || _('conversation_media_document_raw');
+          }
+          break;
         case 'messageMediaAudio': notificationMessage = _('conversation_media_audio_raw'); break;
         case 'messageMediaGeo': notificationMessage = _('conversation_media_location_raw'); break;
         case 'messageMediaContact': notificationMessage = _('conversation_media_contact_raw'); break;
@@ -2350,17 +2358,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     // console.log('chosen photo size', photoID, thumbPhotoSize);
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
-        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      }
-      else {
-        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
-        if (thumb.width > width) {
-          thumb.height = parseInt(thumb.height * width / thumb.width);
-          thumb.width = width;
-        }
-      }
-
+      var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+      thumb.width = dim.w;
+      thumb.height = dim.h;
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
     } else {
@@ -2692,6 +2692,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete apiDoc.thumb.bytes;
       apiDoc.thumb._ = 'photoSize';
     }
+    angular.forEach(apiDoc.attributes, function (attribute) {
+      switch (attribute._) {
+        case 'documentAttributeFilename':
+          apiDoc.file_name = attribute.file_name;
+          break;
+        case 'documentAttributeVideo':
+        case 'documentAttributeAudio':
+          apiDoc.duration = attribute.duration;
+          break;
+        case 'documentAttributeSticker':
+          apiDoc.sticker = true;
+          break;
+        case 'documentAttributeImageSize':
+          apiDoc.w = attribute.w;
+          apiDoc.h = attribute.h;
+          break;
+      }
+    });
   };
 
   function wrapForHistory (docID) {
@@ -2701,28 +2719,42 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var doc = angular.copy(docs[docID]),
         isGif = doc.mime_type == 'image/gif',
-        isAudio = doc.mime_type.substr(0, 6) == 'audio/',
-        width = isGif ? Math.min(windowW - 80, 260) : 100,
-        height = isGif ? Math.min(windowH - 100, 260) : 100,
+        isSticker = doc.mime_type == 'image/webp' || doc.mime_type.substr(0, 6) == 'image/' && doc.sticker,
         thumbPhotoSize = doc.thumb,
-        thumb = {
+        width, height;
+
+    if (isGif) {
+      width = Math.min(windowW - 80, 260);
+      height = Math.min(windowH - 100, 260);
+    }
+    else if (isSticker) {
+      width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
+      height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+      thumbPhotoSize = {
+        _: 'photoSize',
+        type: 'x',
+        location: {
+          _: 'inputDocumentFileLocation',
+          id: doc.id,
+          access_hash: doc.access_hash
+        },
+        w: doc.w,
+        h: doc.h,
+        size: doc.size
+      };
+    } else {
+      width = height = 100;
+    }
+
+    var thumb = {
           width: width,
           height: height
         };
 
-
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
-        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      }
-      else {
-        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
-        if (thumb.width > width) {
-          thumb.height = parseInt(thumb.height * width / thumb.width);
-          thumb.width = width;
-        }
-      }
-
+      var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+      thumb.width = dim.w;
+      thumb.height = dim.h;
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
     } else {
@@ -2735,7 +2767,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (isGif && doc.thumb) {
       doc.isSpecial = 'gif';
     }
-    else if (isAudio) {
+    else if (isSticker) {
+      doc.isSpecial = 'sticker';
+    }
+    else if (doc.mime_type.substr(0, 6) == 'audio/') {
       doc.isSpecial = 'audio';
     }
 

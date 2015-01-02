@@ -374,11 +374,15 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       return cachedDownloads[fileName] = blob;
     }, function () {
       var downloadPromise = downloadRequest(location.dc_id, function () {
+        var inputLocation = location;
+        if (!inputLocation._ || inputLocation._ == 'fileLocation') {
+          inputLocation = angular.extend({}, location, {_: 'inputFileLocation'});
+        }
         // console.log('next small promise');
         return MtpApiManager.invokeApi('upload.getFile', {
-          location: angular.extend({}, location, {_: 'inputFileLocation'}),
+          location: inputLocation,
           offset: 0,
-          limit: 0
+          limit: 1024 * 1024
         }, {
           dcID: location.dc_id,
           fileDownload: true,
