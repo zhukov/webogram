@@ -858,10 +858,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         var pr = parseInt($(scrollableWrap).css('paddingRight'))
         $(scrollableWrap).addClass('im_history_to_bottom');
         scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
-        $(scrollable).css({bottom: 0, marginLeft: -Math.ceil(pr / 2)});
+        $(scrollable).css({bottom: 0, paddingRight: pr});
         onContentLoaded(function () {
           $(scrollableWrap).removeClass('im_history_to_bottom');
-          $(scrollable).css({bottom: '', marginLeft: ''});
+          $(scrollable).css({bottom: '', paddingRight: ''});
           updateSizes(true);
           moreNotified = false;
           lessNotified = false;
@@ -889,11 +889,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         $(scrollableWrap).addClass('im_history_to_bottom');
         scrollableWrap.scrollHeight; // Some strange Chrome bug workaround
-        $(scrollable).css({bottom: -(sh - st - ch), marginLeft: -Math.ceil(pr / 2)});
+        $(scrollable).css({bottom: -(sh - st - ch), paddingRight: pr});
 
         var upd = function () {
             $(scrollableWrap).removeClass('im_history_to_bottom');
-            $(scrollable).css({bottom: '', marginLeft: ''});
+            $(scrollable).css({bottom: '', paddingRight: ''});
             if (scrollTopInitial >= 0) {
               changeScroll();
             } else {

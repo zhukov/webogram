@@ -4,7 +4,7 @@
   max-width: 1010px;
   margin: 0 auto;
   height: 48px;
-  background: #517b9b;
+  background: #5682a3;
 }
 .tg_head_logo_wrap {
   float: left;
@@ -28,7 +28,7 @@
 .tg_head_btn:hover {
   color: #FFF;
   text-decoration: none;
-  background: #3f6c8c;
+  background: #497799;
 }
 
 .tg_head_logo_dropdown .dropdown-toggle {
@@ -237,6 +237,7 @@
   font-size: 13px;
   line-height: 20px;
   float: left;
+  font-weight: bold;
 }
 .icon-filter-photos,
 .icon-filter-video,
@@ -542,9 +543,9 @@ a.footer_link.active:active {
 .im_history_typing {
   font-size: 11px;
   color: #999;
-  max-width: 526px;
+  max-width: 556px;
   margin: 0 auto;
-  padding: 0 77px 0 71px;
+  padding: 0 81px 0 85px;
 }
 .im_history_typing a.im_history_typing_author {
   color: #999;
@@ -1295,6 +1296,9 @@ a.im_panel_peer_photo .peer_initials {
 }
 .im_grouped_short .im_content_message_wrap {
   margin: 6px 10px 6px 16px
+}
+.im_grouped_short:last-child .im_content_message_wrap {
+  margin-bottom: 8px;
 }
 @media (min-width: 901px) {
   .im_message_wrap {
