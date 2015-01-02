@@ -1061,9 +1061,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           fileSelects = $('input', element),
           dropbox = $('.im_send_dropbox_wrap', element)[0],
           emojiButton = $('.im_emoji_btn', element)[0],
+          emojiQuickSelect = !Config.Mobile ? $('.im_emoji_quick_select_area', element)[0] : false,
           editorElement = messageField,
           dragStarted, dragTimeout,
-          emojiArea = $(messageField).emojiarea({button: emojiButton, norealTime: true}),
+          emojiArea = $(messageField).emojiarea({button: emojiButton, norealTime: true, quickSelect: emojiQuickSelect}),
           emojiMenu = $('.emoji-menu', element)[0],
           submitBtn = $('.im_submit', element)[0],
           richTextarea = $('.emoji-wysiwyg-editor', element)[0];

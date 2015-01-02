@@ -635,6 +635,8 @@ a.footer_link.active:active {
   border-radius: 0;
   float: right;
   min-width: 0;
+  margin-top: 5px;
+  margin-left: 10px;
   width: auto;
   padding: 0;
   font-weight: bold;
@@ -642,6 +644,25 @@ a.footer_link.active:active {
 .im_submit:hover {
   color: #3589c5;
   background: inherit;
+}
+
+.im_emoji_quick_select_area {
+  display: block;
+  height: 30px;
+  overflow: hidden;
+  max-width: 210px;
+}
+
+.im_emoji_quick_select_area a {
+  display: inline-block;
+  padding: 5px;
+}
+
+.im_emoji_quick_select_area a:hover {
+  background-color: #edf2f5;
+}
+.im_emoji_quick_select_area a .label {
+  display: none;
 }
 
 .im_message_selected .im_message_date,
@@ -795,6 +816,7 @@ a.footer_link.active:active {
 
 .im_send_panel_wrap {
   max-width: 554px;
+  padding-bottom: 23px;
 }
 .im_send_form {
   max-width: 382px;
@@ -873,7 +895,7 @@ a.im_panel_peer_photo .peer_initials {
 }
 
 .im_send_field_wrap {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 .emoji-wysiwyg-editor,
 .im_message_field {
@@ -904,7 +926,7 @@ a.im_panel_peer_photo .peer_initials {
   width: 18px;
   height: 17px;
   margin-right: 28px;
-  margin-top: 1px;
+  margin-top: 6px;
 }
 
 .icon-paperclip {
@@ -938,6 +960,8 @@ a.im_panel_peer_photo .peer_initials {
 
   width: 20px;
   height: 18px;
+  margin-top: 5px;
+  margin-right: 25px;
 }
 
 
