@@ -175,24 +175,35 @@
 	util.emojiInserted = function (emojiKey, menu, quickSelect) {
 		ConfigStorage.get('emojis_recent', function (curEmojis) {
 			curEmojis = curEmojis || defaultRecentEmojis || [];
+			if (curEmojis.length && typeof curEmojis[0] === 'string') {
+				var newCurEmojis = [];
+				for (var i = 0, l = curEmojis.length; i < l; i++) {
+					newCurEmojis.push([curEmojis[i], 1]);
+				}
+				curEmojis = newCurEmojis;
+			}
 
-			var pos = curEmojis.indexOf(emojiKey);
-			if (!pos) {
-				return false;
+			var exists = false;
+			for (var i = 0, l = curEmojis.length; i < l; i++) {
+				if (curEmojis[i][0] == emojiKey) {
+					exists = true;
+					curEmojis[i][1]++;
+					break;
+				}
 			}
-			if (pos != -1) {
-				curEmojis.splice(pos, 1);
-			}
-			curEmojis.unshift(emojiKey);
-			if (curEmojis.length > 42) {
-				curEmojis = curEmojis.slice(42);
+			if (exists) {
+				curEmojis.sort(function (a, b) {
+					if (a[1] == b[1]) return 0;
+					return a[1] > b[1] ? -1 : 1;
+				});
+			} else {
+				if (curEmojis.length > 41) {
+					curEmojis = curEmojis.slice(0, 41);
+				}
+				curEmojis.push([emojiKey, 1]);
 			}
 
 			ConfigStorage.set({emojis_recent: curEmojis});
-
-			if (menu) {
-				menu.updateRecentTab(curEmojis);
-			}
 
 			if (quickSelect) {
 				quickSelect.load(0);
@@ -635,7 +646,10 @@
 				curEmojis = curEmojis || defaultRecentEmojis || [];
 				var key, i;
 				for (i = 0; i < curEmojis.length; i++) {
-					key = curEmojis[i]
+					key = curEmojis[i];
+					if (Array.isArray(key)) {
+						key = key[0];
+					}
 					if (options[key]) {
 						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 					}
