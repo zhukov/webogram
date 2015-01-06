@@ -1075,6 +1075,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (richTextarea) {
         editorElement = richTextarea;
         $(richTextarea).addClass('form-control');
+        $(richTextarea).attr('dir', 'auto');
         $(richTextarea).attr('placeholder', $interpolate($(messageField).attr('placeholder'))($scope));
 
         var updatePromise;
