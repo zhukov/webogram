@@ -65,5 +65,62 @@
     "90": "/img/icons/icon90.png",
     "120": "/img/icons/icon120.png",
     "128": "/img/icons/icon128.png"
-  }
+  },
+  "locales": {
+    "eo": {
+      "name": "Telegram",
+      "description": "Retaplikaĵo de Telegram.\Pliaj informoj kaj fontkodo ĉi tie: https://github.com/zhukov/webogram",
+      "permissions": {
+        "desktop-notification": {
+          "description": "Necesata por montri atentigojn pri novaj mesaĝoj"
+        },
+        "contacts": {
+          "description": "Necesata por enporti kontaktojn"
+        },
+        "push": {
+          "description": "Necesata por atentigoj"
+        },
+        "device-storage:music": {
+          "description": "Necesata por elŝuti voĉajn notojn"
+        },
+        "device-storage:pictures": {
+          "description": "Necesata por elŝuti fotojn"
+        },
+        "device-storage:sdcard": {
+          "description": "Necesata por elŝuti dokumentojn"
+        },
+        "device-storage:videos": {
+          "description": "Necesata por elŝuti filmetojn"
+        }
+      }
+    },
+    "it": {
+      "name": "Telegram",
+      "description": "Web app di Telegram.\nMaggiori informazioni e codice sorgente qui: https://github.com/zhukov/webogram",
+      "permissions": {
+        "desktop-notification": {
+          "description": "Necessario per mostrare le notifiche di nuovi messaggi"
+        },
+        "contacts": {
+          "description": "Necessario per importare i contatti"
+        },
+        "push": {
+          "description": "Necessario per ricevere notifiche push"
+        },
+        "device-storage:music": {
+          "description": "Necessario per scaricare le note vocali"
+        },
+        "device-storage:pictures": {
+          "description": "Necessario per scaricare le foto"
+        },
+        "device-storage:sdcard": {
+          "description": "Necessario per scaricare documenti"
+        },
+        "device-storage:videos": {
+          "description": "Necessario per scaricare video"
+        }
+      }
+    }
+  },
+  "default_locale": "en"
 }
