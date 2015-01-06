@@ -8,7 +8,7 @@ Go to our [issue tracker](https://github.com/zhukov/webogram/issues) and check i
 
 ### Localization
 
-If you don't see your native language available for Webogram and you can help with translation, please consult the [Telegram Translations Manual](core.telegram.org/translating_telegram).
+If you don't see your native language available for Webogram and you can help with translation, please consult the [Telegram Translations Manual](https://core.telegram.org/translating_telegram).
 
 To test your translation live, use [Localization guide](/app/js/locales/README.md).
 
