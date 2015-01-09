@@ -819,6 +819,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
 
+
     $scope.$on('history_return_recent', returnToRecent);
 
     var peerID,
@@ -1402,6 +1403,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     });
 
+
+    $scope.fixLastMessage = function() {
+      var myMessages = []; // replace with filter
+      angular.forEach(historiesQueueFind(peerID).messages, function (m) {
+        if (m.out) {
+          myMessages.push(m);
+        }
+      });
+      if (myMessages.length > 0) {
+        var lastMessage = myMessages[myMessages.length - 1];
+        $('form').scope().$deleteMessageId = lastMessage.id;
+        $('.emoji-wysiwyg-editor').text(lastMessage.message);
+        setTimeout(function () { //workaround for emojiarea restoring selection
+            var range = document.createRange();
+            range.setStart($('.emoji-wysiwyg-editor')[0].firstChild, lastMessage.message.length);
+            range.collapse(true);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }, 10);
+
+      }
+    }
+
     $scope.$on('history_need_less', showLessHistory);
     $scope.$on('history_need_more', showMoreHistory);
 
@@ -1428,38 +1453,50 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$watch('draftMessage.files', onFilesSelected);
 
     function sendMessage (e) {
+
       $scope.$broadcast('ui_message_before_send');
 
-      $timeout(function () {
-        var text = $scope.draftMessage.text;
+      if ($scope.$deleteMessageId) {
+        AppMessagesManager.deleteMessages([$scope.$deleteMessageId]).then(function (e) {
+          $scope.$deleteMessageId = null;
+          _sendMessage();
+        });
+      } else {
+        _sendMessage();
+      }
 
-        if (angular.isString(text) && text.length > 0) {
-          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
-            var utfChar = $.emojiarea.reverseIcons[name];
-            if (utfChar !== undefined) {
-              return utfChar;
-            }
-            return all;
-          });
+      function _sendMessage() {
+        $timeout(function () {
+          var text = $scope.draftMessage.text;
 
-          var timeout = 0;
-          do {
+          if (angular.isString(text) && text.length > 0) {
+            text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
+              var utfChar = $.emojiarea.reverseIcons[name];
+              if (utfChar !== undefined) {
+                return utfChar;
+              }
+              return all;
+            });
 
-            (function (peerID, curText, curTimeout) {
-              setTimeout(function () {
-                AppMessagesManager.sendText(peerID, curText);
-              }, curTimeout)
-            })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
+            var timeout = 0;
+            do {
 
-            text = text.substr(4096);
-            timeout += 100;
+              (function (peerID, curText, curTimeout) {
+                setTimeout(function () {
+                  AppMessagesManager.sendText(peerID, curText);
+                }, curTimeout)
+              })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
 
-          } while (text.length);
-        }
+              text = text.substr(4096);
+              timeout += 100;
 
-        resetDraft();
-        $scope.$broadcast('ui_message_send');
-      });
+            } while (text.length);
+          }
+
+          resetDraft();
+          $scope.$broadcast('ui_message_send');
+        });
+      }
 
       return cancelEvent(e);
     }
