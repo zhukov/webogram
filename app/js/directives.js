@@ -2532,7 +2532,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-
+      $scope.$on("value_updated", function (event, args) {
+        setZeroTimeout(function () {
+          updateHasValueClass();
+        });
+      });
     };
   })
 
