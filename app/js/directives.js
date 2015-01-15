@@ -2525,14 +2525,18 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       if (!isDisabled) {
-        input.on('blur focus', function (e) {
+        input.on('blur focus change', function (e) {
           focused = e.type == 'focus';
           element.toggleClass('md-input-focused', focused);
           updateHasValueClass();
         });
       }
 
-
+      $scope.$on('value_updated', function (event, args) {
+        setZeroTimeout(function () {
+          updateHasValueClass();
+        });
+      });
     };
   })
 

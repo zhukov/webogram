@@ -118,6 +118,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         updateCountry();
       }
       $scope.$broadcast('country_selected');
+      $scope.$broadcast('value_updated');
     }
 
     function updateCountry () {
