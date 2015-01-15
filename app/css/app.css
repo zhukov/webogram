@@ -173,14 +173,21 @@ input[type="number"] {
   text-transform: uppercase;
   font-size: 13px;
   padding: 6px 10px;
+  font-weight: bold;
 }
 .btn-md,
 .btn-md:focus,
 .btn-md:hover {
-  color: #3a6d99;
+  color: #72a0c7;
+  /*color: #4680b3;*/
 }
 .btn-md:hover {
   background: #f2f6fa;
+}
+.btn-md-primary,
+.btn-md-primary:focus,
+.btn-md-primary:hover {
+  color: #4680b3;
 }
 
 .btn-md-danger,
@@ -278,6 +285,7 @@ a.md_modal_action {
   float: right;
   color: #dde8f1;
   padding: 19px 15px 5px;
+  font-weight: bold;
 }
 a.md_modal_action:hover {
   color: #FFF;
@@ -767,11 +775,14 @@ a.tg_radio_on:hover i.icon-radio {
 .login_head_submit_progress {
   float: right;
 }
+.login_head_submit_wrap {
+  font-weight: bold;
+}
 .login_head_submit_btn,
 .login_head_submit_progress {
   font-size: 13px;
   line-height: 20px;
-  padding: 26px 15px 29px;
+  padding: 27px 15px 28px;
   display: inline-block;
   color: #FFF;
 }
@@ -1108,9 +1119,10 @@ a.im_dialog_selected .im_dialog_message_text {
   background: #64c270;
   font-size: 11px;
   padding: 5px;
-  border-radius: 10px;
+  border-radius: 11px;
   min-width: 21px;
   text-align: center;
+  margin-top: 4px;
 }
 .active .im_dialog_badge {
   color: #428bca;
@@ -2446,7 +2458,8 @@ a.peer_photo_init:focus {
 .im_dialogs_contacts_wrap h5 {
   color: #999;
   font-size: 13px;
-  margin-left: 8px;
+  margin-left: 20px;
+  font-weight: bold;
 }
 
 /* Gif documents */

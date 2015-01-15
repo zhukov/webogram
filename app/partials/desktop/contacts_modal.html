@@ -66,10 +66,10 @@
 
     <div ng-switch-when="new_group" class="pull-right">
       <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
-      <button class="btn btn-md" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
+      <button class="btn btn-md btn-md-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
     </div>
 
-    <button ng-switch-when="select" class="btn btn-md pull-right" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
+    <button ng-switch-when="select" class="btn btn-md btn-md-primary pull-right" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
 
     <button ng-switch-when="edit" class="btn btn-md btn-md-danger pull-right"  ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
       <my-i18n msgid="contacts_modal_edit_delete"></my-i18n>
@@ -77,7 +77,7 @@
     </button>
 
     <div ng-switch-default class="text-center">
-      <button class="btn btn-md" ng-click="importContact()" my-i18n="contacts_modal_new_contact"></button>
+      <button class="btn btn-md btn-md-primary" ng-click="importContact()" my-i18n="contacts_modal_new_contact"></button>
     </div>
 
   </div>
