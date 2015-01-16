@@ -1598,6 +1598,12 @@ img.im_message_document_thumb {
   height: 4px;
   width: 0;
 }
+.audio_player_seek_slider .tg_slider_thumb {
+  display: none;
+}
+.audio_player_seek_slider:hover .tg_slider_thumb {
+  display: block;
+}
 
 .audio_player_volume_slider {
   width: 50px;
@@ -2039,6 +2045,7 @@ img.img_fullsize {
 .emoji-menu-tabs .icon-grid {background-position: -9px -248px; }
 .emoji-menu-tabs .icon-grid-selected {background-position: -9px -222px; }
 
+.emoji-menu-tabs .icon-recent,
 .emoji-menu-tabs .icon-smile,
 .emoji-menu-tabs .icon-flower,
 .emoji-menu-tabs .icon-bell,
@@ -2046,6 +2053,7 @@ img.img_fullsize {
 .emoji-menu-tabs .icon-grid {
   opacity: 0.7;
 }
+.emoji-menu-tabs .icon-recent:hover,
 .emoji-menu-tabs .icon-smile:hover,
 .emoji-menu-tabs .icon-flower:hover,
 .emoji-menu-tabs .icon-bell:hover,

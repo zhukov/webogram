@@ -716,7 +716,7 @@
 		this.$items = $items;
 
 		this.load(0);
-		this.$items.on('click', 'a', function(e) {
+		this.$items.on('mousedown', 'a', function(e) {
 			var emoji = $('.label', $(this)).text();
 			self.onItemSelected(emoji);
 			self.changed = true;

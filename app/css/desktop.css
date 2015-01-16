@@ -31,10 +31,10 @@
   background: #497799;
 }
 
-/*.dropdown.open .tg_head_btn {
+.dropdown.open .tg_head_btn {
   position: relative;
   z-index: 5;
-}*/
+}
 
 .tg_head_logo_dropdown .dropdown-toggle {
   color: #FFF;
@@ -124,13 +124,15 @@
   float: none;
   right: 0;
   border: 1px solid rgba(15, 60, 96, 0.2);
+  border-left-color: #b5c3d0;
+  border-right-color: #b5c3d0;
   -webkit-box-shadow: 0px 1px 3px 0px rgba(60,75,87,0.27);
   -moz-box-shadow: 0px 1px 3px 0px rgba(60,75,87,0.27);
   box-shadow: 0px 1px 3px 0px rgba(60,75,87,0.27);
   overflow: hidden;
 }
 
-/*@-webkit-keyframes rollIn {
+@-webkit-keyframes rollIn {
     from { transform: translateY(-220px); }
       to { transform: translateY(0); }
 }
@@ -141,10 +143,10 @@
 }
 
 .tg_head_logo_dropdown.open .dropdown-menu {
-  -webkit-animation: rollIn 0.2s cubic-bezier(0,2,1,0.5);
-  animation: rollIn 0.2s cubic-bezier(0,2,1,0.5);
+  -webkit-animation: rollIn 0.1s ease-in;
+  animation: rollIn 0.1s ease-in;
   z-index: 4;
-}*/
+}
 .tg_head_logo_dropdown .dropdown-menu > li > a {
   font-size: 12px;
   line-height: 21px;
@@ -726,6 +728,7 @@ a.footer_link.active:active {
   display: inline-block;
   padding: 5px;
   outline: 0;
+  border-radius: 2px;
 }
 
 .im_emoji_quick_select_area a:hover {
