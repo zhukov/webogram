@@ -1,9 +1,8 @@
 CACHE MANIFEST
-# Time: Fri Jan 02 2015 21:31:58 GMT+0100 (CET)
+# Time: Fri Jan 16 2015 19:11:56 GMT+0300 (MSK)
 
 
 CACHE:
-badbrowser.html
 favicon.ico
 favicon_unread.ico
 css/app.css
@@ -22,7 +21,7 @@ img/emojisprite_4.png
 img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
-img/sound_a.wav
+img/sound_a.mp3
 js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
