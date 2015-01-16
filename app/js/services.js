@@ -2108,9 +2108,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           var timeout = $rootScope.idle.isIDLE && StatusManager.isOtherDeviceActive() ? 30000 : 1000;
           setTimeout(function () {
             isMutedPromise.then(function (muted) {
-            if (message.unread && !muted) {
-              notifyAboutMessage(message);
-            }
+              if (message.unread && !muted) {
+                notifyAboutMessage(message);
+              }
+            })
           }, timeout);
         }
         break;
