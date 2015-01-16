@@ -3567,6 +3567,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var notificationIndex = 0;
   var notificationsCount = 0;
   var vibrateSupport = !!navigator.vibrate;
+  var nextSoundAt = false;
+  var prevSoundVolume = false;
   var peerSettings = {};
   var faviconBackupEl = $('link[rel="icon"]:first'),
       faviconNewEl = $('<link rel="icon" href="favicon_unread.ico" type="image/x-icon" />');
@@ -3786,7 +3788,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   };
 
   function playSound (volume) {
-    var filename = 'img/sound_a.wav';
+    var now = tsNow();
+    if (nextSoundAt && now < nextSoundAt && prevSoundVolume == volume) {
+      return;
+    }
+    nextSoundAt = now + 1000;
+    prevSoundVolume = volume;
+    var filename = 'img/sound_a.mp3';
     var obj = $('#notify_sound').html('<audio autoplay="autoplay">' +
         '<source src="' + filename + '" type="audio/mpeg" />' +
         '<embed hidden="true" autostart="true" loop="false" volume="' + (volume * 100) +'" src="' + filename +'" />' +
