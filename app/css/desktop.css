@@ -675,13 +675,13 @@ a.footer_link.active:active {
 }
 .im_edit_panel_border {
   display: block;
-  margin: 0 0 49px 3px;
+  margin: 0 0 47px 3px;
   border-bottom: 1px solid #EEE;
 }
 .im_edit_flush_link,
 .im_edit_cancel_link {
   display: block;
-  padding: 6px 17px;
+  padding: 7px 17px;
   border-radius: 2px;
   overflow: hidden;
   margin: 6px 6px;
