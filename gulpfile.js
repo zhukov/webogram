@@ -147,7 +147,7 @@ gulp.task('add-appcache-manifest', function() {
   var sources = [
     './dist/**/*',
     '!dist/manifest.*',
-    '!dist/index.html',
+    '!dist/*.html',
     '!dist/fonts/*',
     '!dist/img/icons/icon*.png',
     '!dist/js/background.js'

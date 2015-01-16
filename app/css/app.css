@@ -2477,7 +2477,7 @@ a.peer_photo_init:focus {
   -o-filter: blur(2px);
   -ms-filter: blur(2px);
   filter: blur(2px);
-  filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
+  filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
   margin: -1px;
   padding: 1px;
   max-width: 100%;
