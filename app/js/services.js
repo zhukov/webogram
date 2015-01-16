@@ -687,7 +687,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, SearchIndexManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -2100,16 +2100,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         dialogsStorage.dialogs.unshift(dialog);
         $rootScope.$broadcast('dialogs_update', dialog);
 
-
-        if ((Config.Mobile && $rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
+        if (($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
             !message.out &&
             message.unread) {
-          NotificationsManager.getPeerMuted(peerID).then(function (muted) {
-            if (!message.unread || muted) {
-              return;
+
+          var isMutedPromise = NotificationsManager.getPeerMuted(peerID);
+          var timeout = $rootScope.idle.isIDLE && StatusManager.isOtherDeviceActive() ? 30000 : 1000;
+          setTimeout(function () {
+            isMutedPromise.then(function (muted) {
+            if (message.unread && !muted) {
+              notifyAboutMessage(message);
             }
-            notifyAboutMessage(message);
-          });
+          }, timeout);
         }
         break;
 
@@ -2252,7 +2254,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppPhotosManager', function ($modal, $window, $timeout, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager, FileManager) {
+.service('AppPhotosManager', function ($modal, $window, $rootScope, MtpApiManager, MtpApiFileManager, AppUsersManager, FileManager) {
   var photos = {},
       windowW = $(window).width(),
       windowH = $(window).height();
@@ -2489,7 +2491,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, $timeout, MtpApiFileManager, AppUsersManager, FileManager) {
+.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, AppUsersManager, FileManager) {
   var videos = {},
       videosForHistory = {},
       windowW = $(window).width(),
@@ -2675,7 +2677,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $timeout, $q, MtpApiFileManager, FileManager) {
+.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, MtpApiFileManager, FileManager) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2877,7 +2879,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, $timeout, MtpApiFileManager, FileManager) {
+.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, FileManager) {
   var audios = {};
   var audiosForHistory = {};
 
@@ -3508,10 +3510,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('StatusManager', function ($timeout, $rootScope, MtpApiManager, IdleManager) {
 
-  var toPromise, lastOnlineUpdated = 0, started = false;
+  var toPromise;
+  var lastOnlineUpdated = 0
+  var started = false;
+  var myID = 0;
+  var myOtherDeviceActive = false;
+
+  MtpApiManager.getUserID().then(function (id) {
+    myID = id;
+  });
+
+  $rootScope.$on('apiUpdate', function (e, update) {
+    if (update._ == 'updateUserStatus' && update.user_id == myID) {
+      myOtherDeviceActive = tsNow() + (update.status._ == 'userStatusOnline' ? 300000 : 0);
+    }
+  });
 
   return {
-    start: start
+    start: start,
+    isOtherDeviceActive: isOtherDeviceActive
   };
 
   function start() {
@@ -3547,9 +3564,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
+  function isOtherDeviceActive() {
+    if (!myOtherDeviceActive) {
+      return false;
+    }
+    if (tsNow() > myOtherDeviceActive) {
+      myOtherDeviceActive = false;
+      return false;
+    }
+    return true;
+  }
+
 })
 
-.service('NotificationsManager', function ($rootScope, $window, $timeout, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager) {
+.service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager) {
 
   navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
 
