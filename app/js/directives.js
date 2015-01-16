@@ -434,6 +434,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(document).off('keydown', onKeyDown);
       });
 
+      $scope.$on('ui_dialogs_change', function () {
+        onContentLoaded(function () {
+          var selectedDialog = $(scrollableWrap).find('.active a.im_dialog')[0];
+          if (selectedDialog) {
+            scrollToDialog(selectedDialog.parentNode);
+          }
+        });
+      });
+
       function onKeyDown(e) {
         if (!searchFocused && $modalStack.getTop()) {
           return true;
@@ -526,24 +535,26 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (nextDialogWrap) {
-            var elTop = nextDialogWrap.offsetTop,
-                elHeight = nextDialogWrap.offsetHeight,
-                scrollTop = scrollableWrap.scrollTop,
-                viewportHeight = scrollableWrap.clientHeight;
-
-
-            if (scrollTop > elTop) {
-              scrollableWrap.scrollTop = elTop;
-              $(dialogsWrap).nanoScroller({flash: true});
-            }
-            else if (scrollTop < elTop + elHeight - viewportHeight) {
-              scrollableWrap.scrollTop = elTop + elHeight - viewportHeight;
-              $(dialogsWrap).nanoScroller({flash: true});
-            }
-
+            scrollToDialog(nextDialogWrap);
           }
 
           return cancelEvent(e);
+        }
+      }
+
+      function scrollToDialog(dialogWrap) {
+        var elTop = dialogWrap.offsetTop,
+            elHeight = dialogWrap.offsetHeight,
+            scrollTop = scrollableWrap.scrollTop,
+            viewportHeight = scrollableWrap.clientHeight;
+
+        if (scrollTop > elTop) {
+          scrollableWrap.scrollTop = elTop;
+          $(dialogsWrap).nanoScroller({flash: true});
+        }
+        else if (scrollTop < elTop + elHeight - viewportHeight) {
+          scrollableWrap.scrollTop = elTop + elHeight - viewportHeight;
+          $(dialogsWrap).nanoScroller({flash: true});
         }
       }
 
