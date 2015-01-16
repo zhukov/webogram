@@ -1239,9 +1239,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         angular.forEach($scope.selectedMsgs, function (t, messageID) {
           selectedMessageIDs.push(messageID);
         });
-        AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
-          selectedCancel();
-        });
+        if (selectedMessageIDs.length) {
+          ErrorService.confirm({type: 'MESSAGES_DELETE', count: selectedMessageIDs.length}).then(function () {
+            AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
+              selectedCancel();
+            });
+          });
+        }
       }
     }
 

@@ -15,6 +15,11 @@
       </span>
       <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send"></span>
       <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete"></span>
+      <span ng-switch-when="MESSAGES_DELETE">
+        <ng-pluralize count="count"
+                     when="confirm_modal_X_messages_delete">
+        </ng-pluralize>
+      </span>
       <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete"></span>
       <span ng-switch-when="CONTACTS_IMPORT_PERFORM" my-i18n="confirm_modal_contacts_import"></span>
       <div ng-switch-when="LOGIN_PHONE_CORRECT">
@@ -56,6 +61,7 @@
       <span ng-switch-when="FILES_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_files_send_submit"></span>
       <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send_submit"></span>
       <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete_submit"></span>
+      <span ng-switch-when="MESSAGES_DELETE" my-i18n="confirm_modal_messages_delete_submit"></span>
       <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete_submit"></span>
       <span ng-switch-when="FORWARD_PEER" my-i18n="confirm_modal_forward_message_submit"></span>
       <span ng-switch-when="PHOTO_SHARE_PEER" my-i18n="confirm_modal_share_photo_submit"></span>
