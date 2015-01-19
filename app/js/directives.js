@@ -1312,7 +1312,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
               $(dropbox)
-                .css({height: $(editorElement).height() + 12, width: $(editorElement).width() + 12})
+                .css({height: editorElement.offsetHeight + 2, width: editorElement.offsetWidth})
                 .show();
             }
           } else {

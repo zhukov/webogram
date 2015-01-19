@@ -1858,9 +1858,8 @@ span.emoji {
 .im_send_dropbox_wrap {
   background: #FFF;
   display: none;
-  padding: 15px 10px;
-  margin: 1px;
-  border-radius: 4px;
+  padding: 17px 10px 0;
+  border: 1px dashed #999;
   overflow: hidden;
   text-align: center;
   color: #999;
