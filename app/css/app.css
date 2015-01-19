@@ -60,6 +60,16 @@ a.disabled {
   outline: none;
 }
 
+.form-control::-moz-placeholder {
+  color: #b3b3b3;
+}
+.form-control:-ms-input-placeholder {
+  color: #b3b3b3;
+}
+.form-control::-webkit-input-placeholder {
+  color: #b3b3b3;
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
