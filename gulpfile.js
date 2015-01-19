@@ -25,7 +25,7 @@ gulp.task('usemin', ['templates', 'enable-production'], function() {
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
       js: ['concat', $.ngAnnotate(), $.uglify({outSourceMap: false})],
-      css: [$.minifyCss({compatibility: true, keepBreaks: true}), 'concat']
+      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})]
     }))
     .pipe(gulp.dest('dist'));
 });
