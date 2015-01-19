@@ -10,6 +10,7 @@ body {
   background: none;
   font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
   overflow: visible;
+  overflow-x: hidden;
 }
 body.non_osx {
   font: 13px/18px Tahoma, sans-serif, Arial, Helvetica;

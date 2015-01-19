@@ -3599,8 +3599,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var nextSoundAt = false;
   var prevSoundVolume = false;
   var peerSettings = {};
-  var faviconBackupEl = $('link[rel="icon"]:first'),
-      faviconNewEl = $('<link rel="icon" href="favicon_unread.ico" type="image/x-icon" />');
+  var faviconEl = $('link[rel="icon"]:first')[0];
   var langNotificationsPluralize = _.pluralize('page_title_pluralize_notifications');
 
   var titleBackup = document.title,
@@ -3614,7 +3613,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       $interval.cancel(titlePromise);
       if (!newVal) {
         document.title = titleBackup;
-        $('link[rel="icon"]:first').replaceWith(faviconBackupEl);
+        setFavicon();
       } else {
         titleBackup = document.title;
 
@@ -3622,13 +3621,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           var time = tsNow();
           if (!notificationsCount || time % 2000 > 1000) {
             document.title = titleBackup;
-            var curFav = $('link[rel="icon"]:first');
-            if (curFav.attr('href').indexOf('favicon_unread') != -1) {
-              curFav.replaceWith(faviconBackupEl);
-            }
+            setFavicon();
           } else {
             document.title = langNotificationsPluralize(notificationsCount);
-            $('link[rel="icon"]:first').replaceWith(faviconNewEl);
+            setFavicon('favicon_unread.ico');
           }
         }, 1000);
       }
@@ -3685,6 +3681,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         peer: AppPeersManager.getInputPeerByID(peerID)
       }
     });
+  }
+
+  function setFavicon (href) {
+    var link = document.createElement('link');
+    link.rel = 'shortcut icon';
+    link.type = 'image/x-icon';
+    link.href = href || 'favicon.ico';
+    faviconEl.parentNode.replaceChild(link, faviconEl);
+    faviconEl = link;
   }
 
   function savePeerSettings (peerID, settings) {
