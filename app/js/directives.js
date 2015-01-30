@@ -1071,6 +1071,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
+
+      var emojiButton = $('.composer_emoji_insert_btn', element)[0];
+      new EmojiTooltip(emojiButton);
+
+      var emojiPanel = $('.composer_emoji_panel', element)[0];
+      new EmojiPanel(emojiPanel);
+
+      return;
+
+
       var messageField = $('textarea', element)[0],
           fileSelects = $('input', element),
           dropbox = $('.im_send_dropbox_wrap', element)[0],

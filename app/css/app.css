@@ -771,7 +771,7 @@ a.tg_radio_on:hover i.icon-radio {
   display: inline-block;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -5px -10px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   margin-right: 18px;
 }
 .icon-tg-title {
@@ -809,7 +809,7 @@ a.tg_radio_on:hover i.icon-radio {
   display: inline-block;
   vertical-align: middle;
   background: url(../img/icons/General.png) no-repeat -18px -50px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   margin-left: 12px;
   margin-top: -1px;
 }
@@ -1453,7 +1453,7 @@ div.im_message_video_thumb {
   display: inline-block;
   line-height: 0;
   background: url(../img/icons/General.png) no-repeat -14px -509px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   width: 12px;
   height: 18px;
   margin: 12px 15px;
@@ -1476,7 +1476,7 @@ div.im_message_video_thumb {
   width: 14px;
   height: 16px;
   background: url(../img/icons/General.png) no-repeat -13px -611px;
-  background-size: 40px 678px;;
+  background-size: 40px 778px;;
   margin: 13px 16px;
 }
 .is_1x .im_message_file_button_dl_audio .im_message_file_button_icon {
@@ -1775,42 +1775,6 @@ a.im_message_fwd_photo {
   line-height: 150%;
 }
 
-span.emoji {
-  display: -moz-inline-box;
-  -moz-box-orient: vertical;
-  display: inline-block;
-  vertical-align: baseline;
-  *vertical-align: auto;
-  *zoom: 1;
-  *display: inline;
-  height: 18px;
-  width: 18px;
-  background-repeat: no-repeat;
-  text-indent: -9999px;
-}
-
-/* widths and heights calculated according to spritesheet dimensions and icon size */
-.emoji-spritesheet-0 {
-  background-size: 486px 126px;
-  background-image: url('../img/emojisprite_0.png');
-}
-.emoji-spritesheet-1 {
-  background-size: 522px 72px;
-  background-image: url('../img/emojisprite_1.png');
-}
-.emoji-spritesheet-2 {
-  background-size: 594px 126px;
-  background-image: url('../img/emojisprite_2.png');
-}
-.emoji-spritesheet-3 {
-  background-size: 612px 54px;
-  background-image: url('../img/emojisprite_3.png');
-}
-.emoji-spritesheet-4 {
-  background-size: 612px 126px;
-  background-image: url('../img/emojisprite_4.png');
-}
-
 .im_history_not_selected,
 .im_history_empty {
   visibility: hidden;
@@ -1995,116 +1959,189 @@ img.img_fullsize {
   vertical-align: middle;
   margin: -3px 0 0 0;
 }
-.emoji-menu {
+
+
+
+.composer_emoji_insert_btn {
+  display: block;
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  cursor: pointer;
+  padding: 0;
+
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+}
+.icon-emoji {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  vertical-align: top;
+  background: url(../img/icons/General.png) no-repeat -9px -335px;
+  background-size: 40px 778px;
+  opacity: 0.8;
+}
+.composer_emoji_tooltip {
+  display: none;
   position: absolute;
   z-index: 999;
   width: 220px;
-  margin-left: -107px;
-  margin-top: -252px;
-  overflow: hidden;
+  margin-left: -100px;
+  margin-top: -248px;
 
   border: 1px #dfdfdf solid;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
-  overflow: hidden;
   -webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
   -moz-box-shadow:    0px 1px 1px rgba(0, 0, 0, 0.1);
   box-shadow:         0px 1px 1px rgba(0, 0, 0, 0.1);
-}
-.emoji-items-wrap1 {
   background: #FFF;
   padding: 5px 2px 5px 5px;
 }
-.emoji-items-wrap1 .emoji-menu-tabs {
+.icon-tooltip-tail {
+  background: #FFF;
+  width: 18px;
+  height: 18px;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+  display: inline-block;
+  -webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow:    1px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow:         1px 1px 1px rgba(0, 0, 0, 0.1);
+  border: 1px #dfdfdf solid;
+  border-width: 0 1px 1px 0;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  margin-left: -9px;
+}
+
+.composer_emoji_tooltip_tabs {
   width: 100%;
   margin-bottom: 8px;
   margin-top: 3px;
 }
-.emoji-items-wrap1 .emoji-menu-tabs td {
-  text-align: center;
-  color: white;
+.composer_emoji_tooltip_tab {
   line-height: 0;
-}
-.emoji-menu-tabs .emoji-menu-tab {
+  color: white;
   display: inline-block;
   width: 24px;
   height: 29px;
   background: url(../img/icons/IconsetSmiles.png) no-repeat;
-  background-size: 42px 350px;
+  background-size: 42px 470px;
+  cursor: pointer;
+  opacity: 0.7;
+  margin: 0 3px;
 }
-.is_1x .emoji-menu-tabs .emoji-menu-tab {
+.is_1x .composer_emoji_tooltip_tab {
   background-image: url(../img/icons/IconsetSmiles_1x.png);
 }
-
-.emoji-menu-tabs .icon-recent {background-position: -9px -306px; }
-.emoji-menu-tabs .icon-recent-selected {background-position: -9px -277px; }
-
-.emoji-menu-tabs .icon-smile {background-position: -9px -34px; }
-.emoji-menu-tabs .icon-smile-selected {background-position: -9px -5px; }
-
-.emoji-menu-tabs .icon-flower {background-position: -9px -145px; }
-.emoji-menu-tabs .icon-flower-selected {background-position: -9px -118px; }
-
-.emoji-menu-tabs .icon-bell {background-position: -9px -89px; }
-.emoji-menu-tabs .icon-bell-selected {background-position: -9px -61px; }
-
-.emoji-menu-tabs .icon-car {background-position: -9px -196px; }
-.emoji-menu-tabs .icon-car-selected {background-position: -9px -170px; }
-
-.emoji-menu-tabs .icon-grid {background-position: -9px -248px; }
-.emoji-menu-tabs .icon-grid-selected {background-position: -9px -222px; }
-
-.emoji-menu-tabs .icon-recent,
-.emoji-menu-tabs .icon-smile,
-.emoji-menu-tabs .icon-flower,
-.emoji-menu-tabs .icon-bell,
-.emoji-menu-tabs .icon-car,
-.emoji-menu-tabs .icon-grid {
-  opacity: 0.7;
-}
-.emoji-menu-tabs .icon-recent:hover,
-.emoji-menu-tabs .icon-smile:hover,
-.emoji-menu-tabs .icon-flower:hover,
-.emoji-menu-tabs .icon-bell:hover,
-.emoji-menu-tabs .icon-car:hover,
-.emoji-menu-tabs .icon-grid:hover {
+.composer_emoji_tooltip_tab.active {
   opacity: 1;
 }
 
+.composer_emoji_tooltip_tab_recent {background-position: -9px -306px; }
+.composer_emoji_tooltip_tab_recent.active {background-position: -9px -277px; }
 
-.emoji-menu .emoji-items-wrap {
+.composer_emoji_tooltip_tab_smile {background-position: -9px -34px; }
+.composer_emoji_tooltip_tab_smile.active {background-position: -9px -5px; }
+
+.composer_emoji_tooltip_tab_flower {background-position: -9px -145px; }
+.composer_emoji_tooltip_tab_flower.active {background-position: -9px -118px; }
+
+.composer_emoji_tooltip_tab_bell {background-position: -9px -89px; }
+.composer_emoji_tooltip_tab_bell.active {background-position: -9px -61px; }
+
+.composer_emoji_tooltip_tab_car {background-position: -9px -196px; }
+.composer_emoji_tooltip_tab_car.active {background-position: -9px -170px; }
+
+.composer_emoji_tooltip_tab_grid {background-position: -9px -248px; }
+.composer_emoji_tooltip_tab_grid.active {background-position: -9px -222px; }
+
+.composer_emoji_tooltip_tab_stickers {background-position: -9px -361px; }
+.composer_emoji_tooltip_tab_stickers.active {background-position: -9px -333px; }
+
+.composer_emoji_tooltip_content {
   position: relative;
   height: 174px;
+  overflow: hidden;
+  overflow-y: auto;
 }
-.emoji-menu .emoji-items {
-  padding-right: 8px;
-  outline: 0 !important;
-}
-.emoji-menu img {
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-  border: 0 none;
-}
-.emoji-menu .emoji-items a {
+
+
+a.composer_emoji_btn {
   margin: -1px 0 0 -1px;
   padding: 5px;
   display: block;
   float: left;
   border-radius: 2px;
 }
-.emoji-menu .emoji-items a:hover {
+a.composer_emoji_btn:hover {
   background-color: #edf2f5;
 }
-.emoji-menu:after {
-  content: ' ';
-  display: block;
-  clear: left;
+
+
+
+.emoji {
+  display: -moz-inline-box;
+  -moz-box-orient: vertical;
+  display: inline-block;
+  vertical-align: baseline;
+  *vertical-align: auto;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  width: 18px;
+  background-repeat: no-repeat;
+  text-indent: -9999px;
 }
-.emoji-menu a .label {
-  display: none;
+
+/* widths and heights calculated according to spritesheet dimensions and icon size */
+.emoji-spritesheet-0 {
+  background-size: 486px 126px;
+  background-image: url('../img/emojisprite_0.png');
 }
+.emoji-spritesheet-1 {
+  background-size: 522px 72px;
+  background-image: url('../img/emojisprite_1.png');
+}
+.emoji-spritesheet-2 {
+  background-size: 594px 126px;
+  background-image: url('../img/emojisprite_2.png');
+}
+.emoji-spritesheet-3 {
+  background-size: 612px 54px;
+  background-image: url('../img/emojisprite_3.png');
+}
+.emoji-spritesheet-4 {
+  background-size: 612px 126px;
+  background-image: url('../img/emojisprite_4.png');
+}
+
+
+.composer_emoji_btn .emoji {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  border: 0 none;
+  display: inline-block;
+}
+.composer_emoji_btn .emoji-spritesheet-0 {background-size: 540px 140px;}
+.composer_emoji_btn .emoji-spritesheet-1 {background-size: 580px 80px;}
+.composer_emoji_btn .emoji-spritesheet-2 {background-size: 660px 140px;}
+.composer_emoji_btn .emoji-spritesheet-3 {background-size: 680px 60px;}
+.composer_emoji_btn .emoji-spritesheet-4 {background-size: 680px 140px;}
+
+
 
 
 .error_modal_window .modal-dialog {

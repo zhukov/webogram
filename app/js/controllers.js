@@ -2992,7 +2992,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, SearchIndexManager, _) {
+  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, _) {
 
     $scope.search = {};
     $scope.slice = {limit: 20, limitDelta: 20}
@@ -3035,7 +3035,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   })
 
 
-  .controller('PhonebookModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, PhonebookContactsService, SearchIndexManager, ErrorService) {
+  .controller('PhonebookModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, PhonebookContactsService, ErrorService) {
 
     $scope.search           = {};
     $scope.phonebook        = [];
