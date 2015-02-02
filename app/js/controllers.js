@@ -359,6 +359,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
+    $scope.openFaq = function () {
+      var url = 'https://telegram.org/faq';
+      switch (Config.I18n.locale) {
+        case 'es-es': url += '/es'; break;
+        case 'it-it': url += '/it'; break;
+        case 'de-de': url += '/de'; break;
+        case 'ko-ko': url += '/ko'; break;
+        case 'pt-br': url += '/br'; break;
+      };
+      window.open(url, '_blank');
+    };
+
     $scope.openContacts = function () {
       ContactsSelectService.selectContact().then(function (userID) {
         $scope.dialogSelect(AppUsersManager.getUserString(userID));
