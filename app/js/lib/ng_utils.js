@@ -736,16 +736,7 @@ angular.module('izhukov.utils', [])
 
 .service('SearchIndexManager', function () {
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-      trimRe = /^\s+|\s$/g,
-      accentsReplace = {
-        a: /[åáâäà]/g,
-        e: /[éêëè]/g,
-        i: /[íîïì]/g,
-        o: /[óôöò]/g,
-        u: /[úûüù]/g,
-        c: /ç/g,
-        ss: /ß/g
-      }
+      trimRe = /^\s+|\s$/g;
 
   return {
     createIndex: createIndex,
@@ -762,13 +753,11 @@ angular.module('izhukov.utils', [])
   }
 
   function cleanSearchText (text) {
-    text = text.replace(badCharsRe, ' ').replace(trimRe, '').toLowerCase();
-
-    for (var key in accentsReplace) {
-      if (accentsReplace.hasOwnProperty(key)) {
-        text = text.replace(accentsReplace[key], key);
-      }
-    }
+    text = text.replace(badCharsRe, ' ').replace(trimRe, '');
+    text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
+      return Config.LatinizeMap[ch] || ch;
+    });
+    text = text.toLowerCase();
 
     return text;
   }
