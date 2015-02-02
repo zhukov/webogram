@@ -1073,10 +1073,22 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
 
       var emojiButton = $('.composer_emoji_insert_btn', element)[0];
-      new EmojiTooltip(emojiButton);
+      new EmojiTooltip(emojiButton, {
+        onEmojiSelected: function (code) {
+          composer.onEmojiSelected(code);
+        }
+      });
 
       var emojiPanel = $('.composer_emoji_panel', element)[0];
-      new EmojiPanel(emojiPanel);
+      new EmojiPanel(emojiPanel, {
+        onEmojiSelected: function (code) {
+          composer.onEmojiSelected(code);
+        }
+      });
+
+
+      var messageField = $('textarea', element)[0];
+      var composer = new MessageComposer(messageField, {});
 
       return;
 
