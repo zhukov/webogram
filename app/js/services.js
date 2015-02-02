@@ -712,6 +712,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       midnightOffseted = new Date(),
       midnightOffset;
 
+
+  var maxSeenID = false;
+  if (Config.Modes.packed) {
+    Storage.get('max_seen_msg').then(function (maxID) {
+      maxSeenID = maxID || 0;
+    });
+  }
+
   Storage.get('server_time_offset').then(function (to) {
     if (to) {
       serverTimeOffset = to;
@@ -791,6 +799,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       curDialogStorage.count = dialogsResult.count || dialogsResult.dialogs.length;
 
+      if (!maxID && curDialogStorage.dialogs.length) {
+        incrementMaxSeenID(curDialogStorage.dialogs[0].top_message);
+      }
+
       curDialogStorage.dialogs.splice(offset, curDialogStorage.dialogs.length - offset);
       angular.forEach(dialogsResult.dialogs, function (dialog) {
         var peerID = AppPeersManager.getPeerID(dialog.peer),
@@ -809,6 +821,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
 
         NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
+
+        if (
+          dialog.unread_count > 0 &&
+          maxSeenID &&
+          dialog.top_message > maxSeenID
+        ) {
+          var message = getMessage(dialog.top_message);
+          if (message.unread && !message.out) {
+            NotificationsManager.getPeerMuted(peerID).then(function (muted) {
+              if (!muted) {
+                notifyAboutMessage(message);
+              }
+            });
+          }
+        }
       });
 
       return {
@@ -1917,6 +1944,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return [];
   }
 
+  function incrementMaxSeenID (maxID) {
+    if (maxSeenID !== false && maxID && maxID > maxSeenID) {
+      Storage.set({
+        max_seen_msg: maxID
+      });
+    }
+  }
+
   function notifyAboutMessage (message) {
     var peerID = getMessagePeer(message);
     var fromUser = AppUsersManager.getUser(message.from_id);
@@ -2114,6 +2149,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             })
           }, timeout);
         }
+
+        incrementMaxSeenID(message.id);
         break;
 
       case 'updateReadMessages':
