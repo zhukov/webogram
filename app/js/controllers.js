@@ -273,8 +273,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (forceSignUp) {
         method = 'auth.signUp';
         angular.extend(params, {
-          first_name: $scope.credentials.first_name,
-          last_name: $scope.credentials.last_name
+          first_name: $scope.credentials.first_name || '',
+          last_name: $scope.credentials.last_name || ''
         });
       }
 

@@ -1586,7 +1586,7 @@ div.im_dialog_photo .peer_initials {
   background-size: 40px 200px;
   width: 16px;
   height: 24px;
-  opacity: 0.3;
+  opacity: 0.15;
   position: absolute;
   top: 50%;
   pointer-events: none;
