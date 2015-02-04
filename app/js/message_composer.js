@@ -380,8 +380,9 @@ EmojiPanel.prototype.update = function () {
 function MessageComposer (textarea, options) {
   this.textareaEl = $(textarea);
 
-  this.textareaEl.on('keyup keydown', this.onKeyEvent.bind(this));
-  this.textareaEl.on('focus blur', this.onFocusBlur.bind(this));
+  this.setUpInput();
+  // this.textareaEl.on('keyup keydown', this.onKeyEvent.bind(this));
+  // this.textareaEl.on('focus blur', this.onFocusBlur.bind(this));
 
   this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu"></ul>').appendTo(document.body);
 
@@ -402,6 +403,29 @@ function MessageComposer (textarea, options) {
   });
 
   this.isActive = false;
+}
+
+MessageComposer.prototype.setUpInput = function () {
+  if ('contentEditable' in document.body) {
+    this.setUpContenteditable();
+  } else {
+    this.setUpPlaintext();
+  }
+}
+
+MessageComposer.prototype.setUpContenteditable = function () {
+  this.textareaEl.hide();
+  this.contentEditableEl = $('<div class="composer_rich_textarea" contenteditable="true"></div>');
+
+  this.textareaEl[0].parentNode.insertBefore(this.contentEditableEl[0], this.textareaEl[0]);
+
+  this.contentEditableEl.on('keyup keydown', this.onKeyEvent.bind(this));
+  this.contentEditableEl.on('focus blur', this.onFocusBlur.bind(this));
+}
+
+MessageComposer.prototype.setUpPlaintext = function () {
+  this.textareaEl.on('keyup keydown', this.onKeyEvent.bind(this));
+  this.textareaEl.on('focus blur', this.onFocusBlur.bind(this));
 }
 
 MessageComposer.prototype.onKeyEvent = function (e) {
@@ -445,9 +469,12 @@ MessageComposer.prototype.onKeyEvent = function (e) {
 }
 
 MessageComposer.prototype.checkAutocomplete = function () {
-  var textarea = this.textareaEl[0];
+  var textarea = this.contentEditableEl ? this.contentEditableEl[0] : this.textareaEl;
   var pos = getFieldSelection(textarea);
-  var value = this.textareaEl[0].value.substr(0, pos);
+  var value = getFieldValue(textarea).substr(0, pos);
+
+  console.log(pos, value);
+
   var matches = value.match(/:([A-Za-z_0-z\+-]*)$/);
   if (matches) {
     if (this.previousQuery == matches[0]) {

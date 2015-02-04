@@ -1082,10 +1082,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           });
         },
         onEmojiSelected: function (code) {
-          composer.onEmojiSelected(code);
+          $scope.$apply(function () {
+            composer.onEmojiSelected(code);
+          })
         },
         onStickerSelected: function (docID) {
-          $scope.draftMessage.sticker = docID;
+          $scope.$apply(function () {
+            $scope.draftMessage.sticker = docID;
+          });
         }
       });
 

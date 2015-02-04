@@ -103,7 +103,7 @@ function getFieldSelection (field) {
 
   sel.text = txt + c;
   len = dup.text.indexOf(c);
-  sel.moveStart('character',-1);
+  sel.moveStart('character', -1);
   sel.text  = '';
 
   // if (browser.msie && len == -1) {
@@ -112,6 +112,51 @@ function getFieldSelection (field) {
   return len;
 }
 
+function getFieldValue(field) {
+  if (!field) {
+    return '';
+  }
+  if (field.tagName == 'INPUT' || field.tagName == 'TEXTAREA') {
+    return field.value;
+  }
+  var lines = [];
+  var line = [];
+  getFieldElementValue(field, lines, line);
+  if (line.length) {
+    lines.push(line.join(''));
+  }
+  return lines.join('\n');
+}
+
+function getFieldElementValue(node, lines, line) {
+  if (node.nodeType == 3) { // TEXT
+    line.push(node.nodeValue);
+    return;
+  }
+  if (node.nodeType != 1) { // NON-ELEMENT
+    return;
+  }
+  var isBlock = node.tagName == 'DIV' || node.tagName == 'P';
+  var curChild;
+  if (isBlock && line.length || node.tagName == 'BR') {
+    lines.push(line.join(''));
+    line.splice(0, line.length);
+  }
+  else if (node.tagName == 'IMG') {
+    if (node.alt) {
+      line.push(node.alt);
+    }
+  }
+  var curChild = node.firstChild;
+  while (curChild) {
+    getFieldElementValue(curChild, lines, line);
+    curChild = curChild.nextSibling;
+  }
+  if (isBlock && line.length) {
+    lines.push(line.join(''));
+    line.splice(0, line.length);
+  }
+}
 
 function onContentLoaded (cb) {
   setTimeout(cb, 0);
