@@ -509,6 +509,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('AppChatsManager', function ($rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
   var chats = {},
+      chatsFull = {},
       cachedPhotoLocations = {};
 
   function saveApiChats (apiChats) {
@@ -1521,7 +1522,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
 
         case 'inputMediaPhoto':
-          media = {photo: AppPhotosManager.getPhoto(inputMedia.id.id)};
+          media = {
+            _: 'messageMediaPhoto',
+            photo: AppPhotosManager.getPhoto(inputMedia.id.id)
+          };
+          break;
+
+        case 'inputMediaDocument':
+          media = {
+            _: 'messageMediaDocument',
+            'document': AppDocsManager.getDoc(inputMedia.id.id)
+          };
           break;
       }
 
@@ -2715,6 +2726,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   };
 
+  function getDoc (docID) {
+    return docs[docID] || {_: 'documentEmpty'};
+  }
+
   function wrapForHistory (docID) {
     if (docsForHistory[docID] !== undefined) {
       return docsForHistory[docID];
@@ -2872,6 +2887,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   return {
     saveDoc: saveDoc,
+    getDoc: getDoc,
     wrapForHistory: wrapForHistory,
     updateDocDownloaded: updateDocDownloaded,
     downloadDoc: downloadDoc,
@@ -2982,6 +2998,111 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     updateAudioDownloaded: updateAudioDownloaded,
     downloadAudio: downloadAudio,
     saveAudioFile: saveAudioFile
+  }
+})
+
+.service('AppStickersManager', function ($q, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
+
+  var stickersToEmoji = {};
+  var currentStickers = [];
+  var applied = false;
+  var started = false;
+
+  return {
+    start: start,
+    getStickerEmoji: getStickerEmoji,
+    getStickers: getStickers,
+    getStickersImages: getStickersImages
+  };
+
+  function start () {
+    if (!started) {
+      started = true;
+      setTimeout(getStickers, 1000);
+      setInterval(preloadStickers, 900000);
+    }
+  }
+
+  function preloadStickers() {
+    getStickers().then(getStickersImages);
+  }
+
+  function getStickerEmoji(docID) {
+    return stickersToEmoji[docID] || false;
+  }
+
+  function processRawStickers(stickers) {
+    if (applied !== stickers.hash) {
+      applied = stickers.hash;
+      var i, j, len1, len2;
+
+      len1 = stickers.documents.length;
+      for (i = 0; i < len1; i++) {
+        AppDocsManager.saveDoc(stickers.documents[i]);
+      }
+
+      var pack, emoticon, docID;
+      var doneDocIDs = {};
+      stickersToEmoji = {};
+      currentStickers = [];
+      len1 = stickers.packs.length;
+      for (i = 0; i < len1; i++) {
+        pack = stickers.packs[i];
+        emoticon = pack.emoticon;
+        len2 = pack.documents.length;
+        for (j = 0; j < len2; j++) {
+          docID = pack.documents[j];
+          if (stickersToEmoji[docID] === undefined) {
+            stickersToEmoji[docID] = emoticon;
+          }
+          if (doneDocIDs[docID] === undefined) {
+            doneDocIDs[docID] = true;
+            currentStickers.push(docID);
+          }
+        }
+      }
+    }
+    return currentStickers;
+  }
+
+  function getStickers () {
+    return Storage.get('all_stickers').then(function (stickers) {
+      var layer = Config.Schema.API.layer;
+      if (stickers.layer != layer) {
+        stickers = false;
+      }
+      if (stickers && stickers.date > tsNow(true)) {
+        return processRawStickers(stickers);
+      }
+      return MtpApiManager.invokeApi('messages.getAllStickers', {
+        hash: stickers && stickers.hash || ''
+      }).then(function (newStickers) {
+        if (newStickers._ == 'messages.allStickersNotModified') {
+          newStickers = stickers;
+        }
+        newStickers.date = tsNow(true) + 3600;
+        newStickers.layer = layer;
+        delete newStickers._;
+        Storage.set({all_stickers: newStickers});
+
+        return processRawStickers(newStickers);
+      });
+    })
+  }
+
+  function getStickersImages () {
+    var promises = [];
+    angular.forEach(currentStickers, function (docID) {
+      var doc = AppDocsManager.getDoc(docID);
+      var promise = MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
+        return {
+          id: docID,
+          src: FileManager.getUrl(blob, 'image/webp')
+        };
+      });
+      promises.push(promise);
+    });
+    return $q.all(promises);
   }
 })
 

@@ -134,6 +134,8 @@ function EmojiTooltip (btnEl, options) {
 
   this.btnEl = $(btnEl);
   this.onEmojiSelected = options.onEmojiSelected;
+  this.onStickerSelected = options.onStickerSelected;
+  this.getStickers = options.getStickers;
 
   $(this.btnEl).on('mouseenter mouseleave', function (e) {
     self.isOverBtn = e.type == 'mouseenter';
@@ -191,13 +193,21 @@ EmojiTooltip.prototype.createTooltip = function () {
         self.selectTab(tabIndex);
         return cancelEvent(e);
       })
+      .on('mouseenter mouseleave', function (e) {
+        clearTimeout(self.selectTabTimeout);
+        if (e.type == 'mouseenter') {
+          self.selectTabTimeout = setTimeout(function () {
+            self.selectTab(tabIndex);
+          }, 300);
+        }
+      })
       .appendTo(self.tabsEl);
   });
 
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), code;
-    if (target.hasClass('emoji')) {
+    var target = $(e.target), code, sticker;
+    if (target.hasClass('emoji') || target.hasClass('composer_sticker_image')) {
       target = $(target[0].parentNode);
     }
     if (code = target.attr('data-code')) {
@@ -206,11 +216,15 @@ EmojiTooltip.prototype.createTooltip = function () {
       }
       EmojiHelper.pushPopularEmoji(code);
     }
+    if (sticker = target.attr('data-sticker')) {
+      if (self.onStickerSelected) {
+        self.onStickerSelected(sticker);
+      }
+    }
     return cancelEvent(e);
   });
 
   this.tooltipEl.on('mouseenter mouseleave', function (e) {
-    console.log(dT(), e.type);
     if (e.type == 'mouseenter') {
       self.onMouseEnter();
     } else {
@@ -240,7 +254,19 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
   var self = this;
   var iconSize = Config.Mobile ? 26 : 20;
 
-  if (this.tab > 0) {
+  if (this.tab == 6) { // Stickers
+    var renderStickers = function (stickers) {
+      var sticker, i;
+      var count = stickers.length;
+      for (i = 0; i < count; i++) {
+        sticker = stickers[i];
+        html.push('<a class="composer_sticker_btn" data-sticker="' + sticker.id + '"><img class="composer_sticker_image" src="' + encodeEntities(sticker.src) + '" /></a>');
+      }
+      self.contentEl.html(html.join(''));
+    };
+    this.getStickers(renderStickers);
+  }
+  else if (this.tab > 0) {
     var categoryIndex = this.tab - 1;
     var emoticonCodes = Config.EmojiCategories[categoryIndex];
     var totalColumns = Config.EmojiCategorySpritesheetDimens[categoryIndex][1];

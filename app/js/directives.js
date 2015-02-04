@@ -1061,7 +1061,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, ErrorService) {
+  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, AppStickersManager, ErrorService) {
 
     return {
       link: link,
@@ -1074,8 +1074,18 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var emojiButton = $('.composer_emoji_insert_btn', element)[0];
       new EmojiTooltip(emojiButton, {
+        getStickers: function (callback) {
+          AppStickersManager.getStickers().then(function () {
+            AppStickersManager.getStickersImages().then(function (stickersData) {
+              callback(stickersData);
+            });
+          });
+        },
         onEmojiSelected: function (code) {
           composer.onEmojiSelected(code);
+        },
+        onStickerSelected: function (docID) {
+          $scope.draftMessage.sticker = docID;
         }
       });
 

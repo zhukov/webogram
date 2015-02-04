@@ -2170,6 +2170,21 @@ a.composer_emoji_btn:hover {
   margin-left: 15px;
   line-height: 20px;
 }
+.composer_sticker_btn {
+  width: 70px;
+  height: 70px;
+  display: block;
+  display: inline-block;
+  text-align: center;
+  padding: 3px;
+}
+.composer_sticker_btn:hover {
+  background: #f2f6fa;
+}
+.composer_sticker_image {
+  max-width: 64px;
+  max-height: 64px;
+}
 
 
 
