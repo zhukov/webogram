@@ -2855,11 +2855,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
 
     downloadPromise.then(function (blob) {
-      FileManager.getFileCorrectUrl(blob, doc.mime_type).then(function (url) {
-        historyDoc.url = $sce.trustAsResourceUrl(url);
-      })
       delete historyDoc.progress;
-      historyDoc.downloaded = true;
+      if (blob) {
+        FileManager.getFileCorrectUrl(blob, doc.mime_type).then(function (url) {
+          historyDoc.url = $sce.trustAsResourceUrl(url);
+        })
+        historyDoc.downloaded = true;
+      }
       console.log('file save done');
     }, function (e) {
       console.log('document download failed', e);
