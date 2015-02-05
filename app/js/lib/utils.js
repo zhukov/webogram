@@ -58,9 +58,173 @@ function onCtrlEnter (textarea, cb) {
   });
 }
 
+function setFieldSelection(field, from, to) {
+  field = $(field)[0];
+  try {
+    field.focus();
+    if (from === undefined || from === false) {
+      from = field.value.length;
+    }
+    if (to === undefined || to === false) {
+      to = from;
+    }
+    if (field.createTextRange) {
+      var range = field.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', to);
+      range.moveStart('character', from);
+      range.select();
+    }
+    else if (field.setSelectionRange) {
+      field.setSelectionRange(from, to);
+    }
+  } catch(e) {}
+}
+
+function getFieldSelection (field) {
+  if (field.selectionStart) {
+    return field.selectionStart;
+  }
+  else if (!document.selection) {
+    return 0;
+  }
+
+  var c = "\001",
+      sel = document.selection.createRange(),
+      txt = sel.text,
+      dup = sel.duplicate(),
+      len = 0;
+
+  try {
+    dup.moveToElementText(field);
+  } catch(e) {
+    return 0;
+  }
+
+  sel.text = txt + c;
+  len = dup.text.indexOf(c);
+  sel.moveStart('character', -1);
+  sel.text  = '';
+
+  // if (browser.msie && len == -1) {
+  //   return field.value.length;
+  // }
+  return len;
+}
+
+function getRichValue(field) {
+  if (!field) {
+    return '';
+  }
+  var lines = [];
+  var line = [];
+
+  getRichElementValue(field, lines, line);
+  if (line.length) {
+    lines.push(line.join(''));
+  }
+
+  return lines.join('\n');
+}
+
+function getRichValueWithCaret(field) {
+  if (!field) {
+    return [];
+  }
+  var lines = [];
+  var line = [];
+
+  var sel = window.getSelection ? window.getSelection() : false;
+  var selNode, selOffset;
+  if (sel && sel.rangeCount) {
+    var range = sel.getRangeAt(0);
+    if (range.startContainer &&
+        range.startContainer == range.endContainer &&
+        range.startOffset == range.endOffset) {
+      selNode = range.startContainer;
+      selOffset = range.startOffset;
+    }
+  }
+
+  getRichElementValue(field, lines, line, selNode, selOffset);
+
+  if (line.length) {
+    lines.push(line.join(''));
+  }
+
+  var value = lines.join('\n');
+  var caretPos = value.indexOf('\001');
+  if (caretPos != -1) {
+    value = value.substr(0, caretPos) + value.substr(caretPos + 1);
+  }
+
+  return [value, caretPos];
+}
+
+function getRichElementValue(node, lines, line, selNode, selOffset) {
+  if (node.nodeType == 3) { // TEXT
+    if (selNode === node) {
+      var value = node.nodeValue;
+      line.push(value.substr(0, selOffset) + '\001' + value.substr(selOffset));
+    } else {
+      line.push(node.nodeValue);
+    }
+    return;
+  }
+  if (node.nodeType != 1) { // NON-ELEMENT
+    return;
+  }
+  var isBlock = node.tagName == 'DIV' || node.tagName == 'P';
+  var curChild;
+  if (isBlock && line.length || node.tagName == 'BR') {
+    lines.push(line.join(''));
+    line.splice(0, line.length);
+  }
+  else if (node.tagName == 'IMG') {
+    if (node.alt) {
+      line.push(node.alt);
+    }
+  }
+  if (selNode === node) {
+    line.push('\001');
+  }
+  var curChild = node.firstChild;
+  while (curChild) {
+    getRichElementValue(curChild, lines, line, selNode, selOffset);
+    curChild = curChild.nextSibling;
+  }
+  if (isBlock && line.length) {
+    lines.push(line.join(''));
+    line.splice(0, line.length);
+  }
+}
+
+function setRichFocus(field, selectNode) {
+  field.focus();
+  if (window.getSelection && document.createRange) {
+    var range = document.createRange();
+    if (selectNode) {
+      range.selectNode(selectNode);
+    } else {
+      range.selectNodeContents(field);
+    }
+    range.collapse(false);
+
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  else if (document.body.createTextRange !== undefined) {
+    var textRange = document.body.createTextRange();
+    textRange.moveToElementText(selectNode || field);
+    textRange.collapse(false);
+    textRange.select();
+  }
+}
+
 function onContentLoaded (cb) {
-  setTimeout(cb, 0);
-};
+  setZeroTimeout(cb);
+}
 
 function tsNow (seconds) {
   var t = +new Date() + (window.tsOffset || 0);
@@ -153,27 +317,129 @@ function calcImageInBox(imageW, imageH, boxW, boxH, noZooom) {
 }
 
 function versionCompare (ver1, ver2) {
-    if (typeof ver1 !== 'string') {
-      ver1 = '';
-    }
-    if (typeof ver2 !== 'string') {
-      ver2 = '';
-    }
-    ver1 = ver1.replace(/^\s+|\s+$/g, '').split('.');
-    ver2 = ver2.replace(/^\s+|\s+$/g, '').split('.');
-
-    var a = Math.max(ver1.length, ver2.length), i;
-
-    for (i = 0; i < a; i++) {
-      if (ver1[i] == ver2[i]) {
-        continue;
-      }
-      if (ver1[i] > ver2[i]) {
-        return 1;
-      } else {
-        return -1;
-      }
-    }
-
-    return 0;
+  if (typeof ver1 !== 'string') {
+    ver1 = '';
   }
+  if (typeof ver2 !== 'string') {
+    ver2 = '';
+  }
+  ver1 = ver1.replace(/^\s+|\s+$/g, '').split('.');
+  ver2 = ver2.replace(/^\s+|\s+$/g, '').split('.');
+
+  var a = Math.max(ver1.length, ver2.length), i;
+
+  for (i = 0; i < a; i++) {
+    if (ver1[i] == ver2[i]) {
+      continue;
+    }
+    if (ver1[i] > ver2[i]) {
+      return 1;
+    } else {
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+
+(function (global) {
+
+  var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
+        trimRe = /^\s+|\s$/g;
+
+  function createIndex () {
+    return {
+      shortIndexes: {},
+      fullTexts: {}
+    }
+  }
+
+  function cleanSearchText (text) {
+    text = text.replace(badCharsRe, ' ').replace(trimRe, '');
+    text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
+      return Config.LatinizeMap[ch] || ch;
+    });
+    text = text.toLowerCase();
+
+    return text;
+  }
+
+  function indexObject (id, searchText, searchIndex) {
+    if (searchIndex.fullTexts[id] !== undefined) {
+      return false;
+    }
+
+    searchText = cleanSearchText(searchText);
+
+    if (!searchText.length) {
+      return false;
+    }
+
+    var shortIndexes = searchIndex.shortIndexes;
+
+    searchIndex.fullTexts[id] = searchText;
+
+    angular.forEach(searchText.split(' '), function(searchWord) {
+      var len = Math.min(searchWord.length, 3),
+          wordPart, i;
+      for (i = 1; i <= len; i++) {
+        wordPart = searchWord.substr(0, i);
+        if (shortIndexes[wordPart] === undefined) {
+          shortIndexes[wordPart] = [id];
+        } else {
+          shortIndexes[wordPart].push(id);
+        }
+      }
+    });
+  }
+
+  function search (query, searchIndex) {
+    var shortIndexes = searchIndex.shortIndexes,
+        fullTexts = searchIndex.fullTexts;
+
+    query = cleanSearchText(query);
+
+    var queryWords = query.split(' '),
+        foundObjs = false,
+        newFoundObjs, i, j, searchText, found;
+
+    for (i = 0; i < queryWords.length; i++) {
+      newFoundObjs = shortIndexes[queryWords[i].substr(0, 3)];
+      if (!newFoundObjs) {
+        foundObjs = [];
+        break;
+      }
+      if (foundObjs === false || foundObjs.length > newFoundObjs.length) {
+        foundObjs = newFoundObjs;
+      }
+    }
+
+    newFoundObjs = {};
+
+    for (j = 0; j < foundObjs.length; j++) {
+      found = true;
+      searchText = fullTexts[foundObjs[j]];
+      for (i = 0; i < queryWords.length; i++) {
+        if (searchText.indexOf(queryWords[i]) == -1) {
+          found = false;
+          break;
+        }
+      }
+      if (found) {
+        newFoundObjs[foundObjs[j]] = true;
+      }
+    }
+
+    return newFoundObjs;
+  }
+
+  global.SearchIndexManager = {
+    createIndex: createIndex,
+    indexObject: indexObject,
+    cleanSearchText: cleanSearchText,
+    search: search
+  };
+
+})(window);
+

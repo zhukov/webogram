@@ -1,0 +1,26 @@
+<div class="composer_emoji_btn_wrap">
+
+  <div class="composer_emoji_tooltip_wrap">
+    <div class="composer_emoji_tooltip">
+
+      <div class="composer_emoji_tooltip_tabs">
+        <a ng-repeat="tab in ::tabs" href="" class="composer_emoji_tooltip_tab" ng-class="['composer_emoji_tooltip_tab_' + tab, curTab == tab ? 'active' : '']" ng-click="tabSelect(tab)"></a>
+      </div>
+
+      <div class="composer_emoji_content" ng-switch="curTab == 'stickers'">
+        <div ng-switch-when="true" class="composer_emoji_content_emoticons">
+          <a class="composer_emoticon_option" href="" ng-repeat="emoji in emojis" ng-click="emojiSelect(emoji)"></a>
+        </div>
+        <div ng-switch-default class="composer_emoji_content_stickers">
+          <a class="composer_sticker_option" href="" ng-repeat="sticker in stickers" ng-click="stickerSelect(sticker)"></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <a class="composer_emoji_btn">
+    <i class="icon icon-emoji"></i>
+  </a>
+
+</div>

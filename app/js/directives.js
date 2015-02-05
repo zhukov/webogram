@@ -1061,7 +1061,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, ErrorService) {
+  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, AppStickersManager, ErrorService) {
 
     return {
       link: link,
@@ -1071,139 +1071,107 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
-      var messageField = $('textarea', element)[0],
-          fileSelects = $('input', element),
-          dropbox = $('.im_send_dropbox_wrap', element)[0],
-          emojiButton = $('.im_emoji_btn', element)[0],
-          emojiQuickSelect = !Config.Mobile ? $('.im_emoji_quick_select_area', element)[0] : false,
-          editorElement = messageField,
-          dragStarted, dragTimeout,
-          emojiArea = $(messageField).emojiarea({button: emojiButton, norealTime: true, quickSelect: emojiQuickSelect}),
-          emojiMenu = $('.emoji-menu', element)[0],
-          submitBtn = $('.im_submit', element)[0],
-          richTextarea = $('.emoji-wysiwyg-editor', element)[0];
 
-      if (richTextarea) {
-        editorElement = richTextarea;
-        $(richTextarea).addClass('form-control');
-        $(richTextarea).attr('placeholder', $interpolate($(messageField).attr('placeholder'))($scope));
+      var messageField = $('textarea', element)[0];
+      var emojiButton = $('.composer_emoji_insert_btn', element)[0];
+      var emojiPanel = $('.composer_emoji_panel', element)[0];
+      var fileSelects = $('input', element);
+      var dropbox = $('.im_send_dropbox_wrap', element)[0];
+      var messageFieldWrap = $('.im_send_field_wrap', element)[0];
+      var dragStarted, dragTimeout;
+      var submitBtn = $('.im_submit', element)[0];
 
-        var updatePromise;
-        $(richTextarea)
-          .on('DOMNodeInserted', onPastedImageEvent)
-          .on('keyup', function (e) {
-            updateHeight();
-
-            if (!sendAwaiting) {
-              $scope.$apply(function () {
-                $scope.draftMessage.text = richTextarea.textContent;
-              });
-            }
-
-            $timeout.cancel(updatePromise);
-            updatePromise = $timeout(updateValue, 1000);
+      new EmojiTooltip(emojiButton, {
+        getStickers: function (callback) {
+          AppStickersManager.getStickers().then(function () {
+            AppStickersManager.getStickersImages().then(function (stickersData) {
+              callback(stickersData);
+            });
           });
+        },
+        onEmojiSelected: function (code) {
+          $scope.$apply(function () {
+            composer.onEmojiSelected(code);
+          })
+        },
+        onStickerSelected: function (docID) {
+          $scope.$apply(function () {
+            $scope.draftMessage.sticker = docID;
+          });
+        }
+      });
+
+      var composerEmojiPanel;
+      if (emojiPanel) {
+        composerEmojiPanel = new EmojiPanel(emojiPanel, {
+          onEmojiSelected: function (code) {
+            composer.onEmojiSelected(code);
+          }
+        });
       }
 
-      // Head is sometimes slower
-      $timeout(function () {
-        fileSelects
-          .on('change', function () {
-            var self = this;
-            $scope.$apply(function () {
-              $scope.draftMessage.files = Array.prototype.slice.call(self.files);
-              $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input') || Config.Mobile;
-              setTimeout(function () {
-                try {
-                  self.value = '';
-                } catch (e) {};
-              }, 1000);
-            });
-          });
-      }, 1000);
+      var composer = new MessageComposer(messageField, {
+        onTyping: function () {
+          $scope.$emit('ui_typing');
+        },
+        getSendOnEnter: function () {
+          return sendOnEnter;
+        },
+        onMessageSubmit: onMessageSubmit,
+        onFilesPaste: onFilesPaste
+      });
 
-      var sendOnEnter = true,
-          updateSendSettings = function () {
-            Storage.get('send_ctrlenter').then(function (sendOnCtrl) {
-              sendOnEnter = !sendOnCtrl;
-            });
-          };
+      var richTextarea = composer.richTextareaEl[0];
+      if (richTextarea) {
+        $(richTextarea)
+          .attr('placeholder', $interpolate($(messageField).attr('placeholder'))($scope))
+          .on('keydown keyup', updateHeight);
+      }
 
+      fileSelects.on('change', function () {
+        var self = this;
+        $scope.$apply(function () {
+          $scope.draftMessage.files = Array.prototype.slice.call(self.files);
+          $scope.draftMessage.isMedia = $(self).hasClass('im_media_attach_input') || Config.Mobile;
+          setTimeout(function () {
+            try {
+              self.value = '';
+            } catch (e) {};
+          }, 1000);
+        });
+      });
+
+      var sendOnEnter = true;
+      function updateSendSettings () {
+        Storage.get('send_ctrlenter').then(function (sendOnCtrl) {
+          sendOnEnter = !sendOnCtrl;
+        });
+      };
       $scope.$on('settings_changed', updateSendSettings);
       updateSendSettings();
 
-      $(editorElement).on('keydown', function (e) {
-        if (richTextarea) {
-          updateHeight();
-        }
+      $(submitBtn).on('mousedown touchstart', onMessageSubmit);
 
-        if (e.keyCode == 13) {
-          var submit = false;
-          if (sendOnEnter && !e.shiftKey) {
-            submit = true;
-          } else if (!sendOnEnter && (e.ctrlKey || e.metaKey)) {
-            submit = true;
+      function onMessageSubmit (e) {
+        $scope.$apply(function () {
+          updateValue();
+          $scope.draftMessage.send();
+          composer.resetTyping();
+          if (composerEmojiPanel) {
+            composerEmojiPanel.update();
           }
-
-          if (submit) {
-            $timeout.cancel(updatePromise);
-            updateValue();
-            $scope.draftMessage.send();
-            $(element).trigger('message_send');
-            resetTyping();
-            return cancelEvent(e);
-          }
-        }
-
-      });
-
-      $(submitBtn).on('mousedown touchstart', function (e) {
-        $timeout.cancel(updatePromise);
-        updateValue();
-        $scope.draftMessage.send();
-        $(element).trigger('message_send');
-        resetTyping();
+        });
         return cancelEvent(e);
-      });
-
-      var lastTyping = 0,
-          lastLength;
-      $(editorElement).on('keyup', function (e) {
-        var now = tsNow(),
-            length = (editorElement[richTextarea ? 'textContent' : 'value']).length;
-
-
-        if (now - lastTyping > 5000 && length != lastLength) {
-          lastTyping = now;
-          lastLength = length;
-          $scope.$emit('ui_typing');
-        }
-      });
-
-      function resetTyping () {
-        lastTyping = 0;
-        lastLength = 0;
-      };
-
-      function updateRichTextarea () {
-        if (richTextarea) {
-          $timeout.cancel(updatePromise);
-          var html = $('<div>').text($scope.draftMessage.text || '').html();
-          html = html.replace(/\n/g, '<br/>');
-          $(richTextarea).html(html);
-          lastLength = html.length;
-          updateHeight();
-        }
       }
 
       function updateValue () {
         if (richTextarea) {
-          $(richTextarea).trigger('change');
+          composer.onChange();
           updateHeight();
         }
       }
 
-      var height = richTextarea.offsetHeight;
+      var height = richTextarea && richTextarea.offsetHeight;
       function updateHeight () {
         var newHeight = richTextarea.offsetHeight;
         if (height != newHeight) {
@@ -1214,7 +1182,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function onKeyDown(e) {
         if (e.keyCode == 9 && !e.shiftKey && !e.ctrlKey && !e.metaKey && !$modalStack.getTop()) { // TAB
-          editorElement.focus();
+          composer.focus();
           return cancelEvent(e);
         }
       }
@@ -1229,13 +1197,18 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$on('ui_history_change', focusField);
       }
 
-      $scope.$on('ui_peer_change', resetTyping);
-      $scope.$on('ui_peer_draft', updateRichTextarea);
+      $scope.$on('ui_peer_change', composer.resetTyping.bind(composer));
+      $scope.$on('ui_peer_draft', function () {
+        if (richTextarea) {
+          composer.setValue($scope.draftMessage.text || '');
+          updateHeight();
+        }
+        composer.focus();
+      });
 
       var sendAwaiting = false;
       $scope.$on('ui_message_before_send', function () {
         sendAwaiting = true;
-        $timeout.cancel(updatePromise);
         updateValue();
       });
       $scope.$on('ui_message_send', function () {
@@ -1243,35 +1216,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         focusField();
       });
 
-
       function focusField () {
         onContentLoaded(function () {
-          editorElement.focus();
+          composer.focus();
         });
       }
 
-      function onPastedImageEvent (e) {
-        var element = (e.originalEvent || e).target,
-            src = (element || {}).src || '',
-            remove = false;
-
-        if (src.substr(0, 5) == 'data:') {
-          remove = true;
-          var blob = dataUrlToBlob(src);
-          ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
-            $scope.draftMessage.files = [blob];
-            $scope.draftMessage.isMedia = true;
-          });
-          setZeroTimeout(function () {
-            element.parentNode.removeChild(element);
-          })
-        }
-        else if (src && !src.match(/img\/blank\.gif/)) {
-          var replacementNode = document.createTextNode(' ' + src + ' ');
-          setTimeout(function () {
-            element.parentNode.replaceChild(replacementNode, element);
-          }, 100);
-        }
+      function onFilesPaste (blobs) {
+        ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
+          $scope.draftMessage.files = blobs;
+          $scope.draftMessage.isMedia = true;
+        });
       };
 
       function onPasteEvent (e) {
@@ -1312,7 +1267,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
               $(dropbox)
-                .css({height: editorElement.offsetHeight + 2, width: editorElement.offsetWidth})
+                .css({height: messageFieldWrap.offsetHeight + 2, width: messageFieldWrap.offsetWidth})
                 .show();
             }
           } else {
@@ -1335,15 +1290,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
 
       $scope.$on('$destroy', function cleanup() {
-        $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
         $(document).off('paste', onPasteEvent);
         $(document).off('keydown', onKeyDown);
-        $(submitBtn).off('mousedown')
+        $('body').off('dragenter dragleave dragover drop', onDragDropEvent);
+        $(submitBtn).off('mousedown touchstart');
         fileSelects.off('change');
-        if (richTextarea) {
-          $(richTextarea).off('DOMNodeInserted keyup', onPastedImageEvent);
-        }
-        $(editorElement).off('keydown');
       });
 
       if (!Config.Navigator.touch) {

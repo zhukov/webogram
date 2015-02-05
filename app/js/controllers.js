@@ -316,7 +316,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService) {
+  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -496,6 +496,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     HttpsMigrateService.start();
     LayoutSwitchService.start();
     LocationParamsService.start();
+    AppStickersManager.start();
   })
 
   .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, PhonebookContactsService, ErrorService, AppRuntimeManager) {
@@ -1454,7 +1455,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppPeersManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppPeersManager, AppDocsManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -1463,6 +1464,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.draftMessage = {text: '', send: sendMessage};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
+    $scope.$watch('draftMessage.sticker', onStickerSelected);
 
     function sendMessage (e) {
       $scope.$broadcast('ui_message_before_send');
@@ -1471,10 +1473,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var text = $scope.draftMessage.text;
 
         if (angular.isString(text) && text.length > 0) {
-          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
-            var utfChar = $.emojiarea.reverseIcons[name];
-            if (utfChar !== undefined) {
-              return utfChar;
+          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, shortcut) {
+            var emojiCode = EmojiHelper.shortcuts[shortcut];
+            if (emojiCode !== undefined) {
+              return EmojiHelper.emojis[emojiCode][0];
             }
             return all;
           });
@@ -1529,10 +1531,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var backupDraftObj = {};
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         Storage.set(backupDraftObj);
-        // console.log('draft save', backupDraftObj);
+        // console.log(dT(), 'draft save', backupDraftObj);
       } else {
         Storage.remove('draft' + $scope.curDialog.peerID);
-        // console.log('draft delete', 'draft' + $scope.curDialog.peerID);
+        // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
       }
     }
 
@@ -1554,6 +1556,28 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         });
         $scope.$broadcast('ui_message_send');
       }
+    }
+
+    function onStickerSelected (newVal) {
+      if (!newVal) {
+        return;
+      }
+
+      var doc = AppDocsManager.getDoc(newVal);
+      if (doc.id && doc.access_hash) {
+        console.log('sticker', doc);
+        var inputMedia = {
+          _: 'inputMediaDocument',
+          id: {
+            _: 'inputDocument',
+            id: doc.id,
+            access_hash: doc.access_hash
+          }
+        }
+        AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia);
+        $scope.$broadcast('ui_message_send');
+      }
+      delete $scope.draftMessage.sticker;
     }
   })
 
@@ -3017,7 +3041,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, SearchIndexManager, _) {
+  .controller('CountrySelectModalController', function ($scope, $modalInstance, $rootScope, _) {
 
     $scope.search = {};
     $scope.slice = {limit: 20, limitDelta: 20}
@@ -3060,7 +3084,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   })
 
 
-  .controller('PhonebookModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, PhonebookContactsService, SearchIndexManager, ErrorService) {
+  .controller('PhonebookModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, PhonebookContactsService, ErrorService) {
 
     $scope.search           = {};
     $scope.phonebook        = [];

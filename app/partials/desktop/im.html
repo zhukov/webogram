@@ -168,9 +168,8 @@
                   <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_field_wrap">
-                      <div class="im_emoji_btn pull-right" title="{{'im_emoji_btn_title' | i18n}}">
-                        <i class="icon icon-emoji"></i>
-                      </div>
+                      <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
+
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
                       <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline"></textarea>
                     </div>
@@ -188,7 +187,7 @@
                         <i class="icon icon-camera"></i>
                       </div>
 
-                      <div class="im_emoji_quick_select_area"></div>
+                      <div class="composer_emoji_panel"></div>
 
                     </div>
                   </form>
