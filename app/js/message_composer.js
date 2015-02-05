@@ -147,6 +147,17 @@ function EmojiTooltip (btnEl, options) {
       self.onMouseLeave(true);
     }
   });
+  $(this.btnEl).on('mousedown', function (e) {
+    if (!self.shown) {
+      clearTimeout(self.showTimeout);
+      delete self.showTimeout;
+      self.show();
+    } else {
+      clearTimeout(self.hideTimeout);
+      delete self.hideTimeout;
+      self.hide();
+    }
+  });
 }
 
 EmojiTooltip.prototype.onMouseEnter = function (triggerShow) {
@@ -180,7 +191,7 @@ EmojiTooltip.prototype.createTooltip = function () {
   }
 
   var self = this;
-  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"></div><div class="composer_emoji_tooltip_content clearfix"></div><div class="composer_emoji_tooltip_footer"><a class="composer_emoji_tooltip_settings"></a></div><i class="icon icon-tooltip-tail"></i></div>').appendTo(document.body);
+  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"></div><div class="composer_emoji_tooltip_content clearfix"></div><div class="composer_emoji_tooltip_footer"><a class="composer_emoji_tooltip_settings"></a></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
 
   this.tabsEl = $('.composer_emoji_tooltip_tabs', this.tooltip);
   this.contentEl = $('.composer_emoji_tooltip_content', this.tooltip);
@@ -278,7 +289,7 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
       emoticonData = Config.Emoji[emoticonCode];
       x = iconSize * (i % totalColumns);
       y = iconSize * Math.floor(i / totalColumns);
-      html.push('<a class="composer_emoji_btn" title=":' + encodeEntities(emoticonData[1][0]) + ':" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w20 emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i></a>');
+      html.push('<a class="composer_emoji_btn" title=":' + encodeEntities(emoticonData[1][0]) + ':" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w' + iconSize + ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i></a>');
     }
     this.contentEl.html(html.join(''));
   }
@@ -296,7 +307,7 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
           pos = spritesheet[1];
           x = iconSize * spritesheet[3];
           y = iconSize * spritesheet[2];
-          html.push('<a class="composer_emoji_btn" title=":' + encodeEntities(emoticonData[1][0]) + ':" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w20 emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i></a>');
+          html.push('<a class="composer_emoji_btn" title=":' + encodeEntities(emoticonData[1][0]) + ':" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w' + iconSize + ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i></a>');
         }
       }
       self.contentEl.html(html.join(''));
@@ -311,13 +322,17 @@ EmojiTooltip.prototype.updatePosition = function () {
 
 EmojiTooltip.prototype.show = function () {
   this.updatePosition();
-  this.tooltipEl.show();
+  this.tooltipEl.addClass('composer_emoji_tooltip_shown');
+  this.btnEl.addClass('composer_emoji_insert_btn_on');
   delete this.showTimeout;
+  this.shown = true;
 };
 
 EmojiTooltip.prototype.hide = function () {
-  this.tooltipEl.hide();
+  this.tooltipEl.removeClass('composer_emoji_tooltip_shown');
+  this.btnEl.removeClass('composer_emoji_insert_btn_on');
   delete this.hideTimeout;
+  delete this.shown;
 };
 
 
@@ -381,8 +396,6 @@ function MessageComposer (textarea, options) {
   this.textareaEl = $(textarea);
 
   this.setUpInput();
-  // this.textareaEl.on('keyup keydown', this.onKeyEvent.bind(this));
-  // this.textareaEl.on('focus blur', this.onFocusBlur.bind(this));
 
   this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu"></ul>').appendTo(document.body);
 
@@ -395,7 +408,7 @@ function MessageComposer (textarea, options) {
     }
     if (code = target.attr('data-code')) {
       if (self.onEmojiSelected) {
-        self.onEmojiSelected(code);
+        self.onEmojiSelected(code, true);
       }
       EmojiHelper.pushPopularEmoji(code);
     }
@@ -403,24 +416,32 @@ function MessageComposer (textarea, options) {
   });
 
   this.isActive = false;
+
+  this.onTyping = options.onTyping;
+  this.onMessageSubmit = options.onMessageSubmit;
+  this.getSendOnEnter = options.getSendOnEnter;
 }
 
 MessageComposer.prototype.setUpInput = function () {
   if ('contentEditable' in document.body) {
-    this.setUpContenteditable();
+    this.setUpRich();
   } else {
     this.setUpPlaintext();
   }
 }
 
-MessageComposer.prototype.setUpContenteditable = function () {
+MessageComposer.prototype.setUpRich = function () {
   this.textareaEl.hide();
-  this.contentEditableEl = $('<div class="composer_rich_textarea" contenteditable="true"></div>');
+  this.richTextareaEl = $('<div class="composer_rich_textarea" contenteditable="true"></div>');
 
-  this.textareaEl[0].parentNode.insertBefore(this.contentEditableEl[0], this.textareaEl[0]);
+  this.textareaEl[0].parentNode.insertBefore(this.richTextareaEl[0], this.textareaEl[0]);
 
-  this.contentEditableEl.on('keyup keydown', this.onKeyEvent.bind(this));
-  this.contentEditableEl.on('focus blur', this.onFocusBlur.bind(this));
+  this.richTextareaEl.on('keyup keydown', this.onKeyEvent.bind(this));
+  this.richTextareaEl.on('focus blur', this.onFocusBlur.bind(this));
+  this.richTextareaEl.on('paste', this.onRichPaste.bind(this));
+  this.richTextareaEl.on('DOMNodeInserted', this.onRichPasteNode.bind(this));
+
+  $(document.body).on('keydown', this.backupSelection.bind(this));
 }
 
 MessageComposer.prototype.setUpPlaintext = function () {
@@ -432,51 +453,145 @@ MessageComposer.prototype.onKeyEvent = function (e) {
   var self = this;
   if (e.type == 'keyup') {
     this.checkAutocomplete();
-  }
-  if (e.type == 'keydown' && this.autocompleteShown) {
-    if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
-      var next = e.keyCode == 40;
-      var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active');
 
-      if (currentSelected.length) {
-        var currentSelectedWrap = currentSelected[0].parentNode;
-        var nextWrap = currentSelectedWrap[next ? 'nextSibling' : 'previousSibling'];
-        currentSelected.removeClass('composer_emoji_option_active');
-        if (nextWrap) {
-          $(nextWrap).find('a').addClass('composer_emoji_option_active');
-          return cancelEvent(e);
+    if (this.onTyping) {
+      var now = tsNow();
+      if (now - this.lastTyping > 5000) {
+        var length = (this.richTextareaEl ? this.richTextareaEl[0].textContent : this.textareaEl[0].value).length;
+
+        if (length != this.lastLength) {
+          this.lastTyping = now;
+          this.lastLength = length;
+          this.onTyping();
         }
       }
-
-      var childNodes = this.autoCompleteEl[0].childNodes;
-      var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
-      $(nextWrap).find('a').addClass('composer_emoji_option_active');
-
-      return cancelEvent(e);
     }
 
-    if (e.keyCode == 13) { // ENTER
-      var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active') ||
-                            $(this.autoCompleteEl).childNodes[0].find('a');
-      var code = currentSelected.attr('data-code');
-      if (code) {
-        this.onEmojiSelected(code);
-        EmojiHelper.pushPopularEmoji(code);
+    if (this.richTextareaEl) {
+      clearTimeout(this.updateValueTO);
+      var now = tsNow();
+      if (this.keyupStarted === undefined) {
+        this.keyupStarted = now;
       }
-      return cancelEvent(e);
+      if (now - this.keyupStarted > 10000) {
+        this.onChange();
+      }
+      else {
+        this.updateValueTO = setTimeout(this.onChange.bind(this), 1000);
+      }
+    }
+
+  }
+  if (e.type == 'keydown') {
+    if (this.autocompleteShown) {
+      if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
+        var next = e.keyCode == 40;
+        var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active');
+
+        if (currentSelected.length) {
+          var currentSelectedWrap = currentSelected[0].parentNode;
+          var nextWrap = currentSelectedWrap[next ? 'nextSibling' : 'previousSibling'];
+          currentSelected.removeClass('composer_emoji_option_active');
+          if (nextWrap) {
+            $(nextWrap).find('a').addClass('composer_emoji_option_active');
+            return cancelEvent(e);
+          }
+        }
+
+        var childNodes = this.autoCompleteEl[0].childNodes;
+        var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
+        $(nextWrap).find('a').addClass('composer_emoji_option_active');
+
+        return cancelEvent(e);
+      }
+
+      if (e.keyCode == 13) { // ENTER
+        var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active') ||
+                              $(this.autoCompleteEl).childNodes[0].find('a');
+        var code = currentSelected.attr('data-code');
+        if (code) {
+          this.onEmojiSelected(code, true);
+          EmojiHelper.pushPopularEmoji(code);
+        }
+        return cancelEvent(e);
+      }
+    }
+
+    else if (e.keyCode == 13) {
+      var submit = false;
+      var sendOnEnter = true;
+      if (this.getSendOnEnter && !this.getSendOnEnter()) {
+        sendOnEnter = false;
+      }
+      if (sendOnEnter && !e.shiftKey) {
+        submit = true;
+      } else if (!sendOnEnter && (e.ctrlKey || e.metaKey)) {
+        submit = true;
+      }
+
+      if (submit) {
+        this.onMessageSubmit(e);
+        return cancelEvent(e);
+      }
     }
   }
 }
 
-MessageComposer.prototype.checkAutocomplete = function () {
-  var textarea = this.contentEditableEl ? this.contentEditableEl[0] : this.textareaEl;
-  var pos = getFieldSelection(textarea);
-  var value = getFieldValue(textarea).substr(0, pos);
+MessageComposer.prototype.backupSelection = function () {
+  delete this.selection;
 
-  console.log(pos, value);
+  if (!this.isActive) {
+    return;
+  }
+  if (window.getSelection) {
+    var sel = window.getSelection();
+    if (sel.getRangeAt && sel.rangeCount) {
+      this.selection = sel.getRangeAt(0);
+    }
+  } else if (document.selection && document.selection.createRange) {
+    this.selection = document.selection.createRange();
+  }
+}
+
+MessageComposer.prototype.restoreSelection = function () {
+  if (!this.selection) {
+    return false;
+  }
+  var result = false;
+  if (window.getSelection) {
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(this.selection);
+    result = true;
+  }
+  else if (document.selection && this.selection.select) {
+    this.selection.select();
+    result = true;
+  }
+  delete this.selection;
+
+  return result;
+}
+
+
+
+MessageComposer.prototype.checkAutocomplete = function () {
+  var pos, value;
+  if (this.richTextareaEl) {
+    var textarea = this.richTextareaEl[0];
+    var valueCaret = getRichValueWithCaret(textarea);
+    var value = valueCaret[0];
+    var pos = valueCaret[1] >= 0 ? valueCaret[1] : value.length;
+  } else {
+    var textarea = this.textareaEl[0];
+    var pos = getFieldSelection(textarea);
+    var value = textarea.value;
+  }
+
+  value = value.substr(0, pos);
 
   var matches = value.match(/:([A-Za-z_0-z\+-]*)$/);
-  if (matches) {
+  if (matches/* && !this.richTextareaEl*/) {
     if (this.previousQuery == matches[0]) {
       return;
     }
@@ -509,31 +624,157 @@ MessageComposer.prototype.onFocusBlur = function (e) {
   } else {
     setTimeout(this.checkAutocomplete.bind(this), 100);
   }
+  if (this.richTextareaEl) {
+    document.execCommand('enableObjectResizing', !this.isActive, !this.isActive);
+  }
 }
 
-MessageComposer.prototype.onEmojiSelected = function (code) {
-  console.log('emoji selected', code);
-
-  var emoji = EmojiHelper.emojis[code];
-
-  var textarea = this.textareaEl[0];
-  var fullValue = textarea.value;
-  var pos = this.isActive ? getFieldSelection(textarea) : fullValue.length;
-  var suffix = fullValue.substr(pos);
-  var prefix = fullValue.substr(0, pos);
-  var matches = prefix.match(/:([A-Za-z_0-z\+-]*)$/);
-
-  if (matches && matches[0]) {
-    var newValue = prefix.substr(0, matches.index) + ':' + emoji[1] + ': ' + suffix;
-    var newPos = matches.index + emoji[1].length + 3;
-  } else {
-    var newValue = prefix + ':' + emoji[1] + ': ' + suffix;
-    var newPos = prefix.length + emoji[1].length + 3;
+MessageComposer.prototype.onRichPaste = function (e) {
+  var cData = (e.originalEvent || e).clipboardData,
+      items = cData && cData.items || [],
+      i;
+  for (i = 0; i < items.length; i++) {
+    if (items[i].kind == 'file') {
+      e.preventDefault();
+      return true;
+    }
   }
-  textarea.value = newValue;
-  setFieldSelection(textarea, newPos);
+
+  var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+  setZeroTimeout(this.onChange.bind(this), 0);
+  if (text.length) {
+    document.execCommand('insertText', false, text);
+    return cancelEvent(e);
+  }
+  return true;
+}
+
+MessageComposer.prototype.onRichPasteNode = function (e) {
+  var element = (e.originalEvent || e).target,
+      src = (element || {}).src || '',
+      remove = false;
+
+  if (src.substr(0, 5) == 'data:') {
+    remove = true;
+    var blob = dataUrlToBlob(src);
+    this.onFilePaste(blob);
+    setZeroTimeout(function () {
+      element.parentNode.removeChild(element);
+    })
+  }
+  else if (src && !src.match(/img\/blank\.gif/)) {
+    var replacementNode = document.createTextNode(' ' + src + ' ');
+    setTimeout(function () {
+      element.parentNode.replaceChild(replacementNode, element);
+    }, 100);
+  }
+}
+
+
+
+MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
+  if (this.richTextareaEl) {
+    var textarea = this.richTextareaEl[0];
+    if (!this.isActive) {
+      if (!this.restoreSelection()) {
+        setRichFocus(textarea);
+      }
+    }
+    if (autocomplete) {
+      var valueCaret = getRichValueWithCaret(textarea);
+      var fullValue = valueCaret[0];
+      var pos = valueCaret[1] >= 0 ? valueCaret[1] : fullValue.length;
+      var suffix = fullValue.substr(pos);
+      var prefix = fullValue.substr(0, pos);
+      var matches = prefix.match(/:([A-Za-z0-9\-\+\*_]*)$/);
+      var emoji = EmojiHelper.emojis[code];
+
+      var newValuePrefix;
+      if (matches && matches[0]) {
+        newValuePrefix = prefix.substr(0, matches.index) + ':' + emoji[1] + ':';
+      } else {
+        newValuePrefix = prefix + ':' + emoji[1] + ':';
+      }
+      textarea.value = newValue;
+
+      this.selId = (this.selId || 0) + 1;
+      var html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
+
+      this.richTextareaEl.html(html);
+      setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+    } else {
+      document.execCommand('insertHTML', false, this.getEmojiHtml(code));
+    }
+  }
+  else {
+    var textarea = this.textareaEl[0];
+    var fullValue = textarea.value;
+    var pos = this.isActive ? getFieldSelection(textarea) : fullValue.length;
+    var suffix = fullValue.substr(pos);
+    var prefix = fullValue.substr(0, pos);
+    var matches = autocomplete && prefix.match(/:([A-Za-z0-9\-\+\*_]*)$/);
+    var emoji = EmojiHelper.emojis[code];
+
+    if (matches && matches[0]) {
+      var newValue = prefix.substr(0, matches.index) + ':' + emoji[1] + ': ' + suffix;
+      var newPos = matches.index + emoji[1].length + 3;
+    } else {
+      var newValue = prefix + ':' + emoji[1] + ': ' + suffix;
+      var newPos = prefix.length + emoji[1].length + 3;
+    }
+    textarea.value = newValue;
+    setFieldSelection(textarea, newPos);
+  }
 
   this.hideSuggestions();
+  this.onChange();
+}
+
+MessageComposer.prototype.onChange = function (e) {
+  if (this.richTextareaEl) {
+    delete this.keyupStarted;
+    this.textareaEl.val(getRichValue(this.richTextareaEl[0])).trigger('change');
+  }
+}
+
+MessageComposer.prototype.getEmojiHtml = function (code, emoji) {
+  emoji = emoji || EmojiHelper.emojis[code];
+  var iconSize = 20;
+  var spritesheet = EmojiHelper.spritesheetPositions[code];
+  var categoryIndex = spritesheet[0];
+  var pos = spritesheet[1];
+  var x = iconSize * spritesheet[3];
+  var y = iconSize * spritesheet[2];
+
+  return '<img src="img/blank.gif" alt=":' + encodeEntities(emoji[1]) + ':" data-code="' + encodeEntities(code) + '" class="emoji emoji-w20 emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;" onresizestart="return false" />';
+}
+
+MessageComposer.prototype.setValue = function (text) {
+  if (this.richTextareaEl) {
+    this.richTextareaEl.html(this.getRichHtml(text));
+    this.lastLength = text.length;
+  } else {
+    this.textareaEl.val(text);
+  }
+}
+
+MessageComposer.prototype.getRichHtml = function (text) {
+  return $('<div>').text(text).html().replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
+    var code = EmojiHelper.shortcuts[shortcut];
+    if (code !== undefined) {
+      return this.getEmojiHtml(code);
+    }
+    return all;
+  }).bind(this));
+}
+
+
+MessageComposer.prototype.focus = function () {
+  if (this.richTextareaEl) {
+    setRichFocus(this.richTextareaEl[0]);
+  } else {
+    setFieldSelection(this.textareaEl[0]);
+  }
 }
 
 
@@ -567,7 +808,7 @@ MessageComposer.prototype.showEmojiSuggestions = function (codes) {
 }
 
 MessageComposer.prototype.updatePosition = function () {
-  var offset = this.textareaEl.offset();
+  var offset = (this.richTextareaEl || this.textareaEl).offset();
   var height = this.autoCompleteEl.outerHeight();
   this.autoCompleteEl.css({top: offset.top - height, left: offset.left});
 }
@@ -576,3 +817,9 @@ MessageComposer.prototype.hideSuggestions = function () {
   this.autoCompleteEl.hide();
   delete this.autocompleteShown;
 }
+
+MessageComposer.prototype.resetTyping = function () {
+  this.lastTyping = 0;
+  this.lastLength = 0;
+}
+

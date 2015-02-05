@@ -112,25 +112,63 @@ function getFieldSelection (field) {
   return len;
 }
 
-function getFieldValue(field) {
+function getRichValue(field) {
   if (!field) {
     return '';
   }
-  if (field.tagName == 'INPUT' || field.tagName == 'TEXTAREA') {
-    return field.value;
-  }
   var lines = [];
   var line = [];
-  getFieldElementValue(field, lines, line);
+
+  getRichElementValue(field, lines, line);
   if (line.length) {
     lines.push(line.join(''));
   }
+
   return lines.join('\n');
 }
 
-function getFieldElementValue(node, lines, line) {
+function getRichValueWithCaret(field) {
+  if (!field) {
+    return [];
+  }
+  var lines = [];
+  var line = [];
+
+  var sel = window.getSelection ? window.getSelection() : false;
+  var selNode, selOffset;
+  if (sel && sel.rangeCount) {
+    var range = sel.getRangeAt(0);
+    if (range.startContainer &&
+        range.startContainer == range.endContainer &&
+        range.startOffset == range.endOffset) {
+      selNode = range.startContainer;
+      selOffset = range.startOffset;
+    }
+  }
+
+  getRichElementValue(field, lines, line, selNode, selOffset);
+
+  if (line.length) {
+    lines.push(line.join(''));
+  }
+
+  var value = lines.join('\n');
+  var caretPos = value.indexOf('\001');
+  if (caretPos != -1) {
+    value = value.substr(0, caretPos) + value.substr(caretPos + 1);
+  }
+
+  return [value, caretPos];
+}
+
+function getRichElementValue(node, lines, line, selNode, selOffset) {
   if (node.nodeType == 3) { // TEXT
-    line.push(node.nodeValue);
+    if (selNode === node) {
+      var value = node.nodeValue;
+      line.push(value.substr(0, selOffset) + '\001' + value.substr(selOffset));
+    } else {
+      line.push(node.nodeValue);
+    }
     return;
   }
   if (node.nodeType != 1) { // NON-ELEMENT
@@ -147,9 +185,12 @@ function getFieldElementValue(node, lines, line) {
       line.push(node.alt);
     }
   }
+  if (selNode === node) {
+    line.push('\001');
+  }
   var curChild = node.firstChild;
   while (curChild) {
-    getFieldElementValue(curChild, lines, line);
+    getRichElementValue(curChild, lines, line, selNode, selOffset);
     curChild = curChild.nextSibling;
   }
   if (isBlock && line.length) {
@@ -158,8 +199,31 @@ function getFieldElementValue(node, lines, line) {
   }
 }
 
+function setRichFocus(field, selectNode) {
+  field.focus();
+  if (window.getSelection && document.createRange) {
+    var range = document.createRange();
+    if (selectNode) {
+      range.selectNode(selectNode);
+    } else {
+      range.selectNodeContents(field);
+    }
+    range.collapse(false);
+
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  else if (document.body.createTextRange !== undefined) {
+    var textRange = document.body.createTextRange();
+    textRange.moveToElementText(selectNode || field);
+    textRange.collapse(false);
+    textRange.select();
+  }
+}
+
 function onContentLoaded (cb) {
-  setTimeout(cb, 0);
+  setZeroTimeout(cb);
 }
 
 function tsNow (seconds) {

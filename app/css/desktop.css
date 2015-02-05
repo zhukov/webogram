@@ -963,7 +963,7 @@ a.im_panel_peer_photo .peer_initials {
   opacity: 1;
 }
 .composer_emoji_insert_btn:active .icon-emoji,
-.composer_emoji_insert_btn.on .icon-emoji {
+.composer_emoji_insert_btn.composer_emoji_insert_btn_on .icon-emoji {
   background-position: -9px -367px;
   opacity: 1;
 }
@@ -986,8 +986,8 @@ a.im_panel_peer_photo .peer_initials {
 .im_send_field_wrap {
   margin-bottom: 15px;
 }
-.emoji-wysiwyg-editor,
-.form-control.im_message_field {
+.composer_rich_textarea,
+.composer_textarea {
   border-radius: 0;
   border: 0;
   box-shadow: none;
@@ -999,8 +999,8 @@ a.im_panel_peer_photo .peer_initials {
   line-height: 20px;
   height: auto;
 }
-.emoji-wysiwyg-editor:focus,
-.form-control.im_message_field:focus {
+.composer_rich_textarea:focus,
+.composer_textarea:focus {
   border: 0;
   box-shadow: none;
   outline: none;

@@ -1448,10 +1448,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var text = $scope.draftMessage.text;
 
         if (angular.isString(text) && text.length > 0) {
-          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, name) {
-            var utfChar = $.emojiarea.reverseIcons[name];
-            if (utfChar !== undefined) {
-              return utfChar;
+          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, shortcut) {
+            var emojiCode = EmojiHelper.shortcuts[shortcut];
+            if (emojiCode !== undefined) {
+              return EmojiHelper.emojis[emojiCode][0];
             }
             return all;
           });
@@ -1506,10 +1506,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var backupDraftObj = {};
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         Storage.set(backupDraftObj);
-        // console.log('draft save', backupDraftObj);
+        // console.log(dT(), 'draft save', backupDraftObj);
       } else {
         Storage.remove('draft' + $scope.curDialog.peerID);
-        // console.log('draft delete', 'draft' + $scope.curDialog.peerID);
+        // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
       }
     }
 

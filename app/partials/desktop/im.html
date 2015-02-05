@@ -171,13 +171,13 @@
                   </a>
                   <a class="pull-left im_panel_own_photo" my-peer-photolink="ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
 
-                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}" message-composer>
+                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_field_wrap">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
 
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
-                      <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline" message-composer-field></textarea>
+                      <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline"></textarea>
                     </div>
 
                     <div class="clearfix">
@@ -193,7 +193,7 @@
                         <i class="icon icon-camera"></i>
                       </div>
 
-                      <div class="composer_emoji_panel" message-composer-emoji-recents></div>
+                      <div class="composer_emoji_panel"></div>
 
                     </div>
                   </form>

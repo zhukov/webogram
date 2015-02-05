@@ -1915,53 +1915,7 @@ img.img_fullsize {
 
 
 
-/* Emoji area */
-.emoji-wysiwyg-editor:empty:before {
-  content: attr(placeholder);
-  color: #9aa2ab;
-}
-.emoji-wysiwyg-editor:active:before,
-.emoji-wysiwyg-editor:focus:before {
-  content: none;
-}
-
-.emoji-wysiwyg-editor {
-  box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  font-size: 12px;
-  margin-bottom: 10px;
-  padding: 6px;
-  min-height: 38px;
-  height: auto;
-  width: auto;
-  max-height: 284px;
-  overflow: auto;
-  line-height: 17px;
-
-  border: 1px solid #d2dbe3;
-  border-radius: 2px;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
-  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
-
-  -webkit-user-select: text;
-  word-wrap: break-word;
-
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-.emoji-wysiwyg-editor img {
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-  margin: -3px 0 0 0;
-}
-
-
-
+/* Message composer */
 .composer_emoji_insert_btn {
   display: block;
   position: absolute;
@@ -2001,6 +1955,18 @@ img.img_fullsize {
   background: #FFF;
   padding: 5px 2px 5px 5px;
 }
+.composer_emoji_tooltip_shown {
+  display: block;
+}
+.composer_emoji_tooltip_tail {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  margin-left: -13px;
+  overflow: hidden;
+  width: 26px;
+  height: 14px;
+}
 .icon-tooltip-tail {
   background: #FFF;
   width: 18px;
@@ -2019,10 +1985,10 @@ img.img_fullsize {
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  margin-left: -9px;
+  position: relative;
+  top: -8px;
+  left: 4px;
+
 }
 
 .composer_emoji_tooltip_tabs {
@@ -2089,8 +2055,6 @@ a.composer_emoji_btn:hover {
   background-color: #edf2f5;
 }
 
-
-
 .emoji {
   display: -moz-inline-box;
   -moz-box-orient: vertical;
@@ -2128,7 +2092,6 @@ a.composer_emoji_btn:hover {
   background-image: url('../img/emojisprite_4.png');
 }
 
-
 .emoji-w20 {
   width: 20px;
   height: 20px;
@@ -2140,6 +2103,18 @@ a.composer_emoji_btn:hover {
 .emoji-w20.emoji-spritesheet-2 {background-size: 660px 140px;}
 .emoji-w20.emoji-spritesheet-3 {background-size: 680px 60px;}
 .emoji-w20.emoji-spritesheet-4 {background-size: 680px 140px;}
+
+.emoji-w26 {
+  width: 26px;
+  height: 26px;
+  vertical-align: middle;
+  display: inline-block;
+}
+.emoji-w26.emoji-spritesheet-0 {background-size: 702px 182px;}
+.emoji-w26.emoji-spritesheet-1 {background-size: 754px 104px;}
+.emoji-w26.emoji-spritesheet-2 {background-size: 858px 182px;}
+.emoji-w26.emoji-spritesheet-3 {background-size: 884px 78px;}
+.emoji-w26.emoji-spritesheet-4 {background-size: 884px 182px;}
 
 .composer_dropdown {
   display: none;
@@ -2186,6 +2161,55 @@ a.composer_emoji_btn:hover {
   max-height: 64px;
 }
 
+.composer_rich_textarea {
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  font-size: 12px;
+  margin-bottom: 10px;
+  padding: 6px;
+  min-height: 38px;
+  height: auto;
+  width: auto;
+  max-height: 284px;
+  overflow: auto;
+  line-height: 17px;
+
+  border: 1px solid #d2dbe3;
+  border-radius: 2px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+
+  -webkit-user-select: text;
+  word-wrap: break-word;
+
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.composer_rich_textarea:empty:before {
+  content: attr(placeholder);
+  color: #9aa2ab;
+}
+.composer_rich_textarea:active:before,
+.composer_rich_textarea:focus:before {
+  content: none;
+}
+.composer_rich_textarea:empty:active:before,
+.composer_rich_textarea:empty:focus:before {
+  content: attr(placeholder);
+  color: #9aa2ab;
+}
+
+.composer_rich_textarea img {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin: -3px 0 0 0;
+}
 
 
 .error_modal_window .modal-dialog {
