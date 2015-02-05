@@ -348,13 +348,6 @@ function versionCompare (ver1, ver2) {
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
         trimRe = /^\s+|\s$/g;
 
-  return {
-    createIndex: createIndex,
-    indexObject: indexObject,
-    cleanSearchText: cleanSearchText,
-    search: search
-  };
-
   function createIndex () {
     return {
       shortIndexes: {},

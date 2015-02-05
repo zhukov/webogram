@@ -2036,11 +2036,17 @@ img.img_fullsize {
 .composer_emoji_tooltip_tab_stickers {background-position: -9px -361px; }
 .composer_emoji_tooltip_tab_stickers.active {background-position: -9px -333px; }
 
-.composer_emoji_tooltip_content {
-  position: relative;
+
+.nano.composer_emoji_tooltip_content_wrap {
   height: 174px;
-  overflow: hidden;
-  overflow-y: auto;
+  position: relative;
+}
+.composer_emoji_tooltip_content {
+  /*position: relative;*/
+  /*overflow: hidden;
+  overflow-y: auto;*/
+  padding-right: 8px;
+  outline: 0!important;
 }
 
 
@@ -2146,8 +2152,8 @@ a.composer_emoji_btn:hover {
   line-height: 20px;
 }
 .composer_sticker_btn {
-  width: 70px;
-  height: 70px;
+  width: 67px;
+  height: 67px;
   display: block;
   display: inline-block;
   text-align: center;

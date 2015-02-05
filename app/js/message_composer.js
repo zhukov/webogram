@@ -191,9 +191,10 @@ EmojiTooltip.prototype.createTooltip = function () {
   }
 
   var self = this;
-  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"></div><div class="composer_emoji_tooltip_content clearfix"></div><div class="composer_emoji_tooltip_footer"><a class="composer_emoji_tooltip_settings"></a></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
+  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"></div><div class="composer_emoji_tooltip_content_wrap nano mobile_scrollable_wrap"><div class="composer_emoji_tooltip_content nano-content clearfix"></div></div><div class="composer_emoji_tooltip_footer"><a class="composer_emoji_tooltip_settings"></a></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
 
   this.tabsEl = $('.composer_emoji_tooltip_tabs', this.tooltip);
+  this.contentWrapEl = $('.composer_emoji_tooltip_content_wrap', this.tooltip);
   this.contentEl = $('.composer_emoji_tooltip_content', this.tooltip);
   this.footerEl = $('.composer_emoji_tooltip_footer', this.tooltip);
   this.settingsEl = $('.composer_emoji_tooltip_settings', this.tooltip);
@@ -214,6 +215,10 @@ EmojiTooltip.prototype.createTooltip = function () {
       })
       .appendTo(self.tabsEl);
   });
+
+  if (!Config.Mobile) {
+    this.contentWrapEl.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+  }
 
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
@@ -265,6 +270,16 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
   var self = this;
   var iconSize = Config.Mobile ? 26 : 20;
 
+  var renderContent = function () {
+    self.contentEl.html(html.join(''));
+
+    if (!Config.Mobile) {
+      setTimeout(function () {
+        self.contentWrapEl.nanoScroller();
+      }, 100);
+    }
+  }
+
   if (this.tab == 6) { // Stickers
     var renderStickers = function (stickers) {
       var sticker, i;
@@ -273,7 +288,7 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
         sticker = stickers[i];
         html.push('<a class="composer_sticker_btn" data-sticker="' + sticker.id + '"><img class="composer_sticker_image" src="' + encodeEntities(sticker.src) + '" /></a>');
       }
-      self.contentEl.html(html.join(''));
+      renderContent();
     };
     this.getStickers(renderStickers);
   }
@@ -291,7 +306,7 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
       y = iconSize * Math.floor(i / totalColumns);
       html.push('<a class="composer_emoji_btn" title=":' + encodeEntities(emoticonData[1][0]) + ':" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w' + iconSize + ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i></a>');
     }
-    this.contentEl.html(html.join(''));
+    renderContent();
   }
   else {
     EmojiHelper.getPopularEmoji(function (popularEmoji) {
@@ -310,7 +325,7 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
           html.push('<a class="composer_emoji_btn" title=":' + encodeEntities(emoticonData[1][0]) + ':" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w' + iconSize + ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i></a>');
         }
       }
-      self.contentEl.html(html.join(''));
+      renderContent();
     });
   }
 };
@@ -590,25 +605,38 @@ MessageComposer.prototype.checkAutocomplete = function () {
 
   value = value.substr(0, pos);
 
-  var matches = value.match(/:([A-Za-z_0-z\+-]*)$/);
-  if (matches/* && !this.richTextareaEl*/) {
+  var matches = value.match(/(?:\s|^):([A-Za-z0-9\-\+\*_]*)$/);
+  if (matches) {
     if (this.previousQuery == matches[0]) {
       return;
     }
     this.previousQuery = matches[0];
     var query = SearchIndexManager.cleanSearchText(matches[1]);
-    if (query.length) {
-      var found = EmojiHelper.searchEmojis(query);
-      if (found.length) {
-        this.showEmojiSuggestions(found);
+    EmojiHelper.getPopularEmoji((function (popular) {
+      if (query.length) {
+        var found = EmojiHelper.searchEmojis(query);
+        if (found.length) {
+          var popularFound = [],
+              code, pos;
+          for (var i = 0, len = popular.length; i < len; i++) {
+            code = popular[i].code;
+            pos = found.indexOf(code);
+            if (pos >= 0) {
+              popularFound.push(code);
+              found.splice(pos, 1);
+              if (!found.length) {
+                break;
+              }
+            }
+          }
+          this.showEmojiSuggestions(popularFound.concat(found));
+        } else {
+          this.hideSuggestions();
+        }
       } else {
-        this.hideSuggestions();
+        this.showEmojiSuggestions(popular);
       }
-    } else {
-      EmojiHelper.getPopularEmoji((function (found) {
-        this.showEmojiSuggestions(found);
-      }).bind(this));
-    }
+    }).bind(this));
   }
   else {
     delete this.previousQuery;
@@ -771,7 +799,9 @@ MessageComposer.prototype.getRichHtml = function (text) {
 
 MessageComposer.prototype.focus = function () {
   if (this.richTextareaEl) {
-    setRichFocus(this.richTextareaEl[0]);
+    setZeroTimeout((function () {
+      setRichFocus(this.richTextareaEl[0]);
+    }).bind(this));
   } else {
     setFieldSelection(this.textareaEl[0]);
   }
