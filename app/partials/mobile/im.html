@@ -12,13 +12,6 @@
             <i class="icon icon-search-clear"></i>
           </a>
         </div>
-
-        <div class="im_dialogs_tabs_wrap">
-          <div class="im_dialogs_tabs clearfix">
-            <a href="" class="im_dialogs_tab" ng-class="{active: !search.messages}" ng-click="search.messages = false" my-i18n="im_conversations"></a>
-            <a href="" class="im_dialogs_tab" ng-class="{active: search.messages}" ng-click="search.messages = true" my-i18n="im_messages"></a>
-          </div>
-        </div>
       </div>
 
       <div my-dialogs-list-mobile class="im_dialogs_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
@@ -30,21 +23,16 @@
           <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-block im_dialogs_import_phonebook" ng-click="importPhonebook()" my-i18n="im_import_phonebook"></button>
         </div>
 
-        <div ng-switch="search.messages">
-          <ul ng-switch-when="true" class="nav nav-pills nav-stacked">
-            <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.id" ng-class="{active: curDialog.peerID == dialogMessage.peerID &amp;&amp; curDialog.messageID == dialogMessage.id}"></li>
-          </ul>
-          <ul ng-switch-default class="nav nav-pills nav-stacked">
-            <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
-          </ul>
-        </div>
+        <ul class="nav nav-pills nav-stacked">
+          <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+        </ul>
 
-        <div class="im_dialogs_contacts_wrap" ng-show="!search.messages &amp;&amp; contacts.length > 0">
+        <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
           <h5 my-i18n="im_contacts_title"></h5>
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
               <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
-                <div class="im_dialog_photo pull-left" my-user-photolink="contact.userID" img-class="im_dialog_photo"></div>
+                <div class="im_dialog_photo pull-left" my-user-photolink="contact.userID" img-class="im_dialog_photo" watch="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
                     <span class="im_dialog_user" my-user-link="contact.userID"></span>
@@ -58,12 +46,12 @@
           </ul>
         </div>
 
-        <div class="im_dialogs_contacts_wrap" ng-show="!search.messages &amp;&amp; foundUsers.length > 0">
+        <div class="im_dialogs_contacts_wrap" ng-show="foundUsers.length > 0">
           <h5 my-i18n="im_found_title"></h5>
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="foundUser in foundUsers track by foundUser.userID" ng-class="{active: curDialog.peerID == foundUser.userID}">
               <a class="im_dialog" ng-mousedown="dialogSelect(foundUser.peerString)">
-                <div class="im_dialog_photo pull-left" my-user-photolink="foundUser.userID" img-class="im_dialog_photo"></div>
+                <div class="im_dialog_photo pull-left" my-user-photolink="foundUser.userID" img-class="im_dialog_photo" watch="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
                     <span class="im_dialog_user" my-user-link="foundUser.userID"></span>
@@ -75,6 +63,13 @@
                 </div>
               </a>
             </li>
+          </ul>
+        </div>
+
+        <div class="im_dialogs_messages_wrap" ng-show="foundMessages.length > 0">
+          <h5 my-i18n="im_messages"></h5>
+          <ul class="nav nav-pills nav-stacked">
+            <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in foundMessages track by dialogMessage.id" ng-class="{active: curDialog.peerID == dialogMessage.peerID &amp;&amp; curDialog.messageID == dialogMessage.id}"></li>
           </ul>
         </div>
 

@@ -22,7 +22,7 @@
 	"group_modal_settings": "Settings",
 	"group_modal_notifications": "Notifications",
 	"group_modal_members": "Members",
-	"group_modal_members_kick": "Kick",
+	"group_modal_members_kick": "Remove",
 
 	"country_select_modal_title": "Country",
 
@@ -201,9 +201,9 @@
 	"conversation_returned_to_group": "returned to group",
 	"conversation_invited_user": "invited {user}",
 	"conversation_left_group": "left group",
-	"conversation_kicked_user": "kicked {user}",
+	"conversation_kicked_user": "removed {user}",
 	"conversation_invited_user_message": "invited user",
-	"conversation_kicked_user_message": "kicked user",
+	"conversation_kicked_user_message": "removed user",
 
 	"conversation_unknown_user": "Somebody",
 	"conversation_unknown_chat": "Unknown chat",
@@ -214,7 +214,7 @@
 	"message_service_removed_group_photo": "removed group photo",
 	"message_service_invited_user": "invited {user}",
 	"message_service_returned_to_group": "returned to group",
-	"message_service_kicked_user": "kicked {user}",
+	"message_service_kicked_user": "removed {user}",
 	"message_service_left_group": "left group",
 	"message_service_unsupported_action": "Unsupported action {action}",
 

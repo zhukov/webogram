@@ -2578,7 +2578,8 @@ a.peer_photo_init:focus {
 
 
 
-.im_dialogs_contacts_wrap h5 {
+.im_dialogs_contacts_wrap h5,
+.im_dialogs_messages_wrap h5 {
   color: #999;
   font-size: 13px;
   margin-left: 20px;
