@@ -447,7 +447,7 @@ MessageComposer.prototype.setUpInput = function () {
 
 MessageComposer.prototype.setUpRich = function () {
   this.textareaEl.hide();
-  this.richTextareaEl = $('<div class="composer_rich_textarea" contenteditable="true"></div>');
+  this.richTextareaEl = $('<div class="composer_rich_textarea" contenteditable="true" dir="auto"></div>');
 
   this.textareaEl[0].parentNode.insertBefore(this.richTextareaEl[0], this.textareaEl[0]);
 
