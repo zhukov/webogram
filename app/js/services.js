@@ -1981,6 +1981,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         case 'messageMediaDocument':
           if (message.media.document.sticker) {
             notificationMessage = _('conversation_media_sticker');
+            var stickerEmoji = EmojiHelper.stickers[message.media.document.id];
+            if (stickerEmoji !== undefined) {
+              notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' (' + notificationMessage + ')';
+            }
           } else {
             notificationMessage = message.media.document.file_name || _('conversation_media_document_raw');
           }
@@ -2726,7 +2730,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, MtpApiFileManager, FileManager) {
+.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, RichTextProcessor, MtpApiFileManager, FileManager) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2753,7 +2757,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           apiDoc.duration = attribute.duration;
           break;
         case 'documentAttributeSticker':
-          apiDoc.sticker = true;
+          apiDoc.sticker = 1;
+          var stickerEmoji = EmojiHelper.stickers[apiDoc.id];
+          if (stickerEmoji !== undefined) {
+            apiDoc.sticker = 2;
+            apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(stickerEmoji, {noLinks: true, noLinebreaks: true});
+          }
           break;
         case 'documentAttributeImageSize':
           apiDoc.w = attribute.w;
@@ -3067,7 +3076,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getStickerEmoji(docID) {
-    return stickersToEmoji[docID] || false;
+    return EmojiHelper.stickers[docID] || false;
   }
 
   function processRawStickers(stickers) {
@@ -3082,7 +3091,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       var pack, emoticon, docID;
       var doneDocIDs = {};
-      stickersToEmoji = {};
       currentStickers = [];
       len1 = stickers.packs.length;
       for (i = 0; i < len1; i++) {
@@ -3091,8 +3099,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         len2 = pack.documents.length;
         for (j = 0; j < len2; j++) {
           docID = pack.documents[j];
-          if (stickersToEmoji[docID] === undefined) {
-            stickersToEmoji[docID] = emoticon;
+          if (EmojiHelper.stickers[docID] === undefined) {
+            EmojiHelper.stickers[docID] = emoticon;
           }
           if (doneDocIDs[docID] === undefined) {
             doneDocIDs[docID] = true;
