@@ -507,9 +507,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 })
 
-.service('AppChatsManager', function ($rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, RichTextProcessor) {
+.service('AppChatsManager', function ($q, $rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, AppPhotosManager, RichTextProcessor) {
   var chats = {},
       chatsFull = {},
+      chatFullPromises = {},
       cachedPhotoLocations = {};
 
   function saveApiChats (apiChats) {
@@ -543,6 +544,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getChat (id) {
     return chats[id] || {id: id, deleted: true};
+  }
+
+  function getChatFull(id) {
+    if (chatsFull[id] !== undefined) {
+      return $q.when(chatsFull[id]);
+    }
+    if (chatFullPromises[id] !== undefined) {
+      return chatFullPromises[id];
+    }
+    return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
+      chat_id: id
+    }).then(function (result) {
+      AppChatsManager.saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+      if (result.full_chat && result.full_chat.chat_photo.id) {
+        AppPhotosManager.savePhoto(result.full_chat.chat_photo);
+      }
+      // NotificationsManager.savePeerSettings(-id, result.notify_settings);
+      delete chatFullPromises[id];
+      $rootScope.$broadcast('chat_full_update', id);
+
+      return chatsFull[id] = result;
+    });
   }
 
   function hasChat (id) {
@@ -607,10 +631,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  $rootScope.$on('apiUpdate', function (e, update) {
+    // console.log('on apiUpdate', update);
+    switch (update._) {
+      case 'updateChatParticipants':
+      var participants = update.participants;
+      var chatFull = chatsFull[participants.id];
+        if (chatFull !== undefined) {
+          chatFull.participants = update.participants;
+        }
+        $rootScope.$broadcast('chat_full_update', chatID);
+        break;
+    }
+  });
+
   return {
     saveApiChats: saveApiChats,
     saveApiChat: saveApiChat,
     getChat: getChat,
+    getChatFull: getChatFull,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
     hasChat: hasChat,
