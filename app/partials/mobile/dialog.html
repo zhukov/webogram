@@ -1,15 +1,15 @@
-<a class="im_dialog" ng-mousedown="dialogSelect(dialogMessage.peerString, dialogMessage.unreadCount == -1 &amp;&amp; dialogMessage.id)">
+<a class="im_dialog" ng-mousedown="dialogSelect(dialogMessage.peerString, dialogMessage.unreadCount == -1 && dialogMessage.id)">
 
   <div class="im_dialog_meta pull-right text-right">
     <div class="im_dialog_date" ng-bind="dialogMessage.dateText"></div>
     <span
       class="im_dialog_badge badge"
-      ng-show="dialogMessage.unreadCount > 0 &amp;&amp; !dialogMessage.out"
+      ng-show="dialogMessage.unreadCount > 0 && !dialogMessage.out"
       ng-bind="dialogMessage.unreadCount"
     ></span>
     <i
       class="im_dialog_unread"
-      ng-show="dialogMessage.out &amp;&amp; dialogMessage.unread"
+      ng-show="dialogMessage.out && dialogMessage.unread"
     ></i>
   </div>
 
@@ -24,28 +24,42 @@
 
   <div class="im_dialog_message_wrap">
 
-    <div class="im_dialog_peer" ng-switch="dialogMessage.peerID > 0">
-      <span class="im_dialog_user" ng-switch-when="true" ng-bind-html="dialogMessage.peerData.rFullName"></span>
-      <span class="im_dialog_chat" ng-switch-default>
-        <span ng-bind-html="dialogMessage.peerData.rTitle"></span>
-      </span>
+    <div class="im_dialog_peer" ng-switch="::dialogMessage.peerID > 0">
+      <span class="im_dialog_user" ng-switch-when="true" my-user-link="dialogMessage.peerID"></span>
+      <span class="im_dialog_chat" ng-switch-default ng-bind-html="dialogMessage.peerData.rTitle"></span>
     </div>
 
-    <div ng-switch="dialogMessage.deleted">
+    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message" ng-switch="::dialogMessage.peerID > 0" my-i18n>
+      <span ng-switch-when="true" my-i18n-format="im_conversation_single_typing"></span><span ng-switch-default my-i18n-format="im_conversation_group_typing"></span><my-i18n-param name="name"><span my-user-link="dialogMessage.typing" short="true"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+    </div>
+
+    <div ng-show="!dialogMessage.typing" ng-switch="dialogMessage.deleted">
       <div ng-switch-when="true" class="im_dialog_message">
         <span class="im_dialog_message_text" my-i18n="conversation_message_deleted"></span>
       </div>
       <div ng-switch-default class="im_dialog_message">
-        <span class="im_dialog_chat_from_wrap">
-          <span
-            class="im_dialog_chat_from"
-            ng-if="!dialogMessage.out &amp;&amp; dialogMessage.chatID"
-            ng-bind-html="dialogMessage.fromUser.rFirstName"
-          ></span><span
-            class="im_dialog_chat_from"
-            ng-if="dialogMessage.out"
-            my-i18n="conversation_you"
-          ></span>{{((dialogMessage.out || dialogMessage.peerID &lt; 0) &amp;&amp; (dialogMessage.message.length || dialogMessage.media &amp;&amp; dialogMessage.media._ != 'messageMediaEmpty')) ? ':' : ''}}
+        <span ng-switch="::dialogMessage.peerID > 0">
+          <span ng-switch-when="true">
+            <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.out">
+              <span
+                class="im_dialog_chat_from"
+                my-i18n="conversation_you"
+              ></span><span ng-if="dialogMessage.message.length || dialogMessage.media">:</span>
+            </span>
+          </span>
+          <span ng-switch-default>
+            <span class="im_dialog_chat_from_wrap" ng-switch="dialogMessage.out">
+              <span
+                ng-switch-when="false"
+                class="im_dialog_chat_from"
+                my-user-link="dialogMessage.from_id" short="true" user-watch="true"
+              ></span><span
+                ng-switch-when="true"
+                class="im_dialog_chat_from"
+                my-i18n="conversation_you"
+              ></span><span ng-if="dialogMessage.message.length || dialogMessage.media">:</span>
+            </span>
+          </span>
         </span>
 
         <span class="im_dialog_message_media" ng-if="dialogMessage.media" ng-switch="dialogMessage.media._">

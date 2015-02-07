@@ -317,6 +317,8 @@
 	"im_one_typing": "{name1} is typing{dots}",
 	"im_two_typing": "{name1} and {name2} are typing{dots}",
 	"im_many_typing": "{name1}, {name2} and {count} more are typing{dots}",
+	"im_conversation_single_typing": "typing{dots}",
+	"im_conversation_group_typing": "{name} is typing{dots}",
 	"im_delete_chat": "Delete Chat",
 	"im_clear_history": "Clear History",
 	"im_delete": "Delete {count}",

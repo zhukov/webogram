@@ -580,7 +580,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return {
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + chat.num + '@2x.png',
+      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + (Config.Mobile ? chat.num : Math.ceil(chat.num / 2)) + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
@@ -1290,20 +1290,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       apiMessage.date -= serverTimeOffset;
 
-      if (apiMessage.media && apiMessage.media._ == 'messageMediaPhoto') {
-        AppPhotosManager.savePhoto(apiMessage.media.photo);
-      }
-      if (apiMessage.media && apiMessage.media._ == 'messageMediaVideo') {
-        AppVideoManager.saveVideo(apiMessage.media.video);
-      }
-      if (apiMessage.media && apiMessage.media._ == 'messageMediaDocument') {
-        AppDocsManager.saveDoc(apiMessage.media.document);
-      }
-      if (apiMessage.media && apiMessage.media._ == 'messageMediaAudio') {
-        AppAudioManager.saveAudio(apiMessage.media.audio);
-      }
-      if (apiMessage.media && apiMessage.media._ == 'messageMediaUnsupported') {
-        delete apiMessage.media.bytes;
+      if (apiMessage.media) {
+        switch (apiMessage.media._) {
+          case 'messageMediaEmpty':
+            delete apiMessage.media;
+            break;
+          case 'messageMediaPhoto':
+            AppPhotosManager.savePhoto(apiMessage.media.photo);
+            break;
+          case 'messageMediaVideo':
+            AppVideoManager.saveVideo(apiMessage.media.video);
+            break;
+          case 'messageMediaDocument':
+            AppDocsManager.saveDoc(apiMessage.media.document);
+            break;
+          case 'messageMediaAudio':
+            AppAudioManager.saveAudio(apiMessage.media.audio);
+            break;
+          case 'messageMediaUnsupported':
+            delete apiMessage.media.bytes;
+            break;
+        }
       }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
         AppPhotosManager.savePhoto(apiMessage.action.photo);
@@ -1335,7 +1342,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         flags: 3,
         date: tsNow(true) + serverTimeOffset,
         message: text,
-        media: {_: 'messageMediaEmpty'},
         random_id: randomIDS,
         pending: true
       };
@@ -1813,8 +1819,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
 
-    message.fromUser = AppUsersManager.getUser(message.from_id);
-
     if (message.chatID = message.to_id.chat_id) {
       message.peerID = -message.chatID;
       message.peerData = AppChatsManager.getChat(message.chatID);
@@ -1878,9 +1882,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             {noLinks: true, noLinebreaks: true}
           );
           break;
-
-        case 'messageMediaEmpty':
-          delete message.media;
       }
     }
     else if (message.action) {
@@ -2012,7 +2013,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (message.message) {
       notificationMessage = RichTextProcessor.wrapPlainText(message.message);
-    } else if (message.media && message.media._ != 'messageMediaEmpty') {
+    } else if (message.media) {
       switch (message.media._) {
         case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo_raw'); break;
         case 'messageMediaVideo': notificationMessage = _('conversation_media_video_raw'); break;
@@ -3253,8 +3254,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             to_id: AppPeersManager.getOutputPeer(MtpApiManager.getUserID()),
             flags: 1,
             date: updateMessage.date,
-            message: updateMessage.message,
-            media: {_: 'messageMediaEmpty'}
+            message: updateMessage.message
           },
           pts: updateMessage.pts
         });
@@ -3276,8 +3276,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             to_id: AppPeersManager.getOutputPeer(-updateMessage.chat_id),
             flags: 1,
             date: updateMessage.date,
-            message: updateMessage.message,
-            media: {_: 'messageMediaEmpty'}
+            message: updateMessage.message
           },
           pts: updateMessage.pts
         });

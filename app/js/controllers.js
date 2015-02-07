@@ -520,6 +520,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var jump = 0;
     var contactsJump = 0;
     var peersInDialogs = {};
+    var typingTimeouts = {};
     var contactsShown;
 
     $scope.$on('dialogs_need_more', function () {
@@ -581,6 +582,39 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           break;
         }
+      }
+    });
+
+    $scope.$on('apiUpdate', function (e, update) {
+      switch (update._) {
+        case 'updateUserTyping':
+        case 'updateChatUserTyping':
+          if (!AppUsersManager.hasUser(update.user_id)) {
+            if (update.chat_id) {
+              AppChatsManager.getChatFull(update.chat_id);
+            }
+            return;
+          }
+          var peerID = update._ == 'updateUserTyping'? update.user_id : -update.chat_id;
+          AppUsersManager.forceUserOnline(update.user_id);
+          for (var i = 0; i < $scope.dialogs.length; i++) {
+            if ($scope.dialogs[i].peerID == peerID) {
+              $scope.dialogs[i].typing = update.user_id;
+              $timeout.cancel(typingTimeouts[peerID]);
+
+              typingTimeouts[peerID] = $timeout(function () {
+                for (var i = 0; i < $scope.dialogs.length; i++) {
+                  if ($scope.dialogs[i].peerID == peerID) {
+                    if ($scope.dialogs[i].typing == update.user_id) {
+                      delete $scope.dialogs[i].typing;
+                    }
+                  }
+                }
+              }, 6000);
+              break;
+            }
+          }
+          break;
       }
     });
 
