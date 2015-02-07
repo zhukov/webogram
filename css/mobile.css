@@ -1105,7 +1105,7 @@ a.mobile_modal_action .tg_checkbox_label {
   display: block;
 }
 
-.im_emoji_btn {
+.composer_emoji_insert_btn {
   position: absolute;
   left: 0;
   top: 0;
@@ -1127,10 +1127,10 @@ a.mobile_modal_action .tg_checkbox_label {
 .is_1x .icon-emoji {
   background-image: url(../img/icons/IconsetW_1x.png);
 }
-.im_emoji_btn:active .icon-emoji,
-.is_1x .im_emoji_btn:active .icon-emoji,
-.im_emoji_btn.on .icon-emoji,
-.is_1x .im_emoji_btn.on .icon-emoji {
+.composer_emoji_insert_btn:active .icon-emoji,
+.is_1x .composer_emoji_insert_btn:active .icon-emoji,
+.composer_emoji_insert_btn.on .icon-emoji,
+.is_1x .composer_emoji_insert_btn.on .icon-emoji {
   background-position: -10px -803px;
 }
 
@@ -1141,21 +1141,21 @@ a.mobile_modal_action .tg_checkbox_label {
 .im_send_field_wrap .form-control {
   border-radius: 4px;
 }
-.emoji-wysiwyg-editor {
+.composer_rich_textarea {
   min-height: 18px;
   max-height: 136px;
   margin-bottom: 0;
   font-size: 15px;
 }
-.emoji-wysiwyg-editor:empty {
+.composer_rich_textarea:empty {
   background: #f1f1f1;
   border-color: #f1f1f1;
 }
-.emoji-wysiwyg-editor:empty:before {
+.composer_rich_textarea:empty:before {
   color: #999;
 }
-.emoji-wysiwyg-editor:active,
-.emoji-wysiwyg-editor:focus {
+.composer_rich_textarea:active,
+.composer_rich_textarea:focus {
   box-shadow: none;
   outline: 0;
   background: #FFF;
@@ -1164,16 +1164,32 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 
 
-.emoji-menu {
-  margin-left: -20px;
-  margin-top: -202px;
+.composer_emoji_tooltip {
+  margin-left: 10px;
+  margin-top: -175px;
   width: 262px;
 }
-.emoji-menu .emoji-items-wrap {
+.composer_emoji_tooltip .composer_emoji_tooltip_content {
   height: 106px;
 }
-.emoji-menu .emoji-items a {
+.composer_emoji_tooltip .composer_emoji_tooltip_content .composer_emoji_btn {
   padding: 5px;
+}
+.icon-tooltip-tail {
+  display: none;
+}
+.composer_emoji_tooltip_tab {
+  margin: 0 5px;
+}
+
+.composer_sticker_btn {
+  width: 80px;
+  height: 80px;
+  padding: 3px;
+}
+.composer_sticker_image {
+  max-width: 64px;
+  max-height: 64px;
 }
 
 

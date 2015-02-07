@@ -10,6 +10,8 @@
 
 	"group_modal_info": "Group info",
 	"group_modal_pluralize_participants": "{'0': 'No members', 'one': '1 member', 'other': '{} members'}",
+	"group_modal_pluralize_online_participants": "{'one': '1 online', 'other': '{} online'}",
+	"group_modal_participants": "{total}, {online}",
 	"group_modal_add_member": "Add member",
 	"group_modal_return": "Return to group",
 	"group_modal_update_photo": "Update photo",
@@ -22,7 +24,7 @@
 	"group_modal_settings": "Settings",
 	"group_modal_notifications": "Notifications",
 	"group_modal_members": "Members",
-	"group_modal_members_kick": "Kick",
+	"group_modal_members_kick": "Remove",
 
 	"country_select_modal_title": "Country",
 
@@ -201,9 +203,9 @@
 	"conversation_returned_to_group": "returned to group",
 	"conversation_invited_user": "invited {user}",
 	"conversation_left_group": "left group",
-	"conversation_kicked_user": "kicked {user}",
+	"conversation_kicked_user": "removed {user}",
 	"conversation_invited_user_message": "invited user",
-	"conversation_kicked_user_message": "kicked user",
+	"conversation_kicked_user_message": "removed user",
 
 	"conversation_unknown_user": "Somebody",
 	"conversation_unknown_chat": "Unknown chat",
@@ -214,7 +216,7 @@
 	"message_service_removed_group_photo": "removed group photo",
 	"message_service_invited_user": "invited {user}",
 	"message_service_returned_to_group": "returned to group",
-	"message_service_kicked_user": "kicked {user}",
+	"message_service_kicked_user": "removed {user}",
 	"message_service_left_group": "left group",
 	"message_service_unsupported_action": "Unsupported action {action}",
 
@@ -315,6 +317,8 @@
 	"im_one_typing": "{name1} is typing{dots}",
 	"im_two_typing": "{name1} and {name2} are typing{dots}",
 	"im_many_typing": "{name1}, {name2} and {count} more are typing{dots}",
+	"im_conversation_single_typing": "typing{dots}",
+	"im_conversation_group_typing": "{name} is typing{dots}",
 	"im_delete_chat": "Delete Chat",
 	"im_clear_history": "Clear History",
 	"im_delete": "Delete {count}",

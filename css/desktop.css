@@ -171,7 +171,7 @@
   margin-right: 38px;
   display: inline-block;
   background: url(../img/icons/General.png) no-repeat -10px -111px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   vertical-align: top;
   margin-top: 3px;
 }
@@ -183,7 +183,7 @@
   display: inline-block;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -11px -135px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
 }
 .icon-settings {
   width: 20px;
@@ -193,7 +193,7 @@
   display: inline-block;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -10px -163px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
 }
 .icon-faq {
   width: 20px;
@@ -203,7 +203,7 @@
   display: inline-block;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -10px -637px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
 }
 .icon-about {
   width: 21px;
@@ -212,7 +212,7 @@
   display: inline-block;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -10px -193px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
 }
 .is_1x .icon-new-group,
 .is_1x .icon-contacts,
@@ -315,7 +315,7 @@
 .icon-filter-audio {
   display: inline-block;
   background: url(../img/icons/General.png) no-repeat 0 0;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   margin-right: 12px;
   vertical-align: top;
 }
@@ -408,11 +408,11 @@
   opacity    : 0.99;
 }
 
-.emoji-menu .nano > .nano-pane {
+.composer_emoji_tooltip .nano > .nano-pane {
   background : rgba(255,255,255,0.0);
   right: -2px;
 }
-.emoji-menu .nano > .nano-pane > .nano-slider {
+.composer_emoji_tooltip .nano > .nano-pane > .nano-slider {
   background: #d1d1d1;
   margin: 0 3px 0 4px;
 }
@@ -722,26 +722,21 @@ a.footer_link.active:active {
   background: inherit;
 }
 
-.im_emoji_quick_select_area {
+.composer_emoji_panel {
   display: block;
   height: 30px;
   overflow: hidden;
   max-width: 210px;
 }
-
-.im_emoji_quick_select_area a {
+.composer_emoji_panel a {
   display: inline-block;
   padding: 5px;
   outline: 0;
   border-radius: 2px;
 }
-
-.im_emoji_quick_select_area a:hover {
+/*.composer_emoji_panel a:hover {
   background-color: #edf2f5;
-}
-.im_emoji_quick_select_area a .label {
-  display: none;
-}
+}*/
 
 .im_message_selected .im_message_date,
 .im_message_selected .im_message_document_size,
@@ -940,7 +935,8 @@ a.im_panel_peer_photo .peer_initials {
   margin-left: 36px;
 }
 
-.im_emoji_btn {
+/*.composer_emoji_insert_btn {
+  display: block;
   position: absolute;
   right: 3px;
   top: 2px;
@@ -950,33 +946,48 @@ a.im_panel_peer_photo .peer_initials {
   width: 22px;
   height: 22px;
   margin-top: 1px;
-}
-.icon-emoji {
+}*/
+/*.icon-emoji {
   display: inline-block;
   width: 22px;
   height: 22px;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -9px -335px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   opacity: 0.8;
-}
+}*/
 .is_1x .icon-emoji {
   background-image: url(../img/icons/General_1x.png);
 }
-.im_emoji_btn:hover .icon-emoji {
+.composer_emoji_insert_btn:hover .icon-emoji {
   opacity: 1;
 }
-.im_emoji_btn:active .icon-emoji,
-.im_emoji_btn.on .icon-emoji {
+.composer_emoji_insert_btn:active .icon-emoji,
+.composer_emoji_insert_btn.composer_emoji_insert_btn_on .icon-emoji {
   background-position: -9px -367px;
   opacity: 1;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .im_send_field_wrap {
   margin-bottom: 15px;
 }
-.emoji-wysiwyg-editor,
-.form-control.im_message_field {
+.composer_rich_textarea,
+.composer_textarea {
   border-radius: 0;
   border: 0;
   box-shadow: none;
@@ -988,8 +999,8 @@ a.im_panel_peer_photo .peer_initials {
   line-height: 20px;
   height: auto;
 }
-.emoji-wysiwyg-editor:focus,
-.form-control.im_message_field:focus {
+.composer_rich_textarea:focus,
+.composer_textarea:focus {
   border: 0;
   box-shadow: none;
   outline: none;
@@ -1014,7 +1025,7 @@ a.im_panel_peer_photo .peer_initials {
   height: 17px;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -11px -455px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   opacity: 0.8;
   margin: 0;
 }
@@ -1050,7 +1061,7 @@ a.im_panel_peer_photo .peer_initials {
   height: 18px;
   vertical-align: top;
   background: url(../img/icons/General.png) no-repeat -10px -399px;
-  background-size: 40px 678px;
+  background-size: 40px 778px;
   opacity: 0.8;
 }
 .is_1x .icon-camera {
@@ -1586,7 +1597,7 @@ div.im_dialog_photo .peer_initials {
   background-size: 40px 200px;
   width: 16px;
   height: 24px;
-  opacity: 0.3;
+  opacity: 0.15;
   position: absolute;
   top: 50%;
   pointer-events: none;
