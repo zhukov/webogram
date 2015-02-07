@@ -88,9 +88,7 @@
                   <div class="navbar-quick-back-title">
                     <h4 ng-bind-html="historyPeer.data.rTitle"></h4>
                     <small ng-switch="historyState.typing.length">
-                      <ng-pluralize ng-switch-when="0" count="historyPeer.data.participants_count"
-                                       when="head_pluralize_participants">
-                      </ng-pluralize>
+                      <span ng-switch-when="0" class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
                       <my-i18n>
                         <span ng-switch-when="1" class="status_online" my-i18n-format="head_one_typing"></span>
                         <span ng-switch-when="2" class="status_online" my-i18n-format="head_two_typing"></span>

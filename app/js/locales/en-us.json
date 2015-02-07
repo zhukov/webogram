@@ -10,6 +10,8 @@
 
 	"group_modal_info": "Group info",
 	"group_modal_pluralize_participants": "{'0': 'No members', 'one': '1 member', 'other': '{} members'}",
+	"group_modal_pluralize_online_participants": "{'one': '1 online', 'other': '{} online'}",
+	"group_modal_participants": "{total}, {online}",
 	"group_modal_add_member": "Add member",
 	"group_modal_return": "Return to group",
 	"group_modal_update_photo": "Update photo",

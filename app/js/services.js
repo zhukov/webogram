@@ -556,16 +556,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
       chat_id: id
     }).then(function (result) {
-      AppChatsManager.saveApiChats(result.chats);
+      saveApiChats(result.chats);
       AppUsersManager.saveApiUsers(result.users);
       if (result.full_chat && result.full_chat.chat_photo.id) {
         AppPhotosManager.savePhoto(result.full_chat.chat_photo);
       }
-      // NotificationsManager.savePeerSettings(-id, result.notify_settings);
       delete chatFullPromises[id];
       $rootScope.$broadcast('chat_full_update', id);
 
-      return chatsFull[id] = result;
+      return chatsFull[id] = result.full_chat;
     });
   }
 
@@ -639,8 +638,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var chatFull = chatsFull[participants.id];
         if (chatFull !== undefined) {
           chatFull.participants = update.participants;
+          $rootScope.$broadcast('chat_full_update', chatID);
         }
-        $rootScope.$broadcast('chat_full_update', chatID);
         break;
     }
   });

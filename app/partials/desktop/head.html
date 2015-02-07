@@ -79,11 +79,7 @@
             </div>
             <div class="tg_head_peer_info" ng-switch-default>
               <span class="tg_head_peer_title" ng-bind-html="historyPeer.data.rTitle" dir="auto"></span>
-              <span class="tg_head_peer_status">
-                <ng-pluralize count="historyPeer.data.participants_count"
-                                 when="im_pluralize_participants">
-                </ng-pluralize>
-              </span>
+              <span class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
             </div>
           </a>
 

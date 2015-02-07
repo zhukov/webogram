@@ -2074,6 +2074,97 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myChatStatus', function ($rootScope, _, MtpApiManager, AppChatsManager, AppUsersManager) {
+
+    var ind = 0;
+    var statuses = {};
+
+    var allPluralize = _.pluralize('group_modal_pluralize_participants');
+    var onlinePluralize = _.pluralize('group_modal_pluralize_online_participants');
+
+    var myID = 0;
+    MtpApiManager.getUserID().then(function (newMyID) {
+      myID = newMyID;
+    });
+
+    setInterval(updateAll, 90000);
+
+    return {
+      link: link
+    };
+
+    function updateAll () {
+      angular.forEach(statuses, function (update) {
+        update();
+      });
+    }
+
+    function link($scope, element, attrs) {
+      var chatID;
+      var curInd = ind++;
+      var participantsCount = 0;
+      var participants = {};
+
+      var updateParticipants = function () {
+        participantsCount = 0;
+        participants = {};
+        if (!chatID) {
+          return;
+        }
+        AppChatsManager.getChatFull(chatID).then(function (chatFull) {
+          var participantsVector = (chatFull.participants || {}).participants || [];
+          participantsCount = participantsVector.length;
+          angular.forEach(participantsVector, function (participant) {
+            participants[participant.user_id] = true;
+          });
+          update();
+        });
+      };
+
+      var update = function () {
+        var html = allPluralize(participantsCount);
+        var onlineCount = 0;
+        var wasMe = false;
+        angular.forEach(participants, function (t, userID) {
+          var user = AppUsersManager.getUser(userID);
+          if (user.status && user.status._ == 'userStatusOnline') {
+            if (user.id == myID) {
+              wasMe = true;
+            }
+            onlineCount++;
+          }
+        });
+        if (onlineCount > 1 || onlineCount == 1 && !wasMe) {
+          html = _('group_modal_participants', {total: html, online: onlinePluralize(onlineCount)});
+        }
+
+        element.html(html);
+      };
+
+      $scope.$watch(attrs.myChatStatus, function (newChatID) {
+        chatID = newChatID;
+        updateParticipants();
+      });
+
+      $rootScope.$on('chat_full_update', function (e, updChatID) {
+        if (chatID == updChatID) {
+          updateParticipants();
+        }
+      });
+
+      $rootScope.$on('user_update', function (e, updUserID) {
+        if (participants[updUserID]) {
+          update();
+        }
+      });
+
+      statuses[curInd] = update;
+      $scope.$on('$destroy', function () {
+        delete statuses[curInd];
+      });
+    }
+  })
+
 
   .directive('myUserPhotolink', function (AppUsersManager) {
 

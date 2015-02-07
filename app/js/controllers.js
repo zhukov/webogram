@@ -2249,39 +2249,33 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
-
-    MtpApiManager.invokeApi('messages.getFullChat', {
-      chat_id: $scope.chatID
-    }).then(function (result) {
-      AppChatsManager.saveApiChats(result.chats);
-      AppUsersManager.saveApiUsers(result.users);
-      if (result.full_chat && result.full_chat.chat_photo.id) {
-        AppPhotosManager.savePhoto(result.full_chat.chat_photo);
-      }
-
-      $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, result.full_chat);
-      $scope.$broadcast('ui_height');
-    });
-
     $scope.settings = {notifications: true};
 
-    NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
-      $scope.settings.notifications = !muted;
+    AppChatsManager.getChatFull($scope.chatID).then(function (chatFull) {
+      $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull);
+      $scope.$broadcast('ui_height');
 
-      $scope.$watch('settings.notifications', function(newValue, oldValue) {
-        if (newValue === oldValue) {
-          return false;
-        }
-        NotificationsManager.getPeerSettings(-$scope.chatID).then(function (settings) {
-          if (newValue) {
-            settings.mute_until = 0;
-          } else {
-            settings.mute_until = 2000000000;
+      NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings);
+
+      NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
+        $scope.settings.notifications = !muted;
+
+        $scope.$watch('settings.notifications', function(newValue, oldValue) {
+          if (newValue === oldValue) {
+            return false;
           }
-          NotificationsManager.updatePeerSettings(-$scope.chatID, settings);
+          NotificationsManager.getPeerSettings(-$scope.chatID).then(function (settings) {
+            if (newValue) {
+              settings.mute_until = 0;
+            } else {
+              settings.mute_until = 2000000000;
+            }
+            NotificationsManager.updatePeerSettings(-$scope.chatID, settings);
+          });
         });
       });
     });
+
 
     function onStatedMessage (statedMessage) {
       AppMessagesManager.onStatedMessage(statedMessage);
