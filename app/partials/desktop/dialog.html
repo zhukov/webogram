@@ -22,8 +22,10 @@
       <span class="im_dialog_chat" ng-switch-default ng-bind-html="dialogMessage.peerData.rTitle"></span>
     </div>
 
-    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message" ng-switch="::dialogMessage.peerID > 0" my-i18n>
-      <span ng-switch-when="true" my-i18n-format="im_conversation_single_typing"></span><span ng-switch-default my-i18n-format="im_conversation_group_typing"></span><my-i18n-param name="name"><span my-user-link="dialogMessage.typing" short="true"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message">
+      <span class="im_dialog_message_service" my-i18n="im_conversation_group_typing">
+        <my-i18n-param name="name"><span my-user-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+      </span>
     </div>
 
     <div ng-show="!dialogMessage.typing" ng-switch="dialogMessage.deleted">
