@@ -17,7 +17,7 @@
             <li ng-if="user._ == 'userContact'">
               <a ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
             </li>
-            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
+            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact' &amp;&amp; user._ != 'userSelf'">
               <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
             </li>
             <li>

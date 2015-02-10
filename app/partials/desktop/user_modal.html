@@ -30,9 +30,9 @@
 
 
   <div class="md_modal_body">
-    
+
     <div class="md_modal_sections">
-    
+
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username">
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
 
@@ -62,7 +62,7 @@
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-init="f.showMoreActions = !user.phone.length">
         <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
-        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact'">
+        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact' &amp;&amp; user._ != 'userSelf'">
           <a class="md_modal_section_link" ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
         </div>
 
