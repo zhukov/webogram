@@ -2837,19 +2837,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     else if (isSticker) {
       width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
       height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
-      thumbPhotoSize = {
-        _: 'photoSize',
-        type: 'x',
-        location: {
-          _: 'inputDocumentFileLocation',
-          id: doc.id,
-          access_hash: doc.access_hash,
-          dc_id: doc.dc_id
-        },
-        w: doc.w,
-        h: doc.h,
-        size: doc.size
-      };
     } else {
       width = height = 100;
     }
@@ -3185,10 +3172,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     angular.forEach(currentStickers, function (docID) {
       var doc = AppDocsManager.getDoc(docID);
       var promise = MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
-        return {
-          id: docID,
-          src: FileManager.getUrl(blob, 'image/webp')
-        };
+        if (WebpManager.isWebpSupported()) {
+          return {
+            id: docID,
+            src: FileManager.getUrl(blob, 'image/webp')
+          };
+        }
+
+        return FileManager.getByteArray(blob).then(function (bytes) {
+          return {
+            id: docID,
+            src: WebpManager.getPngUrlFromData(bytes)
+          };
+        });
       });
       promises.push(promise);
     });

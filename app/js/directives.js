@@ -413,7 +413,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$broadcast('ui_dialogs_search');
         $($window).scrollTop(0);
         $timeout(function () {
-          searchField.focus();
+          setFieldSelection(searchField);
         })
       });
 
@@ -460,7 +460,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (e.keyCode == 27 || e.keyCode == 9 && e.shiftKey && !e.ctrlKey && !e.metaKey) { // ESC or Shift + Tab
           if (!searchFocused) {
-            searchField.focus();
+            setFieldSelection(searchField);
             if (searchField.value) {
               searchField.select();
             }
@@ -1579,6 +1579,68 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myLoadSticker', function(MtpApiFileManager, FileManager) {
+
+    var emptySrc = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+    return {
+      link: link,
+      scope: {
+        document: '='
+      }
+    };
+
+    function link ($scope, element, attrs) {
+      var imgElement = element;
+
+      var setSrc = function (blob) {
+        if (WebpManager.isWebpSupported()) {
+          imgElement.attr('src', FileManager.getUrl(blob, 'image/webp'));
+          return;
+        }
+        FileManager.getByteArray(blob).then(function (bytes) {
+          imgElement.attr('src', WebpManager.getPngUrlFromData(bytes));
+        });
+      };
+
+      imgElement.css({
+        width: $scope.document.thumb.width,
+        height: $scope.document.thumb.height
+      });
+
+      var smallLocation = $scope.document.thumb.location;
+      var fullLocation = {
+        _: 'inputDocumentFileLocation',
+        id: $scope.document.id,
+        access_hash: $scope.document.access_hash,
+        dc_id: $scope.document.dc_id
+      };
+
+
+      var cachedBlob = MtpApiFileManager.getCachedFile(fullLocation);
+      var fullDone = false;
+      if (!cachedBlob) {
+        cachedBlob = MtpApiFileManager.getCachedFile(smallLocation);
+      } else {
+        fullDone = true;
+      }
+      if (cachedBlob) {
+        setSrc(cachedBlob);
+        if (fullDone) {
+          return;
+        }
+      } else {
+        imgElement.attr('src', emptySrc);
+      }
+
+      MtpApiFileManager.downloadFile($scope.document.dc_id, fullLocation, $scope.document.size).then(function (blob) {
+        setSrc(blob);
+      }, function (e) {
+        console.log('Download sticker failed', e, fullLocation);
+      });
+    }
+  })
+
   .directive('myLoadDocument', function(MtpApiFileManager, AppDocsManager, FileManager) {
 
     return {
@@ -1748,7 +1810,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return false;
         }
         setTimeout(function () {
-          element[0].focus();
+          setFieldSelection(element[0]);
         }, 100);
       }
     };
@@ -1762,7 +1824,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             return false;
           }
           onContentLoaded(function () {
-            element[0].focus();
+            setFieldSelection(element[0]);
           });
         });
       }
@@ -2615,7 +2677,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         var ev = attrs.myScrollToOn;
         var doScroll = function () {
           onContentLoaded(function () {
-            console.log(111,element, element.offset().top);
             $('html, body').animate({
               scrollTop: element.offset().top
             }, 200);

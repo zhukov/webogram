@@ -182,6 +182,27 @@ angular.module('izhukov.utils', [])
     return 'data:' + mimeType + ';base64,' + bytesToBase64(fileData);
   }
 
+  function getByteArray(fileData) {
+    if (fileData instanceof Blob) {
+      var deferred = $q.defer();
+      try {
+        var reader = new FileReader();
+        reader.onloadend = function (e) {
+          deferred.resolve(new Uint8Array(e.target.result));
+        };
+        reader.onerror = function (e) {
+          deferred.reject(e);
+        };
+        reader.readAsArrayBuffer(fileData);
+
+        return deferred.promise;
+      } catch (e) {
+        return $q.reject(e);
+      }
+    }
+    return $q.when(fileData);
+  }
+
   function getDataUrl(blob) {
     var deferred;
     try {
@@ -275,6 +296,7 @@ angular.module('izhukov.utils', [])
     chooseSave: chooseSaveFile,
     getUrl: getUrl,
     getDataUrl: getDataUrl,
+    getByteArray: getByteArray,
     getFileCorrectUrl: getFileCorrectUrl,
     download: downloadFile
   };
