@@ -1898,9 +1898,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (message.message && message.message.length) {
-      message.richMessage = RichTextProcessor.wrapRichText(message.message);
+      var options = {};
       if (!Config.Navigator.mobile) {
-        message.richUrlEmbed = RichTextProcessor.extractExternalEmbed(message.message);
+        options.extractUrlEmbed = true;
+      }
+      message.richMessage = RichTextProcessor.wrapRichText(message.message, options);
+      if (options.extractedUrlEmbed) {
+        message.richUrlEmbed = options.extractedUrlEmbed;
       }
     }
 
@@ -3482,19 +3486,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
   var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
 
-  var youtubeRegex = /(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
-  var vimeoRegex = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
-  var instagramRegex = /https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
-  var vineRegex = /https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
-  var twitterRegex = /https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
-  var facebookRegex = /https?:\/\/(?:www\.)?facebook\.com\/.+?\/posts\/\d+/i;
-  var gplusRegex = /https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
-  var soundcloudRegex = /https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
+  var youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
+  var vimeoRegex = /^(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
+  var instagramRegex = /^https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
+  var vineRegex = /^https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
+  var twitterRegex = /^https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
+  var facebookRegex = /^https?:\/\/(?:www\.)?facebook\.com\/.+?\/posts\/\d+/i;
+  var gplusRegex = /^https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
+  var soundcloudRegex = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
 
   return {
     wrapRichText: wrapRichText,
-    wrapPlainText: wrapPlainText,
-    extractExternalEmbed: extractExternalEmbed
+    wrapPlainText: wrapPlainText
   };
 
   function getEmojiSpritesheetCoords(emojiCode) {
@@ -3561,17 +3564,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               '</a>'
             );
           } else {
+            var url = match[5] + '://' + match[7];
             html.push(
               '<a href="',
-              encodeEntities(match[5] + '://' + match[7]),
+              encodeEntities(url),
               '" target="_blank">',
-              encodeEntities(match[5] + '://' + match[7]),
+              encodeEntities(url),
               '</a>'
             );
+            if (options.extractUrlEmbed &&
+                !options.extractedUrlEmbed) {
+              options.extractedUrlEmbed = findExternalEmbed(url);
+            }
           }
         } else {
           html.push(encodeEntities(match[0]));
         }
+
       }
       else if (match[8]) { // New line
         if (!options.noLinebreaks) {
@@ -3636,38 +3645,40 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return $sce.trustAs('html', text);
   }
 
-  function extractExternalEmbed (text) {
+  function findExternalEmbed (url) {
     var embedUrlMatches,
         result;
 
-    if (embedUrlMatches = text.match(youtubeRegex)) {
+    if (embedUrlMatches = url.match(youtubeRegex)) {
       return ['youtube', embedUrlMatches[1]];
     }
-    if (embedUrlMatches = text.match(vimeoRegex)) {
+    if (embedUrlMatches = url.match(vimeoRegex)) {
       return ['vimeo', embedUrlMatches[1]];
     }
-    else if (embedUrlMatches = text.match(instagramRegex)) {
+    else if (embedUrlMatches = url.match(instagramRegex)) {
       return ['instagram', embedUrlMatches[1]];
     }
-    else if (embedUrlMatches = text.match(vineRegex)) {
+    else if (embedUrlMatches = url.match(vineRegex)) {
       return ['vine', embedUrlMatches[1]];
     }
-    else if (embedUrlMatches = text.match(soundcloudRegex)) {
+    else if (embedUrlMatches = url.match(soundcloudRegex)) {
       var badFolders = 'explore,upload,pages,terms-of-use,mobile,jobs,imprint'.split(',');
-      if (badFolders.indexOf(embedUrlMatches[1]) == -1) {
+      var badSubfolders = 'sets'.split(',');
+      if (badFolders.indexOf(embedUrlMatches[1]) == -1 &&
+          badSubfolders.indexOf(embedUrlMatches[2]) == -1) {
         return ['soundcloud', embedUrlMatches[0]];
       }
     }
 
     if (!Config.Modes.chrome_packed) { // Need external JS
-      if (embedUrlMatches = text.match(twitterRegex)) {
+      if (embedUrlMatches = url.match(twitterRegex)) {
         return ['twitter', embedUrlMatches[0]];
       }
-      else if (embedUrlMatches = text.match(facebookRegex)) {
+      else if (embedUrlMatches = url.match(facebookRegex)) {
         return ['facebook', embedUrlMatches[0]];
       }
       // Sorry, GPlus widget has no `xfbml.render` like callback and is too wide.
-      // else if (embedUrlMatches = text.match(gplusRegex)) {
+      // else if (embedUrlMatches = url.match(gplusRegex)) {
       //   return ['gplus', embedUrlMatches[0]];
       // }
     }
