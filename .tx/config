@@ -1,0 +1,8 @@
+[main]
+host = https://www.transifex.com
+
+[webogram.translations]
+file_filter = app/js/locales/<lang>-<lang>.json
+source_file = app/js/locales/en-us.json
+source_lang = en_US
+type = KEYVALUEJSON
