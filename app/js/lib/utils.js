@@ -275,7 +275,14 @@ function listUniqSorted (list) {
 }
 
 function templateUrl (tplName) {
-  return 'partials/' + (Config.Mobile ? 'mobile' : 'desktop') + '/' + tplName + '.html';
+  var forceLayout = {
+    confirm_modal: 'desktop',
+    error_modal: 'desktop',
+    media_modal_layout: 'desktop',
+    slider: 'desktop',
+  };
+  var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
+  return 'partials/' + layout + '/' + tplName + '.html';
 }
 
 function encodeEntities(value) {
