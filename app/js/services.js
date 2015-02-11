@@ -952,8 +952,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 1) {
         var unreadCount = foundDialog[0].unread_count;
         if (unreadSkip = (unreadCount > 50)) {
-          limit = 10;
-          unreadOffset = 6;
+          limit = 20;
+          unreadOffset = 16;
           offset = unreadCount - unreadOffset;
         } else {
           limit = Math.max(10, prerendered, unreadCount + 2);

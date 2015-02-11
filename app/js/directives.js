@@ -911,6 +911,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             if (scrollTopInitial >= 0) {
               changeScroll();
             } else {
+              // console.log('change scroll prepend');
               scrollableWrap.scrollTop = st + scrollableWrap.scrollHeight - sh;
             }
 

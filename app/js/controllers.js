@@ -1136,8 +1136,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       if ($scope.curDialog.messageID) {
         maxID = parseInt($scope.curDialog.messageID);
-        limit = 10;
-        backLimit = 10;
+        limit = 20;
+        backLimit = 20;
       }
       else if (forceRecent) {
         limit = 10;
