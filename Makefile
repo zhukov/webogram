@@ -19,3 +19,9 @@ txinstall:
 	sudo python get-pip.py
 	sudo pip install transifex-client
 
+txupdate:
+	tx pull -f
+
+txupload:
+	tx pull -f
+	tx push -s
