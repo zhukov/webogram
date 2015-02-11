@@ -1255,6 +1255,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           if (messagesForDialogs[messageID]) {
             messagesForDialogs[messageID].unread = false;
           }
+          NotificationsManager.cancel('msg' + messageID);
         }
       }
     }
