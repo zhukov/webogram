@@ -3816,6 +3816,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   var titleBackup = document.title,
       titlePromise;
+  var prevFavicon;
 
   $rootScope.$watch('idle.isIDLE', function (newVal) {
     if (!newVal) {
@@ -3896,12 +3897,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function setFavicon (href) {
+    href = href || 'favicon.ico';
+    if (prevFavicon === href) {
+      return
+    }
     var link = document.createElement('link');
     link.rel = 'shortcut icon';
     link.type = 'image/x-icon';
-    link.href = href || 'favicon.ico';
+    link.href = href;
     faviconEl.parentNode.replaceChild(link, faviconEl);
     faviconEl = link;
+
+    prevFavicon = href
   }
 
   function savePeerSettings (peerID, settings) {
