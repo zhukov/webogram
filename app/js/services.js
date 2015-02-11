@@ -2853,7 +2853,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       thumb.height = dim.h;
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
-    } else {
+    }
+    else if (isSticker) {
+      var dim = calcImageInBox(doc.w, doc.h, width, height);
+      thumb.width = dim.w;
+      thumb.height = dim.h;
+    }
+    else {
       thumb = false;
     }
     doc.thumb = thumb;
