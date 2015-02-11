@@ -276,6 +276,7 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
     self.contentEl.html(html.join(''));
 
     if (!Config.Mobile) {
+      self.contentWrapEl.nanoScroller({scroll: 'top'});
       setTimeout(function () {
         self.contentWrapEl.nanoScroller();
       }, 100);
