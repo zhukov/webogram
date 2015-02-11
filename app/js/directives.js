@@ -2441,8 +2441,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           downloadPromise.then(function () {
             onContentLoaded(function () {
-              var audioEl = $('audio', element)[0];
-              if (audioEl) {
+              var errorListenerEl = $('audio', element)[0] || element[0];
+              if (errorListenerEl) {
                 var errorAlready = false;
                 var onAudioError = function (event) {
                   if (errorAlready) {
@@ -2462,16 +2462,18 @@ angular.module('myApp.directives', ['myApp.filters'])
                   }
                 };
 
-                audioEl.addEventListener('error', onAudioError, true);
-                $(audioEl).on('$destroy', function () {
+                errorListenerEl.addEventListener('error', onAudioError, true);
+                $scope.$on('$destroy', function () {
                   errorAlready = true;
-                  audioEl.removeEventListener('error', onAudioError);
+                  errorListenerEl.removeEventListener('error', onAudioError);
                 });
               }
-              checkPlayer($scope.mediaPlayer.player);
-              $scope.mediaPlayer.player.setVolume(audioVolume);
-              $scope.mediaPlayer.player.play();
-            })
+              setTimeout(function () {
+                checkPlayer($scope.mediaPlayer.player);
+                $scope.mediaPlayer.player.setVolume(audioVolume);
+                $scope.mediaPlayer.player.play();
+              }, 300);
+            });
           })
         }
       };
