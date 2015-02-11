@@ -50,7 +50,7 @@
             </span>
           </span>
           <span ng-switch-default>
-            <span class="im_dialog_chat_from_wrap" ng-switch="dialogMessage.out">
+            <span class="im_dialog_chat_from_wrap" ng-switch="dialogMessage.out && dialogMessage._ != 'messageService'">
               <span
                 ng-switch-when="false"
                 class="im_dialog_chat_from"
