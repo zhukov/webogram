@@ -275,7 +275,6 @@ angular.module('izhukov.utils', [])
       } catch (e) {
         console.error('Download click error', e);
         try {
-          console.error('Download click error', e);
           anchor[0].click();
         } catch (e) {
           window.open(url, '_blank');

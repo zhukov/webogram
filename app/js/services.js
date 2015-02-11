@@ -2911,7 +2911,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     historyDoc.progress = {enabled: !historyDoc.downloaded, percent: 1, total: doc.size};
 
     var downloadPromise = MtpApiFileManager.downloadFile(doc.dc_id, inputFileLocation, doc.size, {
-      mime: doc.mime_type,
+      mime: doc.mime_type || 'application/octet-stream',
       toFileEntry: toFileEntry
     });
 
