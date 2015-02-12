@@ -1089,7 +1089,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       moreActive = true;
 
       var curJump = jump,
-          curMoreJump = moreJump,
+          curMoreJump = ++moreJump,
           inputMediaFilter = $scope.historyFilter.mediaType && {_: inputMediaFilters[$scope.historyFilter.mediaType]},
           limit = Config.Mobile ? 20 : 0,
           getMessagesPromise = inputMediaFilter
