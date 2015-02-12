@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Thu Feb 12 2015 18:55:38 GMT+0300 (MSK)
+# Time: Thu Feb 12 2015 23:44:11 GMT+0300 (MSK)
 
 
 CACHE:
@@ -71,8 +71,8 @@ js/locales/it-it.json
 js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
-vendor/closure/long.js
 vendor/cryptoJS/crypto.js
+vendor/closure/long.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/rusha/rusha.js
