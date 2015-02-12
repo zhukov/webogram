@@ -3482,7 +3482,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
 
   // Regular Expression for URL validation by Diego Perini
-  var urlRegex =  "(?:(?:https?|ftp)://)?" +
+  var urlRegex =  "((?:https?|ftp)://|mailto:)?" +
     // user:pass authentication
     "(?:\\S+(?::\\S*)?@)?" +
     "(?:" +
@@ -3583,7 +3583,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           } else {
             html.push(
               '<a href="',
-              encodeEntities(match[4]),
+              encodeEntities((match[5] ? '' : 'http://') + match[4]),
               '" target="_blank">',
               encodeEntities(match[4]),
               '</a>'
@@ -3593,15 +3593,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           html.push(encodeEntities(match[0]));
         }
       }
-      else if (match[5]) { // New line
+      else if (match[6]) { // New line
         if (!options.noLinebreaks) {
           html.push('<br/>');
         } else {
           html.push(' ');
         }
       }
-      else if (match[6]) {
-        if ((emojiCode = emojiMap[match[6]]) &&
+      else if (match[7]) {
+        if ((emojiCode = emojiMap[match[7]]) &&
             (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
 
           emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
@@ -3618,13 +3618,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             ':', emojiTitle, ':</span>'
           );
         } else {
-          html.push(encodeEntities(match[6]));
+          html.push(encodeEntities(match[7]));
         }
       }
       else if (match[8]) {
         if (!options.noLinks) {
           html.push(
-            match[7],
+            match[8],
             '<a href="#/im?q=',
             encodeURIComponent(match[8]),
             '">',
@@ -3633,7 +3633,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           );
         } else {
           html.push(
-            match[7],
+            match[8],
             encodeEntities(match[8])
           );
         }
