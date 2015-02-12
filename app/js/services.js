@@ -3491,8 +3491,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                         "\\uffa1-\\uffdc";                  // half width Hangul (Korean)
 
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
-  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|((?:(ftp|https?)://|(?:mailto:)?([A-Za-z0-9._%+-]+@))(\\S*\\.\\S*[^\\s.;,(){}<>"\']))|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
 
+  // Regular Expression for URL validation by Diego Perini
+  var urlRegex =  "((?:https?|ftp)://|mailto:)?" +
+    // user:pass authentication
+    "(?:\\S+(?::\\S*)?@)?" +
+    "(?:" +
+      "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}" +
+    "|" +
+      // host name
+      "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)" +
+      // domain name
+      "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
+      // TLD identifier
+      "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,24}))" +
+    ")" +
+    // port number
+    "(?::\\d{2,5})?" +
+    // resource path
+    "(?:/[^\\s\\.\"\']*)?";
+
+  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
+
+  var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   var youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
   var vimeoRegex = /^(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
   var instagramRegex = /^https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
@@ -3540,7 +3561,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         emojiCoords;
 
     while ((match = raw.match(regExp))) {
-      // console.log(2, match);
       html.push(encodeEntities(raw.substr(0, match.index)));
 
       if (match[3]) { // telegram.me links
@@ -3560,23 +3580,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           );
         }
       }
-      else if (match[4]) { // URL
+      else if (match[4]) { // URL & e-mail
         if (!options.noLinks) {
-          if (match[6]) {
+          if (emailRegex.test(match[4])) {
             html.push(
               '<a href="',
-              encodeEntities('mailto:' + match[6] + match[7]),
+              encodeEntities('mailto:' + match[4]),
               '" target="_blank">',
-              encodeEntities(match[6] + match[7]),
+              encodeEntities(match[4]),
               '</a>'
             );
           } else {
-            var url = match[5] + '://' + match[7];
+            var url = (match[5] ? '' : 'http://') + match[4];
             html.push(
               '<a href="',
               encodeEntities(url),
               '" target="_blank">',
-              encodeEntities(url),
+              encodeEntities(match[4]),
               '</a>'
             );
             if (options.extractUrlEmbed &&
@@ -3589,16 +3609,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
 
       }
-      else if (match[8]) { // New line
+      else if (match[6]) { // New line
         if (!options.noLinebreaks) {
           html.push('<br/>');
         } else {
           html.push(' ');
         }
       }
-      else if (match[9]) {
-
-        if ((emojiCode = emojiMap[match[9]]) &&
+      else if (match[7]) {
+        if ((emojiCode = emojiMap[match[7]]) &&
             (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
 
           emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
@@ -3615,23 +3634,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             ':', emojiTitle, ':</span>'
           );
         } else {
-          html.push(encodeEntities(match[9]));
+          html.push(encodeEntities(match[7]));
         }
       }
-      else if (match[11]) {
+      else if (match[8]) {
         if (!options.noLinks) {
           html.push(
-            match[10],
+            match[8],
             '<a href="#/im?q=',
-            encodeURIComponent(match[11]),
+            encodeURIComponent(match[8]),
             '">',
-            encodeEntities(match[11]),
+            encodeEntities(match[8]),
             '</a>'
           );
         } else {
           html.push(
-            match[10],
-            encodeEntities(match[11])
+            match[8],
+            encodeEntities(match[8])
           );
         }
       }
@@ -3713,8 +3732,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     while ((match = raw.match(regExp))) {
       text.push(raw.substr(0, match.index));
 
-      if (match[9]) {
-        if ((emojiCode = emojiMap[match[9]]) &&
+      if (match[6]) {
+        if ((emojiCode = emojiMap[match[6]]) &&
             (emojiTitle = emojiData[emojiCode][1][0])) {
           text.push(':' + emojiTitle + ':');
         } else {
