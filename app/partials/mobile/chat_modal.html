@@ -57,7 +57,7 @@
       />
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" ng-bind-html="chatFull.chat.rTitle"></h4>
+        <h4 class="mobile_user_modal_header" my-chat-link="chatFull.chat.id"></h4>
         <p class="mobile_user_modal_status"  ng-if="chatFull.chat.participants_count > 0">
           <ng-pluralize count="chatFull.chat.participants_count"
                            when="group_modal_pluralize_participants">

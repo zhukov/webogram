@@ -2090,10 +2090,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         userID = $scope.$eval(attrs.myUserLink);
         update();
       }
+      if (!attrs.noWatch) {
+        $scope.$on('user_update', function (e, updUserID) {
+          if (userID == updUserID) {
+            update();
+          }
+        });
+      }
     }
   })
 
-  .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
+  .directive('myUserStatus', function ($filter, AppUsersManager) {
 
     var statusFilter = $filter('userStatus'),
         ind = 0,
@@ -2125,7 +2132,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         userID = newUserID;
         update();
       });
-      $rootScope.$on('user_update', function (e, updUserID) {
+      $scope.$on('user_update', function (e, updUserID) {
         if (userID == updUserID) {
           update();
         }
@@ -2133,6 +2140,46 @@ angular.module('myApp.directives', ['myApp.filters'])
       statuses[curInd] = update;
       $scope.$on('$destroy', function () {
         delete statuses[curInd];
+      });
+    }
+  })
+
+  .directive('myChatLink', function ($timeout, AppChatsManager) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      var chatID;
+      var update = function () {
+        var chat = AppChatsManager.getChat(chatID);
+
+        element.html(
+          (chat.rTitle || '').valueOf()
+        )
+      };
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          AppChatsManager.openChat(chatID);
+        });
+      }
+
+      if (attrs.chatWatch) {
+        $scope.$watch(attrs.myChatLink, function (newChatID) {
+          chatID = newChatID;
+          update();
+        });
+      } else {
+        chatID = $scope.$eval(attrs.myChatLink);
+        update();
+      }
+
+      $scope.$on('chat_update', function (e, updChatID) {
+        if (chatID == updChatID) {
+          update();
+        }
       });
     }
   })

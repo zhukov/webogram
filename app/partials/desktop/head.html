@@ -74,11 +74,11 @@
 
           <a class="tg_head_btn" ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
             <div class="tg_head_peer_info" ng-switch-when="true">
-              <span class="tg_head_peer_title" ng-bind-html="historyPeer.data.rFullName" dir="auto"></span>
+              <span class="tg_head_peer_title" my-user-link="historyPeer.id" user-watch="true" dir="auto"></span>
               <span class="tg_head_peer_status" my-user-status="historyPeer.id"></span>
             </div>
             <div class="tg_head_peer_info" ng-switch-default>
-              <span class="tg_head_peer_title" ng-bind-html="historyPeer.data.rTitle" dir="auto"></span>
+              <span class="tg_head_peer_title" my-chat-link="-historyPeer.id" chat-watch="true" dir="auto"></span>
               <span class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
             </div>
           </a>

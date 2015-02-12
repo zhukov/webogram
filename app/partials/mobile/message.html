@@ -1,11 +1,11 @@
 <div class="im_message_outer_wrap" ng-click="toggleMessage(historyMessage.id, $event)">
 
 
-  <div class="im_message_wrap clearfix">
+  <div class="im_message_wrap clearfix" ng-switch="::historyMessage._ == 'messageService'">
 
-    <div class="im_service_message_wrap" ng-if="::historyMessage._ == 'messageService'">
+    <div class="im_service_message_wrap" ng-switch-when="true">
       <div class="im_service_message">
-        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0"></a>
+        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0" no-watch="true"></a>
         <span class="im_message_service" my-service-message></span>
       </div>
 
@@ -19,7 +19,7 @@
 
     </div>
 
-    <div ng-if="::historyMessage._ != 'messageService'" class="im_content_message_wrap" ng-class="::[historyMessage.out ? 'im_message_out' : 'im_message_in']">
+    <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.out ? 'im_message_out' : 'im_message_in']">
       <i ng-if="::historyMessage.unread || historyMessage.pending || false" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
 
       <a class="im_message_from_photo pull-left" my-user-photolink="historyMessage.from_id" img-class="im_message_from_photo"></a>
@@ -31,10 +31,10 @@
 
       <div class="im_message_body" ng-class="::{im_message_body_media: !!historyMessage.media}">
 
-        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0"></a>
+        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0" no-watch="true"></a>
 
         <div ng-if="::historyMessage._ == 'messageForwarded' &amp;&amp; !historyMessage.media" class="im_message_fwd_header" my-i18n="message_forwarded_message_mobile">
-          <a my-i18n-param="from" class="im_message_fwd_author" my-user-link="historyMessage.fwd_from_id"></a>
+          <a my-i18n-param="from" class="im_message_fwd_author" my-user-link="historyMessage.fwd_from_id" no-watch="true"></a>
           <span my-i18n-param="date" class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
         </div>
 

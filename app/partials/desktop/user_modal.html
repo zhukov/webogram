@@ -14,7 +14,7 @@
         <a ng-click="openPhoto(user.photo.photo_id, {p: user.id})" class="peer_modal_photo" ng-class="{disabled: !user.photo.photo_id}" ng-disabled="!user.photo.photo_id" my-peer-photolink="::user.id" img-class="peer_modal_photo" no-open="true"></a>
       </div>
       <div class="peer_modal_profile">
-        <div class="peer_modal_profile_name" ng-bind-html="user.rFullName"></div>
+        <div class="peer_modal_profile_name" my-user-link="user.id"></div>
         <div class="peer_modal_profile_description" my-user-status="::user.id"></div>
       </div>
     </div>

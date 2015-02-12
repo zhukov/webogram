@@ -243,6 +243,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         expires: tsNow(true) + serverTimeOffset + 60,
         wasStatus: wasStatus
       };
+      user.sortStatus = getUserStatusForSort(user.status);
       $rootScope.$broadcast('user_update', id);
     }
   }
@@ -364,6 +365,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   };
 
+  function setUserStatus (userID, offline) {
+    var user = users[userID];
+    if (user) {
+      var status = offline ? {
+          _: 'userStatusOffline',
+          was_online: tsNow(true) + serverTimeOffset
+        } : {
+          _: 'userStatusOnline',
+          expires: tsNow(true) + serverTimeOffset + 500
+        };
+
+      user.status = status;
+      user.sortStatus = getUserStatusForSort(user.status);
+      $rootScope.$broadcast('user_update', userID);
+    }
+  }
+
 
   $rootScope.$on('apiUpdate', function (e, update) {
     // console.log('on apiUpdate', update);
@@ -373,7 +391,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             user = users[userID];
         if (user) {
           user.status = update.status;
-          user.sortStatus = getUserStatusForSort(update.status);
+          user.sortStatus = getUserStatusForSort(user.status);
           $rootScope.$broadcast('user_update', userID);
         }
         break;
@@ -407,6 +425,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiUser: saveApiUser,
     getUser: getUser,
     getUserInput: getUserInput,
+    setUserStatus: setUserStatus,
     forceUserOnline: forceUserOnline,
     getUserPhoto: getUserPhoto,
     getUserString: getUserString,
@@ -3751,10 +3770,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 })
 
-.service('StatusManager', function ($timeout, $rootScope, MtpApiManager, IdleManager) {
+.service('StatusManager', function ($timeout, $rootScope, MtpApiManager, AppUsersManager, IdleManager) {
 
   var toPromise;
-  var lastOnlineUpdated = 0
+  var lastOnlineUpdated = 0;
   var started = false;
   var myID = 0;
   var myOtherDeviceActive = false;
@@ -3790,6 +3809,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return;
     }
     lastOnlineUpdated = offline ? 0 : date;
+    AppUsersManager.setUserStatus(myID, offline);
     return MtpApiManager.invokeApi('account.updateStatus', {
       offline: offline
     }, {noErrorBox: true});
