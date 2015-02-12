@@ -738,29 +738,27 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
       if (window.getSelection) {
         var sel = window.getSelection();
         if (sel.getRangeAt && sel.rangeCount) {
-          var range = sel.getRangeAt(0);
-          range.deleteContents();
 
           var el = document.createElement('div');
           el.innerHTML = html;
-          var frag = document.createDocumentFragment(), node, lastNode;
-          while ( (node = el.firstChild) ) {
-            lastNode = frag.appendChild(node);
-          }
-          range.insertNode(frag);
+          var node = el.firstChild;
+          var range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(document.createTextNode(' '));
+          range.insertNode(node);
+          range.setStart(node, 0);
 
-          if (lastNode) {
-            range = range.cloneRange();
-            range.setStartAfter(lastNode);
+          setTimeout(function() {
+            range = document.createRange();
+            range.setStartAfter(node);
             range.collapse(true);
             sel.removeAllRanges();
             sel.addRange(range);
-          }
+          }, 0);
         }
       } else if (document.selection && document.selection.type != 'Control') {
         document.selection.createRange().pasteHTML(html);
       }
-      // document.execCommand('insertHTML', false, html);
     }
   }
   else {
