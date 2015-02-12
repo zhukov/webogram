@@ -9,7 +9,7 @@
     "modal_done": "Fatto",
     "group_modal_info": "Informazioni gruppo",
     "group_modal_pluralize_participants": "{'0': 'Nessun membro', 'one': '1 membro', 'other': '{} membri'}",
-    "group_modal_pluralize_online_participants": "{'one': '1 in linea', 'other': '{} in linea}",
+    "group_modal_pluralize_online_participants": "{'one': '1 in linea', 'other': '{} in linea'}",
     "group_modal_participants": "{total}, {online}",
     "group_modal_add_member": "Aggiungi membro",
     "group_modal_return": "Ritorna nel gruppo",

@@ -639,7 +639,8 @@ a.footer_link.active:active {
   color: #FFF;
 }
 .contacts_modal_members_list .active a.contacts_modal_contact .md_modal_list_peer_description,
-.contacts_modal_members_list .active a.contacts_modal_contact:hover .md_modal_list_peer_description {
+.contacts_modal_members_list .active a.contacts_modal_contact:hover .md_modal_list_peer_description,
+.contacts_modal_members_list .active a.contacts_modal_contact .md_modal_list_peer_description .status_online {
   color: #FFF;
 }
 

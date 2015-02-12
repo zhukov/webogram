@@ -1386,7 +1386,7 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .im_message_document_size{color:#999;padding-left:2px;vertical-align:text-top}
 .audio_player_actions a,.im_message_document_actions a{margin-right:10px}
 .audio_player_title_wrap{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:1px 0;line-height:16px;height:19px;width:200px}
-.audio_player_title{display:inline-block;font-weight:700;max-width:85px;overflow:hidden;vertical-align:text-top;white-space:nowrap;text-overflow:ellipsis}
+.audio_player_title{display:inline-block;font-weight:700;max-width:100px;overflow:hidden;vertical-align:text-top;white-space:nowrap;text-overflow:ellipsis}
 .audio_player_meta{overflow:hidden;vertical-align:text-top;display:inline-block}
 .audio_player_duration,.audio_player_size{color:#999;padding-left:2px}
 .audio_player_actions{margin-top:3px}
