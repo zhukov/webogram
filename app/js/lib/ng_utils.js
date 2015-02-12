@@ -40,7 +40,12 @@ angular.module('izhukov.utils', [])
       return {then: function (cb) {
         return cb(result);
       }};
-    }
+    },
+    reject: function (result) {
+      return {then: function (cb, badcb) {
+        return badcb(result);
+      }};
+    },
   }
 
 })
@@ -109,7 +114,7 @@ angular.module('izhukov.utils', [])
 
   function chooseSaveFile (fileName, ext, mimeType) {
     if (!$window.chrome || !chrome.fileSystem || !chrome.fileSystem.chooseEntry) {
-      return $q.reject();
+      return qSync.reject();
     };
     var deferred = $q.defer();
 

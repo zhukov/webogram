@@ -492,6 +492,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
               }, {
                 dcID: dcID,
                 fileDownload: true,
+                singleInRequest: true,
                 createNetworker: true
               });
             }, 2).then(function (result) {

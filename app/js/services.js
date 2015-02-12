@@ -2610,7 +2610,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, AppUsersManager, FileManager) {
+.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, AppUsersManager, FileManager, qSync) {
   var videos = {},
       videosForHistory = {},
       windowW = $(window).width(),
@@ -2735,6 +2735,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           id: videoID,
           access_hash: video.access_hash
         };
+
+    if (historyVideo.downloaded && !toFileEntry) {
+      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
+      if (cachedBlob) {
+        return qSync.when(cachedBlob);
+      }
+    }
 
     historyVideo.progress = {enabled: !historyVideo.downloaded, percent: 1, total: video.size};
 
