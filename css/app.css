@@ -1502,7 +1502,6 @@ a.composer_emoji_btn:hover{background-color:#edf2f5}
 .composer_rich_textarea{box-sizing:content-box;-moz-box-sizing:content-box;font-size:12px;margin-bottom:10px;padding:6px;min-height:38px;height:auto;width:auto;max-height:284px;overflow:auto;line-height:17px;border:1px solid #d2dbe3;border-radius:2px;-webkit-box-shadow:none;box-shadow:none;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;word-wrap:break-word;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
 .composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab}
 .composer_rich_textarea:active:before,.composer_rich_textarea:focus:before{content:none}
-.composer_rich_textarea:empty:active:before,.composer_rich_textarea:empty:focus:before{content:attr(placeholder);color:#9aa2ab}
 .composer_rich_textarea img{width:20px;height:20px;vertical-align:middle;margin:-3px 0 0}
 .error_modal_description{color:#999;padding:5px 0;font-size:13px;line-height:160%}
 .error_modal_details textarea{display:block;font-family:Menlo,Monaco,Consolas,"Courier New",monospace;font-size:10px;line-height:100%;white-space:pre-wrap;padding:4px;margin:10px 0;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border:1px solid #ccc;border-radius:4px;width:100%;text-align:left}
