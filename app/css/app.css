@@ -2204,11 +2204,11 @@ a.composer_emoji_btn:hover {
 .composer_rich_textarea:focus:before {
   content: none;
 }
-.composer_rich_textarea:empty:active:before,
+/*.composer_rich_textarea:empty:active:before,
 .composer_rich_textarea:empty:focus:before {
   content: attr(placeholder);
   color: #9aa2ab;
-}
+}*/
 
 .composer_rich_textarea img {
   width: 20px;
