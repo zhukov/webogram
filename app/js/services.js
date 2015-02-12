@@ -3680,20 +3680,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           html.push(encodeEntities(match[7]));
         }
       }
-      else if (match[8]) {
+      else if (match[9]) {
         if (!options.noLinks) {
           html.push(
-            match[8],
             '<a href="#/im?q=',
-            encodeURIComponent(match[8]),
+            encodeURIComponent(match[9]),
             '">',
-            encodeEntities(match[8]),
+            encodeEntities(match[9]),
             '</a>'
           );
         } else {
           html.push(
-            match[8],
-            encodeEntities(match[8])
+            encodeEntities(match[9])
           );
         }
       }
