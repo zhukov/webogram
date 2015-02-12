@@ -823,6 +823,10 @@ angular.module('izhukov.utils', [])
   function onEvent (e) {
     // console.log('event', e.type);
     if (e.type == 'mousemove') {
+      var e = e.originalEvent || e;
+      if (e && e.movementX === 0 && e.movementY === 0) {
+        return;
+      }
       $($window).off('mousemove', onEvent);
     }
     var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
