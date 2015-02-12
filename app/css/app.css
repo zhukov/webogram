@@ -1569,7 +1569,7 @@ img.im_message_document_thumb {
 .audio_player_title {
   display: inline-block;
   font-weight: bold;
-  max-width: 85px;
+  max-width: 100px;
   overflow: hidden;
   vertical-align: text-top;
   white-space: nowrap;
