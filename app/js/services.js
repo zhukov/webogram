@@ -2584,6 +2584,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         });
       }
     }, function () {
+      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
+      if (cachedBlob) {
+        return FileManager.download(cachedBlob, mimeType, fileName);
+      }
+
       MtpApiFileManager.downloadFile(
         fullPhotoSize.location.dc_id, inputFileLocation, fullPhotoSize.size, {mime: mimeType}
       ).then(function (blob) {
@@ -2803,7 +2808,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, RichTextProcessor, MtpApiFileManager, FileManager) {
+.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2918,8 +2923,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: doc.access_hash
         };
 
-    // historyDoc.progress = {enabled: true, percent: 10, total: doc.size};
-
     if (historyDoc.downloaded === undefined) {
       MtpApiFileManager.getDownloadedFile(inputFileLocation, doc.size).then(function () {
         historyDoc.downloaded = true;
@@ -2937,6 +2940,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           id: docID,
           access_hash: doc.access_hash
         };
+
+    if (historyDoc.downloaded && !toFileEntry) {
+      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
+      if (cachedBlob) {
+        return qSync.when(cachedBlob);
+      }
+    }
 
     historyDoc.progress = {enabled: !historyDoc.downloaded, percent: 1, total: doc.size};
 
@@ -3011,7 +3021,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, FileManager) {
+.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, FileManager, qSync) {
   var audios = {};
   var audiosForHistory = {};
 
@@ -3058,6 +3068,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           id: audioID,
           access_hash: audio.access_hash
         };
+
+    if (historyAudio.downloaded && !toFileEntry) {
+      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
+      if (cachedBlob) {
+        return qSync.when(cachedBlob);
+      }
+    }
 
     historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 1, total: audio.size};
 

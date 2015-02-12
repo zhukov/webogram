@@ -260,7 +260,18 @@ angular.module('izhukov.utils', [])
       return;
     }
 
+    var popup = false;
+    if (window.safari) {
+      popup = window.open();
+    }
+
     getFileCorrectUrl(blob, mimeType).then(function (url) {
+      if (popup) {
+        try {
+          popup.location.href = url;
+          return;
+        } catch (e) {}
+      }
       var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
       anchor.href = url;
       anchor.target  = '_blank';
@@ -318,11 +329,11 @@ angular.module('izhukov.utils', [])
   var storageIsAvailable = $window.indexedDB !== undefined &&
                            $window.IDBTransaction !== undefined;
 
-  // IndexedDB was REALLY slow till Safari 8.0.3, no point in it
+  // IndexedDB is REALLY slow without blob support in Safari 8, no point in it
   if (storageIsAvailable &&
       navigator.userAgent.indexOf('Safari') != -1 &&
-      navigator.userAgent.indexOf('Chrome') == -1 &&
-      navigator.userAgent.match(/Version\/([67]|8.0.[012])/)
+      navigator.userAgent.indexOf('Chrome') == -1
+      // && navigator.userAgent.match(/Version\/([67]|8.0.[012])/)
   ) {
     storageIsAvailable = false;
   }
