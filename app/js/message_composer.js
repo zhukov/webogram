@@ -734,7 +734,33 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
       this.richTextareaEl.html(html);
       setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
     } else {
-      document.execCommand('insertHTML', false, this.getEmojiHtml(code));
+      var html = this.getEmojiHtml(code);
+      if (window.getSelection) {
+        var sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+          var range = sel.getRangeAt(0);
+          range.deleteContents();
+
+          var el = document.createElement('div');
+          el.innerHTML = html;
+          var frag = document.createDocumentFragment(), node, lastNode;
+          while ( (node = el.firstChild) ) {
+            lastNode = frag.appendChild(node);
+          }
+          range.insertNode(frag);
+
+          if (lastNode) {
+            range = range.cloneRange();
+            range.setStartAfter(lastNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      } else if (document.selection && document.selection.type != 'Control') {
+        document.selection.createRange().pasteHTML(html);
+      }
+      // document.execCommand('insertHTML', false, html);
     }
   }
   else {
