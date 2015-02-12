@@ -2057,6 +2057,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       notification.title = (fromUser.first_name || '') +
                            (fromUser.first_name && fromUser.last_name ? ' ' : '') +
                            (fromUser.last_name || '');
+      if (!notification.title) {
+        notification.title = fromUser.phone || _('conversation_unknown_user_raw');
+      }
 
       notificationPhoto = fromPhoto;
 
@@ -2814,6 +2817,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
       }
     });
+    apiDoc.file_name = apiDoc.file_name || '';
   };
 
   function getDoc (docID) {

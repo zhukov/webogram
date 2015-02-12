@@ -311,9 +311,17 @@ angular.module('izhukov.utils', [])
   var dbVersion = 1;
   var openDbPromise;
   var storageIsAvailable = $window.indexedDB !== undefined &&
-                           $window.IDBTransaction !== undefined &&
-                           navigator.userAgent.indexOf('Safari') == -1;
-                           // As of Safari 8.0 IndexedDB is REALLY slow, no point in it
+                           $window.IDBTransaction !== undefined;
+
+  // IndexedDB was REALLY slow till Safari 8.0.3, no point in it
+  if (storageIsAvailable &&
+      navigator.userAgent.indexOf('Safari') != -1 &&
+      navigator.userAgent.indexOf('Chrome') == -1 &&
+      navigator.userAgent.match(/Version\/([67]|8.0.[012])/)
+  ) {
+    storageIsAvailable = false;
+  }
+
   var storeBlobsAvailable = storageIsAvailable || false;
 
   function isAvailable () {
