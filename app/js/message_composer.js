@@ -501,6 +501,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
 
   }
   if (e.type == 'keydown') {
+    var checkSubmit = !this.autocompleteShown;
     if (this.autocompleteShown) {
       if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
         var next = e.keyCode == 40;
@@ -524,18 +525,19 @@ MessageComposer.prototype.onKeyEvent = function (e) {
       }
 
       if (e.keyCode == 13) { // ENTER
-        var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active') ||
-                              $(this.autoCompleteEl).childNodes[0].find('a');
+        var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active')/* ||
+                              $(this.autoCompleteEl).childNodes[0].find('a')*/;
         var code = currentSelected.attr('data-code');
         if (code) {
           this.onEmojiSelected(code, true);
           EmojiHelper.pushPopularEmoji(code);
+          return cancelEvent(e);
         }
-        return cancelEvent(e);
+        checkSubmit = true;
       }
     }
 
-    else if (e.keyCode == 13) {
+    if (checkSubmit && e.keyCode == 13) {
       var submit = false;
       var sendOnEnter = true;
       if (this.getSendOnEnter && !this.getSendOnEnter()) {
