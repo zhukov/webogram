@@ -139,26 +139,30 @@ function EmojiTooltip (btnEl, options) {
   this.onStickerSelected = options.onStickerSelected;
   this.getStickers = options.getStickers;
 
-  $(this.btnEl).on('mouseenter mouseleave', function (e) {
-    self.isOverBtn = e.type == 'mouseenter';
-    self.createTooltip();
+  if (!Config.Navigator.touch) {
+    $(this.btnEl).on('mouseenter mouseleave', function (e) {
+      self.isOverBtn = e.type == 'mouseenter';
+      self.createTooltip();
 
-    if (self.isOverBtn) {
-      self.onMouseEnter(true);
-    } else {
-      self.onMouseLeave(true);
-    }
-  });
+      if (self.isOverBtn) {
+        self.onMouseEnter(true);
+      } else {
+        self.onMouseLeave(true);
+      }
+    });
+  }
   $(this.btnEl).on('mousedown', function (e) {
     if (!self.shown) {
       clearTimeout(self.showTimeout);
       delete self.showTimeout;
+      self.createTooltip();
       self.show();
     } else {
       clearTimeout(self.hideTimeout);
       delete self.hideTimeout;
       self.hide();
     }
+    return cancelEvent(e);
   });
 }
 
@@ -202,20 +206,23 @@ EmojiTooltip.prototype.createTooltip = function () {
   this.settingsEl = $('.composer_emoji_tooltip_settings', this.tooltip);
 
   angular.forEach(['recent', 'smile', 'flower', 'bell', 'car', 'grid', 'stickers'], function (tabName, tabIndex) {
-    $('<a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_' + tabName + '"></a>')
+    var tab = $('<a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_' + tabName + '"></a>')
       .on('mousedown', function (e) {
         self.selectTab(tabIndex);
         return cancelEvent(e);
       })
-      .on('mouseenter mouseleave', function (e) {
+      .appendTo(self.tabsEl);
+
+    if (!Config.Navigator.touch) {
+      tab.on('mouseenter mouseleave', function (e) {
         clearTimeout(self.selectTabTimeout);
         if (e.type == 'mouseenter') {
           self.selectTabTimeout = setTimeout(function () {
             self.selectTab(tabIndex);
           }, 300);
         }
-      })
-      .appendTo(self.tabsEl);
+      });
+    }
   });
 
   if (!Config.Mobile) {
@@ -238,19 +245,26 @@ EmojiTooltip.prototype.createTooltip = function () {
       if (self.onStickerSelected) {
         self.onStickerSelected(sticker);
       }
+      if (Config.Mobile) {
+        self.hide();
+      }
     }
     return cancelEvent(e);
   });
 
-  this.tooltipEl.on('mouseenter mouseleave', function (e) {
-    if (e.type == 'mouseenter') {
-      self.onMouseEnter();
-    } else {
-      self.onMouseLeave();
-    }
-  });
+  if (!Config.Navigator.touch) {
+    this.tooltipEl.on('mouseenter mouseleave', function (e) {
+      if (e.type == 'mouseenter') {
+        self.onMouseEnter();
+      } else {
+        self.onMouseLeave();
+      }
+    });
+  }
 
   this.selectTab(0);
+
+  $(window).on('resize', this.updatePosition.bind(this));
 
   return true;
 }
@@ -473,19 +487,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
   if (e.type == 'keyup') {
     this.checkAutocomplete();
 
-    if (this.onTyping) {
-      var now = tsNow();
-      if (now - this.lastTyping > 5000) {
-        var length = (this.richTextareaEl ? this.richTextareaEl[0].textContent : this.textareaEl[0].value).length;
-
-        if (length != this.lastLength) {
-          this.lastTyping = now;
-          this.lastLength = length;
-          this.onTyping();
-        }
-      }
-    }
-
+    var length = false;
     if (this.richTextareaEl) {
       clearTimeout(this.updateValueTO);
       var now = tsNow();
@@ -496,10 +498,30 @@ MessageComposer.prototype.onKeyEvent = function (e) {
         this.onChange();
       }
       else {
-        this.updateValueTO = setTimeout(this.onChange.bind(this), 1000);
+        length = this.richTextareaEl[0].textContent.length;
+        if (this.wasEmpty != !length) {
+          this.wasEmpty = !this.wasEmpty;
+          this.onChange();
+        } else {
+          this.updateValueTO = setTimeout(this.onChange.bind(this), 1000);
+        }
       }
     }
 
+    if (this.onTyping) {
+      var now = tsNow();
+      if (now - this.lastTyping > 5000) {
+        if (length === false) {
+          length = (this.richTextareaEl ? this.richTextareaEl[0].textContent : this.textareaEl[0].value).length;
+        }
+
+        if (length != this.lastLength) {
+          this.lastTyping = now;
+          this.lastLength = length;
+          this.onTyping();
+        }
+      }
+    }
   }
   if (e.type == 'keydown') {
     var checkSubmit = !this.autocompleteShown;
@@ -597,6 +619,9 @@ MessageComposer.prototype.restoreSelection = function () {
 
 
 MessageComposer.prototype.checkAutocomplete = function () {
+  if (Config.Mobile) {
+    return false;
+  }
   var pos, value;
   if (this.richTextareaEl) {
     var textarea = this.richTextareaEl[0];
@@ -815,6 +840,8 @@ MessageComposer.prototype.setValue = function (text) {
   if (this.richTextareaEl) {
     this.richTextareaEl.html(this.getRichHtml(text));
     this.lastLength = text.length;
+    this.wasEmpty = !text.length;
+    this.onKeyEvent({type: 'keyup'});
   } else {
     this.textareaEl.val(text);
   }

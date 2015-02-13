@@ -1204,7 +1204,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           composer.setValue($scope.draftMessage.text || '');
           updateHeight();
         }
-        composer.focus();
+        if (!Config.Navigator.touch) {
+          composer.focus();
+        }
       });
 
       var sendAwaiting = false;
@@ -1214,7 +1216,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
       $scope.$on('ui_message_send', function () {
         sendAwaiting = false;
-        focusField();
+        if (!Config.Navigator.touch) {
+          focusField();
+        }
       });
 
       function focusField () {
