@@ -53,7 +53,7 @@
           if (Array.isArray(shortcut)) {
             shortcut = shortcut[0];
           }
-          if (shortcut && typeof shortcut !== 'string') {
+          if (shortcut && typeof shortcut === 'string') {
             if (shortcut.charAt(0) == ':') {
               shortcut = shortcut.substr(1, shortcut.length - 2);
             }
