@@ -3495,15 +3495,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('RichTextProcessor', function ($sce, $sanitize) {
 
-  var emojiUtf = [],
-      emojiMap = {},
+  var emojiMap = {},
       emojiData = Config.Emoji,
       emojiIconSize = 18,
       emojiSupported = navigator.userAgent.search(/OS X|iPhone|iPad|iOS|Android/i) != -1,
       emojiCode;
 
+  var emojiRegex = '\\u0023\\u20E3|\\u00a9|\\u00ae|\\u203c|\\u2049|\\u2139|[\\u2194-\\u2199]|\\u21a9|\\u21aa|\\u231a|\\u231b|\\u23e9|[\\u23ea-\\u23ec]|\\u23f0|\\u24c2|\\u25aa|\\u25ab|\\u25b6|\\u2611|\\u2614|\\u26fd|\\u2705|\\u2709|[\\u2795-\\u2797]|\\u27a1|\\u27b0|\\u27bf|\\u2934|\\u2935|[\\u2b05-\\u2b07]|\\u2b1b|\\u2b1c|\\u2b50|\\u2b55|\\u3030|\\u303d|\\u3297|\\u3299|[\\uE000-\\uF8FF\\u270A-\\u2764\\u2122\\u25C0\\u25FB-\\u25FE\\u2615\\u263a\\u2648-\\u2653\\u2660-\\u2668\\u267B\\u267F\\u2693\\u261d\\u26A0-\\u26FA\\u2708\\u2702\\u2601\\u260E]|[\\u2600\\u26C4\\u26BE\\u23F3\\u2764]|\\uD83D[\\uDC00-\\uDFFF]|\\uD83C[\\uDDE8-\\uDDFA\uDDEC]\\uD83C[\\uDDEA-\\uDDFA\uDDE7]|[0-9]\\u20e3|\\uD83C[\\uDC00-\\uDFFF]';
+
   for (emojiCode in emojiData) {
-    emojiUtf.push(emojiData[emojiCode][0]);
     emojiMap[emojiData[emojiCode][0]] = emojiCode;
   }
 
@@ -3554,7 +3554,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     // resource path
     "(?:/(?:\\S*[^\s.;,(){}<>\"'])?)?";
 
-  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiUtf.join('|') + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
+  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiRegex + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
 
   var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   var youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
@@ -3593,8 +3593,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     options = options || {};
 
-    text = text.replace(/\ufe0f/g, '', text);
-
     var match,
         raw = text,
         html = [],
@@ -3602,6 +3600,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         emojiFound = false,
         emojiTitle,
         emojiCoords;
+
+    // var start = tsNow();
 
     while ((match = raw.match(regExp))) {
       html.push(encodeEntities(raw.substr(0, match.index)));
@@ -3700,11 +3700,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     html.push(encodeEntities(raw));
 
+    // var timeDiff = tsNow() - start;
+    // if (timeDiff > 1) {
+    //   console.log(dT(), 'wrap text', text.length, timeDiff);
+    // }
+
     text = $sanitize(html.join(''));
 
     // console.log(3, text, html);
 
     if (emojiFound) {
+      text = text.replace(/\ufe0f/g, '', text);
       text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
                           '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
     }
@@ -3887,6 +3893,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var langNotificationsPluralize = _.pluralize('page_title_pluralize_notifications');
 
   var titleBackup = document.title,
+      titleChanged = false,
       titlePromise;
   var prevFavicon;
 
@@ -3897,6 +3904,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (!Config.Navigator.mobile) {
       $interval.cancel(titlePromise);
       if (!newVal) {
+        titleChanged = false;
         document.title = titleBackup;
         setFavicon();
       } else {
@@ -3905,9 +3913,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         titlePromise = $interval(function () {
           var time = tsNow();
           if (!notificationsCount || time % 2000 > 1000) {
-            document.title = titleBackup;
-            setFavicon();
+            if (titleChanged) {
+              titleChanged = false;
+              document.title = titleBackup;
+              setFavicon();
+            }
           } else {
+            titleChanged = true;
             document.title = langNotificationsPluralize(notificationsCount);
             setFavicon('favicon_unread.ico');
           }
