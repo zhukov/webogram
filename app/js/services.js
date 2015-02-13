@@ -1967,6 +1967,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
 
+      if (curMessage.fwd_from_id &&
+          curMessage.media &&
+          curMessage.media.document &&
+          curMessage.media.document.sticker &&
+          (curMessage.from_id != (prevMessage || {}).from_id || !(prevMessage || {}).fwd_from_id)) {
+        delete curMessage.fwd_from_id;
+        curMessage._ = 'message';
+      }
+
       if (prevMessage &&
           curMessage.from_id == prevMessage.from_id &&
           !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
