@@ -3544,11 +3544,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
 
-  // Regular Expression for URL validation by Diego Perini
+  // Based on Regular Expression for URL validation by Diego Perini
   var urlRegex =  "((?:https?|ftp)://|mailto:)?" +
     // user:pass authentication
     "(?:\\S+(?::\\S*)?@)?" +
     "(?:" +
+      // sindresorhus/ip-regex
       "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}" +
     "|" +
       // host name
@@ -3556,12 +3557,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       // domain name
       "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
       // TLD identifier
-      "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,24}))" +
+      "(?:\\.([a-z\\u00a1-\\uffff]{2,24}))" +
     ")" +
     // port number
     "(?::\\d{2,5})?" +
     // resource path
-    "(?:/(?:\\S*[^\s.;,(){}<>\"'])?)?";
+    "(?:/(?:\\S*[^\\s.;,(\\[\\]{}<>\"'])?)?";
 
   var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiRegex + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,20})', 'i');
 
@@ -3643,33 +3644,62 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               '</a>'
             );
           } else {
-            var url = (match[5] ? '' : 'http://') + match[4];
-            html.push(
-              '<a href="',
-              encodeEntities(url),
-              '" target="_blank">',
-              encodeEntities(match[4]),
-              '</a>'
-            );
-            if (options.extractUrlEmbed &&
-                !options.extractedUrlEmbed) {
-              options.extractedUrlEmbed = findExternalEmbed(url);
+            var url = false,
+                protocol = match[5],
+                tld = match[6],
+                excluded = '',
+                test = '';
+
+            if (tld) {
+              if (Config.TLD.indexOf(tld.toLowerCase()) !== -1) {
+                protocol = protocol || 'http://';
+              }
+
+              if (protocol) {
+                test = checkBrackets(match[4]);
+
+                if (test.length !== match[4].length) {
+                  excluded = match[4].substring(test.length);
+                  match[4] = test;
+                }
+
+                url = (match[5] ? '' : protocol) + match[4];
+              }
+            } else {
+              url = (match[5] ? '' : 'http://') + match[4];
+            }
+
+            if (url) {
+              html.push(
+                '<a href="',
+                encodeEntities(url),
+                '" target="_blank">',
+                encodeEntities(match[4]),
+                '</a>',
+                excluded
+              );
+
+              if (options.extractUrlEmbed &&
+                  !options.extractedUrlEmbed) {
+                options.extractedUrlEmbed = findExternalEmbed(url);
+              }
+            } else {
+              html.push(encodeEntities(match[0]));
             }
           }
         } else {
           html.push(encodeEntities(match[0]));
         }
-
       }
-      else if (match[6]) { // New line
+      else if (match[7]) { // New line
         if (!options.noLinebreaks) {
           html.push('<br/>');
         } else {
           html.push(' ');
         }
       }
-      else if (match[7]) {
-        if ((emojiCode = emojiMap[match[7]]) &&
+      else if (match[8]) {
+        if ((emojiCode = emojiMap[match[8]]) &&
             (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
 
           emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
@@ -3686,21 +3716,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             ':', emojiTitle, ':</span>'
           );
         } else {
-          html.push(encodeEntities(match[7]));
+          html.push(encodeEntities(match[8]));
         }
       }
-      else if (match[9]) {
+      else if (match[10]) {
         if (!options.noLinks) {
           html.push(
             '<a href="#/im?q=',
-            encodeURIComponent(match[9]),
+            encodeURIComponent(match[10]),
             '">',
-            encodeEntities(match[9]),
+            encodeEntities(match[10]),
             '</a>'
           );
         } else {
           html.push(
-            encodeEntities(match[9])
+            encodeEntities(match[10])
           );
         }
       }
@@ -3727,7 +3757,38 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return $sce.trustAs('html', text);
   }
 
-  function findExternalEmbed (url) {
+  function checkBrackets(url) {
+    var urlLength = url.length,
+        urlOpenBrackets = url.split('(').length - 1,
+        urlCloseBrackets = url.split(')').length - 1;
+
+    if (url.charAt(urlLength - 1) === ')') {
+      if (urlOpenBrackets > urlCloseBrackets) {
+        for (var j = urlLength - 1; j >= 0; j--) {
+          if (url.charAt(j) !== ')') {
+            break;
+          } else {
+            url = url.substring(0, j);
+          }
+        }
+      } else if (urlOpenBrackets < urlCloseBrackets) {
+        while (urlCloseBrackets - urlOpenBrackets) {
+          var lastCharIndex = url.length - 1;
+
+          if (url.charAt(lastCharIndex) === ')') {
+            url = url.substring(0, lastCharIndex);
+            urlCloseBrackets--;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    return url;
+  }
+
+  function findExternalEmbed(url) {
     var embedUrlMatches,
         result;
 
@@ -3788,8 +3849,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     while ((match = raw.match(regExp))) {
       text.push(raw.substr(0, match.index));
 
-      if (match[6]) {
-        if ((emojiCode = emojiMap[match[6]]) &&
+      if (match[7]) {
+        if ((emojiCode = emojiMap[match[7]]) &&
             (emojiTitle = emojiData[emojiCode][1][0])) {
           text.push(':' + emojiTitle + ':');
         } else {
