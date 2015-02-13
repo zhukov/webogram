@@ -952,10 +952,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (pos > -1) {
         history = $scope.peerHistories[pos];
-        // if (pos) {
-        //   $scope.peerHistories.splice(pos, 1);
-        //   $scope.peerHistories.unshift(history);
-        // }
         return history;
       }
       history = {peerID: peerID, messages: []};
@@ -1389,7 +1385,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       // console.log('append', addedMessage);
       // console.trace();
-      history.messages.push(AppMessagesManager.wrapForHistory(addedMessage.messageID));
+      var historyMessage = AppMessagesManager.wrapForHistory(addedMessage.messageID);
+      history.messages.push(historyMessage);
       if (AppMessagesManager.regroupWrappedHistory(history.messages, -3)) {
         $scope.$broadcast('messages_regroup');
       }
@@ -1402,8 +1399,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.$broadcast('messages_unread_after');
         }
 
-        // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID);
-        if (!$rootScope.idle.isIDLE) {
+        // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID, historyMessage, history.messages[history.messages.length - 2]);
+        if ($rootScope.idle.isIDLE) {
+          if (historyMessage.unread &&
+              !historyMessage.out &&
+              !(history.messages[history.messages.length - 2] || {}).unread) {
+
+            $scope.historyUnreadAfter = historyMessage.id;
+            $scope.$broadcast('messages_unread_after');
+          }
+        } else {
           $timeout(function () {
             AppMessagesManager.readHistory($scope.curDialog.inputPeer);
           });
