@@ -1165,12 +1165,16 @@ a.mobile_modal_action .tg_checkbox_label {
 
 
 .composer_emoji_tooltip {
-  margin-left: 10px;
-  margin-top: -175px;
+  margin-left: 6px;
+  margin-top: -170px;
   width: 262px;
+  z-index: 10000;
 }
-.composer_emoji_tooltip .composer_emoji_tooltip_content {
+.composer_emoji_tooltip .composer_emoji_tooltip_content_wrap {
   height: 106px;
+}
+.composer_emoji_tooltip_tabs {
+  margin-bottom: 3px;
 }
 .composer_emoji_tooltip .composer_emoji_tooltip_content .composer_emoji_btn {
   padding: 5px;
