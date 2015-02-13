@@ -438,6 +438,7 @@ function MessageComposer (textarea, options) {
   this.onTyping = options.onTyping;
   this.onMessageSubmit = options.onMessageSubmit;
   this.getSendOnEnter = options.getSendOnEnter;
+  this.onFilePaste = options.onFilePaste;
 }
 
 MessageComposer.prototype.setUpInput = function () {
@@ -673,7 +674,11 @@ MessageComposer.prototype.onRichPaste = function (e) {
     }
   }
 
-  var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+  try {
+    var text = cData.getData('text/plain');
+  } catch (e) {
+    return true;
+  }
   setZeroTimeout(this.onChange.bind(this), 0);
   if (text.length) {
     document.execCommand('insertText', false, text);
@@ -692,7 +697,7 @@ MessageComposer.prototype.onRichPasteNode = function (e) {
     var blob = dataUrlToBlob(src);
     this.onFilePaste(blob);
     setZeroTimeout(function () {
-      element.parentNode.removeChild(element);
+      element.parentNode.replaceChild(document.createTextNode('   '), element);
     })
   }
   else if (src && !src.match(/img\/blank\.gif/)) {

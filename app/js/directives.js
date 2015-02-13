@@ -1119,7 +1119,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return sendOnEnter;
         },
         onMessageSubmit: onMessageSubmit,
-        onFilesPaste: onFilesPaste
+        onFilePaste: onFilePaste
       });
 
       var richTextarea = composer.richTextareaEl[0];
@@ -1223,9 +1223,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      function onFilesPaste (blobs) {
+      function onFilePaste (blob) {
         ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
-          $scope.draftMessage.files = blobs;
+          $scope.draftMessage.files = [blob];
           $scope.draftMessage.isMedia = true;
         });
       };
