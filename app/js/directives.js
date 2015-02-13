@@ -2344,6 +2344,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       var updatePeerPhoto = function () {
+        var curJump = ++jump;
+
         peerPhoto = peer.photo && angular.copy(peer.photo.photo_small);
 
         var hasPhoto = peerPhoto !== undefined;
@@ -2362,7 +2364,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
 
         if (hasPhoto) {
-          var curJump = ++jump;
 
           MtpApiFileManager.downloadSmallFile(peer.photo.photo_small).then(function (blob) {
             if (curJump != jump) {
