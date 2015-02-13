@@ -53,11 +53,13 @@
           if (Array.isArray(shortcut)) {
             shortcut = shortcut[0];
           }
-          if (shortcut.charAt(0) == ':') {
-            shortcut = shortcut.substr(1, shortcut.length - 2);
-          }
-          if (code = shortcuts[shortcut]) {
-            result.push({code: code, rate: 1});
+          if (shortcut && typeof shortcut !== 'string') {
+            if (shortcut.charAt(0) == ':') {
+              shortcut = shortcut.substr(1, shortcut.length - 2);
+            }
+            if (code = shortcuts[shortcut]) {
+              result.push({code: code, rate: 1});
+            }
           }
         }
         callback(result);
