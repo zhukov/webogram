@@ -1393,7 +1393,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       if (curPeer) {
         $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
-        $scope.$broadcast('ui_history_append_new', {my: addedMessage.my});
+        $scope.$broadcast('ui_history_append_new', {my: addedMessage.my, idle: $rootScope.idle.isIDLE});
         if (addedMessage.my && $scope.historyUnreadAfter) {
           delete $scope.historyUnreadAfter;
           $scope.$broadcast('messages_unread_after');

@@ -800,7 +800,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {
-        if (!atBottom && !options.my) {
+        if ((!atBottom || options.idle) && !options.my) {
           return;
         }
         var curAnimated = animated &&
