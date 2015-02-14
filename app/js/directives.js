@@ -800,7 +800,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {
-        if ((!atBottom || options.idle) && !options.my) {
+        if (!atBottom && !options.my || options.noScroll) {
+          onContentLoaded(function () {
+            $(historyWrap).nanoScroller();
+          })
           return;
         }
         var curAnimated = animated &&

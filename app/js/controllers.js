@@ -890,6 +890,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     var peerID,
         peerHistory = false,
+        unreadAfterIdle = false,
         hasMore = false,
         hasLess = false,
         maxID = 0,
@@ -1393,7 +1394,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       if (curPeer) {
         $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
-        $scope.$broadcast('ui_history_append_new', {my: addedMessage.my, idle: $rootScope.idle.isIDLE});
+        $scope.$broadcast('ui_history_append_new', {
+          my: addedMessage.my,
+          noScroll: unreadAfterIdle && !historyMessage.out && $rootScope.idle.isIDLE
+        });
         if (addedMessage.my && $scope.historyUnreadAfter) {
           delete $scope.historyUnreadAfter;
           $scope.$broadcast('messages_unread_after');
@@ -1406,6 +1410,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               !(history.messages[history.messages.length - 2] || {}).unread) {
 
             $scope.historyUnreadAfter = historyMessage.id;
+            unreadAfterIdle = true;
             $scope.$broadcast('messages_unread_after');
           }
         } else {
@@ -1485,6 +1490,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $rootScope.$watch('idle.isIDLE', function (newVal) {
       if (!newVal && $scope.curDialog && $scope.curDialog.peerID && !$scope.historyFilter.mediaType && !$scope.skippedHistory) {
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+      }
+      if (!newVal) {
+        unreadAfterIdle = false;
       }
     });
 
