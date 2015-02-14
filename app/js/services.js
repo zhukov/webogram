@@ -3767,6 +3767,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       urlCloseBrackets--;
       urlLength--;
     }
+    if (urlOpenBrackets > urlCloseBrackets) {
+      url = url.replace(/\)+$/, '');
+    }
     return url;
   }
 
