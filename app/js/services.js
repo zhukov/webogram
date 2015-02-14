@@ -3557,7 +3557,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       // domain name
       "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
       // TLD identifier
-      "(?:\\.([a-z\\u00a1-\\uffff]{2,24}))" +
+      "(?:\\.(xn--[0-9a-z]{2,16}|[a-z\\u00a1-\\uffff]{2,24}))" +
     ")" +
     // port number
     "(?::\\d{2,5})?" +
@@ -3647,25 +3647,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             var url = false,
                 protocol = match[5],
                 tld = match[6],
-                excluded = '',
-                test = '';
+                excluded = '';
 
             if (tld) {
-              if (Config.TLD.indexOf(tld.toLowerCase()) !== -1) {
-                protocol = protocol || 'http://';
+              if (!protocol && (tld.substr(0, 4) === 'xn--' || Config.TLD.indexOf(tld.toLowerCase()) !== -1)) {
+                protocol = 'http://';
               }
 
               if (protocol) {
-                test = checkBrackets(match[4]);
+                var balanced = checkBrackets(match[4]);
 
-                if (test.length !== match[4].length) {
-                  excluded = match[4].substring(test.length);
-                  match[4] = test;
+                if (balanced.length !== match[4].length) {
+                  excluded = match[4].substring(balanced.length);
+                  match[4] = balanced;
                 }
 
                 url = (match[5] ? '' : protocol) + match[4];
               }
-            } else {
+            } else { // IP address
               url = (match[5] ? '' : 'http://') + match[4];
             }
 
@@ -3762,29 +3761,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         urlOpenBrackets = url.split('(').length - 1,
         urlCloseBrackets = url.split(')').length - 1;
 
-    if (url.charAt(urlLength - 1) === ')') {
-      if (urlOpenBrackets > urlCloseBrackets) {
-        for (var j = urlLength - 1; j >= 0; j--) {
-          if (url.charAt(j) !== ')') {
-            break;
-          } else {
-            url = url.substring(0, j);
-          }
-        }
-      } else if (urlOpenBrackets < urlCloseBrackets) {
-        while (urlCloseBrackets - urlOpenBrackets) {
-          var lastCharIndex = url.length - 1;
-
-          if (url.charAt(lastCharIndex) === ')') {
-            url = url.substring(0, lastCharIndex);
-            urlCloseBrackets--;
-          } else {
-            break;
-          }
-        }
-      }
+    while (urlCloseBrackets > urlOpenBrackets &&
+           url.charAt(urlLength - 1) === ')') {
+      url = url.substr(0, urlLength - 1);
+      urlCloseBrackets--;
+      urlLength--;
     }
-
     return url;
   }
 
