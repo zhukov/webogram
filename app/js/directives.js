@@ -1119,7 +1119,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return sendOnEnter;
         },
         onMessageSubmit: onMessageSubmit,
-        onFilesPaste: onFilesPaste
+        onFilePaste: onFilePaste
       });
 
       var richTextarea = composer.richTextareaEl[0];
@@ -1204,7 +1204,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           composer.setValue($scope.draftMessage.text || '');
           updateHeight();
         }
-        composer.focus();
+        if (!Config.Navigator.touch) {
+          composer.focus();
+        }
       });
 
       var sendAwaiting = false;
@@ -1214,7 +1216,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
       $scope.$on('ui_message_send', function () {
         sendAwaiting = false;
-        focusField();
+        if (!Config.Navigator.touch) {
+          focusField();
+        }
       });
 
       function focusField () {
@@ -1223,9 +1227,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      function onFilesPaste (blobs) {
+      function onFilePaste (blob) {
         ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
-          $scope.draftMessage.files = blobs;
+          $scope.draftMessage.files = [blob];
           $scope.draftMessage.isMedia = true;
         });
       };
@@ -2344,6 +2348,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       var updatePeerPhoto = function () {
+        var curJump = ++jump;
+
         peerPhoto = peer.photo && angular.copy(peer.photo.photo_small);
 
         var hasPhoto = peerPhoto !== undefined;
@@ -2362,7 +2368,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
 
         if (hasPhoto) {
-          var curJump = ++jump;
 
           MtpApiFileManager.downloadSmallFile(peer.photo.photo_small).then(function (blob) {
             if (curJump != jump) {

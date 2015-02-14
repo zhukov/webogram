@@ -4,8 +4,8 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-      "folder_exclude_patterns": ["*dist", "node_modules", "releases"],
-      "file_exclude_patterns": ["*.zip", "templates.js"]
+			"folder_exclude_patterns": ["*dist", "node_modules", "releases"],
+			"file_exclude_patterns": ["*.zip", "templates.js"]
 		}
 	]
 }
