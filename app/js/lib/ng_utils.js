@@ -45,7 +45,7 @@ angular.module('izhukov.utils', [])
       return {then: function (cb, badcb) {
         return badcb(result);
       }};
-    },
+    }
   }
 
 })
