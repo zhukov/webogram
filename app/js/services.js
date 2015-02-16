@@ -3839,8 +3839,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     while ((match = raw.match(regExp))) {
       text.push(raw.substr(0, match.index));
 
-      if (match[7]) {
-        if ((emojiCode = emojiMap[match[7]]) &&
+      if (match[8]) {
+        if ((emojiCode = emojiMap[match[8]]) &&
             (emojiTitle = emojiData[emojiCode][1][0])) {
           text.push(':' + emojiTitle + ':');
         } else {
