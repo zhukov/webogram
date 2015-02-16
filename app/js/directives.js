@@ -814,7 +814,8 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (curAnimated) {
           wasH = scrollableWrap.scrollHeight;
         } else {
-          $(scrollable).css({bottom: 0});
+          var pr = parseInt($(scrollableWrap).css('paddingRight'))
+          $(scrollable).css({bottom: 0, paddingRight: pr});
           $(scrollableWrap).addClass('im_history_to_bottom');
         }
 
@@ -835,7 +836,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             });
           } else {
             $(scrollableWrap).removeClass('im_history_to_bottom');
-            $(scrollable).css({bottom: ''});
+            $(scrollable).css({bottom: '', paddingRight: 0});
             scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
             updateBottomizer();
           }
@@ -1599,7 +1600,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
-      var imgElement = element;
+      var imgElement = $('<img />').appendTo(element);
 
       var setSrc = function (blob) {
         if (WebpManager.isWebpSupported()) {
@@ -1612,6 +1613,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       imgElement.css({
+        width: $scope.document.thumb.width,
+        height: $scope.document.thumb.height
+      });
+      element.css({
         width: $scope.document.thumb.width,
         height: $scope.document.thumb.height
       });
