@@ -1166,6 +1166,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         count: foundCount,
         history: foundMsgs
       };
+    }, function (error) {
+      if (error.code == 400) {
+        error.handled = true;
+      }
+      return $q.reject(error);
     });
   }
 
