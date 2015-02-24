@@ -43,6 +43,7 @@
 	"settings_modal_sounds": "Sounds",
 	"settings_modal_language": "Language",
 	"settings_modal_notifications": "Desktop notifications",
+	"settings_modal_message_preview": "Message Preview",
 	"settings_modal_sound": "Sound",
 	"settings_modal_enter_send_description_md": "**Enter** - send message, **Shift + Enter** - new line",
 	"settings_modal_ctrl_enter_send_description_md": "**Ctrl + Enter** - send message, **Enter** - new line",
@@ -206,6 +207,7 @@
 	"conversation_kicked_user": "removed {user}",
 	"conversation_invited_user_message": "invited user",
 	"conversation_kicked_user_message": "removed user",
+	"conversation_message_sent": "sent you a message",
 
 	"conversation_unknown_user": "Somebody",
 	"conversation_unknown_chat": "Unknown chat",
