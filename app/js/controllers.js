@@ -2549,7 +2549,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate').then(function (settings) {
+    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (settings) {
       $scope.notify.desktop = !settings[0];
       $scope.send.enter = settings[2] ? '' : '1';
 
@@ -2563,6 +2563,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       $scope.notify.canVibrate = NotificationsManager.getVibrateSupport();
       $scope.notify.vibrate = !settings[4];
+
+      $scope.notify.preview = !settings[5];
 
       $scope.notify.volumeOf4 = function () {
         return 1 + Math.ceil(($scope.notify.volume - 0.1) / 0.33);
@@ -2599,6 +2601,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           Storage.remove('notify_nodesktop');
         } else {
           Storage.set({notify_nodesktop: true});
+        }
+      }
+
+      $scope.togglePreview = function () {
+        $scope.notify.preview = !$scope.notify.preview;
+
+        if ($scope.notify.preview) {
+          Storage.remove('notify_nopreview');
+        } else {
+          Storage.set({notify_nopreview: true});
         }
       }
 

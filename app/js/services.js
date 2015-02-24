@@ -889,7 +889,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           if (message.unread && !message.out) {
             NotificationsManager.getPeerMuted(peerID).then(function (muted) {
               if (!muted) {
-                notifyAboutMessage(message);
+                Storage.get('notify_nopreview').then(function (no_preview) {
+                  notifyAboutMessage(message, no_preview);
+                });
               }
             });
           }
@@ -2040,7 +2042,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
-  function notifyAboutMessage (message) {
+  function notifyAboutMessage (message, no_preview) {
     var peerID = getMessagePeer(message);
     var fromUser = AppUsersManager.getUser(message.from_id);
     var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
@@ -2050,7 +2052,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         notificationPhoto;
 
     if (message.message) {
-      notificationMessage = RichTextProcessor.wrapPlainText(message.message);
+      if (no_preview) {
+        notificationMessage = _('conversation_message_sent');
+      } else {
+        notificationMessage = RichTextProcessor.wrapPlainText(message.message);
+      }
     } else if (message.media) {
       switch (message.media._) {
         case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo_raw'); break;
@@ -2239,7 +2245,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           setTimeout(function () {
             isMutedPromise.then(function (muted) {
               if (message.unread && !muted) {
-                notifyAboutMessage(message);
+                Storage.get('notify_nopreview').then(function (no_preview) {
+                  notifyAboutMessage(message, no_preview);
+                });
               }
             })
           }, timeout);
