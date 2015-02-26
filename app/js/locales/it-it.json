@@ -291,7 +291,7 @@
     "im_delete": "Elimina {count}",
     "im_forward": "Inoltra {count}",
     "im_photos_drop_text": "Rilascia le foto qui per inviarle",
-    "im_message_field_placeholder": "Scrivi un messaggio..",
+    "im_message_field_placeholder": "Scrivi un messaggio{dots}",
     "im_media_attach_title": "Invia media",
     "im_attach_file_title": "Invia file",
     "im_emoji_btn_title": "Inserisci emoticon",
