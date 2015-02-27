@@ -2142,8 +2142,8 @@ a.composer_emoji_btn:hover {
 }
 .composer_dropdown li a:hover,
 .composer_dropdown li a.composer_emoji_option_active {
-  color: #52719a;
-  background: #f2f6fa;
+  color: #ffffff;
+  background: #6490b1;
 }
 .composer_emoji_shortcut {
   display: inline-block;
