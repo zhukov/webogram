@@ -850,7 +850,7 @@ MessageComposer.prototype.setValue = function (text) {
 }
 
 MessageComposer.prototype.getRichHtml = function (text) {
-  return $('<div>').text(text).html().replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
+  return $('<div>').text(text).html().replace(/\n/g, '<br/>').replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
     var code = EmojiHelper.shortcuts[shortcut];
     if (code !== undefined) {
       return this.getEmojiHtml(code);
