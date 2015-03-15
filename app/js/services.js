@@ -3823,6 +3823,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       else if (match[10]) {
         if (!options.noLinks) {
           html.push(
+            encodeEntities(match[9]),
             '<a href="#/im?q=',
             encodeURIComponent(match[10]),
             '">',
@@ -3831,6 +3832,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           );
         } else {
           html.push(
+            encodeEntities(match[9]),
             encodeEntities(match[10])
           );
         }
