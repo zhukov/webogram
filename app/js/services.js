@@ -411,7 +411,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         break;
 
       case 'updateContactLink':
-        onContactUpdated(update.user_id, update.my_link._ == 'contacts.myLinkContact');
+        onContactUpdated(update.user_id, update.my_link._ == 'contactLinkContact');
         break;
     }
   });
@@ -1183,12 +1183,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function deleteMessages (messageIDs) {
     return MtpApiManager.invokeApi('messages.deleteMessages', {
       id: messageIDs
-    }).then(function (deletedMessageIDs) {
+    }).then(function (affectedMessages) {
       ApiUpdatesManager.processUpdateMessage({
         _: 'updateShort',
         update: {
           _: 'updateDeleteMessages',
-          messages: deletedMessageIDs
+          messages: messageIDs,
+          pts: affectedMessages.pts,
+          pts_count: affectedMessages.pts_count
         }
       });
       return deletedMessageIDs;
@@ -1197,9 +1199,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function processAffectedHistory (inputPeer, affectedHistory, method) {
     if (!ApiUpdatesManager.processUpdateMessage({
-        _: 'updates',
-        seq: affectedHistory.seq,
-        updates: []
+        _: 'updateShort',
+        update: {
+          _: 'updatePts',
+          pts: affectedHistory.pts,
+          pts_count: affectedHistory.pts_count
+        }
       })) {
       return false;
     }
@@ -1210,8 +1215,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return MtpApiManager.invokeApi(method, {
       peer: inputPeer,
       offset: affectedHistory.offset,
-      max_id: 0,
-      read_contents: true
+      max_id: 0
     }).then(function (affectedHistory) {
       return processAffectedHistory(inputPeer, affectedHistory, method);
     });
@@ -1253,8 +1257,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     historyStorage.readPromise = MtpApiManager.invokeApi('messages.readHistory', {
       peer: inputPeer,
       offset: 0,
-      max_id: 0,
-      read_contents: true
+      max_id: 0
     }).then(function (affectedHistory) {
       return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
     }).then(function () {
@@ -1334,9 +1337,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           case 'messageMediaAudio':
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
-          case 'messageMediaUnsupported':
-            delete apiMessage.media.bytes;
-            break;
         }
       }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
@@ -1398,7 +1398,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         MtpApiManager.invokeApi('messages.sendMessage', {
           peer: inputPeer,
           message: text,
-          random_id: randomID
+          random_id: randomID,
+          reply_to_msg_id: 0
         }, sentRequestOptions).then(function (sentMessage) {
           message.date = sentMessage.date;
           message.id = sentMessage.id;
@@ -1407,7 +1408,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             _: 'updates',
             users: [],
             chats: [],
-            seq: sentMessage.seq,
+            seq: 0,
             updates: [{
               _: 'updateMessageID',
               random_id: randomIDS,
@@ -1415,7 +1416,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             }, {
               _: 'updateNewMessage',
               message: message,
-              pts: sentMessage.pts
+              pts: sentMessage.pts,
+              pts_count: sentMessage.pts_count
             }]
           });
         }, function (error) {
@@ -1542,7 +1544,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             MtpApiManager.invokeApi('messages.sendMedia', {
               peer: inputPeer,
               media: inputMedia,
-              random_id: randomID
+              random_id: randomID,
+              reply_to_msg_id: 0
             }).then(function (statedMessage) {
               message.date = statedMessage.message.date;
               message.id = statedMessage.message.id;
@@ -1552,7 +1555,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                 _: 'updates',
                 users: statedMessage.users,
                 chats: statedMessage.chats,
-                seq: statedMessage.seq,
+                seq: 0,
                 updates: [{
                   _: 'updateMessageID',
                   random_id: randomIDS,
@@ -1560,7 +1563,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                 }, {
                   _: 'updateNewMessage',
                   message: message,
-                  pts: statedMessage.pts
+                  pts: statedMessage.pts,
+                  pts_count: statedMessage.pts_count
                 }]
               });
             }, function (error) {
@@ -1667,7 +1671,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         MtpApiManager.invokeApi('messages.sendMedia', {
           peer: inputPeer,
           media: inputMedia,
-          random_id: randomID
+          random_id: randomID,
+          reply_to_msg_id: 0
         }).then(function (statedMessage) {
           message.date = statedMessage.message.date;
           message.id = statedMessage.message.id;
@@ -1677,7 +1682,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             _: 'updates',
             users: statedMessage.users,
             chats: statedMessage.chats,
-            seq: statedMessage.seq,
+            seq: 0,
             updates: [{
               _: 'updateMessageID',
               random_id: randomIDS,
@@ -1685,7 +1690,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             }, {
               _: 'updateNewMessage',
               message: message,
-              pts: statedMessage.pts
+              pts: statedMessage.pts,
+              pts_count: statedMessage.pts_count
             }]
           });
         }, function (error) {
@@ -1706,16 +1712,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function forwardMessages (peerID, msgIDs) {
     msgIDs = msgIDs.sort();
 
+    var randomIDs = [];
+    var i;
+    var len = msgIDs.length;
+    for (var i = 0; i < msgIDs.length; i++) {
+      randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
+    }
+
     return MtpApiManager.invokeApi('messages.forwardMessages', {
       peer: AppPeersManager.getInputPeerByID(peerID),
-      id: msgIDs
+      id: msgIDs,
+      random_id: randomIDs
     }).then(function (statedMessages) {
       var updates = [];
       angular.forEach(statedMessages.messages, function(apiMessage) {
         updates.push({
           _: 'updateNewMessage',
           message: apiMessage,
-          pts: statedMessages.pts
+          pts: statedMessages.pts,
+          pts_count: statedMessages.pts_count
         });
       });
 
@@ -1723,7 +1738,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         _: 'updates',
         users: statedMessages.users,
         chats: statedMessages.chats,
-        seq: statedMessages.seq,
+        seq: 0,
         updates: updates
       });
     });
@@ -1817,11 +1832,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       _: 'updates',
       users: statedMessage.users,
       chats: statedMessage.chats,
-      seq: statedMessage.seq,
+      seq: 0,
       updates: [{
         _: 'updateNewMessage',
         message: statedMessage.message,
-        pts: statedMessage.pts
+        pts: statedMessage.pts,
+        pts_count: statedMessage.pts_count
       }]
     });
   }
@@ -2297,6 +2313,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           $rootScope.$broadcast('messages_read');
         }
         break;
+
+      // case 'updateReadHistoryInbox':
+      // case 'updateReadHistoryOutbox':
 
       case 'updateDeleteMessages':
         var dialogsUpdated = {},
@@ -2858,7 +2877,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = 1;
-          var stickerEmoji = EmojiHelper.stickers[apiDoc.id];
+          var stickerEmoji = attribute.alt || EmojiHelper.stickers[apiDoc.id];
           if (stickerEmoji !== undefined) {
             apiDoc.sticker = 2;
             apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(stickerEmoji, {noLinks: true, noLinebreaks: true});
@@ -3270,39 +3289,106 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
 
-  var isSynchronizing = true,
-      getDifferencePending = false,
-      curState = {},
-      pendingUpdates = {};
+  var curState = {};
 
-  function popPendingUpdate () {
+  var myID = 0;
+  MtpApiManager.getUserID().then(function (id) {
+    myID = id;
+  });
+
+  var syncPending = false;
+  var syncLoading = true;
+  var pendingSeqUpdates = {};
+  var pendingPtsUpdates = [];
+
+  function popPendingSeqUpdate () {
     var nextSeq = curState.seq + 1,
-        updateMessage = pendingUpdates[nextSeq];
-    if (updateMessage) {
-      console.log(dT(), 'pop pending update', nextSeq, updateMessage);
-      if (processUpdateMessage(updateMessage)) {
-        delete pendingUpdates[nextSeq];
+        pendingUpdatesData = pendingSeqUpdates[nextSeq];
+    if (!pendingUpdatesData) {
+      return false;
+    }
+    var updates = pendingUpdatesData.updates;
+    var i, length;
+    for (var i = 0, length = updates.length; i < length; i++) {
+      saveUpdate(updates[i]);
+    }
+    curState.seq = pendingUpdatesData.seq;
+    if (pendingUpdatesData.date && curState.date < pendingUpdatesData.date) {
+      curState.date = pendingUpdatesData.date;
+    }
+    delete pendingSeqUpdates[nextSeq];
+
+    if (!popPendingSeqUpdate() &&
+        syncPending &&
+        syncPending.seqAwaiting &&
+        curState.seq >= syncPending.seqAwaiting) {
+      if (!syncPending.ptsAwaiting) {
+        clearTimeout(syncPending.timeout);
+        syncPending = false;
+      } else {
+        delete syncPending.seqAwaiting;
       }
     }
+
+    return true;
+  }
+
+  function popPendingPtsUpdate () {
+    if (!pendingPtsUpdates.length) {
+      return false;
+    }
+    pendingPtsUpdates.sort(function (a, b) {
+      return a.pts - b.pts;
+    });
+
+    var curPts = curState.pts;
+    var goodPts = false;
+    var goodIndex = false;
+    var update;
+    for (var i = 0, length = pendingPtsUpdates.length; i < length; i++) {
+      update = pendingPtsUpdates[i];
+      curPts += update.pts_count;
+      if (curPts >= update.pts) {
+        goodPts = update.pts;
+        goodIndex = i;
+      }
+    }
+
+    if (!goodPts) {
+      return false;
+    }
+
+    curState.pts = goodPts;
+    for (i = 0; i <= goodIndex; i++) {
+      update = pendingPtsUpdates[i];
+      saveUpdate(update);
+    }
+    pendingPtsUpdates.splice(goodIndex, length - goodIndex);
+
+    if (!pendingPtsUpdates.length && syncPending) {
+      if (!syncPending.seqAwaiting) {
+        clearTimeout(syncPending.timeout);
+        syncPending = false;
+      } else {
+        delete syncPending.ptsAwaiting;
+      }
+    }
+
+    return true;
   }
 
   function forceGetDifference () {
-    if (!isSynchronizing) {
+    if (!syncLoading) {
       getDifference();
     }
   }
 
   function processUpdateMessage (updateMessage) {
-    if (updateMessage.seq) {
-      if (!saveSeq(updateMessage.seq, updateMessage.seq_start)) {
-        pendingUpdates[updateMessage.seq_start || updateMessage.seq] = updateMessage;
-        return false;
-      }
-      if (updateMessage.date) {
-        curState.date = updateMessage.date;
-      }
-    }
-
+    var processOpts = {
+      date: updateMessage.date,
+      seq: updateMessage.seq,
+      seqStart: updateMessage.seq_start
+    };
 
     switch (updateMessage._) {
       case 'updatesTooLong':
@@ -3311,51 +3397,35 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         break;
 
       case 'updateShort':
-        saveUpdate(updateMessage.update);
+        processUpdate(updateMessage.update, processOpts);
         break;
 
 
       case 'updateShortMessage':
-        if (!AppUsersManager.hasUser(updateMessage.from_id)) {
-          console.log('User not found', updateMessage.from_id, 'getDiff');
-          forceGetDifference();
-          break;
-        }
-        saveUpdate({
-          _: 'updateNewMessage',
-          message: {
-            _: 'message',
-            id: updateMessage.id,
-            from_id: updateMessage.from_id,
-            to_id: AppPeersManager.getOutputPeer(MtpApiManager.getUserID()),
-            flags: 1,
-            date: updateMessage.date,
-            message: updateMessage.message
-          },
-          pts: updateMessage.pts
-        });
-        break;
-
       case 'updateShortChatMessage':
-        if (!AppUsersManager.hasUser(updateMessage.from_id) ||
-            !AppChatsManager.hasChat(updateMessage.chat_id)) {
-          console.log('User or chat not found', updateMessage.from_id, updateMessage.chat_id, 'getDiff');
-          forceGetDifference();
-          break;
-        }
-        saveUpdate({
+        var isOut  = updateMessage.flags & 2;
+        var fromID = updateMessage.from_id || (isOut ? myID : updateMessage.user_id);
+        var toID   = updateMessage.chat_id
+                       ? -updateMessage.chat_id
+                       : (isOut ? updateMessage.user_id : myID);
+
+        processUpdate({
           _: 'updateNewMessage',
           message: {
             _: 'message',
+            flags: updateMessage.flags,
             id: updateMessage.id,
-            from_id: updateMessage.from_id,
-            to_id: AppPeersManager.getOutputPeer(-updateMessage.chat_id),
-            flags: 1,
+            from_id: fromID,
+            to_id: AppPeersManager.getOutputPeer(toID),
             date: updateMessage.date,
-            message: updateMessage.message
+            message: updateMessage.message,
+            fwd_from_id: updateMessage.fwd_from_id,
+            fwd_date: updateMessage.fwd_date,
+            reply_to_msg_id: updateMessage.reply_to_msg_id,
           },
-          pts: updateMessage.pts
-        });
+          pts: updateMessage.pts,
+          pts_count: updateMessage.pts_count
+        }, processOpts);
         break;
 
       case 'updatesCombined':
@@ -3363,52 +3433,26 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         AppUsersManager.saveApiUsers(updateMessage.users);
         AppChatsManager.saveApiChats(updateMessage.chats);
 
-        var i, update, message;
-        for (var i = 0; i < updateMessage.updates.length; i++) {
-          update = updateMessage.updates[i];
-          switch (update._) {
-            case 'updateNewMessage':
-              message = update.message;
-              if (message.from_id && !AppUsersManager.hasUser(message.from_id)) {
-                console.log('User not found', message.from_id, 'getDiff');
-                forceGetDifference();
-                return false;
-              }
-              if (message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
-                console.log('Chat not found', message.to_id.chat_id, 'getDiff');
-                forceGetDifference();
-                return false;
-              }
-              break;
-          }
-        }
-
         angular.forEach(updateMessage.updates, function (update) {
-          saveUpdate(update);
+          processUpdate(update, processOpts);
         });
         break;
 
       default:
         console.warn(dT(), 'Unknown update message', updateMessage);
     }
-
-    popPendingUpdate();
-
-    if (getDifferencePending && curState.seq >= getDifferencePending.seqAwaiting) {
-      console.log(dT(), 'cancel pending getDiff', getDifferencePending.seqAwaiting);
-      clearTimeout(getDifferencePending.timeout);
-      getDifferencePending = false;
-    }
-
-    return true;
   }
 
   function getDifference () {
-    isSynchronizing = true;
+    if (!syncLoading) {
+      syncLoading = true;
+      pendingSeqUpdates = {};
+      pendingPtsUpdates = [];
+    }
 
-    if (getDifferencePending) {
-      clearTimeout(getDifferencePending.timeout);
-      getDifferencePending = false;
+    if (syncPending) {
+      clearTimeout(syncPending.timeout);
+      syncPending = false;
     }
 
     MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: 0}).then(function (differenceResult) {
@@ -3416,8 +3460,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         console.log(dT(), 'apply empty diff', differenceResult.seq);
         curState.date = differenceResult.date;
         curState.seq = differenceResult.seq;
-        isSynchronizing = false;
-        popPendingUpdate();
+        syncLoading = false;
         return false;
       }
 
@@ -3433,7 +3476,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         saveUpdate({
           _: 'updateNewMessage',
           message: apiMessage,
-          pts: curState.pts
+          pts: curState.pts,
+          pts_count: 0
         });
       });
 
@@ -3445,55 +3489,100 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       console.log(dT(), 'apply diff', curState.seq, curState.pts);
 
       if (differenceResult._ == 'updates.differenceSlice') {
-        getDifference(true);
+        getDifference();
       } else {
-        isSynchronizing = false;
+        syncLoading = false;
       }
     });
   }
 
-  function saveUpdate (update) {
-    if (update.pts) {
-      curState.pts = update.pts;
-    }
-
-    $rootScope.$broadcast('apiUpdate', update);
-  }
-
-
-
-  function saveSeq (seq, seqStart) {
-    seqStart = seqStart || seq;
-
-    if (!seqStart) {
-      return true;
-    }
-
-    if (isSynchronizing) {
-      console.log(dT(), 'Seq decline', seqStart);
+  function processUpdate (update, options) {
+    if (syncLoading) {
       return false;
     }
+    if (update._ == 'updateNewMessage') {
+      var message = update.message;
+      if (message.from_id && !AppUsersManager.hasUser(message.from_id) ||
+          message.fwd_from_id && !AppUsersManager.hasUser(message.fwd_from_id) ||
+          message.to_id.user_id && !AppUsersManager.hasUser(message.to_id.user_id) ||
+          message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
+        console.warn(dT(), 'Short update not enough data', message);
+        forceGetDifference();
+        return false;
+      }
+    }
 
-    if (seqStart != curState.seq + 1) {
-      if (seqStart > curState.seq) {
-        console.warn(dT(), 'Seq hole', seqStart, getDifferencePending && getDifferencePending.seqAwaiting);
-        if (!getDifferencePending) {
-          getDifferencePending = {
-            seqAwaiting: seqStart,
+    var popPts, popSeq;
+
+    if (update.pts) {
+      var newPts = curState.pts + (update.pts_count || 0);
+      if (newPts < update.pts) {
+        console.log(dT(), 'Pts hole', curState, update);
+        pendingPtsUpdates.push(update);
+        if (!syncPending) {
+          syncPending = {
             timeout: setTimeout(function () {
               getDifference();
             }, 5000)
           };
         }
+        syncPending.ptsAwaiting = true;
+        return false;
       }
-      return false;
-    } else {
-      // console.log(dT(), 'Seq apply', seqStart);
+      curState.pts = update.pts;
+      popPts = true;
+    }
+    else if (options.seq > 0) {
+      var seq = options.seq;
+      var seqStart = options.seqStart || seq;
+
+      if (seqStart != curState.seq + 1) {
+        if (seqStart > curState.seq) {
+          console.warn(dT(), 'Seq hole', curState, syncPending && syncPending.seqAwaiting);
+
+          if (pendingSeqUpdates[seqStart] === undefined) {
+            pendingSeqUpdates[seqStart] = {seq: seq, date: options.date, updates: []};
+          }
+          pendingSeqUpdates[seqStart].updates.push(update);
+
+          if (!syncPending) {
+            syncPending = {
+              timeout: setTimeout(function () {
+                getDifference();
+              }, 5000)
+            };
+          }
+          if (!syncPending.seqAwaiting ||
+              syncPending.seqAwaiting < seqStart) {
+            syncPending.seqAwaiting = seqStart;
+          }
+          return false;
+        }
+      }
+
+      if (curState.seq != seq) {
+        curState.seq = seq;
+        if (options.date && curState.date < options.date) {
+          curState.date = options.date;
+        }
+        popSeq = true;
+      }
     }
 
-    curState.seq = seq;
 
-    return true;
+    saveUpdate (update);
+
+
+    if (popPts) {
+      popPendingPtsUpdate();
+    }
+    else if (popSeq) {
+      popPendingSeqUpdate();
+    }
+  }
+
+  function saveUpdate (update) {
+    $rootScope.$broadcast('apiUpdate', update);
   }
 
   function attach () {
@@ -3503,7 +3592,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       curState.pts = stateResult.pts;
       curState.date = stateResult.date;
       setTimeout(function () {
-        isSynchronizing = false;
+        syncLoading = false;
       }, 1000);
     })
   }

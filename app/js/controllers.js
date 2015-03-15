@@ -2360,13 +2360,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }).then(function (addResult) {
             ApiUpdatesManager.processUpdateMessage({
               _: 'updates',
-              seq: addResult.seq,
               users: addResult.users,
               chats: addResult.chats,
+              seq: 0,
               updates: [{
                 _: 'updateNewMessage',
                 message: addResult.message,
-                pts: addResult.pts
+                pts: addResult.pts,
+                pts_count: addResult.pts_count
               }]
             });
           });
@@ -2997,13 +2998,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }).then(function (createdResult) {
         ApiUpdatesManager.processUpdateMessage({
           _: 'updates',
-          seq: createdResult.seq,
           users: createdResult.users,
           chats: createdResult.chats,
+          seq: 0,
           updates: [{
             _: 'updateNewMessage',
             message: createdResult.message,
-            pts: createdResult.pts
+            pts: createdResult.pts,
+            pts_count: createdResult.pts_count
           }]
         });
 
@@ -3037,13 +3039,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }).then(function (editResult) {
         ApiUpdatesManager.processUpdateMessage({
           _: 'updates',
-          seq: editResult.seq,
           users: editResult.users,
           chats: editResult.chats,
+          seq: 0,
           updates: [{
             _: 'updateNewMessage',
             message: editResult.message,
-            pts: editResult.pts
+            pts: editResult.pts,
+            pts_count: editResult.pts_count
           }]
         });
 
