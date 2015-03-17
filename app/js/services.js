@@ -567,7 +567,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getChatFull(id) {
     if (chatsFull[id] !== undefined) {
-      return $q.when(chatsFull[id]);
+      if (chats[id].version == chatsFull[id].participants.version) {
+        return $q.when(chatsFull[id]);
+      }
     }
     if (chatFullPromises[id] !== undefined) {
       return chatFullPromises[id];
@@ -653,11 +655,46 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     // console.log('on apiUpdate', update);
     switch (update._) {
       case 'updateChatParticipants':
-      var participants = update.participants;
-      var chatFull = chatsFull[participants.id];
+        var participants = update.participants;
+        var chatFull = chatsFull[participants.id];
         if (chatFull !== undefined) {
           chatFull.participants = update.participants;
           $rootScope.$broadcast('chat_full_update', chatID);
+        }
+        break;
+
+      case 'updateChatParticipantAdd':
+        var chatFull = chatsFull[update.chat_id];
+        if (chatFull !== undefined) {
+          var participants = chatFull.participants.participants || [];
+          for (var i = 0, length = participants.length; i < length; i++) {
+            if (participants[i].user_id == update.user_id) {
+              return;
+            }
+          }
+          participants.push({
+            _: 'chatParticipant',
+            user_id: update.user_id,
+            inviter_id: update.inviter_id,
+            date: tsNow(true)
+          });
+          chatFull.participants.version = update.version;
+          $rootScope.$broadcast('chat_full_update', update.chat_id);
+        }
+        break;
+
+      case 'updateChatParticipantDelete':
+        var chatFull = chatsFull[update.chat_id];
+        if (chatFull !== undefined) {
+          var participants = chatFull.participants.participants || [];
+          for (var i = 0, length = participants.length; i < length; i++) {
+            if (participants[i].user_id == update.user_id) {
+              participants.splice(i, 1);
+              chatFull.participants.version = update.version;
+              $rootScope.$broadcast('chat_full_update', update.chat_id);
+              return;
+            }
+          }
         }
         break;
     }
