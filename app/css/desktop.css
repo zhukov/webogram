@@ -734,6 +734,7 @@ a.footer_link.active:active {
   padding: 5px;
   outline: 0;
   border-radius: 2px;
+  margin-bottom: 2px;
 }
 /*.composer_emoji_panel a:hover {
   background-color: #edf2f5;
