@@ -1413,7 +1413,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
         $scope.$broadcast('ui_history_append_new', {
           my: addedMessage.my,
-          noScroll: unreadAfterIdle && !historyMessage.out && $rootScope.idle.isIDLE
+          idleScroll: unreadAfterIdle && !historyMessage.out && $rootScope.idle.isIDLE
         });
         if (addedMessage.my && $scope.historyUnreadAfter) {
           delete $scope.historyUnreadAfter;

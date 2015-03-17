@@ -872,10 +872,17 @@ angular.module('myApp.directives', ['myApp.filters'])
           curAnimation = false;
 
       $scope.$on('ui_history_append_new', function (e, options) {
-        if (!atBottom && !options.my || options.noScroll) {
+        if (!atBottom && !options.my) {
           onContentLoaded(function () {
             $(historyWrap).nanoScroller();
-          })
+          });
+          return;
+        }
+        if (options.idleScroll) {
+          onContentLoaded(function () {
+            $(historyWrap).nanoScroller();
+            changeScroll();
+          });
           return;
         }
         var curAnimated = animated &&
