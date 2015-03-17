@@ -1552,7 +1552,6 @@ a.im_panel_peer_photo .peer_initials {
 .im_dialog_photo {
   width: 48px;
   height: 48px;
-  line-height: 48px;
   border-radius: 50%;
   overflow: hidden;
 }
