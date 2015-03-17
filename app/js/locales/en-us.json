@@ -325,6 +325,8 @@
 	"im_clear_history": "Clear History",
 	"im_delete": "Delete {count}",
 	"im_forward": "Forward {count}",
+	"im_reply": "Reply",
+	"im_reply_loading": "Loading{dots}",
 	"im_photos_drop_text": "Drop photos here to send",
 	"im_message_field_placeholder": "Write a message...",
 	"im_media_attach_title": "Send media",

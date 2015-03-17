@@ -52,7 +52,7 @@
           </ul>
         </div>
 
-        <a class="tg_head_btn tg_head_peer_return_btn" ng-show="historyFilter.mediaType.length || skippedHistory" ng-click="returnToRecent()" ng-switch="skippedHistory">
+        <a class="tg_head_btn tg_head_peer_return_btn" ng-show="historyFilter.mediaType.length || historyState.skipped" ng-click="returnToRecent()" ng-switch="historyState.skipped">
           <span ng-switch-when="true" my-i18n="im_show_recent_messages"></span>
           <span ng-switch-default my-i18n="im_show_all_messages"></span>
           <strong class="tg_head_peer_return_count" ng-show="historyState.missedCount > 0" ng-bind="'+' + historyState.missedCount"></strong>

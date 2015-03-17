@@ -349,7 +349,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.search = {};
     $scope.historyFilter = {mediaType: false};
     $scope.historyPeer = {};
-    $scope.historyState = {selectActions: false, typing: [], missedCount: 0};
+    $scope.historyState = {
+      selectActions: false,
+      typing: [],
+      missedCount: 0,
+      skipped: false
+    };
 
     $scope.openSettings = function () {
       $modal.open({
@@ -862,16 +867,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     StatusManager.start();
 
     $scope.peerHistories = [];
-    $scope.skippedHistory = false;
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
     $scope.historyState.selectActions = false;
     $scope.historyState.missedCount = 0;
+    $scope.historyState.skipped = false;
     $scope.state = {};
 
     $scope.toggleMessage = toggleMessage;
     $scope.selectedDelete = selectedDelete;
     $scope.selectedForward = selectedForward;
+    $scope.selectedReply = selectedReply;
     $scope.selectedCancel = selectedCancel;
     $scope.selectedFlush = selectedFlush;
 
@@ -1066,7 +1072,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else {
           minID = 0;
         }
-        $scope.skippedHistory = hasLess = minID > 0;
+        $scope.historyState.skipped = hasLess = minID > 0;
 
         if (morePending) {
           showMoreHistory();
@@ -1123,7 +1129,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.historyState.missedCount = 0;
 
       hasMore = false;
-      $scope.skippedHistory = hasLess = false;
+      $scope.historyState.skipped = hasLess = false;
       maxID = 0;
       minID = 0;
       peerHistory = historiesQueuePush(peerID);
@@ -1169,7 +1175,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                   : 0;
         maxID = historyResult.history[historyResult.history.length - 1];
 
-        $scope.skippedHistory = hasLess = minID > 0;
+        $scope.historyState.skipped = hasLess = minID > 0;
         hasMore = historyResult.count === null ||
                   fetchedLength && fetchedLength < historyResult.count;
 
@@ -1179,7 +1185,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         peerHistory.messages = [];
         angular.forEach(historyResult.history, function (id) {
           var message = AppMessagesManager.wrapForHistory(id);
-          if ($scope.skippedHistory) {
+          if ($scope.historyState.skipped) {
             delete message.unread;
           }
           if (historyResult.unreadOffset) {
@@ -1336,6 +1342,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
+    function selectedReply () {
+      if ($scope.selectedCount == 1) {
+        var selectedMessageID;
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          selectedMessageID = messageID;
+        });
+        selectedCancel();
+        $scope.$broadcast('reply_selected', selectedMessageID);
+      }
+    }
+
     function toggleEdit () {
       if ($scope.historyState.selectActions) {
         selectedCancel();
@@ -1374,7 +1391,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       var curPeer = addedMessage.peerID == $scope.curDialog.peerID;
       if (curPeer) {
-        if ($scope.historyFilter.mediaType || $scope.skippedHistory) {
+        if ($scope.historyFilter.mediaType || $scope.historyState.skipped) {
           if (addedMessage.my) {
             returnToRecent();
           } else {
@@ -1488,7 +1505,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('history_need_more', showMoreHistory);
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
-      if (!newVal && $scope.curDialog && $scope.curDialog.peerID && !$scope.historyFilter.mediaType && !$scope.skippedHistory) {
+      if (!newVal && $scope.curDialog && $scope.curDialog.peerID && !$scope.historyFilter.mediaType && !$scope.historyState.skipped) {
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
       }
       if (!newVal) {
@@ -1506,9 +1523,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
+    $scope.$on('reply_selected', function (e, messageID) {
+      replySelect(messageID);
+    });
     $scope.$on('ui_typing', onTyping);
 
-    $scope.draftMessage = {text: '', send: sendMessage};
+    $scope.draftMessage = {text: '', send: sendMessage, replyClear: replyClear};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
@@ -1529,11 +1549,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           });
 
           var timeout = 0;
+          var options = {
+            replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.id
+          };
           do {
 
             (function (peerID, curText, curTimeout) {
               setTimeout(function () {
-                AppMessagesManager.sendText(peerID, curText);
+                AppMessagesManager.sendText(peerID, curText, options);
               }, curTimeout)
             })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
 
@@ -1552,6 +1575,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
 
     function resetDraft (newPeer) {
+      replyClear();
+
       if (newPeer) {
         Storage.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
           // console.log('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
@@ -1566,12 +1591,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
+    function replySelect(messageID) {
+      $scope.draftMessage.replyToMessage = AppMessagesManager.wrapForHistory(messageID);
+      $scope.$broadcast('ui_peer_reply');
+    }
+
+    function replyClear() {
+      delete $scope.draftMessage.replyToMessage;
+      $scope.$broadcast('ui_peer_reply');
+    }
+
     function onMessageChange(newVal) {
       // console.log('ctrl text changed', newVal);
       // console.trace('ctrl text changed', newVal);
 
       if (newVal && newVal.length) {
-        if (!$scope.historyFilter.mediaType && !$scope.skippedHistory) {
+        if (!$scope.historyFilter.mediaType && !$scope.historyState.skipped) {
           AppMessagesManager.readHistory($scope.curDialog.inputPeer);
         }
 
@@ -1596,11 +1631,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!angular.isArray(newVal) || !newVal.length) {
         return;
       }
+      var options = {
+        replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.id,
+        isMedia: $scope.draftMessage.isMedia
+      };
+
+      delete $scope.draftMessage.replyToMessage;
 
       for (var i = 0; i < newVal.length; i++) {
-        AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i], {
-          isMedia: $scope.draftMessage.isMedia
-        });
+        AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i], options);
         $scope.$broadcast('ui_message_send');
       }
     }

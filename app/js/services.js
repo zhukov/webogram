@@ -764,6 +764,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var lastSearchFilter = {},
       lastSearchResults = [];
 
+  var needSingleMessages = [],
+      fetchSingleMessagesTimeout = false;
+
   var serverTimeOffset = 0,
       timestampNow = tsNow(true),
       midnightNoOffset = timestampNow - (timestampNow % 86400),
@@ -1345,15 +1348,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function sendText(peerID, text) {
+  function sendText(peerID, text, options) {
+
+    console.log(peerID, text, options);
     if (!angular.isString(text) || !text.length) {
       return;
     }
+    options = options || {};
     var messageID = tempID--,
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        flags = 0,
+        replyToMsgID = options.replyToMsgID,
         message;
 
     if (historyStorage === undefined) {
@@ -1361,15 +1369,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     MtpApiManager.getUserID().then(function (fromID) {
+      if (peerID != fromID) {
+        flags |= 3;
+      }
+      if (replyToMsgID) {
+        flags |= 8;
+      }
       message = {
         _: 'message',
         id: messageID,
         from_id: fromID,
         to_id: AppPeersManager.getOutputPeer(peerID),
-        flags: peerID == fromID ? 0 : 3,
+        flags: flags,
         date: tsNow(true) + serverTimeOffset,
         message: text,
         random_id: randomIDS,
+        reply_to_msg_id: replyToMsgID,
         pending: true
       };
 
@@ -1399,7 +1414,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           peer: inputPeer,
           message: text,
           random_id: randomID,
-          reply_to_msg_id: 0
+          reply_to_msg_id: replyToMsgID
         }, sentRequestOptions).then(function (sentMessage) {
           message.date = sentMessage.date;
           message.id = sentMessage.id;
@@ -1450,6 +1465,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        flags = 0,
+        replyToMsgID = options.replyToMsgID,
         attachType, apiFileName, realFileName;
 
     if (!options.isMedia) {
@@ -1474,6 +1491,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     MtpApiManager.getUserID().then(function (fromID) {
+      if (peerID != fromID) {
+        flags |= 3;
+      }
+      if (replyToMsgID) {
+        flags |= 8;
+      }
       var media = {
         _: 'messageMediaPending',
         type: attachType,
@@ -1487,11 +1510,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         id: messageID,
         from_id: fromID,
         to_id: AppPeersManager.getOutputPeer(peerID),
-        flags: peerID == fromID ? 0 : 3,
+        flags: flags,
         date: tsNow(true) + serverTimeOffset,
         message: '',
         media: media,
         random_id: randomIDS,
+        reply_to_msg_id: replyToMsgID,
         pending: true
       };
 
@@ -1545,7 +1569,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               peer: inputPeer,
               media: inputMedia,
               random_id: randomID,
-              reply_to_msg_id: 0
+              reply_to_msg_id: replyToMsgID
             }).then(function (statedMessage) {
               message.date = statedMessage.message.date;
               message.id = statedMessage.message.id;
@@ -1940,6 +1964,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
 
+    var replyToMsgID = message.reply_to_msg_id;
+    if (replyToMsgID) {
+      if (messagesStorage[replyToMsgID]) {
+        message.reply_to_msg = wrapForHistory(replyToMsgID);
+      } else {
+        message.reply_to_msg = {id: replyToMsgID, loading: true};
+        if (needSingleMessages.indexOf(replyToMsgID) == -1) {
+          needSingleMessages.push(replyToMsgID);
+          if (fetchSingleMessagesTimeout === false) {
+            fetchSingleMessagesTimeout = setTimeout(fetchSingleMessages, 100);
+          }
+        }
+      }
+    }
+
     if (message.message && message.message.length) {
       var options = {};
       if (!Config.Navigator.mobile) {
@@ -1952,6 +1991,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return messagesForHistory[msgID] = message;
+  }
+
+  function fetchSingleMessages () {
+    if (fetchSingleMessagesTimeout !== false) {
+      clearTimeout(fetchSingleMessagesTimeout);
+      fetchSingleMessagesTimeout = false;
+    }
+    if (!needSingleMessages.length) {
+      return;
+    }
+    var msgIDs = needSingleMessages.slice();
+    needSingleMessages = [];
+    MtpApiManager.invokeApi('messages.getMessages', {
+      id: msgIDs
+    }).then(function (getMessagesResult) {
+      AppUsersManager.saveApiUsers(getMessagesResult.users);
+      AppChatsManager.saveApiChats(getMessagesResult.chats);
+      saveMessages(getMessagesResult.messages);
+
+      $rootScope.$broadcast('messages_downloaded', msgIDs);
+    })
   }
 
   function regroupWrappedHistory (history, limit) {
@@ -2006,7 +2066,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           !curMessage.action &&
           curMessage.date < prevMessage.date + 900) {
 
-        var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1;
+        var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1 && !curMessage.reply_to_msg_id;
         if (groupFwd && curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
           curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {

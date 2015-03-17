@@ -320,6 +320,78 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_service')
     };
   })
+
+  .directive('myReplyMessage', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
+
+    return {
+      templateUrl: templateUrl('reply_message'),
+      scope: {
+        'replyMessage': '=myReplyMessage'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var message = $scope.replyMessage;
+      if (!message.loading) {
+        updateMessage($scope, element);
+      } else {
+        var messageID = message.id;
+        var stopWaiting = $scope.$on('messages_downloaded', function (e, msgIDs) {
+          if (msgIDs.indexOf(messageID) != -1) {
+            $scope.replyMessage = AppMessagesManager.wrapForHistory(messageID);
+            updateMessage($scope, element);
+            stopWaiting();
+          }
+        });
+      }
+    }
+
+    function updateMessage($scope, element) {
+      var message = $scope.replyMessage;
+      var thumbWidth = 42;
+      var thumbHeight = 42;
+      var thumbPhotoSize;
+      if (message.media) {
+        switch (message.media._) {
+          case 'messageMediaPhoto':
+            thumbPhotoSize = AppPhotosManager.choosePhotoSize(message.media.photo, thumbWidth, thumbHeight);
+            break;
+
+          case 'messageMediaDocument':
+            thumbPhotoSize = message.media.document.thumb;
+            break;
+
+          case 'messageMediaVideo':
+            thumbPhotoSize = message.media.video.thumb;
+            break;
+        }
+      }
+
+      if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+        var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, thumbWidth, thumbHeight, true);
+
+        $scope.thumb = {
+          width: dim.w,
+          height: dim.h,
+          location: thumbPhotoSize.location,
+          size: thumbPhotoSize.size
+        };
+      }
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          var peerID = AppMessagesManager.getMessagePeer(message);
+          var peerString = AppPeersManager.getPeerString(peerID);
+
+          $rootScope.$broadcast('history_focus',  {peerString: peerString, messageID: message.id});
+
+        })
+      }
+    }
+
+  })
+
   .directive('myMessagePhoto', function() {
     return {
       templateUrl: templateUrl('message_attach_photo')
@@ -1212,6 +1284,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           composer.focus();
         }
       });
+      $scope.$on('ui_peer_reply', function () {
+        onContentLoaded(function () {
+          $scope.$emit('ui_editor_resize');
+          if (!Config.Navigator.touch) {
+            composer.focus();
+          }
+        })
+      });
 
       var sendAwaiting = false;
       $scope.$on('ui_message_before_send', function () {
@@ -2055,8 +2135,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_height', function () {
         onContentLoaded(updateMargin);
       });
-
-
 
     };
 
