@@ -2206,7 +2206,7 @@ a.composer_emoji_btn:hover {
 }
 .composer_user_mention {
   color: #808080;
-  margin-left: 10px;
+  margin-left: 7px;
 }
 .composer_dropdown li a:hover .composer_user_mention,
 .composer_dropdown li a.composer_autocomplete_option_active .composer_user_mention {

@@ -412,6 +412,9 @@ html {
 .im_message_selected {
   background: #e1e9f0;
 }
+.im_message_focus .im_message_outer_wrap {
+  background: rgba(225, 233, 240, 0.35);
+}
 
 
 .im_message_body {
