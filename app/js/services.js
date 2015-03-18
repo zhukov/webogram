@@ -3773,6 +3773,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var facebookRegex = /^https?:\/\/(?:www\.)?facebook\.com\/.+?\/posts\/\d+/i;
   var gplusRegex = /^https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
   var soundcloudRegex = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
+  var spotifyRegex = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)/(.+)|spotify:(.+))/i;
 
   return {
     wrapRichText: wrapRichText,
@@ -3980,16 +3981,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (embedUrlMatches = url.match(youtubeRegex)) {
       return ['youtube', embedUrlMatches[1]];
     }
+	
     if (embedUrlMatches = url.match(vimeoRegex)) {
       return ['vimeo', embedUrlMatches[1]];
     }
-    else if (embedUrlMatches = url.match(instagramRegex)) {
+	
+    if (embedUrlMatches = url.match(instagramRegex)) {
       return ['instagram', embedUrlMatches[1]];
     }
-    else if (embedUrlMatches = url.match(vineRegex)) {
+    
+	if (embedUrlMatches = url.match(vineRegex)) {
       return ['vine', embedUrlMatches[1]];
     }
-    else if (embedUrlMatches = url.match(soundcloudRegex)) {
+    
+	if (embedUrlMatches = url.match(soundcloudRegex)) {
       var badFolders = 'explore,upload,pages,terms-of-use,mobile,jobs,imprint'.split(',');
       var badSubfolders = 'sets'.split(',');
       if (badFolders.indexOf(embedUrlMatches[1]) == -1 &&
@@ -3997,6 +4002,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return ['soundcloud', embedUrlMatches[0]];
       }
     }
+	
+	if (embedUrlMatches = url.match(spotifyRegex)) {
+		return ['spotify', embedUrlMatches[0].replace('/', ':')];
+	}
 
     if (!Config.Modes.chrome_packed) { // Need external JS
       if (embedUrlMatches = url.match(twitterRegex)) {

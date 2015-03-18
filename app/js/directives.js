@@ -224,6 +224,12 @@ angular.module('myApp.directives', ['myApp.filters'])
                 'src="https://w.soundcloud.com/player/?url=' + encodeEntities(encodeURIComponent(soundcloudUrl)) +
                 '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
           break;
+		  
+		case 'spotify':
+			var spotifyUrl = embedData[1];
+			html = '<div class="im_message_media_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://embed.spotify.com/?uri=spotify:' + encodeEntities(encodeURIComponent(spotifyUrl)) +
+                '" width="300" height="380"></' + embedTag + '></div>';
 
         case 'twitter':
           html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
