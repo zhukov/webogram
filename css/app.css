@@ -1419,6 +1419,19 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .im_message_date,.im_message_fwd_date{color:#adadad;font-size:.85em;padding:0 0 20px 10px}
 div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 .im_message_body,.im_message_meta{-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
+.im_message_reply_wrap{display:block;color:inherit;text-decoration:none;margin-bottom:5px;margin-top:2px;overflow:hidden}
+.im_message_reply_wrap:hover{text-decoration:none;color:inherit}
+.im_message_reply_border{background:#7eaad1;height:33px;width:2px;position:absolute;margin-left:-12px}
+.im_message_reply{padding-left:12px}
+.im_message_reply_thumb_wrap{display:block;float:left;width:42px;height:42px;text-align:center;position:absolute}
+.im_message_reply_author{font-weight:700;color:#3a6d99;line-height:16px;margin-bottom:3px}
+.im_message_reply_loading{padding:7px 0 8px}
+.im_reply_message_media,.im_reply_message_service{color:#999}
+.im_message_reply_body{line-height:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:1px}
+.im_message_reply_thumbed .im_message_reply_border,.im_message_reply_thumbed .im_message_reply_wrap{height:42px}
+.im_message_reply_thumbed .im_message_reply_author{margin-top:4px}
+.im_message_reply_thumbed .im_message_reply_author,.im_message_reply_thumbed .im_message_reply_body{margin-left:52px}
+.im_message_reply_wrap .im_message_reply_thumbed{margin-bottom:4px}
 a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_message_fwd_date{padding:0}
 .im_message_text{word-wrap:break-word;line-height:150%}
@@ -1448,12 +1461,12 @@ img.img_fullsize{margin:0 auto}
 .non_osx .media_modal_author{font-size:12px}
 .composer_emoji_insert_btn{display:block;position:absolute;right:3px;top:2px;cursor:pointer;padding:0;width:22px;height:22px;margin-top:1px}
 .icon-emoji{display:inline-block;width:22px;height:22px;vertical-align:top;background:url(../img/icons/General.png) -9px -335px no-repeat;background-size:40px 778px;opacity:.8}
-.composer_emoji_tooltip{display:none;position:absolute;z-index:999;width:220px;margin-left:-100px;margin-top:-248px;border:1px solid #dfdfdf;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.1);-moz-box-shadow:0 1px 1px rgba(0,0,0,.1);box-shadow:0 1px 1px rgba(0,0,0,.1);background:#FFF;padding:5px 2px 5px 5px}
+.composer_emoji_tooltip{display:none;position:absolute;z-index:999;width:254px;margin-left:-116px;margin-top:-245px;border:1px solid #dfdfdf;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.1);-moz-box-shadow:0 1px 1px rgba(0,0,0,.1);box-shadow:0 1px 1px rgba(0,0,0,.1);background:#FFF;padding:5px 2px 5px 8px}
 .composer_emoji_tooltip_shown{display:block}
 .composer_emoji_tooltip_tail{position:absolute;bottom:-14px;left:50%;margin-left:-13px;overflow:hidden;width:26px;height:14px}
 .icon-tooltip-tail{background:#FFF;width:18px;height:18px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);display:inline-block;-webkit-box-shadow:1px 1px 1px rgba(0,0,0,.1);-moz-box-shadow:1px 1px 1px rgba(0,0,0,.1);box-shadow:1px 1px 1px rgba(0,0,0,.1);border:1px solid #dfdfdf;border-width:0 1px 1px 0;-webkit-border-radius:2px;-moz-border-radius:2px;border-radius:2px;position:relative;top:-8px;left:4px}
-.composer_emoji_tooltip_tabs{width:100%;margin-bottom:8px;margin-top:3px}
-.composer_emoji_tooltip_tab{line-height:0;color:#fff;display:inline-block;width:24px;height:29px;background:url(../img/icons/IconsetSmiles.png) no-repeat;background-size:42px 470px;cursor:pointer;opacity:.7;margin:0 3px}
+.composer_emoji_tooltip_tabs{width:100%;margin:5px 0 2px}
+.composer_emoji_tooltip_tab{line-height:0;color:#fff;display:inline-block;width:24px;height:29px;background:url(../img/icons/IconsetSmiles.png) no-repeat;background-size:42px 470px;cursor:pointer;opacity:.7;margin:0 5px 0 4px}
 .is_1x .composer_emoji_tooltip_tab{background-image:url(../img/icons/IconsetSmiles_1x.png)}
 .composer_emoji_tooltip_tab.active{opacity:1}
 .composer_emoji_tooltip_tab_recent{background-position:-9px -306px}
@@ -1472,7 +1485,7 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_tooltip_tab_stickers.active{background-position:-9px -333px}
 .nano.composer_emoji_tooltip_content_wrap{height:174px;position:relative}
 .composer_emoji_tooltip_content{padding-right:8px;outline:0!important}
-a.composer_emoji_btn{margin:-1px 0 0 -1px;padding:5px;display:block;float:left;border-radius:2px}
+a.composer_emoji_btn{margin:0 1px 0 0;padding:6px;display:block;float:left;border-radius:2px}
 a.composer_emoji_btn:hover{background-color:#edf2f5}
 .emoji{-moz-box-orient:vertical;display:inline-block;vertical-align:baseline;height:18px;width:18px;background-repeat:no-repeat;text-indent:-9999px;border:0}
 .emoji-spritesheet-0{background-size:486px 126px;background-image:url(../img/emojisprite_0.png)}
@@ -1492,13 +1505,20 @@ a.composer_emoji_btn:hover{background-color:#edf2f5}
 .emoji-w26.emoji-spritesheet-2{background-size:858px 182px}
 .emoji-w26.emoji-spritesheet-3{background-size:884px 78px}
 .emoji-w26.emoji-spritesheet-4{background-size:884px 182px}
-.composer_dropdown{display:none;border-radius:2px;padding:6px 0;border:1px solid rgba(15,60,96,.2);-webkit-box-shadow:0 1px 3px 0 rgba(60,75,87,.27);-moz-box-shadow:0 1px 3px 0 rgba(60,75,87,.27);box-shadow:0 1px 3px 0 rgba(60,75,87,.27)}
+.composer_dropdown{display:none;padding:6px 0;border:0;-webkit-box-shadow:0 1px 1px 0 rgba(60,75,87,.27);-moz-box-shadow:0 1px 1px 0 rgba(60,75,87,.27);box-shadow:0 1px 1px 0 rgba(60,75,87,.27);border-radius:0;margin-top:-5px}
 .composer_dropdown>li>a{display:block;font-size:13px;line-height:15px;padding:4px 10px;color:#52719a}
-.composer_dropdown li a.composer_emoji_option_active,.composer_dropdown li a:hover{color:#52719a;background:#f2f6fa}
+.composer_dropdown li a.composer_autocomplete_option_active,.composer_dropdown li a:hover{color:#52719a;background:#f2f6fa}
 .composer_emoji_shortcut{display:inline-block;vertical-align:top;margin-left:15px;line-height:20px}
-.composer_sticker_btn{width:67px;height:67px;display:block;display:inline-block;text-align:center;padding:3px}
+.composer_mention_option{line-height:20px}
+.composer_user_mention{color:grey;margin-left:7px}
+.composer_dropdown li a.composer_autocomplete_option_active .composer_user_mention,.composer_dropdown li a:hover .composer_user_mention{color:#698192}
+span.composer_user_photo{display:inline-block;width:32px;height:32px;border-radius:50%;overflow:hidden;margin-right:10px;vertical-align:top}
+img.composer_user_photo{width:32px;height:32px}
+span.composer_user_photo .peer_initials{line-height:32px;font-size:14px}
+.composer_user_mention,.composer_user_name{display:inline-block;line-height:32px;vertical-align:top}
+.composer_sticker_btn{width:78px;height:78px;display:block;display:inline-block;text-align:center;padding:3px}
 .composer_sticker_btn:hover{background:#f2f6fa}
-.composer_sticker_image{max-width:64px;max-height:64px}
+.composer_sticker_image{max-width:72px;max-height:72px}
 .composer_rich_textarea{box-sizing:content-box;-moz-box-sizing:content-box;font-size:12px;margin-bottom:10px;padding:6px;min-height:38px;height:auto;width:auto;max-height:284px;overflow:auto;line-height:17px;border:1px solid #d2dbe3;border-radius:2px;-webkit-box-shadow:none;box-shadow:none;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;word-wrap:break-word;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
 .composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab}
 .composer_rich_textarea:active:before,.composer_rich_textarea:focus:before{content:none}
@@ -1552,8 +1572,6 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .contacts_modal_members_list .disabled{pointer-events:none}
 .contacts_modal_members_list .disabled .icon-contact-tick{display:none}
 .confirm_modal_window .modal-dialog,.error_modal_window .modal-dialog,.md_simple_modal_window .modal-dialog{max-width:348px}
-.im_edit_selected_actions{text-align:center}
-.im_edit_delete_btn,.im_edit_forward_btn{border-radius:2px;padding:7px 17px;font-weight:400;font-size:12px;line-height:18px;margin:6px}
 .im_edit_panel_title{text-align:center;margin:0;font-size:14px;line-height:34px}
 .im_message_focus .audio_player_duration,.im_message_focus .audio_player_size,.im_message_focus .im_message_date,.im_message_focus .im_message_document_size,.im_message_focus .im_message_fwd_date{color:#899daf}
 .user_color_1,.user_color_1:hover{color:#8365ab}

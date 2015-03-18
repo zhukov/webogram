@@ -412,6 +412,9 @@ html {
 .im_message_selected {
   background: #e1e9f0;
 }
+.im_message_focus .im_message_outer_wrap {
+  background: rgba(225, 233, 240, 0.35);
+}
 
 
 .im_message_body {
@@ -608,6 +611,14 @@ img.im_message_video_thumb,
   margin-top: 0;
 }
 
+
+.im_message_reply_wrap {
+  margin-top: 2px;
+}
+.im_message_reply_author {
+  font-weight: normal;
+  font-size: 13px;
+}
 .im_message_fwd_header {
   font-size: 12px;
 }
@@ -624,7 +635,6 @@ img.im_message_video_thumb,
 }
 .im_message_date {
   font-size: 10px;
-  /*font-size: 12px;*/
   padding: 0;
 }
 .im_message_out .im_message_meta {
@@ -736,8 +746,14 @@ a.im_message_from_photo {
 .contacts_modal_search_field {
   font-size: 1.2em;
 }
+.im_edit_selected_actions {
+  text-align: center;
+}
 .im_edit_delete_btn,
 .im_edit_forward_btn {
+  border-radius: 2px;
+  font-weight: normal;
+  line-height: 18px;
   background: none !important;
   border: 0 !important;
   width: 50%;
@@ -1169,6 +1185,7 @@ a.mobile_modal_action .tg_checkbox_label {
   margin-top: -170px;
   width: 262px;
   z-index: 10000;
+  padding: 5px 2px 5px 5px;
 }
 .composer_emoji_tooltip .composer_emoji_tooltip_content_wrap {
   height: 106px;
@@ -1178,6 +1195,7 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .composer_emoji_tooltip .composer_emoji_tooltip_content .composer_emoji_btn {
   padding: 5px;
+  margin: -1px 0 0 -1px;
 }
 .icon-tooltip-tail {
   display: none;
