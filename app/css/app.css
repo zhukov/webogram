@@ -1767,18 +1767,23 @@ div.im_message_body {
   color: inherit;
   text-decoration: none;
   margin-bottom: 5px;
-  height: 42px;
+  margin-top: 2px;
+  height: 36px;
   overflow: hidden;
 }
 .im_message_reply_wrap:hover {
   text-decoration: none;
   color: inherit;
-  background: rgba(242, 246, 250, 0.5);
+}
+.im_message_reply_border {
+  background: #7eaad1;
+  height: 33px;
+  width: 2px;
+  position: absolute;
+  margin-left: -12px;
 }
 .im_message_reply {
-  border: 0 #77b7e4 solid;
-  border-left-width: 2px;
-  padding-left: 8px;
+  padding-left: 12px;
 }
 .im_message_reply_thumb_wrap {
   display: block;
@@ -1791,7 +1796,7 @@ div.im_message_body {
 .im_message_reply_author {
   font-weight: bold;
   color: #3a6d99;
-  margin-top: 2px;
+  line-height: 16px;
   margin-bottom: 3px;
 }
 .im_message_reply_loading {
@@ -1802,9 +1807,11 @@ div.im_message_body {
   color: #999;
 }
 .im_message_reply_body {
+  line-height: 16px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  margin-bottom: 1px;
 }
 .im_message_reply_thumbed .im_message_reply_author,
 .im_message_reply_thumbed .im_message_reply_body {
