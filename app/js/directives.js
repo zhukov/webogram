@@ -1145,7 +1145,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $modalStack, $http, $interpolate, Storage, AppStickersManager, ErrorService) {
+  .directive('mySendForm', function ($timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, ErrorService) {
 
     return {
       link: link,
@@ -1195,12 +1195,27 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
+      var peerPhotoCompiled = $compile('<span class="composer_user_photo" my-peer-photolink="peerID" img-class="composer_user_photo"></span>');
+      var cachedPeerPhotos = {};
+
       var composer = new MessageComposer(messageField, {
         onTyping: function () {
           $scope.$emit('ui_typing');
         },
         getSendOnEnter: function () {
           return sendOnEnter;
+        },
+        getPeerImage: function (element, peerID) {
+          if (cachedPeerPhotos[peerID]) {
+            element.replaceWith(cachedPeerPhotos[peerID]);
+            return;
+          }
+          var scope = $scope.$new(true);
+          scope.peerID = peerID;
+          peerPhotoCompiled(scope, function (clonedElement) {
+            cachedPeerPhotos[peerID] = clonedElement;
+            element.replaceWith(clonedElement);
+          });
         },
         mentions: $scope.mentions,
         onMessageSubmit: onMessageSubmit,

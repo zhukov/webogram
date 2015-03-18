@@ -2212,6 +2212,29 @@ a.composer_emoji_btn:hover {
 .composer_dropdown li a.composer_autocomplete_option_active .composer_user_mention {
   color: #698192;
 }
+span.composer_user_photo {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 10px;
+  vertical-align: top;
+}
+img.composer_user_photo {
+  width: 32px;
+  height: 32px;
+}
+span.composer_user_photo .peer_initials {
+  line-height: 32px;
+  font-size: 14px;
+}
+.composer_user_name,
+.composer_user_mention {
+  display: inline-block;
+  line-height: 32px;
+  vertical-align: top;
+}
 
 .composer_sticker_btn {
   width: 67px;

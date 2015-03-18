@@ -461,6 +461,7 @@ function MessageComposer (textarea, options) {
   this.getSendOnEnter = options.getSendOnEnter;
   this.onFilePaste = options.onFilePaste;
   this.mentions = options.mentions;
+  this.getPeerImage = options.getPeerImage;
 }
 
 MessageComposer.prototype.setUpInput = function () {
@@ -1006,10 +1007,16 @@ MessageComposer.prototype.showMentionSuggestions = function (users) {
 
   for (i = 0; i < count; i++) {
     user = users[i];
-    html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
+    html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_photo" data-user-id="' + user.id + '"></span><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
   }
 
   this.autoCompleteEl.html(html.join(''));
+
+  var self = this;
+  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
+    self.getPeerImage($(element), element.getAttribute('data-user-id'));
+  });
+
   this.autoCompleteEl.show();
   this.updatePosition();
   this.autocompleteShown = true;
