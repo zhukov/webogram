@@ -2368,13 +2368,35 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         incrementMaxSeenID(message.id);
         break;
 
-      case 'updateReadMessages':
-        var dialogsUpdated = {},
-            messageID, message, i, peerID, foundDialog, dialog,
-            foundAffected = false;
-        for (i = 0; i < update.messages.length; i++) {
-          messageID = update.messages[i];
+      case 'updateReadHistoryInbox':
+      case 'updateReadHistoryOutbox':
+        var maxID = update.max_id;
+        var isOut = update._ == 'updateReadHistoryOutbox';
+        var peerID = AppPeersManager.getPeerID(update.peer);
+        var foundDialog = getDialogByPeerID(peerID);
+        var history = (historiesStorage[peerID] || {}).history || [];
+        var newUnreadCount = false;
+        var length = history.length;
+        var foundAffected = false;
+        var messageID, message, i;
+
+        if (peerID > 0 && isOut) {
+          AppUsersManager.forceUserOnline(peerID);
+        }
+
+        for (i = 0; i < length; i++) {
+          messageID = history[i];
+          if (messageID > maxID) {
+            continue;
+          }
           message = messagesStorage[messageID];
+
+          if (message.out != isOut) {
+            continue;
+          }
+          if (!message.unread) {
+            break;
+          }
           // console.log('read', messageID, message.unread, message);
           if (message && message.unread) {
             message.unread = false;
@@ -2387,36 +2409,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             if (messagesForDialogs[messageID]) {
               messagesForDialogs[messageID].unread = false;
             }
-            peerID = getMessagePeer(message);
             if (!message.out) {
-              foundDialog = getDialogByPeerID(peerID);
               if (foundDialog) {
-                dialogsUpdated[peerID] = --foundDialog[0].unread_count;
+                newUnreadCount = --foundDialog[0].unread_count;
               }
-
               NotificationsManager.cancel('msg' + messageID);
-            }
-            else if (peerID > 0) {
-              AppUsersManager.forceUserOnline(peerID);
             }
           }
         }
 
-        angular.forEach(dialogsUpdated, function(count, peerID) {
-          $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: count});
-        });
+        if (newUnreadCount !== false) {
+          $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: newUnreadCount});
+        }
         if (foundAffected) {
           $rootScope.$broadcast('messages_read');
         }
         break;
 
-      // case 'updateReadHistoryInbox':
-      // case 'updateReadHistoryOutbox':
-
       case 'updateDeleteMessages':
         var dialogsUpdated = {},
             historiesUpdated = {},
-            messageID, message, i, peerID, foundDialog, dialog, history;
+            messageID, message, i, peerID, foundDialog, history;
 
         for (i = 0; i < update.messages.length; i++) {
           messageID = update.messages[i];
