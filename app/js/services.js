@@ -2003,7 +2003,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var replyToMsgID = message.reply_to_msg_id;
     if (replyToMsgID) {
       if (messagesStorage[replyToMsgID]) {
-        message.reply_to_msg = wrapForHistory(replyToMsgID);
+        message.reply_to_msg = wrapForDialog(replyToMsgID);
       } else {
         message.reply_to_msg = {id: replyToMsgID, loading: true};
         if (needSingleMessages.indexOf(replyToMsgID) == -1) {

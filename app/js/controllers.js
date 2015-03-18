@@ -1623,7 +1623,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function replySelect(messageID) {
-      $scope.draftMessage.replyToMessage = AppMessagesManager.wrapForHistory(messageID);
+      $scope.draftMessage.replyToMessage = AppMessagesManager.wrapForDialog(messageID);
       $scope.$broadcast('ui_peer_reply');
     }
 

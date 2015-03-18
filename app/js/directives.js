@@ -339,7 +339,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var messageID = message.id;
         var stopWaiting = $scope.$on('messages_downloaded', function (e, msgIDs) {
           if (msgIDs.indexOf(messageID) != -1) {
-            $scope.replyMessage = AppMessagesManager.wrapForHistory(messageID);
+            $scope.replyMessage = AppMessagesManager.wrapForDialog(messageID);
             updateMessage($scope, element);
             stopWaiting();
           }
