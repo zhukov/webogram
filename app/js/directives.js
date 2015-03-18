@@ -227,9 +227,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 		  
 		case 'spotify':
 			var spotifyUrl = embedData[1];
-			html = '<div class="im_message_media_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+			html = '<div class="im_message_media_embed" style="width: 300px; height: 80px"><' + embedTag + ' type="text/html" frameborder="0" allowtransparency="true"' +
                 'src="https://embed.spotify.com/?uri=spotify:' + encodeEntities(encodeURIComponent(spotifyUrl)) +
-                '" width="300" height="380"></' + embedTag + '></div>';
+                '"></' + embedTag + '></div>';
+			break;
 
         case 'twitter':
           html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
