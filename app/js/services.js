@@ -4706,9 +4706,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var confirmShown = false;
 
   function switchLayout(mobile) {
+    ConfigStorage.noPrefix();
     Storage.set({
-      current_layout: mobile ? 'mobile' : 'desktop',
-      layout_confirmed: {width: $(window).width(), mobile: mobile}
+      layout_selected: mobile ? 'mobile' : 'desktop',
+      layout_width: $(window).width()
     }).then(function () {
       AppRuntimeManager.reload();
     });
@@ -4719,28 +4720,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return;
     }
     var width = $(window).width();
-    if (!e && Config.Mobile && width <= 800) {
+    var newMobile = width < 600;
+    if (!width ||
+        !e && (Config.Navigator.mobile ? width <= 800 : newMobile)) {
       return;
     }
-    var newMobile = width < 600;
     if (newMobile != Config.Mobile) {
-      Storage.get('layout_confirmed').then(function (result) {
-        if (result &&
-            (result.mobile
-              ? width == result.width
-              : width == result.width
-            )
-        ) {
+      ConfigStorage.noPrefix();
+      Storage.get('layout_width').then(function (confirmedWidth) {
+        if (width == confirmedWidth) {
           return false;
         }
         confirmShown = true;
         ErrorService.confirm({
           type: newMobile ? 'SWITCH_MOBILE_VERSION' : 'SWITCH_DESKTOP_VERSION'
         }).then(function () {
-          Storage.remove('layout_confirmed');
           switchLayout(newMobile);
         }, function () {
-          Storage.set({layout_confirmed: {width: width, mobile: Config.Mobile}});
+          ConfigStorage.noPrefix();
+          Storage.set({layout_width: width});
           confirmShown = false;
         });
       });

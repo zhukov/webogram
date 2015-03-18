@@ -2517,7 +2517,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, AppRuntimeManager, ErrorService, _) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -2717,6 +2717,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           AppRuntimeManager.reload();
         });
       })
+    };
+
+    $scope.switchBackToDesktop = Config.Mobile && !Config.Navigator.mobile;
+    $scope.switchToDesktop = function () {
+      LayoutSwitchService.switchLayout(false);
     };
   })
 

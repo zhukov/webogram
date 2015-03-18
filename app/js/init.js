@@ -72,7 +72,7 @@
   }
   $(document.body).addClass(classes.join(' '));
 
-  ConfigStorage.get('current_layout', 'i18n_locale', function (params) {
+  ConfigStorage.get('layout_selected', 'i18n_locale', function (params) {
     var layout = params[0],
         locale = params[1],
         defaultLocale = 'en-us',
@@ -91,7 +91,7 @@
             }
           }
           if (ready) {
-            bootReady.boot = false; 
+            bootReady.boot = false;
             angular.bootstrap(document, ['myApp']);
           }
         };
@@ -100,7 +100,8 @@
       case 'mobile': Config.Mobile = true; break;
       case 'desktop': Config.Mobile = false; break;
       default:
-        Config.Mobile = Config.Navigator.mobile || $(window).width() < 480;
+        var width = $(window).width();
+        Config.Mobile = Config.Navigator.mobile || width > 10 && width < 480;
         break;
     }
     $('head').append(
