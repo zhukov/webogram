@@ -162,7 +162,7 @@
                   </a>
                   <a class="pull-left im_panel_own_photo" my-peer-photolink="ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
 
-                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
+                  <form my-send-form draft-message="draftMessage" mentions="mentions" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
                       <a class="im_send_reply_cancel" ng-click="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>

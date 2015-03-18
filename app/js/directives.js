@@ -1150,7 +1150,8 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       scope: {
-        draftMessage: '='
+        draftMessage: '=',
+        mentions: '='
       }
     };
 
@@ -1201,6 +1202,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         getSendOnEnter: function () {
           return sendOnEnter;
         },
+        mentions: $scope.mentions,
         onMessageSubmit: onMessageSubmit,
         onFilePaste: onFilePaste
       });
@@ -1298,6 +1300,10 @@ angular.module('myApp.directives', ['myApp.filters'])
             composer.focus();
           }
         })
+      });
+
+      $scope.$on('mentions_update', function () {
+        composer.onMentionsUpdated();
       });
 
       var sendAwaiting = false;

@@ -1519,7 +1519,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppPeersManager, AppDocsManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -1529,6 +1529,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('ui_typing', onTyping);
 
     $scope.draftMessage = {text: '', send: sendMessage, replyClear: replyClear};
+    $scope.mentions = {};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
@@ -1573,8 +1574,38 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return cancelEvent(e);
     }
 
+    function updateMentions () {
+      var peerID = $scope.curDialog.peerID;
+
+      if (!peerID || peerID > 0) {
+        safeReplaceObject($scope.mentions, {});
+        $scope.$broadcast('mentions_update');
+        return;
+      }
+      AppChatsManager.getChatFull(-peerID).then(function (chatFull) {
+        var participantsVector = (chatFull.participants || {}).participants || [];
+
+        var mentionUsers = [];
+        var mentionIndex = SearchIndexManager.createIndex();
+
+        angular.forEach(participantsVector, function (participant) {
+          var user = AppUsersManager.getUser(participant.user_id);
+          if (user.username) {
+            mentionUsers.push(user);
+            SearchIndexManager.indexObject(user.id, AppUsersManager.getUserSearchText(user.id), mentionIndex);
+          }
+        });
+
+        safeReplaceObject($scope.mentions, {
+          users: mentionUsers,
+          index: mentionIndex
+        });
+        $scope.$broadcast('mentions_update');
+      });
+    }
 
     function resetDraft (newPeer) {
+      updateMentions();
       replyClear();
 
       if (newPeer) {
@@ -1651,7 +1682,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       var doc = AppDocsManager.getDoc(newVal);
       if (doc.id && doc.access_hash) {
-        console.log('sticker', doc);
         var inputMedia = {
           _: 'inputMediaDocument',
           id: {

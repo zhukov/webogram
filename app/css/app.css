@@ -2190,7 +2190,7 @@ a.composer_emoji_btn:hover {
   color: #52719a;
 }
 .composer_dropdown li a:hover,
-.composer_dropdown li a.composer_emoji_option_active {
+.composer_dropdown li a.composer_autocomplete_option_active {
   color: #52719a;
   background: #f2f6fa;
 }
@@ -2200,6 +2200,19 @@ a.composer_emoji_btn:hover {
   margin-left: 15px;
   line-height: 20px;
 }
+
+.composer_mention_option {
+  line-height: 20px;
+}
+.composer_user_mention {
+  color: #808080;
+  margin-left: 10px;
+}
+.composer_dropdown li a:hover .composer_user_mention,
+.composer_dropdown li a.composer_autocomplete_option_active .composer_user_mention {
+  color: #698192;
+}
+
 .composer_sticker_btn {
   width: 67px;
   height: 67px;

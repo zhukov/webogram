@@ -111,7 +111,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (apiUser.first_name) {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true});
-      apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true});
+      apiUser.rFullName = apiUser.last_name ? RichTextProcessor.wrapRichText(apiUser.first_name + ' ' + (apiUser.last_name || ''), {noLinks: true, noLinebreaks: true}) : apiUser.rFirstName;
     } else {
       apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_first_name_deleted');
       apiUser.rFullName = RichTextProcessor.wrapRichText(apiUser.last_name, {noLinks: true, noLinebreaks: true}) || apiUser.rPhone || _('user_name_deleted');
@@ -926,8 +926,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           dialog.top_message > maxSeenID
         ) {
           var message = getMessage(dialog.top_message);
+          var notifyPeer = message.flags & 16 ? message.from_id : peerID;
           if (message.unread && !message.out) {
-            NotificationsManager.getPeerMuted(peerID).then(function (muted) {
+            NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
               if (!muted) {
                 Storage.get('notify_nopreview').then(function (no_preview) {
                   notifyAboutMessage(message, no_preview);
@@ -1233,7 +1234,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           pts_count: affectedMessages.pts_count
         }
       });
-      return deletedMessageIDs;
+      return messageIDs;
     });
   }
 
@@ -1386,8 +1387,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function sendText(peerID, text, options) {
-
-    console.log(peerID, text, options);
     if (!angular.isString(text) || !text.length) {
       return;
     }
