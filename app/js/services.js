@@ -2352,7 +2352,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             !message.out &&
             message.unread) {
 
-          var isMutedPromise = NotificationsManager.getPeerMuted(peerID);
+          var notifyPeer = message.flags & 16 ? message.from_id : peerID;
+          var isMutedPromise = NotificationsManager.getPeerMuted(notifyPeer);
           var timeout = $rootScope.idle.isIDLE && StatusManager.isOtherDeviceActive() ? 30000 : 1000;
           setTimeout(function () {
             isMutedPromise.then(function (muted) {
