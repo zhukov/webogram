@@ -142,14 +142,11 @@
 
             <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
               <div class="im_edit_panel_border"></div>
-              <a class="btn btn-md btn-md-primary im_edit_flush_link" ng-click="selectedFlush()" ng-switch="historyPeer.id > 0">
-                <span ng-switch-when="true" my-i18n="im_delete_chat"></span>
-                <span ng-switch-default my-i18n="im_clear_history"></span>
-              </a>
-              <a class="btn btn-md im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
+              <a class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
               <div class="im_edit_selected_actions" my-i18n>
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
-                <a class="btn btn-danger im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete"></a>
+                <a class="btn btn-primary im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete"></a>
+                <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedReply()" ng-show="selectedCount == 1"my-i18n="im_reply"></a>
                 <my-i18n-param name="count"><strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong></my-i18n-param>
               </div>
             </div>
@@ -158,14 +155,19 @@
 
               <div class="im_send_form_wrap1">
 
-                <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
+                <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController" ng-class="{im_send_reply_form_wrap: draftMessage.replyToMessage != null}">
 
                   <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true">
                     <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
                   </a>
                   <a class="pull-left im_panel_own_photo" my-peer-photolink="ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
 
-                  <form my-send-form draft-message="draftMessage" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
+                  <form my-send-form draft-message="draftMessage" mentions="mentions" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
+
+                    <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
+                      <a class="im_send_reply_cancel" ng-click="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+                      <div my-reply-message="draftMessage.replyToMessage"></div>
+                    </div>
 
                     <div class="im_send_field_wrap">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>

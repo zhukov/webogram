@@ -466,6 +466,7 @@ TLDeserialization.prototype.fetchRawBytes = function (len, typed, field) {
 
 TLDeserialization.prototype.fetchObject = function (type, field) {
   switch (type) {
+    case '#':
     case 'int':    return this.fetchInt(field);
     case 'long':   return this.fetchLong(field);
     case 'int128': return this.fetchIntBytes(128, false, field);
@@ -574,7 +575,17 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
     this.override[overrideKey].apply(this, [result, field + '[' + predicate + ']']);
   } else {
     angular.forEach(constructorData.params, function (param) {
-      result[param.name] = self.fetchObject(param.type, field + '[' + predicate + '][' + param.name + ']');
+      var type = param.type;
+      if (type.indexOf('?') !== -1) {
+        var condType = type.split('?');
+        var fieldBit = condType[0].split('.');
+        if (!(result[fieldBit[0]] & (1 << fieldBit[1]))) {
+          return;
+        }
+        type = condType[1];
+      }
+
+      result[param.name] = self.fetchObject(type, field + '[' + predicate + '][' + param.name + ']');
     });
   }
 

@@ -280,6 +280,7 @@ function templateUrl (tplName) {
     error_modal: 'desktop',
     media_modal_layout: 'desktop',
     slider: 'desktop',
+    reply_message: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';

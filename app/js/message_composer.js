@@ -234,7 +234,7 @@ EmojiTooltip.prototype.createTooltip = function () {
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
     var target = $(e.target), code, sticker;
-    if (target.hasClass('emoji') || target.hasClass('composer_sticker_image')) {
+    if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
     if (code = target.attr('data-code')) {
@@ -382,7 +382,7 @@ function EmojiPanel (containerEl, options) {
   this.containerEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
     var target = $(e.target), code;
-    if (target.hasClass('emoji')) {
+    if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
     if (code = target.attr('data-code')) {
@@ -436,8 +436,8 @@ function MessageComposer (textarea, options) {
   var self = this;
   this.autoCompleteEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), code;
-    if (target.hasClass('emoji') || target.hasClass('composer_emoji_shortcut')) {
+    var target = $(e.target), mention, code;
+    if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
     if (code = target.attr('data-code')) {
@@ -445,6 +445,11 @@ function MessageComposer (textarea, options) {
         self.onEmojiSelected(code, true);
       }
       EmojiHelper.pushPopularEmoji(code);
+    }
+    if (mention = target.attr('data-mention')) {
+      if (self.onMentionSelected) {
+        self.onMentionSelected(mention);
+      }
     }
     return cancelEvent(e);
   });
@@ -455,6 +460,7 @@ function MessageComposer (textarea, options) {
   this.onMessageSubmit = options.onMessageSubmit;
   this.getSendOnEnter = options.getSendOnEnter;
   this.onFilePaste = options.onFilePaste;
+  this.mentions = options.mentions;
 }
 
 MessageComposer.prototype.setUpInput = function () {
@@ -463,6 +469,7 @@ MessageComposer.prototype.setUpInput = function () {
   } else {
     this.setUpPlaintext();
   }
+  this.autoCompleteRegEx = /(?:\s|^)(:|@)([A-Za-z0-9\-\+\*_]*)$/;
 }
 
 MessageComposer.prototype.setUpRich = function () {
@@ -530,33 +537,38 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     if (this.autocompleteShown) {
       if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
         var next = e.keyCode == 40;
-        var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active');
+        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
 
         if (currentSelected.length) {
           var currentSelectedWrap = currentSelected[0].parentNode;
           var nextWrap = currentSelectedWrap[next ? 'nextSibling' : 'previousSibling'];
-          currentSelected.removeClass('composer_emoji_option_active');
+          currentSelected.removeClass('composer_autocomplete_option_active');
           if (nextWrap) {
-            $(nextWrap).find('a').addClass('composer_emoji_option_active');
+            $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
             return cancelEvent(e);
           }
         }
 
         var childNodes = this.autoCompleteEl[0].childNodes;
         var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
-        $(nextWrap).find('a').addClass('composer_emoji_option_active');
+        $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
 
         return cancelEvent(e);
       }
 
       if (e.keyCode == 13) { // ENTER
-        var currentSelected = $(this.autoCompleteEl).find('.composer_emoji_option_active')/* ||
-                              $(this.autoCompleteEl).childNodes[0].find('a')*/;
-        var code = currentSelected.attr('data-code');
-        if (code) {
+        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
+        var code, mention;
+        if (code = currentSelected.attr('data-code')) {
           this.onEmojiSelected(code, true);
           EmojiHelper.pushPopularEmoji(code);
           return cancelEvent(e);
+        }
+        if (mention = currentSelected.attr('data-mention')) {
+          if (this.onMentionSelected) {
+            this.onMentionSelected(mention);
+            return cancelEvent(e);
+          }
         }
         checkSubmit = true;
       }
@@ -638,38 +650,65 @@ MessageComposer.prototype.checkAutocomplete = function () {
 
   value = value.substr(0, pos);
 
-  var matches = value.match(/(?:\s|^):([A-Za-z0-9\-\+\*_]*)$/);
+  var matches = value.match(this.autoCompleteRegEx);
   if (matches) {
     if (this.previousQuery == matches[0]) {
       return;
     }
     this.previousQuery = matches[0];
-    var query = SearchIndexManager.cleanSearchText(matches[1]);
-    EmojiHelper.getPopularEmoji((function (popular) {
-      if (query.length) {
-        var found = EmojiHelper.searchEmojis(query);
-        if (found.length) {
-          var popularFound = [],
-              code, pos;
-          for (var i = 0, len = popular.length; i < len; i++) {
-            code = popular[i].code;
-            pos = found.indexOf(code);
-            if (pos >= 0) {
-              popularFound.push(code);
-              found.splice(pos, 1);
-              if (!found.length) {
-                break;
-              }
+    var query = SearchIndexManager.cleanSearchText(matches[2]);
+
+    if (matches[1] == '@') { // mentions
+      if (this.mentions && this.mentions.index) {
+        if (query.length) {
+          var foundObject = SearchIndexManager.search(query, this.mentions.index);
+          var foundUsers = [];
+          var user;
+          for (var i = 0, length = this.mentions.users.length; i < length; i++) {
+            user = this.mentions.users[i];
+            if (foundObject[user.id]) {
+              foundUsers.push(user);
             }
           }
-          this.showEmojiSuggestions(popularFound.concat(found));
+        } else {
+          var foundUsers = this.mentions.users;
+        }
+        if (foundUsers.length) {
+          this.showMentionSuggestions(foundUsers);
         } else {
           this.hideSuggestions();
         }
       } else {
-        this.showEmojiSuggestions(popular);
+        this.hideSuggestions();
       }
-    }).bind(this));
+    }
+    else { // emoji
+      EmojiHelper.getPopularEmoji((function (popular) {
+        if (query.length) {
+          var found = EmojiHelper.searchEmojis(query);
+          if (found.length) {
+            var popularFound = [],
+                code, pos;
+            for (var i = 0, len = popular.length; i < len; i++) {
+              code = popular[i].code;
+              pos = found.indexOf(code);
+              if (pos >= 0) {
+                popularFound.push(code);
+                found.splice(pos, 1);
+                if (!found.length) {
+                  break;
+                }
+              }
+            }
+            this.showEmojiSuggestions(popularFound.concat(found));
+          } else {
+            this.hideSuggestions();
+          }
+        } else {
+          this.showEmojiSuggestions(popular);
+        }
+      }).bind(this));
+    }
   }
   else {
     delete this.previousQuery;
@@ -819,6 +858,65 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
   this.onChange();
 }
 
+MessageComposer.prototype.onMentionsUpdated = function (username) {
+  delete this.previousQuery;
+  if (this.isActive) {
+    this.checkAutocomplete();
+  }
+}
+
+MessageComposer.prototype.onMentionSelected = function (username) {
+  if (this.richTextareaEl) {
+    var textarea = this.richTextareaEl[0];
+    if (!this.isActive) {
+      if (!this.restoreSelection()) {
+        setRichFocus(textarea);
+      }
+    }
+    var valueCaret = getRichValueWithCaret(textarea);
+    var fullValue = valueCaret[0];
+    var pos = valueCaret[1] >= 0 ? valueCaret[1] : fullValue.length;
+    var suffix = fullValue.substr(pos);
+    var prefix = fullValue.substr(0, pos);
+    var matches = prefix.match(/@([A-Za-z0-9\-\+\*_]*)$/);
+
+    var newValuePrefix;
+    if (matches && matches[0]) {
+      newValuePrefix = prefix.substr(0, matches.index) + '@' + username;
+    } else {
+      newValuePrefix = prefix + '@' + username;
+    }
+    textarea.value = newValue;
+
+    this.selId = (this.selId || 0) + 1;
+    var html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
+
+    this.richTextareaEl.html(html);
+    setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+  }
+  else {
+    var textarea = this.textareaEl[0];
+    var fullValue = textarea.value;
+    var pos = this.isActive ? getFieldSelection(textarea) : fullValue.length;
+    var suffix = fullValue.substr(pos);
+    var prefix = fullValue.substr(0, pos);
+    var matches = prefix.match(/@([A-Za-z0-9\-\+\*_]*)$/);
+
+    if (matches && matches[0]) {
+      var newValue = prefix.substr(0, matches.index) + '@' + username + ' ' + suffix;
+      var newPos = matches.index + username.length + 2;
+    } else {
+      var newValue = prefix + ':' + username + ': ' + suffix;
+      var newPos = prefix.length + username.length + 2;
+    }
+    textarea.value = newValue;
+    setFieldSelection(textarea, newPos);
+  }
+
+  this.hideSuggestions();
+  this.onChange();
+}
+
 MessageComposer.prototype.onChange = function (e) {
   if (this.richTextareaEl) {
     delete this.keyupStarted;
@@ -850,7 +948,7 @@ MessageComposer.prototype.setValue = function (text) {
 }
 
 MessageComposer.prototype.getRichHtml = function (text) {
-  return $('<div>').text(text).html().replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
+  return $('<div>').text(text).html().replace(/\n/g, '<br/>').replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
     var code = EmojiHelper.shortcuts[shortcut];
     if (code !== undefined) {
       return this.getEmojiHtml(code);
@@ -892,6 +990,23 @@ MessageComposer.prototype.showEmojiSuggestions = function (codes) {
       y = iconSize * spritesheet[2];
       html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w20 emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
     }
+  }
+
+  this.autoCompleteEl.html(html.join(''));
+  this.autoCompleteEl.show();
+  this.updatePosition();
+  this.autocompleteShown = true;
+}
+
+MessageComposer.prototype.showMentionSuggestions = function (users) {
+  var html = [];
+  var user;
+  var count = Math.min(5, users.length);
+  var i;
+
+  for (i = 0; i < count; i++) {
+    user = users[i];
+    html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
   }
 
   this.autoCompleteEl.html(html.join(''));
