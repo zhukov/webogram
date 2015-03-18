@@ -1025,7 +1025,8 @@ MessageComposer.prototype.showMentionSuggestions = function (users) {
 MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
   var height = this.autoCompleteEl.outerHeight();
-  this.autoCompleteEl.css({top: offset.top - height, left: offset.left});
+  var width = (this.richTextareaEl || this.textareaEl).outerWidth();
+  this.autoCompleteEl.css({top: offset.top - height, left: offset.left, width: width - 2});
 }
 
 MessageComposer.prototype.hideSuggestions = function () {

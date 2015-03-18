@@ -410,7 +410,9 @@
   visibility : visible\9; /* Target only IE7 and IE8 with this hack */
   opacity    : 0.99;
 }
-
+.composer_emoji_tooltip {
+  z-index: 1001;
+}
 .composer_emoji_tooltip .nano > .nano-pane {
   background : rgba(255,255,255,0.0);
   right: -2px;
