@@ -96,10 +96,13 @@
   -ms-transform: translateY(-1px);
   -o-transform: translateY(-1px);
   transform: translateY(-1px);
-
 }
 .tg_head_logo_dropdown:not(.open) .dropdown-toggle:hover .icon-bar:nth-child(3) {
   -webkit-transform: translateY(1px);
+  -moz-transform: translateY(1px);
+  -ms-transform: translateY(1px);
+  -o-transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 .tg_head_logo_dropdown.open .icon-bar:nth-child(1) {
