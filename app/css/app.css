@@ -1822,6 +1822,9 @@ a.im_message_fwd_photo {
 .im_message_text {
   word-wrap: break-word;
   line-height: 150%;
+  background-color: #E7ECF2;
+  border-radius: 7px;
+  padding: 5px 8px;
 }
 
 .im_history_not_selected,
