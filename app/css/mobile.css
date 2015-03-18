@@ -1185,6 +1185,7 @@ a.mobile_modal_action .tg_checkbox_label {
   margin-top: -170px;
   width: 262px;
   z-index: 10000;
+  padding: 5px 2px 5px 5px;
 }
 .composer_emoji_tooltip .composer_emoji_tooltip_content_wrap {
   height: 106px;
@@ -1194,6 +1195,7 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .composer_emoji_tooltip .composer_emoji_tooltip_content .composer_emoji_btn {
   padding: 5px;
+  margin: -1px 0 0 -1px;
 }
 .icon-tooltip-tail {
   display: none;

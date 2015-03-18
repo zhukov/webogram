@@ -743,12 +743,12 @@ a.footer_link.active:active {
   overflow: hidden;
   max-width: 210px;
 }
-.composer_emoji_panel a {
+.composer_emoji_panel a.composer_emoji_btn {
   display: inline-block;
   padding: 5px;
   outline: 0;
   border-radius: 2px;
-  margin-bottom: 2px;
+  margin: -1px 0 2px -1px;
 }
 /*.composer_emoji_panel a:hover {
   background-color: #edf2f5;

@@ -1797,7 +1797,8 @@ div.im_message_body {
 .im_message_reply_loading {
   padding: 12px 0;
 }
-.im_reply_message_service {
+.im_reply_message_service,
+.im_reply_message_media {
   color: #999;
 }
 .im_message_reply_body {
@@ -1990,9 +1991,9 @@ img.img_fullsize {
   display: none;
   position: absolute;
   z-index: 999;
-  width: 220px;
-  margin-left: -100px;
-  margin-top: -248px;
+  width: 254px;
+  margin-left: -116px;
+  margin-top: -245px;
 
   border: 1px #dfdfdf solid;
   -webkit-border-radius: 3px;
@@ -2002,7 +2003,7 @@ img.img_fullsize {
   -moz-box-shadow:    0px 1px 1px rgba(0, 0, 0, 0.1);
   box-shadow:         0px 1px 1px rgba(0, 0, 0, 0.1);
   background: #FFF;
-  padding: 5px 2px 5px 5px;
+  padding: 5px 2px 5px 8px;
 }
 .composer_emoji_tooltip_shown {
   display: block;
@@ -2042,8 +2043,7 @@ img.img_fullsize {
 
 .composer_emoji_tooltip_tabs {
   width: 100%;
-  margin-bottom: 8px;
-  margin-top: 3px;
+  margin: 5px 0 2px;
 }
 .composer_emoji_tooltip_tab {
   line-height: 0;
@@ -2055,7 +2055,7 @@ img.img_fullsize {
   background-size: 42px 470px;
   cursor: pointer;
   opacity: 0.7;
-  margin: 0 3px;
+  margin: 0 5px 0 4px;
 }
 .is_1x .composer_emoji_tooltip_tab {
   background-image: url(../img/icons/IconsetSmiles_1x.png);
@@ -2100,8 +2100,8 @@ img.img_fullsize {
 
 
 a.composer_emoji_btn {
-  margin: -1px 0 0 -1px;
-  padding: 5px;
+  margin: 0 1px 0 0;
+  padding: 6px;
   display: block;
   float: left;
   border-radius: 2px;
@@ -2237,8 +2237,8 @@ span.composer_user_photo .peer_initials {
 }
 
 .composer_sticker_btn {
-  width: 67px;
-  height: 67px;
+  width: 78px;
+  height: 78px;
   display: block;
   display: inline-block;
   text-align: center;
@@ -2248,8 +2248,8 @@ span.composer_user_photo .peer_initials {
   background: #f2f6fa;
 }
 .composer_sticker_image {
-  max-width: 64px;
-  max-height: 64px;
+  max-width: 72px;
+  max-height: 72px;
 }
 
 .composer_rich_textarea {
