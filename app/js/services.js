@@ -1569,12 +1569,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         $rootScope.$broadcast('messages_pending');
       }
 
+      var uploaded = false,
+          uploadPromise;
+
       message.send = function () {
         var sendFileDeferred = $q.defer();
 
         sendFilePromise.then(function () {
-          var uploaded = false,
-              uploadPromise = MtpApiFileManager.uploadFile(file);
+          if (!uploaded || message.error) {
+            uploaded = false;
+            uploadPromise = MtpApiFileManager.uploadFile(file);
+          }
 
           uploadPromise.then(function (inputFile) {
             inputFile.name = apiFileName;
@@ -1626,6 +1631,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                 }]
               });
             }, function (error) {
+              if (attachType == 'photo' &&
+                  error.code == 400 &&
+                  error.type == 'PHOTO_INVALID_DIMENSIONS') {
+                error.handled = true;
+                attachType = 'document';
+                message.send();
+                return;
+              }
               toggleError(true);
             });
           }, function (error) {
