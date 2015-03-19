@@ -225,6 +225,13 @@ angular.module('myApp.directives', ['myApp.filters'])
                 '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
           break;
 
+    		case 'spotify':
+    			var spotifyUrl = embedData[1];
+    			html = '<div class="im_message_media_embed im_message_spotify_embed"><' + embedTag + ' type="text/html" frameborder="0" allowtransparency="true"' +
+                    'src="https://embed.spotify.com/?uri=spotify:' + encodeEntities(encodeURIComponent(spotifyUrl)) +
+                    '"></' + embedTag + '></div>';
+    			break;
+
         case 'twitter':
           html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
 
