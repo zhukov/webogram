@@ -1360,6 +1360,7 @@ div.im_message_video_thumb{position:relative}
 .im_message_insta_embed{padding-bottom:122%}
 .im_message_vine_embed{padding-bottom:100%}
 .im_message_soundcloud_embed{padding-bottom:56.25%}
+.im_message_spotify_embed{width:300px;height:80px}
 .im_message_media_embed iframe,.im_message_media_embed webview{position:absolute;top:0;left:0;width:100%;height:100%}
 .im_message_twitter_embed>blockquote{visibility:hidden}
 .im_message_gif_wrap{position:relative}
@@ -1435,6 +1436,7 @@ div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_message_fwd_date{padding:0}
 .im_message_text{word-wrap:break-word;line-height:150%}
+.im_message_mymention{background:#FFF8CC}
 .im_history_empty,.im_history_not_selected{visibility:hidden;text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
 .im_history_empty.vertical-aligned,.im_history_not_selected.vertical-aligned{visibility:visible}
 .im_history_to_bottom .im_history_empty,.im_history_to_bottom .im_history_not_selected{display:none}
