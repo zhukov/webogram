@@ -31,6 +31,17 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.4.2')">
+        <div class="md_modal_section_version">0.4.2</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Optimization for screens with smaller Y-resolutions.</li>
+            <li>Supported Spotify URL embeds.</li>
+            <li>Mentions of the current user in group chats are now highlighted.</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.4.1')">
         <div class="md_modal_section_version">0.4.1</div>
         <div class="md_modal_section_description changelog_version_changes">
