@@ -3862,7 +3862,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (match[3]) { // telegram.me links
         if (!options.noLinks) {
           var attr = '';
-          if (options.highlightUsername == match[3] &&
+          if (options.highlightUsername &&
+              options.highlightUsername.toLowerCase() == match[3].toLowerCase() &&
               match[2] == '@') {
             attr = 'class="im_message_mymention"';
           }
