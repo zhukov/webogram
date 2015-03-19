@@ -174,7 +174,7 @@ EmojiTooltip.prototype.onMouseEnter = function (triggerShow) {
     delete this.hideTimeout;
   }
   else if (triggerShow && !this.showTimeout) {
-    this.showTimeout = setTimeout(this.show.bind(this), 500);
+    this.showTimeout = setTimeout(this.show.bind(this), 200);
   }
 };
 
@@ -183,7 +183,7 @@ EmojiTooltip.prototype.onMouseLeave = function (triggerUnshow) {
     var self = this;
     this.hideTimeout = setTimeout(function () {
       self.hide();
-    }, 500);
+    }, 400);
   }
   else if (triggerUnshow && this.showTimeout) {
     clearTimeout(this.showTimeout);
