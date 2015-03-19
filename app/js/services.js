@@ -1239,16 +1239,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function processAffectedHistory (inputPeer, affectedHistory, method) {
-    if (!ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updatePts',
-          pts: affectedHistory.pts,
-          pts_count: affectedHistory.pts_count
-        }
-      })) {
-      return false;
-    }
+    ApiUpdatesManager.processUpdateMessage({
+      _: 'updateShort',
+      update: {
+        _: 'updatePts',
+        pts: affectedHistory.pts,
+        pts_count: affectedHistory.pts_count
+      }
+    });
     if (!affectedHistory.offset) {
       return $q.when();
     }
