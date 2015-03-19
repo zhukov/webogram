@@ -18,12 +18,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       contactsFillPromise,
       contactsList,
       contactsIndex = SearchIndexManager.createIndex(),
+      myID,
       serverTimeOffset = 0;
 
   Storage.get('server_time_offset').then(function (to) {
     if (to) {
       serverTimeOffset = to;
     }
+  });
+  MtpApiManager.getUserID().then(function (id) {
+    myID = id;
   });
 
   function fillContacts () {
@@ -169,6 +173,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return id;
     }
     return users[id] || {id: id, deleted: true, num: 1};
+  }
+
+  function getSelf() {
+    return getUser(myID);
   }
 
   function hasUser(id) {
@@ -424,6 +432,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiUsers: saveApiUsers,
     saveApiUser: saveApiUser,
     getUser: getUser,
+    getSelf: getSelf,
     getUserInput: getUserInput,
     setUserStatus: setUserStatus,
     forceUserOnline: forceUserOnline,
@@ -2031,6 +2040,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (!Config.Navigator.mobile) {
         options.extractUrlEmbed = true;
       }
+      if (message.flags & 16) {
+        var user = AppUsersManager.getSelf();
+        if (user) {
+          options.highlightUsername = user.username;
+        }
+      }
       message.richMessage = RichTextProcessor.wrapRichText(message.message, options);
       if (options.extractedUrlEmbed) {
         message.richUrlEmbed = options.extractedUrlEmbed;
@@ -2240,7 +2255,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     notification.title = RichTextProcessor.wrapPlainText(notification.title);
 
     notification.onclick = function () {
-      $rootScope.$broadcast('history_focus', {peerString: peerString});
+      $rootScope.$broadcast('history_focus', {
+        peerString: peerString,
+        messageID: message.flags & 16 ? message.id : 0,
+      });
     };
 
     notification.message = notificationMessage;
@@ -3843,9 +3861,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       if (match[3]) { // telegram.me links
         if (!options.noLinks) {
+          var attr = '';
+          if (options.highlightUsername == match[3] &&
+              match[2] == '@') {
+            attr = 'class="im_message_mymention"';
+          }
           html.push(
             match[1],
-            '<a href="#/im?p=',
+            '<a ' + attr + ' href="#/im?p=',
             encodeURIComponent('@' + match[3]),
             '">',
             encodeEntities(match[2] + match[3]),

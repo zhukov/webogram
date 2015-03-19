@@ -1844,6 +1844,11 @@ a.im_message_fwd_photo {
   word-wrap: break-word;
   line-height: 150%;
 }
+.im_message_mymention {
+  background: #FFF8CC;
+  /*border-bottom: 1px solid #FFE222;*/
+  /*font-weight: bold;*/
+}
 
 .im_history_not_selected,
 .im_history_empty {
