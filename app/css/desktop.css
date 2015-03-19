@@ -694,12 +694,12 @@ a.footer_link.active:active {
   margin: 6px 0 6px 14px;
 }
 .im_edit_panel_wrap {
-  padding: 0px 0 38px;
+  padding: 0px 0 43px;
   margin: 0 24px 0 12px;
 }
 .im_edit_panel_border {
   display: block;
-  margin: 0 0 47px 3px;
+  margin: 0 0 42px 3px;
   border-bottom: 1px solid #EEE;
 }
 .im_edit_cancel_link {
@@ -999,9 +999,6 @@ a.im_panel_peer_photo .peer_initials {
 
 
 
-
-
-
 .im_send_field_wrap {
   margin-bottom: 15px;
   position: relative;
@@ -1136,6 +1133,95 @@ a.im_panel_peer_photo .peer_initials {
   -ms-transform: translate3d(0,-2px,0) rotate(45deg);
   -o-transform: translate3d(0,-2px,0) rotate(45deg);
   transform: translate3d(0,-2px,0) rotate(45deg);
+}
+
+
+@media (max-height: 700px) {
+  a.im_panel_peer_photo,
+  a.im_panel_own_photo {
+    display: none;
+  }
+  .im_send_field_wrap {
+    margin-bottom: 0;
+  }
+  .composer_rich_textarea,
+  .composer_textarea {
+    min-height: 25px;
+    padding-right: 25px;
+  }
+  .composer_emoji_insert_btn {
+    top: 0;
+    right: 0px;
+    margin-top: -3px;
+  }
+  .composer_emoji_panel {
+    display: none;
+  }
+  .im_submit {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin: 0 0 0 15px;
+  }
+  .im_media_attach {
+    position: absolute;
+    top: -7px;
+    left: -43px;
+    width: 19px;
+    height: 24px;
+  }
+  .icon-camera {
+    display: inline-block;
+    width: 19px;
+    height: 23px;
+    vertical-align: text-top;
+    background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
+    background-size: 42px 1171px;
+    opacity: 0.8;
+  }
+  .is_1x .icon-camera {
+    background-image: url(../img/icons/IconsetW_1x.png);
+  }
+  .im_media_attach:hover .icon-camera,
+  .im_media_attach:active .icon-camera {
+    background-position: -12px -100px;
+    opacity: 1;
+  }
+  .im_attach {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 100%;
+    margin: 0;
+    margin-right: 45px;
+    margin-top: 1px;
+  }
+  .icon-emoji {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    vertical-align: text-top;
+    opacity: 1;
+    margin: 0;
+    background: url(../img/icons/IconsetW.png) -10px -771px no-repeat;
+    background-size: 42px 1171px;
+  }
+  .is_1x .icon-emoji {
+    background-image: url(../img/icons/IconsetW_1x.png);
+  }
+  .composer_emoji_insert_btn:active .icon-emoji,
+  .is_1x .composer_emoji_insert_btn:active .icon-emoji,
+  .composer_emoji_insert_btn.composer_emoji_insert_btn_on .icon-emoji,
+  .is_1x .composer_emoji_insert_btn.composer_emoji_insert_btn_on .icon-emoji {
+    background-position: -10px -803px;
+  }
+
+  .im_edit_panel_wrap {
+    padding-bottom: 8px;
+  }
+  .im_edit_panel_border {
+    margin-bottom: 7px;
+  }
 }
 
 /* Peer modals */
