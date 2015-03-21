@@ -7,6 +7,8 @@ var path = require('path');
 var http = require('http');
 var livereload = require('gulp-livereload');
 var st = require('st');
+var less = require('gulp-less');
+var runSequence = require('run-sequence');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -35,6 +37,14 @@ gulp.task('imagemin', function() {
   return gulp.src(['app/img/**/*', '!app/img/screenshot*', '!app/img/*.wav'])
     .pipe($.imagemin())
     .pipe(gulp.dest('dist/img'));
+});
+
+gulp.task('less', function () {
+  gulp.src('app/less/*.less')
+    .pipe(less({
+      paths: [path.join(__dirname, 'less', 'includes')]
+    }))
+    .pipe(gulp.dest('app/css'));
 });
 
 gulp.task('copy-images', function() {
@@ -115,7 +125,6 @@ gulp.task('update-version-comments', function() {
   .pipe(gulp.dest('app'));
 });
 
-
 gulp.task('enable-production', function() {
  return es.concat(
   gulp.src('app/**/*.html')
@@ -143,7 +152,6 @@ gulp.task('disable-production', function() {
 });
 
 gulp.task('add-appcache-manifest', function() {
-
   var sources = [
     './dist/**/*',
     '!dist/manifest.*',
@@ -221,6 +229,7 @@ gulp.task('watchhtml', function() {
 gulp.task('watch', ['server'], function() {
   livereload.listen({ basePath: 'app' });
   gulp.watch('app/css/*.css', ['watchcss']);
+  gulp.watch('app/less/*.less', ['less']);
   gulp.watch('app/partials/**/*.html', ['watchhtml']);
 });
 
@@ -230,18 +239,22 @@ gulp.task('server', function(done) {
   ).listen(8000, done);
 });
 
-
 gulp.task('clean', function() {
-  return gulp.src(['dist/*', 'app/js/templates.js', '!dist/.git']).pipe($.clean());
+  return gulp.src(['dist/*', 'app/js/templates.js', 'app/css/*', '!dist/.git']).pipe($.clean());
 });
 
 gulp.task('bump', ['update-version-manifests', 'update-version-config'], function () {
   gulp.start('update-version-comments');
 });
 
-gulp.task('build', ['usemin', 'copy', 'copy-locales', 'copy-images'], function () {
-  gulp.start('disable-production');
+gulp.task('build', function(callback) {
+  runSequence('less', 'usemin',
+    ['copy', 'copy-locales', 'copy-images'], function() {
+      gulp.start('disable-production');
+    }
+  );
 });
+
 gulp.task('package', ['cleanup-dist']);
 
 gulp.task('publish', ['build'], function() {

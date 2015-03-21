@@ -1,0 +1,76 @@
+@user_colors:   '#8365ab',
+                '#539e4f',
+                '#ae9661',
+                '#4979a3',
+                '#b7635d',
+                '#b3577a',
+                '#5397b4',
+                '#c07844';
+
+@user_bgcolors: '#cc90e2',
+                '#80d066',
+                '#ecd074',
+                '#6fb1e4',
+                '#e57979',
+                '#f98bae',
+                '#73cdd0',
+                '#fba76f';
+
+.generate_user(@arr, @isColor) {
+    .-(@i: 1) when (@i <= length(@arr)) {
+        @color: e(extract(@arr, @i));
+        & when (@isColor) {
+          &_color_@{i},
+          &_color_@{i}:hover {
+            color: @color;
+          }
+        }
+        & when not (@isColor) {
+          &_bgcolor_@{i} {
+            background: @color;
+          }
+        }
+        .-((@i + 1));
+    } .-;
+}
+
+.user-select(@argument: none) {
+  -webkit-user-select: @argument;
+  -moz-user-select: @argument;
+  -ms-user-select: @argument;
+  user-select: @argument;
+}
+
+.box-shadow(@arguments) {
+  -webkit-box-shadow: @arguments;
+  -moz-box-shadow: @arguments;
+  box-shadow: @arguments;
+}
+
+.transform(@arguments) {
+  -webkit-transform: @arguments;
+  -moz-transform: @arguments;
+  -o-transform: @arguments;
+  -ms-transform: @arguments;
+  transform: @arguments;
+}
+
+.box-sizing(@sizing: border-box) {
+  -ms-box-sizing: @sizing;
+  -moz-box-sizing: @sizing;
+  -webkit-box-sizing: @sizing;
+  box-sizing: @sizing;
+}
+
+.rounded(@radius: 2px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  border-radius: @radius;
+}
+
+.noTransition() {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
