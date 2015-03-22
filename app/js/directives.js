@@ -141,7 +141,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         applyUnreadAfter();
         deregisterUnreadAfter = $scope.$on('messages_unread_after', applyUnreadAfter);
       }
-      if ($scope.historyMessage.unread) {
+      if ($scope.historyMessage.unread && $scope.historyMessage.out) {
         element.addClass(unreadClass);
         var deregisterUnread = $scope.$on('messages_read', function () {
           if (!$scope.historyMessage.unread) {
