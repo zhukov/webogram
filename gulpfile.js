@@ -226,7 +226,7 @@ gulp.task('watchhtml', function() {
     .pipe(livereload());
 });
 
-gulp.task('watch', ['server'], function() {
+gulp.task('watch', ['server', 'less'], function() {
   livereload.listen({ basePath: 'app' });
   gulp.watch('app/css/*.css', ['watchcss']);
   gulp.watch('app/less/*.less', ['less']);
