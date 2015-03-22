@@ -3813,7 +3813,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var instagramRegex = /^https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
   var vineRegex = /^https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
   var twitterRegex = /^https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
-  var facebookRegex = /^https?:\/\/(?:www\.)?facebook\.com\/.+?\/posts\/\d+/i;
+  var facebookRegex = /^https?:\/\/(?:www\.|m\.)?facebook\.com\/(?:.+?\/posts\/\d+|(?:story\.php|permalink\.php)\?story_fbid=(\d+)(?:&substory_index=\d+)?&id=(\d+))/i;
   var gplusRegex = /^https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
   var soundcloudRegex = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
   var spotifyRegex = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
@@ -4057,6 +4057,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return ['twitter', embedUrlMatches[0]];
       }
       else if (embedUrlMatches = url.match(facebookRegex)) {
+        if (embedUrlMatches[2]!= undefined){
+          return ['facebook', "https://www.facebook.com/"+embedUrlMatches[2]+"/posts/"+embedUrlMatches[1]];
+        }
         return ['facebook', embedUrlMatches[0]];
       }
       // Sorry, GPlus widget has no `xfbml.render` like callback and is too wide.
