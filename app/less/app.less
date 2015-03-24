@@ -495,16 +495,12 @@ a {
 
     i {
       display: inline-block;
-      background: url(../img/icons/IconsetW.png) -15px -320px no-repeat;
-      background-size: 42px 1171px;
       width: 12px;
       height: 12px;
       margin: 21px;
       opacity: 0.8;
-
-      .is_1x & {
-        background-image: url(../img/icons/IconsetW_1x.png);
-      }
+      .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+      background-position: -15px -320px;
     }
   }
 
@@ -849,17 +845,19 @@ a.tg_radio_on:hover i.icon-radio {
   height: 30px;
   display: inline-block;
   vertical-align: top;
-  background: url(../img/icons/General.png) no-repeat -5px -10px;
-  background-size: 40px 778px;
   margin-right: 18px;
+
+  .image-2x('../img/icons/General.png', 40px, 778px);
+  background-position: -5px -10px;
 }
 .icon-tg-title {
   width: 63px;
   height: 16px;
   display: inline-block;
   vertical-align: middle;
-  background: url(../img/Telegram_2x.png) no-repeat 0 0;
-  background-size: 63px 16px;
+
+  .image-2x('../img/Telegram.png', 63px, 16px);
+  background-position: 0 0;
 }
 .login_head_submit_wrap,
 .login_head_submit_progress {
@@ -887,10 +885,11 @@ a.tg_radio_on:hover i.icon-radio {
   height: 12px;
   display: inline-block;
   vertical-align: middle;
-  background: url(../img/icons/General.png) no-repeat -18px -50px;
-  background-size: 40px 778px;
   margin-left: 12px;
   margin-top: -1px;
+
+  .image-2x('../img/icons/General.png', 40px, 778px);
+  background-position: -18px -50px;
 }
 
 .login_footer_wrap {
@@ -1033,20 +1032,17 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_search_field {
   font-size: 12px;
   line-height: normal;
-  background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 1171px;
   border: 1px solid #F2F2F2;
   border-radius: 2px;
   padding: 6px 20px 6px 30px;
   margin: 0 0 6px;
 
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -6px -205px;
+
   .im_dialogs_modal_col_wrap & {
     background-color: #fff;
     border-color: #d9dbde;
-  }
-
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
   }
 
   &:focus,
@@ -1080,12 +1076,8 @@ i.icon-search-clear {
   height: 13px;
   margin: 10px 0 0 11px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png) -15px -192px no-repeat;
-  background-size: 42px 1171px;
-
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -15px -192px;
 }
 
 .im_dialogs_tabs_wrap {
@@ -1298,12 +1290,8 @@ a.im_dialog_selected {
   margin-top: 7px;
   margin-left: 6px;
 
-  background: url(../img/icons/IconsetW.png) -17px -444px no-repeat;
-  background-size: 42px 1171px;
-
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -17px -444px;
 }
 
 .im_dialogs_empty_header {
@@ -1434,14 +1422,10 @@ div.im_message_video_thumb {
   margin-top: -21px;
   width: 42px;
   height: 42px;
-
-  background: url(../img/icons/IconsetW.png) 0 -590px no-repeat;
-  background-size: 42px 1171px;
   z-index: 1;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: 0 -590px;
 }
 
 .im_message_geopoint {
@@ -1464,12 +1448,8 @@ div.im_message_video_thumb {
   width: 15px;
   height: 19px;
 
-  background: url(../img/icons/IconsetW.png) -14px -389px no-repeat;
-  background-size: 42px 1171px;
-
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -14px -389px;
 }
 
 .im_message_media_embed {
@@ -1550,15 +1530,13 @@ div.im_message_video_thumb {
 .im_message_file_button_icon {
   display: inline-block;
   line-height: 0;
-  background: url(../img/icons/General.png) no-repeat -14px -509px;
-  background-size: 40px 778px;
   width: 12px;
   height: 18px;
   margin: 12px 15px;
 
-  .is_1x & {
-    background-image: url(../img/icons/General_1x.png);
-  }
+  .image-2x('../img/icons/General.png', 40px, 778px);
+  background-position: -14px -509px;
+
   .im_message_file_button_dl_doc & {
     background-position: -12px -561px;
     width: 16px;
@@ -1575,13 +1553,10 @@ div.im_message_video_thumb {
     display: block;
     width: 14px;
     height: 16px;
-    background: url(../img/icons/General.png) no-repeat -13px -611px;
-    background-size: 40px 778px;
     margin: 13px 16px;
 
-    .is_1x & {
-      background-image: url(../img/icons/General_1x.png);
-    }
+    .image-2x('../img/icons/General.png', 40px, 778px);
+    background-position: -13px -611px;
   }
 
   &,
@@ -2130,9 +2105,10 @@ img.img_fullsize {
   width: 22px;
   height: 22px;
   vertical-align: top;
-  background: url(../img/icons/General.png) no-repeat -9px -335px;
-  background-size: 40px 778px;
   opacity: 0.8;
+
+  .image-2x('../img/icons/General.png', 40px, 778px);
+  background-position: -9px -335px;
 }
 
 
@@ -2196,15 +2172,11 @@ img.img_fullsize {
   display: inline-block;
   width: 24px;
   height: 29px;
-  background: url(../img/icons/IconsetSmiles.png) no-repeat;
-  background-size: 42px 470px;
   cursor: pointer;
   opacity: 0.7;
   margin: 0 5px 0 4px;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetSmiles_1x.png);
-  }
+  .image-2x('../img/icons/IconsetSmiles.png', 42px, 470px);
 
   &.active {
     opacity: 1;
@@ -2586,8 +2558,9 @@ a.composer_emoji_btn {
   display: inline-block;
   width: 59px;
   height: 18px;
-  background: url(../img/icons/AboutLogos_2x.png) no-repeat 0 -5px;
-  background-size: 60px 136px;
+
+  .image-2x('../img/icons/AboutLogos.png', 60px, 136px);
+  background-position: 0 -5px;
 
   a:hover & {
     background-position: 0 -43px;
@@ -2599,18 +2572,12 @@ a.composer_emoji_btn {
   width: 20px;
   height: 15px;
   margin-top: 1px;
-  background: url(../img/icons/AboutLogos_2x.png) no-repeat 0 -81px;
-  background-size: 60px 136px;
+
+  .image-2x('../img/icons/AboutLogos.png', 60px, 136px);
+  background-position: 0 -81px;
 
   a:hover & {
     background-position: 0 -116px;
-  }
-}
-
-.is_1x {
-  .icon-github,
-  .icon-twitter {
-    background-image: url(../img/icons/AboutLogos_1x.png);
   }
 }
 
@@ -2623,16 +2590,13 @@ a.composer_emoji_btn {
 .contacts_modal_search_field {
   font-size: 12px;
   line-height: normal;
-  background: url(../img/icons/IconsetW.png) -6px -205px no-repeat;
-  background-size: 42px 1171px;
   border: 1px solid #d9dbde;
   border-radius: 2px;
   padding: 6px 15px 6px 30px;
   margin: 0;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -6px -205px;
 }
 
 a.contacts_modal_search_clear {
@@ -2764,13 +2728,9 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
   display: inline-block;
   width: 25px;
   height: 25px;
-  background: url(../img/icons/IconsetW.png) -9px -516px no-repeat;
-  background-size: 42px 1171px;
   opacity: 0.5;
-
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -9px -516px;
 }
 
 .contacts_modal_members_list {
@@ -2936,7 +2896,6 @@ h5 {
 .countries_modal_search_field {
   font-size: 12px;
   line-height: normal;
-  background: #F2F2F2 url(../img/icons/IconsetW.png) -6px -205px no-repeat;
   background-size: 42px 1171px;
   border: 1px solid #F2F2F2;
   border-radius: 3px;
@@ -2944,9 +2903,9 @@ h5 {
   margin-bottom: 0;
   margin: 0;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  background-color: #F2F2F2;
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -6px -205px;
 
   &:focus,
   &:active {
@@ -3068,12 +3027,8 @@ a.countries_modal_search_clear {
 }
 
 .telegram_modal_logo {
-  background: url(../img/Telegram72_2x.png) no-repeat 0 0;
-  background-size: 72px 72px;
-
-  .is_1x & {
-    background-image: url(../img/Telegram72.png);
-  }
+  .image-2x('../img/Telegram72.png', 72px, 72px);
+  background-position: 0 0;
 }
 
 .changelog {
@@ -3215,10 +3170,10 @@ a.countries_modal_search_clear {
     display: inline-block;
     width: 20px;
     height: 18px;
-    background: url(../img/icons/ProfileIcons_2x.png) 0 0 no-repeat;
-    background-size: 40px 360px;
-    background-position: -10px -164px;
     margin: 17px 0 0 16px;
+
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    background-position: -10px -164px;
   }
 
   &:hover &_camera,
@@ -3230,10 +3185,10 @@ a.countries_modal_search_clear {
     display: inline-block;
     width: 27px;
     height: 22px;
-    background: url(../img/icons/ProfileIcons_2x.png) 0 0 no-repeat;
-    background-size: 40px 360px;
-    background-position: -7px -280px;
     margin: 17px 0 0 13px;
+
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    background-position: -7px -280px;
   }
 
   &:hover &_twitter,
@@ -3245,21 +3200,15 @@ a.countries_modal_search_clear {
     display: inline-block;
     width: 20px;
     height: 20px;
-    background: url(../img/icons/ProfileIcons_2x.png) 0 0 no-repeat;
-    background-size: 40px 360px;
-    background-position: -10px -220px;
     margin: 18px 0 0 16px;
+
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    background-position: -10px -220px;
   }
 
   &:hover &_msg,
   &:active &_msg {
     background-position: -10px -250px;
-  }
-
-  .is_1x &_camera,
-  .is_1x &_twitter,
-  .is_1x &_msg {
-    background-image: url(../img/icons/ProfileIcons.png);
   }
 }
 
@@ -3297,13 +3246,10 @@ a.countries_modal_search_clear {
     display: inline-block;
     margin-left: -64px;
     margin-top: 5px;
-    background: url(../img/icons/ProfileIcons_2x.png) 0 0 no-repeat;
-    background-size: 40px 360px;
     position: absolute;
 
-    .is_1x & {
-      background-image: url(../img/icons/ProfileIcons.png);
-    }
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    background-position: 0 0;
 
     .md_modal_iconed_section_toggle & {
       margin-top: 8px;

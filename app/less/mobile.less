@@ -216,12 +216,8 @@ html {
   display: inline-block;
   width: 21px;
   height: 21px;
-  background: url(../img/icons/MobileIcons_2x.png) 0 0 no-repeat;
-  background-size: 21px 52px;
-
-  .is_1x & {
-    background-image: url(../img/icons/MobileIcons_1x.png);
-  }
+  .image-2x('../img/icons/MobileIcons.png', 21px, 52px);
+  background-position: 0 0;
 }
 
 .tg_page_head .navbar_peer_not_selected .navbar-search-wrap,
@@ -251,14 +247,11 @@ html {
   width: 11px;
   height: 19px;
   vertical-align: text-top;
-
-  background: url(../img/icons/IconsetW.png) -15px -835px no-repeat;
-  background-size: 42px 1171px;
   opacity: 0.8;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -15px -835px;
 }
 
 .tg_page_head {
@@ -893,28 +886,18 @@ a.im_message_from_photo {
     opacity: 1;
     margin-top: 6px;
     background: none;
-
-    .is_1x & {
-      background: none;
-    }
   }
 }
 
 .im_message_unread {
   .icon-message-status-tick {
-    &,
-    .is_1x & {
-      background: #43A4DB;
-    }
+    background: #43A4DB;
   }
 }
 
 .im_message_pending {
   .icon-message-status-tick {
-    &,
-    .is_1x & {
-      background: #9fd2ee;
-    }
+    background: #9fd2ee;
   }
 }
 
@@ -1302,14 +1285,11 @@ a.im_message_fwd_author {
   &,
   &:active,
   &:hover {
-    background: url(../img/icons/IconsetW.png) 2px -860px no-repeat;
-    background-size: 42px 1171px;
     color: transparent;
     box-shadow: none;
-  }
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
+    .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+    background-position: 2px -860px;
   }
 }
 
@@ -1318,13 +1298,10 @@ a.im_message_fwd_author {
   width: 19px;
   height: 23px;
   vertical-align: text-top;
-  background: url(../img/icons/IconsetW.png) -12px -68px no-repeat;
-  background-size: 42px 1171px;
   opacity: 0.8;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -12px -68px;
 }
 
 .im_attach {
@@ -1365,12 +1342,9 @@ a.im_message_fwd_author {
   vertical-align: text-top;
   opacity: 1;
   margin: 0;
-  background: url(../img/icons/IconsetW.png) -10px -771px no-repeat;
-  background-size: 42px 1171px;
 
-  .is_1x & {
-    background-image: url(../img/icons/IconsetW_1x.png);
-  }
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -10px -771px;
 }
 
 .composer_emoji_insert_btn {
@@ -1647,21 +1621,16 @@ a.media_modal_date:hover {
   }
 
   i {
-    background: url(../img/icons/PhotoIcons.png) 0 0 no-repeat;
-    background-size: 40px 200px;
     display: block;
     opacity: 0.8;
+
+    .image-2x('../img/icons/PhotoIcons.png', 40px, 200px);
+    background-position: 0 0;
   }
 
   &:active {
     i {
       opacity: 1;
-    }
-  }
-
-  .is_1x & {
-    i {
-      background-image: url(../img/icons/PhotoIcons_1x.png);
     }
   }
 
