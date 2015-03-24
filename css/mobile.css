@@ -159,12 +159,12 @@ html {
   display: inline-block;
   width: 21px;
   height: 21px;
-  background-image: url(../img/icons/MobileIcons.png?1);
+  background-image: url(../img/icons/MobileIcons.png);
   background-repeat: no-repeat;
   background-position: 0 0;
 }
 .is_2x .icon-search {
-  background-image: url(../img/icons/MobileIcons_2x.png?1);
+  background-image: url(../img/icons/MobileIcons_2x.png);
   background-size: 21px 52px;
 }
 .tg_page_head .navbar_peer_not_selected .navbar-search-wrap,
@@ -189,12 +189,12 @@ html {
   height: 19px;
   vertical-align: text-top;
   opacity: 0.8;
-  background-image: url(../img/icons/IconsetW.png?1);
+  background-image: url(../img/icons/IconsetW.png);
   background-repeat: no-repeat;
   background-position: -15px -835px;
 }
 .is_2x .icon-back {
-  background-image: url(../img/icons/IconsetW_2x.png?1);
+  background-image: url(../img/icons/IconsetW_2x.png);
   background-size: 42px 1171px;
 }
 .tg_page_head .navbar-quick-nav a:active .icon-back {
@@ -999,14 +999,14 @@ a.mobile_modal_action .tg_checkbox_label {
 .im_submit:hover {
   color: transparent;
   box-shadow: none;
-  background-image: url(../img/icons/IconsetW.png?1);
+  background-image: url(../img/icons/IconsetW.png);
   background-repeat: no-repeat;
   background-position: 2px -860px;
 }
 .is_2x .im_submit,
 .is_2x .im_submit:active,
 .is_2x .im_submit:hover {
-  background-image: url(../img/icons/IconsetW_2x.png?1);
+  background-image: url(../img/icons/IconsetW_2x.png);
   background-size: 42px 1171px;
 }
 .icon-paperclip {
@@ -1015,12 +1015,12 @@ a.mobile_modal_action .tg_checkbox_label {
   height: 23px;
   vertical-align: text-top;
   opacity: 0.8;
-  background-image: url(../img/icons/IconsetW.png?1);
+  background-image: url(../img/icons/IconsetW.png);
   background-repeat: no-repeat;
   background-position: -12px -68px;
 }
 .is_2x .icon-paperclip {
-  background-image: url(../img/icons/IconsetW_2x.png?1);
+  background-image: url(../img/icons/IconsetW_2x.png);
   background-size: 42px 1171px;
 }
 .im_attach {
@@ -1053,12 +1053,12 @@ a.mobile_modal_action .tg_checkbox_label {
   vertical-align: text-top;
   opacity: 1;
   margin: 0;
-  background-image: url(../img/icons/IconsetW.png?1);
+  background-image: url(../img/icons/IconsetW.png);
   background-repeat: no-repeat;
   background-position: -10px -771px;
 }
 .is_2x .icon-emoji {
-  background-image: url(../img/icons/IconsetW_2x.png?1);
+  background-image: url(../img/icons/IconsetW_2x.png);
   background-size: 42px 1171px;
 }
 .composer_emoji_insert_btn {
@@ -1273,12 +1273,12 @@ a.media_modal_date:hover {
 .media_modal_action_btn i {
   display: block;
   opacity: 0.8;
-  background-image: url(../img/icons/PhotoIcons.png?1);
+  background-image: url(../img/icons/PhotoIcons.png);
   background-repeat: no-repeat;
   background-position: 0 0;
 }
 .is_2x .media_modal_action_btn i {
-  background-image: url(../img/icons/PhotoIcons_2x.png?1);
+  background-image: url(../img/icons/PhotoIcons_2x.png);
   background-size: 40px 200px;
 }
 .media_modal_action_btn:active i {

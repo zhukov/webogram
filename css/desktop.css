@@ -174,12 +174,12 @@
   display: inline-block;
   vertical-align: top;
   margin-top: 3px;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -10px -111px;
 }
 .is_2x .icon-new-group {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .icon-contacts {
@@ -189,12 +189,12 @@
   margin-top: 2px;
   display: inline-block;
   vertical-align: top;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -11px -135px;
 }
 .is_2x .icon-contacts {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .icon-settings {
@@ -204,12 +204,12 @@
   margin-top: 1px;
   display: inline-block;
   vertical-align: top;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -10px -163px;
 }
 .is_2x .icon-settings {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .icon-faq {
@@ -219,12 +219,12 @@
   margin-top: 1px;
   display: inline-block;
   vertical-align: top;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -10px -637px;
 }
 .is_2x .icon-faq {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .icon-about {
@@ -233,12 +233,12 @@
   margin-right: 37px;
   display: inline-block;
   vertical-align: top;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -10px -193px;
 }
 .is_2x .icon-about {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .tg_head_connecting_text {
@@ -330,7 +330,7 @@
   display: inline-block;
   margin-right: 12px;
   vertical-align: top;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: 0 0;
 }
@@ -338,7 +338,7 @@
 .is_2x .icon-filter-video,
 .is_2x .icon-filter-documents,
 .is_2x .icon-filter-audio {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .icon-filter-photos {
@@ -768,12 +768,12 @@ a.footer_link.active:active {
   width: 26px;
   height: 26px;
   margin: 16px 0 0 40px;
-  background-image: url(../img/icons/IconsetW.png?1);
+  background-image: url(../img/icons/IconsetW.png);
   background-repeat: no-repeat;
   background-position: -9px -516px;
 }
 .is_2x .icon-select-tick {
-  background-image: url(../img/icons/IconsetW_2x.png?1);
+  background-image: url(../img/icons/IconsetW_2x.png);
   background-size: 42px 1171px;
 }
 @media (min-width: 1024px) {
@@ -851,24 +851,24 @@ a.footer_link.active:active {
     height: 10px;
     top: 2px;
     position: relative;
-    background-image: url(../img/icons/Checks2.png?1);
+    background-image: url(../img/icons/Checks2.png);
     background-repeat: no-repeat;
     background-position: 0 0;
   }
   .is_2x .im_message_out .icon-message-status-tick {
-    background-image: url(../img/icons/Checks2_2x.png?1);
+    background-image: url(../img/icons/Checks2_2x.png);
     background-size: 16px 10px;
   }
   .im_message_pending .icon-message-status-tick {
     display: none;
   }
   .im_message_unread .icon-message-status-tick {
-    background-image: url(../img/icons/Checks1.png?1);
+    background-image: url(../img/icons/Checks1.png);
     background-repeat: no-repeat;
     background-position: 0 0;
   }
   .is_2x .im_message_unread .icon-message-status-tick {
-    background-image: url(../img/icons/Checks1_2x.png?1);
+    background-image: url(../img/icons/Checks1_2x.png);
     background-size: 16px 10px;
   }
   .im_message_date {
@@ -971,12 +971,12 @@ a.im_panel_peer_photo .peer_initials {
   vertical-align: top;
   opacity: 0.8;
   margin: 0;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -11px -455px;
 }
 .is_2x .icon-paperclip {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .im_attach {
@@ -1013,12 +1013,12 @@ a.im_panel_peer_photo .peer_initials {
   height: 18px;
   vertical-align: top;
   opacity: 0.8;
-  background-image: url(../img/icons/General.png?1);
+  background-image: url(../img/icons/General.png);
   background-repeat: no-repeat;
   background-position: -10px -399px;
 }
 .is_2x .icon-camera {
-  background-image: url(../img/icons/General_2x.png?1);
+  background-image: url(../img/icons/General_2x.png);
   background-size: 40px 778px;
 }
 .im_media_attach:hover .icon-camera {
@@ -1111,12 +1111,12 @@ a.im_panel_peer_photo .peer_initials {
     vertical-align: text-top;
     opacity: 0.8;
     margin-top: -1px;
-    background-image: url(../img/icons/IconsetW.png?1);
+    background-image: url(../img/icons/IconsetW.png);
     background-repeat: no-repeat;
     background-position: -12px -68px;
   }
   .is_2x .icon-camera {
-    background-image: url(../img/icons/IconsetW_2x.png?1);
+    background-image: url(../img/icons/IconsetW_2x.png);
     background-size: 42px 1171px;
   }
   .im_media_attach:hover .icon-camera,
@@ -1140,12 +1140,12 @@ a.im_panel_peer_photo .peer_initials {
     vertical-align: text-top;
     opacity: 1;
     margin: 0;
-    background-image: url(../img/icons/IconsetW.png?1);
+    background-image: url(../img/icons/IconsetW.png);
     background-repeat: no-repeat;
     background-position: -10px -771px;
   }
   .is_2x .icon-emoji {
-    background-image: url(../img/icons/IconsetW_2x.png?1);
+    background-image: url(../img/icons/IconsetW_2x.png);
     background-size: 42px 1171px;
   }
   .composer_emoji_insert_btn:active .icon-emoji,
@@ -1607,12 +1607,12 @@ div.im_dialog_photo .peer_initials {
   -moz-transition: .2s;
   -o-transition: .2s;
   transition: .2s;
-  background-image: url(../img/icons/PhotoIcons.png?1);
+  background-image: url(../img/icons/PhotoIcons.png);
   background-repeat: no-repeat;
   background-position: -10px -10px;
 }
 .is_2x .modal_close {
-  background-image: url(../img/icons/PhotoIcons_2x.png?1);
+  background-image: url(../img/icons/PhotoIcons_2x.png);
   background-size: 40px 200px;
 }
 .modal_close_wrap {
@@ -1657,13 +1657,13 @@ div.im_dialog_photo .peer_initials {
   -moz-transition: .2s;
   -o-transition: .2s;
   transition: .2s;
-  background-image: url(../img/icons/PhotoIcons.png?1);
+  background-image: url(../img/icons/PhotoIcons.png);
   background-repeat: no-repeat;
   background-position: -12px -41px;
 }
 .is_2x .modal_prev,
 .is_2x .modal_next {
-  background-image: url(../img/icons/PhotoIcons_2x.png?1);
+  background-image: url(../img/icons/PhotoIcons_2x.png);
   background-size: 40px 200px;
 }
 .modal_next {
@@ -1791,12 +1791,12 @@ div.media_modal_date {
 .media_modal_action_btn i {
   display: block;
   opacity: 0.5;
-  background-image: url(../img/icons/PhotoIcons.png?1);
+  background-image: url(../img/icons/PhotoIcons.png);
   background-repeat: no-repeat;
   background-position: 0 0;
 }
 .is_2x .media_modal_action_btn i {
-  background-image: url(../img/icons/PhotoIcons_2x.png?1);
+  background-image: url(../img/icons/PhotoIcons_2x.png);
   background-size: 40px 200px;
 }
 .media_modal_action_btn:hover i {
