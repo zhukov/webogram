@@ -1833,7 +1833,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var peerID = pendingData[0],
           tempID = pendingData[1],
           historyStorage = historiesStorage[peerID],
-          i;
+          pos = historyStorage.pending.indexOf(tempID);
 
       ApiUpdatesManager.processUpdateMessage({
         _: 'updateShort',
@@ -1843,16 +1843,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       });
 
-      for (i = 0; i < historyStorage.pending.length; i++) {
-        if (historyStorage.pending[i] == tempID) {
-          historyStorage.pending.splice(i, 1);
-          break;
-        }
+      if (pos != -1) {
+        historyStorage.pending.splice(pos, 1);
       }
 
       delete messagesForHistory[tempID];
       delete messagesStorage[tempID];
-
 
       return true;
     }
@@ -1868,17 +1864,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var peerID = pendingData[0],
           tempID = pendingData[1],
           historyStorage = historiesStorage[peerID],
-          index = false,
-          message = false,
-          historyMessage = false,
-          i;
+          message,
+          historyMessage;
 
       // console.log('pending', randomID, historyStorage.pending);
-      for (i = 0; i < historyStorage.pending.length; i++) {
-        if (historyStorage.pending[i] == tempID) {
-          historyStorage.pending.splice(i, 1);
-          break;
-        }
+      var pos = historyStorage.pending.indexOf(tempID);
+      if (pos != -1) {
+        historyStorage.pending.splice(pos, 1);
       }
 
       if (message = messagesStorage[tempID]) {
@@ -2315,17 +2307,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             historyStorage = historiesStorage[peerID];
 
         if (historyStorage !== undefined) {
-          var topMsgID = historiesStorage[peerID].history[0];
           if (historiesStorage[peerID].history.indexOf(message.id) != -1) {
             return false;
           }
-          else {
-            historyStorage.history.unshift(message.id);
-            if (message.id > 0 && message.id < topMsgID || true) {
-              historyStorage.history.sort(function (a, b) {
-                return b - a;
-              });
-            }
+          var topMsgID = historiesStorage[peerID].history[0];
+          historyStorage.history.unshift(message.id);
+          if (message.id > 0 && message.id < topMsgID) {
+            historyStorage.history.sort(function (a, b) {
+              return b - a;
+            });
           }
         } else {
           historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};

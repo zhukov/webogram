@@ -1165,8 +1165,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
 
       $scope.state.mayBeHasMore = true;
+      console.log(dT(), 'start load history', $scope.curDialog);
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
+        console.log(dT(), 'history loaded', historyResult);
 
         var fetchedLength = historyResult.history.length;
 
