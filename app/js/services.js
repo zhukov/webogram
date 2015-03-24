@@ -976,6 +976,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       historyStorage.count = historyResult.count || historyResult.messages.length;
 
       var offset = 0;
+      if (!maxID && historyResult.messages.length) {
+        maxID = historyResult.messages[0].id + 1;
+      }
       if (maxID > 0) {
         for (offset = 0; offset < historyStorage.history.length; offset++) {
           if (maxID > historyStorage.history[offset]) {
@@ -2328,6 +2331,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         } else {
           historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};
         }
+        console.log('upd', historyStorage.history);
 
         saveMessages([message]);
 
