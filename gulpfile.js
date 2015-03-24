@@ -248,10 +248,11 @@ gulp.task('bump', ['update-version-manifests', 'update-version-config'], functio
 });
 
 gulp.task('build', function(callback) {
-  runSequence('less', 'usemin',
-    ['copy', 'copy-locales', 'copy-images'], function() {
-      gulp.start('disable-production');
-    }
+  runSequence(
+    'less',
+    'usemin',
+    ['copy', 'copy-locales', 'copy-images', 'disable-production'],
+    callback
   );
 });
 
