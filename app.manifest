@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Thu Mar 19 2015 21:52:31 GMT+0300 (MSK)
+# Time: Tue Mar 24 2015 22:18:29 GMT+0300 (MSK)
 
 
 CACHE:
@@ -26,22 +26,22 @@ js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
 img/changelog/card_wecandoit.png
-img/icons/AboutLogos_1x.png
+img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
-img/icons/Checks1_1x.png
+img/icons/Checks1.png
 img/icons/Checks1_2x.png
-img/icons/Checks2_1x.png
+img/icons/Checks2.png
 img/icons/Checks2_2x.png
 img/icons/General.png
-img/icons/General_1x.png
+img/icons/General_2x.png
 img/icons/IconsetSmiles.png
-img/icons/IconsetSmiles_1x.png
+img/icons/IconsetSmiles_2x.png
 img/icons/IconsetW.png
-img/icons/IconsetW_1x.png
-img/icons/MobileIcons_1x.png
+img/icons/IconsetW_2x.png
+img/icons/MobileIcons.png
 img/icons/MobileIcons_2x.png
 img/icons/PhotoIcons.png
-img/icons/PhotoIcons_1x.png
+img/icons/PhotoIcons_2x.png
 img/icons/ProfileIcons.png
 img/icons/ProfileIcons_2x.png
 img/placeholders/DialogListAvatarSystem@2x.png
