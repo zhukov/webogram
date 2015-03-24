@@ -104,10 +104,10 @@
 .image-2x(@image, @width, @height, @repeat: no-repeat) {
   @filename  : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[1]`;
   @extension : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[2]`;
-  background-image: ~`"url(@{filename}.@{extension}?1)"`;
+  background-image: ~`"url(@{filename}.@{extension})"`;
   background-repeat: @repeat;
   .is_2x & {
-    background-image: ~`"url(@{filename}_2x.@{extension}?1)"`;
+    background-image: ~`"url(@{filename}_2x.@{extension})"`;
     background-size: @width @height;
   }
 }
