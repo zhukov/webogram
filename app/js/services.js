@@ -1006,16 +1006,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         offset = 0,
         offsetNotFound = false,
         unreadOffset = false,
-        unreadSkip = false,
-        resultPending = [];
+        unreadSkip = false;
 
     prerendered = prerendered ? Math.min(50, prerendered) : 0;
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
-    }
-    else if (!maxID && historyStorage.pending.length) {
-      resultPending = historyStorage.pending.slice();
     }
 
     if (!limit && !maxID) {
@@ -1056,9 +1052,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       } else {
         limit = limit || (offset ? 20 : (prerendered || 5));
       }
+      var history = historyStorage.history.slice(offset, offset + limit);
+      if (!maxID && historyStorage.pending.length) {
+        history = historyStorage.pending.slice().concat(history);
+      }
       return $q.when({
         count: historyStorage.count,
-        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
+        history: history,
         unreadOffset: unreadOffset,
         unreadSkip: unreadSkip
       });
@@ -1082,10 +1082,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         angular.forEach(historyResult.messages, function (message) {
           history.push(message.id);
         });
+        if (!maxID && historyStorage.pending.length) {
+          history = historyStorage.pending.slice().concat(history);
+        }
 
         return {
           count: historyStorage.count,
-          history: resultPending.concat(history),
+          history: history,
           unreadOffset: unreadOffset,
           unreadSkip: unreadSkip
         };
@@ -1102,9 +1105,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
 
+      var history = historyStorage.history.slice(offset, offset + limit);
+      if (!maxID && historyStorage.pending.length) {
+        history = historyStorage.pending.slice().concat(history);
+      }
+
       return {
         count: historyStorage.count,
-        history: resultPending.concat(historyStorage.history.slice(offset, offset + limit)),
+        history: history,
         unreadOffset: unreadOffset,
         unreadSkip: unreadSkip
       };
