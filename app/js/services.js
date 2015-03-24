@@ -2331,7 +2331,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         } else {
           historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};
         }
-        console.log('upd', historyStorage.history);
 
         saveMessages([message]);
 
