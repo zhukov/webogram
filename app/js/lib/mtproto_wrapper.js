@@ -556,7 +556,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
     var totalParts = Math.ceil(fileSize / partSize);
 
-    if (totalParts > 1500) {
+    if (totalParts > 3000) {
       return $q.reject({type: 'FILE_TOO_BIG'});
     }
 
