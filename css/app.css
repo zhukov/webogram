@@ -1285,7 +1285,7 @@ a.tg_radio_on:hover i.icon-radio{background-color:#5785aa}
 .im_dialogs_import_phonebook{margin-top:10px}
 .im_dialogs_panel{padding:12px 12px 6px;position:relative}
 .im_dialogs_search{position:relative}
-.im_dialogs_search_field{font-size:12px;line-height:normal;border:1px solid #F2F2F2;border-radius:2px;padding:6px 20px 6px 30px;margin:0 0 6px;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
+.im_dialogs_search_field{font-size:12px;line-height:normal;border:1px solid #F2F2F2;border-radius:2px;padding:6px 20px 6px 30px;margin:0 0 6px;background-color:#F2F2F2;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
 .is_2x .im_dialogs_search_field{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .im_dialogs_modal_col_wrap .im_dialogs_search_field{background-color:#fff;border-color:#d9dbde}
 .im_dialogs_search_field:active,.im_dialogs_search_field:focus{background-color:#fff}

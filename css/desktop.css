@@ -1160,6 +1160,10 @@ a.im_panel_peer_photo .peer_initials {
   .im_edit_panel_border {
     margin-bottom: 7px;
   }
+  .im_send_dropbox_wrap {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 }
 /* Peer modals */
 .user_modal_window .modal-dialog {
