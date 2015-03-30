@@ -1943,7 +1943,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return messagesForDialogs[msgID];
     }
 
-    var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
+    var message = angular.copy(messagesStorage[msgID]);
+
+    if (!message || !message.to_id) {
+      return message;
+    }
 
     if (message.chatID = message.to_id.chat_id) {
       message.peerID = -message.chatID;

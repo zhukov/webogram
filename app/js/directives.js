@@ -356,6 +356,10 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function updateMessage($scope, element) {
       var message = $scope.replyMessage;
+      if (!message || message.deleted || !message.to_id) {
+        $(element).remove();
+        return;
+      }
       var thumbWidth = 42;
       var thumbHeight = 42;
       var thumbPhotoSize;
