@@ -999,6 +999,7 @@ a.mobile_modal_action .tg_checkbox_label {
 .im_submit:hover {
   color: transparent;
   box-shadow: none;
+  background-color: inherit;
   background-image: url(../img/icons/IconsetW.png);
   background-repeat: no-repeat;
   background-position: 2px -860px;

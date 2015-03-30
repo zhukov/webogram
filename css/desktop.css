@@ -853,6 +853,7 @@ a.footer_link.active:active {
     position: relative;
     background-image: url(../img/icons/Checks2.png);
     background-repeat: no-repeat;
+    background-size: 16px 10px;
     background-position: 0 0;
   }
   .is_2x .im_message_out .icon-message-status-tick {
@@ -865,6 +866,7 @@ a.footer_link.active:active {
   .im_message_unread .icon-message-status-tick {
     background-image: url(../img/icons/Checks1.png);
     background-repeat: no-repeat;
+    background-size: 16px 10px;
     background-position: 0 0;
   }
   .is_2x .im_message_unread .icon-message-status-tick {

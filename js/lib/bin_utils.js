@@ -191,8 +191,21 @@ function bytesFromWords (wordArray) {
 function bytesFromBigInt (bigInt, len) {
   var bytes = bigInt.toByteArray();
 
-  while (!bytes[0] && (!len || bytes.length > len)) {
-    bytes = bytes.slice(1);
+  if (len && bytes.length < len) {
+    var padding = [];
+    for (var i = 0, needPadding = len - bytes.length; i < needPadding; i++) {
+      padding[i] = 0;
+    }
+    if (bytes instanceof ArrayBuffer) {
+      bytes = bufferConcat(padding, bytes);
+    } else {
+      bytes = padding.concat(bytes);
+    }
+  }
+  else {
+    while (!bytes[0] && (!len || bytes.length > len)) {
+      bytes = bytes.slice(1);
+    }
   }
 
   return bytes;
@@ -320,13 +333,19 @@ function rsaEncrypt (publicKey, bytes) {
   return encryptedBytes;
 }
 
-function addPadding(bytes, blockSize) {
+function addPadding(bytes, blockSize, zeroes) {
   blockSize = blockSize || 16;
   var len = bytes.byteLength || bytes.length;
   var needPadding = blockSize - (len % blockSize);
   if (needPadding > 0 && needPadding < blockSize) {
     var padding = new Array(needPadding);
-    (new SecureRandom()).nextBytes(padding);
+    if (zeroes) {
+      for (var i = 0; i < needPadding; i++) {
+        padding[i] = 0
+      }
+    } else {
+      (new SecureRandom()).nextBytes(padding);
+    }
 
     if (bytes instanceof ArrayBuffer) {
       bytes = bufferConcat(bytes, padding);
@@ -383,7 +402,7 @@ function nextRandomInt (maxValue) {
 };
 
 function pqPrimeFactorization (pqBytes) {
-  var what = new BigInteger(pqBytes), 
+  var what = new BigInteger(pqBytes),
       result = false;
 
   // console.log(dT(), 'PQ start', pqBytes, what.toString(16), what.bitLength());
@@ -635,5 +654,5 @@ function bytesModPow (x, y, m) {
     console.error('mod pow error', e);
   }
 
-  return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)));
+  return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)), 256);
 }
