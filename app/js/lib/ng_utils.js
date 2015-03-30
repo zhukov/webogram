@@ -805,6 +805,21 @@ angular.module('izhukov.utils', [])
 
   var toPromise, started = false;
 
+  var hidden = 'hidden';
+  var visibilityChange = 'visibilitychange';
+  if (typeof document.hidden !== 'undefined') {
+    // default
+  } else if (typeof document.mozHidden !== 'undefined') {
+    hidden = 'mozHidden';
+    visibilityChange = 'mozvisibilitychange';
+  } else if (typeof document.msHidden !== 'undefined') {
+    hidden = 'msHidden';
+    visibilityChange = 'msvisibilitychange';
+  } else if (typeof document.webkitHidden !== 'undefined') {
+    hidden = 'webkitHidden';
+    visibilityChange = 'webkitvisibilitychange';
+  }
+
   return {
     start: start
   };
@@ -812,7 +827,7 @@ angular.module('izhukov.utils', [])
   function start () {
     if (!started) {
       started = true;
-      $($window).on('blur focus keydown mousedown touchstart', onEvent);
+      $($window).on(visibilityChange + ' blur focus keydown mousedown touchstart', onEvent);
 
       setTimeout(function () {
         onEvent({type: 'blur'});
@@ -829,7 +844,11 @@ angular.module('izhukov.utils', [])
       }
       $($window).off('mousemove', onEvent);
     }
+
     var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
+    if (hidden && document[hidden]) {
+      isIDLE = true;
+    }
 
     $timeout.cancel(toPromise);
     if (!isIDLE) {
