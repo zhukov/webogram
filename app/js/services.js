@@ -3793,22 +3793,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   // Based on Regular Expression for URL validation by Diego Perini
   var urlRegex =  "((?:https?|ftp)://|mailto:)?" +
     // user:pass authentication
-    "(?:\\S+(?::\\S*)?@)?" +
+    "(?:\\S{1,64}(?::\\S{0,64})?@)?" +
     "(?:" +
       // sindresorhus/ip-regex
       "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}" +
     "|" +
       // host name
-      "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[" + regexAlphaChars + "0-9]+)" +
+      "[" + regexAlphaChars + "0-9][" + regexAlphaChars + "0-9\-]{0,64}" +
       // domain name
-      "(?:\\.(?:[" + regexAlphaChars + "]-*)*[" + regexAlphaChars + "0-9]+)*" +
+      "(?:\\.[" + regexAlphaChars + "0-9][" + regexAlphaChars + "0-9\-]{1,64}){0,10}" +
+
       // TLD identifier
       "(?:\\.(xn--[0-9a-z]{2,16}|[" + regexAlphaChars + "]{2,24}))" +
     ")" +
     // port number
     "(?::\\d{2,5})?" +
     // resource path
-    "(?:/(?:\\S*[^\\s.;,(\\[\\]{}<>\"'])?)?";
+    "(?:/(?:\\S{0,255}[^\\s.;,(\\[\\]{}<>\"'])?)?";
 
   var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiRegex + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,64})', 'i');
 
