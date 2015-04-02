@@ -457,6 +457,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_contact')
     };
   })
+  .directive('myMessageWebpage', function() {
+    return {
+      scope: {
+        'webpage': '=myMessageWebpage'
+      },
+      templateUrl: templateUrl('message_attach_webpage')
+    };
+  })
   .directive('myMessagePending', function() {
     return {
       templateUrl: templateUrl('message_attach_pending')

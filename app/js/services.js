@@ -801,6 +801,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var pendingByRandomID = {};
   var pendingByMessageID = {};
   var pendingAfterMsgs = {};
+  var pendingWebPages = {};
   var sendFilePromise = $q.when();
   var tempID = -1;
 
@@ -1396,6 +1397,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           case 'messageMediaAudio':
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
+          case 'messageMediaWebPage':
+            var webpage = apiMessage.media.webpage;
+            if (webpage.photo && webpage.photo._ === 'photo') {
+              AppPhotosManager.savePhoto(webpage.photo);
+            } else {
+              delete webpage.photo;
+            }
+            if (pendingWebPages[webpage.id] === undefined) {
+              pendingWebPages[webpage.id] = {};
+            }
+            pendingWebPages[webpage.id][apiMessage.id] = true;
+            break;
         }
       }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
@@ -1472,6 +1485,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }, sentRequestOptions).then(function (sentMessage) {
           message.date = sentMessage.date;
           message.id = sentMessage.id;
+          message.media = sentMessage.media;
 
           ApiUpdatesManager.processUpdateMessage({
             _: 'updates',
@@ -2012,6 +2026,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             {noLinks: true, noLinebreaks: true}
           );
           break;
+
+        case 'messageMediaWebPage':
+          if (message.media.webpage.photo) {
+            message.media.webpage.photo = AppPhotosManager.wrapForHistory(message.media.webpage.photo.id, {website: true});
+          }
+          break;
       }
     }
     else if (message.action) {
@@ -2534,6 +2554,32 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
         });
         break;
+
+      case 'updateWebPage':
+        console.log('webpage update', update);
+        var webpage = update.webpage;
+        if (pendingWebPages[webpage.id] !== undefined) {
+          var message, historyMessage;
+          angular.forEach(pendingWebPages[webpage.id], function (t, msgID) {
+            if (message = messagesStorage[msgID]) {
+              message.media = {
+                _: 'messageMediaWebPage',
+                webpage: webpage
+              };
+            }
+            if (historyMessage = messagesForHistory[msgID]) {
+              if (webpage.photo) {
+                AppPhotosManager.savePhoto(webpage.photo);
+                webpage.photo = AppPhotosManager.wrapForHistory(webpage.photo.id, {website: true});
+              }
+              historyMessage.media = {
+                _: 'messageMediaWebPage',
+                webpage: webpage
+              };
+            }
+          });
+        }
+        break;
     }
   });
 
@@ -2651,10 +2697,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return photos[photoID] || {_: 'photoEmpty'};
   }
 
-  function wrapForHistory (photoID) {
+  function wrapForHistory (photoID, options) {
+    options = options || {};
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = Math.min(windowW - 80, Config.Mobile ? 210 : 260),
-        height = Math.min(windowH - 100, Config.Mobile ? 210 : 260),
+        width = options.website ? 100 : Math.min(windowW - 80, Config.Mobile ? 210 : 260),
+        height = options.website ? 100 : Math.min(windowH - 100, Config.Mobile ? 210 : 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',

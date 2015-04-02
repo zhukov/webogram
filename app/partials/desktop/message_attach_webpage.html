@@ -1,0 +1,21 @@
+<div class="im_message_document clearfix" ng-class="{im_message_document_thumbed: !!webpage.photo}" ng-if="webpage._ == 'webPage'">
+
+  <a ng-if="::webpage.photo" ng-click="docOpen()">
+    <div class="im_message_document_thumb_wrap">
+      <img
+        class="im_message_document_thumb"
+        my-load-thumb
+        thumb="webpage.photo.thumb"
+      />
+    </div>
+  </a>
+
+  <div class="im_message_document_info">
+    <div class="im_message_document_name_wrap">
+      <a href="" ng-click="docOpen()" class="im_message_document_name" ng-bind="webpage.title || webpage.author"></a>
+      <span class="im_message_document_size"  ng-bind="webpage.display_url"></span>
+    </div>
+    <div class="im_message_website_description" ng-bind="webpage.description"></div>
+  </div>
+
+</div>
