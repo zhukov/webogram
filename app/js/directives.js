@@ -2381,7 +2381,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (onlineCount > 1 || onlineCount == 1 && !wasMe) {
           html = _('group_modal_participants', {total: html, online: onlinePluralize(onlineCount)});
         }
-
+        if (!onlineCount && !participantsCount) {
+          html = '';
+        }
         element.html(html);
       };
 

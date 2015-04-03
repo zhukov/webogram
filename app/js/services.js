@@ -576,7 +576,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getChatFull(id) {
     if (chatsFull[id] !== undefined) {
-      if (chats[id].version == chatsFull[id].participants.version) {
+      if (chats[id].version == chatsFull[id].participants.version ||
+          chats[id].left) {
         return $q.when(chatsFull[id]);
       }
     }
