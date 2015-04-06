@@ -111,6 +111,13 @@
         </div>
 
         <div class="md_modal_section_link_wrap">
+          <a ng-if="password._ == 'account.noPassword' && !password.email_unconfirmed_pattern" class="md_modal_section_link" ng-click="changePassword()">Set password</a>
+          <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link" ng-click="changePassword({cancelEmail: true})">Cancel pending {{password.email_unconfirmed_pattern}}</a>
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link" ng-click="updatePassword({disable: true})">Turn off</a>
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link" ng-click="changePassword()">Change password</a>
+        </div>
+
+        <div class="md_modal_section_link_wrap">
           <a class="md_modal_section_link" ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
         </div>
 

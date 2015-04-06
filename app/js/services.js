@@ -4537,6 +4537,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 })
 
+.service('PasswordManager', function ($timeout, $rootScope, MtpApiManager) {
+
+  return {
+    getPasswordState: getPasswordState
+  };
+
+  function getPasswordState () {
+    return MtpApiManager.invokeApi('account.getPassword').then(function (result) {
+      return result;
+    });
+  }
+
+})
+
 
 .service('ErrorService', function ($rootScope, $modal, $window) {
 

@@ -2510,7 +2510,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -2532,6 +2532,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.send = {};
 
     $scope.$watch('photo.file', onPhotoSelected);
+
+    $scope.password = {_: 'account.noPassword'};
+    updatePasswordState();
+
+    $scope.changePassword = function (options) {
+      options = options || {};
+      var scope = $rootScope.$new();
+      angular.extend(scope, options);
+      var modal = $modal.open({
+        scope: scope,
+        templateUrl: templateUrl('password_update_modal'),
+        controller: 'PasswordUpdateModalController',
+        windowClass: 'md_simple_modal_window mobile_modal'
+      });
+
+      modal.result['finally'](updatePasswordState);
+    };
+
+    function updatePasswordState (argument) {
+      PasswordManager.getPasswordState().then(function (result) {
+        $scope.password = result;
+      });
+    }
+
 
     function onPhotoSelected (photo) {
       if (!photo || !photo.type || photo.type.indexOf('image') !== 0) {
@@ -2856,6 +2880,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       });
     })
+  })
+
+  .controller('PasswordUpdateModalController', function ($scope, PasswordManager, MtpApiManager) {
+
   })
 
   .controller('ContactsModalController', function ($scope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
