@@ -1477,7 +1477,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (pendingAfterMsgs[peerID]) {
           sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
         }
+        var flags = 0;
+        if (replyToMsgID) {
+          flags |= 1;
+        }
         MtpApiManager.invokeApi('messages.sendMessage', {
+          flags: flags,
           peer: inputPeer,
           message: text,
           random_id: randomID,
@@ -1638,32 +1643,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                   {_: 'documentAttributeFilename', file_name: file.name}
                 ]};
             }
+            var flags = 0;
+            if (replyToMsgID) {
+              flags |= 1;
+            }
             MtpApiManager.invokeApi('messages.sendMedia', {
+              flags: flags,
               peer: inputPeer,
               media: inputMedia,
               random_id: randomID,
               reply_to_msg_id: replyToMsgID
-            }).then(function (statedMessage) {
-              message.date = statedMessage.message.date;
-              message.id = statedMessage.message.id;
-              message.media = statedMessage.message.media;
-
-              ApiUpdatesManager.processUpdateMessage({
-                _: 'updates',
-                users: statedMessage.users,
-                chats: statedMessage.chats,
-                seq: 0,
-                updates: [{
-                  _: 'updateMessageID',
-                  random_id: randomIDS,
-                  id: statedMessage.message.id
-                }, {
-                  _: 'updateNewMessage',
-                  message: message,
-                  pts: statedMessage.pts,
-                  pts_count: statedMessage.pts_count
-                }]
-              });
+            }).then(function (updates) {
+              ApiUpdatesManager.processUpdateMessage(updates);
             }, function (error) {
               if (attachType == 'photo' &&
                   error.code == 400 &&
@@ -1710,12 +1701,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
-  function sendOther(peerID, inputMedia) {
+  function sendOther(peerID, inputMedia, options) {
+    options = options || {};
+
     var messageID = tempID--,
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID);
+        inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        replyToMsgID = options.replyToMsgID;
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1773,32 +1767,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       message.send = function () {
+        var flags = 0;
+        if (replyToMsgID) {
+          flags |= 1;
+        }
         MtpApiManager.invokeApi('messages.sendMedia', {
+          flags: flags,
           peer: inputPeer,
           media: inputMedia,
           random_id: randomID,
-          reply_to_msg_id: 0
-        }).then(function (statedMessage) {
-          message.date = statedMessage.message.date;
-          message.id = statedMessage.message.id;
-          message.media = statedMessage.message.media;
-
-          ApiUpdatesManager.processUpdateMessage({
-            _: 'updates',
-            users: statedMessage.users,
-            chats: statedMessage.chats,
-            seq: 0,
-            updates: [{
-              _: 'updateMessageID',
-              random_id: randomIDS,
-              id: statedMessage.message.id
-            }, {
-              _: 'updateNewMessage',
-              message: message,
-              pts: statedMessage.pts,
-              pts_count: statedMessage.pts_count
-            }]
-          });
+          reply_to_msg_id: replyToMsgID
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
         }, function (error) {
           toggleError(true);
         });
@@ -1828,24 +1808,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       peer: AppPeersManager.getInputPeerByID(peerID),
       id: msgIDs,
       random_id: randomIDs
-    }).then(function (statedMessages) {
-      var updates = [];
-      angular.forEach(statedMessages.messages, function(apiMessage) {
-        updates.push({
-          _: 'updateNewMessage',
-          message: apiMessage,
-          pts: statedMessages.pts,
-          pts_count: statedMessages.pts_count
-        });
-      });
-
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updates',
-        users: statedMessages.users,
-        chats: statedMessages.chats,
-        seq: 0,
-        updates: updates
-      });
+    }).then(function (updates) {
+      ApiUpdatesManager.processUpdateMessage(updates);
     });
   };
 
@@ -1922,21 +1886,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return false;
-  }
-
-  function onStatedMessage (statedMessage) {
-    ApiUpdatesManager.processUpdateMessage({
-      _: 'updates',
-      users: statedMessage.users,
-      chats: statedMessage.chats,
-      seq: 0,
-      updates: [{
-        _: 'updateNewMessage',
-        message: statedMessage.message,
-        pts: statedMessage.pts,
-        pts_count: statedMessage.pts_count
-      }]
-    });
   }
 
   function getMessagePeer (message) {
@@ -2596,7 +2545,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     sendFile: sendFile,
     sendOther: sendOther,
     forwardMessages: forwardMessages,
-    onStatedMessage: onStatedMessage,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,

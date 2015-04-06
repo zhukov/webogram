@@ -1524,7 +1524,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -1695,7 +1695,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             access_hash: doc.access_hash
           }
         }
-        AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia);
+        var options = {
+          replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.id
+        };
+        AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options);
         $scope.$broadcast('ui_message_send');
       }
       delete $scope.draftMessage.sticker;
@@ -2162,8 +2165,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         MtpApiManager.invokeApi('messages.editChatPhoto', {
           chat_id: $scope.chatID,
           photo: {_: 'inputChatPhotoEmpty'}
-        }).then(function (updateResult) {
-          AppMessagesManager.onStatedMessage(updateResult);
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
           $modalInstance.dismiss();
           $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString($scope.chatID)});
         })['finally'](function () {
@@ -2398,8 +2401,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
 
-    function onStatedMessage (statedMessage) {
-      AppMessagesManager.onStatedMessage(statedMessage);
+    function onChatUpdated (updates) {
+      ApiUpdatesManager.processUpdateMessage(updates);
       $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
     }
 
@@ -2408,14 +2411,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
-      }).then(onStatedMessage);
+      }).then(onChatUpdated);
     };
 
     $scope.returnToGroup = function () {
       MtpApiManager.invokeApi('messages.addChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
-      }).then(onStatedMessage);
+      }).then(onChatUpdated);
     };
 
 
@@ -2431,19 +2434,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             chat_id: $scope.chatID,
             user_id: AppUsersManager.getUserInput(userID),
             fwd_limit: 100
-          }).then(function (addResult) {
-            ApiUpdatesManager.processUpdateMessage({
-              _: 'updates',
-              users: addResult.users,
-              chats: addResult.chats,
-              seq: 0,
-              updates: [{
-                _: 'updateNewMessage',
-                message: addResult.message,
-                pts: addResult.pts,
-                pts_count: addResult.pts_count
-              }]
-            });
+          }).then(function (updates) {
+            ApiUpdatesManager.processUpdateMessage(updates);
           });
         });
 
@@ -2457,7 +2449,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserForeign', user_id: userID, access_hash: user.access_hash || '0'}
-      }).then(onStatedMessage);
+      }).then(onChatUpdated);
     };
 
 
@@ -2488,9 +2480,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             file: inputFile,
             crop: {_: 'inputPhotoCropAuto'}
           }
-        }).then(function (updateResult) {
-          onStatedMessage(updateResult);
-        });
+        }).then(onChatUpdated);
       })['finally'](function () {
         $scope.photo.updating = false;
       });
@@ -2501,9 +2491,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.editChatPhoto', {
         chat_id: $scope.chatID,
         photo: {_: 'inputChatPhotoEmpty'}
-      }).then(function (updateResult) {
-        onStatedMessage(updateResult);
-      })['finally'](function () {
+      }).then(onChatUpdated)['finally'](function () {
         $scope.photo.updating = false;
       });
     };
@@ -3115,19 +3103,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return MtpApiManager.invokeApi('messages.editChatTitle', {
         chat_id: $scope.chatID,
         title: $scope.group.name
-      }).then(function (editResult) {
-        ApiUpdatesManager.processUpdateMessage({
-          _: 'updates',
-          users: editResult.users,
-          chats: editResult.chats,
-          seq: 0,
-          updates: [{
-            _: 'updateNewMessage',
-            message: editResult.message,
-            pts: editResult.pts,
-            pts_count: editResult.pts_count
-          }]
-        });
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
 
         var peerString = AppChatsManager.getChatString($scope.chatID);
         $rootScope.$broadcast('history_focus', {peerString: peerString});
