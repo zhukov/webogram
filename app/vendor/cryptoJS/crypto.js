@@ -1912,136 +1912,188 @@ code.google.com/p/crypto-js/wiki/License
 
 
 
-/**
- * Copyright (c) 2012 T. Michael Keesey
- * LICENSE: http://opensource.org/licenses/MIT
- */
-var sha1;
-(function (sha1) {
-    var POW_2_24 = Math.pow(2, 24);
-    var POW_2_32 = Math.pow(2, 32);
-    function hex(n) {
-        var s = "", v;
-        for(var i = 7; i >= 0; --i) {
-            v = (n >>> (i << 2)) & 15;
-            s += v.toString(16);
-        }
-        return s;
-    };
+/*
+CryptoJS v3.1.2
+code.google.com/p/crypto-js
+(c) 2009-2013 by Jeff Mott. All rights reserved.
+code.google.com/p/crypto-js/wiki/License
+*/
+(function (Math) {
+    // Shortcuts
+    var C = CryptoJS;
+    var C_lib = C.lib;
+    var WordArray = C_lib.WordArray;
+    var Hasher = C_lib.Hasher;
+    var C_algo = C.algo;
 
-    function toBytes(n) {
-      var b = [], v;
-      for(var i = 3; i >= 0; --i) {
-          v = (n >> (i * 8)) & 255;
-          b.push(v);
-      }
-      return b;
-    };
+    // Initialization and round constants tables
+    var H = [];
+    var K = [];
 
-    function lrot(n, bits) {
-        return ((n << bits) | (n >>> (32 - bits)));
-    }
-    var Uint32ArrayBigEndian = (function () {
-        function Uint32ArrayBigEndian(length) {
-            this.bytes = new Uint8Array(length << 2);
-        }
-        Uint32ArrayBigEndian.prototype.get = function (index) {
-            index <<= 2;
-            return (this.bytes[index] * POW_2_24) + ((this.bytes[index + 1] << 16) | (this.bytes[index + 2] << 8) | this.bytes[index + 3]);
-        };
-        Uint32ArrayBigEndian.prototype.set = function (index, value) {
-            var high = Math.floor(value / POW_2_24), rest = value - (high * POW_2_24);
-            index <<= 2;
-            this.bytes[index] = high;
-            this.bytes[index + 1] = rest >> 16;
-            this.bytes[index + 2] = (rest >> 8) & 255;
-            this.bytes[index + 3] = rest & 255;
-        };
-        return Uint32ArrayBigEndian;
-    })();
-    function string2ArrayBuffer(s) {
-        s = s.replace(/[\u0080-\u07ff]/g, function (c) {
-            var code = c.charCodeAt(0);
-            return String.fromCharCode(192 | code >> 6, 128 | code & 63);
-        });
-        s = s.replace(/[\u0080-\uffff]/g, function (c) {
-            var code = c.charCodeAt(0);
-            return String.fromCharCode(224 | code >> 12, 128 | code >> 6 & 63, 128 | code & 63);
-        });
-        var n = s.length, array = new Uint8Array(n);
-        for(var i = 0; i < n; ++i) {
-            array[i] = s.charCodeAt(i);
-        }
-        return array.buffer;
-    }
-    function bytes2ArrayBuffer(b) {
-      var n = b.length, array = new Uint8Array(n);
-      for(var i = 0; i < n; ++i) {
-          array[i] = b[i];
-      }
-      return array.buffer;
-    }
-
-    function hash(bufferOrString, byteArray) {
-        var source;
-        if (bufferOrString instanceof ArrayBuffer) {
-            source = bufferOrString;
-        } else if (Object.prototype.toString.apply(bufferOrString) == '[object Array]') {
-            source = bytes2ArrayBuffer(bufferOrString);
-        } else {
-            source = string2ArrayBuffer(String(bufferOrString));
-        }
-        var h0 = 1732584193, h1 = 4023233417, h2 = 2562383102, h3 = 271733878, h4 = 3285377520, i, sbytes = source.byteLength, sbits = sbytes << 3, minbits = sbits + 65, bits = Math.ceil(minbits / 512) << 9, bytes = bits >>> 3, slen = bytes >>> 2, s = new Uint32ArrayBigEndian(slen), s8 = s.bytes, j, w = new Uint32Array(80), sourceArray = new Uint8Array(source);
-        for(i = 0; i < sbytes; ++i) {
-            s8[i] = sourceArray[i];
-        }
-        s8[sbytes] = 128;
-        s.set(slen - 2, Math.floor(sbits / POW_2_32));
-        s.set(slen - 1, sbits & 4294967295);
-        for(i = 0; i < slen; i += 16) {
-            for(j = 0; j < 16; ++j) {
-                w[j] = s.get(i + j);
-            }
-            for(; j < 80; ++j) {
-                w[j] = lrot(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
-            }
-            var a = h0, b = h1, c = h2, d = h3, e = h4, f, k, temp;
-            for(j = 0; j < 80; ++j) {
-                if(j < 20) {
-                    f = (b & c) | ((~b) & d);
-                    k = 1518500249;
-                } else {
-                    if(j < 40) {
-                        f = b ^ c ^ d;
-                        k = 1859775393;
-                    } else {
-                        if(j < 60) {
-                            f = (b & c) ^ (b & d) ^ (c & d);
-                            k = 2400959708;
-                        } else {
-                            f = b ^ c ^ d;
-                            k = 3395469782;
-                        }
-                    }
+    // Compute constants
+    (function () {
+        function isPrime(n) {
+            var sqrtN = Math.sqrt(n);
+            for (var factor = 2; factor <= sqrtN; factor++) {
+                if (!(n % factor)) {
+                    return false;
                 }
-                temp = (lrot(a, 5) + f + e + k + w[j]) & 4294967295;
-                e = d;
-                d = c;
-                c = lrot(b, 30);
-                b = a;
-                a = temp;
             }
-            h0 = (h0 + a) & 4294967295;
-            h1 = (h1 + b) & 4294967295;
-            h2 = (h2 + c) & 4294967295;
-            h3 = (h3 + d) & 4294967295;
-            h4 = (h4 + e) & 4294967295;
+
+            return true;
         }
 
-        if (byteArray) {
-          return toBytes(h0).concat(toBytes(h1), toBytes(h2), toBytes(h3), toBytes(h4));
+        function getFractionalBits(n) {
+            return ((n - (n | 0)) * 0x100000000) | 0;
         }
-        return hex(h0) + hex(h1) + hex(h2) + hex(h3) + hex(h4);
-    }
-    sha1.hash = hash;
-})(sha1 || (sha1 = {}));
+
+        var n = 2;
+        var nPrime = 0;
+        while (nPrime < 64) {
+            if (isPrime(n)) {
+                if (nPrime < 8) {
+                    H[nPrime] = getFractionalBits(Math.pow(n, 1 / 2));
+                }
+                K[nPrime] = getFractionalBits(Math.pow(n, 1 / 3));
+
+                nPrime++;
+            }
+
+            n++;
+        }
+    }());
+
+    // Reusable object
+    var W = [];
+
+    /**
+     * SHA-256 hash algorithm.
+     */
+    var SHA256 = C_algo.SHA256 = Hasher.extend({
+        _doReset: function () {
+            this._hash = new WordArray.init(H.slice(0));
+        },
+
+        _doProcessBlock: function (M, offset) {
+            // Shortcut
+            var H = this._hash.words;
+
+            // Working variables
+            var a = H[0];
+            var b = H[1];
+            var c = H[2];
+            var d = H[3];
+            var e = H[4];
+            var f = H[5];
+            var g = H[6];
+            var h = H[7];
+
+            // Computation
+            for (var i = 0; i < 64; i++) {
+                if (i < 16) {
+                    W[i] = M[offset + i] | 0;
+                } else {
+                    var gamma0x = W[i - 15];
+                    var gamma0  = ((gamma0x << 25) | (gamma0x >>> 7))  ^
+                                  ((gamma0x << 14) | (gamma0x >>> 18)) ^
+                                   (gamma0x >>> 3);
+
+                    var gamma1x = W[i - 2];
+                    var gamma1  = ((gamma1x << 15) | (gamma1x >>> 17)) ^
+                                  ((gamma1x << 13) | (gamma1x >>> 19)) ^
+                                   (gamma1x >>> 10);
+
+                    W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16];
+                }
+
+                var ch  = (e & f) ^ (~e & g);
+                var maj = (a & b) ^ (a & c) ^ (b & c);
+
+                var sigma0 = ((a << 30) | (a >>> 2)) ^ ((a << 19) | (a >>> 13)) ^ ((a << 10) | (a >>> 22));
+                var sigma1 = ((e << 26) | (e >>> 6)) ^ ((e << 21) | (e >>> 11)) ^ ((e << 7)  | (e >>> 25));
+
+                var t1 = h + sigma1 + ch + K[i] + W[i];
+                var t2 = sigma0 + maj;
+
+                h = g;
+                g = f;
+                f = e;
+                e = (d + t1) | 0;
+                d = c;
+                c = b;
+                b = a;
+                a = (t1 + t2) | 0;
+            }
+
+            // Intermediate hash value
+            H[0] = (H[0] + a) | 0;
+            H[1] = (H[1] + b) | 0;
+            H[2] = (H[2] + c) | 0;
+            H[3] = (H[3] + d) | 0;
+            H[4] = (H[4] + e) | 0;
+            H[5] = (H[5] + f) | 0;
+            H[6] = (H[6] + g) | 0;
+            H[7] = (H[7] + h) | 0;
+        },
+
+        _doFinalize: function () {
+            // Shortcuts
+            var data = this._data;
+            var dataWords = data.words;
+
+            var nBitsTotal = this._nDataBytes * 8;
+            var nBitsLeft = data.sigBytes * 8;
+
+            // Add padding
+            dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] = Math.floor(nBitsTotal / 0x100000000);
+            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] = nBitsTotal;
+            data.sigBytes = dataWords.length * 4;
+
+            // Hash final blocks
+            this._process();
+
+            // Return final computed hash
+            return this._hash;
+        },
+
+        clone: function () {
+            var clone = Hasher.clone.call(this);
+            clone._hash = this._hash.clone();
+
+            return clone;
+        }
+    });
+
+    /**
+     * Shortcut function to the hasher's object interface.
+     *
+     * @param {WordArray|string} message The message to hash.
+     *
+     * @return {WordArray} The hash.
+     *
+     * @static
+     *
+     * @example
+     *
+     *     var hash = CryptoJS.SHA256('message');
+     *     var hash = CryptoJS.SHA256(wordArray);
+     */
+    C.SHA256 = Hasher._createHelper(SHA256);
+
+    /**
+     * Shortcut function to the HMAC's object interface.
+     *
+     * @param {WordArray|string} message The message to hash.
+     * @param {WordArray|string} key The secret key.
+     *
+     * @return {WordArray} The HMAC.
+     *
+     * @static
+     *
+     * @example
+     *
+     *     var hmac = CryptoJS.HmacSHA256(message, key);
+     */
+    C.HmacSHA256 = Hasher._createHmacHelper(SHA256);
+}(Math));

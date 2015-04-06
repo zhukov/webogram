@@ -317,6 +317,16 @@ function sha1BytesSync (bytes) {
   return bytesFromArrayBuffer(sha1HashSync(bytes));
 }
 
+function sha256HashSync (bytes) {
+  console.log(dT(), 'SHA-2 hash start', bytes.byteLength || bytes.length);
+  var hashWords = CryptoJS.SHA256(bytes);
+  console.log(dT(), 'SHA-2 hash finish');
+
+  var hashBytes = bytesFromWords(hashWords);
+
+  return hashBytes;
+}
+
 
 
 function rsaEncrypt (publicKey, bytes) {
