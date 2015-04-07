@@ -122,6 +122,9 @@ TLSerialization.prototype.storeDouble = function (f) {
 TLSerialization.prototype.storeString = function (s, field) {
   this.debug && console.log('>>>', s, (field || '') + ':string');
 
+  if (s === undefined) {
+    s = '';
+  }
   var sUTF8 = unescape(encodeURIComponent(s));
 
   this.checkLength(sUTF8.length + 8);
@@ -150,6 +153,9 @@ TLSerialization.prototype.storeString = function (s, field) {
 TLSerialization.prototype.storeBytes = function (bytes, field) {
   if (bytes instanceof ArrayBuffer) {
     bytes = new Uint8Array(bytes);
+  }
+  else if (bytes === undefined) {
+    bytes = [];
   }
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 
@@ -222,7 +228,17 @@ TLSerialization.prototype.storeMethod = function (methodName, params) {
 
   var self = this;
   angular.forEach(methodData.params, function (param) {
-    self.storeObject(params[param.name], param.type, methodName + '[' + param.name + ']');
+    var type = param.type;
+    if (type.indexOf('?') !== -1) {
+      var condType = type.split('?');
+      var fieldBit = condType[0].split('.');
+      if (!(params[fieldBit[0]] & (1 << fieldBit[1]))) {
+        return;
+      }
+      type = condType[1];
+    }
+
+    self.storeObject(params[param.name], type, methodName + '[' + param.name + ']');
   });
 
   return methodData.type;
@@ -230,6 +246,7 @@ TLSerialization.prototype.storeMethod = function (methodName, params) {
 
 TLSerialization.prototype.storeObject = function (obj, type, field) {
   switch (type) {
+    case '#':
     case 'int':    return this.storeInt(obj,  field);
     case 'long':   return this.storeLong(obj,  field);
     case 'int128': return this.storeIntBytes(obj, 128, field);
@@ -293,7 +310,17 @@ TLSerialization.prototype.storeObject = function (obj, type, field) {
 
   var self = this;
   angular.forEach(constructorData.params, function (param) {
-    self.storeObject(obj[param.name], param.type, field + '[' + predicate + '][' + param.name + ']');
+    var type = param.type;
+    if (type.indexOf('?') !== -1) {
+      var condType = type.split('?');
+      var fieldBit = condType[0].split('.');
+      if (!(obj[fieldBit[0]] & (1 << fieldBit[1]))) {
+        return;
+      }
+      type = condType[1];
+    }
+
+    self.storeObject(obj[param.name], type, field + '[' + predicate + '][' + param.name + ']');
   });
 
   return constructorData.type;

@@ -111,6 +111,20 @@
         </div>
 
         <div class="md_modal_section_link_wrap">
+          <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'cancel_email'})" my-i18n="settings_modal_password_email_pending_cancel">
+          </a>
+          <span class="md_modal_section_text" ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link" my-i18n="settings_modal_password_email_pending">
+            <my-i18n-param name="email">
+              <span ng-bind="password.email_unconfirmed_pattern"></span>
+            </my-i18n-param>
+          </span>
+          <a ng-if="password._ == 'account.noPassword' && !password.email_unconfirmed_pattern" class="md_modal_section_link" ng-click="changePassword({action: 'create'})" my-i18n="settings_modal_set_password"></a>
+
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'disable'})" my-i18n="settings_modal_disable_password"></a>
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link" ng-click="changePassword({action: 'change'})" my-i18n="settings_modal_change_password"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap">
           <a class="md_modal_section_link" ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
         </div>
 

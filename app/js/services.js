@@ -802,6 +802,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var pendingByRandomID = {};
   var pendingByMessageID = {};
   var pendingAfterMsgs = {};
+  var pendingWebPages = {};
   var sendFilePromise = $q.when();
   var tempID = -1;
 
@@ -1397,6 +1398,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           case 'messageMediaAudio':
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
+          case 'messageMediaWebPage':
+            var webpage = apiMessage.media.webpage;
+            if (webpage.photo && webpage.photo._ === 'photo') {
+              AppPhotosManager.savePhoto(webpage.photo);
+            } else {
+              delete webpage.photo;
+            }
+            if (pendingWebPages[webpage.id] === undefined) {
+              pendingWebPages[webpage.id] = {};
+            }
+            pendingWebPages[webpage.id][apiMessage.id] = true;
+            break;
         }
       }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
@@ -1465,7 +1478,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (pendingAfterMsgs[peerID]) {
           sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
         }
+        var flags = 0;
+        if (replyToMsgID) {
+          flags |= 1;
+        }
         MtpApiManager.invokeApi('messages.sendMessage', {
+          flags: flags,
           peer: inputPeer,
           message: text,
           random_id: randomID,
@@ -1473,6 +1491,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }, sentRequestOptions).then(function (sentMessage) {
           message.date = sentMessage.date;
           message.id = sentMessage.id;
+          message.media = sentMessage.media;
 
           ApiUpdatesManager.processUpdateMessage({
             _: 'updates',
@@ -1625,32 +1644,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                   {_: 'documentAttributeFilename', file_name: file.name}
                 ]};
             }
+            var flags = 0;
+            if (replyToMsgID) {
+              flags |= 1;
+            }
             MtpApiManager.invokeApi('messages.sendMedia', {
+              flags: flags,
               peer: inputPeer,
               media: inputMedia,
               random_id: randomID,
               reply_to_msg_id: replyToMsgID
-            }).then(function (statedMessage) {
-              message.date = statedMessage.message.date;
-              message.id = statedMessage.message.id;
-              message.media = statedMessage.message.media;
-
-              ApiUpdatesManager.processUpdateMessage({
-                _: 'updates',
-                users: statedMessage.users,
-                chats: statedMessage.chats,
-                seq: 0,
-                updates: [{
-                  _: 'updateMessageID',
-                  random_id: randomIDS,
-                  id: statedMessage.message.id
-                }, {
-                  _: 'updateNewMessage',
-                  message: message,
-                  pts: statedMessage.pts,
-                  pts_count: statedMessage.pts_count
-                }]
-              });
+            }).then(function (updates) {
+              ApiUpdatesManager.processUpdateMessage(updates);
             }, function (error) {
               if (attachType == 'photo' &&
                   error.code == 400 &&
@@ -1697,12 +1702,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
-  function sendOther(peerID, inputMedia) {
+  function sendOther(peerID, inputMedia, options) {
+    options = options || {};
+
     var messageID = tempID--,
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID);
+        inputPeer = AppPeersManager.getInputPeerByID(peerID),
+        replyToMsgID = options.replyToMsgID;
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1760,32 +1768,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       message.send = function () {
+        var flags = 0;
+        if (replyToMsgID) {
+          flags |= 1;
+        }
         MtpApiManager.invokeApi('messages.sendMedia', {
+          flags: flags,
           peer: inputPeer,
           media: inputMedia,
           random_id: randomID,
-          reply_to_msg_id: 0
-        }).then(function (statedMessage) {
-          message.date = statedMessage.message.date;
-          message.id = statedMessage.message.id;
-          message.media = statedMessage.message.media;
-
-          ApiUpdatesManager.processUpdateMessage({
-            _: 'updates',
-            users: statedMessage.users,
-            chats: statedMessage.chats,
-            seq: 0,
-            updates: [{
-              _: 'updateMessageID',
-              random_id: randomIDS,
-              id: statedMessage.message.id
-            }, {
-              _: 'updateNewMessage',
-              message: message,
-              pts: statedMessage.pts,
-              pts_count: statedMessage.pts_count
-            }]
-          });
+          reply_to_msg_id: replyToMsgID
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
         }, function (error) {
           toggleError(true);
         });
@@ -1815,24 +1809,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       peer: AppPeersManager.getInputPeerByID(peerID),
       id: msgIDs,
       random_id: randomIDs
-    }).then(function (statedMessages) {
-      var updates = [];
-      angular.forEach(statedMessages.messages, function(apiMessage) {
-        updates.push({
-          _: 'updateNewMessage',
-          message: apiMessage,
-          pts: statedMessages.pts,
-          pts_count: statedMessages.pts_count
-        });
-      });
-
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updates',
-        users: statedMessages.users,
-        chats: statedMessages.chats,
-        seq: 0,
-        updates: updates
-      });
+    }).then(function (updates) {
+      ApiUpdatesManager.processUpdateMessage(updates);
     });
   };
 
@@ -1909,21 +1887,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return false;
-  }
-
-  function onStatedMessage (statedMessage) {
-    ApiUpdatesManager.processUpdateMessage({
-      _: 'updates',
-      users: statedMessage.users,
-      chats: statedMessage.chats,
-      seq: 0,
-      updates: [{
-        _: 'updateNewMessage',
-        message: statedMessage.message,
-        pts: statedMessage.pts,
-        pts_count: statedMessage.pts_count
-      }]
-    });
   }
 
   function getMessagePeer (message) {
@@ -2012,6 +1975,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             message.media.first_name + ' ' + (message.media.last_name || ''),
             {noLinks: true, noLinebreaks: true}
           );
+          break;
+
+        case 'messageMediaWebPage':
+          if (message.media.webpage.photo) {
+            message.media.webpage.photo = AppPhotosManager.wrapForHistory(message.media.webpage.photo.id, {website: true});
+          }
           break;
       }
     }
@@ -2535,6 +2504,32 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
         });
         break;
+
+      case 'updateWebPage':
+        console.log('webpage update', update);
+        var webpage = update.webpage;
+        if (pendingWebPages[webpage.id] !== undefined) {
+          var message, historyMessage;
+          angular.forEach(pendingWebPages[webpage.id], function (t, msgID) {
+            if (message = messagesStorage[msgID]) {
+              message.media = {
+                _: 'messageMediaWebPage',
+                webpage: webpage
+              };
+            }
+            if (historyMessage = messagesForHistory[msgID]) {
+              if (webpage.photo) {
+                AppPhotosManager.savePhoto(webpage.photo);
+                webpage.photo = AppPhotosManager.wrapForHistory(webpage.photo.id, {website: true});
+              }
+              historyMessage.media = {
+                _: 'messageMediaWebPage',
+                webpage: webpage
+              };
+            }
+          });
+        }
+        break;
     }
   });
 
@@ -2551,7 +2546,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     sendFile: sendFile,
     sendOther: sendOther,
     forwardMessages: forwardMessages,
-    onStatedMessage: onStatedMessage,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
@@ -2652,10 +2646,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return photos[photoID] || {_: 'photoEmpty'};
   }
 
-  function wrapForHistory (photoID) {
+  function wrapForHistory (photoID, options) {
+    options = options || {};
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = Math.min(windowW - 80, Config.Mobile ? 210 : 260),
-        height = Math.min(windowH - 100, Config.Mobile ? 210 : 260),
+        width = options.website ? 100 : Math.min(windowW - 80, Config.Mobile ? 210 : 260),
+        height = options.website ? 100 : Math.min(windowH - 100, Config.Mobile ? 210 : 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -4539,6 +4534,106 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getVibrateSupport () {
     return vibrateSupport;
+  }
+
+})
+
+.service('PasswordManager', function ($timeout, $q, $rootScope, MtpApiManager, CryptoWorker, MtpSecureRandom) {
+
+  return {
+    check: check,
+    getState: getState,
+    requestRecovery: requestRecovery,
+    recover: recover,
+    updateSettings: updateSettings
+  };
+
+  function getState (options) {
+    return MtpApiManager.invokeApi('account.getPassword', {}, options).then(function (result) {
+      return result;
+    });
+  }
+
+  function updateSettings (state, settings) {
+    var currentHashPromise;
+    var newHashPromise;
+    var params = {
+      new_settings: {
+        _: 'account.passwordInputSettings',
+        flags: 0,
+        hint: settings.hint || ''
+      }
+    };
+
+    if (typeof settings.cur_password === 'string' &&
+        settings.cur_password.length > 0) {
+      currentHashPromise = makePasswordHash(state.current_salt, settings.cur_password);
+    } else {
+      currentHashPromise = $q.when([]);
+    }
+
+    if (typeof settings.new_password === 'string' &&
+        settings.new_password.length > 0) {
+      var saltRandom = new Array(8);
+      var newSalt = bufferConcat(state.new_salt, saltRandom);
+      MtpSecureRandom.nextBytes(saltRandom);
+      newHashPromise = makePasswordHash(newSalt, settings.new_password);
+      params.new_settings.new_salt = newSalt;
+      params.new_settings.flags |= 1;
+    } else {
+      if (typeof settings.new_password === 'string') {
+        params.new_settings.flags |= 1;
+        params.new_settings.new_salt = [];
+      }
+      newHashPromise = $q.when([]);
+    }
+
+    if (typeof settings.email === 'string') {
+      params.new_settings.flags |= 2;
+      params.new_settings.email = settings.email || '';
+    }
+
+    return $q.all([currentHashPromise, newHashPromise]).then(function (hashes) {
+      params.current_password_hash = hashes[0];
+      params.new_settings.new_password_hash = hashes[1];
+
+      return MtpApiManager.invokeApi('account.updatePasswordSettings', params);
+    });
+
+  }
+
+  function check (state, password, options) {
+    return makePasswordHash(state.current_salt, password).then(function (passwordHash) {
+      return MtpApiManager.invokeApi('auth.checkPassword', {
+        password_hash: passwordHash
+      }, options);
+    });
+  }
+
+  function requestRecovery (state, options) {
+    return MtpApiManager.invokeApi('auth.requestPasswordRecovery', {}, options);
+  }
+
+  function recover (code, options) {
+    return MtpApiManager.invokeApi('auth.recoverPassword', {
+      code: code
+    }, options);
+  }
+
+
+
+  function makePasswordHash (salt, password) {
+    var passwordUTF8 = unescape(encodeURIComponent(password));
+
+    var buffer   = new ArrayBuffer(passwordUTF8.length);
+    var byteView = new Uint8Array(buffer);
+    for (var i = 0, len = passwordUTF8.length; i < len; i++) {
+      byteView[i] = passwordUTF8.charCodeAt(i);
+    }
+
+    buffer = bufferConcat(bufferConcat(salt, byteView), salt);
+
+    return CryptoWorker.sha256Hash(buffer);
   }
 
 })

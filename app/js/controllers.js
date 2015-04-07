@@ -30,7 +30,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start();
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
 
     $modalStack.dismissAll();
     IdleManager.start();
@@ -156,6 +156,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
 
     var callTimeout;
+    var updatePasswordTimeout = false;
 
     function saveAuth (result) {
       MtpApiManager.setUserAuth(options.dcID, {
@@ -204,7 +205,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           phone_number: $scope.credentials.phone_full,
           // sms_type: 5,
           api_id: Config.App.id,
-          api_hash: Config.App.hash
+          api_hash: Config.App.hash,
+          lang_code: navigator.language || 'en'
         }, options).then(function (sentCode) {
           $scope.progress.enabled = false;
 
@@ -290,6 +292,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else if (error.code == 400 && error.type == 'PHONE_NUMBER_OCCUPIED') {
           error.handled = true;
           return $scope.logIn(false);
+        } else if (error.code == 401 && error.type == 'SESSION_PASSWORD_NEEDED') {
+          $scope.progress.enabled = true;
+          updatePasswordState().then(function () {
+            $scope.progress.enabled = false;
+            $scope.credentials.phone_code_valid = true;
+            $scope.credentials.password_needed = true;
+            $scope.about = {};
+          });
+          error.handled = true;
+          return;
         }
 
 
@@ -311,6 +323,82 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
 
     };
+
+    $scope.checkPassword = function () {
+      return PasswordManager.check($scope.password, $scope.credentials.password, options).then(saveAuth, function (error) {
+        switch (error.type) {
+          case 'PASSWORD_HASH_INVALID':
+            $scope.error = {field: 'password'};
+            error.handled = true;
+            break;
+        }
+      });
+    };
+
+    $scope.forgotPassword = function (event) {
+      PasswordManager.requestRecovery($scope.password, options).then(function (emailRecovery) {
+
+        var scope = $rootScope.$new();
+        scope.recovery = emailRecovery;
+        scope.options = options;
+        var modal = $modal.open({
+          scope: scope,
+          templateUrl: templateUrl('password_recovery_modal'),
+          controller: 'PasswordRecoveryModalController',
+          windowClass: 'md_simple_modal_window mobile_modal'
+        });
+
+        modal.result.then(function (result) {
+          if (result && result.user) {
+            saveAuth(result);
+          } else {
+            $scope.canReset = true;
+          }
+        });
+
+      }, function (error) {
+        switch (error.type) {
+          case 'PASSWORD_EMPTY':
+            $scope.logIn();
+            break;
+          case 'PASSWORD_RECOVERY_NA':
+            $timeout(function () {
+              $scope.canReset = true;
+            }, 1000);
+            break;
+        }
+      })
+
+      return cancelEvent(event);
+    };
+
+    $scope.resetAccount = function () {
+      ErrorService.confirm({
+        type: 'RESET_ACCOUNT'
+      }).then(function () {
+        $scope.progress.enabled = true;
+        MtpApiManager.invokeApi('account.deleteAccount', {
+          reason: 'Forgot password'
+        }, options).then(function () {
+          delete $scope.progress.enabled;
+          delete $scope.credentials.password_needed;
+          $scope.credentials.phone_unoccupied = true;
+        }, function () {
+          delete $scope.progress.enabled;
+        })
+      });
+    };
+
+    function updatePasswordState () {
+      // $timeout.cancel(updatePasswordTimeout);
+      // updatePasswordTimeout = false;
+      return PasswordManager.getState(options).then(function (result) {
+        return $scope.password = result;
+        // if (result._ == 'account.noPassword' && result.email_unconfirmed_pattern) {
+        //   updatePasswordTimeout = $timeout(updatePasswordState, 5000);
+        // }
+      });
+    }
 
     ChangelogNotifyService.checkUpdate();
     LayoutSwitchService.start();
@@ -363,6 +451,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         windowClass: 'settings_modal_window mobile_modal'
       });
     };
+
+    // setTimeout($scope.openSettings, 1000);
 
     $scope.openFaq = function () {
       var url = 'https://telegram.org/faq';
@@ -1524,7 +1614,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, ApiUpdatesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -1695,7 +1785,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             access_hash: doc.access_hash
           }
         }
-        AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia);
+        var options = {
+          replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.id
+        };
+        AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options);
         $scope.$broadcast('ui_message_send');
       }
       delete $scope.draftMessage.sticker;
@@ -2162,8 +2255,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         MtpApiManager.invokeApi('messages.editChatPhoto', {
           chat_id: $scope.chatID,
           photo: {_: 'inputChatPhotoEmpty'}
-        }).then(function (updateResult) {
-          AppMessagesManager.onStatedMessage(updateResult);
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
           $modalInstance.dismiss();
           $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString($scope.chatID)});
         })['finally'](function () {
@@ -2398,8 +2491,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
 
-    function onStatedMessage (statedMessage) {
-      AppMessagesManager.onStatedMessage(statedMessage);
+    function onChatUpdated (updates) {
+      ApiUpdatesManager.processUpdateMessage(updates);
       $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
     }
 
@@ -2408,14 +2501,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
-      }).then(onStatedMessage);
+      }).then(onChatUpdated);
     };
 
     $scope.returnToGroup = function () {
       MtpApiManager.invokeApi('messages.addChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserSelf'}
-      }).then(onStatedMessage);
+      }).then(onChatUpdated);
     };
 
 
@@ -2431,19 +2524,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             chat_id: $scope.chatID,
             user_id: AppUsersManager.getUserInput(userID),
             fwd_limit: 100
-          }).then(function (addResult) {
-            ApiUpdatesManager.processUpdateMessage({
-              _: 'updates',
-              users: addResult.users,
-              chats: addResult.chats,
-              seq: 0,
-              updates: [{
-                _: 'updateNewMessage',
-                message: addResult.message,
-                pts: addResult.pts,
-                pts_count: addResult.pts_count
-              }]
-            });
+          }).then(function (updates) {
+            ApiUpdatesManager.processUpdateMessage(updates);
           });
         });
 
@@ -2457,7 +2539,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
         user_id: {_: 'inputUserForeign', user_id: userID, access_hash: user.access_hash || '0'}
-      }).then(onStatedMessage);
+      }).then(onChatUpdated);
     };
 
 
@@ -2488,9 +2570,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             file: inputFile,
             crop: {_: 'inputPhotoCropAuto'}
           }
-        }).then(function (updateResult) {
-          onStatedMessage(updateResult);
-        });
+        }).then(onChatUpdated);
       })['finally'](function () {
         $scope.photo.updating = false;
       });
@@ -2501,9 +2581,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.editChatPhoto', {
         chat_id: $scope.chatID,
         photo: {_: 'inputChatPhotoEmpty'}
-      }).then(function (updateResult) {
-        onStatedMessage(updateResult);
-      })['finally'](function () {
+      }).then(onChatUpdated)['finally'](function () {
         $scope.photo.updating = false;
       });
     };
@@ -2522,7 +2600,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
 
     $scope.profile = {};
     $scope.photo = {};
@@ -2544,6 +2622,42 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.send = {};
 
     $scope.$watch('photo.file', onPhotoSelected);
+
+    $scope.password = {_: 'account.noPassword'};
+    updatePasswordState();
+    var updatePasswordTimeout = false;
+
+    $scope.changePassword = function (options) {
+      options = options || {};
+      if (options.action == 'cancel_email') {
+        return ErrorService.confirm({type: 'PASSWORD_ABORT_SETUP'}).then(function () {
+          PasswordManager.updateSettings($scope.password, {email: ''}).then(updatePasswordState);
+        });
+      }
+      var scope = $rootScope.$new();
+      scope.password = $scope.password;
+      angular.extend(scope, options);
+      var modal = $modal.open({
+        scope: scope,
+        templateUrl: templateUrl('password_update_modal'),
+        controller: 'PasswordUpdateModalController',
+        windowClass: 'md_simple_modal_window mobile_modal'
+      });
+
+      modal.result['finally'](updatePasswordState);
+    };
+
+    function updatePasswordState () {
+      $timeout.cancel(updatePasswordTimeout);
+      updatePasswordTimeout = false;
+      PasswordManager.getState().then(function (result) {
+        $scope.password = result;
+        if (result._ == 'account.noPassword' && result.email_unconfirmed_pattern) {
+          updatePasswordTimeout = $timeout(updatePasswordState, 5000);
+        }
+      });
+    }
+
 
     function onPhotoSelected (photo) {
       if (!photo || !photo.type || photo.type.indexOf('image') !== 0) {
@@ -2870,6 +2984,144 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     })
   })
 
+  .controller('PasswordUpdateModalController', function ($scope, $q, _, PasswordManager, MtpApiManager, ErrorService, $modalInstance) {
+
+    $scope.passwordSettings = {};
+
+    $scope.updatePassword = function () {
+      delete $scope.passwordSettings.error_field;
+
+      var confirmPromise;
+      if ($scope.action == 'disable') {
+        confirmPromise = $q.when();
+      }
+      else {
+        if (!$scope.passwordSettings.new_password) {
+          $scope.passwordSettings.error_field = 'new_password';
+          $scope.$broadcast('new_password_focus');
+          return false;
+        }
+        if ($scope.passwordSettings.new_password != $scope.passwordSettings.confirm_password) {
+          $scope.passwordSettings.error_field = 'confirm_password';
+          $scope.$broadcast('confirm_password_focus');
+          return false;
+        }
+        confirmPromise = $scope.passwordSettings.email
+          ? $q.when()
+          : ErrorService.confirm({type: 'RECOVERY_EMAIL_EMPTY'});
+      }
+
+      $scope.passwordSettings.loading = true;
+
+      confirmPromise.then(function () {
+        PasswordManager.updateSettings($scope.password, {
+          cur_password: $scope.passwordSettings.cur_password || '',
+          new_password: $scope.passwordSettings.new_password,
+          email: $scope.passwordSettings.email,
+          hint: $scope.passwordSettings.hint
+        }).then(function (result) {
+          delete $scope.passwordSettings.loading;
+          $modalInstance.close(true);
+          if ($scope.action == 'disable') {
+            ErrorService.alert(
+              _('error_modal_password_disabled_title'),
+              _('error_modal_password_disabled_descripion')
+            );
+          } else {
+            ErrorService.alert(
+              _('error_modal_password_success_title'),
+              _('error_modal_password_success_descripion')
+            );
+          }
+        }, function (error) {
+          switch (error.type) {
+            case 'PASSWORD_HASH_INVALID':
+            case 'NEW_PASSWORD_BAD':
+              $scope.passwordSettings.error_field = 'cur_password';
+              error.handled = true;
+              $scope.$broadcast('cur_password_focus');
+              break;
+            case 'NEW_PASSWORD_BAD':
+              $scope.passwordSettings.error_field = 'new_password';
+              error.handled = true;
+              break;
+            case 'EMAIL_INVALID':
+              $scope.passwordSettings.error_field = 'email';
+              error.handled = true;
+              break;
+            case 'EMAIL_UNCONFIRMED':
+              ErrorService.alert(
+                _('error_modal_email_unconfirmed_title'),
+                _('error_modal_email_unconfirmed_descripion')
+              );
+              $modalInstance.close(true);
+              error.handled = true;
+              break;
+          }
+          delete $scope.passwordSettings.loading;
+        });
+      })
+    }
+
+    switch ($scope.action) {
+      case 'disable':
+        $scope.passwordSettings.new_password = '';
+        break;
+      case 'create':
+        onContentLoaded(function () {
+          $scope.$broadcast('new_password_focus');
+        });
+        break;
+
+    }
+
+    $scope.$watch('passwordSettings.new_password', function (newValue) {
+      var len = newValue && newValue.length || 0;
+      if (!len) {
+        $scope.passwordSettings.hint = '';
+      }
+      else if (len <= 3) {
+        $scope.passwordSettings.hint = '***';
+      }
+      else {
+        $scope.passwordSettings.hint = newValue.charAt(0) + (new Array(len - 1)).join('*') + newValue.charAt(len - 1);
+      }
+      $scope.$broadcast('value_updated');
+    })
+  })
+
+  .controller('PasswordRecoveryModalController', function ($scope, $q, _, PasswordManager, MtpApiManager, ErrorService, $modalInstance) {
+
+    $scope.checkCode = function () {
+      $scope.recovery.updating = true;
+
+      PasswordManager.recover($scope.recovery.code, $scope.options).then(function (result) {
+        ErrorService.alert(
+          _('error_modal_password_disabled_title'),
+          _('error_modal_password_disabled_descripion')
+        );
+        $modalInstance.close(result);
+      }, function (error) {
+        delete $scope.recovery.updating;
+        switch (error.type) {
+          case 'CODE_EMPTY':
+          case 'CODE_INVALID':
+            $scope.recovery.error_field = 'code';
+            error.handled = true;
+            break;
+
+          case 'PASSWORD_EMPTY':
+          case 'PASSWORD_RECOVERY_NA':
+          case 'PASSWORD_RECOVERY_EXPIRED':
+            $modalInstance.dismiss();
+            error.handled = true;
+            break;
+        }
+      });
+    };
+
+  })
+
   .controller('ContactsModalController', function ($scope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
 
     $scope.contacts = [];
@@ -3115,19 +3367,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return MtpApiManager.invokeApi('messages.editChatTitle', {
         chat_id: $scope.chatID,
         title: $scope.group.name
-      }).then(function (editResult) {
-        ApiUpdatesManager.processUpdateMessage({
-          _: 'updates',
-          users: editResult.users,
-          chats: editResult.chats,
-          seq: 0,
-          updates: [{
-            _: 'updateNewMessage',
-            message: editResult.message,
-            pts: editResult.pts,
-            pts_count: editResult.pts_count
-          }]
-        });
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
 
         var peerString = AppChatsManager.getChatString($scope.chatID);
         $rootScope.$broadcast('history_focus', {peerString: peerString});
