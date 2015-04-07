@@ -122,6 +122,9 @@ TLSerialization.prototype.storeDouble = function (f) {
 TLSerialization.prototype.storeString = function (s, field) {
   this.debug && console.log('>>>', s, (field || '') + ':string');
 
+  if (s === undefined) {
+    s = '';
+  }
   var sUTF8 = unescape(encodeURIComponent(s));
 
   this.checkLength(sUTF8.length + 8);
@@ -150,6 +153,9 @@ TLSerialization.prototype.storeString = function (s, field) {
 TLSerialization.prototype.storeBytes = function (bytes, field) {
   if (bytes instanceof ArrayBuffer) {
     bytes = new Uint8Array(bytes);
+  }
+  else if (bytes === undefined) {
+    bytes = [];
   }
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 

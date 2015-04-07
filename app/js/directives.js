@@ -2840,7 +2840,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      $scope.$on('value_updated', function (event, args) {
+      $scope.$on('value_updated', function () {
         setZeroTimeout(function () {
           updateHasValueClass();
         });
@@ -2858,6 +2858,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       element.on('keydown', function (event) {
         if (event.keyCode == 13) {
           element.trigger('submit');
+          return cancelEvent(event);
         }
       });
     };

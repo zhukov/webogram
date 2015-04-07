@@ -242,6 +242,9 @@ input[type="number"] {
   padding: 0;
   margin: 0 0 22px;
 }
+.md-input-grouped {
+  margin-bottom: 12px;
+}
 
 .md-input-label {
   font-weight: normal;
@@ -974,6 +977,12 @@ a.tg_radio_on:hover i.icon-radio {
   font-size: 13px;
   line-height: 160%;
 }
+.login_form_hint {
+  color: #999;
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 160%;
+}
 .login_form_messaging {
   color: #999;
   font-size: 13px;
@@ -1000,6 +1009,15 @@ a.tg_radio_on:hover i.icon-radio {
   &:last-child {
     margin-bottom: 30px;
   }
+}
+
+.login_forgot_button {
+  text-align: center;
+  margin: 30px 0 10px;
+}
+.login_reset_button {
+  text-align: center;
+  margin: 10px 0 0;
 }
 
 /* IM page start */
@@ -3363,6 +3381,15 @@ a.countries_modal_search_clear {
     &:hover {
       text-decoration: none;
     }
+    &.pull-right {
+      color: #3a6d99;
+    }
+  }
+
+  &_text {
+    display: block;
+    padding: 4px 0;
+    color: #777;
   }
 
   &_version {

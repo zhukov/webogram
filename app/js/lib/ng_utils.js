@@ -651,7 +651,7 @@ angular.module('izhukov.utils', [])
       awaiting = {},
       webCrypto = Config.Modes.webcrypto && window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle)/* || window.msCrypto && window.msCrypto.subtle*/,
       useSha1Crypto = webCrypto && webCrypto.digest !== undefined,
-      useSha2Crypto = webCrypto && webCrypto.digest !== undefined,
+      useSha256Crypto = webCrypto && webCrypto.digest !== undefined,
       finalizeTask = function (taskID, result) {
         var deferred = awaiting[taskID];
         if (deferred !== undefined) {
@@ -729,8 +729,8 @@ angular.module('izhukov.utils', [])
         return sha1HashSync(bytes);
       });
     },
-    sha2Hash: function (bytes) {
-      if (useSha2Crypto) {
+    sha256Hash: function (bytes) {
+      if (useSha256Crypto) {
         var deferred = $q.defer(),
             bytesTyped = Array.isArray(bytes) ? convertToUint8Array(bytes) : bytes;
         // console.log(dT(), 'Native sha1 start');
@@ -739,7 +739,7 @@ angular.module('izhukov.utils', [])
           deferred.resolve(digest);
         }, function  (e) {
           console.error('Crypto digest error', e);
-          useSha2Crypto = false;
+          useSha256Crypto = false;
           deferred.resolve(sha256HashSync(bytes));
         });
 

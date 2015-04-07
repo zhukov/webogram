@@ -5,6 +5,7 @@
     <h4 ng-if="error" class="md_simple_header" ng-switch="error.type">
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_title"></span>
       <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_not_found_title"></span>
+      <span ng-switch-when="PASSWORD_RECOVERY_NA" my-i18n="error_modal_recovery_na_title"></span>
       <span ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400" my-i18n="error_modal_bad_request_title"></span>
         <span ng-switch-when="401" my-i18n="error_modal_unauthorized_title"></span>
@@ -37,6 +38,7 @@
       <span ng-switch-when="USERNAME_OCCUPIED" my-i18n="error_modal_username_occupied_description"></span>
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_description"></span>
       <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_username_not_found_description"></span>
+      <span ng-switch-when="PASSWORD_RECOVERY_NA" my-i18n="error_modal_recovery_na_description"></span>
 
 
       <div ng-switch-default ng-switch="error.code">
@@ -66,7 +68,7 @@ Stack: {{error.originalError.stack || error.stack}}</textarea>
   </div>
 
   <div class="md_simple_modal_footer">
-    <button class="btn btn-md btn-md-primary" ng-click="$dismiss()">
+    <button class="btn btn-md btn-md-primary" ng-click="$dismiss()" my-focused>
       <span my-i18n="modal_ok"></span>
     </button>
   </div>
