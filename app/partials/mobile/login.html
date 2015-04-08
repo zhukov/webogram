@@ -6,7 +6,7 @@
         <ul class="nav navbar-nav navbar-quick-nav">
           <li class="navbar-quick-right login_head_submit_wrap">
             <a class="disabled" disabled="disabled" ng-if="progress.enabled" class="login_head_submit_progress">
-              <my-i18n ng-if="!credentials.phone_code_hash" msgid="login_generating_key"></my-i18n><my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n><span my-loading-dots></span>
+              <my-i18n ng-if="!credentials.phone_code_hash" msgid="login_generating_key"></my-i18n><my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" msgid="login_checking_password"></my-i18n><span my-loading-dots></span>
             </a>
             <a ng-if="!progress.enabled &amp;&amp; !credentials.phone_code_hash" ng-click="sendCode()">
               <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
@@ -15,6 +15,9 @@
               <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
             </a>
             <a ng-if="!progress.enabled &amp;&amp; credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" ng-click="logIn(true)">
+              <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
+            </a>
+            <a ng-if="!progress.enabled &amp;&amp; credentials.phone_code_valid &amp;&amp; credentials.password_needed" ng-click="checkPassword()">
               <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
             </a>
           </li>
@@ -104,6 +107,28 @@
           <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_last_name"></label>
           <label ng-switch-default class="md-input-label" my-i18n="login_last_name"></label>
           <input autocomplete="off" class="md-input" name="last_name" type="text" ng-model="credentials.last_name" />
+        </div>
+
+      </form>
+
+      <form name="myPasswordForm" ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" ng-submit="checkPassword()">
+        <h3 class="login_form_head" my-i18n="login_password_title"></h3>
+        <p class="login_form_lead" my-i18n="login_password_label"></p>
+
+        <div class="md-input-group" ng-class="{'md-input-error': error.field == 'password'}" my-labeled-input ng-switch="error.field == 'password'">
+          <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_password"></label>
+          <label ng-switch-default class="md-input-label" my-i18n="login_password"></label>
+          <input autocomplete="off" class="md-input" my-focused name="password" type="password" ng-model="credentials.password" my-submit-on-enter required />
+        </div>
+
+        <p ng-if="password.hint.length > 0" class="login_form_hint" ng-bind="password.hint"></p>
+
+        <div class="login_forgot_button">
+          <button class="btn btn-md" ng-click="forgotPassword($event)" my-i18n="login_password_forgot_link"></button>
+        </div>
+
+        <div ng-if="canReset" class="login_reset_button">
+          <button class="btn btn-md btn-md-danger" ng-click="resetAccount($event)" my-i18n="login_account_reset"></button>
         </div>
 
       </form>
