@@ -349,7 +349,7 @@
     "conversation_select_modal_contacts": "Контакты",
     "conversation_one_selected": "{name1}",
     "conversation_two_selected": "{name1} и {name2}",
-    "conversation_many_selected": "{name1}, {name2} и ещё {count}",
+    "conversation_many_selected": "{name1}, {name2} и {count} других",
     "phonebook_modal_title": "Телефонная книга",
     "phonebook_modal_deselect_all": "Отменить выбор",
     "phonebook_modal_select_all": "Выбрать всё",
