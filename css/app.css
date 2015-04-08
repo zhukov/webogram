@@ -1161,6 +1161,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .btn-md-danger,.btn-md-danger:focus,.btn-md-danger:hover{color:#c05f5a}
 .btn-md-danger:hover{background:#fbe7e6}
 .md-input-group{height:50px;border-bottom:1px solid #e6e6e6;padding:0;margin:0 0 22px}
+.md-input-grouped{margin-bottom:12px}
 .md-input-label{font-weight:400;color:#999;cursor:pointer;display:block;font-size:13px;margin:0;padding:0;z-index:1;pointer-events:none;-webkit-font-smoothing:antialiased;transform-origin:left center;-webkit-transform-origin:left center;-webkit-transform:translate3d(0,22px,0);transform:translate3d(0,22px,0)}
 .md-input-animated .md-input-group,.md-input-animated .md-input-label{-webkit-transition:all .15s cubic-bezier(.35,0,.25,1);transition:all .15s cubic-bezier(.35,0,.25,1)}
 .md-input{color:#000;background:#fff;display:inline-block;border:0;outline:0;font-size:13px;padding:3px 0;margin:3px 0 0;width:100%;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
@@ -1249,6 +1250,7 @@ a.tg_radio_on:hover i.icon-radio{background-color:#5785aa}
 .img_fullsize_progress_overlay{position:absolute;width:100%;height:100%}
 .img_fullsize_progress_wrap{position:relative}
 .img_fullsize_progress{position:absolute;bottom:0;left:0;width:100%;height:25px;margin:0;background:rgba(0,0,0,.5);border:0;border-radius:0;padding:10px}
+.nano-content{outline:0!important}
 .login_head_bg{background:#5682a3;height:226px}
 .login_page{margin:-131px auto 90px;max-width:404px}
 .login_head_wrap{height:75px}
@@ -1276,11 +1278,14 @@ a.tg_radio_on:hover i.icon-radio{background-color:#5785aa}
 .login_footer_about_wrap p:last-child{margin:0}
 .login_form_head{color:#222;margin:0 0 20px;font-size:15px;font-weight:700}
 .login_form_lead{color:#999;margin:15px 0 30px;font-size:13px;line-height:160%}
+.login_form_hint{color:#999;margin:0 0 20px;font-size:13px;line-height:160%}
 .login_form_messaging{color:#999;font-size:13px;margin-top:20px;line-height:160%}
 .login_phone_head{color:#222;font-size:15px;font-weight:700;text-align:center;margin:0}
 .login_edit_phone{margin:5px 0 15px;text-align:center}
 .login_smscode_lead{color:#999;margin:15px 0;line-height:160%;text-align:center}
 .login_smscode_lead:last-child{margin-bottom:30px}
+.login_forgot_button{text-align:center;margin:30px 0 10px}
+.login_reset_button{text-align:center;margin:10px 0 0}
 .im_dialogs_empty_wrap{margin:60px 50px;text-align:center}
 .im_dialogs_import_phonebook{margin-top:10px}
 .im_dialogs_panel{padding:12px 12px 6px;position:relative}
@@ -1385,7 +1390,7 @@ div.im_message_video_thumb{position:relative}
 .im_message_document_thumb_wrap{border-radius:2px;overflow:hidden;background:#f2f2f2;width:100px;min-height:38px;max-height:100px;margin-right:10px;text-align:center;float:left;line-height:0}
 img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:middle}
 .im_message_document_name_wrap{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:265px;padding:0 0 1px}
-.im_message_document_actions{width:265px}
+.im_message_document_actions,.im_message_website_description{width:265px}
 .im_message_document_name{color:#3a6d99;display:inline-block;font-weight:700;max-width:170px;overflow:hidden;vertical-align:text-top;white-space:nowrap;text-overflow:ellipsis}
 .im_message_document_size{color:#999;padding-left:2px;vertical-align:text-top}
 .audio_player_actions a,.im_message_document_actions a{margin-right:10px}
@@ -1409,7 +1414,7 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .audio_player_progress_wrap{overflow:hidden}
 .audio_player_progress_wrap .tg_down_progress{margin-top:5px}
 .im_message_download_progress_wrap,.im_message_upload_progress_wrap{margin-top:5px;width:200px}
-.im_message_document_thumbed .im_message_document_actions,.im_message_document_thumbed .im_message_document_name_wrap,.im_message_document_thumbed .im_message_download_progress_wrap,.im_message_document_thumbed .im_message_upload_progress_wrap{width:207px}
+.im_message_document_thumbed .im_message_document_actions,.im_message_document_thumbed .im_message_document_name_wrap,.im_message_document_thumbed .im_message_download_progress_wrap,.im_message_document_thumbed .im_message_upload_progress_wrap,.im_message_document_thumbed .im_message_website_description{width:207px}
 .im_message_document_thumbed .im_message_document_name{max-width:110px}
 .im_message_video .im_message_document_actions,.im_message_video .im_message_document_name_wrap,.im_message_video .im_message_download_progress_wrap{width:152px}
 .im_message_video .im_message_document_name_wrap{margin-top:5px}
@@ -1579,6 +1584,18 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .contacts_modal_members_list .contacts_modal_contact_wrap.active .icon-contact-tick{background-position:-9px -481px;opacity:1}
 .contacts_modal_members_list .disabled{pointer-events:none}
 .contacts_modal_members_list .disabled .icon-contact-tick{display:none}
+.sessions_modal_session{padding:8px 16px}
+.sessions_modal_sessions_header{color:#999;font-size:13px;margin-left:16px;margin-top:20px;font-weight:700}
+.sessions_modal_terminate_all_wrap{margin:5px 0;text-align:center}
+.sessions_modal_sessions_list{margin-bottom:20px}
+.session_active_date_online{color:#3a6d99}
+.sessions_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
+.session_active_date{color:#999}
+.session_meta_wrap{text-align:right}
+.session_terminate_btn{margin-top:17px}
+.sessions_modal_session_app{font-weight:700;font-style:12px;margin-bottom:3px}
+.sessions_modal_session_device{margin:3px 0}
+.sessions_modal_session_location{color:#777}
 .confirm_modal_window .modal-dialog,.error_modal_window .modal-dialog,.md_simple_modal_window .modal-dialog{max-width:348px}
 .im_edit_panel_title{text-align:center;margin:0;font-size:14px;line-height:34px}
 .im_message_focus .audio_player_duration,.im_message_focus .audio_player_size,.im_message_focus .im_message_date,.im_message_focus .im_message_document_size,.im_message_focus .im_message_fwd_date{color:#899daf}
@@ -1700,6 +1717,8 @@ a.peer_modal_photo,div.peer_modal_photo{display:block;margin-right:19px}
 .md_modal_section_link{color:inherit;display:block;padding:4px 0}
 .md_modal_section_link_wrap{padding-bottom:15px}
 .md_modal_section_link:hover{text-decoration:none}
+.md_modal_section_link.pull-right{color:#3a6d99}
+.md_modal_section_text{display:block;padding:4px 0;color:#777}
 .md_modal_section_version{color:#777;display:inline-block;margin-left:-70px;position:absolute}
 .md_modal_section_splitter{border-top:1px solid #dfdfdf;height:12px;background:#f5f5f5;-webkit-box-shadow:inset 0 1px 1px #ededed;-moz-box-shadow:inset 0 1px 1px #ededed;box-shadow:inset 0 1px 1px #ededed}
 .md_modal_versioned_section_wrap{position:relative;border-bottom:1px solid #ebebeb;margin:19px 0 0 120px;padding-right:28px}

@@ -1157,6 +1157,9 @@ a.mobile_modal_action .tg_checkbox_label {
 .contacts_modal_members_list li:last-child a {
   border-bottom: 0;
 }
+.sessions_modal_wrap .mobile_modal_body {
+  padding: 0;
+}
 .mobile_modal .peer_select_modal_wrap .modal-body {
   padding: 0;
 }

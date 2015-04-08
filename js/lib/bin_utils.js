@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.2 - messaging web application for MTProto
+ * Webogram v0.4.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -315,6 +315,16 @@ function sha1HashSync (bytes) {
 
 function sha1BytesSync (bytes) {
   return bytesFromArrayBuffer(sha1HashSync(bytes));
+}
+
+function sha256HashSync (bytes) {
+  // console.log(dT(), 'SHA-2 hash start', bytes.byteLength || bytes.length);
+  var hashWords = CryptoJS.SHA256(bytesToWords(bytes));
+  // console.log(dT(), 'SHA-2 hash finish');
+
+  var hashBytes = bytesFromWords(hashWords);
+
+  return hashBytes;
 }
 
 
