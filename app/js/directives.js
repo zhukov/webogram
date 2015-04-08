@@ -843,6 +843,33 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('mySessionsList', function($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var sessionsWrap = $('.sessions_wrap', element)[0];
+
+      onContentLoaded(function () {
+        $(sessionsWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
+        updateSizes();
+      });
+
+      function updateSizes () {
+        $(element).css({
+          height: $($window).height()
+                    - (Config.Mobile ? 46 + 18 : 200)
+        });
+        $(sessionsWrap).nanoScroller();
+      }
+
+      $($window).on('resize', updateSizes);
+    };
+
+  })
+
   .directive('myHistory', function ($window, $timeout, $rootScope, $transition) {
 
     return {

@@ -37,6 +37,7 @@
 	"settings_modal_edit_username": "Change username",
 	"settings_modal_empty_username_set": "Set username",
 	"settings_modal_terminate_sessions": "Terminate all sessions",
+	"settings_modal_active_sessions": "Active sessions",
 	"settings_modal_settings": "Settings",
 	"settings_modal_notification_alert": "Notification alerts",
 	"settings_modal_vibrate": "Vibrate",
@@ -73,6 +74,14 @@
 	"password_create_submit": "Save",
 	"password_delete_active": "Deleting...",
 	"password_delete_submit": "Delete password",
+
+	"sessions_modal_title": "Active Sessions",
+	"sessions_modal_loading": "Loading{dots}",
+	"sessions_modal_current_session": "Current session",
+	"sessions_modal_session_online": "online",
+	"sessions_modal_terminate_one": "Terminate",
+	"sessions_modal_terminate_all": "Terminate all other sessions",
+	"sessions_modal_active_sessions": "Active sessions",
 
 	"page_title_pluralize_notifications": "{'0': 'No notifications', 'one': '1 notification', 'other': '{} notifications'}",
 
@@ -152,7 +161,8 @@
 	"confirm_modal_logout": "Are you sure you want to log out?",
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
-	"confirm_modal_terminate_sessions": "Are you sure you want to log out all devices except for the current one?",
+	"confirm_modal_terminate_sessions": "Are you sure you want to log out all devices except for this one?",
+	"confirm_modal_terminate_session": "Are you sure you want to log out this device?",
 	"confirm_modal_clipboard_file_send": "Are you sure to send file(s) from clipboard?",
 	"confirm_modal_clipboard_X_files_send": "{'one': 'Are you sure to send file from clipboard?', 'other': 'Are you sure to send {} files from clipboard?'}",
 	"confirm_modal_message_delete": "Are you sure you want to delete the message?",
