@@ -58,8 +58,10 @@
 	"settings_modal_set_password": "Set Additional Password",
 	"settings_modal_change_password": "Change password",
 	"settings_modal_disable_password": "Turn off",
+	"settings_modal_disable_password_mobile": "Turn password off",
 	"settings_modal_password_email_pending": "Click the link in {email} to complete Two-Step Verification setup.",
 	"settings_modal_password_email_pending_cancel": "Abort",
+	"settings_modal_password_email_pending_cancel_mobile": "Abort Password",
 
 	"password_delete_title": "Turn Password Off",
 	"password_change_title": "Two-Step Verification",
