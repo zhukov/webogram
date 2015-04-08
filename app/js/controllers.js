@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.2 - messaging web application for MTProto
+ * Webogram v0.4.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -791,22 +791,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
 
         return result;
-      }, function (error) {
-        if (error.code == 401) {
-          MtpApiManager.logOut()['finally'](function () {
-            if (location.protocol == 'http:' &&
-                !Config.Modes.http &&
-                Config.App.domains.indexOf(location.hostname) != -1) {
-              location.href = location.href.replace(/^http:/, 'https:');
-            } else {
-              location.hash = '/login';
-              AppRuntimeManager.reload();
-            }
-          });
-          error.handled = true;
-        }
-
-        return $q.reject();
       });
     };
 
@@ -2626,6 +2610,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.password = {_: 'account.noPassword'};
     updatePasswordState();
     var updatePasswordTimeout = false;
+    var stopped = false;
 
     $scope.changePassword = function (options) {
       options = options || {};
@@ -2660,11 +2645,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       updatePasswordTimeout = false;
       PasswordManager.getState().then(function (result) {
         $scope.password = result;
-        if (result._ == 'account.noPassword' && result.email_unconfirmed_pattern) {
+        if (result._ == 'account.noPassword' && result.email_unconfirmed_pattern && !stopped) {
           updatePasswordTimeout = $timeout(updatePasswordState, 5000);
         }
       });
     }
+
+    $scope.$on('$destroy', function () {
+      $timeout.cancel(updatePasswordTimeout);
+      stopped = true;
+    });
 
 
     function onPhotoSelected (photo) {
@@ -2997,6 +2987,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.slice = {limit: 20, limitDelta: 20};
 
     var updateSessionsTimeout = false;
+    var stopped = false;
 
     function updateSessions () {
       $timeout.cancel(updateSessionsTimeout);
@@ -3018,7 +3009,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           return sB.date_active - sA.date_active;
         });
-        updateSessionsTimeout = $timeout(updateSessions, 5000);
+        if (!stopped) {
+          updateSessionsTimeout = $timeout(updateSessions, 5000);
+        }
       })
     }
 
@@ -3040,6 +3033,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (update._ == 'updateNewAuthorization') {
         updateSessions();
       }
+    });
+
+    $scope.$on('$destroy', function () {
+      $timeout.cancel(updateSessionsTimeout);
+      stopped = true;
     });
 
   })

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.2 - messaging web application for MTProto
+ * Webogram v0.4.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -7,7 +7,7 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, ErrorService, qSync, $q, TelegramMeWebService) {
+.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $q, TelegramMeWebService) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
@@ -134,7 +134,20 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             error.stack = error.originalError && error.originalError.stack || error.stack || (new Error()).stack;
             setTimeout(function () {
               if (!error.handled) {
-                ErrorService.show({error: error});
+                if (error.code == 401) {
+                  mtpLogOut()['finally'](function () {
+                    if (location.protocol == 'http:' &&
+                        !Config.Modes.http &&
+                        Config.App.domains.indexOf(location.hostname) != -1) {
+                      location.href = location.href.replace(/^http:/, 'https:');
+                    } else {
+                      location.hash = '/login';
+                      AppRuntimeManager.reload();
+                    }
+                  });
+                } else {
+                  ErrorService.show({error: error});
+                }
                 error.handled = true;
               }
             }, 100);
