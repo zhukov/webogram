@@ -3082,13 +3082,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $modalInstance.close(true);
           if ($scope.action == 'disable') {
             ErrorService.alert(
-              _('error_modal_password_disabled_title'),
-              _('error_modal_password_disabled_descripion')
+              _('error_modal_password_disabled_title_raw'),
+              _('error_modal_password_disabled_descripion_raw')
             );
           } else {
             ErrorService.alert(
-              _('error_modal_password_success_title'),
-              _('error_modal_password_success_descripion')
+              _('error_modal_password_success_title_raw'),
+              _('error_modal_password_success_descripion_raw')
             );
           }
         }, function (error) {
@@ -3109,8 +3109,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               break;
             case 'EMAIL_UNCONFIRMED':
               ErrorService.alert(
-                _('error_modal_email_unconfirmed_title'),
-                _('error_modal_email_unconfirmed_descripion')
+                _('error_modal_email_unconfirmed_title_raw'),
+                _('error_modal_email_unconfirmed_descripion_raw')
               );
               $modalInstance.close(true);
               error.handled = true;
@@ -3155,8 +3155,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       PasswordManager.recover($scope.recovery.code, $scope.options).then(function (result) {
         ErrorService.alert(
-          _('error_modal_password_disabled_title'),
-          _('error_modal_password_disabled_descripion')
+          _('error_modal_password_disabled_title_raw'),
+          _('error_modal_password_disabled_descripion_raw')
         );
         $modalInstance.close(result);
       }, function (error) {
