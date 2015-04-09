@@ -53,18 +53,37 @@ The app is based on AngularJS JavaScript framework, written in pure JavaScript. 
 ### Running locally
 
 
+Project repository is based on angularjs-seed and includes gulp tasks, so it's easy to launch the app locally on your desktop.
+Install [node.js](http://nodejs.org/) and run following commands in the project directory
+
+```
+sudo npm install -g gulp
+sudo npm install
+```
+
+This will install all the needed dependencies.
+
+
 #### Running web-server
 
-Project repository is based on angularjs-seed and includes a simple web-server, so it's easy to launch the app locally on your desktop.
-Install [node.js](http://nodejs.org/) and run `node server.js`. Open page http://localhost:8000/app/index.html in your browser.
+
+Just run `gulp watch` task to start web server and livereload task.
+Open page http://localhost:8000/app/index.html in your browser.
+
+
 
 #### Running as Chrome Packaged App
 
 To run this application in Google Chrome browser as a packaged app, open this URL in Chrome: `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram application should appear in the list.
 
+Launch `gulp watch` command to watch for file changes and automatically rebuild the app.
+
+
 #### Running as Firefox OS App
 
 To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or use `Shift + F8` shortcut). Choose "Open packaged app" from Project menu and select `app` folder.
+
+Launch `gulp watch` command to watch for file changes and automatically rebuild the app.
 
 
 ### Third party libraries
