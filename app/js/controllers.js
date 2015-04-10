@@ -1805,7 +1805,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('PhotoModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
+  .controller('PhotoModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, AppWebPagesManager, PeersSelectService, ErrorService) {
 
     $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
     $scope.nav = {};
@@ -1861,55 +1861,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     updatePrevNext();
 
-    AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, 0, 1000).then(function (searchCachedResult) {
-      if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
-        list = searchCachedResult.history;
-        maxID = list[list.length - 1];
-
-        updatePrevNext();
-        preloadPhotos(+1);
-      }
-      loadMore();
-    }, loadMore);
-
-
-    var jump = 0;
-    function movePosition (sign) {
-      var curIndex = list.indexOf($scope.messageID),
-          index = curIndex >= 0 ? curIndex + sign : 0,
-          curJump = ++jump;
-
-      var promise = index >= list.length ? loadMore() : $q.when();
-      promise.then(function () {
-        if (curJump != jump) {
-          return;
-        }
-
-        var messageID = list[index];
-        var message = AppMessagesManager.getMessage(messageID);
-        if (!message ||
-            !message.media ||
-            !message.media.photo ||
-            !message.media.photo.id) {
-          console.error('Invalid photo message', index, list, messageID, message);
-          return;
-        }
-
-        $scope.messageID = messageID;
-        $scope.photoID = message.media.photo.id;
-        $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
-
-        preloaded[$scope.messageID] = true;
-
-        updatePrevNext();
-
-        if (sign > 0 && hasMore && list.indexOf(messageID) + 1 >= list.length) {
-          loadMore();
-        } else {
-          preloadPhotos(sign);
-        }
-      });
-    };
 
     function preloadPhotos (sign) {
       // var preloadOffsets = sign < 0 ? [-1,-2,1,-3,2] : [1,2,-1,3,-2];
@@ -1925,30 +1876,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       })
     }
-
-    var loadingPromise = false;
-    function loadMore () {
-      if (loadingPromise) return loadingPromise;
-
-      return loadingPromise = AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, maxID).then(function (searchResult) {
-        if (searchResult.history.length) {
-          maxID = searchResult.history[searchResult.history.length - 1];
-          list = list.concat(searchResult.history);
-          hasMore = list.length < searchResult.count;
-        } else {
-          hasMore = false;
-        }
-
-        updatePrevNext(searchResult.count);
-        loadingPromise = false;
-
-        if (searchResult.history.length) {
-          return $q.reject();
-        }
-
-        preloadPhotos(+1);
-      });
-    };
 
     function updatePrevNext (count) {
       var index = list.indexOf($scope.messageID);
@@ -2000,6 +1927,83 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         list = newList;
       }
     });
+
+    if ($scope.webpageID) {
+      $scope.webpage = AppWebPagesManager.wrapForHistory($scope.webpageID);
+      return;
+    }
+
+    AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, 0, 1000).then(function (searchCachedResult) {
+      if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
+        list = searchCachedResult.history;
+        maxID = list[list.length - 1];
+
+        updatePrevNext();
+        preloadPhotos(+1);
+      }
+      loadMore();
+    }, loadMore);
+
+
+    var jump = 0;
+    function movePosition (sign) {
+      var curIndex = list.indexOf($scope.messageID),
+          index = curIndex >= 0 ? curIndex + sign : 0,
+          curJump = ++jump;
+
+      var promise = index >= list.length ? loadMore() : $q.when();
+      promise.then(function () {
+        if (curJump != jump) {
+          return;
+        }
+
+        var messageID = list[index];
+        var message = AppMessagesManager.getMessage(messageID);
+        var photoID = message && message.media && (message.media.photo && message.media.photo.id || message.media.webpage && message.media.webpage.photo && message.media.webpage.photo.id)
+        if (!photoID) {
+          console.error('Invalid photo message', index, list, messageID, message);
+          return;
+        }
+
+        $scope.messageID = messageID;
+        $scope.photoID = photoID;
+        $scope.photo = AppPhotosManager.wrapForFull($scope.photoID);
+
+        preloaded[$scope.messageID] = true;
+
+        updatePrevNext();
+
+        if (sign > 0 && hasMore && list.indexOf(messageID) + 1 >= list.length) {
+          loadMore();
+        } else {
+          preloadPhotos(sign);
+        }
+      });
+    };
+
+    var loadingPromise = false;
+    function loadMore () {
+      if (loadingPromise) return loadingPromise;
+
+      return loadingPromise = AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, maxID).then(function (searchResult) {
+        if (searchResult.history.length) {
+          maxID = searchResult.history[searchResult.history.length - 1];
+          list = list.concat(searchResult.history);
+          hasMore = list.length < searchResult.count;
+        } else {
+          hasMore = false;
+        }
+
+        updatePrevNext(searchResult.count);
+        loadingPromise = false;
+
+        if (searchResult.history.length) {
+          return $q.reject();
+        }
+
+        preloadPhotos(+1);
+      });
+    };
 
   })
 

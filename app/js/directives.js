@@ -460,11 +460,18 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myMessageWebpage', function(AppPhotosManager) {
     return {
       scope: {
-        'webpage': '=myMessageWebpage'
+        'webpage': '=myMessageWebpage',
+        'messageId': '=messageId'
       },
       templateUrl: templateUrl('message_attach_webpage'),
       link: function ($scope) {
         $scope.openPhoto = AppPhotosManager.openPhoto;
+
+        $scope.$on('webpage_updated', function (e, eventData) {
+          if ($scope.webpage && $scope.webpage.id == eventData.id) {
+            $scope.$emit('ui_height');
+          }
+        });
       }
     };
   })

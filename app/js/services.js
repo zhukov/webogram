@@ -1398,7 +1398,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
           case 'messageMediaWebPage':
-            AppWebPagesManager.saveWebPage(apiMessage.media.webpage);
+            AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.id);
             break;
         }
       }
@@ -1968,6 +1968,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
 
         case 'messageMediaWebPage':
+          if (!message.media.webpage ||
+              message.media.webpage._ == 'webPageEmpty') {
+            delete message.media;
+            break;
+          }
           message.media.webpage = AppWebPagesManager.wrapForHistory(message.media.webpage.id);
           break;
       }
@@ -2495,6 +2500,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   });
 
+  $rootScope.$on('webpage_updated', function (e, eventData) {
+    angular.forEach(eventData.msgs, function (msgID) {
+      var historyMessage = messagesForHistory[msgID];
+      if (historyMessage) {
+        historyMessage.media = {
+          _: 'messageMediaWebPage',
+          webpage: AppWebPagesManager.wrapForHistory(eventData.id)
+        };
+      }
+    })
+  })
+
   return {
     getDialogs: getDialogs,
     getHistory: getHistory,
@@ -2688,6 +2705,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     else if (list && list.m > 0) {
       scope.messageID = list.m;
+      if (list.w) {
+        scope.webpageID = list.w;
+      }
     }
 
     var modalInstance = $modal.open({
@@ -2780,16 +2800,30 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     );
 
     if (messageID) {
-      if (pendingWebPages[webpage.id] === undefined) {
-        pendingWebPages[webpage.id] = {};
+      if (pendingWebPages[apiWebPage.id] === undefined) {
+        pendingWebPages[apiWebPage.id] = {};
       }
-      pendingWebPages[webpage.id][messageID] = true;
+      pendingWebPages[apiWebPage.id][messageID] = true;
       webpages[apiWebPage.id] = apiWebPage;
     }
+
     if (webpages[apiWebPage.id] === undefined) {
       webpages[apiWebPage.id] = apiWebPage;
     } else {
       safeReplaceObject(webpages[apiWebPage.id], apiWebPage);
+    }
+
+    if (!messageID &&
+        pendingWebPages[apiWebPage.id] !== undefined) {
+      var msgs = [];
+      angular.forEach(pendingWebPages[apiWebPage.id], function (t, msgID) {
+        msgs.push(msgID);
+      });
+      $rootScope.$broadcast('webpage_updated', {
+        id: apiWebPage.id,
+        msgs: msgs
+      });
+
     }
   };
 

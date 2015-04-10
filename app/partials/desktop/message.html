@@ -60,7 +60,7 @@
           <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio"></div>
           <div ng-switch-when="messageMediaGeo"       my-message-map></div>
           <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>
-          <div ng-switch-when="messageMediaWebPage"   class="im_message_webpage" my-message-webpage="historyMessage.media.webpage"></div>
+          <div ng-switch-when="messageMediaWebPage"   class="im_message_webpage" my-message-webpage="historyMessage.media.webpage" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaPending"   my-message-pending></div>
           <div ng-switch-when="messageMediaUnsupported">
             <div class="im_message_text">
