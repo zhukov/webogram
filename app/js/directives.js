@@ -457,12 +457,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_contact')
     };
   })
-  .directive('myMessageWebpage', function() {
+  .directive('myMessageWebpage', function(AppPhotosManager) {
     return {
       scope: {
         'webpage': '=myMessageWebpage'
       },
-      templateUrl: templateUrl('message_attach_webpage')
+      templateUrl: templateUrl('message_attach_webpage'),
+      link: function ($scope) {
+        $scope.openPhoto = AppPhotosManager.openPhoto;
+      }
     };
   })
   .directive('myMessagePending', function() {

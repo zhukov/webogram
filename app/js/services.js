@@ -792,7 +792,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -802,7 +802,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var pendingByRandomID = {};
   var pendingByMessageID = {};
   var pendingAfterMsgs = {};
-  var pendingWebPages = {};
   var sendFilePromise = $q.when();
   var tempID = -1;
 
@@ -1399,16 +1398,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
           case 'messageMediaWebPage':
-            var webpage = apiMessage.media.webpage;
-            if (webpage.photo && webpage.photo._ === 'photo') {
-              AppPhotosManager.savePhoto(webpage.photo);
-            } else {
-              delete webpage.photo;
-            }
-            if (pendingWebPages[webpage.id] === undefined) {
-              pendingWebPages[webpage.id] = {};
-            }
-            pendingWebPages[webpage.id][apiMessage.id] = true;
+            AppWebPagesManager.saveWebPage(apiMessage.media.webpage);
             break;
         }
       }
@@ -1978,9 +1968,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
 
         case 'messageMediaWebPage':
-          if (message.media.webpage.photo) {
-            message.media.webpage.photo = AppPhotosManager.wrapForHistory(message.media.webpage.photo.id, {website: true});
-          }
+          message.media.webpage = AppWebPagesManager.wrapForHistory(message.media.webpage.id);
           break;
       }
     }
@@ -2504,32 +2492,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
         });
         break;
-
-      case 'updateWebPage':
-        console.log('webpage update', update);
-        var webpage = update.webpage;
-        if (pendingWebPages[webpage.id] !== undefined) {
-          var message, historyMessage;
-          angular.forEach(pendingWebPages[webpage.id], function (t, msgID) {
-            if (message = messagesStorage[msgID]) {
-              message.media = {
-                _: 'messageMediaWebPage',
-                webpage: webpage
-              };
-            }
-            if (historyMessage = messagesForHistory[msgID]) {
-              if (webpage.photo) {
-                AppPhotosManager.savePhoto(webpage.photo);
-                webpage.photo = AppPhotosManager.wrapForHistory(webpage.photo.id, {website: true});
-              }
-              historyMessage.media = {
-                _: 'messageMediaWebPage',
-                webpage: webpage
-              };
-            }
-          });
-        }
-        break;
     }
   });
 
@@ -2792,6 +2754,66 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     wrapForFull: wrapForFull,
     openPhoto: openPhoto,
     downloadPhoto: downloadPhoto
+  }
+})
+
+.service('AppWebPagesManager', function ($modal, $window, $rootScope, MtpApiManager, AppPhotosManager, RichTextProcessor) {
+
+  var webpages = {};
+  var pendingWebPages = {};
+
+  function saveWebPage (apiWebPage, messageID) {
+    if (apiWebPage.photo && apiWebPage.photo._ === 'photo') {
+      AppPhotosManager.savePhoto(apiWebPage.photo);
+    } else {
+      delete apiWebPage.photo;
+    }
+
+    apiWebPage.rTitle = RichTextProcessor.wrapRichText(
+      apiWebPage.title || apiWebPage.author,
+      {noLinks: true, noLinebreaks: true}
+    );
+    apiWebPage.rDescription = RichTextProcessor.wrapRichText(
+      apiWebPage.description, {
+        contextSite: apiWebPage.site_name || 'external'
+      }
+    );
+
+    if (messageID) {
+      if (pendingWebPages[webpage.id] === undefined) {
+        pendingWebPages[webpage.id] = {};
+      }
+      pendingWebPages[webpage.id][messageID] = true;
+      webpages[apiWebPage.id] = apiWebPage;
+    }
+    if (webpages[apiWebPage.id] === undefined) {
+      webpages[apiWebPage.id] = apiWebPage;
+    } else {
+      safeReplaceObject(webpages[apiWebPage.id], apiWebPage);
+    }
+  };
+
+  $rootScope.$on('apiUpdate', function (e, update) {
+    switch (update._) {
+      case 'updateWebPage':
+        saveWebPage(update.webpage);
+        break;
+    }
+  });
+
+  function wrapForHistory (webPageID) {
+    var webPage = angular.copy(webpages[webPageID]) || {_: 'webPageEmpty'};
+
+    if (webPage.photo && webPage.photo.id) {
+      webPage.photo = AppPhotosManager.wrapForHistory(webPage.photo.id, {website: webPage.type != 'photo' && webPage.type != 'video'});
+    }
+
+    return webPage;
+  }
+
+  return {
+    saveWebPage: saveWebPage,
+    wrapForHistory: wrapForHistory
   }
 })
 
@@ -3820,6 +3842,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var soundcloudRegex = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
   var spotifyRegex = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
 
+  var siteHashtags = {
+    Telegram: '#/im?q=%23{1}',
+    Twitter: 'https://twitter.com/hashtag/{1}',
+    Instagram: 'https://instagram.com/explore/tags/{1}/'
+  };
+
+  var siteMentions = {
+    Telegram: '#/im?p=%40{1}',
+    Twitter: 'https://twitter.com/{1}',
+    Instagram: 'https://instagram.com/{1}/'
+  };
 
   return {
     wrapRichText: wrapRichText,
@@ -3852,6 +3885,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         raw = text,
         html = [],
         url,
+        contextSite = options.contextSite || 'Telegram',
+        contextExternal = contextSite != 'Telegram',
         emojiFound = false,
         emojiTitle,
         emojiCoords;
@@ -3862,7 +3897,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       html.push(encodeEntities(raw.substr(0, match.index)));
 
       if (match[3]) { // telegram.me links
-        if (!options.noLinks) {
+        var contextUrl = !options.noLinks && siteMentions[contextSite];
+        if (match[2] != '@' && contextExternal) {
+          contextUrl = false;
+        }
+        if (contextUrl) {
           var attr = '';
           if (options.highlightUsername &&
               options.highlightUsername.toLowerCase() == match[3].toLowerCase() &&
@@ -3871,8 +3910,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           html.push(
             match[1],
-            '<a ' + attr + ' href="#/im?p=',
-            encodeURIComponent('@' + match[3]),
+            '<a ',
+            attr,
+            contextExternal ? ' target="_blank" ' : '',
+            ' href="',
+            contextUrl.replace('{1}', encodeURIComponent(match[3])),
             '">',
             encodeEntities(match[2] + match[3]),
             '</a>'
@@ -3970,11 +4012,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
       else if (match[10]) {
-        if (!options.noLinks) {
+        var contextUrl = !options.noLinks && siteHashtags[contextSite];
+        if (contextUrl) {
           html.push(
             encodeEntities(match[9]),
-            '<a href="#/im?q=',
-            encodeURIComponent(match[10]),
+            '<a ',
+            contextExternal ? ' target="_blank" ' : '',
+            'href="',
+            contextUrl.replace('{1}', encodeURIComponent(match[10].substr(1)))
+            ,
             '">',
             encodeEntities(match[10]),
             '</a>'
