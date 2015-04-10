@@ -2335,6 +2335,37 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
   })
 
+  .controller('EmbedModalController', function ($q, $sce, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, AppWebPagesManager, PeersSelectService, ErrorService) {
+
+    $scope.webpage = AppWebPagesManager.wrapForHistory($scope.webpageID);
+
+    $scope.iframeSrc = $sce.trustAsResourceUrl($scope.webpage.embed_url);
+
+    $scope.nav = {};
+
+    $scope.forward = function () {
+      var messageID = $scope.messageID;
+      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
+        angular.forEach(peerStrings, function (peerString) {
+          var peerID = AppPeersManager.getPeerID(peerString);
+          AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
+            if (peerStrings.length == 1) {
+              $rootScope.$broadcast('history_focus', {peerString: peerString});
+            }
+          });
+        });
+      });
+    };
+
+    $scope['delete'] = function () {
+      var messageID = $scope.messageID;
+      ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
+        AppMessagesManager.deleteMessages([messageID]);
+      });
+    };
+
+  })
+
   .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
 
     var peerString = AppUsersManager.getUserString($scope.userID);

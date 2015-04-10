@@ -2827,13 +2827,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   };
 
-  $rootScope.$on('apiUpdate', function (e, update) {
-    switch (update._) {
-      case 'updateWebPage':
-        saveWebPage(update.webpage);
-        break;
-    }
-  });
+  function openEmbed (webpageID, messageID) {
+    var scope = $rootScope.$new(true);
+
+    scope.webpageID = webpageID;
+    scope.messageID = messageID;
+
+    $modal.open({
+      templateUrl: templateUrl('embed_modal'),
+      windowTemplateUrl: templateUrl('media_modal_layout'),
+      controller: 'EmbedModalController',
+      scope: scope,
+      windowClass: 'photo_modal_window'
+    });
+  }
 
   function wrapForHistory (webPageID) {
     var webPage = angular.copy(webpages[webPageID]) || {_: 'webPageEmpty'};
@@ -2845,8 +2852,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return webPage;
   }
 
+  $rootScope.$on('apiUpdate', function (e, update) {
+    switch (update._) {
+      case 'updateWebPage':
+        saveWebPage(update.webpage);
+        break;
+    }
+  });
+
   return {
     saveWebPage: saveWebPage,
+    openEmbed: openEmbed,
     wrapForHistory: wrapForHistory
   }
 })

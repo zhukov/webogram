@@ -457,7 +457,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_contact')
     };
   })
-  .directive('myMessageWebpage', function(AppPhotosManager) {
+  .directive('myMessageWebpage', function(AppWebPagesManager, AppPhotosManager) {
     return {
       scope: {
         'webpage': '=myMessageWebpage',
@@ -466,6 +466,12 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_webpage'),
       link: function ($scope) {
         $scope.openPhoto = AppPhotosManager.openPhoto;
+        $scope.openEmbed = function ($event) {
+          if ($scope.webpage && $scope.webpage.embed_url) {
+            AppWebPagesManager.openEmbed($scope.webpage.id, $scope.messageId);
+            return cancelEvent($event);
+          }
+        };
 
         $scope.$on('webpage_updated', function (e, eventData) {
           if ($scope.webpage && $scope.webpage.id == eventData.id) {

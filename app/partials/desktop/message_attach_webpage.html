@@ -19,7 +19,7 @@
       <a href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
     </div>
     <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
-    <a class="im_message_video_thumb" ng-href="{{webpage.url}}" target="_blank" ng-style="::{width: video.thumb.width + 'px'}">
+    <a class="im_message_video_thumb" ng-click="openEmbed($event)" ng-href="{{webpage.url}}" target="_blank" ng-style="::{width: video.thumb.width + 'px'}">
       <span ng-if="webpage.duration > 0" class="im_message_video_duration" ng-bind="::webpage.duration | duration"></span>
       <i class="icon icon-videoplay"></i>
       <img
@@ -40,7 +40,7 @@
     </a>
     <div class="im_message_webpage_site" ng-bind="webpage.site_name"></div>
     <div class="im_message_webpage_title">
-      <a href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
+      <a ng-click="openEmbed($event)" href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
     </div>
     <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
   </div>
