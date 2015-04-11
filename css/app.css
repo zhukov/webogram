@@ -1355,7 +1355,7 @@ a.im_message_photo_thumb,a.im_message_video_thumb{display:block;overflow:hidden;
 img.im_message_photo_thumb,img.im_message_video_thumb{overflow:hidden;border-radius:2px}
 .im_message_video,a.im_message_photo_thumb{margin-top:5px}
 a.im_message_video_thumb{float:left;margin-right:15px;position:relative}
-img.im_message_video_thumb{-webkit-filter:blur(2px);-moz-filter:blur(2px);-o-filter:blur(2px);-ms-filter:blur(2px);filter:blur(2px);filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2')}
+img.im_message_video_thumb_blurred{-webkit-filter:blur(2px);-moz-filter:blur(2px);-o-filter:blur(2px);-ms-filter:blur(2px);filter:blur(2px);filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2')}
 div.im_message_video_thumb{position:relative}
 .im_message_video_duration{background:rgba(0,0,0,.4);color:#fff;position:absolute;bottom:4px;right:4px;padding:2px 6px;font-size:11px;line-height:15px;border-radius:2px;overflow:hidden;z-index:1}
 .icon-videoplay{position:absolute;display:inline-block;top:50%;left:50%;margin-left:-21px;margin-top:-21px;width:42px;height:42px;z-index:1;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:0 -590px}
@@ -1365,6 +1365,12 @@ div.im_message_video_thumb{position:relative}
 .is_2x .icon-geo-point{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .im_message_media_embed{position:relative;height:0;overflow:hidden;margin-top:5px}
 .im_message_media_embed iframe,.im_message_media_embed webview{position:absolute;top:0;left:0;width:100%;height:100%}
+.im_message_webpage_wrap{margin:3px 0;border-left:2px solid #7eaad1;padding-left:12px}
+.im_message_webpage_site{color:#999;font-weight:400;line-height:120%;margin-bottom:3px}
+.im_message_webpage_title{font-weight:700}
+.icon-circle{display:none;width:.5em;height:.5em;border-radius:.5em;background:#999;overflow:hidden;vertical-align:middle;margin:-2px 3px 0}
+.im_message_webpage_description{margin:2px 0}
+.im_message_webpage_article_photo{display:block;margin:5px 0 5px 5px}
 .im_message_video_embed{padding-bottom:56.25%}
 .im_message_insta_embed{padding-bottom:122%}
 .im_message_vine_embed{padding-bottom:100%}
