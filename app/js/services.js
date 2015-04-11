@@ -2777,7 +2777,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppWebPagesManager', function ($modal, $window, $rootScope, MtpApiManager, AppPhotosManager, RichTextProcessor) {
+.service('AppWebPagesManager', function ($modal, $sce, $window, $rootScope, MtpApiManager, AppPhotosManager, RichTextProcessor) {
 
   var webpages = {};
   var pendingWebPages = {};
@@ -2852,6 +2852,46 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return webPage;
   }
 
+  function wrapForFull (webPageID) {
+    var webPage = wrapForHistory(webPageID);
+
+    if (!webPage.embed_url) {
+      return webPage;
+    }
+
+    var fullWidth = $(window).width() - (Config.Mobile ? 0 : 10);
+    var fullHeight = $($window).height() - (Config.Mobile ? 92 : 150);
+
+    if (!Config.Mobile && fullWidth > 800) {
+      fullWidth -= 208;
+    }
+
+    var full = {
+          width: fullWidth,
+          height: fullHeight,
+        };
+
+    if (!webPage.embed_width || !webPage.embed_height) {
+      full.height = full.width = Math.min(fullWidth, fullHeight);
+    } else {
+      var wh = calcImageInBox(webPage.embed_width, webPage.embed_height, fullWidth, fullHeight);
+      full.width = wh.w;
+      full.height = wh.h;
+    }
+
+    var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+
+    var embedType = webPage.embed_type != 'iframe' ? webPage.embed_type || 'text/html' : 'text/html';
+
+    var embedHtml = '<' + embedTag + ' src="' + encodeEntities(webPage.embed_url) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '"></' + embedTag + '>';
+
+    full.html = $sce.trustAs('html', embedHtml);
+
+    webPage.full = full;
+
+    return webPage;
+  }
+
   $rootScope.$on('apiUpdate', function (e, update) {
     switch (update._) {
       case 'updateWebPage':
@@ -2863,6 +2903,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   return {
     saveWebPage: saveWebPage,
     openEmbed: openEmbed,
+    wrapForFull: wrapForFull,
     wrapForHistory: wrapForHistory
   }
 })

@@ -26,10 +26,10 @@
 
 <div class="modal-dialog">
   <div class="modal-content">
-    <div my-modal-width="{{webpage.embed_width - 32}}" class="media_modal_wrap embed_modal_wrap" my-modal-position animation="no">
+    <div my-modal-width="{{webpage.full.width - 32}}" class="media_modal_wrap embed_modal_wrap" my-modal-position animation="no">
 
-      <div class="modal-body">
-        <iframe src="{{iframeSrc}}" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="{{webpage.embed_width}}" height="{{webpage.embed_height}}"></iframe>
+      <div class="modal-body" ng-bind-html="webpage.full.html">
+
 
       </div>
 

@@ -16,7 +16,7 @@
   <div ng-switch-when="video" class="im_message_webpage_video">
     <div class="im_message_webpage_site" ng-bind="webpage.site_name || webpage.display_url"></div>
     <div class="im_message_webpage_title">
-      <a href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
+      <a ng-click="openEmbed($event)" href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
     </div>
     <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
     <a class="im_message_video_thumb" ng-click="openEmbed($event)" ng-href="{{webpage.url}}" target="_blank" ng-style="::{width: video.thumb.width + 'px'}">

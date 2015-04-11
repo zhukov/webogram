@@ -2335,11 +2335,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
   })
 
-  .controller('EmbedModalController', function ($q, $sce, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, AppWebPagesManager, PeersSelectService, ErrorService) {
+  .controller('EmbedModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, AppWebPagesManager, PeersSelectService, ErrorService) {
 
-    $scope.webpage = AppWebPagesManager.wrapForHistory($scope.webpageID);
-
-    $scope.iframeSrc = $sce.trustAsResourceUrl($scope.webpage.embed_url);
+    $scope.webpage = AppWebPagesManager.wrapForFull($scope.webpageID);
 
     $scope.nav = {};
 
