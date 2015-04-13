@@ -2793,9 +2793,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       apiWebPage.title || apiWebPage.author,
       {noLinks: true, noLinebreaks: true}
     );
+    var contextHashtag = '';
+    if (apiWebPage.site_name == 'GitHub') {
+      var matches = apiWebPage.url.match(/(https?:\/\/github\.com\/[^\/]+\/[^\/]+)/);
+      if (matches) {
+        contextHashtag = matches[0] + '/issues/{1}';
+      }
+    }
     apiWebPage.rDescription = RichTextProcessor.wrapRichText(
       apiWebPage.description, {
-        contextSite: apiWebPage.site_name || 'external'
+        contextSite: apiWebPage.site_name || 'external',
+        contextHashtag: contextHashtag
       }
     );
 
@@ -3936,13 +3944,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var siteHashtags = {
     Telegram: '#/im?q=%23{1}',
     Twitter: 'https://twitter.com/hashtag/{1}',
-    Instagram: 'https://instagram.com/explore/tags/{1}/'
+    Instagram: 'https://instagram.com/explore/tags/{1}/',
+    'Google Plus': 'https://plus.google.com/explore/{1}'
   };
 
   var siteMentions = {
     Telegram: '#/im?p=%40{1}',
     Twitter: 'https://twitter.com/{1}',
-    Instagram: 'https://instagram.com/{1}/'
+    Instagram: 'https://instagram.com/{1}/',
+    GitHub: 'https://github.com/{1}'
   };
 
   return {
@@ -4103,7 +4113,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
       else if (match[10]) {
-        var contextUrl = !options.noLinks && siteHashtags[contextSite];
+        var contextUrl = !options.noLinks && siteHashtags[contextSite] || options.contextHashtag;
         if (contextUrl) {
           html.push(
             encodeEntities(match[9]),
