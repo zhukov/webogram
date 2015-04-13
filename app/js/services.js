@@ -4148,7 +4148,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     // console.log(3, text, html);
 
     if (emojiFound) {
-      text = text.replace(/\ufe0f|&#65039;/g, '', text);
+      text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text);
       text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
                           '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
     }
