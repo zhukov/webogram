@@ -3417,22 +3417,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return MtpApiManager.invokeApi('messages.createChat', {
         title: $scope.group.name,
         users: inputUsers
-      }).then(function (createdResult) {
-        ApiUpdatesManager.processUpdateMessage({
-          _: 'updates',
-          users: createdResult.users,
-          chats: createdResult.chats,
-          seq: 0,
-          updates: [{
-            _: 'updateNewMessage',
-            message: createdResult.message,
-            pts: createdResult.pts,
-            pts_count: createdResult.pts_count
-          }]
-        });
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
 
-        var peerString = AppChatsManager.getChatString(createdResult.message.to_id.chat_id);
-        $rootScope.$broadcast('history_focus', {peerString: peerString});
+        if (updates.updates && updates.updates.length) {
+          for (var i = 0, len = updates.updates.length, update; i < len; i++) {
+            update = updates.updates[i];
+            if (update._ == 'updateNewMessage') {
+              $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(update.message.to_id.chat_id)
+              });
+              break;
+            }
+          }
+          $modalInstance.close();
+        }
+
       })['finally'](function () {
         delete $scope.group.creating;
       });
