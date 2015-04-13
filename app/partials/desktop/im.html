@@ -121,7 +121,7 @@
 
                   <div class="im_history_typing_wrap">
 
-                    <div class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType" ng-switch="historyState.typing.length" my-i18n>
+                    <div class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType &amp;&amp; state.loaded" ng-switch="historyState.typing.length" my-i18n>
                       <span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
                       <span ng-switch-when="2" my-i18n-format="im_two_typing"></span>
                       <span ng-switch-default my-i18n-format="im_many_typing"></span>
