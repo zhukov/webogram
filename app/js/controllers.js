@@ -1229,6 +1229,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (prerenderedLen && (maxID || backLimit)) {
         prerenderedLen = 0;
         peerHistory.messages = [];
+        $scope.state.empty = true;
       }
 
       var curJump = ++jump,
