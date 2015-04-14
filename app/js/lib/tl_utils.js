@@ -226,20 +226,22 @@ TLSerialization.prototype.storeMethod = function (methodName, params) {
 
   this.storeInt(intToUint(methodData.id), methodName + '[id]');
 
-  var self = this;
-  angular.forEach(methodData.params, function (param) {
-    var type = param.type;
+  var param, type, i, condType, fieldBit;
+  var len = methodData.params.length;
+  for (i = 0; i < len; i++) {
+    param = methodData.params[i];
+    type = param.type;
     if (type.indexOf('?') !== -1) {
-      var condType = type.split('?');
-      var fieldBit = condType[0].split('.');
+      condType = type.split('?');
+      fieldBit = condType[0].split('.');
       if (!(params[fieldBit[0]] & (1 << fieldBit[1]))) {
-        return;
+        continue;
       }
       type = condType[1];
     }
 
-    self.storeObject(params[param.name], type, methodName + '[' + param.name + ']');
-  });
+    this.storeObject(params[param.name], type, methodName + '[' + param.name + ']');
+  }
 
   return methodData.type;
 };
@@ -308,20 +310,22 @@ TLSerialization.prototype.storeObject = function (obj, type, field) {
     this.writeInt(intToUint(constructorData.id), field + '[' + predicate + '][id]');
   }
 
-  var self = this;
-  angular.forEach(constructorData.params, function (param) {
-    var type = param.type;
+  var param, type, i, condType, fieldBit;
+  var len = constructorData.params.length;
+  for (i = 0; i < len; i++) {
+    param = constructorData.params[i];
+    type = param.type;
     if (type.indexOf('?') !== -1) {
-      var condType = type.split('?');
-      var fieldBit = condType[0].split('.');
+      condType = type.split('?');
+      fieldBit = condType[0].split('.');
       if (!(obj[fieldBit[0]] & (1 << fieldBit[1]))) {
-        return;
+        continue;
       }
       type = condType[1];
     }
 
-    self.storeObject(obj[param.name], type, field + '[' + predicate + '][' + param.name + ']');
-  });
+    this.storeObject(obj[param.name], type, field + '[' + predicate + '][' + param.name + ']');
+  }
 
   return constructorData.type;
 };
@@ -532,7 +536,7 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
 
   if (type.charAt(0) == '%') {
     var checkType = type.substr(1);
-    for (i = 0; i < schema.constructors.length; i++) {
+    for (var i = 0; i < schema.constructors.length; i++) {
       if (schema.constructors[i].type == checkType) {
         constructorData = schema.constructors[i];
         break
@@ -543,7 +547,7 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
     }
   }
   else if (type.charAt(0) >= 97 && type.charAt(0) <= 122) {
-    for (i = 0; i < schema.constructors.length; i++) {
+    for (var i = 0; i < schema.constructors.length; i++) {
       if (schema.constructors[i].predicate == type) {
         constructorData = schema.constructors[i];
         break
@@ -566,11 +570,16 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
       return newDeserializer.fetchObject(type, field);
     }
 
-    for (i = 0; i < schema.constructors.length; i++) {
-      if (schema.constructors[i].id == constructorCmp) {
-        constructorData = schema.constructors[i];
-        break;
+    var index = schema.constructorsIndex;
+    if (!index) {
+      schema.constructorsIndex = index = {};
+      for (var i = 0; i < schema.constructors.length; i++) {
+        index[schema.constructors[i].id] = i;
       }
+    }
+    var i = index[constructorCmp];
+    if (i) {
+      constructorData = schema.constructors[i];
     }
 
     var fallback = false;
@@ -601,19 +610,22 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
   if (this.override[overrideKey]) {
     this.override[overrideKey].apply(this, [result, field + '[' + predicate + ']']);
   } else {
-    angular.forEach(constructorData.params, function (param) {
-      var type = param.type;
+    var i, param, type, condType, fieldBit;
+    var len = constructorData.params.length;
+    for (i = 0; i < len; i++) {
+      param = constructorData.params[i];
+      type = param.type;
       if (type.indexOf('?') !== -1) {
-        var condType = type.split('?');
-        var fieldBit = condType[0].split('.');
+        condType = type.split('?');
+        fieldBit = condType[0].split('.');
         if (!(result[fieldBit[0]] & (1 << fieldBit[1]))) {
-          return;
+          continue;
         }
         type = condType[1];
       }
 
       result[param.name] = self.fetchObject(type, field + '[' + predicate + '][' + param.name + ']');
-    });
+    }
   }
 
   if (fallback) {

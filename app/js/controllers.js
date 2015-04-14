@@ -631,24 +631,37 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     });
 
-    $scope.$on('dialogs_update', function (e, dialog) {
+    $scope.$on('dialogs_multiupdate', function (e, dialogsUpdated) {
       if ($scope.search.query !== undefined && $scope.search.query.length) {
         return false;
       }
 
-      var pos = false;
-      angular.forEach($scope.dialogs, function(curDialog, curPos) {
-        if (curDialog.peerID == dialog.peerID) {
-          pos = curPos;
-        }
+      var topMessages = [];
+      var topToDialogs = {};
+      angular.forEach(dialogsUpdated, function (dialog, peerID) {
+        topToDialogs[dialog.top_message] = dialog;
+        topMessages.push(dialog.top_message);
       });
+      topMessages.sort();
 
-      var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count);
-      if (pos !== false) {
-        var prev = $scope.dialogs.splice(pos, 1);
-        safeReplaceObject(prev, wrappedDialog);
+      var i, dialog;
+      var len = $scope.dialogs.length;
+      for (i = 0; i < len; i++) {
+        dialog = $scope.dialogs[i];
+        if (dialogsUpdated[dialog.peerID]) {
+          $scope.dialogs.splice(i, 1);
+          i--;
+          len--;
+        }
       }
-      $scope.dialogs.unshift(wrappedDialog);
+      len = topMessages.length;
+      for (i = 0; i < len; i++) {
+        dialog = topToDialogs[topMessages[i]];
+        $scope.dialogs.unshift(
+          AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count)
+        );
+      }
+
       delete $scope.isEmpty.dialogs;
 
       if (!peersInDialogs[dialog.peerID]) {
@@ -1050,6 +1063,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       for (i = 0; i < $scope.peerHistories.length; i++) {
         if ($scope.peerHistories[i].peerID == peerID) {
           return $scope.peerHistories[i];
+        }
+      }
+      return false;
+    }
+
+    function historiesQueuePop (peerID) {
+      var i;
+      for (i = 0; i < $scope.peerHistories.length; i++) {
+        if ($scope.peerHistories[i].peerID == peerID) {
+          $scope.peerHistories.splice(i, 1);
+          return true;
         }
       }
       return false;
@@ -1460,15 +1484,29 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$on('history_update', angular.noop);
 
+    var loadAfterSync = false;
+    $scope.$on('stateSynchronized', function () {
+      if (!loadAfterSync) {
+        return;
+      }
+      if (loadAfterSync == $scope.curDialog.peerID) {
+        loadHistory();
+      }
+      loadAfterSync = false;
+    });
+
+
     var typingTimeouts = {};
     $scope.$on('history_append', function (e, addedMessage) {
       var history = historiesQueueFind(addedMessage.peerID);
+      // var history = historiesQueuePush(addedMessage.peerID);
       if (!history) {
         return;
       }
       var curPeer = addedMessage.peerID == $scope.curDialog.peerID;
       if (curPeer) {
-        if ($scope.historyFilter.mediaType || $scope.historyState.skipped) {
+        if ($scope.historyFilter.mediaType ||
+            $scope.historyState.skipped) {
           if (addedMessage.my) {
             returnToRecent();
           } else {
@@ -1515,6 +1553,101 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             AppMessagesManager.readHistory($scope.curDialog.inputPeer);
           });
         }
+      }
+    });
+
+    $scope.$on('history_multiappend', function (e, historyMultiAdded) {
+      // console.log(dT(), 'multiappend', historyMultiAdded);
+      var regroupped = false;
+      var unreadAfterChanged = false;
+      var isIDLE = $rootScope.idle.isIDLE;
+      angular.forEach(historyMultiAdded, function (msgs, peerID) {
+        var history = historiesQueueFind(peerID);
+        // var history = historiesQueuePush(peerID);
+        if (!history) {
+          return;
+        }
+        var curPeer = peerID == $scope.curDialog.peerID;
+        var len = msgs.length;
+
+        if (curPeer) {
+          if ($scope.historyFilter.mediaType ||
+              $scope.historyState.skipped) {
+            $scope.historyState.missedCount += len;
+            return;
+          }
+          delete $scope.state.empty;
+        }
+        if (len > 10) {
+          if (curPeer) {
+            var exlen = history.messages.length;
+            if (exlen > 10) {
+              minID = history.messages[exlen - 1].id;
+              $scope.historyState.skipped = hasLess = minID > 0;
+              if (hasLess) {
+                loadAfterSync = peerID;
+                $scope.$broadcast('ui_history_append');
+                return;
+              }
+            }
+          } else {
+            historiesQueuePop(peerID);
+            return;
+          }
+        }
+        var messageID, historyMessage, i;
+        var hasOut = false;
+        var unreadAfterNew = false;
+        var lastIsRead = !(history.messages[history.messages.length - 1] || {}).unread;
+        for (i = 0; i < len; i++) {
+          messageID = msgs[i];
+          historyMessage = AppMessagesManager.wrapForHistory(messageID);
+          history.messages.push(historyMessage);
+          if (!unreadAfterNew && isIDLE) {
+            if (historyMessage.unread &&
+                !historyMessage.out &&
+                lastIsRead) {
+              unreadAfterNew = messageID;
+            } else {
+              lastIsRead = !historyMessage.unread;
+            }
+          }
+          if (!hasOut && historyMessage.out) {
+            hasOut = true;
+          }
+        }
+
+        if (AppMessagesManager.regroupWrappedHistory(history.messages, -len - 2)) {
+          regroupped = true;
+        }
+
+        if (curPeer) {
+          if ($scope.historyState.typing.length) {
+            $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
+          }
+          $scope.$broadcast('ui_history_append_new', {
+            idleScroll: unreadAfterIdle && !hasOut && unreadAfterNew
+          });
+
+          if (isIDLE) {
+            if (unreadAfterNew) {
+              $scope.historyUnreadAfter = unreadAfterNew;
+              unreadAfterIdle = true;
+              unreadAfterChanged = true;
+            }
+          } else {
+            $timeout(function () {
+              AppMessagesManager.readHistory($scope.curDialog.inputPeer);
+            });
+          }
+        }
+      });
+
+      if (regroupped) {
+        $scope.$broadcast('messages_regroup');
+      }
+      if (unreadAfterChanged) {
+        $scope.$broadcast('messages_unread_after');
       }
     });
 

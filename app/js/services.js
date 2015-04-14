@@ -792,7 +792,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -895,6 +895,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       AppUsersManager.saveApiUsers(dialogsResult.users);
       AppChatsManager.saveApiChats(dialogsResult.chats);
+
+      // return {
+      //   count: 0,
+      //   dialogs: []
+      // };
+
       saveMessages(dialogsResult.messages);
 
       if (maxID > 0) {
@@ -2270,6 +2276,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  var newMessagesHandlePromise = false;
+  var newMessagesToHandle = {};
+  var newDialogsHandlePromise = false;
+  var newDialogsToHandle = {};
+
+  function handleNewMessages () {
+    $timeout.cancel(newMessagesHandlePromise);
+    newMessagesHandlePromise = false;
+    $rootScope.$broadcast('history_multiappend', newMessagesToHandle);
+    newMessagesToHandle = {};
+  }
+
+  function handleNewDialogs () {
+    $timeout.cancel(newDialogsHandlePromise);
+    newDialogsHandlePromise = false;
+    $rootScope.$broadcast('dialogs_multiupdate', newDialogsToHandle);
+    newDialogsToHandle = {};
+  }
+
   $rootScope.$on('apiUpdate', function (e, update) {
     // if (update._ != 'updateUserStatus') {
     //   console.log('on apiUpdate', update);
@@ -2320,34 +2345,45 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
 
         if (!pendingMessage) {
-          $rootScope.$broadcast('history_append', {peerID: peerID, messageID: message.id});
+          if (newMessagesToHandle[peerID] === undefined) {
+            newMessagesToHandle[peerID] = [];
+          }
+          newMessagesToHandle[peerID].push(message.id);
+          if (!newMessagesHandlePromise) {
+            newMessagesHandlePromise = $timeout(handleNewMessages, 0);
+          }
         }
 
-        var foundDialog = getDialogByPeerID(peerID),
-            dialog;
+        var foundDialog = getDialogByPeerID(peerID);
+        var dialog;
+        var inboxUnread = !message.out && message.unread;
 
         if (foundDialog.length) {
           dialog = foundDialog[0];
-          dialogsStorage.dialogs.splice(foundDialog[1], 1);
+          if (foundDialog[1] > 0) {
+            dialogsStorage.dialogs.splice(foundDialog[1], 1);
+            dialogsStorage.dialogs.unshift(dialog);
+          }
+          dialog.top_message = message.id;
+          if (inboxUnread) {
+            dialog.unread_count++;
+          }
         } else {
-          dialog = {peerID: peerID, unread_count: 0, top_message: false}
+          SearchIndexManager.indexObject(peerID, AppPeersManager.getPeerSearchText(peerID), dialogsIndex);
+
+          dialog = {
+            peerID: peerID,
+            unread_count: inboxUnread ? 1 : 0,
+            top_message: message.id
+          };
+          dialogsStorage.dialogs.unshift(dialog);
         }
-        if (!message.out && message.unread) {
-          // console.log('inc unread count', dialog.unread_count);
-          dialog.unread_count++;
+        newDialogsToHandle[peerID] = dialog;
+        if (!newDialogsHandlePromise) {
+          newDialogsHandlePromise = $timeout(handleNewDialogs, 0);
         }
-        dialog.top_message = message.id;
 
-        // console.log('new message', message, peerID, historyStorage, foundDialog, dialog);
-
-        SearchIndexManager.indexObject(peerID, AppPeersManager.getPeerSearchText(peerID), dialogsIndex);
-
-        dialogsStorage.dialogs.unshift(dialog);
-        $rootScope.$broadcast('dialogs_update', dialog);
-
-        if (($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
-            !message.out &&
-            message.unread) {
+        if (inboxUnread && ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE)) {
 
           var notifyPeer = message.flags & 16 ? message.from_id : peerID;
           var isMutedPromise = NotificationsManager.getPeerMuted(notifyPeer);
@@ -3716,12 +3752,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       syncPending = false;
     }
 
-    MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: 0}).then(function (differenceResult) {
+    MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: -1}).then(function (differenceResult) {
       if (differenceResult._ == 'updates.differenceEmpty') {
         console.log(dT(), 'apply empty diff', differenceResult.seq);
         curState.date = differenceResult.date;
         curState.seq = differenceResult.seq;
         syncLoading = false;
+        $rootScope.$broadcast('stateSynchronized');
         return false;
       }
 
@@ -3729,10 +3766,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       AppChatsManager.saveApiChats(differenceResult.chats);
 
       // Should be first because of updateMessageID
+      // console.log(dT(), 'applying', differenceResult.other_updates.length, 'other updates');
       angular.forEach(differenceResult.other_updates, function(update){
         saveUpdate(update);
       });
 
+      // console.log(dT(), 'applying', differenceResult.new_messages.length, 'new messages');
       angular.forEach(differenceResult.new_messages, function (apiMessage) {
         saveUpdate({
           _: 'updateNewMessage',
@@ -3752,6 +3791,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (differenceResult._ == 'updates.differenceSlice') {
         getDifference();
       } else {
+        // console.log(dT(), 'finished get diff');
+        $rootScope.$broadcast('stateSynchronized');
         syncLoading = false;
       }
     });
@@ -3855,6 +3896,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       setTimeout(function () {
         syncLoading = false;
       }, 1000);
+
+      // curState.seq = 1;
+      // curState.pts = stateResult.pts - 5000;
+      // curState.date = 1;
+      // getDifference();
     })
   }
 
