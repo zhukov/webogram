@@ -1598,9 +1598,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var messageID, historyMessage, i;
         var hasOut = false;
         var unreadAfterNew = false;
-        var lastIsRead = !(history.messages[history.messages.length - 1] || {}).unread;
+        var historyMessage = history.messages[history.messages.length - 1];
+        var lastIsRead = !historyMessage || !historyMessage.unread;
         for (i = 0; i < len; i++) {
           messageID = msgs[i];
+          if (historyMessage.id == messageID) {
+            continue;
+          }
           historyMessage = AppMessagesManager.wrapForHistory(messageID);
           history.messages.push(historyMessage);
           if (!unreadAfterNew && isIDLE) {
