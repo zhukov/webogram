@@ -2284,6 +2284,52 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function handleNewMessages () {
     $timeout.cancel(newMessagesHandlePromise);
     newMessagesHandlePromise = false;
+
+    angular.forEach(newMessagesToHandle, function (msgs, peerID) {
+      var historyStorage = historiesStorage[peerID];
+      var topMsgID = false;
+
+      if (historyStorage !== undefined) {
+        topMsgID = historiesStorage[peerID].history[0];
+      } else {
+        historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+      }
+
+      var i, messageID;
+      var needToSort = false;
+      var len = msgs.length;
+      var history = historyStorage.history;
+      for (i = 0; i < len; i++) {
+        messageID = msgs[i];
+        if (history.indexOf(messageID) != -1) {
+          msgs.splice(i, 1);
+          len--;
+          continue;
+        }
+        if (topMsgID > 0 &&
+            messageID > 0 &&
+            messageID < topMsgID) {
+          needToSort = true;
+        }
+        history.unshift(messageID);
+        topMsgID = messageID;
+      }
+      if (!len) {
+        delete newMessagesToHandle[peerID];
+        return;
+      }
+
+      if (needToSort) {
+        history.sort(function (a, b) {
+          return b - a;
+        });
+      }
+
+      if (historyStorage.count !== null) {
+        historyStorage.count += len;
+      }
+    });
+
     $rootScope.$broadcast('history_multiappend', newMessagesToHandle);
     newMessagesToHandle = {};
   }
@@ -2306,32 +2352,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       case 'updateNewMessage':
         var message = update.message,
-            peerID = getMessagePeer(message),
-            historyStorage = historiesStorage[peerID];
-
-        if (historyStorage !== undefined) {
-          if (historiesStorage[peerID].history.indexOf(message.id) != -1) {
-            return false;
-          }
-          var topMsgID = historiesStorage[peerID].history[0];
-          historyStorage.history.unshift(message.id);
-          if (message.id > 0 && message.id < topMsgID) {
-            historyStorage.history.sort(function (a, b) {
-              return b - a;
-            });
-          }
-        } else {
-          historyStorage = historiesStorage[peerID] = {count: null, history: [message.id], pending: []};
-        }
+            peerID = getMessagePeer(message);
 
         saveMessages([message]);
 
         if (!message.out) {
           AppUsersManager.forceUserOnline(message.from_id);
-        }
-
-        if (historyStorage.count !== null) {
-          historyStorage.count++;
         }
 
         var randomID = pendingByMessageID[message.id],
