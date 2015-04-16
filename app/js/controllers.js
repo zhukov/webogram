@@ -1048,7 +1048,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         history = $scope.peerHistories[pos];
         return history;
       }
-      history = {peerID: peerID, messages: []};
+      history = {peerID: peerID, messages: [], ids: []};
       $scope.peerHistories.unshift(history);
       diff = $scope.peerHistories.length - maxLen;
       if (diff > 0) {
@@ -1109,20 +1109,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function messageFocusHistory () {
-      var i,
-          found = false,
-          history = historiesQueueFind();
+      var history = historiesQueueFind();
 
-      if (history) {
-        for (i = 0; i < history.messages.length; i++) {
-          if ($scope.curDialog.messageID == history.messages[i].id) {
-            found = true;
-            break;
-          }
-        }
-      }
-
-      if (found) {
+      if (history &&
+          history.ids.indexOf($scope.curDialog.messageID) != -1) {
         $scope.historyUnread = {};
         $scope.$broadcast('messages_focus', $scope.curDialog.messageID);
         $scope.$broadcast('ui_history_change_scroll');
@@ -1155,6 +1145,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           id = historyResult.history[i];
           if (id > minID) {
             peerHistory.messages.push(AppMessagesManager.wrapForHistory(id));
+            peerHistory.ids.push(id);
           }
         }
 
@@ -1203,6 +1194,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         angular.forEach(historyResult.history, function (id) {
           peerHistory.messages.unshift(AppMessagesManager.wrapForHistory(id));
+          peerHistory.ids.unshift(id);
         });
 
         hasMore = historyResult.count === null ||
@@ -1253,6 +1245,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (prerenderedLen && (maxID || backLimit)) {
         prerenderedLen = 0;
         peerHistory.messages = [];
+        peerHistory.ids = [];
         $scope.state.empty = true;
       }
 
@@ -1284,6 +1277,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         safeReplaceObject($scope.state, {loaded: true, empty: !fetchedLength});
 
         peerHistory.messages = [];
+        peerHistory.ids = [];
         angular.forEach(historyResult.history, function (id) {
           var message = AppMessagesManager.wrapForHistory(id);
           if ($scope.historyState.skipped) {
@@ -1293,8 +1287,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             message.unreadAfter = true;
           }
           peerHistory.messages.push(message);
+          peerHistory.ids.push(id);
         });
         peerHistory.messages.reverse();
+        peerHistory.ids.reverse();
 
         if (AppMessagesManager.regroupWrappedHistory(peerHistory.messages)) {
           $scope.$broadcast('messages_regroup');
@@ -1466,6 +1462,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function toggleMedia (mediaType) {
       $scope.historyFilter.mediaType = mediaType || false;
       peerHistory.messages = [];
+      peerHistory.ids = [];
       $scope.state.empty = true;
       loadHistory();
     }
@@ -1523,6 +1520,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       // console.trace();
       var historyMessage = AppMessagesManager.wrapForHistory(addedMessage.messageID);
       history.messages.push(historyMessage);
+      history.ids.push(addedMessage.messageID);
       if (AppMessagesManager.regroupWrappedHistory(history.messages, -3)) {
         $scope.$broadcast('messages_regroup');
       }
@@ -1568,6 +1566,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           return;
         }
         var curPeer = peerID == $scope.curDialog.peerID;
+        var exlen = history.messages.length;
         var len = msgs.length;
 
         if (curPeer) {
@@ -1580,7 +1579,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         if (len > 10) {
           if (curPeer) {
-            var exlen = history.messages.length;
             if (exlen > 10) {
               minID = history.messages[exlen - 1].id;
               $scope.historyState.skipped = hasLess = minID > 0;
@@ -1602,11 +1600,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var lastIsRead = !historyMessage || !historyMessage.unread;
         for (i = 0; i < len; i++) {
           messageID = msgs[i];
-          if (historyMessage.id == messageID) {
+          if (history.ids.indexOf(messageID) !== -1) {
             continue;
           }
           historyMessage = AppMessagesManager.wrapForHistory(messageID);
           history.messages.push(historyMessage);
+          history.ids.push(messageID);
           if (!unreadAfterNew && isIDLE) {
             if (historyMessage.unread &&
                 !historyMessage.out &&
@@ -1630,7 +1629,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
           }
           $scope.$broadcast('ui_history_append_new', {
-            idleScroll: unreadAfterIdle && !hasOut && unreadAfterNew
+            idleScroll: unreadAfterIdle && !hasOut && isIDLE
           });
 
           if (isIDLE) {
@@ -1680,6 +1679,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var history = historiesQueueFind(dialog.peerID);
       if (history) {
         history.messages = [];
+        history.ids = [];
         if (dialog.peerID == $scope.curDialog.peerID) {
           $scope.state.empty = true;
         }
