@@ -1231,7 +1231,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var dragStarted, dragTimeout;
       var submitBtn = $('.im_submit', element)[0];
 
-      new EmojiTooltip(emojiButton, {
+      var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
           AppStickersManager.getStickers().then(function () {
             AppStickersManager.getStickersImages().then(function (stickersData) {
@@ -1371,6 +1371,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         if (!Config.Navigator.touch) {
           composer.focus();
+        }
+        if (emojiTooltip) {
+          emojiTooltip.hide();
         }
       });
       $scope.$on('ui_peer_reply', function () {

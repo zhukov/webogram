@@ -637,7 +637,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     chatFull.thumb = {
-      placeholder: 'img/placeholders/GroupAvatar'+((Math.abs(id) % 4) + 1)+'@2x.png',
+      placeholder: 'img/placeholders/GroupAvatar'+(Config.Mobile ? chat.num : Math.ceil(chat.num / 2))+'@2x.png',
       location: chat && chat.photo && chat.photo.photo_small,
       width: 72,
       height: 72,
