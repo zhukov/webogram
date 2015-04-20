@@ -2931,7 +2931,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var embedType = webPage.embed_type != 'iframe' ? webPage.embed_type || 'text/html' : 'text/html';
 
-    var embedHtml = '<' + embedTag + ' src="' + encodeEntities(webPage.embed_url) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '"></' + embedTag + '>';
+    var embedHtml = '<' + embedTag + ' src="' + encodeEntities(webPage.embed_url) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '" style="width: ' + full.width + 'px; height: ' + full.height + 'px;"></' + embedTag + '>';
 
     full.html = $sce.trustAs('html', embedHtml);
 

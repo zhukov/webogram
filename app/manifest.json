@@ -14,7 +14,8 @@
     "webview",
     {"fileSystem": ["write"]},
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "fullscreen"
   ],
   "icons": {
     "16": "img/icons/icon16.png",
