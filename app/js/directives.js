@@ -588,7 +588,22 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
           return cancelEvent(e);
         }
+        
+        if ( e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey &&
+              e.keyCode >= 49 && e.keyCode <= 57 ) { // Alt + Shift + # , switch to conversation number # in [1..9]
+          
+          var dialog_nr = e.keyCode - 49,
+              dialogWraps = $(scrollableWrap).find('.im_dialog_wrap');
+              nextDialogWrap = dialogWraps[dialog_nr];
 
+          if (nextDialogWrap) {
+            $(nextDialogWrap).find('a').trigger('mousedown');
+            scrollToDialog(nextDialogWrap);
+          }
+          
+          return cancelEvent(e);
+        }
+        
         var next, prev, skip, ctrlTabSupported = Config.Modes.packed;
         if (e.keyCode == 40 || e.keyCode == 38) { // UP, DOWN
           next = e.keyCode == 40;
@@ -600,6 +615,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           prev = !next;
           skip = true;
         }
+        
         if (next || prev) {
           if (!skip && (!searchFocused || e.metaKey)) {
             return true;
