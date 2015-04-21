@@ -588,7 +588,22 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
           return cancelEvent(e);
         }
+        
+        if ( e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey &&
+              e.keyCode >= 49 && e.keyCode <= 57 ) { // Alt + Shift + # , switch to conversation # where # is in [1..9]
+          
+          var dialogNumber = e.keyCode - 49,
+              dialogWraps = $(scrollableWrap).find('.im_dialog_wrap'),
+              nextDialogWrap = dialogWraps[dialogNumber];
 
+          if (nextDialogWrap) {
+            $(nextDialogWrap).find('a').trigger('mousedown');
+            scrollToDialog(nextDialogWrap);
+          }
+          
+          return cancelEvent(e);
+        }
+        
         var next, prev, skip, ctrlTabSupported = Config.Modes.packed;
         if (e.keyCode == 40 || e.keyCode == 38) { // UP, DOWN
           next = e.keyCode == 40;
@@ -600,6 +615,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           prev = !next;
           skip = true;
         }
+        
         if (next || prev) {
           if (!skip && (!searchFocused || e.metaKey)) {
             return true;
@@ -650,16 +666,16 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function scrollToDialog(dialogWrap) {
-        var elTop = dialogWrap.offsetTop,
-            elHeight = dialogWrap.offsetHeight,
+        var elTop = dialogWrap.offsetTop - 15,
+            elHeight = dialogWrap.offsetHeight + 30,
             scrollTop = scrollableWrap.scrollTop,
             viewportHeight = scrollableWrap.clientHeight;
 
-        if (scrollTop > elTop) {
+        if (scrollTop > elTop) { // we are below the dialog to scroll 
           scrollableWrap.scrollTop = elTop;
           $(dialogsWrap).nanoScroller({flash: true});
         }
-        else if (scrollTop < elTop + elHeight - viewportHeight) {
+        else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the dialog to scroll
           scrollableWrap.scrollTop = elTop + elHeight - viewportHeight;
           $(dialogsWrap).nanoScroller({flash: true});
         }
