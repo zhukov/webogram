@@ -242,6 +242,9 @@ input[type="number"] {
   padding: 0;
   margin: 0 0 22px;
 }
+.md-textarea-group {
+  height: 66px;
+}
 .md-input-grouped {
   margin-bottom: 12px;
 }
@@ -283,6 +286,7 @@ input[type="number"] {
   padding: 3px 0;
   margin: 3px 0 0;
   width: 100%;
+  resize: none;
 
   .box-shadow(none);
 }
@@ -1457,8 +1461,23 @@ div.im_message_video_thumb {
   overflow: hidden;
   display: block;
   position: relative;
-  width: 200px;
+  width: 300px;
+  height: 150px;
+}
+
+
+.im_message_venue_geopoint_wrap {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  width: 100px;
   height: 100px;
+  margin-right: 10px;
+  float: left;
+  border-radius: 2px;
+  background: #f2f2f2;
+  text-align: center;
+  line-height: 0;
 }
 
 .icon-geo-point {
@@ -1467,7 +1486,7 @@ div.im_message_video_thumb {
   top: 50%;
   left: 50%;
   margin-left: -8px;
-  margin-top: -10px;
+  margin-top: -15px;
   width: 15px;
   height: 19px;
 
@@ -1673,8 +1692,7 @@ img.im_message_document_thumb {
   width: 265px;
   padding: 0 0 1px;
 }
-.im_message_document_actions,
-.im_message_website_description {
+.im_message_document_actions {
   width: 265px;
 }
 .im_message_document_name {
@@ -1713,6 +1731,16 @@ img.im_message_document_thumb {
   vertical-align: text-top;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.icon-audio-unread {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #4eabf1;
+  border: 0;
+  border-radius: 4px;
+  margin: 5px 5px 0 2px;
+  vertical-align: text-top;
 }
 .audio_player_meta {
   overflow: hidden;
@@ -1820,8 +1848,7 @@ img.im_message_document_thumb {
   .im_message_document_name_wrap,
   .im_message_upload_progress_wrap,
   .im_message_download_progress_wrap,
-  .im_message_document_actions,
-  .im_message_website_description {
+  .im_message_document_actions {
     width: 207px;
   }
   .im_message_document_name {
@@ -2000,6 +2027,12 @@ a.im_message_fwd_photo {
 .im_message_text {
   word-wrap: break-word;
   line-height: 150%;
+}
+.im_message_photo_caption,
+.im_message_video_caption {
+  word-wrap: break-word;
+  line-height: 150%;
+  margin-top: 3px;
 }
 .im_message_mymention {
   background: #fff8cc;

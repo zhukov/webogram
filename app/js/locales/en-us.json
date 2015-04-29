@@ -23,6 +23,7 @@
 	"group_modal_menu_delete_chat": "Delete chat",
 	"group_modal_settings": "Settings",
 	"group_modal_notifications": "Notifications",
+	"group_modal_menu_share_link": "Invite to group via link",
 	"group_modal_members": "Members",
 	"group_modal_members_kick": "Remove",
 
@@ -159,6 +160,12 @@
 	"group_edit_name": "Group name",
 	"group_edit_submit": "Save",
 	"group_edit_submit_active": "Saving...",
+
+	"group_invite_link_modal_title": "Invite link",
+	"group_invite_link_link_label": "Copy link",
+	"group_invite_link_loading": "Loading...",
+	"group_invite_revoke_active": "Revoking...",
+	"group_invite_revoke": "Revoke",
 
 	"confirm_modal_logout": "Are you sure you want to log out?",
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",

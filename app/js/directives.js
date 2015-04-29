@@ -403,25 +403,32 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myMessagePhoto', function() {
+  .directive('myMessagePhoto', function(AppPhotosManager) {
     return {
-      templateUrl: templateUrl('message_attach_photo')
+      scope: {
+        'media': '=myMessagePhoto',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_photo'),
+      link: function ($scope, element, attrs) {
+        $scope.openPhoto = AppPhotosManager.openPhoto;
+      }
     };
   })
   .directive('myMessageVideo', function(AppVideoManager) {
     return {
       scope: {
-        'video': '=myMessageVideo',
+        'media': '=myMessageVideo',
         'messageId': '=messageId'
       },
       templateUrl: templateUrl('message_attach_video'),
       link: function ($scope, element, attrs) {
-        AppVideoManager.updateVideoDownloaded($scope.video.id);
+        AppVideoManager.updateVideoDownloaded($scope.media.video.id);
         $scope.videoSave = function () {
-          AppVideoManager.saveVideoFile($scope.video.id);
+          AppVideoManager.saveVideoFile($scope.media.video.id);
         };
         $scope.videoOpen = function () {
-          AppVideoManager.openVideo($scope.video.id, $scope.messageId);
+          AppVideoManager.openVideo($scope.media.video.id, $scope.messageId);
         };
       }
     };
@@ -447,9 +454,20 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
   })
-  .directive('myMessageMap', function() {
+  .directive('myMessageGeo', function() {
     return {
-      templateUrl: templateUrl('message_attach_map')
+      scope: {
+        'media': '=myMessageGeo'
+      },
+      templateUrl: templateUrl('message_attach_geo')
+    };
+  })
+  .directive('myMessageVenue', function() {
+    return {
+      scope: {
+        'venue': '=myMessageVenue'
+      },
+      templateUrl: templateUrl('message_attach_venue')
     };
   })
   .directive('myMessageContact', function() {
@@ -1936,27 +1954,27 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myMapPoint', function(ExternalResourcesManager) {
-
+  .directive('myGeoPointMap', function(ExternalResourcesManager) {
     return {
       link: link,
       scope: {
-        point: '='
+        point: '=myGeoPointMap'
       }
     };
 
     function link ($scope, element, attrs) {
+      var width = element.attr('width') || 200;
+      var height = element.attr('height') || 200;
 
-      var apiKey = 'AIzaSyC32ij28dCa0YzEV_HqbWfIwTZQql-RNS0';
+      element.attr('src', 'img/blank.gif');
 
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=13&size=200x100&scale=2&key=' + apiKey;
+      var apiKey = Config.ExtCredentials.gmaps.api_key;
+
+      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=15&size='+width+'x'+height+'&scale=2&key=' + apiKey;
 
       ExternalResourcesManager.downloadImage(src).then(function (url) {
-        element.append('<img src="' + url + '" width="200" height="100"/>');
+        element.attr('src', url);
       });
-
-      element.attr('href','https://maps.google.com/?q=' + $scope.point['lat'] + ',' + $scope.point['long']);
-      element.attr('target','_blank');
     }
 
   })
@@ -2600,7 +2618,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager, ErrorService) {
+  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager, AppMessagesManager, ErrorService) {
 
     var currentPlayer = false;
     var audioVolume = 0.5;
@@ -2628,7 +2646,8 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       scope: {
-        audio: '='
+        audio: '=',
+        message: '='
       },
       templateUrl: templateUrl('audio_player')
     };
@@ -2710,6 +2729,12 @@ angular.module('myApp.directives', ['myApp.filters'])
                 checkPlayer($scope.mediaPlayer.player);
                 $scope.mediaPlayer.player.setVolume(audioVolume);
                 $scope.mediaPlayer.player.play();
+
+                if ($scope.message &&
+                    !$scope.message.out &&
+                    $scope.message.media_unread) {
+                  AppMessagesManager.readMessages([$scope.message.id]);
+                }
               }, 300);
             });
           })
@@ -2894,6 +2919,23 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
     };
+  })
+
+  .directive('myCopyField', function () {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+      element.attr('readonly', 'true');
+      // element.on('keydown paste', cancelEvent);
+      element.on('click', function () {
+        this.select();
+      });
+      element[0].readonly = true;
+    };
+
   })
 
   .directive('mySubmitOnEnter', function () {
