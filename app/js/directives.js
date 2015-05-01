@@ -2924,16 +2924,27 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myCopyField', function () {
 
     return {
+      scope: {
+        selectEvent: '=myCopyField'
+      },
       link: link
     };
 
     function link($scope, element, attrs) {
       element.attr('readonly', 'true');
-      // element.on('keydown paste', cancelEvent);
+      element[0].readonly = true;
       element.on('click', function () {
         this.select();
       });
-      element[0].readonly = true;
+
+      if ($scope.selectEvent) {
+        $scope.$on($scope.selectEvent, function () {
+          setTimeout(function () {
+            element[0].focus();
+            element[0].select();
+          }, 100);
+        });
+      }
     };
 
   })

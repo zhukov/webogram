@@ -617,46 +617,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function openInviteLink (hash) {
-    return MtpApiManager.invokeApi('messages.checkChatInvite', {
-      hash: hash
-    }).then(function (chatInvite) {
-      var chatTitle;
-      if (chatInvite._ == 'chatInviteAlready') {
-        saveApiChat(chatInvite.chat);
-        if (!chatInvite.chat.left) {
-          return $rootScope.$broadcast('history_focus', {
-            peerString: getChatString(chatInvite.chat.id)
-          });
-        }
-        chatTitle = chatInvite.chat.title;
-      } else {
-        chatTitle = chatInvite.title;
-      }
-      ErrorService.confirm({
-        type: 'JOIN_GROUP_BY_LINK',
-        title: chatTitle
-      }).then(function () {
-        return MtpApiManager.invokeApi('messages.importChatInvite', {
-          hash: hash
-        }).then(function (updates) {
-          ApiUpdatesManager.processUpdateMessage(updates);
-
-          if (updates.updates && updates.updates.length) {
-            for (var i = 0, len = updates.updates.length, update; i < len; i++) {
-              update = updates.updates[i];
-              if (update._ == 'updateNewMessage') {
-                $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(update.message.to_id.chat_id)
-                });
-                break;
-              }
-            }
-          }
-        });
-      });
-    });
-  }
-
   function hasChat (id) {
     return angular.isObject(chats[id]);
   }
@@ -777,7 +737,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
     getChatInviteLink: getChatInviteLink,
-    openInviteLink: openInviteLink,
     hasChat: hasChat,
     wrapForFull: wrapForFull,
     openChat: openChat
@@ -853,7 +812,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -1963,6 +1922,46 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return false;
   }
 
+  function openChatInviteLink (hash) {
+    return MtpApiManager.invokeApi('messages.checkChatInvite', {
+      hash: hash
+    }).then(function (chatInvite) {
+      var chatTitle;
+      if (chatInvite._ == 'chatInviteAlready') {
+        AppChatsManager.saveApiChat(chatInvite.chat);
+        if (!chatInvite.chat.left) {
+          return $rootScope.$broadcast('history_focus', {
+            peerString: AppChatsManager.getChatString(chatInvite.chat.id)
+          });
+        }
+        chatTitle = chatInvite.chat.title;
+      } else {
+        chatTitle = chatInvite.title;
+      }
+      ErrorService.confirm({
+        type: 'JOIN_GROUP_BY_LINK',
+        title: chatTitle
+      }).then(function () {
+        return MtpApiManager.invokeApi('messages.importChatInvite', {
+          hash: hash
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
+
+          if (updates.updates && updates.updates.length) {
+            for (var i = 0, len = updates.updates.length, update; i < len; i++) {
+              update = updates.updates[i];
+              if (update._ == 'updateNewMessage') {
+                $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(update.message.to_id.chat_id)
+                });
+                break;
+              }
+            }
+          }
+        });
+      });
+    });
+  }
+
   function getMessagePeer (message) {
     var toID = message.to_id && AppPeersManager.getPeerID(message.to_id) || 0;
 
@@ -2682,6 +2681,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     sendFile: sendFile,
     sendOther: sendOther,
     forwardMessages: forwardMessages,
+    openChatInviteLink: openChatInviteLink,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
@@ -4095,7 +4095,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     // resource path
     "(?:/(?:\\S{0,255}[^\\s.;,(\\[\\]{}<>\"'])?)?";
 
-  var regExp = new RegExp('(^|\\s)((?:https?://)?telegram\\.me/|@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiRegex + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,64})', 'i');
+  var regExp = new RegExp('(^|\\s)(@)([a-zA-Z\\d_]{5,32})|(' + urlRegex + ')|(\\n)|(' + emojiRegex + ')|(^|\\s)(#[' + regexAlphaNumericChars + ']{2,64})', 'i');
 
   var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   var youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
@@ -4166,14 +4166,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       if (match[3]) { // telegram.me links
         var contextUrl = !options.noLinks && siteMentions[contextSite];
-        if (match[2] != '@' && contextExternal) {
-          contextUrl = false;
-        }
         if (contextUrl) {
           var attr = '';
           if (options.highlightUsername &&
-              options.highlightUsername.toLowerCase() == match[3].toLowerCase() &&
-              match[2] == '@') {
+              options.highlightUsername.toLowerCase() == match[3].toLowerCase()) {
             attr = 'class="im_message_mymention"';
           }
           html.push(
@@ -4224,6 +4220,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                 }
 
                 url = (match[5] ? '' : protocol) + match[4];
+              }
+
+              var tgMeMatch;
+              if (tld == 'me' &&
+                  (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+                var path = tgMeMatch[1].split('/');
+                switch (path[0]) {
+                  case 'joinchat':
+                    url = 'tg://join?invite=' + path[1];
+                    break;
+                  default:
+                    url = 'tg://resolve?domain=' + path[0];
+                }
               }
             } else { // IP address
               url = (match[5] ? '' : 'http://') + match[4];
@@ -5269,26 +5278,37 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppChatsManager) {
+.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppMessagesManager) {
 
-  function checkTgAddr () {
-    if (!$routeParams.tgaddr) {
-      return;
+  var tgAddrRegEx = /^(web\+)?tg:(\/\/)?(.+)/;
+
+  function checkLocationTgAddr () {
+    if ($routeParams.tgaddr) {
+      var matches = $routeParams.tgaddr.match(tgAddrRegEx);
+      if (matches) {
+        handleTgProtoAddr(matches[3]);
+      }
     }
-    var matches = $routeParams.tgaddr.match(/^(web\+)?tg:(\/\/)?resolve\?domain=(.+)$/);
-    if (matches && matches[3]) {
-      AppUsersManager.resolveUsername(matches[3]).then(function (userID) {
+  }
+
+  function handleTgProtoAddr (url) {
+    var matches;
+
+    if (matches = url.match(/^resolve\?domain=(.+)$/)) {
+      AppUsersManager.resolveUsername(matches[1]).then(function (userID) {
         $rootScope.$broadcast('history_focus', {
           peerString: AppUsersManager.getUserString(userID)
         });
       });
-      return;
+      return true;
     }
 
-    var matches = $routeParams.tgaddr.match(/^(web\+)?tg:(\/\/)?join\?invite=(.+)$/);
-    if (matches && matches[3]) {
-      AppChatsManager.openInviteLink(matches[3]);
+    if (matches = url.match(/^join\?invite=(.+)$/)) {
+      AppMessagesManager.openChatInviteLink(matches[1]);
+      return true;
     }
+
+    return false;
   }
 
   var started = !('registerProtocolHandler' in navigator);
@@ -5304,8 +5324,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
     } catch (e) {}
 
-    $rootScope.$on('$routeUpdate', checkTgAddr);
-    checkTgAddr();
+
+    $(document).on('click', function (event) {
+      var target = event.target;
+      if (target &&
+          target.tagName == 'A' &&
+          !target.onclick &&
+          !target.onmousedown) {
+        var href = $(target).attr('href') || target.href || '';
+        var match = href.match(tgAddrRegEx);
+        if (match) {
+          if (handleTgProtoAddr(match[3])) {
+            return cancelEvent(event);
+          }
+        }
+      }
+    });
+
+    $rootScope.$on('$routeUpdate', checkLocationTgAddr);
+    checkLocationTgAddr();
   };
 
   return {

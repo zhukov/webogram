@@ -3618,22 +3618,33 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
   })
 
-  .controller('ChatInviteLinkModalController', function (_, $scope, $modalInstance, AppChatsManager) {
+  .controller('ChatInviteLinkModalController', function (_, $scope, $timeout, $modalInstance, AppChatsManager, ErrorService) {
 
     $scope.exportedInvite = {link: _('group_invite_link_loading_raw')};
 
-    $scope.updateLink = function (force) {
+    function updateLink (force) {
       if (force) {
         $scope.exportedInvite.revoking = true;
       }
       AppChatsManager.getChatInviteLink($scope.chatID, force).then(function (link) {
         $scope.exportedInvite = {link: link};
+        $timeout(function () {
+          $scope.$broadcast('ui_invite_select');
+        }, 100);
       })['finally'](function () {
         delete $scope.exportedInvite.revoking;
       });
     }
 
-    $scope.updateLink();
+    $scope.revokeLink = function () {
+      ErrorService.confirm({
+        type: 'REVOKE_GROUP_INVITE_LINK'
+      }).then(function () {
+        updateLink(true);
+      })
+    }
+
+    updateLink();
 
   })
 
