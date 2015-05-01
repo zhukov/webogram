@@ -4072,7 +4072,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                         "\\uff66-\\uff9f" +                 // half width Katakana
                         "\\uffa1-\\uffdc";                  // half width Hangul (Korean)
 
-  var regexAlphaNumericChars  = "0-9\.\_" + regexAlphaChars;
+  var regexAlphaNumericChars  = "0-9\_" + regexAlphaChars;
 
   // Based on Regular Expression for URL validation by Diego Perini
   var urlRegex =  "((?:https?|ftp)://|mailto:)?" +
@@ -4085,7 +4085,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       // host name
       "[" + regexAlphaChars + "0-9][" + regexAlphaChars + "0-9\-]{0,64}" +
       // domain name
-      "(?:\\.[" + regexAlphaChars + "0-9][" + regexAlphaChars + "0-9\-]{1,64}){0,10}" +
+      "(?:\\.[" + regexAlphaChars + "0-9][" + regexAlphaChars + "0-9\-]{0,64}){0,10}" +
 
       // TLD identifier
       "(?:\\.(xn--[0-9a-z]{2,16}|[" + regexAlphaChars + "]{2,24}))" +
