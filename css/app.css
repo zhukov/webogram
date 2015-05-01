@@ -1161,10 +1161,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .btn-md-danger,.btn-md-danger:focus,.btn-md-danger:hover{color:#c05f5a}
 .btn-md-danger:hover{background:#fbe7e6}
 .md-input-group{height:50px;border-bottom:1px solid #e6e6e6;padding:0;margin:0 0 22px}
+.md-textarea-group{height:66px}
 .md-input-grouped{margin-bottom:12px}
 .md-input-label{font-weight:400;color:#999;cursor:pointer;display:block;font-size:13px;margin:0;padding:0;z-index:1;pointer-events:none;-webkit-font-smoothing:antialiased;transform-origin:left center;-webkit-transform-origin:left center;-webkit-transform:translate3d(0,22px,0);transform:translate3d(0,22px,0)}
 .md-input-animated .md-input-group,.md-input-animated .md-input-label{-webkit-transition:all .15s cubic-bezier(.35,0,.25,1);transition:all .15s cubic-bezier(.35,0,.25,1)}
-.md-input{color:#000;background:#fff;display:inline-block;border:0;outline:0;font-size:13px;padding:3px 0;margin:3px 0 0;width:100%;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
+.md-input{color:#000;background:#fff;display:inline-block;border:0;outline:0;font-size:13px;padding:3px 0;margin:3px 0 0;width:100%;resize:none;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
 .md-input-disabled .md-input{color:#999}
 .md-input-focused{border-bottom:2px solid #6bace1}
 .md-input-error{border-bottom:2px solid #e2726f}
@@ -1360,8 +1361,9 @@ div.im_message_video_thumb{position:relative}
 .im_message_video_duration{background:rgba(0,0,0,.4);color:#fff;position:absolute;bottom:4px;right:4px;padding:2px 6px;font-size:11px;line-height:15px;border-radius:2px;overflow:hidden;z-index:1}
 .icon-videoplay{position:absolute;display:inline-block;top:50%;left:50%;margin-left:-21px;margin-top:-21px;width:42px;height:42px;z-index:1;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:0 -590px}
 .is_2x .icon-videoplay{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
-.im_message_geopoint{border-radius:2px;margin-top:5px;overflow:hidden;display:block;position:relative;width:200px;height:100px}
-.icon-geo-point{position:absolute;display:inline-block;top:50%;left:50%;margin-left:-8px;margin-top:-10px;width:15px;height:19px;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-14px -389px}
+.im_message_geopoint{border-radius:2px;margin-top:5px;overflow:hidden;display:block;position:relative;width:300px;height:150px}
+.im_message_venue_geopoint_wrap{display:block;position:relative;overflow:hidden;width:100px;height:100px;margin-right:10px;float:left;border-radius:2px;background:#f2f2f2;text-align:center;line-height:0}
+.icon-geo-point{position:absolute;display:inline-block;top:50%;left:50%;margin-left:-8px;margin-top:-15px;width:15px;height:19px;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-14px -389px}
 .is_2x .icon-geo-point{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .im_message_media_embed{position:relative;height:0;overflow:hidden;margin-top:5px}
 .im_message_media_embed iframe,.im_message_media_embed webview{position:absolute;top:0;left:0;width:100%;height:100%}
@@ -1396,12 +1398,13 @@ div.im_message_video_thumb{position:relative}
 .im_message_document_thumb_wrap{border-radius:2px;overflow:hidden;background:#f2f2f2;width:100px;min-height:38px;max-height:100px;margin-right:10px;text-align:center;float:left;line-height:0}
 img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:middle}
 .im_message_document_name_wrap{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;width:265px;padding:0 0 1px}
-.im_message_document_actions,.im_message_website_description{width:265px}
+.im_message_document_actions{width:265px}
 .im_message_document_name{color:#3a6d99;display:inline-block;font-weight:700;max-width:170px;overflow:hidden;vertical-align:text-top;white-space:nowrap;text-overflow:ellipsis}
 .im_message_document_size{color:#999;padding-left:2px;vertical-align:text-top}
 .audio_player_actions a,.im_message_document_actions a{margin-right:10px}
 .audio_player_title_wrap{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:1px 0;line-height:16px;height:19px;width:200px}
 .audio_player_title{display:inline-block;font-weight:700;max-width:100px;overflow:hidden;vertical-align:text-top;white-space:nowrap;text-overflow:ellipsis}
+.icon-audio-unread{display:inline-block;width:6px;height:6px;background:#4eabf1;border:0;border-radius:4px;margin:5px 5px 0 2px;vertical-align:text-top}
 .audio_player_meta{overflow:hidden;vertical-align:text-top;display:inline-block}
 .audio_player_duration,.audio_player_size{color:#999;padding-left:2px}
 .audio_player_actions{margin-top:3px}
@@ -1420,7 +1423,7 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .audio_player_progress_wrap{overflow:hidden}
 .audio_player_progress_wrap .tg_down_progress{margin-top:5px}
 .im_message_download_progress_wrap,.im_message_upload_progress_wrap{margin-top:5px;width:200px}
-.im_message_document_thumbed .im_message_document_actions,.im_message_document_thumbed .im_message_document_name_wrap,.im_message_document_thumbed .im_message_download_progress_wrap,.im_message_document_thumbed .im_message_upload_progress_wrap,.im_message_document_thumbed .im_message_website_description{width:207px}
+.im_message_document_thumbed .im_message_document_actions,.im_message_document_thumbed .im_message_document_name_wrap,.im_message_document_thumbed .im_message_download_progress_wrap,.im_message_document_thumbed .im_message_upload_progress_wrap{width:207px}
 .im_message_document_thumbed .im_message_document_name{max-width:110px}
 .im_message_video .im_message_document_actions,.im_message_video .im_message_document_name_wrap,.im_message_video .im_message_download_progress_wrap{width:152px}
 .im_message_video .im_message_document_name_wrap{margin-top:5px}
@@ -1451,6 +1454,7 @@ div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_message_fwd_date{padding:0}
 .im_message_text{word-wrap:break-word;line-height:150%}
+.im_message_photo_caption,.im_message_video_caption{word-wrap:break-word;line-height:150%;margin-top:3px}
 .im_message_mymention{background:#fff8cc}
 .im_history_empty,.im_history_not_selected{visibility:hidden;text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
 .im_history_empty.vertical-aligned,.im_history_not_selected.vertical-aligned{visibility:visible}

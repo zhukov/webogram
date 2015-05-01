@@ -433,6 +433,10 @@ html {
   background: #f1f1f1;
   margin-top: 0;
 }
+.im_message_body_media .im_message_geopoint {
+  width: 200px;
+  height: 100px;
+}
 .im_message_body_media a.im_message_photo_thumb,
 .im_message_body_media .im_message_video {
   margin-top: 0;
@@ -494,6 +498,14 @@ html {
 .im_message_video {
   width: auto;
   max-width: 250px;
+}
+.im_message_audio {
+  width: auto;
+  max-width: 200px;
+}
+.im_message_audio .audio_player_title_wrap {
+  width: auto;
+  font-size: 12px;
 }
 .im_message_contact {
   width: 200px;
