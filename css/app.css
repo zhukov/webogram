@@ -1295,6 +1295,7 @@ a.tg_radio_on:hover i.icon-radio{background-color:#5785aa}
 .is_2x .im_dialogs_search_field{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .im_dialogs_modal_col_wrap .im_dialogs_search_field{background-color:#fff;border-color:#d9dbde}
 .im_dialogs_search_field:active,.im_dialogs_search_field:focus{background-color:#fff}
+.im_dialogs_search_field::-ms-clear{display:none}
 a.tg_search_clear{position:absolute;right:0;margin-top:-40px;width:34px;height:34px;opacity:.6}
 .contacts_modal_search a.tg_search_clear{right:12px;margin-top:-34px}
 a.tg_search_clear:hover{opacity:1}
@@ -1567,6 +1568,7 @@ a:hover .icon-twitter{background-position:0 -116px}
 .contacts_modal_search{padding:0 0 14px;position:relative}
 .contacts_modal_search_field{font-size:12px;line-height:normal;border:1px solid #d9dbde;border-radius:2px;padding:6px 15px 6px 30px;margin:0;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
 .is_2x .contacts_modal_search_field{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
+.contacts_modal_search_field::-ms-clear{display:none}
 a.contacts_modal_search_clear{right:9px;margin-top:-24px}
 .contacts_scrollable_wrap{outline:0!important}
 .contacts_modal_contacts_empty{visibility:hidden;text-align:center;color:#999;font-size:16px;line-height:160%;padding:1px 50px;margin:0}
@@ -1642,6 +1644,7 @@ a.peer_photo_init:active,a.peer_photo_init:focus,a.peer_photo_init:hover{text-de
 .countries_modal_search_field{font-size:12px;line-height:normal;background-size:42px 1171px;border:1px solid #F2F2F2;border-radius:3px;padding:6px 20px 6px 30px;margin:0;background-color:#F2F2F2;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
 .is_2x .countries_modal_search_field{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .countries_modal_search_field:active,.countries_modal_search_field:focus{background-color:#fff}
+.countries_modal_search_field::-ms-clear{display:none}
 a.countries_modal_search_clear{right:12px;margin-top:-34px}
 .countries_modal_wrap .modal-body{padding:14px 0}
 .countries_scrollable_wrap a.countries_modal_country{clear:both;overflow:hidden;color:#000;padding:8px 26px;font-size:12px;border-radius:0}
