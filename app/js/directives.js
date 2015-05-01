@@ -595,6 +595,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
           else {
             $scope.$emit('esc_no_more');
+            // Strange Chrome bug, when field doesn't get blur, but becomes inactive after location change
+            setTimeout(function () {
+              searchField.blur();
+              searchField.focus();
+            }, 100);
           }
           return cancelEvent(e);
         }
@@ -606,10 +611,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
           return cancelEvent(e);
         }
-        
+
         if ( e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey &&
               e.keyCode >= 49 && e.keyCode <= 57 ) { // Alt + Shift + # , switch to conversation # where # is in [1..9]
-          
+
           var dialogNumber = e.keyCode - 49,
               dialogWraps = $(scrollableWrap).find('.im_dialog_wrap'),
               nextDialogWrap = dialogWraps[dialogNumber];
@@ -618,10 +623,10 @@ angular.module('myApp.directives', ['myApp.filters'])
             $(nextDialogWrap).find('a').trigger('mousedown');
             scrollToDialog(nextDialogWrap);
           }
-          
+
           return cancelEvent(e);
         }
-        
+
         var next, prev, skip, ctrlTabSupported = Config.Modes.packed;
         if (e.keyCode == 40 || e.keyCode == 38) { // UP, DOWN
           next = e.keyCode == 40;
@@ -633,7 +638,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           prev = !next;
           skip = true;
         }
-        
+
         if (next || prev) {
           if (!skip && (!searchFocused || e.metaKey)) {
             return true;
@@ -689,7 +694,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             scrollTop = scrollableWrap.scrollTop,
             viewportHeight = scrollableWrap.clientHeight;
 
-        if (scrollTop > elTop) { // we are below the dialog to scroll 
+        if (scrollTop > elTop) { // we are below the dialog to scroll
           scrollableWrap.scrollTop = elTop;
           $(dialogsWrap).nanoScroller({flash: true});
         }
