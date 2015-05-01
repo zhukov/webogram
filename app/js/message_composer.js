@@ -586,8 +586,11 @@ MessageComposer.prototype.onKeyEvent = function (e) {
         return cancelEvent(e);
       }
 
-      if (e.keyCode == 13) { // ENTER
+      if (e.keyCode == 13 || e.keyCode == 9) { // Enter or Tab
         var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
+        if (!currentSelected.length && e.keyCode == 9) {
+          currentSelected = $(this.autoCompleteEl[0].childNodes[0]).find('a');
+        }
         var code, mention;
         if (code = currentSelected.attr('data-code')) {
           this.onEmojiSelected(code, true);
