@@ -19,5 +19,9 @@
     <span ng-switch-default my-i18n="message_service_left_group"></span>
   </span>
 
-  <span ng-switch-default ng-bind="'message_service_unsupported_action' | i18n:historyMessage.action._"></span>
+  <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="message_service_joined_by_link"></span>
+
+  <span ng-switch-default my-i18n="message_service_unsupported_action">
+    <my-i18n-param name="action"><span ng-bind="historyMessage.action._"></span></my-i18n-param>
+  </span>
 </span>

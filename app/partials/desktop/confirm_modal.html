@@ -47,6 +47,12 @@
       <div ng-switch-when="RECOVERY_EMAIL_EMPTY" my-i18n="confirm_modal_recovery_email_empty_md"></div>
       <div ng-switch-when="PASSWORD_ABORT_SETUP"  my-i18n="confirm_modal_abort_password_setup"></div>
       <div ng-switch-when="RESET_ACCOUNT" my-i18n="confirm_modal_reset_account_md"></div>
+      <div ng-switch-when="JOIN_GROUP_BY_LINK" my-i18n="confirm_modal_join_group_link">
+        <my-i18n-param name="title"><strong ng-bind="title"></strong></my-i18n-param>
+      </div>
+      <div ng-switch-when="REVOKE_GROUP_INVITE_LINK" my-i18n="confirm_modal_revoke_group_link"></div>
+
+
       <span ng-switch-default ng-switch="message.length > 0">
         <span ng-switch-when="true" ng-bind="message"></span>
         <span ng-switch-default my-i18n="confirm_modal_are_u_sure"></span>

@@ -77,6 +77,7 @@
           </span>
           <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
           <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
+          <span ng-switch-when="messageMediaVenue" my-i18n="conversation_media_location"></span>
           <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
         </span>
 
@@ -100,6 +101,8 @@
             </span>
           </span>
         </span>
+
+        <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
 
         <span class="im_dialog_message_text" ng-if="dialogMessage.message.length" ng-bind-html="dialogMessage.richMessage"></span>
       </div>

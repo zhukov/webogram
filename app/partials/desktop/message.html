@@ -54,11 +54,12 @@
         <!-- <div class="im_message_external_embed_wrap" ng-if="::historyMessage.richUrlEmbed || false" my-external-embed="historyMessage.richUrlEmbed"></div> -->
         <div ng-if="::historyMessage.media || historyMessage.id < 0 ? true : false" class="im_message_media" ng-switch="historyMessage.media._">
 
-          <div ng-switch-when="messageMediaPhoto"     my-message-photo></div>
-          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media.video" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media.document" message-id="historyMessage.id"></div>
-          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio"></div>
-          <div ng-switch-when="messageMediaGeo"       my-message-map></div>
+          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio" message="historyMessage"></div>
+          <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
+          <div ng-switch-when="messageMediaVenue"     my-message-venue="historyMessage.media"></div>
           <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>
           <div ng-switch-when="messageMediaWebPage"   class="im_message_webpage" my-message-webpage="historyMessage.media.webpage" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaPending"   my-message-pending></div>

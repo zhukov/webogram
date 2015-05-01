@@ -2707,6 +2707,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
+    $scope.inviteViaLink = function () {
+      var scope = $rootScope.$new();
+      scope.chatID = $scope.chatID;
+
+      $modal.open({
+        templateUrl: templateUrl('chat_invite_link_modal'),
+        controller: 'ChatInviteLinkModalController',
+        scope: scope,
+        windowClass: 'md_simple_modal_window mobile_modal'
+      });
+    }
+
 
     $scope.photo = {};
 
@@ -3604,6 +3616,36 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         delete $scope.group.updating;
       });
     };
+  })
+
+  .controller('ChatInviteLinkModalController', function (_, $scope, $timeout, $modalInstance, AppChatsManager, ErrorService) {
+
+    $scope.exportedInvite = {link: _('group_invite_link_loading_raw')};
+
+    function updateLink (force) {
+      if (force) {
+        $scope.exportedInvite.revoking = true;
+      }
+      AppChatsManager.getChatInviteLink($scope.chatID, force).then(function (link) {
+        $scope.exportedInvite = {link: link};
+        $timeout(function () {
+          $scope.$broadcast('ui_invite_select');
+        }, 100);
+      })['finally'](function () {
+        delete $scope.exportedInvite.revoking;
+      });
+    }
+
+    $scope.revokeLink = function () {
+      ErrorService.confirm({
+        type: 'REVOKE_GROUP_INVITE_LINK'
+      }).then(function () {
+        updateLink(true);
+      })
+    }
+
+    updateLink();
+
   })
 
   .controller('ImportContactModalController', function ($scope, $modalInstance, $rootScope, AppUsersManager, ErrorService, PhonebookContactsService) {

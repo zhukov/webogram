@@ -23,6 +23,7 @@
 	"group_modal_menu_delete_chat": "Delete chat",
 	"group_modal_settings": "Settings",
 	"group_modal_notifications": "Notifications",
+	"group_modal_menu_share_link": "Invite to group via link",
 	"group_modal_members": "Members",
 	"group_modal_members_kick": "Remove",
 
@@ -160,6 +161,12 @@
 	"group_edit_submit": "Save",
 	"group_edit_submit_active": "Saving...",
 
+	"group_invite_link_modal_title": "Invite link",
+	"group_invite_link_link_label": "Copy link",
+	"group_invite_link_loading": "Loading...",
+	"group_invite_revoke_active": "Revoking...",
+	"group_invite_revoke": "Revoke",
+
 	"confirm_modal_logout": "Are you sure you want to log out?",
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
@@ -182,6 +189,8 @@
 	"confirm_modal_recovery_email_empty_md": "Warning! Are you sure you don't want to add a password recovery e-mail?\n\nIf you forget your password, you will lose access to your Telegram account",
 	"confirm_modal_abort_password_setup": "Abort two-step verification setup?",
 	"confirm_modal_reset_account_md": "Are you sure?\nThis action can not be undone.\n\nYou will lose all your chats and messages, along with any media and files you shared, if you proceed with resetting your account.",
+	"confirm_modal_join_group_link": "Do you want to join the group «{title}»?",
+	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
 	"confirm_modal_are_u_sure": "Are you sure?",
 
 	"confirm_modal_logout_submit": "Log out",
@@ -244,6 +253,7 @@
 	"conversation_kicked_user": "removed {user}",
 	"conversation_invited_user_message": "invited user",
 	"conversation_kicked_user_message": "removed user",
+	"conversation_joined_by_link": "joined group",
 	"conversation_message_sent": "sent you a message",
 
 	"conversation_unknown_user": "Somebody",
@@ -257,6 +267,7 @@
 	"message_service_returned_to_group": "returned to group",
 	"message_service_kicked_user": "removed {user}",
 	"message_service_left_group": "left group",
+	"message_service_joined_by_link": "joined group via invite link",
 	"message_service_unsupported_action": "Unsupported action {action}",
 
 	"error_modal_warning_title": "Warning",
@@ -279,7 +290,7 @@
 	"error_modal_firstname_invali_description": "The first name you entered is invalid.",
 	"error_modal_lastname_invalid_description": "The last name you entered is invalid.",
 	"error_modal_phone_invalid_description": "The phone number you entered is invalid.",
-	"error_modal_users_too_much_description": "You have selected too much users.",
+	"error_modal_users_too_much_description": "Too many group members.",
 	"error_modal_photo_dimensions_invalid_description": "The photo dimensions are invalid, please select another file.",
 	"error_modal_video_file_invalid_description": "The video file extension is invalid or unsupported, please select another file.",
 	"error_modal_photo_too_small_description": "The photo you provided is too small.",
@@ -302,6 +313,8 @@
 	"error_modal_recovery_na_description": "Since you haven't provided a recovery e-mail when setting up your password, your remaining options are either to remember your password or to reset your account.",
 	"error_modal_password_success_descripion": "Your password for Two-Step Verification is now active.",
 	"error_modal_password_disabled_descripion": "You have disabled Two-Step Verification.",
+	"error_modal_user_not_mutual_contact": "The user can be invited by his contact only",
+	"error_modal_invite_link_invalid": "The invite link is invalid",
 
 
 	"head_telegram": "Telegram",

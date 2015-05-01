@@ -29,7 +29,7 @@
         <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
       </div>
 
-      <div class="im_message_body" ng-class="::{im_message_body_media: !!historyMessage.media}">
+      <div class="im_message_body" ng-class="::{im_message_body_media: !!historyMessage.media && !historyMessage.media.rCaption}">
 
         <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0" no-watch="true"></a>
 
@@ -42,11 +42,12 @@
 
         <div ng-if="::historyMessage.media || false" class="im_message_media" ng-switch="historyMessage.media._">
 
-          <div ng-switch-when="messageMediaPhoto"     my-message-photo></div>
-          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media.video" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media.document" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio"></div>
-          <div ng-switch-when="messageMediaGeo"       my-message-map></div>
+          <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
+          <div ng-switch-when="messageMediaVenue"     my-message-geo="historyMessage.media"></div>
           <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>
           <div ng-switch-when="messageMediaPending"   my-message-pending></div>
           <div ng-switch-when="messageMediaUnsupported">
