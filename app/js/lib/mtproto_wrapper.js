@@ -482,7 +482,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           startOffset = fileWriter.length;
           if (startOffset >= size) {
             if (toFileEntry) {
-              deferred.resolve(fileWriter.finalize());
+              deferred.resolve();
             } else {
               deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
             }
