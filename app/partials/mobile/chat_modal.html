@@ -72,6 +72,10 @@
     <div class="mobile_modal_action_wrap" ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length">
       <a class="mobile_modal_action" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
     </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.left && chatFull.isAdmin">
+      <a class="mobile_modal_action" ng-click="inviteViaLink()" my-i18n="group_modal_menu_share_link"></a>
+    </div>
+
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left">
       <a class="mobile_modal_action" ng-click="returnToGroup()" my-i18n="group_modal_return"></a>
     </div>

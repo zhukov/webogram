@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.4 - messaging web application for MTProto
+ * Webogram v0.4.5 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -280,7 +280,8 @@ function templateUrl (tplName) {
     error_modal: 'desktop',
     media_modal_layout: 'desktop',
     slider: 'desktop',
-    reply_message: 'desktop'
+    reply_message: 'desktop',
+    chat_invite_link_modal: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';
