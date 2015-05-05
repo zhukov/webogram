@@ -5366,8 +5366,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var tgAddrRegEx = /^(web\+)?tg:(\/\/)?(.+)/;
 
   function checkLocationTgAddr () {
-    if ($routeParams.tgaddr) {
-      var matches = $routeParams.tgaddr.match(tgAddrRegEx);
+    var tgaddr = $routeParams.tgaddr;
+    if (tgaddr) {
+      try {
+        tgaddr = decodeURIComponent(tgaddr);
+      } catch (e) {};
+      var matches = tgaddr.match(tgAddrRegEx);
       if (matches) {
         handleTgProtoAddr(matches[3]);
       }
