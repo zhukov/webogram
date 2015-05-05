@@ -840,6 +840,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       midnightOffseted = new Date(),
       midnightOffset;
 
+  Storage.get('server_time_offset').then(function (to) {
+    if (to) {
+      serverTimeOffset = to;
+    }
+  });
 
   var maxSeenID = false;
   if (Config.Modes.packed) {
@@ -848,13 +853,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  Storage.get('server_time_offset').then(function (to) {
-    if (to) {
-      serverTimeOffset = to;
-    }
-  });
 
   var dateOrTimeFilter = $filter('dateOrTime');
+  var fwdMessagesPluralize = _.pluralize('conversation_forwarded_X_messages');
 
   midnightOffseted.setHours(0);
   midnightOffseted.setMinutes(0);
@@ -966,9 +967,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           if (message.unread && !message.out) {
             NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
               if (!muted) {
-                Storage.get('notify_nopreview').then(function (no_preview) {
-                  notifyAboutMessage(message, no_preview);
-                });
+                notifyAboutMessage(message);
               }
             });
           }
@@ -1374,6 +1373,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
     }
+
+    NotificationsManager.soundReset(AppPeersManager.getPeerString(peerID))
 
     return historyStorage.readPromise;
   }
@@ -2255,7 +2256,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
-  function notifyAboutMessage (message, no_preview) {
+  function notifyAboutMessage (message, options) {
+    options = options || {};
+
     var peerID = getMessagePeer(message);
     var fromUser = AppUsersManager.getUser(message.from_id);
     var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
@@ -2264,8 +2267,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         notificationMessage = false,
         notificationPhoto;
 
-    if (message.message) {
-      if (no_preview) {
+    var notifySettings = NotificationsManager.getNotifySettings();
+
+    if (message.fwd_from_id && options.fwd_count) {
+      notificationMessage = fwdMessagesPluralize(options.fwd_count);
+    } else if (message.message) {
+      if (notifySettings.nopreview) {
         notificationMessage = _('conversation_message_sent');
       } else {
         notificationMessage = RichTextProcessor.wrapPlainText(message.message);
@@ -2302,6 +2309,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
         case 'messageActionChatDeleteUser':
           notificationMessage = message.action.user_id == message.from_id ? _('conversation_left_group') : _('conversation_kicked_user_message_raw');
+          break;
+        case 'messageActionChatJoinedByLink':
+          notificationMessage = _('conversation_joined_by_link');
           break;
       }
     }
@@ -2380,6 +2390,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var newMessagesToHandle = {};
   var newDialogsHandlePromise = false;
   var newDialogsToHandle = {};
+  var notificationsHandlePromise = false;
+  var notificationsToHandle = {};
 
   function handleNewMessages () {
     $timeout.cancel(newMessagesHandlePromise);
@@ -2393,6 +2405,31 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     newDialogsHandlePromise = false;
     $rootScope.$broadcast('dialogs_multiupdate', newDialogsToHandle);
     newDialogsToHandle = {};
+  }
+
+  function handleNotifications () {
+    $timeout.cancel(notificationsHandlePromise);
+    notificationsHandlePromise = false;
+
+    var timeout = $rootScope.idle.isIDLE && StatusManager.isOtherDeviceActive() ? 30000 : 1000;
+    angular.forEach(notificationsToHandle, function (notifyPeerToHandle) {
+      notifyPeerToHandle.isMutedPromise.then(function (muted) {
+        var topMessage = notifyPeerToHandle.top_message;
+        if (muted ||
+            !topMessage.unread) {
+          return;
+        }
+        setTimeout(function () {
+          if (topMessage.unread) {
+            notifyAboutMessage(topMessage, {
+              fwd_count: notifyPeerToHandle.fwd_count
+            });
+          }
+        }, timeout);
+      });
+    });
+
+    notificationsToHandle = {};
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
@@ -2490,17 +2527,28 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (inboxUnread && ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE)) {
 
           var notifyPeer = message.flags & 16 ? message.from_id : peerID;
-          var isMutedPromise = NotificationsManager.getPeerMuted(notifyPeer);
-          var timeout = $rootScope.idle.isIDLE && StatusManager.isOtherDeviceActive() ? 30000 : 1000;
-          setTimeout(function () {
-            isMutedPromise.then(function (muted) {
-              if (message.unread && !muted) {
-                Storage.get('notify_nopreview').then(function (no_preview) {
-                  notifyAboutMessage(message, no_preview);
-                });
-              }
-            })
-          }, timeout);
+          var notifyPeerToHandle = notificationsToHandle[notifyPeer];
+          if (notifyPeerToHandle === undefined) {
+            notifyPeerToHandle = notificationsToHandle[notifyPeer] = {
+              isMutedPromise: NotificationsManager.getPeerMuted(notifyPeer),
+              fwd_count: 0,
+              from_id: 0
+            };
+          }
+
+          if (notifyPeerToHandle.from_id != message.from_id) {
+            notifyPeerToHandle.from_id = message.from_id;
+            notifyPeerToHandle.fwd_count = 0;
+          }
+          if (message.fwd_from_id) {
+            notifyPeerToHandle.fwd_count++;
+          }
+
+          notifyPeerToHandle.top_message = message;
+
+          if (!notificationsHandlePromise) {
+            notificationsHandlePromise = $timeout(handleNotifications, 1000);
+          }
         }
 
         incrementMaxSeenID(message.id);
@@ -4522,6 +4570,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var notificationsShown = {};
   var notificationIndex = 0;
   var notificationsCount = 0;
+  var soundsPlayed = {};
   var vibrateSupport = !!navigator.vibrate;
   var nextSoundAt = false;
   var prevSoundVolume = false;
@@ -4533,6 +4582,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       titleChanged = false,
       titlePromise;
   var prevFavicon;
+
+  var settings = {};
 
   $rootScope.$watch('idle.isIDLE', function (newVal) {
     if (!newVal) {
@@ -4596,13 +4647,33 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     notify: notify,
     cancel: notificationCancel,
     clear: notificationsClear,
+    soundReset: notificationSoundReset,
     getPeerSettings: getPeerSettings,
     getPeerMuted: getPeerMuted,
     savePeerSettings: savePeerSettings,
     updatePeerSettings: updatePeerSettings,
+    updateNotifySettings: updateNotifySettings,
+    getNotifySettings: getNotifySettings,
     getVibrateSupport: getVibrateSupport,
     testSound: playSound
   };
+
+  function updateNotifySettings () {
+    Storage.get('notify_nodesktop', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (updSettings) {
+
+      settings.nodesktop = updSettings[0];
+      settings.volume = updSettings[1] === false
+                          ? 0.5
+                          : updSettings[1];
+
+      settings.novibrate = updSettings[2];
+      settings.nopreview = updSettings[3];
+    });
+  }
+
+  function getNotifySettings () {
+    return settings;
+  }
 
   function getPeerSettings (peerID) {
     if (peerSettings[peerID] !== undefined) {
@@ -4660,7 +4731,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function start () {
+    updateNotifySettings();
+    $rootScope.$on('settings_changed', updateNotifySettings);
     registerDevice();
+
     if (!notificationsUiSupport) {
       return false;
     }
@@ -4695,70 +4769,75 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     notificationsCount++;
 
-    Storage.get('notify_nosound', 'notify_volume').then(function (settings) {
-      if (!settings[0] && settings[1] === false || settings[1] > 0) {
-        playSound(settings[1] || 0.5);
-      }
-    })
+    var now = tsNow();
+    if (settings.volume > 0 &&
+        (
+          !data.tag ||
+          !soundsPlayed[data.tag] ||
+          now > soundsPlayed[data.tag] + 60000
+        )
+    ) {
+      playSound(settings.volume);
+      soundsPlayed[data.tag] = now;
+    }
 
     if (!notificationsUiSupport ||
         'Notification' in window && Notification.permission !== 'granted') {
       return false;
     }
 
-    Storage.get('notify_nodesktop', 'notify_novibrate').then(function (settings) {
-      if (settings[0]) {
-        if (vibrateSupport && !settings[1]) {
-          navigator.vibrate([200, 100, 200]);
-          return;
-        }
+    if (settings.nodesktop) {
+      if (vibrateSupport && !settings.novibrate) {
+        navigator.vibrate([200, 100, 200]);
         return;
       }
-      var idx = ++notificationIndex,
-          key = data.key || 'k' + idx,
-          notification;
+      return;
+    }
 
-      if ('Notification' in window) {
-        notification = new Notification(data.title, {
-          icon: data.image || '',
-          body: data.message || '',
-          tag: data.tag || ''
-        });
-      }
-      else if ('mozNotification' in navigator) {
-        notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
-      }
-      else if (notificationsMsSiteMode) {
-        window.external.msSiteModeClearIconOverlay();
-        window.external.msSiteModeSetIconOverlay('img/icons/icon16.png', data.title);
-        window.external.msSiteModeActivate();
-        notification = {
-          index: idx
-        };
-      }
-      else {
-        return;
-      }
+    var idx = ++notificationIndex,
+        key = data.key || 'k' + idx,
+        notification;
 
-      notification.onclick = function () {
-        notification.close();
-        AppRuntimeManager.focus();
-        notificationsClear();
-        if (data.onclick) {
-          data.onclick();
-        }
+    if ('Notification' in window) {
+      notification = new Notification(data.title, {
+        icon: data.image || '',
+        body: data.message || '',
+        tag: data.tag || ''
+      });
+    }
+    else if ('mozNotification' in navigator) {
+      notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
+    }
+    else if (notificationsMsSiteMode) {
+      window.external.msSiteModeClearIconOverlay();
+      window.external.msSiteModeSetIconOverlay('img/icons/icon16.png', data.title);
+      window.external.msSiteModeActivate();
+      notification = {
+        index: idx
       };
+    }
+    else {
+      return;
+    }
 
-      notification.onclose = function () {
-        delete notificationsShown[key];
-        notificationsClear();
-      };
-
-      if (notification.show) {
-        notification.show();
+    notification.onclick = function () {
+      notification.close();
+      AppRuntimeManager.focus();
+      notificationsClear();
+      if (data.onclick) {
+        data.onclick();
       }
-      notificationsShown[key] = notification;
-    });
+    };
+
+    notification.onclose = function () {
+      delete notificationsShown[key];
+      notificationsClear();
+    };
+
+    if (notification.show) {
+      notification.show();
+    }
+    notificationsShown[key] = notification;
   };
 
   function playSound (volume) {
@@ -4793,6 +4872,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       } catch (e) {}
       delete notificationsCount[key];
     }
+  }
+
+  function notificationSoundReset (tag) {
+    delete soundsPlayed[tag];
   }
 
   function notificationsClear() {

@@ -49,6 +49,9 @@
           <my-i18n-param name="user"><span my-user-link="replyMessage.action.user_id"></span></my-i18n-param>
         </span>
       </span>
+
+      <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
+
     </span>
 
     <span class="im_reply_message_text" ng-if="replyMessage.message.length" ng-bind-html="replyMessage.richMessage"></span>

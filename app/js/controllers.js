@@ -2919,22 +2919,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    Storage.get('notify_nodesktop', 'notify_nosound', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (settings) {
+    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (settings) {
       $scope.notify.desktop = !settings[0];
-      $scope.send.enter = settings[2] ? '' : '1';
+      $scope.send.enter = settings[1] ? '' : '1';
 
-      if (settings[1]) {
-        $scope.notify.volume = 0;
-      } else if (settings[3] !== false) {
-        $scope.notify.volume = settings[3] > 0 && settings[3] <= 1.0 ? settings[3] : 0;
+      if (settings[2] !== false) {
+        $scope.notify.volume = settings[2] > 0 && settings[2] <= 1.0 ? settings[2] : 0;
       } else {
         $scope.notify.volume = 0.5;
       }
 
       $scope.notify.canVibrate = NotificationsManager.getVibrateSupport();
-      $scope.notify.vibrate = !settings[4];
+      $scope.notify.vibrate = !settings[3];
 
-      $scope.notify.preview = !settings[5];
+      $scope.notify.preview = !settings[4];
 
       $scope.notify.volumeOf4 = function () {
         return 1 + Math.ceil(($scope.notify.volume - 0.1) / 0.33);
@@ -2952,7 +2950,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$watch('notify.volume', function (newValue, oldValue) {
         if (newValue !== oldValue) {
           Storage.set({notify_volume: newValue});
-          Storage.remove('notify_nosound');
+          $rootScope.$broadcast('settings_changed');
           NotificationsManager.clear();
 
           if (testSoundPromise) {
@@ -2972,6 +2970,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else {
           Storage.set({notify_nodesktop: true});
         }
+        $rootScope.$broadcast('settings_changed');
       }
 
       $scope.togglePreview = function () {
@@ -2982,6 +2981,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else {
           Storage.set({notify_nopreview: true});
         }
+        $rootScope.$broadcast('settings_changed');
       }
 
       $scope.toggleVibrate = function () {
@@ -2992,6 +2992,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else {
           Storage.set({notify_novibrate: true});
         }
+        $rootScope.$broadcast('settings_changed');
       }
 
       $scope.toggleCtrlEnter = function (newValue) {

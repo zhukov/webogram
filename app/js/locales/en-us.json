@@ -255,6 +255,7 @@
 	"conversation_kicked_user_message": "removed user",
 	"conversation_joined_by_link": "joined group",
 	"conversation_message_sent": "sent you a message",
+	"conversation_forwarded_X_messages": "{'one': 'forwarded {} message', 'other': 'forwarded {} messages'}",
 
 	"conversation_unknown_user": "Somebody",
 	"conversation_unknown_chat": "Unknown chat",
