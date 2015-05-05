@@ -228,6 +228,7 @@
     "conversation_kicked_user_message": "hat Benutzer entfernt",
     "conversation_joined_by_link": "ist der Gruppe beigetreten",
     "conversation_message_sent": "hat dir eine Nachricht gesendet",
+    "conversation_forwarded_X_messages": "{'one': 'hat {} Nachricht weitergeleitet', 'other': 'hat {} Nachrichten weitergeleitet'}",
     "conversation_unknown_user": "Jemand",
     "conversation_unknown_chat": "Unbekannte Unterhaltung",
     "message_service_created_group": "hat die Gruppe {group-name} erstellt",

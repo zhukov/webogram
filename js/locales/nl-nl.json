@@ -228,6 +228,7 @@
     "conversation_kicked_user_message": "gebruiker verwijderd",
     "conversation_joined_by_link": "Neemt deel aan de groep",
     "conversation_message_sent": "heeft je een bericht gestuurd",
+    "conversation_forwarded_X_messages": "{'one': 'doogestuurd {} bericht', 'other': 'doorgestuurde {} berichten'}",
     "conversation_unknown_user": "Iemand",
     "conversation_unknown_chat": "Onbekende chat",
     "message_service_created_group": "de groep: {group-name} is aangemaakt",

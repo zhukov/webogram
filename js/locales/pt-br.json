@@ -228,6 +228,7 @@
     "conversation_kicked_user_message": "usuário removido",
     "conversation_joined_by_link": "entrou no grupo",
     "conversation_message_sent": "te enviou uma mensagem",
+    "conversation_forwarded_X_messages": "{'one': 'encaminhou {} mensagem', 'other': 'encaminhou {} mensagens'}",
     "conversation_unknown_user": "Alguém",
     "conversation_unknown_chat": "Chat desconhecido",
     "message_service_created_group": "criou o grupo {group-name}",
