@@ -2863,7 +2863,7 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
 
 .sessions_modal {
   &_session {
-    padding: 8px 16px;
+    padding: 8px 24px;
   }
   &_sessions_header {
     color: #999;
@@ -2873,12 +2873,12 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
     font-weight: bold;
   }
   &_terminate_all_wrap {
-    margin: 5px 0 5px;
-    text-align: center;
+    margin: 5px 0 0 24px;
   }
 }
 .sessions_modal_sessions_list {
-  margin-bottom: 20px;
+  padding: 14px 0 10px;
+  margin-bottom: 10px;
 }
 .session_active_date_online {
   color: #3a6d99;
@@ -2898,7 +2898,8 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
   text-align: right;
 }
 .session_terminate_btn {
-  margin-top: 17px;
+  margin-top: 24px;
+  display: inline-block;
 }
 .sessions_modal_session_app {
   font-weight: bold;
@@ -2910,6 +2911,10 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
 }
 .sessions_modal_session_location {
   color: #777;
+}
+
+.sessions_modal_other_splitter {
+  margin: 15px 0 20px 24px;
 }
 
 .modal-dialog {
