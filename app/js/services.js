@@ -2284,7 +2284,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         case 'messageMediaDocument':
           if (message.media.document.sticker) {
             notificationMessage = _('conversation_media_sticker');
-            var stickerEmoji = EmojiHelper.stickers[message.media.document.id];
+            var stickerEmoji = message.media.document.stickerEmojiRaw;
             if (stickerEmoji !== undefined) {
               notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' (' + notificationMessage + ')';
             }
@@ -3343,10 +3343,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = 1;
-          var stickerEmoji = attribute.alt || EmojiHelper.stickers[apiDoc.id];
-          if (stickerEmoji !== undefined) {
+          if (attribute.alt !== undefined) {
             apiDoc.sticker = 2;
-            apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(stickerEmoji, {noLinks: true, noLinebreaks: true});
+            apiDoc.stickerEmojiRaw = attribute.alt;
+            apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(apiDoc.stickerEmojiRaw, {noLinks: true, noLinebreaks: true});
           }
           break;
         case 'documentAttributeImageSize':
@@ -3640,17 +3640,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppStickersManager', function ($q, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
+.service('AppStickersManager', function ($q, $rootScope, $modal, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
 
-  var stickersToEmoji = {};
   var currentStickers = [];
+  var installedStickersets = {};
   var applied = false;
   var started = false;
 
   return {
     start: start,
-    getStickerEmoji: getStickerEmoji,
+    openStickersetLink: openStickersetLink,
     getStickers: getStickers,
+    getStickerset: getStickerset,
     getStickersImages: getStickersImages
   };
 
@@ -3666,38 +3667,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getStickers().then(getStickersImages);
   }
 
-  function getStickerEmoji(docID) {
-    return EmojiHelper.stickers[docID] || false;
-  }
-
   function processRawStickers(stickers) {
     if (applied !== stickers.hash) {
       applied = stickers.hash;
-      var i, j, len1, len2;
+      var i, j, len1, len2, doc;
 
       len1 = stickers.documents.length;
-      for (i = 0; i < len1; i++) {
-        AppDocsManager.saveDoc(stickers.documents[i]);
-      }
-
-      var pack, emoticon, docID;
-      var doneDocIDs = {};
       currentStickers = [];
-      len1 = stickers.packs.length;
       for (i = 0; i < len1; i++) {
-        pack = stickers.packs[i];
-        emoticon = pack.emoticon;
-        len2 = pack.documents.length;
-        for (j = 0; j < len2; j++) {
-          docID = pack.documents[j];
-          if (EmojiHelper.stickers[docID] === undefined) {
-            EmojiHelper.stickers[docID] = emoticon;
-          }
-          if (doneDocIDs[docID] === undefined) {
-            doneDocIDs[docID] = true;
-            currentStickers.push(docID);
-          }
-        }
+        doc = stickers.documents[i];
+        AppDocsManager.saveDoc(doc);
+        currentStickers.push(doc.id);
       }
     }
     return currentStickers;
@@ -3728,28 +3708,56 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     })
   }
 
+  function downloadStickerThumb (docID) {
+    var doc = AppDocsManager.getDoc(docID);
+    return MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
+      if (WebpManager.isWebpSupported()) {
+        return {
+          id: doc.id,
+          src: FileManager.getUrl(blob, 'image/webp')
+        };
+      }
+
+      return FileManager.getByteArray(blob).then(function (bytes) {
+        return {
+          id: doc.id,
+          src: WebpManager.getPngUrlFromData(bytes)
+        };
+      });
+    });
+  }
+
   function getStickersImages () {
     var promises = [];
     angular.forEach(currentStickers, function (docID) {
-      var doc = AppDocsManager.getDoc(docID);
-      var promise = MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
-        if (WebpManager.isWebpSupported()) {
-          return {
-            id: docID,
-            src: FileManager.getUrl(blob, 'image/webp')
-          };
-        }
-
-        return FileManager.getByteArray(blob).then(function (bytes) {
-          return {
-            id: docID,
-            src: WebpManager.getPngUrlFromData(bytes)
-          };
-        });
-      });
-      promises.push(promise);
+      promises.push(downloadStickerThumb (docID));
     });
     return $q.all(promises);
+  }
+
+  function getStickerset (inputStickerset) {
+    return MtpApiManager.invokeApi('messages.getStickerSet', {
+      stickerset: inputStickerset
+    }).then(function (result) {
+      for (var i = 0; i < result.documents.length; i++) {
+        AppDocsManager.saveDoc(result.documents[i]);
+      }
+      return result;
+    });
+  }
+
+  function openStickersetLink (shortName) {
+    var scope = $rootScope.$new(true);
+    scope.inputStickerset = {
+      _: 'inputStickerSetShortName',
+      short_name: shortName
+    };
+    var modal = $modal.open({
+      templateUrl: templateUrl('stickerset_modal'),
+      controller: 'StickersetModalController',
+      scope: scope/*,
+      windowClass: 'error_modal_window'*/
+    });
   }
 })
 
@@ -4277,6 +4285,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                 switch (path[0]) {
                   case 'joinchat':
                     url = 'tg://join?invite=' + path[1];
+                    break;
+                  case 'addstickers':
+                    url = 'tg://addstickers?set=' + path[1];
                     break;
                   default:
                     url = 'tg://resolve?domain=' + path[0];
@@ -5361,7 +5372,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppMessagesManager) {
+.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppMessagesManager, AppStickersManager) {
 
   var tgAddrRegEx = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -5388,6 +5399,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (matches = url.match(/^join\?invite=(.+)$/)) {
       AppMessagesManager.openChatInviteLink(matches[1]);
+      return true;
+    }
+
+    if (matches = url.match(/^addstickers\?set=(.+)$/)) {
+      AppStickersManager.openStickersetLink(matches[1]);
       return true;
     }
 

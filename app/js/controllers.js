@@ -3840,3 +3840,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
   })
+
+  .controller('StickersetModalController', function ($scope, MtpApiManager, AppStickersManager) {
+    $scope.slice = {limit: 20, limitDelta: 20};
+
+    AppStickersManager.getStickerset($scope.inputStickerset).then(function (result) {
+      $scope.$broadcast('ui_height');
+      $scope.stickersetLoaded = true;
+      $scope.stickerset = result.set;
+      $scope.documents = result.documents;
+    });
+  })
