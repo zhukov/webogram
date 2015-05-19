@@ -914,8 +914,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: $($window).height()
-                    - (Config.Mobile ? 46 + 18 : 200)
+          height: Math.min(760, $($window).height()
+                    - (Config.Mobile ? 46 + 18 : 200))
         });
         $(sessionsWrap).nanoScroller();
       }
