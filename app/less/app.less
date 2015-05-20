@@ -2474,6 +2474,20 @@ a.composer_emoji_btn {
   vertical-align: top;
 }
 
+.composer_stickerset_title {
+  display: block;
+  clear: both;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  font-size: 13px;
+  color: #444;
+  margin: 10px 0 3px;
+}
+.composer_stickerset_title:hover {
+  color: #444;
+}
 .composer_sticker_btn {
   width: 78px;
   height: 78px;
@@ -2915,6 +2929,49 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
 
 .sessions_modal_other_splitter {
   margin: 15px 0 20px 24px;
+}
+
+
+.stickerset_modal_window .modal-dialog {
+  max-width: 474px;
+}
+.stickerset_modal_stickers_list {
+  padding: 25px;
+}
+.stickerset_modal_sticker_wrap {
+  list-style: none;
+  margin: 0 10px 10px 0;
+  padding: 0;
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 96px;
+  float: left;
+}
+.stickerset_modal_sticker {
+  width: 96px;
+  height: 96px;
+}
+.stickerset_modal_sticker img {
+  width: 96px;
+  height: 96px;
+}
+.stickerset_modal_sticker_alt {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+.stickerset_actions {
+  padding: 10px 20px;
+  text-align: center;
+}
+.stickerset_modal_loading {
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+  line-height: 18px;
+  padding: 1px 50px;
+  margin: 0;
 }
 
 .modal-dialog {

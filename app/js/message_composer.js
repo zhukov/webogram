@@ -138,6 +138,8 @@ function EmojiTooltip (btnEl, options) {
   this.onEmojiSelected = options.onEmojiSelected;
   this.onStickerSelected = options.onStickerSelected;
   this.getStickers = options.getStickers;
+  this.getStickerImage = options.getStickerImage;
+  this.onStickersetSelected = options.onStickersetSelected;
 
   if (!Config.Navigator.touch) {
     $(this.btnEl).on('mouseenter mouseleave', function (e) {
@@ -258,7 +260,7 @@ EmojiTooltip.prototype.createTooltip = function () {
 
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), code, sticker;
+    var target = $(e.target), code, sticker, stickerset;
     if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
@@ -275,6 +277,12 @@ EmojiTooltip.prototype.createTooltip = function () {
       if (Config.Mobile) {
         self.hide();
       }
+    }
+    if (stickerset = target.attr('data-stickerset')) {
+      if (self.onStickersetSelected) {
+        self.onStickersetSelected(stickerset);
+      }
+      self.hide();
     }
     return cancelEvent(e);
   });
@@ -298,7 +306,7 @@ EmojiTooltip.prototype.createTooltip = function () {
 
 
 EmojiTooltip.prototype.selectTab = function (tab) {
-  if (this.tab === tab) {
+  if (this.tab === tab && tab != 6) {
     return false;
   }
   $('.active', this.tabsEl).removeClass('active');
@@ -308,7 +316,7 @@ EmojiTooltip.prototype.selectTab = function (tab) {
   this.updateTabContents();
 };
 
-EmojiTooltip.prototype.updateTabContents = function (tab) {
+EmojiTooltip.prototype.updateTabContents = function () {
   var html = [];
   var self = this;
   var iconSize = Config.Mobile ? 26 : 20;
@@ -325,14 +333,32 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
   }
 
   if (this.tab == 6) { // Stickers
-    var renderStickers = function (stickers) {
-      var sticker, i;
-      var count = stickers.length;
-      for (i = 0; i < count; i++) {
-        sticker = stickers[i];
-        html.push('<a class="composer_sticker_btn" data-sticker="' + sticker.id + '"><img class="composer_sticker_image" src="' + encodeEntities(sticker.src) + '" /></a>');
+    var renderStickers = function (stickersets) {
+      var set, docID, i, j, len1, len2;
+      for (i = 0, len1 = stickersets.length; i < len1; i++) {
+        set = stickersets[i];
+        if (!set.docIDs.length) {
+          continue;
+        }
+        if (set.id && set.title) {
+          html.push(
+            '<a class="composer_stickerset_title" data-stickerset="',
+            encodeEntities(set.short_name),
+            '">',
+            encodeEntities(set.title),
+            '</a>'
+          );
+        }
+        for (j = 0, len2 = set.docIDs.length; j < len2; j++) {
+          docID = set.docIDs[j];
+          html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
+        }
       }
       renderContent();
+
+      self.contentEl.find('.composer_sticker_btn').each(function (k, element) {
+        self.getStickerImage($(element), element.getAttribute('data-sticker'));
+      });
     };
     this.getStickers(renderStickers);
   }
@@ -381,6 +407,7 @@ EmojiTooltip.prototype.updatePosition = function () {
 
 EmojiTooltip.prototype.show = function () {
   this.updatePosition();
+  this.updateTabContents();
   this.tooltipEl.addClass('composer_emoji_tooltip_shown');
   this.btnEl.addClass('composer_emoji_insert_btn_on');
   delete this.showTimeout;

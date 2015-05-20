@@ -3348,6 +3348,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             apiDoc.stickerEmojiRaw = attribute.alt;
             apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(apiDoc.stickerEmojiRaw, {noLinks: true, noLinebreaks: true});
           }
+          if (attribute.stickerset &&
+              attribute.stickerset._ == 'inputStickerSetID') {
+            apiDoc.stickerSetID = attribute.stickerset.id;
+          }
           break;
         case 'documentAttributeImageSize':
           apiDoc.w = attribute.w;
@@ -3640,16 +3644,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppStickersManager', function ($q, $rootScope, $modal, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
+.service('AppStickersManager', function ($q, $rootScope, $modal, _, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
 
   var currentStickers = [];
+  var currentStickersets = [];
   var installedStickersets = {};
+  var stickersetItems = {};
   var applied = false;
   var started = false;
 
   return {
     start: start,
     openStickersetLink: openStickersetLink,
+    installStickerset: installStickerset,
     getStickers: getStickers,
     getStickerset: getStickerset,
     getStickersImages: getStickersImages
@@ -3670,26 +3677,49 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function processRawStickers(stickers) {
     if (applied !== stickers.hash) {
       applied = stickers.hash;
-      var i, j, len1, len2, doc;
+      var i, j, len1, len2, doc, setID, set;
 
       len1 = stickers.documents.length;
       currentStickers = [];
+      stickersetItems = {};
       for (i = 0; i < len1; i++) {
         doc = stickers.documents[i];
         AppDocsManager.saveDoc(doc);
         currentStickers.push(doc.id);
+        setID = doc.stickerSetID || 0;
+        if (stickersetItems[setID] === undefined) {
+          stickersetItems[setID] = [];
+        }
+        stickersetItems[setID].push(doc.id);
       }
+
+      if (stickersetItems[0] !== undefined) {
+        currentStickersets.push({
+          _: 'stickerSetDefault',
+          id: 0,
+          docIDs: stickersetItems[0]
+        });
+      }
+      len1 = stickers.sets.length;
+      for (i = 0; i < len1; i++) {
+        set = stickers.sets[i];
+        installedStickersets[set.id] = true;
+        set.docIDs = stickersetItems[set.id] || [];
+        currentStickersets.push(set);
+      }
+
     }
-    return currentStickers;
+
+    return currentStickersets;
   }
 
-  function getStickers () {
+  function getStickers (force) {
     return Storage.get('all_stickers').then(function (stickers) {
       var layer = Config.Schema.API.layer;
       if (stickers.layer != layer) {
         stickers = false;
       }
-      if (stickers && stickers.date > tsNow(true)) {
+      if (stickers && stickers.date > tsNow(true) && !force) {
         return processRawStickers(stickers);
       }
       return MtpApiManager.invokeApi('messages.getAllStickers', {
@@ -3742,7 +3772,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       for (var i = 0; i < result.documents.length; i++) {
         AppDocsManager.saveDoc(result.documents[i]);
       }
+      result.installed = installedStickersets[result.set.id] !== undefined;
       return result;
+    });
+  }
+
+  function installStickerset (set, uninstall) {
+    var method = uninstall
+      ? 'messages.uninstallStickerSet'
+      : 'messages.installStickerSet';
+    var inputStickerset = {
+      _: 'inputStickerSetID',
+      id: set.id,
+      access_hash: set.access_hash
+    };
+    return MtpApiManager.invokeApi(method, {
+      stickerset: inputStickerset
+    }).then(function (result) {
+      if (uninstall) {
+        delete installedStickersets[set.id];
+      } else {
+        installedStickersets[set.id] = true;
+      }
+      getStickers(true);
     });
   }
 
@@ -3755,8 +3807,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var modal = $modal.open({
       templateUrl: templateUrl('stickerset_modal'),
       controller: 'StickersetModalController',
-      scope: scope/*,
-      windowClass: 'error_modal_window'*/
+      scope: scope,
+      windowClass: 'stickerset_modal_window'
     });
   }
 })
