@@ -403,7 +403,7 @@
     "login_controller_unknown_country": "Sconosciuto",
     "message_forwarded_message": "Messaggio inoltrato",
     "message_forwarded_message_mobile": "Inoltrato da {from},{date}",
-    "message_attach_audio_message": "Messaggio vocale",
+    "message_attach_audio_message": "Nota vocale",
     "message_attach_audio_play": "Riproduci",
     "message_attach_document_open": "Apri",
     "message_attach_document_download": "Scarica",
