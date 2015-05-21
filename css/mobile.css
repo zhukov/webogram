@@ -1318,3 +1318,11 @@ a.media_modal_date:hover {
   height: 18px;
   margin: 13px 17px;
 }
+.stickerset_modal_stickers_list {
+  padding: 10px;
+}
+.stickerset_modal_sticker_wrap,
+.stickerset_modal_sticker_wrap img {
+  width: 64px;
+  height: 64px;
+}

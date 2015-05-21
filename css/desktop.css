@@ -555,6 +555,7 @@ a.footer_link.active:active {
 .im_history_col .nano > .nano-pane,
 .contacts_modal_col .nano > .nano-pane,
 .sessions_modal_col .nano > .nano-pane,
+.stickerset_modal_col .nano > .nano-pane,
 .im_dialogs_modal_col .nano > .nano-pane {
   background: rgba(216, 223, 225, 0.45);
   /*45% d8dfe5*/
@@ -573,7 +574,8 @@ a.footer_link.active:active {
   width: 5px;
   right: 4px;
 }
-.sessions_modal_col .nano > .nano-pane {
+.sessions_modal_col .nano > .nano-pane,
+.stickerset_modal_col .nano > .nano-pane {
   top: 4px;
   bottom: 4px;
   width: 5px;
@@ -590,6 +592,7 @@ a.footer_link.active:active {
 .im_history_col .nano > .nano-pane > .nano-slider,
 .contacts_modal_col .nano > .nano-pane > .nano-slider,
 .sessions_modal_col .nano > .nano-pane > .nano-slider,
+.stickerset_modal_col .nano > .nano-pane > .nano-slider,
 .im_dialogs_modal_col .nano > .nano-pane > .nano-slider {
   background: rgba(137, 160, 179, 0.5);
   /*50% 89a0b3*/

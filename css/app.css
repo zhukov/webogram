@@ -1539,9 +1539,11 @@ span.composer_user_photo{display:inline-block;width:32px;height:32px;border-radi
 img.composer_user_photo{width:32px;height:32px}
 span.composer_user_photo .peer_initials{line-height:32px;font-size:14px}
 .composer_user_mention,.composer_user_name{display:inline-block;line-height:32px;vertical-align:top}
+.composer_stickerset_title{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:700;font-size:13px;color:#444;margin:10px 0 3px}
+.composer_stickerset_title:hover{color:#444}
 .composer_sticker_btn{width:78px;height:78px;display:block;display:inline-block;text-align:center;padding:3px}
 .composer_sticker_btn:hover{background:#f2f6fa}
-.composer_sticker_image{max-width:72px;max-height:72px}
+.composer_sticker_image{max-width:72px;max-height:72px;vertical-align:top}
 .composer_rich_textarea{font-size:12px;margin-bottom:10px;padding:6px;min-height:38px;height:auto;width:auto;max-height:284px;overflow:auto;line-height:17px;border:1px solid #d2dbe3;border-radius:2px;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;-ms-box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;word-wrap:break-word;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
 .composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab}
 .composer_rich_textarea:active:before,.composer_rich_textarea:focus:before{content:none}
@@ -1596,18 +1598,26 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .contacts_modal_members_list .contacts_modal_contact_wrap.active .icon-contact-tick{background-position:-9px -481px;opacity:1}
 .contacts_modal_members_list .disabled{pointer-events:none}
 .contacts_modal_members_list .disabled .icon-contact-tick{display:none}
-.sessions_modal_session{padding:8px 16px}
+.sessions_modal_session{padding:8px 24px}
 .sessions_modal_sessions_header{color:#999;font-size:13px;margin-left:16px;margin-top:20px;font-weight:700}
-.sessions_modal_terminate_all_wrap{margin:5px 0;text-align:center}
-.sessions_modal_sessions_list{margin-bottom:20px}
+.sessions_modal_terminate_all_wrap{margin:5px 0 0 24px}
+.sessions_modal_sessions_list{padding:14px 0 10px;margin-bottom:10px}
 .session_active_date_online{color:#3a6d99}
 .sessions_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
 .session_active_date{color:#999}
 .session_meta_wrap{text-align:right}
-.session_terminate_btn{margin-top:17px}
+.session_terminate_btn{margin-top:24px;display:inline-block}
 .sessions_modal_session_app{font-weight:700;font-style:12px;margin-bottom:3px}
 .sessions_modal_session_device{margin:3px 0}
 .sessions_modal_session_location{color:#777}
+.sessions_modal_other_splitter{margin:15px 0 20px 24px}
+.stickerset_modal_window .modal-dialog{max-width:474px}
+.stickerset_modal_stickers_list{padding:25px}
+.stickerset_modal_sticker_wrap{list-style:none;margin:0 10px 10px 0;padding:0;position:relative;display:block;width:96px;height:96px;float:left}
+.stickerset_modal_sticker,.stickerset_modal_sticker img{width:96px;height:96px}
+.stickerset_modal_sticker_alt{position:absolute;bottom:0;right:0}
+.stickerset_actions{padding:10px 20px;height:50px;text-align:center}
+.stickerset_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
 .confirm_modal_window .modal-dialog,.error_modal_window .modal-dialog,.md_simple_modal_window .modal-dialog{max-width:348px}
 .im_edit_panel_title{text-align:center;margin:0;font-size:14px;line-height:34px}
 .im_message_focus .audio_player_duration,.im_message_focus .audio_player_size,.im_message_focus .im_message_date,.im_message_focus .im_message_document_size,.im_message_focus .im_message_fwd_date{color:#899daf}
