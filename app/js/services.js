@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -3382,8 +3382,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       height = Math.min(windowH - 100, 260);
     }
     else if (isSticker) {
-      width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
-      height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+      width = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
+      height = Math.min(windowH - 100, Config.Mobile ? 128 : 192);
     } else {
       width = height = 100;
     }
@@ -3809,7 +3809,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       templateUrl: templateUrl('stickerset_modal'),
       controller: 'StickersetModalController',
       scope: scope,
-      windowClass: 'stickerset_modal_window'
+      windowClass: 'stickerset_modal_window mobile_modal'
     });
   }
 })
@@ -5463,19 +5463,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return false;
   }
 
-  var started = !('registerProtocolHandler' in navigator);
+  var started = false;
   function start () {
     if (started) {
       return;
     }
     started = true;
-    try {
-      navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
-    } catch (e) {}
-    try {
-      navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
-    } catch (e) {}
 
+    if ('registerProtocolHandler' in navigator) {
+      try {
+        navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
+      } catch (e) {}
+      try {
+        navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
+      } catch (e) {}
+    }
 
     $(document).on('click', function (event) {
       var target = event.target;

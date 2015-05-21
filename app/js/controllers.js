@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -576,13 +576,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppUsersManager.resolveUsername($routeParams.p.substr(1)).then(function (userID) {
           $scope.curDialog = {
             peer: AppUsersManager.getUserString(userID),
-            messageID: $routeParams.m || false
+            messageID: parseInt($routeParams.m) || false
           };
         });
       } else {
         $scope.curDialog = {
           peer: $routeParams.p || false,
-          messageID: $routeParams.m || false
+          messageID: parseInt($routeParams.m) || false
         };
       }
     }
@@ -1109,13 +1109,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function messageFocusHistory () {
-      var history = historiesQueueFind();
+      var history = historiesQueueFind(peerID);
 
       if (history &&
           history.ids.indexOf($scope.curDialog.messageID) != -1) {
         $scope.historyUnread = {};
         $scope.$broadcast('messages_focus', $scope.curDialog.messageID);
-        $scope.$broadcast('ui_history_change_scroll');
+        $scope.$broadcast('ui_history_change_scroll', true);
       } else {
         loadHistory();
       }
@@ -1461,6 +1461,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function toggleMedia (mediaType) {
       $scope.historyFilter.mediaType = mediaType || false;
+      $scope.curDialog.messageID = false;
       peerHistory.messages = [];
       peerHistory.ids = [];
       $scope.state.empty = true;

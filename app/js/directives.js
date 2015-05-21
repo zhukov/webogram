@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1050,9 +1050,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      function changeScroll (noFocus) {
+      function changeScroll (noFocus, animated) {
         var unreadSplit, focusMessage;
 
+        var newScrollTop = false;
         // console.trace('change scroll');
         if (!noFocus &&
             (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0])) {
@@ -1060,24 +1061,34 @@ angular.module('myApp.directives', ['myApp.filters'])
               st = scrollableWrap.scrollTop,
               ot = focusMessage.offsetTop,
               h = focusMessage.clientHeight;
-          if (!st || st + ch < ot || st > ot + h) {
-            scrollableWrap.scrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
+          if (!st || st + ch < ot || st > ot + h || animated) {
+            newScrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
           }
           atBottom = false;
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
           // console.log('change scroll unread', unreadSplit.offsetTop);
-          scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
+          newScrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
           // console.log('change scroll bottom');
-          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          newScrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
-        updateScroller();
-        $timeout(function () {
-          $(scrollableWrap).trigger('scroll');
-          scrollTopInitial = scrollableWrap.scrollTop;
-        });
+        if (newScrollTop !== false) {
+          var afterScroll = function () {
+            updateScroller();
+            $timeout(function () {
+              $(scrollableWrap).trigger('scroll');
+              scrollTopInitial = scrollableWrap.scrollTop;
+            });
+          }
+          if (animated) {
+            $(scrollableWrap).animate({scrollTop: newScrollTop}, 200, afterScroll);
+          } else {
+            scrollableWrap.scrollTop = newScrollTop;
+            afterScroll();
+          }
+        }
       };
 
       $scope.$on('ui_history_change', function () {
@@ -1095,8 +1106,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      $scope.$on('ui_history_change_scroll', function () {
-        onContentLoaded(changeScroll)
+      $scope.$on('ui_history_change_scroll', function (e, animated) {
+        onContentLoaded(function () {
+          changeScroll(false, animated);
+        })
       });
 
       $scope.$on('ui_history_focus', function () {
