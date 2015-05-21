@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -492,7 +492,11 @@ function versionCompare (ver1, ver2) {
     var mode = decoder.WEBP_CSP_MODE;
     buffer.J = 4;
 
-    status = decoder.WebPDecode(data, data.length, config);
+    try {
+      status = decoder.WebPDecode(data, data.length, config);
+    } catch (e) {
+      status = e;
+    }
 
     ok = (status == 0);
     if (!ok) {

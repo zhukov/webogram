@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -925,6 +925,33 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('myStickersList', function($window, $timeout) {
+
+    return {
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var stickersWrap = $('.stickerset_wrap', element)[0];
+
+      onContentLoaded(function () {
+        $(stickersWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true});
+        updateSizes();
+      });
+
+      function updateSizes () {
+        $(element).css({
+          height: Math.min(500, $($window).height()
+                    - (Config.Mobile ? 46 + 18 : 200))
+        });
+        $(stickersWrap).nanoScroller();
+      }
+
+      $($window).on('resize', updateSizes);
+    };
+
+  })
+
   .directive('myHistory', function ($window, $timeout, $rootScope, $transition) {
 
     return {
@@ -1023,9 +1050,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      function changeScroll (noFocus) {
+      function changeScroll (noFocus, animated) {
         var unreadSplit, focusMessage;
 
+        var newScrollTop = false;
         // console.trace('change scroll');
         if (!noFocus &&
             (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0])) {
@@ -1033,24 +1061,34 @@ angular.module('myApp.directives', ['myApp.filters'])
               st = scrollableWrap.scrollTop,
               ot = focusMessage.offsetTop,
               h = focusMessage.clientHeight;
-          if (!st || st + ch < ot || st > ot + h) {
-            scrollableWrap.scrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
+          if (!st || st + ch < ot || st > ot + h || animated) {
+            newScrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
           }
           atBottom = false;
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
           // console.log('change scroll unread', unreadSplit.offsetTop);
-          scrollableWrap.scrollTop = Math.max(0, unreadSplit.offsetTop - 52);
+          newScrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
           // console.log('change scroll bottom');
-          scrollableWrap.scrollTop = scrollableWrap.scrollHeight;
+          newScrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
-        updateScroller();
-        $timeout(function () {
-          $(scrollableWrap).trigger('scroll');
-          scrollTopInitial = scrollableWrap.scrollTop;
-        });
+        if (newScrollTop !== false) {
+          var afterScroll = function () {
+            updateScroller();
+            $timeout(function () {
+              $(scrollableWrap).trigger('scroll');
+              scrollTopInitial = scrollableWrap.scrollTop;
+            });
+          }
+          if (animated) {
+            $(scrollableWrap).animate({scrollTop: newScrollTop}, 200, afterScroll);
+          } else {
+            scrollableWrap.scrollTop = newScrollTop;
+            afterScroll();
+          }
+        }
       };
 
       $scope.$on('ui_history_change', function () {
@@ -1068,8 +1106,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       });
 
-      $scope.$on('ui_history_change_scroll', function () {
-        onContentLoaded(changeScroll)
+      $scope.$on('ui_history_change_scroll', function (e, animated) {
+        onContentLoaded(function () {
+          changeScroll(false, animated);
+        })
       });
 
       $scope.$on('ui_history_focus', function () {
@@ -1249,7 +1289,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, ErrorService) {
+  .directive('mySendForm', function ($timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService) {
 
     return {
       link: link,
@@ -1270,13 +1310,27 @@ angular.module('myApp.directives', ['myApp.filters'])
       var dragStarted, dragTimeout;
       var submitBtn = $('.im_submit', element)[0];
 
+      var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>');
+      var cachedStickerImages = {};
+
       var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
-          AppStickersManager.getStickers().then(function () {
-            AppStickersManager.getStickersImages().then(function (stickersData) {
-              callback(stickersData);
-            });
+          AppStickersManager.getStickers().then(callback);
+        },
+        getStickerImage: function (element, docID) {
+          if (cachedStickerImages[docID]) {
+            element.replaceWith(cachedStickerImages[docID]);
+            return;
+          }
+          var scope = $scope.$new(true);
+          scope.document = AppDocsManager.getDoc(docID);
+          stickerImageCompiled(scope, function (clonedElement) {
+            cachedStickerImages[docID] = clonedElement;
+            element.replaceWith(clonedElement);
           });
+        },
+        onStickersetSelected: function (stickerset) {
+          AppStickersManager.openStickersetLink(stickerset);
         },
         onEmojiSelected: function (code) {
           $scope.$apply(function () {
@@ -1817,7 +1871,9 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
-      var imgElement = $('<img />').appendTo(element);
+      var imgElement = $('<img />')
+                          .appendTo(element)
+                          .addClass(attrs.imgClass);
 
       var setSrc = function (blob) {
         if (WebpManager.isWebpSupported()) {
@@ -1863,11 +1919,19 @@ angular.module('myApp.directives', ['myApp.filters'])
         imgElement.attr('src', emptySrc);
       }
 
-      MtpApiFileManager.downloadFile($scope.document.dc_id, fullLocation, $scope.document.size).then(function (blob) {
-        setSrc(blob);
-      }, function (e) {
-        console.log('Download sticker failed', e, fullLocation);
-      });
+      if (attrs.thumb) {
+        MtpApiFileManager.downloadSmallFile(smallLocation).then(function (blob) {
+          setSrc(blob);
+        }, function (e) {
+          console.log('Download sticker failed', e, fullLocation);
+        });
+      } else {
+        MtpApiFileManager.downloadFile($scope.document.dc_id, fullLocation, $scope.document.size).then(function (blob) {
+          setSrc(blob);
+        }, function (e) {
+          console.log('Download sticker failed', e, fullLocation);
+        });
+      }
     }
   })
 

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -2284,7 +2284,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         case 'messageMediaDocument':
           if (message.media.document.sticker) {
             notificationMessage = _('conversation_media_sticker');
-            var stickerEmoji = EmojiHelper.stickers[message.media.document.id];
+            var stickerEmoji = message.media.document.stickerEmojiRaw;
             if (stickerEmoji !== undefined) {
               notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' (' + notificationMessage + ')';
             }
@@ -3343,10 +3343,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = 1;
-          var stickerEmoji = attribute.alt || EmojiHelper.stickers[apiDoc.id];
-          if (stickerEmoji !== undefined) {
+          if (attribute.alt !== undefined) {
             apiDoc.sticker = 2;
-            apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(stickerEmoji, {noLinks: true, noLinebreaks: true});
+            apiDoc.stickerEmojiRaw = attribute.alt;
+            apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(apiDoc.stickerEmojiRaw, {noLinks: true, noLinebreaks: true});
+          }
+          if (attribute.stickerset &&
+              attribute.stickerset._ == 'inputStickerSetID') {
+            apiDoc.stickerSetID = attribute.stickerset.id;
           }
           break;
         case 'documentAttributeImageSize':
@@ -3378,8 +3382,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       height = Math.min(windowH - 100, 260);
     }
     else if (isSticker) {
-      width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
-      height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+      width = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
+      height = Math.min(windowH - 100, Config.Mobile ? 128 : 192);
     } else {
       width = height = 100;
     }
@@ -3640,17 +3644,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppStickersManager', function ($q, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
+.service('AppStickersManager', function ($q, $rootScope, $modal, _, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
 
-  var stickersToEmoji = {};
   var currentStickers = [];
+  var currentStickersets = [];
+  var installedStickersets = {};
+  var stickersetItems = {};
   var applied = false;
   var started = false;
 
   return {
     start: start,
-    getStickerEmoji: getStickerEmoji,
+    openStickersetLink: openStickersetLink,
+    installStickerset: installStickerset,
     getStickers: getStickers,
+    getStickerset: getStickerset,
     getStickersImages: getStickersImages
   };
 
@@ -3666,50 +3674,53 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getStickers().then(getStickersImages);
   }
 
-  function getStickerEmoji(docID) {
-    return EmojiHelper.stickers[docID] || false;
-  }
-
   function processRawStickers(stickers) {
     if (applied !== stickers.hash) {
       applied = stickers.hash;
-      var i, j, len1, len2;
+      var i, j, len1, len2, doc, setID, set;
 
       len1 = stickers.documents.length;
+      currentStickers = [];
+      stickersetItems = {};
       for (i = 0; i < len1; i++) {
-        AppDocsManager.saveDoc(stickers.documents[i]);
+        doc = stickers.documents[i];
+        AppDocsManager.saveDoc(doc);
+        currentStickers.push(doc.id);
+        setID = doc.stickerSetID || 0;
+        if (stickersetItems[setID] === undefined) {
+          stickersetItems[setID] = [];
+        }
+        stickersetItems[setID].push(doc.id);
       }
 
-      var pack, emoticon, docID;
-      var doneDocIDs = {};
-      currentStickers = [];
-      len1 = stickers.packs.length;
-      for (i = 0; i < len1; i++) {
-        pack = stickers.packs[i];
-        emoticon = pack.emoticon;
-        len2 = pack.documents.length;
-        for (j = 0; j < len2; j++) {
-          docID = pack.documents[j];
-          if (EmojiHelper.stickers[docID] === undefined) {
-            EmojiHelper.stickers[docID] = emoticon;
-          }
-          if (doneDocIDs[docID] === undefined) {
-            doneDocIDs[docID] = true;
-            currentStickers.push(docID);
-          }
-        }
+      currentStickersets = [];
+      if (stickersetItems[0] !== undefined) {
+        currentStickersets.push({
+          _: 'stickerSetDefault',
+          id: 0,
+          docIDs: stickersetItems[0]
+        });
       }
+      len1 = stickers.sets.length;
+      for (i = 0; i < len1; i++) {
+        set = stickers.sets[i];
+        installedStickersets[set.id] = true;
+        set.docIDs = stickersetItems[set.id] || [];
+        currentStickersets.push(set);
+      }
+
     }
-    return currentStickers;
+
+    return currentStickersets;
   }
 
-  function getStickers () {
+  function getStickers (force) {
     return Storage.get('all_stickers').then(function (stickers) {
       var layer = Config.Schema.API.layer;
       if (stickers.layer != layer) {
         stickers = false;
       }
-      if (stickers && stickers.date > tsNow(true)) {
+      if (stickers && stickers.date > tsNow(true) && !force) {
         return processRawStickers(stickers);
       }
       return MtpApiManager.invokeApi('messages.getAllStickers', {
@@ -3728,28 +3739,78 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     })
   }
 
+  function downloadStickerThumb (docID) {
+    var doc = AppDocsManager.getDoc(docID);
+    return MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
+      if (WebpManager.isWebpSupported()) {
+        return {
+          id: doc.id,
+          src: FileManager.getUrl(blob, 'image/webp')
+        };
+      }
+
+      return FileManager.getByteArray(blob).then(function (bytes) {
+        return {
+          id: doc.id,
+          src: WebpManager.getPngUrlFromData(bytes)
+        };
+      });
+    });
+  }
+
   function getStickersImages () {
     var promises = [];
     angular.forEach(currentStickers, function (docID) {
-      var doc = AppDocsManager.getDoc(docID);
-      var promise = MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
-        if (WebpManager.isWebpSupported()) {
-          return {
-            id: docID,
-            src: FileManager.getUrl(blob, 'image/webp')
-          };
-        }
-
-        return FileManager.getByteArray(blob).then(function (bytes) {
-          return {
-            id: docID,
-            src: WebpManager.getPngUrlFromData(bytes)
-          };
-        });
-      });
-      promises.push(promise);
+      promises.push(downloadStickerThumb (docID));
     });
     return $q.all(promises);
+  }
+
+  function getStickerset (inputStickerset) {
+    return MtpApiManager.invokeApi('messages.getStickerSet', {
+      stickerset: inputStickerset
+    }).then(function (result) {
+      for (var i = 0; i < result.documents.length; i++) {
+        AppDocsManager.saveDoc(result.documents[i]);
+      }
+      result.installed = installedStickersets[result.set.id] !== undefined;
+      return result;
+    });
+  }
+
+  function installStickerset (set, uninstall) {
+    var method = uninstall
+      ? 'messages.uninstallStickerSet'
+      : 'messages.installStickerSet';
+    var inputStickerset = {
+      _: 'inputStickerSetID',
+      id: set.id,
+      access_hash: set.access_hash
+    };
+    return MtpApiManager.invokeApi(method, {
+      stickerset: inputStickerset
+    }).then(function (result) {
+      if (uninstall) {
+        delete installedStickersets[set.id];
+      } else {
+        installedStickersets[set.id] = true;
+      }
+      getStickers(true);
+    });
+  }
+
+  function openStickersetLink (shortName) {
+    var scope = $rootScope.$new(true);
+    scope.inputStickerset = {
+      _: 'inputStickerSetShortName',
+      short_name: shortName
+    };
+    var modal = $modal.open({
+      templateUrl: templateUrl('stickerset_modal'),
+      controller: 'StickersetModalController',
+      scope: scope,
+      windowClass: 'stickerset_modal_window mobile_modal'
+    });
   }
 })
 
@@ -4277,6 +4338,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                 switch (path[0]) {
                   case 'joinchat':
                     url = 'tg://join?invite=' + path[1];
+                    break;
+                  case 'addstickers':
+                    url = 'tg://addstickers?set=' + path[1];
                     break;
                   default:
                     url = 'tg://resolve?domain=' + path[0];
@@ -5361,7 +5425,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppMessagesManager) {
+.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppMessagesManager, AppStickersManager) {
 
   var tgAddrRegEx = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -5395,22 +5459,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return true;
     }
 
+    if (matches = url.match(/^addstickers\?set=(.+)$/)) {
+      AppStickersManager.openStickersetLink(matches[1]);
+      return true;
+    }
+
     return false;
   }
 
-  var started = !('registerProtocolHandler' in navigator);
+  var started = false;
   function start () {
     if (started) {
       return;
     }
     started = true;
-    try {
-      navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
-    } catch (e) {}
-    try {
-      navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
-    } catch (e) {}
 
+    if ('registerProtocolHandler' in navigator) {
+      try {
+        navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web');
+      } catch (e) {}
+      try {
+        navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
+      } catch (e) {}
+    }
 
     $(document).on('click', function (event) {
       var target = event.target;

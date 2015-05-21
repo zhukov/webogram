@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.5 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -15,7 +15,6 @@
   var emojis = {};
   var shortcuts = {};
   var spritesheetPositions = {};
-  var stickers = {};
   var index = false;
 
   var popular = 'joy,kissing_heart,heart,heart_eyes,blush,grin,+1,relaxed,pensive,smile,sob,kiss,unamused,flushed,stuck_out_tongue_winking_eye,see_no_evil,wink,smiley,cry,stuck_out_tongue_closed_eyes,scream,rage,smirk,disappointed,sweat_smile,kissing_closed_eyes,speak_no_evil,relieved,grinning,yum,laughing,ok_hand,neutral_face,confused'.split(',');
@@ -122,7 +121,6 @@
     emojis: emojis,
     shortcuts: shortcuts,
     spritesheetPositions: spritesheetPositions,
-    stickers: stickers,
     getPopularEmoji: getPopularEmoji,
     pushPopularEmoji: pushPopularEmoji,
     indexEmojis: indexEmojis,
@@ -140,6 +138,8 @@ function EmojiTooltip (btnEl, options) {
   this.onEmojiSelected = options.onEmojiSelected;
   this.onStickerSelected = options.onStickerSelected;
   this.getStickers = options.getStickers;
+  this.getStickerImage = options.getStickerImage;
+  this.onStickersetSelected = options.onStickersetSelected;
 
   if (!Config.Navigator.touch) {
     $(this.btnEl).on('mouseenter mouseleave', function (e) {
@@ -260,7 +260,7 @@ EmojiTooltip.prototype.createTooltip = function () {
 
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), code, sticker;
+    var target = $(e.target), code, sticker, stickerset;
     if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
@@ -277,6 +277,12 @@ EmojiTooltip.prototype.createTooltip = function () {
       if (Config.Mobile) {
         self.hide();
       }
+    }
+    if (stickerset = target.attr('data-stickerset')) {
+      if (self.onStickersetSelected) {
+        self.onStickersetSelected(stickerset);
+      }
+      self.hide();
     }
     return cancelEvent(e);
   });
@@ -300,7 +306,7 @@ EmojiTooltip.prototype.createTooltip = function () {
 
 
 EmojiTooltip.prototype.selectTab = function (tab) {
-  if (this.tab === tab) {
+  if (this.tab === tab && tab != 6) {
     return false;
   }
   $('.active', this.tabsEl).removeClass('active');
@@ -310,7 +316,7 @@ EmojiTooltip.prototype.selectTab = function (tab) {
   this.updateTabContents();
 };
 
-EmojiTooltip.prototype.updateTabContents = function (tab) {
+EmojiTooltip.prototype.updateTabContents = function () {
   var html = [];
   var self = this;
   var iconSize = Config.Mobile ? 26 : 20;
@@ -327,14 +333,34 @@ EmojiTooltip.prototype.updateTabContents = function (tab) {
   }
 
   if (this.tab == 6) { // Stickers
-    var renderStickers = function (stickers) {
-      var sticker, i;
-      var count = stickers.length;
-      for (i = 0; i < count; i++) {
-        sticker = stickers[i];
-        html.push('<a class="composer_sticker_btn" data-sticker="' + sticker.id + '"><img class="composer_sticker_image" src="' + encodeEntities(sticker.src) + '" /></a>');
+    var renderStickers = function (stickersets) {
+      var set, docID, i, j, len1, len2;
+      for (i = 0, len1 = stickersets.length; i < len1; i++) {
+        set = stickersets[i];
+        if (!set.docIDs.length) {
+          continue;
+        }
+        html.push('<div class="composer_stickerset_wrap clearfix">');
+        if (set.id && set.title) {
+          html.push(
+            '<a class="composer_stickerset_title" data-stickerset="',
+            encodeEntities(set.short_name),
+            '">',
+            encodeEntities(set.title),
+            '</a>'
+          );
+        }
+        for (j = 0, len2 = set.docIDs.length; j < len2; j++) {
+          docID = set.docIDs[j];
+          html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
+        }
+        html.push('</div>');
       }
       renderContent();
+
+      self.contentEl.find('.composer_sticker_btn').each(function (k, element) {
+        self.getStickerImage($(element), element.getAttribute('data-sticker'));
+      });
     };
     this.getStickers(renderStickers);
   }
@@ -383,6 +409,7 @@ EmojiTooltip.prototype.updatePosition = function () {
 
 EmojiTooltip.prototype.show = function () {
   this.updatePosition();
+  this.updateTabContents();
   this.tooltipEl.addClass('composer_emoji_tooltip_shown');
   this.btnEl.addClass('composer_emoji_insert_btn_on');
   delete this.showTimeout;
