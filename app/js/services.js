@@ -3693,6 +3693,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         stickersetItems[setID].push(doc.id);
       }
 
+      currentStickersets = [];
       if (stickersetItems[0] !== undefined) {
         currentStickersets.push({
           _: 'stickerSetDefault',

@@ -340,6 +340,7 @@ EmojiTooltip.prototype.updateTabContents = function () {
         if (!set.docIDs.length) {
           continue;
         }
+        html.push('<div class="composer_stickerset_wrap clearfix">');
         if (set.id && set.title) {
           html.push(
             '<a class="composer_stickerset_title" data-stickerset="',
@@ -353,6 +354,7 @@ EmojiTooltip.prototype.updateTabContents = function () {
           docID = set.docIDs[j];
           html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
         }
+        html.push('</div>');
       }
       renderContent();
 

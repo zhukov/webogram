@@ -1297,7 +1297,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var dragStarted, dragTimeout;
       var submitBtn = $('.im_submit', element)[0];
 
-      var stickerImageCompiled = $compile('<a class="composer_sticker_btn" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>');
+      var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>');
       var cachedStickerImages = {};
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
