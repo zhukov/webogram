@@ -1,0 +1,85 @@
+<div class="contacts_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-if="action != 'edit'" ng-click="$dismiss()" my-i18n="modal_close"></a>
+        <a class="md_modal_action" ng-if="action == 'edit'" class="contacts_modal_edit_link" ng-click="toggleEdit(false)" my-i18n="contacts_modal_edit_cancel"></a>
+        <a class="md_modal_action" ng-if="!action" ng-click="toggleEdit(true)" my-i18n="contacts_modal_edit_list"></a>
+      </div>
+    </div>
+    <div class="md_modal_title" ng-switch="action">
+      <div ng-switch-when="new_group" ng-switch="selectedCount > 0">
+        <span ng-switch-when="true">
+          <ng-pluralize count="selectedCount" when="contacts_modal_pluralize_new_group_members">
+          </ng-pluralize>
+        </span>
+        <span ng-switch-default my-i18n="group_create_contacts_modal_title"></span>
+      </div>
+      <span ng-switch-default my-i18n="contacts_modal_title"></span>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="contacts_modal_search">
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+      <a class="im_dialogs_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
+    </div>
+
+    <div my-contacts-list class="contacts_modal_col">
+
+      <div class="contacts_wrap nano" my-infinite-scroller>
+        <div class="contacts_scrollable_wrap nano-content" ng-switch="contactsEmpty">
+
+          <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true" my-i18n="contacts_modal_empty_list">
+            <my-i18n-param name="import-link"><a href="" ng-click="importContact()">{0}</a></my-i18n-param>
+          </div>
+
+          <ul ng-switch-default class="contacts_modal_members_list nav nav-pills nav-stacked">
+
+            <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
+              <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
+
+                <div class="md_modal_list_peer_photo pull-left" my-peer-photolink="::contact.userID" img-class="md_modal_list_peer_photo"></div>
+                <div class="md_modal_list_peer_name" my-user-link="contact.userID"></div>
+                <div class="md_modal_list_peer_description" ng-switch="contact.found">
+                  <span ng-switch-when="true" ng-bind="'@' + contact.user.username"></span>
+                  <span ng-switch-default my-user-status="::contact.userID"></span>
+                </div>
+
+              </a>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="md_modal_footer clearfix" ng-switch="action">
+
+    <div ng-switch-when="new_group" class="pull-right">
+      <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+      <button class="btn btn-md btn-md-primary" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
+    </div>
+
+    <button ng-switch-when="select" class="btn btn-md btn-md-primary pull-right" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" type="submit" my-i18n="modal_next"></button>
+
+    <button ng-switch-when="edit" class="btn btn-md btn-md-danger pull-right"  ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
+      <my-i18n msgid="contacts_modal_edit_delete"></my-i18n>
+      <strong ng-bind="selectedCount"></strong>
+    </button>
+
+    <div ng-switch-default class="text-center">
+      <button class="btn btn-md btn-md-primary" ng-click="importContact()" my-i18n="contacts_modal_new_contact"></button>
+    </div>
+
+  </div>
+
+</div>

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.9 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -43,9 +43,15 @@ function bytesToHex (bytes) {
 function bytesFromHex (hexString) {
   var len = hexString.length,
       i,
+      start = 0,
       bytes = [];
 
-  for (i = 0; i < len; i += 2) {
+  if (hexString.length % 2) {
+    bytes.push(parseInt(hexString.charAt(0), 16));
+    start++;
+  }
+
+  for (i = start; i < len; i += 2) {
     bytes.push(parseInt(hexString.substr(i, 2), 16));
   }
 
@@ -86,6 +92,52 @@ function uint6ToBase64 (nUint6) {
             : 65;
 }
 
+function base64ToBlob(base64str, mimeType) {
+  var sliceSize = 1024;
+  var byteCharacters = atob(base64str);
+  var bytesLength = byteCharacters.length;
+  var slicesCount = Math.ceil(bytesLength / sliceSize);
+  var byteArrays = new Array(slicesCount);
+
+  for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+    var begin = sliceIndex * sliceSize;
+    var end = Math.min(begin + sliceSize, bytesLength);
+
+    var bytes = new Array(end - begin);
+    for (var offset = begin, i = 0 ; offset < end; ++i, ++offset) {
+      bytes[i] = byteCharacters[offset].charCodeAt(0);
+    }
+    byteArrays[sliceIndex] = new Uint8Array(bytes);
+  }
+
+  return blobConstruct(byteArrays, mimeType);
+}
+
+function dataUrlToBlob(url) {
+  // var name = 'b64blob ' + url.length;
+  // console.time(name);
+  var urlParts = url.split(',');
+  var base64str = urlParts[1];
+  var mimeType = urlParts[0].split(':')[1].split(';')[0];
+  var blob = base64ToBlob(base64str, mimeType);
+  // console.timeEnd(name);
+  return blob;
+}
+
+function blobConstruct (blobParts, mimeType) {
+  var blob;
+  try {
+    blob = new Blob(blobParts, {type: mimeType});
+  } catch (e) {
+    var bb = new BlobBuilder;
+    angular.forEach(blobParts, function(blobPart) {
+      bb.append(blobPart);
+    });
+    blob = bb.getBlob(mimeType);
+  }
+  return blob;
+}
+
 function bytesCmp (bytes1, bytes2) {
   var len = bytes1.length;
   if (len != bytes2.length) {
@@ -112,11 +164,13 @@ function bytesXor (bytes1, bytes2) {
 }
 
 function bytesToWords (bytes) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   var len = bytes.length,
-      words = [];
-
-  for (var i = 0; i < len; i++) {
-      words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8);
+      words = [], i;
+  for (i = 0; i < len; i++) {
+    words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8);
   }
 
   return new CryptoJS.lib.WordArray.init(words, len);
@@ -128,7 +182,7 @@ function bytesFromWords (wordArray) {
       bytes = [];
 
   for (var i = 0; i < sigBytes; i++) {
-      bytes.push((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff);
+    bytes.push((words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff);
   }
 
   return bytes;
@@ -137,8 +191,21 @@ function bytesFromWords (wordArray) {
 function bytesFromBigInt (bigInt, len) {
   var bytes = bigInt.toByteArray();
 
-  while (!bytes[0] && (!len || bytes.length > len)) {
-    bytes = bytes.slice(1);
+  if (len && bytes.length < len) {
+    var padding = [];
+    for (var i = 0, needPadding = len - bytes.length; i < needPadding; i++) {
+      padding[i] = 0;
+    }
+    if (bytes instanceof ArrayBuffer) {
+      bytes = bufferConcat(padding, bytes);
+    } else {
+      bytes = padding.concat(bytes);
+    }
+  }
+  else {
+    while (!bytes[0] && (!len || bytes.length > len)) {
+      bytes = bytes.slice(1);
+    }
   }
 
   return bytes;
@@ -154,16 +221,57 @@ function bytesToArrayBuffer (b) {
   return (new Uint8Array(b)).buffer;
 }
 
+function convertToArrayBuffer(bytes) {
+  // Be careful with converting subarrays!!
+  if (bytes instanceof ArrayBuffer) {
+    return bytes;
+  }
+  if (bytes.buffer !== undefined &&
+      bytes.buffer.byteLength == bytes.length * bytes.BYTES_PER_ELEMENT) {
+    return bytes.buffer;
+  }
+  return bytesToArrayBuffer(bytes);
+}
+
+function convertToUint8Array(bytes) {
+  if (bytes.buffer !== undefined) {
+    return bytes;
+  }
+  return new Uint8Array(bytes);
+}
+
+function convertToByteArray(bytes) {
+  if (Array.isArray(bytes)) {
+    return bytes;
+  }
+  bytes = convertToUint8Array(bytes);
+  var newBytes = [];
+  for (var i = 0, len = bytes.length; i < len; i++) {
+    newBytes.push(bytes[i]);
+  }
+  return newBytes;
+}
+
 function bytesFromArrayBuffer (buffer) {
   var len = buffer.byteLength,
       byteView = new Uint8Array(buffer),
       bytes = [];
 
   for (var i = 0; i < len; ++i) {
-      bytes[i] = byteView[i];
+    bytes[i] = byteView[i];
   }
 
   return bytes;
+}
+
+function bufferConcat(buffer1, buffer2) {
+  var l1 = buffer1.byteLength || buffer1.length,
+      l2 = buffer2.byteLength || buffer2.length;
+  var tmp = new Uint8Array(l1 + l2);
+  tmp.set(buffer1 instanceof ArrayBuffer ? new Uint8Array(buffer1) : buffer1, 0);
+  tmp.set(buffer2 instanceof ArrayBuffer ? new Uint8Array(buffer2) : buffer2, l1);
+
+  return tmp.buffer;
 }
 
 function longToInts (sLong) {
@@ -195,10 +303,26 @@ function uintToInt (val) {
   return val;
 }
 
-function sha1Hash (bytes) {
-  // console.log('SHA-1 hash start');
-  var hashBytes = sha1.hash(bytes, true);
-  // console.log('SHA-1 hash finish');
+function sha1HashSync (bytes) {
+  this.rushaInstance = this.rushaInstance || new Rusha(1024 * 1024);
+
+  // console.log(dT(), 'SHA-1 hash start', bytes.byteLength || bytes.length);
+  var hashBytes = rushaInstance.rawDigest(bytes).buffer;
+  // console.log(dT(), 'SHA-1 hash finish');
+
+  return hashBytes;
+}
+
+function sha1BytesSync (bytes) {
+  return bytesFromArrayBuffer(sha1HashSync(bytes));
+}
+
+function sha256HashSync (bytes) {
+  // console.log(dT(), 'SHA-2 hash start', bytes.byteLength || bytes.length);
+  var hashWords = CryptoJS.SHA256(bytesToWords(bytes));
+  // console.log(dT(), 'SHA-2 hash finish');
+
+  var hashBytes = bytesFromWords(hashWords);
 
   return hashBytes;
 }
@@ -206,13 +330,7 @@ function sha1Hash (bytes) {
 
 
 function rsaEncrypt (publicKey, bytes) {
-  var needPadding = 255 - bytes.length;
-  if (needPadding > 0) {
-    var padding = new Array(needPadding);
-    (new SecureRandom()).nextBytes(padding);
-
-    bytes = bytes.concat(padding);
-  }
+  bytes = addPadding(bytes, 255);
 
   // console.log('RSA encrypt start');
   var N = new BigInteger(publicKey.modulus, 16),
@@ -220,22 +338,40 @@ function rsaEncrypt (publicKey, bytes) {
       X = new BigInteger(bytes),
       encryptedBigInt = X.modPowInt(E, N),
       encryptedBytes  = bytesFromBigInt(encryptedBigInt, 256);
-
   // console.log('RSA encrypt finish');
 
   return encryptedBytes;
 }
 
-function aesEncrypt (bytes, keyBytes, ivBytes) {
-  // console.log('AES encrypt start', bytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
-
-  var needPadding = 16 - (bytes.length % 16);
-  if (needPadding > 0 && needPadding < 16) {
+function addPadding(bytes, blockSize, zeroes) {
+  blockSize = blockSize || 16;
+  var len = bytes.byteLength || bytes.length;
+  var needPadding = blockSize - (len % blockSize);
+  if (needPadding > 0 && needPadding < blockSize) {
     var padding = new Array(needPadding);
-    (new SecureRandom()).nextBytes(padding);
+    if (zeroes) {
+      for (var i = 0; i < needPadding; i++) {
+        padding[i] = 0
+      }
+    } else {
+      (new SecureRandom()).nextBytes(padding);
+    }
 
-    bytes = bytes.concat(padding);
+    if (bytes instanceof ArrayBuffer) {
+      bytes = bufferConcat(bytes, padding);
+    } else {
+      bytes = bytes.concat(padding);
+    }
   }
+
+  return bytes;
+}
+
+function aesEncryptSync (bytes, keyBytes, ivBytes) {
+  var len = bytes.byteLength || bytes.length;
+
+  // console.log(dT(), 'AES encrypt start', len/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+  bytes = addPadding(bytes);
 
   var encryptedWords = CryptoJS.AES.encrypt(bytesToWords(bytes), bytesToWords(keyBytes), {
     iv: bytesToWords(ivBytes),
@@ -244,15 +380,14 @@ function aesEncrypt (bytes, keyBytes, ivBytes) {
   }).ciphertext;
 
   var encryptedBytes = bytesFromWords(encryptedWords);
-
-  // console.log('AES encrypt finish');
+  // console.log(dT(), 'AES encrypt finish');
 
   return encryptedBytes;
 }
 
-function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
-  // console.log('AES decrypt start', encryptedBytes.length/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/);
+function aesDecryptSync (encryptedBytes, keyBytes, ivBytes) {
 
+  // console.log(dT(), 'AES decrypt start', encryptedBytes.length);
   var decryptedWords = CryptoJS.AES.decrypt({ciphertext: bytesToWords(encryptedBytes)}, bytesToWords(keyBytes), {
     iv: bytesToWords(ivBytes),
     padding: CryptoJS.pad.NoPadding,
@@ -260,8 +395,7 @@ function aesDecrypt (encryptedBytes, keyBytes, ivBytes) {
   });
 
   var bytes = bytesFromWords(decryptedWords);
-
-  // console.log('AES decrypt finish');
+  // console.log(dT(), 'AES decrypt finish');
 
   return bytes;
 }
@@ -278,10 +412,10 @@ function nextRandomInt (maxValue) {
 };
 
 function pqPrimeFactorization (pqBytes) {
-  var what = new BigInteger(pqBytes), 
+  var what = new BigInteger(pqBytes),
       result = false;
 
-  console.log('PQ start', pqBytes, what.toString(16), what.bitLength());
+  // console.log(dT(), 'PQ start', pqBytes, what.toString(16), what.bitLength());
 
   try {
     result = pqPrimeLeemon(str2bigInt(what.toString(16), 16, Math.ceil(64 / bpe) + 1))
@@ -306,7 +440,7 @@ function pqPrimeFactorization (pqBytes) {
     // console.timeEnd('pq BigInt');
   }
 
-  console.log('PQ finish');
+  // console.log(dT(), 'PQ finish');
 
   return result;
 }
@@ -520,13 +654,15 @@ function pqPrimeLeemon (what) {
 
 function bytesModPow (x, y, m) {
   try {
-    var xBigInt = str2bigInt(x, 64),
-        yBigInt = str2bigInt(y, 64),
-        mBigInt = str2bigInt(bytesToHex(m), 16, 2),
+    var xBigInt = str2bigInt(bytesToHex(x), 16),
+        yBigInt = str2bigInt(bytesToHex(y), 16),
+        mBigInt = str2bigInt(bytesToHex(m), 16),
         resBigInt = powMod(xBigInt, yBigInt, mBigInt);
 
     return bytesFromHex(bigInt2str(resBigInt, 16));
-  } catch (e) {}
+  } catch (e) {
+    console.error('mod pow error', e);
+  }
 
-  return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)));
+  return bytesFromBigInt(new BigInteger(x).modPow(new BigInteger(y), new BigInteger(m)), 256);
 }

@@ -1,0 +1,26 @@
+<div class="img_fullsize_with_progress_wrap" ng-style="{width: video.full.width + 'px', height: video.full.height + 'px'}">
+  <div class="img_fullsize_progress_overlay" ng-show="video.progress.enabled">
+    <div class="img_fullsize_progress_wrap" ng-style="{width: video.full.width + 'px', height: video.full.height + 'px'}">
+      <div class="img_fullsize_progress progress tg_progress">
+        <div class="progress-bar progress-bar-success" style="width: {{video.progress.percent}}%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="img_fullsize_wrap" ng-if="!video.url">
+    <img
+      class="img_fullsize"
+      my-load-thumb
+      thumb="video.fullThumb"
+    />
+  </div>
+  <div class="video_full_player" ng-if="video.url" ng-switch="player.quicktime">
+    <embed ng-switch-when="true" ng-src="{{video.url}}" width="{{video.full.width}}" height="{{video.full.height}}" autoplay="true" CONTROLLER="TRUE" SHOWCONTROLS="TRUE" controller="true" loop="false" pluginspace="http://www.apple.com/quicktime/" />
+    <video ng-switch-default width="{{video.full.width}}" height="{{video.full.height}}" controls autoplay >
+      <source ng-src="{{video.url}}" type="video/mp4">
+    </video>
+  </div>
+  <div class="video_full_error_wrap" ng-if="error">
+    <div class="video_full_error" ng-if="error.html" ng-bind-html="error.html"></div>
+    <div class="video_full_error" ng-if="error.text" ng-bind="error.text"></div>
+  </div>
+</div>

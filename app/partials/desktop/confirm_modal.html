@@ -1,0 +1,86 @@
+<div class="confirm_modal_wrap md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <div class="confirm_modal_description" ng-switch="type">
+      <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout"></span>
+      <span ng-switch-when="WEBOGRAM_UPDATED_RELOAD" my-i18n="confirm_modal_update_reload"></span>
+      <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_history_flush"></span>
+      <span ng-switch-when="TERMINATE_SESSIONS" my-i18n="confirm_modal_terminate_sessions"></span>
+      <span ng-switch-when="TERMINATE_SESSION" my-i18n="confirm_modal_terminate_session"></span>
+
+      <span ng-switch-when="FILES_CLIPBOARD_PASTE">
+        <ng-pluralize count="files.length"
+                     when="confirm_modal_clipboard_X_files_send">
+        </ng-pluralize>
+      </span>
+      <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send"></span>
+      <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete"></span>
+      <span ng-switch-when="MESSAGES_DELETE">
+        <ng-pluralize count="count"
+                     when="confirm_modal_X_messages_delete">
+        </ng-pluralize>
+      </span>
+      <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete"></span>
+      <span ng-switch-when="CONTACTS_IMPORT_PERFORM" my-i18n="confirm_modal_contacts_import"></span>
+      <div ng-switch-when="LOGIN_PHONE_CORRECT">
+        <my-i18n msgid="confirm_modal_login_phone_correct"></my-i18n>
+        <div class="confirm_phone_number">
+          <span ng-bind="country_code"></span> <span ng-bind="phone_number"></span>
+        </div>
+      </div>
+      <my-i18n>
+        <span ng-switch-when="FORWARD_PEER" my-i18n-format="confirm_modal_forward_to_peer"></span>
+        <span ng-switch-when="SHARE_CONTACT_PEER" my-i18n-format="confirm_modal_send_to_peer"></span>
+        <span ng-switch-when="EXT_SHARE_PEER" my-i18n-format="confirm_modal_share_file_peer"></span>
+        <my-i18n-param name="peer">
+          <strong ng-switch="peer_id > 0">
+            <span ng-switch-when="true" my-user-link="peer_id"></span>
+            <span ng-switch-default my-chat-link="-peer_id"></span>
+          </strong>
+        </my-i18n-param>
+      </my-i18n>
+      <div ng-switch-when="APPLY_LANG_WITH_RELOAD" my-i18n="confirm_modal_apply_lang_with_reload_md"></div>
+      <div ng-switch-when="MIGRATE_TO_HTTPS" my-i18n="confirm_modal_migrate_to_https_md"></div>
+      <div ng-switch-when="SWITCH_DESKTOP_VERSION" my-i18n="confirm_modal_resize_desktop_md"></div>
+      <div ng-switch-when="SWITCH_MOBILE_VERSION" my-i18n="confirm_modal_resize_mobile_md"></div>
+      <div ng-switch-when="RECOVERY_EMAIL_EMPTY" my-i18n="confirm_modal_recovery_email_empty_md"></div>
+      <div ng-switch-when="PASSWORD_ABORT_SETUP"  my-i18n="confirm_modal_abort_password_setup"></div>
+      <div ng-switch-when="RESET_ACCOUNT" my-i18n="confirm_modal_reset_account_md"></div>
+      <div ng-switch-when="JOIN_GROUP_BY_LINK" my-i18n="confirm_modal_join_group_link">
+        <my-i18n-param name="title"><strong ng-bind="title"></strong></my-i18n-param>
+      </div>
+      <div ng-switch-when="REVOKE_GROUP_INVITE_LINK" my-i18n="confirm_modal_revoke_group_link"></div>
+
+
+      <span ng-switch-default ng-switch="message.length > 0">
+        <span ng-switch-when="true" ng-bind="message"></span>
+        <span ng-switch-default my-i18n="confirm_modal_are_u_sure"></span>
+      </span>
+    </div>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()">
+      <span my-i18n="modal_cancel"></span>
+    </button>
+    <button class="btn btn-md btn-md-primary" ng-switch="type" ng-click="$close()" ng-class="{'btn-md-danger': type == 'RESET_ACCOUNT'}" my-focused >
+      <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout_submit"></span>
+      <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_history_flush_submit"></span>
+      <span ng-switch-when="FILES_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_files_send_submit"></span>
+      <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send_submit"></span>
+      <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete_submit"></span>
+      <span ng-switch-when="MESSAGES_DELETE" my-i18n="confirm_modal_messages_delete_submit"></span>
+      <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete_submit"></span>
+      <span ng-switch-when="FORWARD_PEER" my-i18n="confirm_modal_forward_message_submit"></span>
+      <span ng-switch-when="PHOTO_SHARE_PEER" my-i18n="confirm_modal_share_photo_submit"></span>
+      <span ng-switch-when="VIDEO_SHARE_PEER" my-i18n="confirm_modal_share_video_submit"></span>
+      <span ng-switch-when="SHARE_CONTACT_PEER" my-i18n="confirm_modal_share_contact_submit"></span>
+      <span ng-switch-when="EXT_SHARE_PEER" my-i18n="confirm_modal_share_file_submit"></span>
+      <span ng-switch-when="RESET_ACCOUNT" my-i18n="confirm_modal_reset_account_submit"></span>
+      <span ng-switch-default my-i18n="modal_ok"></span>
+    </button>
+  </div>
+
+</div>

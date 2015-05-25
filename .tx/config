@@ -1,0 +1,9 @@
+[main]
+host = https://www.transifex.com
+
+[telegram-web.en-usjson]
+file_filter = app/js/locales/<lang>.json
+source_file = app/js/locales/en-us.json
+source_lang = en_US
+type = KEYVALUEJSON
+lang_map = de:de-de, es:es-es, it:it-it, ru:ru-ru, nl:nl-nl, pt_BR:pt-br

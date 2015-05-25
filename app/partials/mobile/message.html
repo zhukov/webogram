@@ -1,0 +1,68 @@
+<div class="im_message_outer_wrap" ng-click="toggleMessage(historyMessage.id, $event)">
+
+
+  <div class="im_message_wrap clearfix" ng-switch="::historyMessage._ == 'messageService'">
+
+    <div class="im_service_message_wrap" ng-switch-when="true">
+      <div class="im_service_message">
+        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0" no-watch="true"></a>
+        <span class="im_message_service" my-service-message></span>
+      </div>
+
+      <a ng-if="::historyMessage.action._ == 'messageActionChatEditPhoto'" class="im_service_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.action.photo.id)">
+        <img
+          class="im_service_message_photo_thumb"
+          my-load-thumb
+          thumb="historyMessage.action.photo.thumb"
+        />
+      </a>
+
+    </div>
+
+    <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.out ? 'im_message_out' : 'im_message_in']">
+      <i ng-if="::historyMessage.unread &amp;&amp; historyMessage.out || historyMessage.pending || false" class="icon-message-status" ng-class="{'icon-message-status-unread': historyMessage.unread, 'icon-message-status-pending': historyMessage.pending}" ng-show="!historyMessage.error"></i>
+
+      <a class="im_message_from_photo pull-left" my-user-photolink="historyMessage.from_id" img-class="im_message_from_photo"></a>
+
+      <div class="im_message_meta">
+        <i class="icon-message-status-tick"></i>
+        <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
+      </div>
+
+      <div class="im_message_body" ng-class="::{im_message_body_media: !!historyMessage.media && !historyMessage.media.rCaption}">
+
+        <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0" no-watch="true"></a>
+
+        <a class="im_message_reply_wrap" my-reply-message="historyMessage.reply_to_msg" ng-if="::historyMessage.reply_to_msg_id"></a>
+
+        <div ng-if="::historyMessage.fwd_from_id > 0 &amp;&amp; !historyMessage.media" class="im_message_fwd_header" my-i18n="message_forwarded_message_mobile">
+          <a my-i18n-param="from" class="im_message_fwd_author" my-user-link="historyMessage.fwd_from_id" no-watch="true"></a>
+          <span my-i18n-param="date" class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
+        </div>
+
+        <div ng-if="::historyMessage.media || false" class="im_message_media" ng-switch="historyMessage.media._">
+
+          <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media.document" message-id="historyMessage.id"></div>
+          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio"></div>
+          <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
+          <div ng-switch-when="messageMediaVenue"     my-message-geo="historyMessage.media"></div>
+          <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>
+          <div ng-switch-when="messageMediaPending"   my-message-pending></div>
+          <div ng-switch-when="messageMediaUnsupported">
+            <div class="im_message_text">
+              The message is not supported on your version of Telegram Web. Update the app to view: <a href="https://web.telegram.org">web.telegram.org</a>.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="im_message_text" ng-if="::historyMessage.message.length || false" ng-bind-html="::historyMessage.richMessage" dir="auto"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+

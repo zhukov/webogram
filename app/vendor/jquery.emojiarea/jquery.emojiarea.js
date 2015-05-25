@@ -44,6 +44,7 @@
 			buttonPosition: 'after'
 		}
 	};
+	var defaultRecentEmojis = ':joy:,:kissing_heart:,:heart:,:heart_eyes:,:blush:,:grin:,:+1:,:relaxed:,:pensive:,:smile:,:sob:,:kiss:,:unamused:,:flushed:,:stuck_out_tongue_winking_eye:,:see_no_evil:,:wink:,:smiley:,:cry:,:stuck_out_tongue_closed_eyes:,:scream:,:rage:,:smirk:,:disappointed:,:sweat_smile:,:kissing_closed_eyes:,:speak_no_evil:,:relieved:,:grinning:,:yum:,:laughing:,:ok_hand:,:neutral_face:,:confused:'.split(',');
 	/*! MODIFICATION END */
 
 	$.fn.emojiarea = function(options) {
@@ -171,32 +172,43 @@
 	/*! MODIFICATION START
 		 This function was added by Igor Zhukov to save recent used emojis.
 		 */
-	util.emojiInserted = function (emojiKey, menu) {
-		try {
-			var curEmojisStr = localStorage.getItem('emojis_recent');
-		} catch (e) {
-			return false;
-		}
+	util.emojiInserted = function (emojiKey, menu, quickSelect) {
+		ConfigStorage.get('emojis_recent', function (curEmojis) {
+			curEmojis = curEmojis || defaultRecentEmojis || [];
+			if (curEmojis.length && typeof curEmojis[0] === 'string') {
+				var newCurEmojis = [];
+				for (var i = 0, l = curEmojis.length; i < l; i++) {
+					newCurEmojis.push([curEmojis[i], 1]);
+				}
+				curEmojis = newCurEmojis;
+			}
 
-		var curEmojis = curEmojisStr && curEmojisStr.split(',') || [],
-				pos = curEmojis.indexOf(emojiKey);
+			var exists = false;
+			for (var i = 0, l = curEmojis.length; i < l; i++) {
+				if (curEmojis[i][0] == emojiKey) {
+					exists = true;
+					curEmojis[i][1]++;
+					break;
+				}
+			}
+			if (exists) {
+				curEmojis.sort(function (a, b) {
+					if (a[1] == b[1]) return 0;
+					return a[1] > b[1] ? -1 : 1;
+				});
+			} else {
+				if (curEmojis.length > 41) {
+					curEmojis = curEmojis.slice(0, 41);
+				}
+				curEmojis.push([emojiKey, 1]);
+			}
 
-		if (!pos) {
-			return false;
-		}
-		if (pos != -1) {
-			curEmojis.splice(pos, 1);
-		}
-		curEmojis.unshift(emojiKey);
-		if (curEmojis.length > 42) {
-			curEmojis = curEmojis.slice(42);
-		}
+			ConfigStorage.set({emojis_recent: curEmojis});
 
-		localStorage.setItem('emojis_recent', curEmojis.join(','));
-
-		if (menu) {
-			menu.updateRecentTab(curEmojis);
-		}
+			if (quickSelect) {
+				quickSelect.changed = true;
+			}
+		})
 	};
 	/*! MODIFICATION END */
 
@@ -211,6 +223,11 @@
 		this.$editor.on('blur', function() { self.hasFocus = false; });
 
 		this.setupButton();
+
+		if (this.options.quickSelect) {
+			var $items = $(this.options.quickSelect);
+			this.quickSelect = new EmojiQuickSelectArea(self, $items);
+		}
 	};
 
 	EmojiArea.prototype.setupButton = function() {
@@ -246,7 +263,7 @@
 		var column = emoji[2];
 		var name = emoji[3];
 		var filename = $.emojiarea.spritesheetPath;
-		var iconSize = menu && Config.Navigator.mobile ? 26 : $.emojiarea.iconSize
+		var iconSize = menu && Config.Mobile ? 26 : $.emojiarea.iconSize
 		var xoffset = -(iconSize * column);
 		var yoffset = -(iconSize * row);
 		var scaledWidth = ($.emojiarea.spritesheetDimens[category][1] * iconSize);
@@ -282,7 +299,7 @@
 		if (!$.emojiarea.icons.hasOwnProperty(emoji)) return;
 		util.insertAtCursor(emoji, this.$textarea[0]);
 		/* MODIFICATION: Following line was added by Igor Zhukov, in order to save recent emojis */
-		util.emojiInserted(emoji, this.menu);
+		util.emojiInserted(emoji, this.menu, this.quickSelect);
 		this.$textarea.trigger('change');
 	};
 
@@ -385,9 +402,11 @@
 			$img[0].attachEvent('onresizestart', function(e) { e.returnValue = false; }, false);
 		}
 
-		this.$editor.trigger('focus');
-		if (this.selection) {
-			util.restoreSelection(this.selection);
+		if (!this.hasFocus) {
+			this.$editor.trigger('focus');
+			if (this.selection) {
+				util.restoreSelection(this.selection);
+			}
 		}
 		try { util.replaceSelection($img[0]); } catch (e) {}
 
@@ -401,7 +420,7 @@
 		/*! MODIFICATION END */
 
 		/* MODIFICATION: Following line was added by Igor Zhukov, in order to save recent emojis */
-		util.emojiInserted(emoji, this.menu);
+		util.emojiInserted(emoji, this.menu, this.quickSelect);
 
 
 		this.onChange();
@@ -472,8 +491,6 @@
 		this.$menu = $('<div>');
 		this.$menu.addClass('emoji-menu');
 		this.$menu.hide();
-		/* MODIFICATION: Following line was added by Igor Zhukov, in order to store emoji tab visibility */
-		this.hasRecent = true;
 
 		/*! MODIFICATION START
 			Following code was modified by Igor Zhukov, in order to add scrollbars and tail to EmojiMenu
@@ -488,15 +505,16 @@
 		'<td><a class="emoji-menu-tab icon-car"></a></td>' +
 		'<td><a class="emoji-menu-tab icon-grid"></a></td>' +
 		'</tr></table>').appendTo(this.$itemsTailWrap);
-		this.$itemsWrap = $('<div class="emoji-items-wrap nano"></div>').appendTo(this.$itemsTailWrap);
+		this.$itemsWrap = $('<div class="emoji-items-wrap nano mobile_scrollable_wrap"></div>').appendTo(this.$itemsTailWrap);
 		this.$items = $('<div class="emoji-items nano-content">').appendTo(this.$itemsWrap);
-		$('<div class="emoji-menu-tail">').appendTo(this.$menu);
 		/*! MODIFICATION END */
 
 		$body.append(this.$menu);
 
-		/*! MODIFICATION: Following line is added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
-		this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+		/*! MODIFICATION: Following 3 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
+		if (!Config.Mobile) {
+			this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+		}
 
 		$body.on('keydown', function(e) {
 			if (e.keyCode === KEY_ESC || e.keyCode === KEY_TAB) {
@@ -562,8 +580,6 @@
 
 		/* MODIFICATION: Following line was modified by Andre Staltz, in order to select a default category. */
 		this.selectCategory(0);
-		/* MODIFICATION: Following line was added by Igor Zhukov, in order to update emoji tab visibility */
-		this.updateRecentTab();
 	};
 
 	/*! MODIFICATION START
@@ -585,7 +601,9 @@
 		});
 		this.currentCategory = category;
 		this.load(category);
-    this.$itemsWrap.nanoScroller({ scroll: 'top' });
+		if (!Config.Mobile) {
+	    this.$itemsWrap.nanoScroller({ scroll: 'top' });
+		}
 	};
 	/*! MODIFICATION END */
 
@@ -601,10 +619,21 @@
 		var html = [];
 		var options = $.emojiarea.icons;
 		var path = $.emojiarea.path;
+		var self = this;
 		if (path.length && path.charAt(path.length - 1) !== '/') {
 			path += '/';
 		}
 
+		/*! MODIFICATION: Following function was added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
+		var updateItems = function () {
+			self.$items.html(html.join(''));
+
+			if (!Config.Mobile && self.$itemsWrap) {
+				setTimeout(function () {
+					self.$itemsWrap.nanoScroller();
+				}, 100);
+			}
+		}
 
 		if (category > 0) {
 			for (var key in options) {
@@ -613,55 +642,24 @@
 					html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 				}
 			}
+			updateItems();
 		} else {
-			try {
-				var curEmojis = (localStorage.getItem('emojis_recent') || '').split(','),
-						key, i;
+			ConfigStorage.get('emojis_recent', function (curEmojis) {
+				curEmojis = curEmojis || defaultRecentEmojis || [];
+				var key, i;
 				for (i = 0; i < curEmojis.length; i++) {
-					key = curEmojis[i]
+					key = curEmojis[i];
+					if (Array.isArray(key)) {
+						key = key[0];
+					}
 					if (options[key]) {
 						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
 					}
 				}
-			} catch (e) {}
-		}
-
-		this.$items.html(html.join(''));
-
-		/*! MODIFICATION: Following 4 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
-		var self = this;
-		setTimeout(function () {
-			self.$itemsWrap.nanoScroller();
-		}, 100);
-	};
-
-	/*! MODIFICATION START
-			 This function was added by Igor Zhukov to update recent emojis tab state.
-			 */
-	EmojiMenu.prototype.updateRecentTab = function(curEmojis) {
-		if (curEmojis === undefined) {
-			try {
-				var curEmojisStr = localStorage.getItem('emojis_recent');
-				curEmojis = curEmojisStr && curEmojisStr.split(',') || [];
-			} catch (e) {
-				curEmojis = [];
-			}
-		}
-
-		if (this.hasRecent != (curEmojis.length > 1)) {
-			var tabEl = this.$categoryTabs.find('.emoji-menu-tab').eq(0);
-			if (this.hasRecent) {
-				tabEl.hide();
-				if (!this.currentCategory) {
-					this.selectCategory(1);
-				}
-			} else {
-				tabEl.show();
-			}
-			this.hasRecent = !this.hasRecent;
+				updateItems();
+			});
 		}
 	};
-	/*! MODIFICATION END */
 
 	EmojiMenu.prototype.reposition = function() {
 		var $button = this.emojiarea.$button;
@@ -710,5 +708,31 @@
 			menu.show(emojiarea);
 		};
 	})();
+
+	var EmojiQuickSelectArea = function(emojiarea, $items) {
+		var self = this;
+		var $body = $(document.body);
+
+		this.emojiarea = emojiarea;
+		this.changed = false;
+		this.$items = $items;
+
+		this.load(0);
+		this.$items.on('mousedown', 'a', function(e) {
+			var emoji = $('.label', $(this)).text();
+			self.onItemSelected(emoji);
+			self.changed = true;
+			e.stopPropagation();
+			return false;
+		});
+		$body.on('message_send', function(e) {
+			if (self.changed) {
+				self.load(0);
+				self.changed = false;
+			}
+		});
+	};
+
+	util.extend(EmojiQuickSelectArea.prototype, EmojiMenu.prototype);
 
 })(jQuery, window, document);

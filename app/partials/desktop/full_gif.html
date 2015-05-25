@@ -1,0 +1,25 @@
+<a class="img_gif_with_progress_wrap" ng-click="toggle($event)">
+
+  <div class="img_gif_image_wrap" ng-switch="document.downloaded &amp;&amp; isActive">
+
+    <img ng-switch-when="true" class="img_gif_image" ng-src="{{document.url}}" />
+    <img ng-switch-default class="img_gif_thumb" my-load-thumb thumb="document.thumb" />
+
+  </div>
+
+  <div ng-show="!isActive" ng-switch="document.progress.enabled">
+
+    <div ng-switch-when="true" class="img_gif_progress_wrap">
+      <div class="img_gif_progress progress tg_progress">
+        <div class="progress-bar progress-bar-success" ng-style="{width: document.progress.percent + '%'}"></div>
+      </div>
+    </div>
+
+    <div ng-switch-default class="img_gif_info_wrap">
+      <div class="img_gif_label pull-left">GIF</div>
+      <div ng-if="!document.downloaded" class="img_gif_size pull-right" ng-bind="::document.size | formatSize"></div>
+    </div>
+
+  </div>
+
+</a>

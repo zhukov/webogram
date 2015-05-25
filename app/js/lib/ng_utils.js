@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.9 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -9,135 +9,53 @@ angular.module('izhukov.utils', [])
 
 .provider('Storage', function () {
 
-  var keyPrefix = '';
-  var cache = {};
-  var useCs = !!(window.chrome && chrome.storage && chrome.storage.local);
-  var useLs = !useCs && !!window.localStorage;
-
   this.setPrefix = function (newPrefix) {
-    keyPrefix = newPrefix
+    ConfigStorage.prefix(newPrefix);
   };
 
   this.$get = ['$q', function ($q) {
-    function getValue() {
-      var keys = Array.prototype.slice.call(arguments),
-          result = [],
-          single = keys.length == 1,
-          allFound = true;
+    var methods = {};
+    angular.forEach(['get', 'set', 'remove'], function (methodName) {
+      methods[methodName] = function () {
+        var deferred = $q.defer(),
+            args = Array.prototype.slice.call(arguments);
 
-      for (var i = 0; i < keys.length; i++) {
-        keys[i] = keyPrefix + keys[i];
-      }
-
-      angular.forEach(keys, function (key) {
-        if (cache[key] !== undefined) {
-          result.push(cache[key]);
-        }
-        else if (useLs) {
-          var value = localStorage.getItem(key);
-          value = (value === undefined || value === null) ? false : JSON.parse(value);
-          result.push(cache[key] = value);
-        }
-        else if (!useCs) {
-          result.push(cache[key] = false);
-        }
-        else {
-          allFound = false;
-        }
-      });
-
-      if (allFound) {
-        return $q.when(single ? result[0] : result);
-      }
-
-      var deferred = $q.defer();
-
-      chrome.storage.local.get(keys, function (resultObj) {
-        result = [];
-        angular.forEach(keys, function (key) {
-          var value = resultObj[key];
-          value = value === undefined || value === null ? false : JSON.parse(value);
-          result.push(cache[key] = value);
+        args.push(function (result) {
+          deferred.resolve(result);
         });
+        ConfigStorage[methodName].apply(ConfigStorage, args);
 
-        deferred.resolve(single ? result[0] : result);
-      });
-
-      return deferred.promise;
-    };
-
-    function setValue(obj) {
-      var keyValues = {};
-      angular.forEach(obj, function (value, key) {
-        keyValues[keyPrefix + key] = JSON.stringify(value);
-        cache[keyPrefix + key] = value;
-      });
-
-      if (useLs) {
-        angular.forEach(keyValues, function (value, key) {
-          localStorage.setItem(key, value);
-        });
-        return $q.when();
-      }
-
-      if (!useCs) {
-        return $q.when();
-      }
-
-      var deferred = $q.defer();
-
-      chrome.storage.local.set(keyValues, function () {
-        deferred.resolve();
-      });
-
-      return deferred.promise;
-    };
-
-    function removeValue () {
-      var keys = Array.prototype.slice.call(arguments);
-
-      for (var i = 0; i < keys.length; i++) {
-        keys[i] = keyPrefix + keys[i];
-      }
-
-      angular.forEach(keys, function(key){
-        delete cache[key];
-      });
-
-      if (useLs) {
-        angular.forEach(keys, function(key){
-          localStorage.removeItem(key);
-        });
-
-        return $q.when();
-      }
-
-      if (!useCs) {
-        return $q.when();
-      }
-
-      var deferred = $q.defer();
-
-      chrome.storage.local.remove(keys, function () {
-        deferred.resolve();
-      });
-
-      return deferred.promise;
-    };
-
-    return {
-      get: getValue,
-      set: setValue,
-      remove: removeValue
-    };
+        return deferred.promise;
+      };
+    });
+    return methods;
   }];
 
 })
 
-.service('FileManager', function ($window, $timeout, $q) {
+.service('qSync', function () {
+
+  return {
+    when: function (result) {
+      return {then: function (cb) {
+        return cb(result);
+      }};
+    },
+    reject: function (result) {
+      return {then: function (cb, badcb) {
+        return badcb(result);
+      }};
+    }
+  }
+
+})
+
+.service('FileManager', function ($window, $q, $timeout, qSync) {
 
   $window.URL = $window.URL || $window.webkitURL;
   $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder;
+  var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1 &&
+                         navigator.userAgent.indexOf('Chrome') == -1;
 
   var blobSupported = true;
 
@@ -160,20 +78,6 @@ angular.module('izhukov.utils', [])
         fileWriter.truncate(0);
       });
     });
-  }
-
-  function blobConstruct (blobParts, mimeType) {
-    var blob;
-    try {
-      blob = new Blob(blobParts, {type: mimeType});
-    } catch (e) {
-      var bb = new BlobBuilder;
-      angular.forEach(blobParts, function(blobPart) {
-        bb.append(blobPart);
-      });
-      blob = bb.getBlob(mimeType);
-    }
-    return blob;
   }
 
   function fileWriteData(fileWriter, bytes) {
@@ -199,10 +103,10 @@ angular.module('izhukov.utils', [])
     else {
       try {
         var blob = blobConstruct([bytesToArrayBuffer(bytes)]);
+        fileWriter.write(blob);
       } catch (e) {
         deferred.reject(e);
       }
-      fileWriter.write(blob);
     }
 
     return deferred.promise;
@@ -210,7 +114,7 @@ angular.module('izhukov.utils', [])
 
   function chooseSaveFile (fileName, ext, mimeType) {
     if (!$window.chrome || !chrome.fileSystem || !chrome.fileSystem.chooseEntry) {
-      return $q.reject();
+      return qSync.reject();
     };
     var deferred = $q.defer();
 
@@ -251,7 +155,7 @@ angular.module('izhukov.utils', [])
               return false;
             }
             blobParts.push(blob);
-            $timeout(function () {
+            setZeroTimeout(function () {
               if (fakeFileWriter.onwriteend) {
                 fakeFileWriter.onwriteend();
               }
@@ -283,23 +187,119 @@ angular.module('izhukov.utils', [])
     return 'data:' + mimeType + ';base64,' + bytesToBase64(fileData);
   }
 
-  function downloadFile (url, mimeType, fileName) {
-    // if (Config.Navigator.mobile) {
-    //   window.open(url, '_blank');
-    //   return;
-    // }
-    var anchor = $('<a>Download</a>')
-              .css({position: 'absolute', top: 1, left: 1})
-              .attr('href', url)
-              .attr('target', '_blank')
-              .attr('download', fileName)
-              .appendTo('body');
+  function getByteArray(fileData) {
+    if (fileData instanceof Blob) {
+      var deferred = $q.defer();
+      try {
+        var reader = new FileReader();
+        reader.onloadend = function (e) {
+          deferred.resolve(new Uint8Array(e.target.result));
+        };
+        reader.onerror = function (e) {
+          deferred.reject(e);
+        };
+        reader.readAsArrayBuffer(fileData);
 
-    anchor[0].dataset.downloadurl = [mimeType, fileName, url].join(':');
-    anchor[0].click();
-    $timeout(function () {
-      anchor.remove();
-    }, 100);
+        return deferred.promise;
+      } catch (e) {
+        return $q.reject(e);
+      }
+    }
+    return $q.when(fileData);
+  }
+
+  function getDataUrl(blob) {
+    var deferred;
+    try {
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        deferred.resolve(reader.result);
+      }
+      reader.readAsDataURL(blob);
+    } catch (e) {
+      return $q.reject(e);
+    }
+
+    deferred = $q.defer();
+
+    return deferred.promise;
+  }
+
+  function getFileCorrectUrl(blob, mimeType) {
+    if (buggyUnknownBlob && blob instanceof Blob) {
+      var mimeType = blob.type || blob.mimeType || mimeType || '';
+      if (!mimeType.match(/image\/(jpeg|gif|png|bmp)|video\/quicktime/)) {
+        return getDataUrl(blob);
+      }
+    }
+    return qSync.when(getUrl(blob, mimeType));
+  }
+
+  function downloadFile (blob, mimeType, fileName) {
+    if (window.navigator && navigator.msSaveBlob !== undefined) {
+      window.navigator.msSaveBlob(blob, fileName);
+      return false;
+    }
+
+    if (window.navigator && navigator.getDeviceStorage) {
+      var storageName = 'sdcard';
+      switch (mimeType.split('/')[0]) {
+        case 'video': storageName = 'videos'; break;
+        case 'audio': storageName = 'music'; break;
+        case 'image': storageName = 'pictures'; break;
+      }
+      var deviceStorage = navigator.getDeviceStorage(storageName);
+
+      var request = deviceStorage.addNamed(blob, fileName);
+
+      request.onsuccess = function () {
+        console.log('Device storage save result', this.result);
+      };
+      request.onerror = function () {
+      };
+      return;
+    }
+
+    var popup = false;
+    if (window.safari) {
+      popup = window.open();
+    }
+
+    getFileCorrectUrl(blob, mimeType).then(function (url) {
+      if (popup) {
+        try {
+          popup.location.href = url;
+          return;
+        } catch (e) {}
+      }
+      var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+      anchor.href = url;
+      anchor.target  = '_blank';
+      anchor.download = fileName;
+      if (anchor.dataset) {
+        anchor.dataset.downloadurl = ["video/quicktime", fileName, url].join(':');
+      }
+      $(anchor).css({position: 'absolute', top: 1, left: 1}).appendTo('body');
+
+      try {
+        var clickEvent = document.createEvent('MouseEvents');
+        clickEvent.initMouseEvent(
+          'click', true, false, window, 0, 0, 0, 0, 0
+          , false, false, false, false, 0, null
+        );
+        anchor.dispatchEvent(clickEvent);
+      } catch (e) {
+        console.error('Download click error', e);
+        try {
+          anchor[0].click();
+        } catch (e) {
+          window.open(url, '_blank');
+        }
+      }
+      $timeout(function () {
+        $(anchor).remove();
+      }, 100);
+    });
   }
 
   return {
@@ -310,6 +310,9 @@ angular.module('izhukov.utils', [])
     getFakeFileWriter: getFakeFileWriter,
     chooseSave: chooseSaveFile,
     getUrl: getUrl,
+    getDataUrl: getDataUrl,
+    getByteArray: getByteArray,
+    getFileCorrectUrl: getFileCorrectUrl,
     download: downloadFile
   };
 })
@@ -319,11 +322,23 @@ angular.module('izhukov.utils', [])
   $window.indexedDB = $window.indexedDB || $window.webkitIndexedDB || $window.mozIndexedDB || $window.OIndexedDB || $window.msIndexedDB;
   $window.IDBTransaction = $window.IDBTransaction || $window.webkitIDBTransaction || $window.OIDBTransaction || $window.msIDBTransaction;
 
-  var dbName = 'cachedFiles',
-      dbStoreName = 'files',
-      dbVersion = 1,
-      openDbPromise,
-      storageIsAvailable = $window.indexedDB !== undefined && $window.IDBTransaction !== undefined;
+  var dbName = 'cachedFiles';
+  var dbStoreName = 'files';
+  var dbVersion = 1;
+  var openDbPromise;
+  var storageIsAvailable = $window.indexedDB !== undefined &&
+                           $window.IDBTransaction !== undefined;
+
+  // IndexedDB is REALLY slow without blob support in Safari 8, no point in it
+  if (storageIsAvailable &&
+      navigator.userAgent.indexOf('Safari') != -1 &&
+      navigator.userAgent.indexOf('Chrome') == -1
+      // && navigator.userAgent.match(/Version\/([67]|8.0.[012])/)
+  ) {
+    storageIsAvailable = false;
+  }
+
+  var storeBlobsAvailable = storageIsAvailable || false;
 
   function isAvailable () {
     return storageIsAvailable;
@@ -340,6 +355,9 @@ angular.module('izhukov.utils', [])
           createObjectStore = function (db) {
             db.createObjectStore(dbStoreName);
           };
+      if (!request) {
+        throw new Exception();
+      }
     } catch (error) {
       storageIsAvailable = false;
       return $q.reject(error);
@@ -386,14 +404,23 @@ angular.module('izhukov.utils', [])
 
   function saveFile (fileName, blob) {
     return openDatabase().then(function (db) {
+      if (!storeBlobsAvailable) {
+        return saveFileBase64(db, fileName, blob);
+      }
+
       try {
-        var deferred = $q.defer(),
-            objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
+        var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
             request = objectStore.put(blob, fileName);
       } catch (error) {
+        if (storeBlobsAvailable) {
+          storeBlobsAvailable = false;
+          return saveFileBase64(db, fileName, blob);
+        }
         storageIsAvailable = false;
         return $q.reject(error);
       }
+
+      var deferred = $q.defer();
 
       request.onsuccess = function (event) {
         deferred.resolve(blob);
@@ -407,6 +434,38 @@ angular.module('izhukov.utils', [])
     });
   };
 
+  function saveFileBase64(db, fileName, blob) {
+    try {
+      var reader = new FileReader();
+      reader.readAsDataURL(blob);
+    } catch (e) {
+      storageIsAvailable = false;
+      return $q.reject();
+    }
+
+    var deferred = $q.defer();
+
+    reader.onloadend = function() {
+      try {
+        var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
+            request = objectStore.put(reader.result, fileName);
+      } catch (error) {
+        storageIsAvailable = false;
+        deferred.reject(error);
+        return;
+      };
+      request.onsuccess = function (event) {
+        deferred.resolve(blob);
+      };
+
+      request.onerror = function (error) {
+        deferred.reject(error);
+      };
+    }
+
+    return deferred.promise;
+  }
+
   function getFile (fileName) {
     return openDatabase().then(function (db) {
       var deferred = $q.defer(),
@@ -414,10 +473,14 @@ angular.module('izhukov.utils', [])
           request = objectStore.get(fileName);
 
       request.onsuccess = function (event) {
-        if (event.target.result === undefined) {
+        var result = event.target.result;
+        if (result === undefined) {
           deferred.reject();
+        } else if (typeof result === 'string' &&
+                   result.substr(0, 5) === 'data:') {
+          deferred.resolve(dataUrlToBlob(result));
         } else {
-          deferred.resolve(event.target.result);
+          deferred.resolve(result);
         }
       };
 
@@ -466,7 +529,7 @@ angular.module('izhukov.utils', [])
 
     var deferred = $q.defer();
 
-    $window.requestFileSystem($window.TEMPORARY, 5*1024*1024, function (fs) {
+    $window.requestFileSystem($window.TEMPORARY, 500 * 1024 * 1024, function (fs) {
       cachedFs = fs;
       deferred.resolve();
     }, function (e) {
@@ -524,9 +587,11 @@ angular.module('izhukov.utils', [])
           }
           deferred.resolve(fileWriter);
         }, function (error) {
+          storageIsAvailable = false;
           deferred.reject(error);
         });
       }, function (error) {
+        storageIsAvailable = false;
         deferred.reject(error);
       });
 
@@ -580,34 +645,62 @@ angular.module('izhukov.utils', [])
 
 .service('CryptoWorker', function ($timeout, $q) {
 
-  var worker = window.Worker && new Worker('js/lib/crypto_worker.js') || false,
+  var webWorker = false,
+      naClEmbed = false,
       taskID = 0,
-      awaiting = {};
+      awaiting = {},
+      webCrypto = Config.Modes.webcrypto && window.crypto && (window.crypto.subtle || window.crypto.webkitSubtle)/* || window.msCrypto && window.msCrypto.subtle*/,
+      useSha1Crypto = webCrypto && webCrypto.digest !== undefined,
+      useSha256Crypto = webCrypto && webCrypto.digest !== undefined,
+      finalizeTask = function (taskID, result) {
+        var deferred = awaiting[taskID];
+        if (deferred !== undefined) {
+          // console.log(dT(), 'CW done');
+          deferred.resolve(result);
+          delete awaiting[taskID];
+        }
+      };
 
-  if (worker) {
-    worker.onmessage = function (e) {
-      var deferred = awaiting[e.data.taskID];
-      if (deferred !== undefined) {
-        console.log(dT(), 'CW done');
-        deferred.resolve(e.data.result);
-        delete awaiting[e.data.taskID];
+  if (Config.Modes.nacl &&
+      navigator.mimeTypes &&
+      navigator.mimeTypes['application/x-pnacl'] !== undefined) {
+    var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
+    listener.addEventListener('load', function (e) {
+      naClEmbed = listener.firstChild;
+      console.log(dT(), 'NaCl ready');
+    }, true);
+    listener.addEventListener('message', function (e) {
+      finalizeTask(e.data.taskID, e.data.result);
+    }, true);
+    listener.addEventListener('error', function (e) {
+      console.error('NaCl error', e);
+    }, true);
+  }
+
+  if (window.Worker) {
+    var tmpWorker = new Worker('js/lib/crypto_worker.js');
+    tmpWorker.onmessage = function (e) {
+      if (!webWorker) {
+        webWorker = tmpWorker;
+      } else {
+        finalizeTask(e.data.taskID, e.data.result);
       }
     };
-
-    worker.onerror = function(error) {
-      console.log('CW error', error, error.stack);
+    tmpWorker.onerror = function(error) {
+      console.error('CW error', error, error.stack);
+      webWorker = false;
     };
   }
 
-  function performTaskWorker (task, params) {
-    console.log(dT(), 'CW start', task);
+  function performTaskWorker (task, params, embed) {
+    // console.log(dT(), 'CW start', task);
     var deferred = $q.defer();
 
     awaiting[taskID] = deferred;
 
     params.task = task;
     params.taskID = taskID;
-    worker.postMessage(params);
+    (embed || webWorker).postMessage(params);
 
     taskID++;
 
@@ -616,39 +709,76 @@ angular.module('izhukov.utils', [])
 
   return {
     sha1Hash: function (bytes) {
-      if (worker && false) { // due overhead for data transfer
-        return performTaskWorker ('sha1-hash', {bytes: bytes});
+      if (useSha1Crypto) {
+        // We don't use buffer since typedArray.subarray(...).buffer gives the whole buffer and not sliced one. webCrypto.digest supports typed array
+        var deferred = $q.defer(),
+            bytesTyped = Array.isArray(bytes) ? convertToUint8Array(bytes) : bytes;
+        // console.log(dT(), 'Native sha1 start');
+        webCrypto.digest({name: 'SHA-1'}, bytesTyped).then(function (digest) {
+          // console.log(dT(), 'Native sha1 done');
+          deferred.resolve(digest);
+        }, function  (e) {
+          console.error('Crypto digest error', e);
+          useSha1Crypto = false;
+          deferred.resolve(sha1HashSync(bytes));
+        });
+
+        return deferred.promise;
       }
       return $timeout(function () {
-        return sha1Hash(bytes);
+        return sha1HashSync(bytes);
+      });
+    },
+    sha256Hash: function (bytes) {
+      if (useSha256Crypto) {
+        var deferred = $q.defer(),
+            bytesTyped = Array.isArray(bytes) ? convertToUint8Array(bytes) : bytes;
+        // console.log(dT(), 'Native sha1 start');
+        webCrypto.digest({name: 'SHA-256'}, bytesTyped).then(function (digest) {
+          // console.log(dT(), 'Native sha1 done');
+          deferred.resolve(digest);
+        }, function  (e) {
+          console.error('Crypto digest error', e);
+          useSha256Crypto = false;
+          deferred.resolve(sha256HashSync(bytes));
+        });
+
+        return deferred.promise;
+      }
+      return $timeout(function () {
+        return sha256HashSync(bytes);
       });
     },
     aesEncrypt: function (bytes, keyBytes, ivBytes) {
-      if (worker && false) { // due overhead for data transfer
+      if (naClEmbed) {
         return performTaskWorker('aes-encrypt', {
-          bytes: bytes,
-          keyBytes: keyBytes,
-          ivBytes: ivBytes
-        });
+          bytes: addPadding(convertToArrayBuffer(bytes)),
+          keyBytes: convertToArrayBuffer(keyBytes),
+          ivBytes: convertToArrayBuffer(ivBytes)
+        }, naClEmbed);
       }
       return $timeout(function () {
-        return aesEncrypt(bytes, keyBytes, ivBytes);
+        return convertToArrayBuffer(aesEncryptSync(bytes, keyBytes, ivBytes));
       });
     },
     aesDecrypt: function (encryptedBytes, keyBytes, ivBytes) {
-      if (worker && false) { // due overhead for data transfer
+      if (naClEmbed) {
         return performTaskWorker('aes-decrypt', {
-          encryptedBytes: encryptedBytes,
-          keyBytes: keyBytes,
-          ivBytes: ivBytes
-        });
+          encryptedBytes: addPadding(convertToArrayBuffer(encryptedBytes)),
+          keyBytes: convertToArrayBuffer(keyBytes),
+          ivBytes: convertToArrayBuffer(ivBytes)
+        }, naClEmbed);
       }
       return $timeout(function () {
-        return aesDecrypt(encryptedBytes, keyBytes, ivBytes);
+        return convertToArrayBuffer(aesDecryptSync(encryptedBytes, keyBytes, ivBytes));
       });
     },
     factorize: function (bytes) {
-      if (worker) {
+      bytes = convertToByteArray(bytes);
+      if (naClEmbed && bytes.length <= 8) {
+        return performTaskWorker('factorize', {bytes: bytes}, naClEmbed);
+      }
+      if (webWorker) {
         return performTaskWorker('factorize', {bytes: bytes});
       }
       return $timeout(function () {
@@ -656,7 +786,7 @@ angular.module('izhukov.utils', [])
       });
     },
     modPow: function (x, y, m) {
-      if (worker) {
+      if (webWorker) {
         return performTaskWorker('mod-pow', {
           x: x,
           y: y,
@@ -668,6 +798,133 @@ angular.module('izhukov.utils', [])
       });
     },
   };
+})
+
+.service('ExternalResourcesManager', function ($q, $http) {
+  var urlPromises = {};
+
+  function downloadImage (url) {
+    if (urlPromises[url] !== undefined) {
+      return urlPromises[url];
+    }
+
+    return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
+      .then(function (response) {
+        window.URL = window.URL || window.webkitURL;
+        return window.URL.createObjectURL(response.data);
+      });
+  }
+
+  return {
+    downloadImage: downloadImage
+  }
+})
+
+.service('IdleManager', function ($rootScope, $window, $timeout) {
+
+  $rootScope.idle = {isIDLE: false};
+
+  var toPromise, started = false;
+
+  var hidden = 'hidden';
+  var visibilityChange = 'visibilitychange';
+  if (typeof document.hidden !== 'undefined') {
+    // default
+  } else if (typeof document.mozHidden !== 'undefined') {
+    hidden = 'mozHidden';
+    visibilityChange = 'mozvisibilitychange';
+  } else if (typeof document.msHidden !== 'undefined') {
+    hidden = 'msHidden';
+    visibilityChange = 'msvisibilitychange';
+  } else if (typeof document.webkitHidden !== 'undefined') {
+    hidden = 'webkitHidden';
+    visibilityChange = 'webkitvisibilitychange';
+  }
+
+  return {
+    start: start
+  };
+
+  function start () {
+    if (!started) {
+      started = true;
+      $($window).on(visibilityChange + ' blur focus keydown mousedown touchstart', onEvent);
+
+      setTimeout(function () {
+        onEvent({type: 'blur'});
+      }, 0);
+    }
+  }
+
+  function onEvent (e) {
+    // console.log('event', e.type);
+    if (e.type == 'mousemove') {
+      var e = e.originalEvent || e;
+      if (e && e.movementX === 0 && e.movementY === 0) {
+        return;
+      }
+      $($window).off('mousemove', onEvent);
+    }
+
+    var isIDLE = e.type == 'blur' || e.type == 'timeout' ? true : false;
+    if (hidden && document[hidden]) {
+      isIDLE = true;
+    }
+
+    $timeout.cancel(toPromise);
+    if (!isIDLE) {
+      // console.log('update timeout');
+      toPromise = $timeout(function () {
+        onEvent({type: 'timeout'});
+      }, 30000);
+    }
+
+    if ($rootScope.idle.isIDLE == isIDLE) {
+      return;
+    }
+
+    // console.log('IDLE changed', isIDLE);
+    $rootScope.$apply(function () {
+      $rootScope.idle.isIDLE = isIDLE;
+    });
+
+    if (isIDLE && e.type == 'timeout') {
+      $($window).on('mousemove', onEvent);
+    }
+  }
+})
+
+.service('AppRuntimeManager', function ($window) {
+
+  return {
+    reload: function () {
+      try {
+        location.reload();
+      } catch (e) {};
+
+      if ($window.chrome && chrome.runtime && chrome.runtime.reload) {
+        chrome.runtime.reload();
+      };
+    },
+    close: function () {
+      try {
+        $window.close();
+      } catch (e) {}
+    },
+    focus: function () {
+      if (window.navigator.mozApps && document.hidden) {
+        // Get app instance and launch it to bring app to foreground
+        window.navigator.mozApps.getSelf().onsuccess = function() {
+          this.result.launch();
+        };
+      } else {
+        if (window.chrome && chrome.app && chrome.app.window) {
+          chrome.app.window.current().focus();
+        }
+        window.focus();
+      }
+    }
+  }
 })
 
 

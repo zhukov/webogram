@@ -32,7 +32,7 @@ Modal windows
 ### [jQuery](https://github.com/jquery/jquery)
 
 **Author**: jQuery Foundation and other contributors
-**License**: MIT, https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt
+**License**: MIT, https://github.com/jquery/jquery/blob/master/LICENSE.txt
 
 Dom manupulations.
 

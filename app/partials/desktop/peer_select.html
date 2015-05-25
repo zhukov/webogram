@@ -1,0 +1,75 @@
+<div class="peer_select_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()" my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title" my-i18n="conversations_modal_forward_title"></div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController" my-dialogs>
+      <div class="im_dialogs_panel">
+        <div class="im_dialogs_search">
+          <input my-focused class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+          <a class="im_dialogs_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+            <i class="icon icon-search-clear"></i>
+          </a>
+        </div>
+      </div>
+      <div my-dialogs-list modal="true" class="im_dialogs_modal_col">
+        <div class="im_dialogs_wrap nano">
+          <div class="im_dialogs_scrollable_wrap nano-content">
+            <ul class="nav nav-pills nav-stacked">
+              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: selectedPeers[dialogMessage.peerID] !== undefined}"></li>
+            </ul>
+            <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
+              <h5 my-i18n="conversation_select_modal_contacts"></h5>
+              <ul class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: selectedPeers[contact.userID] !== undefined}">
+                  <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="::contact.userID" img-class="im_dialog_photo"></div>
+                    <div class="im_dialog_message_wrap">
+                      <div class="im_dialog_peer">
+                        <span class="im_dialog_user" my-user-link="contact.userID"></span>
+                      </div>
+                      <div class="im_dialog_message">
+                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="md_modal_footer peer_select_modal_footer clearfix" ng-if="multiSelect">
+    <button class="btn btn-md btn-md-primary pull-right" ng-click="submitSelected()" my-i18n="conversations_modal_forward_submit"></button>
+
+    <div class="peer_select_modal_recipients_wrap" ng-switch="!selectedCount">
+      <span class="peer_select_modal_recipients_empty" ng-switch-when="true" my-i18n="conversations_modal_select_recipients"></span>
+      <span ng-switch-default>
+        <span class="peer_select_modal_recipients_name" my-i18n="conversations_modal_recipients"></span>
+        <span class="peer_select_modal_recipients_list" ng-switch="selectedCount" my-i18n>
+          <span ng-switch-when="1" my-i18n-format="conversation_one_selected"></span>
+          <span ng-switch-when="2" my-i18n-format="conversation_two_selected"></span>
+          <span ng-switch-default my-i18n-format="conversation_many_selected"></span>
+          <my-i18n-param name="name1"><span class="peer_select_modal_recipient" ng-bind-html="selectedPeers[selectedPeerIDs[0]][selectedPeerIDs[0] > 0 ? 'rFullName' : 'rTitle']"></span></my-i18n-param>
+          <my-i18n-param name="name2"><span class="peer_select_modal_recipient" ng-bind-html="selectedPeers[selectedPeerIDs[1]][selectedPeerIDs[1] > 0 ? 'rFullName' : 'rTitle']"></span></my-i18n-param>
+          <my-i18n-param name="count">{{selectedCount - 2}}</my-i18n-param>
+        </span>
+
+      </span>
+    </div>
+  </div>
+
+
+</div>

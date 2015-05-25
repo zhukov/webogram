@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.16
+ * @license AngularJS v1.3.2
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -233,24 +233,24 @@ angular.module('ngMessages', [])
     *   </file>
     * </example>
     */
-  .directive('ngMessages', ['$compile', '$animate', '$http', '$templateCache',
-                   function($compile,    $animate,   $http,   $templateCache) {
+  .directive('ngMessages', ['$compile', '$animate', '$templateRequest',
+                   function($compile,    $animate,   $templateRequest) {
     var ACTIVE_CLASS = 'ng-active';
     var INACTIVE_CLASS = 'ng-inactive';
 
     return {
       restrict: 'AE',
-      controller: ['$scope', function($scope) {
+      controller: function() {
         this.$renderNgMessageClasses = angular.noop;
 
         var messages = [];
         this.registerMessage = function(index, message) {
-          for(var i = 0; i < messages.length; i++) {
-            if(messages[i].type == message.type) {
-              if(index != i) {
+          for (var i = 0; i < messages.length; i++) {
+            if (messages[i].type == message.type) {
+              if (index != i) {
                 var temp = messages[index];
                 messages[index] = messages[i];
-                if(index < messages.length) {
+                if (index < messages.length) {
                   messages[i] = temp;
                 } else {
                   messages.splice(0, i); //remove the old one (and shift left)
@@ -267,7 +267,7 @@ angular.module('ngMessages', [])
 
           var found;
           angular.forEach(messages, function(message) {
-            if((!found || multiple) && truthyVal(values[message.type])) {
+            if ((!found || multiple) && truthyVal(values[message.type])) {
               message.attach();
               found = true;
             } else {
@@ -281,7 +281,7 @@ angular.module('ngMessages', [])
             return value !== null && value !== false && value;
           }
         };
-      }],
+      },
       require: 'ngMessages',
       link: function($scope, element, $attrs, ctrl) {
         ctrl.renderElementClasses = function(bool) {
@@ -300,9 +300,9 @@ angular.module('ngMessages', [])
         });
 
         var tpl = $attrs.ngMessagesInclude || $attrs.include;
-        if(tpl) {
-          $http.get(tpl, { cache: $templateCache })
-            .success(function processTemplate(html) {
+        if (tpl) {
+          $templateRequest(tpl)
+            .then(function processTemplate(html) {
               var after, container = angular.element('<div/>').html(html);
               angular.forEach(container.children(), function(elm) {
                elm = angular.element(elm);
@@ -364,10 +364,10 @@ angular.module('ngMessages', [])
 
         var commentNode = $element[0];
         var parentNode = commentNode.parentNode;
-        for(var i = 0, j = 0; i < parentNode.childNodes.length; i++) {
+        for (var i = 0, j = 0; i < parentNode.childNodes.length; i++) {
           var node = parentNode.childNodes[i];
-          if(node.nodeType == COMMENT_NODE && node.nodeValue.indexOf('ngMessage') >= 0) {
-            if(node === commentNode) {
+          if (node.nodeType == COMMENT_NODE && node.nodeValue.indexOf('ngMessage') >= 0) {
+            if (node === commentNode) {
               index = j;
               break;
             }
@@ -376,17 +376,17 @@ angular.module('ngMessages', [])
         }
 
         ngMessages.registerMessage(index, {
-          type : $attrs.ngMessage || $attrs.when,
-          attach : function() {
-            if(!element) {
+          type: $attrs.ngMessage || $attrs.when,
+          attach: function() {
+            if (!element) {
               $transclude($scope, function(clone) {
                 $animate.enter(clone, null, $element);
                 element = clone;
               });
             }
           },
-          detach : function(now) {
-            if(element) {
+          detach: function(now) {
+            if (element) {
               $animate.leave(element);
               element = null;
             }

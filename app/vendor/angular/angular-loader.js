@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.0-beta.16
+ * @license AngularJS v1.3.2
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -31,16 +31,19 @@
  * should all be static strings, not variables or general expressions.
  *
  * @param {string} module The namespace to use for the new minErr instance.
+ * @param {function} ErrorConstructor Custom error constructor to be instantiated when returning
+ *   error from returned function, for cases when a particular type of error is useful.
  * @returns {function(code:string, template:string, ...templateArgs): Error} minErr instance
  */
 
-function minErr(module) {
-  return function () {
+function minErr(module, ErrorConstructor) {
+  ErrorConstructor = ErrorConstructor || Error;
+  return function() {
     var code = arguments[0],
       prefix = '[' + (module ? module + ':' : '') + code + '] ',
       template = arguments[1],
       templateArgs = arguments,
-      stringify = function (obj) {
+      stringify = function(obj) {
         if (typeof obj === 'function') {
           return obj.toString().replace(/ \{[\s\S]*$/, '');
         } else if (typeof obj === 'undefined') {
@@ -52,7 +55,7 @@ function minErr(module) {
       },
       message, i;
 
-    message = prefix + template.replace(/\{\d+\}/g, function (match) {
+    message = prefix + template.replace(/\{\d+\}/g, function(match) {
       var index = +match.slice(1, -1), arg;
 
       if (index + 2 < templateArgs.length) {
@@ -69,14 +72,13 @@ function minErr(module) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.3.0-beta.16/' +
+    message = message + '\nhttp://errors.angularjs.org/1.3.2/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i-2) + '=' +
         encodeURIComponent(stringify(arguments[i]));
     }
-
-    return new Error(message);
+    return new ErrorConstructor(message);
   };
 }
 
@@ -198,7 +200,7 @@ function setupModuleLoader(window) {
            * @ngdoc property
            * @name angular.Module#requires
            * @module ng
-           * @returns {Array.<string>} List of module names which must be loaded before this module.
+           *
            * @description
            * Holds the list of modules which the injector will load before the current module is
            * loaded.
@@ -209,8 +211,9 @@ function setupModuleLoader(window) {
            * @ngdoc property
            * @name angular.Module#name
            * @module ng
-           * @returns {string} Name of the module.
+           *
            * @description
+           * Name of the module.
            */
           name: name,
 
@@ -301,7 +304,7 @@ function setupModuleLoader(window) {
            * })
            * ```
            *
-           * See {@link ngAnimate.$animateProvider#register $animateProvider.register()} and
+           * See {@link ng.$animateProvider#register $animateProvider.register()} and
            * {@link ngAnimate ngAnimate module} for more information.
            */
           animation: invokeLater('$animateProvider', 'register'),
@@ -351,7 +354,7 @@ function setupModuleLoader(window) {
            * @description
            * Use this method to register work which needs to be performed on module loading.
            * For more about how to configure services, see
-           * {@link providers#providers_provider-recipe Provider Recipe}.
+           * {@link providers#provider-recipe Provider Recipe}.
            */
           config: config,
 
@@ -375,7 +378,7 @@ function setupModuleLoader(window) {
           config(configFn);
         }
 
-        return  moduleInstance;
+        return moduleInstance;
 
         /**
          * @param {string} provider

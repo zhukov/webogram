@@ -1,0 +1,59 @@
+<div class="im_message_reply clearfix" ng-class="{im_message_reply_thumbed: thumb != null}" ng-switch="replyMessage.loading">
+  <div class="im_message_reply_border"></div>
+  <div class="im_message_reply_loading" ng-switch-when="true" my-i18n="im_reply_loading">
+    <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+  </div>
+  <div class="im_message_reply_thumb_wrap pull-left" ng-if="thumb != null">
+    <img
+      class="im_message_reply_thumb"
+      my-load-thumb
+      thumb="thumb"
+    />
+  </div>
+  <div class="im_message_reply_author" ng-switch-default>
+    <span my-user-link="replyMessage.from_id"></span>
+  </div>
+  <div class="im_message_reply_body" ng-switch-default>
+    <span class="im_reply_message_media" ng-if="replyMessage.media" ng-switch="replyMessage.media._">
+      <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
+      <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
+      <span ng-switch-when="messageMediaDocument" ng-switch="::replyMessage.media.document.sticker || false">
+        <span ng-switch-when="1" my-i18n="conversation_media_sticker"></span>
+        <span ng-switch-when="2">
+          <span ng-bind-html="replyMessage.media.document.stickerEmoji"></span>
+          (<my-i18n msgid="conversation_media_sticker"></my-i18n>)
+        </span>
+        <span ng-switch-default ng-bind="replyMessage.media.document.file_name"></span>
+      </span>
+      <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
+      <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
+      <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
+    </span>
+
+    <span class="im_reply_message_service" ng-if="replyMessage._ == 'messageService'" ng-switch="replyMessage.action._">
+      <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
+      <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
+      <span ng-switch-when="messageActionChatEditPhoto" my-i18n="conversation_group_photo_updated"></span>
+      <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="conversation_group_photo_removed"></span>
+
+      <span ng-switch-when="messageActionChatAddUser" ng-switch="replyMessage.from_id == replyMessage.action.user_id">
+        <span ng-switch-when="true" my-i18n="conversation_returned_to_group"></span>
+        <span ng-switch-default my-i18n="conversation_invited_user">
+          <my-i18n-param name="user"><span my-user-link="replyMessage.action.user_id"></span></my-i18n-param>
+        </span>
+      </span>
+
+      <span ng-switch-when="messageActionChatDeleteUser" ng-switch="replyMessage.from_id == replyMessage.action.user_id">
+        <span ng-switch-when="true" my-i18n="conversation_left_group"></span>
+        <span ng-switch-default my-i18n="conversation_kicked_user">
+          <my-i18n-param name="user"><span my-user-link="replyMessage.action.user_id"></span></my-i18n-param>
+        </span>
+      </span>
+
+      <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
+
+    </span>
+
+    <span class="im_reply_message_text" ng-if="replyMessage.message.length" ng-bind-html="replyMessage.richMessage"></span>
+  </div>
+</div>

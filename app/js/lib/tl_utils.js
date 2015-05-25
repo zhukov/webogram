@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.2.9 - messaging web application for MTProto
+ * Webogram v0.4.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -36,7 +36,16 @@ TLSerialization.prototype.getBuffer = function () {
   return this.getArray().buffer;
 };
 
-TLSerialization.prototype.getBytes = function () {
+TLSerialization.prototype.getBytes = function (typed) {
+  if (typed) {
+    var resultBuffer = new ArrayBuffer(this.offset);
+    var resultArray  = new Uint8Array(resultBuffer);
+
+    resultArray.set(this.byteView.subarray(0, this.offset));
+
+    return resultArray;
+  }
+
   var bytes = [];
   for (var i = 0; i < this.offset; i++) {
     bytes.push(this.byteView[i]);
@@ -113,6 +122,9 @@ TLSerialization.prototype.storeDouble = function (f) {
 TLSerialization.prototype.storeString = function (s, field) {
   this.debug && console.log('>>>', s, (field || '') + ':string');
 
+  if (s === undefined) {
+    s = '';
+  }
   var sUTF8 = unescape(encodeURIComponent(s));
 
   this.checkLength(sUTF8.length + 8);
@@ -139,11 +151,16 @@ TLSerialization.prototype.storeString = function (s, field) {
 
 
 TLSerialization.prototype.storeBytes = function (bytes, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
+  else if (bytes === undefined) {
+    bytes = [];
+  }
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':bytes');
 
-  this.checkLength(bytes.length + 8);
-
-  var len = bytes.length;
+  var len = bytes.byteLength || bytes.length;
+  this.checkLength(len + 8);
   if (len <= 253) {
     this.byteView[this.offset++] = len;
   } else {
@@ -152,9 +169,9 @@ TLSerialization.prototype.storeBytes = function (bytes, field) {
     this.byteView[this.offset++] = (len & 0xFF00) >> 8;
     this.byteView[this.offset++] = (len & 0xFF0000) >> 16;
   }
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 
   // Padding
   while (this.offset % 4) {
@@ -163,6 +180,9 @@ TLSerialization.prototype.storeBytes = function (bytes, field) {
 }
 
 TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   var len = bytes.length;
   if ((bits % 32) || (len * 8) != bits) {
     throw new Error('Invalid bits: ' + bits + ', ' + bytes.length);
@@ -171,20 +191,21 @@ TLSerialization.prototype.storeIntBytes = function (bytes, bits, field) {
   this.debug && console.log('>>>', bytesToHex(bytes), (field || '') + ':int' + bits);
   this.checkLength(len);
 
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 };
 
 TLSerialization.prototype.storeRawBytes = function (bytes, field) {
+  if (bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(bytes);
+  }
   var len = bytes.length;
 
   this.debug && console.log('>>>', bytesToHex(bytes), (field || ''));
   this.checkLength(len);
 
-  for (var i = 0; i < len; i++) {
-    this.byteView[this.offset++] = bytes[i];
-  }
+  this.byteView.set(bytes, this.offset);
+  this.offset += len;
 };
 
 
@@ -205,16 +226,29 @@ TLSerialization.prototype.storeMethod = function (methodName, params) {
 
   this.storeInt(intToUint(methodData.id), methodName + '[id]');
 
-  var self = this;
-  angular.forEach(methodData.params, function (param) {
-    self.storeObject(params[param.name], param.type, methodName + '[' + param.name + ']');
-  });
+  var param, type, i, condType, fieldBit;
+  var len = methodData.params.length;
+  for (i = 0; i < len; i++) {
+    param = methodData.params[i];
+    type = param.type;
+    if (type.indexOf('?') !== -1) {
+      condType = type.split('?');
+      fieldBit = condType[0].split('.');
+      if (!(params[fieldBit[0]] & (1 << fieldBit[1]))) {
+        continue;
+      }
+      type = condType[1];
+    }
+
+    this.storeObject(params[param.name], type, methodName + '[' + param.name + ']');
+  }
 
   return methodData.type;
 };
 
 TLSerialization.prototype.storeObject = function (obj, type, field) {
   switch (type) {
+    case '#':
     case 'int':    return this.storeInt(obj,  field);
     case 'long':   return this.storeLong(obj,  field);
     case 'int128': return this.storeIntBytes(obj, 128, field);
@@ -276,10 +310,22 @@ TLSerialization.prototype.storeObject = function (obj, type, field) {
     this.writeInt(intToUint(constructorData.id), field + '[' + predicate + '][id]');
   }
 
-  var self = this;
-  angular.forEach(constructorData.params, function (param) {
-    self.storeObject(obj[param.name], param.type, field + '[' + predicate + '][' + param.name + ']');
-  });
+  var param, type, i, condType, fieldBit;
+  var len = constructorData.params.length;
+  for (i = 0; i < len; i++) {
+    param = constructorData.params[i];
+    type = param.type;
+    if (type.indexOf('?') !== -1) {
+      condType = type.split('?');
+      fieldBit = condType[0].split('.');
+      if (!(obj[fieldBit[0]] & (1 << fieldBit[1]))) {
+        continue;
+      }
+      type = condType[1];
+    }
+
+    this.storeObject(obj[param.name], type, field + '[' + predicate + '][' + param.name + ']');
+  }
 
   return constructorData.type;
 };
@@ -391,10 +437,8 @@ TLDeserialization.prototype.fetchBytes = function (field) {
               (this.byteView[this.offset++] << 16);
   }
 
-  var bytes = [];
-  for (var i = 0; i < len; i++) {
-    bytes.push(this.byteView[this.offset++]);
-  }
+  var bytes = this.byteView.subarray(this.offset, this.offset + len);
+  this.offset += len;
 
   // Padding
   while (this.offset % 4) {
@@ -406,12 +450,18 @@ TLDeserialization.prototype.fetchBytes = function (field) {
   return bytes;
 }
 
-TLDeserialization.prototype.fetchIntBytes = function (bits, field) {
+TLDeserialization.prototype.fetchIntBytes = function (bits, typed, field) {
   if (bits % 32) {
     throw new Error('Invalid bits: ' + bits);
   }
 
   var len = bits / 8;
+  if (typed) {
+    var result = this.byteView.subarray(this.offset, this.offset + len);
+    this.offset += len;
+    return result;
+  }
+
   var bytes = [];
   for (var i = 0; i < len; i++) {
     bytes.push(this.byteView[this.offset++]);
@@ -423,9 +473,16 @@ TLDeserialization.prototype.fetchIntBytes = function (bits, field) {
 };
 
 
-TLDeserialization.prototype.fetchRawBytes = function (len, field) {
+TLDeserialization.prototype.fetchRawBytes = function (len, typed, field) {
   if (len === false) {
     len = this.readInt((field || '') + '_length');
+  }
+
+  if (typed) {
+    var bytes = new Uint8Array(len);
+    bytes.set(this.byteView.subarray(this.offset, this.offset + len));
+    this.offset += len;
+    return bytes;
   }
 
   var bytes = [];
@@ -440,11 +497,12 @@ TLDeserialization.prototype.fetchRawBytes = function (len, field) {
 
 TLDeserialization.prototype.fetchObject = function (type, field) {
   switch (type) {
+    case '#':
     case 'int':    return this.fetchInt(field);
     case 'long':   return this.fetchLong(field);
-    case 'int128': return this.fetchIntBytes(128, field);
-    case 'int256': return this.fetchIntBytes(256, field);
-    case 'int512': return this.fetchIntBytes(512, field);
+    case 'int128': return this.fetchIntBytes(128, false, field);
+    case 'int256': return this.fetchIntBytes(256, false, field);
+    case 'int512': return this.fetchIntBytes(512, false, field);
     case 'string': return this.fetchString(field);
     case 'bytes':  return this.fetchBytes(field);
     case 'double': return this.fetchDouble(field);
@@ -478,7 +536,7 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
 
   if (type.charAt(0) == '%') {
     var checkType = type.substr(1);
-    for (i = 0; i < schema.constructors.length; i++) {
+    for (var i = 0; i < schema.constructors.length; i++) {
       if (schema.constructors[i].type == checkType) {
         constructorData = schema.constructors[i];
         break
@@ -489,7 +547,7 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
     }
   }
   else if (type.charAt(0) >= 97 && type.charAt(0) <= 122) {
-    for (i = 0; i < schema.constructors.length; i++) {
+    for (var i = 0; i < schema.constructors.length; i++) {
       if (schema.constructors[i].predicate == type) {
         constructorData = schema.constructors[i];
         break
@@ -512,11 +570,16 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
       return newDeserializer.fetchObject(type, field);
     }
 
-    for (i = 0; i < schema.constructors.length; i++) {
-      if (schema.constructors[i].id == constructorCmp) {
-        constructorData = schema.constructors[i];
-        break;
+    var index = schema.constructorsIndex;
+    if (!index) {
+      schema.constructorsIndex = index = {};
+      for (var i = 0; i < schema.constructors.length; i++) {
+        index[schema.constructors[i].id] = i;
       }
+    }
+    var i = index[constructorCmp];
+    if (i) {
+      constructorData = schema.constructors[i];
     }
 
     var fallback = false;
@@ -547,9 +610,22 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
   if (this.override[overrideKey]) {
     this.override[overrideKey].apply(this, [result, field + '[' + predicate + ']']);
   } else {
-    angular.forEach(constructorData.params, function (param) {
-      result[param.name] = self.fetchObject(param.type, field + '[' + predicate + '][' + param.name + ']');
-    });
+    var i, param, type, condType, fieldBit;
+    var len = constructorData.params.length;
+    for (i = 0; i < len; i++) {
+      param = constructorData.params[i];
+      type = param.type;
+      if (type.indexOf('?') !== -1) {
+        condType = type.split('?');
+        fieldBit = condType[0].split('.');
+        if (!(result[fieldBit[0]] & (1 << fieldBit[1]))) {
+          continue;
+        }
+        type = condType[1];
+      }
+
+      result[param.name] = self.fetchObject(type, field + '[' + predicate + '][' + param.name + ']');
+    }
   }
 
   if (fallback) {

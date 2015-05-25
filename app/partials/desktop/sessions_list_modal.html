@@ -1,0 +1,60 @@
+<div class="sessions_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()" my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title" my-i18n="sessions_modal_title"></div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div my-sessions-list class="sessions_modal_col">
+
+      <div class="sessions_wrap nano" my-infinite-scroller>
+        <div class="sessions_scrollable_wrap nano-content" ng-switch="!sessionsLoaded">
+
+          <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.2" padding="true" my-i18n="sessions_modal_loading">
+            <my-i18n-param name="dots">
+              <span my-loading-dots></span>
+            </my-i18n-param>
+          </div>
+
+          <ul ng-switch-default class="sessions_modal_sessions_list nav nav-pills nav-stacked">
+
+            <li class="sessions_modal_session_wrap clearfix" ng-repeat="authorization in authorizations | limitTo: slice.limit track by authorization.hash">
+              <div class="sessions_modal_session">
+                <div class="session_meta_wrap pull-right">
+                  <div class="session_active_date" ng-switch="authorization.current">
+                    <span ng-switch-when="true" class="session_active_date_online" my-i18n="sessions_modal_current_session"></span>
+                    <span ng-switch-default ng-bind="authorization.date_active | dateOrTime"></span>
+                  </div>
+
+                  <a ng-if="!authorization.current" class="session_terminate_btn" ng-click="terminateSession(authorization.hash)" my-i18n="sessions_modal_terminate_one"></a>
+                </div>
+
+                <div class="sessions_modal_session_app" ng-bind="authorization.app_name + ' ' + authorization.app_version"></div>
+                <div class="sessions_modal_session_device" ng-bind="authorization.device_model + ', ' + authorization.platform + ' ' + authorization.system_version"></div>
+                <div class="sessions_modal_session_location" ng-bind="authorization.ip + ' - ' + authorization.country"></div>
+              </div>
+              <div ng-if="authorization.current && authorizations.length > 1">
+                <div class="sessions_modal_terminate_all_wrap">
+                  <a ng-click="terminateAllSessions()" my-i18n="sessions_modal_terminate_all"></a>
+                </div>
+
+                <hr class="sessions_modal_other_splitter"></hr>
+              </div>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

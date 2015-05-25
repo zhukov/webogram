@@ -1,0 +1,8 @@
+<div>
+  <a ng-if="historyMessage.media.user_id > 0"  class="im_message_contact_photo pull-left" my-user-photolink="historyMessage.media.user_id" img-class="im_message_contact_photo" user-override="historyMessage.media"></a>
+  <div class="im_message_contact_name" ng-switch="historyMessage.media.user_id > 0">
+    <a ng-switch-when="true" my-user-link="historyMessage.media.user_id" user-override="historyMessage.media"></a>
+    <span ng-switch-default ng-bind-html="::historyMessage.media.rFullName"></span>
+  </div>
+  <div class="im_message_contact_phone" ng-bind="::historyMessage.media.phone_number | phoneNumber"></div>
+</div>

@@ -1,0 +1,44 @@
+<div class="profile_edit_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-right">
+              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="profile.updating"></a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="profile_edit_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body">
+
+    <form class="modal_simple_form" ng-submit="updateProfile()" my-vertical-position="0.3">
+
+      <div class="form-group" ng-class="{'has-error': error.field == 'first_name'}">
+        <input class="form-control input-lg" my-focused type="text" placeholder="{{'profile_edit_first_name' | i18n}}" ng-model="profile.first_name"  name="first_name"/>
+      </div>
+      <div class="form-group" ng-class="{'has-error': error.field == 'last_name'}">
+        <input class="form-control input-lg" type="text" placeholder="{{'profile_edit_last_name' | i18n}}" ng-model="profile.last_name"/>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

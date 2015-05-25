@@ -1,0 +1,91 @@
+<div class="tg_page_head tg_head_wrap noselect clearfix">
+  <div class="tg_head_split">
+
+    <div class="tg_head_logo_wrap">
+      <div class="tg_head_logo_dropdown dropdown" dropdown>
+        <a class="tg_head_btn dropdown-toggle" dropdown-toggle>
+          <div class="icon-hamburger-wrap">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </div><i class="icon icon-tg-title"></i>
+        </a>
+
+        <ul class="dropdown-menu">
+          <li><a ng-click="openGroup()">
+            <i class="icon icon-new-group"></i><span my-i18n="im_new_group"></span>
+          </a></li>
+          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
+            <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
+          </a></li>
+          <li><a ng-click="openSettings()">
+            <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
+          </a></li>
+          <li><a ng-click="openFaq()">
+            <i class="icon icon-faq"></i><span my-i18n="head_telegram_faq"></span>
+          </a></li>
+          <li><a href="" ng-click="openChangelog()">
+            <i class="icon icon-about"></i><span my-i18n="head_about"></span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tg_head_main_wrap" ng-switch="offline">
+      <div ng-switch-when="true" class="tg_head_connecting_wrap" ng-switch="offlineConnecting">
+        <span ng-switch-default class="tg_head_connecting_text"><my-i18n msgid="head_waiting_for_network"></my-i18n><span my-loading-dots></span></span>
+        <a ng-switch-default class="tg_head_btn" ng-click="retryOnline()" my-i18n="head_retry"></a>
+        <span ng-switch-when="true" class="tg_head_connecting_text"><my-i18n msgid="head_connecting"></my-i18n><span my-loading-dots></span></span>
+      </div>
+
+      <div ng-switch-default ng-if="!!historyPeer.id" class="tg_head_main_peer_wrap">
+
+        <a class="tg_head_btn tg_head_msgs_edit_btn" my-i18n="im_edit" ng-click="toggleEdit()"></a>
+
+        <div class="tg_head_peer_dropdown tg_head_peer_media_dropdown dropdown" dropdown>
+          <a class="tg_head_btn dropdown-toggle" dropdown-toggle my-i18n="im_media"></a>
+          <ul class="dropdown-menu">
+            <li><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
+            <li><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
+            <li><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
+            <li><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
+          </ul>
+        </div>
+
+        <a class="tg_head_btn tg_head_peer_return_btn" ng-show="historyFilter.mediaType.length || historyState.skipped" ng-click="returnToRecent()" ng-switch="historyState.skipped">
+          <span ng-switch-when="true" my-i18n="im_show_recent_messages"></span>
+          <span ng-switch-default my-i18n="im_show_all_messages"></span>
+          <strong class="tg_head_peer_return_count" ng-show="historyState.missedCount > 0" ng-bind="'+' + historyState.missedCount"></strong>
+        </a>
+
+        <div class="tg_head_peer_title_wrap" ng-switch="historyFilter.mediaType">
+          <div class="tg_head_peer_media" ng-switch-when="photos">
+            <i class="icon icon-filter-photos"></i><span my-i18n="im_media_photos"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="video">
+            <i class="icon icon-filter-video"></i><span my-i18n="im_media_video"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="documents">
+            <i class="icon icon-filter-documents"></i><span my-i18n="im_media_documents"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="audio">
+            <i class="icon icon-filter-audio"></i><span my-i18n="im_media_audio"></span>
+          </div>
+
+          <a class="tg_head_btn" ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
+            <div class="tg_head_peer_info" ng-switch-when="true">
+              <span class="tg_head_peer_title" my-user-link="historyPeer.id" user-watch="true" dir="auto"></span>
+              <span class="tg_head_peer_status" my-user-status="historyPeer.id"></span>
+            </div>
+            <div class="tg_head_peer_info" ng-switch-default>
+              <span class="tg_head_peer_title" my-chat-link="-historyPeer.id" chat-watch="true" dir="auto"></span>
+              <span class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
+            </div>
+          </a>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

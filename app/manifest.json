@@ -1,7 +1,8 @@
 {
-  "name": "Telegram UNOFFICIAL",
-  "version": "0.2.9",
-  "short_name": "Webogram",
+  "name": "Telegram",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.4.6",
+  "short_name": "Telegram",
   "manifest_version": 2,
   "app": {
     "background": {
@@ -13,7 +14,8 @@
     "webview",
     {"fileSystem": ["write"]},
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "fullscreen"
   ],
   "icons": {
     "16": "img/icons/icon16.png",

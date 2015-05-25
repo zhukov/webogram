@@ -1,0 +1,112 @@
+<a class="im_dialog" ng-mousedown="dialogSelect(dialogMessage.peerString, dialogMessage.unreadCount == -1 && dialogMessage.id)">
+
+  <div class="im_dialog_meta pull-right text-right">
+    <div class="im_dialog_date" ng-bind="dialogMessage.dateText"></div>
+    <span
+      class="im_dialog_badge badge"
+      ng-show="dialogMessage.unreadCount > 0 && !dialogMessage.out"
+      ng-bind="dialogMessage.unreadCount"
+    ></span>
+    <i
+      class="im_dialog_unread"
+      ng-show="dialogMessage.out && dialogMessage.unread"
+    ></i>
+  </div>
+
+  <div class="im_dialog_photo pull-left">
+    <img
+      class="im_dialog_photo"
+      my-load-thumb
+      watch="true"
+      thumb="dialogMessage.peerPhoto"
+    />
+  </div>
+
+  <div class="im_dialog_message_wrap">
+
+    <div class="im_dialog_peer" ng-switch="::dialogMessage.peerID > 0">
+      <span class="im_dialog_user" ng-switch-when="true" my-user-link="dialogMessage.peerID"></span>
+      <span class="im_dialog_chat" ng-switch-default my-chat-link="-dialogMessage.peerID"></span>
+    </div>
+
+    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message">
+      <span class="im_dialog_message_service" my-i18n="im_conversation_group_typing">
+        <my-i18n-param name="name"><span my-user-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+      </span>
+    </div>
+
+    <div ng-show="!dialogMessage.typing" ng-switch="dialogMessage.deleted">
+      <div ng-switch-when="true" class="im_dialog_message">
+        <span class="im_dialog_message_text" my-i18n="conversation_message_deleted"></span>
+      </div>
+      <div ng-switch-default class="im_dialog_message">
+        <span ng-switch="::dialogMessage.peerID > 0">
+          <span ng-switch-when="true">
+            <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.out">
+              <span
+                class="im_dialog_chat_from"
+                my-i18n="conversation_you"
+              ></span><span ng-if="dialogMessage.message.length || dialogMessage.media">:</span>
+            </span>
+          </span>
+          <span ng-switch-default>
+            <span class="im_dialog_chat_from_wrap" ng-switch="dialogMessage.out && dialogMessage._ != 'messageService'">
+              <span
+                ng-switch-when="false"
+                class="im_dialog_chat_from"
+                my-user-link="dialogMessage.from_id" short="true" user-watch="true"
+              ></span><span
+                ng-switch-when="true"
+                class="im_dialog_chat_from"
+                my-i18n="conversation_you"
+              ></span><span ng-if="dialogMessage.message.length || dialogMessage.media">:</span>
+            </span>
+          </span>
+        </span>
+
+        <span class="im_dialog_message_media" ng-if="dialogMessage.media" ng-switch="dialogMessage.media._">
+          <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
+          <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
+          <span ng-switch-when="messageMediaDocument" ng-switch="::dialogMessage.media.document.sticker || false">
+            <span ng-switch-when="1" my-i18n="conversation_media_sticker"></span>
+            <span ng-switch-when="2">
+              <span ng-bind-html="dialogMessage.media.document.stickerEmoji"></span>
+              (<my-i18n msgid="conversation_media_sticker"></my-i18n>)
+            </span>
+            <span ng-switch-default ng-bind="dialogMessage.media.document.file_name"></span>
+          </span>
+          <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
+          <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
+          <span ng-switch-when="messageMediaVenue" my-i18n="conversation_media_location"></span>
+          <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
+        </span>
+
+        <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
+          <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
+          <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
+          <span ng-switch-when="messageActionChatEditPhoto" my-i18n="conversation_group_photo_updated"></span>
+          <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="conversation_group_photo_removed"></span>
+
+          <span ng-switch-when="messageActionChatAddUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
+            <span ng-switch-when="true" my-i18n="conversation_returned_to_group"></span>
+            <span ng-switch-default my-i18n="conversation_invited_user">
+              <my-i18n-param name="user"><span my-user-link="dialogMessage.action.user_id"></span></my-i18n-param>
+            </span>
+          </span>
+
+          <span ng-switch-when="messageActionChatDeleteUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
+            <span ng-switch-when="true" my-i18n="conversation_left_group"></span>
+            <span ng-switch-default my-i18n="conversation_kicked_user">
+              <my-i18n-param name="user"><span my-user-link="dialogMessage.action.user_id"></span></my-i18n-param>
+            </span>
+          </span>
+        </span>
+
+        <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
+
+        <span class="im_dialog_message_text" ng-if="dialogMessage.message.length" ng-bind-html="dialogMessage.richMessage"></span>
+      </div>
+    </div>
+
+  </div>
+</a>

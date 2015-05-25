@@ -1,0 +1,80 @@
+<div class="error_modal_wrap md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <h4 ng-if="error" class="md_simple_header" ng-switch="error.type">
+      <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_title"></span>
+      <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_not_found_title"></span>
+      <span ng-switch-when="PASSWORD_RECOVERY_NA" my-i18n="error_modal_recovery_na_title"></span>
+      <span ng-switch-default ng-switch="error.code">
+        <span ng-switch-when="400" my-i18n="error_modal_bad_request_title"></span>
+        <span ng-switch-when="401" my-i18n="error_modal_unauthorized_title"></span>
+        <span ng-switch-when="403" my-i18n="error_modal_forbidden_title"></span>
+        <span ng-switch-when="404" my-i18n="error_modal_not_found_title"></span>
+        <span ng-switch-when="406" my-i18n="error_modal_network_title"></span>
+        <span ng-switch-when="420" my-i18n="error_modal_flood_title"></span>
+        <span ng-switch-default my-i18n="error_modal_internal_title"></span>
+      </span>
+    </h4>
+    <h4 ng-if="!error" class="md_simple_header" ng-switch="title.length > 0">
+      <span ng-switch-when="true" ng-bind="title"></span>
+      <span ng-switch-default my-i18n="error_modal_alert"></span>
+    </h4>
+
+    <div ng-if="error" class="error_modal_description" ng-switch="error.type">
+      <span ng-switch-when="NETWORK_BAD_REQUEST" my-i18n="error_modal_network_description"></span>
+      <span ng-switch-when="NETWORK_BAD_RESPONSE" my-i18n="error_modal_network_description"></span>
+      <span ng-switch-when="FIRSTNAME_INVALID" my-i18n="error_modal_firstname_invali_description"></span>
+      <span ng-switch-when="LASTNAME_INVALID" my-i18n="error_modal_lastname_invalid_description"></span>
+      <span ng-switch-when="PHONE_NUMBER_INVALID" my-i18n="error_modal_phone_invalid_description"></span>
+      <span ng-switch-when="USERS_TOO_MUCH" my-i18n="error_modal_users_too_much_description"></span>
+      <span ng-switch-when="PHOTO_INVALID_DIMENSIONS" my-i18n="error_modal_photo_dimensions_invalid_description"></span>
+      <span ng-switch-when="VIDEO_EXT_INVALID" my-i18n="error_modal_video_file_invalid_description"></span>
+      <span ng-switch-when="PHOTO_CROP_SIZE_SMALL" my-i18n="error_modal_photo_too_small_description"></span>
+      <span ng-switch-when="USER_NOT_USING_TELEGRAM" my-i18n="error_modal_no_phone_user_description_md"></span>
+      <span ng-switch-when="USERS_NOT_USING_TELEGRAM" my-i18n="error_modal_no_phone_users_description_md"></span>
+      <span ng-switch-when="PHONEBOOK_GET_CONTACTS_FAILED" my-i18n="error_modal_phonebook_required_description"></span>
+      <span ng-switch-when="USERNAME_INVALID" my-i18n="error_modal_username_invalid_description"></span>
+      <span ng-switch-when="USERNAME_OCCUPIED" my-i18n="error_modal_username_occupied_description"></span>
+      <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_description"></span>
+      <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_username_not_found_description"></span>
+      <span ng-switch-when="USER_NOT_MUTUAL_CONTACT" my-i18n="error_modal_user_not_mutual_contact"></span>
+      <span ng-switch-when="INVITE_HASH_INVALID" my-i18n="error_modal_invite_link_invalid"></span>
+      <span ng-switch-when="INVITE_HASH_EXPIRED" my-i18n="error_modal_invite_link_invalid"></span>
+      <span ng-switch-when="INVITE_HASH_EMPTY" my-i18n="error_modal_invite_link_invalid"></span>
+
+
+
+      <div ng-switch-default ng-switch="error.code">
+        <span ng-switch-when="400" my-i18n="error_modal_bad_request_description"></span>
+        <span ng-switch-when="401" my-i18n="error_modal_unauthorized_description">
+          <my-i18n-param name="login-link"><a href="#/login">{0}</a></my-i18n-param>
+        </span>
+        <span ng-switch-when="403" my-i18n="error_modal_forbidden_description"></span>
+        <span ng-switch-when="404" my-i18n="error_modal_not_found_description"></span>
+        <span ng-switch-when="420" my-i18n="error_modal_flood_description"></span>
+        <span ng-switch-default my-i18n="error_modal_internal_description"></span>
+      </div>
+
+    </div>
+
+    <div ng-if="error" class="error_modal_details" ng-switch="error.detailsShown">
+      <textarea ng-switch-when="true" rows="3" onclick="this.select()">Method: {{error.input || 'N/A'}}
+Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}
+Stack: {{error.originalError.stack || error.stack}}</textarea>
+      <div ng-switch-default>
+        <a class="error_modal_details_link" href="" ng-click="error.detailsShown = true" my-i18n="error_modal_tech_details"></a>
+      </div>
+    </div>
+
+    <div ng-if="!error" class="error_modal_description" ng-bind="description"></div>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md btn-md-primary" ng-click="$dismiss()" my-focused>
+      <span my-i18n="modal_ok"></span>
+    </button>
+  </div>
+
+</div>
