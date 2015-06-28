@@ -1583,12 +1583,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     } else if (['image/jpeg', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
       attachType = 'photo';
       apiFileName = 'photo.' + file.type.split('/')[1];
+    } else if (file.type.substr(0, 6) == 'audio/' || ['video/ogg'].indexOf(file.type) >= 0) {
+      attachType = 'audio';
+      apiFileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
     } else if (file.type.substr(0, 6) == 'video/') {
       attachType = 'video';
       apiFileName = 'video.mp4';
-    } else if (file.type.substr(0, 6) == 'audio/') {
-      attachType = 'audio';
-      apiFileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
     } else {
       attachType = 'document';
       apiFileName = 'document.' + file.type.split('/')[1];
