@@ -3445,7 +3445,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         inputFileLocation = {
           _: 'inputDocumentFileLocation',
           id: docID,
-          access_hash: doc.access_hash
+          access_hash: doc.access_hash,
+          file_name: doc.file_name
         };
 
     if (historyDoc.downloaded === undefined) {
@@ -3463,7 +3464,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         inputFileLocation = {
           _: 'inputDocumentFileLocation',
           id: docID,
-          access_hash: doc.access_hash
+          access_hash: doc.access_hash,
+          file_name: doc.file_name
         };
 
     if (historyDoc.downloaded && !toFileEntry) {
@@ -3783,20 +3785,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function downloadStickerThumb (docID) {
     var doc = AppDocsManager.getDoc(docID);
-    return MtpApiFileManager.downloadSmallFile(doc.thumb.location).then(function (blob) {
-      if (WebpManager.isWebpSupported()) {
-        return {
-          id: doc.id,
-          src: FileManager.getUrl(blob, 'image/webp')
-        };
-      }
-
-      return FileManager.getByteArray(blob).then(function (bytes) {
-        return {
-          id: doc.id,
-          src: WebpManager.getPngUrlFromData(bytes)
-        };
-      });
+    var thumbLocation = angular.copy(doc.thumb.location);
+    thumbLocation.sticker = true;
+    return MtpApiFileManager.downloadSmallFile(thumbLocation).then(function (blob) {
+      return {
+        id: doc.id,
+        src: FileManager.getUrl(blob, 'image/webp')
+      };
     });
   }
 

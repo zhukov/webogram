@@ -1876,13 +1876,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                           .addClass(attrs.imgClass);
 
       var setSrc = function (blob) {
-        if (WebpManager.isWebpSupported()) {
-          imgElement.attr('src', FileManager.getUrl(blob, 'image/webp'));
-          return;
-        }
-        FileManager.getByteArray(blob).then(function (bytes) {
-          imgElement.attr('src', WebpManager.getPngUrlFromData(bytes));
-        });
+        imgElement.attr('src', FileManager.getUrl(blob));
       };
 
       imgElement.css({
@@ -1894,12 +1888,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         height: $scope.document.thumb.height
       });
 
-      var smallLocation = $scope.document.thumb.location;
+      var smallLocation = angular.copy($scope.document.thumb.location);
+      smallLocation.sticker = true;
+
       var fullLocation = {
         _: 'inputDocumentFileLocation',
         id: $scope.document.id,
         access_hash: $scope.document.access_hash,
-        dc_id: $scope.document.dc_id
+        dc_id: $scope.document.dc_id,
+        file_name: $scope.document.file_name,
+        sticker: true
       };
 
 

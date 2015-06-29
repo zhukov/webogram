@@ -255,7 +255,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 })
 
-.factory('MtpApiFileManager', function (MtpApiManager, $q, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage) {
+.factory('MtpApiFileManager', function (MtpApiManager, $q, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage, WebpManager) {
 
   var cachedFs = false;
   var cachedFsPromise = false;
@@ -318,17 +318,25 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         return 'video' + location.id + '.mp4';
 
       case 'inputDocumentFileLocation':
+        var fileName = (location.file_name || '').split('.', 2);
+        var ext = fileName[1] || '';
+        if (location.sticker && !WebpManager.isWebpSupported()) {
+          ext += '.png';
+        }
+        if (fileName.length) {
+          return fileName[0] + '_' + location.id + '.' + ext;
+        }
         return 'doc' + location.id;
 
       case 'inputAudioFileLocation':
         return 'audio' + location.id;
-    }
 
-    if (!location.volume_id) {
-      console.trace('Empty location', location);
+      default:
+        if (!location.volume_id) {
+          console.trace('Empty location', location);
+        }
+        return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
     }
-
-    return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
   };
 
   function getTempFileName(file) {
@@ -374,7 +382,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
     // console.log('dload small', location);
     var fileName = getFileName(location),
-        mimeType = 'image/jpeg',
+        mimeType = location.sticker ? 'image/webp' : 'image/jpeg',
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
 
     if (cachedPromise) {
@@ -403,11 +411,20 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         });
       });
 
+      var processDownloaded = function (blob) {
+        if (!location.sticker || WebpManager.isWebpSupported()) {
+          return qSync.when(blob);
+        }
+        return WebpManager.getPngBlobFromWebp(blob);
+      };
+
       return fileStorage.getFileWriter(fileName, mimeType).then(function (fileWriter) {
         return downloadPromise.then(function (result) {
-          return FileManager.write(fileWriter, result.bytes).then(function () {
-            return cachedDownloads[fileName] = fileWriter.finalize();
-          });
+          return processDownloaded.then(function (proccessedResult) {
+            return FileManager.write(fileWriter, proccessedResult.bytes).then(function () {
+              return cachedDownloads[fileName] = fileWriter.finalize();
+            });
+          })
         });
       });
     });
