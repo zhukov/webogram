@@ -160,7 +160,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function saveAuth (result) {
       MtpApiManager.setUserAuth(options.dcID, {
-        expires: result.expires,
         id: result.user.id
       });
       $timeout.cancel(callTimeout);
@@ -2690,11 +2689,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.kickFromGroup = function (userID) {
-      var user = AppUsersManager.getUser(userID);
-
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: $scope.chatID,
-        user_id: {_: 'inputUserForeign', user_id: userID, access_hash: user.access_hash || '0'}
+        user_id: AppUsersManager.getUserInput(userID)
       }).then(onChatUpdated);
     };
 

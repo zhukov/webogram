@@ -127,6 +127,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
 
+    apiUser.pFlags = {
+      self: (apiUser.flags & (1 << 10)) > 0,
+      contact: (apiUser.flags & (1 << 11)) > 0,
+      mutual: (apiUser.flags & (1 << 12)) > 0,
+      deleted: (apiUser.flags & (1 << 13)) > 0,
+      bot: (apiUser.flags & (1 << 14)) > 0,
+      botNoPrivacy: (apiUser.flags & (1 << 15)) > 0,
+      botNoGroups: (apiUser.flags & (1 << 16)) > 0
+    };
+
     var nameWords = apiUser.sortName.split(' ');
     var firstWord = nameWords.shift();
     var lastWord = nameWords.pop();
@@ -160,8 +170,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           return tsNow(true) + serverTimeOffset - 86400 * 3;
         case 'userStatusLastWeek':
           return tsNow(true) + serverTimeOffset - 86400 * 7;
-          case 'userStatusLastMonth':
-          return tsNow(true) + serverTimeOffset - 86400 * 30;
+        case 'userStatusLastMonth':
+        return tsNow(true) + serverTimeOffset - 86400 * 30;
       }
     }
 
@@ -210,11 +220,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getUserInput (id) {
     var user = getUser(id);
-    if (user._ == 'userSelf') {
+    if (user.pFlags.self) {
       return {_: 'inputUserSelf'};
     }
     return {
-      _: 'inputUserForeign',
+      _: 'inputUser',
       user_id: id,
       access_hash: user.access_hash || 0
     };
@@ -332,7 +342,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function deleteContacts (userIDs) {
     var ids = []
     angular.forEach(userIDs, function (userID) {
-      ids.push({_: 'inputUserContact', user_id: userID})
+      ids.push(getUserInput(userID))
     });
     return MtpApiManager.invokeApi('contacts.deleteContacts', {
       id: ids
@@ -750,13 +760,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           peerParams = peerString.substr(1).split('_');
 
       return isUser
-            ? {_: 'inputPeerForeign', user_id: peerParams[0], access_hash: peerParams[1]}
+            ? {_: 'inputPeerUser', user_id: peerParams[0], access_hash: peerParams[1]}
             : {_: 'inputPeerChat', chat_id: peerParams[0]};
     },
     getInputPeerByID: function (peerID) {
       if (peerID > 0) {
         return {
-          _: 'inputPeerForeign',
+          _: 'inputPeerUser',
           user_id: peerID,
           access_hash: AppUsersManager.getUser(peerID).access_hash || 0
         };
@@ -3337,8 +3347,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         case 'documentAttributeFilename':
           apiDoc.file_name = attribute.file_name;
           break;
-        case 'documentAttributeVideo':
         case 'documentAttributeAudio':
+          apiDoc.duration = attribute.duration;
+          apiDoc.audioTitle = attribute.title;
+          apiDoc.audioPerformer = attribute.performer;
+          break;
+        case 'documentAttributeVideo':
           apiDoc.duration = attribute.duration;
           break;
         case 'documentAttributeSticker':
@@ -3677,38 +3691,33 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function processRawStickers(stickers) {
     if (applied !== stickers.hash) {
       applied = stickers.hash;
-      var i, j, len1, len2, doc, setID, set;
-
-      len1 = stickers.documents.length;
-      currentStickers = [];
-      stickersetItems = {};
-      for (i = 0; i < len1; i++) {
-        doc = stickers.documents[i];
-        AppDocsManager.saveDoc(doc);
-        currentStickers.push(doc.id);
-        setID = doc.stickerSetID || 0;
-        if (stickersetItems[setID] === undefined) {
-          stickersetItems[setID] = [];
-        }
-        stickersetItems[setID].push(doc.id);
-      }
+      var i, j, len1, len2, doc, set, setItems, fullSet;
 
       currentStickersets = [];
-      if (stickersetItems[0] !== undefined) {
-        currentStickersets.push({
-          _: 'stickerSetDefault',
-          id: 0,
-          docIDs: stickersetItems[0]
-        });
-      }
+      currentStickers = [];
       len1 = stickers.sets.length;
       for (i = 0; i < len1; i++) {
         set = stickers.sets[i];
+        fullSet = stickers.fullSets[set.id];
+        len2 = fullSet.documents.length;
+        setItems = [];
+        for (j = 0; j < len2; j++) {
+          doc = fullSet.documents[j];
+          AppDocsManager.saveDoc(doc);
+          currentStickers.push(doc.id);
+          setItems.push(doc.id);
+        }
+        currentStickersets.push({
+          id: set.id,
+          title: set.title,
+          short_name: set.short_name,
+          installed: (set.flags & (1 << 0)) > 0,
+          disabled: (set.flags & (1 << 1)) > 0,
+          official: (set.flags & (1 << 2)) > 0,
+          docIDs: setItems
+        });
         installedStickersets[set.id] = true;
-        set.docIDs = stickersetItems[set.id] || [];
-        currentStickersets.push(set);
       }
-
     }
 
     return currentStickersets;
@@ -3726,17 +3735,50 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return MtpApiManager.invokeApi('messages.getAllStickers', {
         hash: stickers && stickers.hash || ''
       }).then(function (newStickers) {
-        if (newStickers._ == 'messages.allStickersNotModified') {
+        var notModified = newStickers._ == 'messages.allStickersNotModified';
+        if (notModified) {
           newStickers = stickers;
         }
         newStickers.date = tsNow(true) + 3600;
         newStickers.layer = layer;
         delete newStickers._;
-        Storage.set({all_stickers: newStickers});
 
-        return processRawStickers(newStickers);
+        if (notModified) {
+          Storage.set({all_stickers: newStickers});
+          return processRawStickers(newStickers);
+        }
+
+        return getStickerSets(newStickers).then(function () {
+          Storage.set({all_stickers: newStickers});
+          return processRawStickers(newStickers);
+        });
+
       });
     })
+  }
+
+  function getStickerSets (allStickers) {
+    var promises = [];
+    var cachedSets = allStickers.fullSets || {};
+    allStickers.fullSets = {};
+    angular.forEach(allStickers.sets, function (shortSet) {
+      var fullSet = cachedSets[shortSet.id];
+      if (fullSet && fullSet.set.hash == shortSet.hash) {
+        allStickers.fullSets[shortSet.id] = fullSet;
+      } else {
+        var promise = MtpApiManager.invokeApi('messages.getStickerSet', {
+          stickerset: {
+            _: 'inputStickerSetID',
+            id: shortSet.id,
+            access_hash: shortSet.access_hash
+          }
+        }).then(function (fullSet) {
+          allStickers.fullSets[shortSet.id] = fullSet;
+        });
+        promises.push(promise);
+      }
+    });
+    return $q.all(promises);
   }
 
   function downloadStickerThumb (docID) {
@@ -3750,10 +3792,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       return FileManager.getByteArray(blob).then(function (bytes) {
-        return {
-          id: doc.id,
-          src: WebpManager.getPngUrlFromData(bytes)
+        var deferred = $q.defer();
+        var freader = new FileReader();
+        freader.onload = function (evt) {
+          return {
+            id: doc.id,
+            src: WebpManager.getPngUrlFromData(evt.target.result)
+          };
+          // WebPDecodeAndDraw(evt.target.result)
         };
+        freader.readAsBinaryString(bytes);
+
+        return deferred.promise;
+
+
+
+        // return {
+        //   id: doc.id,
+        //   src: WebpManager.getPngUrlFromData(bytes)
+        // };
       });
     });
   }
@@ -3788,7 +3845,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       access_hash: set.access_hash
     };
     return MtpApiManager.invokeApi(method, {
-      stickerset: inputStickerset
+      stickerset: inputStickerset,
+      disabled: false
     }).then(function (result) {
       if (uninstall) {
         delete installedStickersets[set.id];

@@ -463,18 +463,30 @@ function versionCompare (ver1, ver2) {
   image.onerror = function () {
     nativeWebpSupport = false;
   };
-  image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+  // image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
 
   var canvas, context;
 
+  function convertBinaryToArray (a) {
+    var b = new Array();
+    var c = a.length;
+    for (i = 0; i < c; ++i) b.push(a.charCodeAt(i));
+    return b
+  }
+
 
   function getPngUrlFromData(data) {
+    console.log(data);
+    data = convertBinaryToArray(data);
+
+
     var start = tsNow();
 
     var decoder = new WebPDecoder();
 
     var config = decoder.WebPDecoderConfig;
-    var buffer = config.j;
+    var buffer = config.output;
+    // var buffer = config.j;
     var bitstream = config.input;
 
     if (!decoder.WebPInitDecoderConfig(config)) {
@@ -490,6 +502,7 @@ function versionCompare (ver1, ver2) {
     }
 
     var mode = decoder.WEBP_CSP_MODE;
+    buffer.colorspace = mode.MODE_RGBA;
     buffer.J = 4;
 
     try {

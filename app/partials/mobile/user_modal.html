@@ -11,13 +11,13 @@
             <span class="icon-bar"></span>
           </a>
           <ul class="dropdown-menu">
-            <li ng-if="user._ == 'userContact'">
+            <li ng-if="user.pFlags.contact">
               <a ng-click="importContact(true)" my-i18n="user_modal_edit_contact"></a>
             </li>
-            <li ng-if="user._ == 'userContact'">
+            <li ng-if="user.pFlags.contact">
               <a ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
             </li>
-            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact' &amp;&amp; user._ != 'userSelf'">
+            <li ng-if="user.phone.length > 0 &amp;&amp; !user.pFlags.contact &amp;&amp; !user.pFlags.self">
               <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
             </li>
             <li>
