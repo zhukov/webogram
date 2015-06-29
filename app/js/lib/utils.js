@@ -463,30 +463,17 @@ function versionCompare (ver1, ver2) {
   image.onerror = function () {
     nativeWebpSupport = false;
   };
-  // image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+  image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
 
   var canvas, context;
 
-  function convertBinaryToArray (a) {
-    var b = new Array();
-    var c = a.length;
-    for (i = 0; i < c; ++i) b.push(a.charCodeAt(i));
-    return b
-  }
-
-
   function getPngUrlFromData(data) {
-    console.log(data);
-    data = convertBinaryToArray(data);
-
-
     var start = tsNow();
 
     var decoder = new WebPDecoder();
 
     var config = decoder.WebPDecoderConfig;
-    var buffer = config.output;
-    // var buffer = config.j;
+    var buffer = config.j || config.output;
     var bitstream = config.input;
 
     if (!decoder.WebPInitDecoderConfig(config)) {
@@ -495,10 +482,11 @@ function versionCompare (ver1, ver2) {
     }
 
     // console.log('[webpjs] status code', decoder.VP8StatusCode);
+    var StatusCode = decoder.VP8StatusCode;
 
     status = decoder.WebPGetFeatures(data, data.length, bitstream);
-    if (status != 0) {
-      console.error('[webpjs] status error', status);
+    if (status != (StatusCode.VP8_STATUS_OK || 0)) {
+      console.error('[webpjs] status error', status, StatusCode);
     }
 
     var mode = decoder.WEBP_CSP_MODE;

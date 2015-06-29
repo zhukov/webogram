@@ -3792,25 +3792,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       return FileManager.getByteArray(blob).then(function (bytes) {
-        var deferred = $q.defer();
-        var freader = new FileReader();
-        freader.onload = function (evt) {
-          return {
-            id: doc.id,
-            src: WebpManager.getPngUrlFromData(evt.target.result)
-          };
-          // WebPDecodeAndDraw(evt.target.result)
+        return {
+          id: doc.id,
+          src: WebpManager.getPngUrlFromData(bytes)
         };
-        freader.readAsBinaryString(bytes);
-
-        return deferred.promise;
-
-
-
-        // return {
-        //   id: doc.id,
-        //   src: WebpManager.getPngUrlFromData(bytes)
-        // };
       });
     });
   }

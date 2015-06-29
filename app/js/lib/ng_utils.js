@@ -205,6 +205,19 @@ angular.module('izhukov.utils', [])
         return $q.reject(e);
       }
     }
+    else if (fileData.file) {
+      var deferred = $q.defer();
+      fileData.file(function (blob) {
+        getByteArray(blob).then(function (result) {
+          deferred.resolve(result);
+        }, function (error) {
+          deferred.reject(error);
+        })
+      }, function (error) {
+        deferred.reject(error);
+      });
+      return deferred.promise;
+    }
     return $q.when(fileData);
   }
 
