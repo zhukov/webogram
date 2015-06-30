@@ -2512,9 +2512,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.settings = {notifications: true};
 
-    MtpApiManager.invokeApi('users.getFullUser', {
-      id: AppUsersManager.getUserInput($scope.userID)
-    }).then(function (userFullResult) {
+    AppUsersManager.getUserFull($scope.userID).then(function (userFullResult) {
       if ($scope.override && $scope.override.phone_number) {
         userFullResult.user.phone = $scope.override.phone_number;
         if ($scope.override.first_name || $scope.override.last_name) {
@@ -2522,8 +2520,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           userFullResult.user.last_name = $scope.override.last_name;
         }
         AppUsersManager.saveApiUser(userFullResult.user);
-      } else {
-        AppUsersManager.saveApiUser(userFullResult.user, true);
       }
       AppPhotosManager.savePhoto(userFullResult.profile_photo);
       $scope.blocked = userFullResult.blocked;
@@ -2537,11 +2533,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             return false;
           }
           NotificationsManager.getPeerSettings($scope.userID).then(function (settings) {
-            if (newValue) {
-              settings.mute_until = 0;
-            } else {
-              settings.mute_until = 2000000000;
-            }
+            settings.mute_until = newValue ? 0 : 2000000000;
             NotificationsManager.updatePeerSettings($scope.userID, settings);
           });
         });

@@ -171,7 +171,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         case 'userStatusLastWeek':
           return tsNow(true) + serverTimeOffset - 86400 * 7;
         case 'userStatusLastMonth':
-        return tsNow(true) + serverTimeOffset - 86400 * 30;
+          return tsNow(true) + serverTimeOffset - 86400 * 30;
       }
     }
 
@@ -183,6 +183,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return id;
     }
     return users[id] || {id: id, deleted: true, num: 1};
+  }
+
+  function getUserFull (id) {
+    return MtpApiManager.invokeApi('users.getFullUser', {
+      id: getUserInput(id)
+    }).then(function (userFullResult) {
+      saveApiUser(userFullResult.user, true);
+      return userFullResult;
+    });
   }
 
   function getSelf() {
@@ -451,6 +460,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getUserString: getUserString,
     getUserSearchText: getUserSearchText,
     hasUser: hasUser,
+    getUserFull: getUserFull,
     importContact: importContact,
     importContacts: importContacts,
     deleteContacts: deleteContacts,
@@ -821,6 +831,36 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
     }
   }
+})
+
+.service('AppBotsManager', function (AppUsersManager, AppChatsManager) {
+
+  return {
+    getPeerBots: function (peerID) {
+      var peerBots = [];
+      if (peerID > 0) {
+        var user = AppUsersManager.getUser(peerID);
+        if (!user.pFlags.bot) {
+          return $q.when(peerBots);
+        }
+        return AppUsersManager.getUserFull(peerID).then(function (userFull) {
+          var botInfo = userFull.bot_info;
+          if (botInfo && botInfo._ != 'botInfoEmpty') {
+            peerBots.push(botInfo);
+          }
+          return peerBots;
+        });
+      }
+
+      return AppChatsManager.getFullChat(-peerID).then(function (chatFull) {
+        angular.forEach(chatFull.bot_info, function (botInfo) {
+          peerBots.push(botInfo);
+        });
+        return peerBots;
+      });
+
+    }
+  };
 })
 
 .service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
