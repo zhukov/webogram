@@ -3682,12 +3682,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (!started) {
       started = true;
       setTimeout(getStickers, 1000);
-      setInterval(preloadStickers, 900000);
     }
-  }
-
-  function preloadStickers() {
-    getStickers().then(getStickersImages);
   }
 
   function processRawStickers(stickers) {
