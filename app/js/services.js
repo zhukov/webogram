@@ -271,7 +271,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       templateUrl: templateUrl('user_modal'),
       controller: 'UserModalController',
       scope: scope,
-      windowClass: 'user_modal_window mobile_modal'
+      windowClass: 'user_modal_window mobile_modal',
+      backdrop: 'single'
     });
   };
 
