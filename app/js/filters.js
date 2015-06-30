@@ -157,7 +157,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
         return size + ' b';
       }
       else if (size < 1048576) {
-        return Math.round(size / 1024) + ' Kb';
+        return Math.round(size / 1024) + ' KB';
       }
       var mbs = size / 1048576;
       if (progressing) {
