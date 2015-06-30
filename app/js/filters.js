@@ -165,7 +165,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
       } else {
         mbs = (Math.round(mbs * 10) / 10);
       }
-      return mbs + ' Mb';
+      return mbs + ' MB';
     }
   }])
 
