@@ -43,7 +43,9 @@ angular.module('izhukov.utils', [])
     },
     reject: function (result) {
       return {then: function (cb, badcb) {
-        return badcb(result);
+        if (badcb) {
+          return badcb(result);
+        }
       }};
     }
   }
@@ -704,7 +706,7 @@ angular.module('izhukov.utils', [])
 
     ok = (status == 0);
     if (!ok) {
-      console.error('[webpjs] decoding failed', status);
+      console.error('[webpjs] decoding failed', status, StatusCode);
       return false;
     }
 
@@ -748,10 +750,10 @@ angular.module('izhukov.utils', [])
 
   function getPngBlobFromWebp (data) {
     if (!getCanvasFromWebp(data)) {
-      return qSync.reject({type: 'WEBP_PROCESS_FAILEd'});
+      return $q.reject({type: 'WEBP_PROCESS_FAILED'});
     }
     if (canvas.toBlob === undefined) {
-      return dataUrlToBlob(canvas.toDataURL('image/png'));
+      return qSync.when(dataUrlToBlob(canvas.toDataURL('image/png')));
     }
 
     var deferred = $q.defer();

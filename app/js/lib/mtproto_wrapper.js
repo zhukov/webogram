@@ -255,7 +255,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 })
 
-.factory('MtpApiFileManager', function (MtpApiManager, $q, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage, WebpManager) {
+.factory('MtpApiFileManager', function (MtpApiManager, $q, qSync, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage, WebpManager) {
 
   var cachedFs = false;
   var cachedFsPromise = false;
@@ -335,7 +335,11 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         if (!location.volume_id) {
           console.trace('Empty location', location);
         }
-        return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
+        var ext = 'jpg';
+        if (location.sticker) {
+          ext = WebpManager.isWebpSupported() ? 'webp' : 'png';
+        }
+        return location.volume_id + '_' + location.local_id + '_' + location.secret + '.' + ext;
     }
   };
 
@@ -411,17 +415,17 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         });
       });
 
-      var processDownloaded = function (blob) {
+      var processDownloaded = function (bytes) {
         if (!location.sticker || WebpManager.isWebpSupported()) {
-          return qSync.when(blob);
+          return qSync.when(bytes);
         }
-        return WebpManager.getPngBlobFromWebp(blob);
+        return WebpManager.getPngBlobFromWebp(bytes);
       };
 
       return fileStorage.getFileWriter(fileName, mimeType).then(function (fileWriter) {
         return downloadPromise.then(function (result) {
-          return processDownloaded.then(function (proccessedResult) {
-            return FileManager.write(fileWriter, proccessedResult.bytes).then(function () {
+          return processDownloaded(result.bytes).then(function (proccessedResult) {
+            return FileManager.write(fileWriter, proccessedResult).then(function () {
               return cachedDownloads[fileName] = fileWriter.finalize();
             });
           })
@@ -443,6 +447,16 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     options = options || {};
+
+    var processSticker = false;
+    if (location.sticker && !WebpManager.isWebpSupported()) {
+      if (options.toFileEntry || size > 524288) {
+        delete location.sticker;
+      } else {
+        processSticker = true;
+        options.mime = 'image/png';
+      }
+    }
 
     // console.log(dT(), 'Dload file', dcID, location, size);
     var fileName = getFileName(location),
@@ -488,6 +502,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }, function () {
       var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
 
+      var processDownloaded = function (bytes) {
+        if (!processSticker) {
+          return qSync.when(bytes);
+        }
+        return WebpManager.getPngBlobFromWebp(bytes);
+      };
+
       fileWriterPromise.then(function (fileWriter) {
         cacheFileWriter = fileWriter;
         var limit = 524288,
@@ -530,20 +551,22 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 if (canceled) {
                   return $q.when();
                 }
-                return FileManager.write(fileWriter, result.bytes).then(function () {
-                  writeFileDeferred.resolve();
-                }, errorHandler).then(function () {
-                  if (isFinal) {
-                    resolved = true;
-                    if (toFileEntry) {
-                      deferred.resolve();
+                return processDownloaded(result.bytes).then(function (processedResult) {
+                  return FileManager.write(fileWriter, processedResult).then(function () {
+                    writeFileDeferred.resolve();
+                  }, errorHandler).then(function () {
+                    if (isFinal) {
+                      resolved = true;
+                      if (toFileEntry) {
+                        deferred.resolve();
+                      } else {
+                        deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
+                      }
                     } else {
-                      deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
-                    }
-                  } else {
-                    deferred.notify({done: offset + limit, total: size});
-                  };
-                });
+                      deferred.notify({done: offset + limit, total: size});
+                    };
+                  });
+                })
               });
             });
           })(offset + limit >= size, offset, writeFileDeferred, writeFilePromise);
