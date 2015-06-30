@@ -473,6 +473,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       skipped: false
     };
 
+    $scope.voiceRecorder = { time : '', recording : null };
+
     $scope.openSettings = function () {
       $modal.open({
         templateUrl: templateUrl('settings_modal'),

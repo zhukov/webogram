@@ -65,7 +65,8 @@
 (function initApplication () {
   var classes = [
     Config.Navigator.osX ? 'osx' : 'non_osx',
-    Config.Navigator.retina ? 'is_2x' : 'is_1x'
+    Config.Navigator.retina ? 'is_2x' : 'is_1x',
+    Config.Navigator.ffos ? 'ffos' : 'non_ffos'
   ];
   if (Config.Modes.ios_standalone) {
     classes.push('ios_standalone');

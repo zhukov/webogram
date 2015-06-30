@@ -1449,9 +1449,12 @@ angular.module('myApp.directives', ['myApp.filters'])
       var messageFieldWrap = $('.im_send_field_wrap', element)[0];
       var dragStarted, dragTimeout;
       var submitBtn = $('.im_submit', element)[0];
+      var voiceRecord = $('.im_record', element);
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>');
       var cachedStickerImages = {};
+      var audioRecorder = null;
+      var audioStream = null;
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
@@ -1551,6 +1554,69 @@ angular.module('myApp.directives', ['myApp.filters'])
           }, 1000);
         });
       });
+
+      if (Config.Navigator.ffos) {
+
+        navigator.getUserMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+
+        voiceRecord.on('touchstart', function(e) {
+          navigator.getUserMedia({audio : true}, function(stream){
+            var start = Date.now();
+            var touch = null;
+
+            audioStream = stream;
+            audioRecorder = new MediaRecorder(stream);
+
+            var interval = setInterval(function(){
+              var time = (new Date());
+
+              time.setTime(Date.now() - start);
+
+              $scope.$apply(function(){
+                $scope.$parent.$parent.voiceRecorder.time = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes() + ':' + (time.getSeconds() < 10 ? '0' : '') + time.getSeconds();
+              });
+            }, 1000);
+
+            $scope.$apply(function(){
+              $scope.$parent.$parent.voiceRecorder.time = '00:00';
+              $scope.$parent.$parent.voiceRecorder.recording = interval;
+            });
+
+            audioRecorder.start();
+
+            console.log('recording now!');
+
+          }, function(e){
+            console.error(e);
+          });
+        });
+
+        voiceRecord.on('click', function(){
+          if (audioRecorder) {
+            audioRecorder.ondataavailable = function(e){
+              var blob = e.data;
+
+              console.log(blob);
+              $scope.draftMessage.files = [blob];
+              $scope.draftMessage.isMedia = true;
+            }
+          }
+        });
+
+        voiceRecord.on('touchend', function(){
+          if (audioRecorder) {
+            audioRecorder.stop();
+            audioStream.stop();
+
+            clearInterval($scope.$parent.$parent.voiceRecorder.recording);
+
+            $scope.$apply(function(){
+              $scope.$parent.$parent.voiceRecorder.recording = null;
+            });
+          }
+        });
+
+      }
 
       var sendOnEnter = true;
       function updateSendSettings () {

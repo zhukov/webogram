@@ -470,6 +470,7 @@
 	"im_attach_file_title": "Send file",
 	"im_emoji_btn_title": "Insert emoticon",
 	"im_submit_message": "Send",
+    "im_voice_recorder_label": "Swipe left to abort",
 
 	"login_sign_in": "Sign in",
 	"login_enter_number_description": "Please choose your country and enter your full phone number.",
