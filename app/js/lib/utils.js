@@ -365,11 +365,15 @@ function versionCompare (ver1, ver2) {
   }
 
   function cleanSearchText (text) {
+    var hasTag = text.charAt(0) == '%';
     text = text.replace(badCharsRe, ' ').replace(trimRe, '');
     text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
       return Config.LatinizeMap[ch] || ch;
     });
     text = text.toLowerCase();
+    if (hasTag) {
+      text = '%' + text;
+    }
 
     return text;
   }

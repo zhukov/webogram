@@ -638,6 +638,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var topMessages = [];
       var topToDialogs = {};
       angular.forEach(dialogsUpdated, function (dialog, peerID) {
+        if ($scope.noUsers && peerID > 0) {
+          return;
+        }
         topToDialogs[dialog.top_message] = dialog;
         topMessages.push(dialog.top_message);
       });
@@ -776,7 +779,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID);
         });
       } else {
-        promise = AppMessagesManager.getDialogs($scope.search.query, maxID);
+        var query = $scope.search.query;
+        if ($scope.noUsers) {
+          query = '%pg ' + (query || '');
+        }
+        promise = AppMessagesManager.getDialogs(query, maxID);
       }
 
       return promise.then(function (result) {
@@ -861,7 +868,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
 
-      if (!hasMore && !searchMessages && ($scope.search.query || !$scope.dialogs.length)) {
+      if (!hasMore &&
+          !searchMessages &&
+          !$scope.noUsers &&
+          ($scope.search.query || !$scope.dialogs.length)) {
         showMoreConversations();
         return;
       }
@@ -936,7 +946,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }, 500);
       }
 
-      if ($scope.search.query) {
+      if ($scope.search.query && !$scope.noMessages) {
         searchMessages = true;
         loadDialogs();
       }
@@ -2567,6 +2577,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.deleteContact = function () {
       AppUsersManager.deleteContacts([$scope.userID]).then(function () {
         $scope.user = AppUsersManager.getUser($scope.userID);
+      });
+    };
+
+    $scope.inviteToGroup = function () {
+      PeersSelectService.selectPeer({
+        confirm_type: 'INVITE_TO_GROUP',
+        noUsers: true
+      }).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        var chatID = peerID < 0 ? -peerID : 0;
+        AppMessagesManager.startBot($scope.user.id, chatID).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: peerString});
+        });
       });
     };
 

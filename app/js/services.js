@@ -795,10 +795,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getPeerSearchText: function (peerID) {
       var text;
       if (peerID > 0) {
-        text = AppUsersManager.getUserSearchText(peerID);
+        text = '%pu ' + AppUsersManager.getUserSearchText(peerID);
       } else if (peerID < 0) {
         var chat = AppChatsManager.getChat(-peerID);
-        text = chat.title || '';
+        text = '%pg ' + (chat.title || '');
       }
       return text;
     },
@@ -973,7 +973,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   NotificationsManager.start();
 
   function getDialogs (query, maxID, limit) {
-
     var curDialogStorage = dialogsStorage;
 
     if (angular.isString(query) && query.length) {
@@ -2006,6 +2005,39 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   };
 
+  function startBot (botID, chatID, startParam) {
+    if (startParam) {
+      var randomID = bigint(nextRandomInt(0xFFFFFFFF)).shiftLeft(32).add(bigint(nextRandomInt(0xFFFFFFFF))).toString();
+
+      return MtpApiManager.invokeApi('messages.startBot', {
+        bot: AppUsersManager.getUserInput(botID),
+        chat_id: chatID,
+        random_id: randomID,
+        start_param: startParam
+      });
+    }
+
+    var peerID = chatID ? -chatID : botID;
+    var inputPeer = AppPeersManager.getInputPeerByID(peerID);
+
+    if (chatID) {
+      return MtpApiManager.invokeApi('messages.addChatUser', {
+        chat_id: chatID,
+        user_id: AppUsersManager.getUserInput(botID)
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
+      }, function (error) {
+        if (error && error.type == 'USER_ALREADY_PARTICIPANT') {
+          var bot = AppUsersManager.getUser(botID);
+          sendText(-chatID, '/start@' + bot.username);
+          error.handled = true;
+        }
+      });
+    }
+
+    return sendText(botID, '/start');
+  }
+
   function cancelPendingMessage (randomID) {
     var pendingData = pendingByRandomID[randomID];
 
@@ -2909,6 +2941,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     sendFile: sendFile,
     sendOther: sendOther,
     forwardMessages: forwardMessages,
+    startBot: startBot,
     openChatInviteLink: openChatInviteLink,
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
@@ -4549,7 +4582,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
                     url = 'tg://addstickers?set=' + path[1];
                     break;
                   default:
-                    url = 'tg://resolve?domain=' + path[0];
+                    var domainQuery = path[0].split('?');
+                    url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
                 }
               }
             } else { // IP address
@@ -5409,6 +5443,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function selectPeer (options) {
     var scope = $rootScope.$new();
     scope.multiSelect = false;
+    scope.noMessages = true;
     if (options) {
       angular.extend(scope, options);
     }
@@ -5430,6 +5465,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var scope = $rootScope.$new();
     scope.multiSelect = true;
+    scope.noMessages = true;
     if (options) {
       angular.extend(scope, options);
     }
@@ -5651,7 +5687,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, AppStickersManager) {
+.service('LocationParamsService', function ($rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, PeersSelectService, AppStickersManager) {
 
   var tgAddrRegExp = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -5671,10 +5707,26 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function handleTgProtoAddr (url, inner) {
     var matches;
 
-    if (matches = url.match(/^resolve\?domain=(.+)$/)) {
+    if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup)=(.+))?$/)) {
       AppUsersManager.resolveUsername(matches[1]).then(function (userID) {
+
+        if (matches[2] == 'startgroup') {
+          PeersSelectService.selectPeer({
+            confirm_type: 'INVITE_TO_GROUP',
+            noUsers: true
+          }).then(function (peerString) {
+            var peerID = AppPeersManager.getPeerID(peerString);
+            var chatID = peerID < 0 ? -peerID : 0;
+            AppMessagesManager.startBot(userID, chatID, matches[3]).then(function () {
+              $rootScope.$broadcast('history_focus', {peerString: peerString});
+            });
+          });
+          return true;
+        }
+
         $rootScope.$broadcast('history_focus', {
-          peerString: AppUsersManager.getUserString(userID)
+          peerString: AppUsersManager.getUserString(userID),
+          startParam: matches[3]
         });
       });
       return true;
