@@ -854,7 +854,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       version: botInfo.version,
       shareText: botInfo.share_text,
       description: botInfo.description,
-      rAbout: RichTextProcessor.wrapRichText(botInfo.share_text, {noLinks: true, noLinebreaks: true}),
+      rAbout: RichTextProcessor.wrapRichText(botInfo.share_text, {noLinebreaks: true}),
       commands: commands
     };
   }
@@ -2184,10 +2184,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       message.media.progress = messagesStorage[msgID].media.progress;
     }
 
+    var fromUser = AppUsersManager.getUser(message.from_id);
+    var fromBot = fromUser.pFlags.bot && fromUser.username || false;
+    var withBot = (fromBot ||
+                    message.to_id && (
+                      message.to_id.chat_id ||
+                      message.to_id.user_id && AppUsersManager.isBot(message.to_id.user_id)
+                    )
+                  );
+
     if (message.media) {
       if (message.media.caption &&
           message.media.caption.length) {
-        message.media.rCaption = RichTextProcessor.wrapRichText(message.media.caption);
+        message.media.rCaption = RichTextProcessor.wrapRichText(message.media.caption, {
+          noCommands: !withBot,
+          fromBot: fromBot
+        });
       }
 
       switch (message.media._) {
@@ -2253,7 +2265,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
 
         case 'messageActionBotIntro':
-          message.action.rDescription = RichTextProcessor.wrapRichText(message.action.description);
+          message.action.rDescription = RichTextProcessor.wrapRichText(message.action.description, {
+            noCommands: !withBot,
+            fromBot: fromBot
+          });
           break;
       }
     }
@@ -2274,7 +2289,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (message.message && message.message.length) {
-      var options = {};
+      var options = {
+        noCommands: !withBot,
+        fromBot: fromBot
+      };
       if (!Config.Navigator.mobile) {
         options.extractUrlEmbed = true;
       }
@@ -4610,11 +4628,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
       else if (match[12]) { // Bot commands
-        if (!options.noLinks || contextExternal) {
+        if (!options.noLinks &&
+            !options.noCommands &&
+            !contextExternal) {
+          var bot = match[13] || options.fromBot;
           html.push(
             encodeEntities(match[11]),
             '<a href="',
-            encodeEntities('tg://bot_command?command=' + encodeURIComponent(match[12]) + (match[13] ? '&bot=' + encodeURIComponent(match[13]) : '')),
+            encodeEntities('tg://bot_command?command=' + encodeURIComponent(match[12]) + (bot ? '&bot=' + encodeURIComponent(bot) : '')),
             '">',
             encodeEntities('/' + match[12] + (match[13] ? '@' + match[13] : '')),
             '</a>',
@@ -5630,7 +5651,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppUsersManager, AppMessagesManager, AppStickersManager) {
+.service('LocationParamsService', function ($rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, AppStickersManager) {
 
   var tgAddrRegExp = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -5670,11 +5691,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (inner &&
-        (matches = url.match(/^bot_command\?command=(.+?)(?:&bot=(.+))?/))) {
-      $rootScope.$broadcast('bot_command', {
-        command: matches[1],
-        bot: matches[2] || ''
+        (matches = url.match(/^bot_command\?command=(.+?)(?:&bot=(.+))?$/))) {
+
+      var peerID = $rootScope.selectedPeerID;
+      var text = '/' + matches[1];
+      if (peerID < 0 && matches[2]) {
+        text += '@' + matches[2];
+      }
+      AppMessagesManager.sendText(peerID, text);
+
+      $rootScope.$broadcast('history_focus', {
+        peerString: AppPeersManager.getPeerString(peerID)
       });
+      return true;
     }
 
     return false;
