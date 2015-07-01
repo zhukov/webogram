@@ -2413,8 +2413,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           update = function () {
             var user = AppUsersManager.getUser(userID);
             element
-              .html(statusFilter(user))
-              .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline');
+              .html(statusFilter(user, attrs.botChatPrivacy))
+              .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline' || false);
           };
 
       $scope.$watch(attrs.myUserStatus, function (newUserID) {

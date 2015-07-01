@@ -2502,7 +2502,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('UserModalController', function ($scope, $location, $rootScope, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
+  .controller('UserModalController', function ($scope, $location, $rootScope, AppProfileManager, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
 
     var peerString = AppUsersManager.getUserString($scope.userID);
 
@@ -2512,19 +2512,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.settings = {notifications: true};
 
-    AppUsersManager.getUserFull($scope.userID).then(function (userFullResult) {
-      if ($scope.override && $scope.override.phone_number) {
-        userFullResult.user.phone = $scope.override.phone_number;
-        if ($scope.override.first_name || $scope.override.last_name) {
-          userFullResult.user.first_name = $scope.override.first_name;
-          userFullResult.user.last_name = $scope.override.last_name;
-        }
-        AppUsersManager.saveApiUser(userFullResult.user);
-      }
-      AppPhotosManager.savePhoto(userFullResult.profile_photo);
-      $scope.blocked = userFullResult.blocked;
+    AppProfileManager.getProfile($scope.userID, $scope.override).then(function (userFull) {
+      $scope.blocked = userFull.blocked;
+      $scope.bot_info = userFull.bot_info;
 
-      NotificationsManager.savePeerSettings($scope.userID, userFullResult.notify_settings);
       NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
         $scope.settings.notifications = !muted;
 
