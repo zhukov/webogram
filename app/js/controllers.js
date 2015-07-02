@@ -2593,6 +2593,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
+    $scope.sendCommand = function (command) {
+      AppMessagesManager.sendText($scope.userID, '/' + command);
+      $rootScope.$broadcast('history_focus', {
+        peerString: peerString
+      });
+    };
+
     $scope.toggleBlock = function (block) {
       MtpApiManager.invokeApi(block ? 'contacts.block' : 'contacts.unblock', {
         id: AppUsersManager.getUserInput($scope.userID)

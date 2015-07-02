@@ -73,6 +73,14 @@
           <a class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
         </div>
 
+        <div class="md_modal_section_link_wrap" ng-if="bot_info.commands.settings != null">
+          <a class="md_modal_section_link" ng-click="sendCommand('settings')" my-i18n="user_modal_bot_settings"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="bot_info.commands.help != null">
+          <a class="md_modal_section_link" ng-click="sendCommand('help')" my-i18n="user_modal_bot_help"></a>
+        </div>
+
         <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; !user.pFlags.contact &amp;&amp; !user.pFlags.self">
           <a class="md_modal_section_link" ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
         </div>
