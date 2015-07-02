@@ -1746,7 +1746,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -1757,6 +1757,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.draftMessage = {text: '', send: sendMessage, replyClear: replyClear};
     $scope.mentions = {};
+    $scope.commands = {};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
@@ -1831,8 +1832,52 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     }
 
+    function updateCommands () {
+      var peerID = $scope.curDialog.peerID;
+
+      AppProfileManager.getPeerBots(peerID).then(function (peerBots) {
+        if (!peerBots.length) {
+          safeReplaceObject($scope.commands, {});
+          $scope.$broadcast('mentions_update');
+          return;
+        }
+
+        var needMentions = peerBots.length > 1;
+        var commandsList = [];
+        var commandsIndex = SearchIndexManager.createIndex();
+
+        angular.forEach(peerBots, function (peerBot) {
+          var mention = '';
+          if (needMentions) {
+            var bot = AppUsersManager.getUser(peerBot.id);
+            if (bot && bot.username) {
+              mention += '@' + bot.username;
+            }
+          }
+          var botSearchText = AppUsersManager.getUserSearchText(peerBot.id);
+          angular.forEach(peerBot.commands, function (description, command) {
+            var value = '/' + command + mention;
+            commandsList.push({
+              botID: peerBot.id,
+              value: value,
+              description: description
+            });
+            SearchIndexManager.indexObject(value, botSearchText + ' ' + command + ' ' + description, commandsIndex);
+          })
+        });
+
+        console.log(commandsList, commandsIndex);
+        safeReplaceObject($scope.commands, {
+          list: commandsList,
+          index: commandsIndex
+        });
+        $scope.$broadcast('mentions_update');
+      });
+    }
+
     function resetDraft (newPeer) {
       updateMentions();
+      updateCommands();
       replyClear();
 
       if (newPeer) {

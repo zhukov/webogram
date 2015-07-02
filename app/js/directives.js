@@ -1295,7 +1295,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link,
       scope: {
         draftMessage: '=',
-        mentions: '='
+        mentions: '=',
+        commands: '='
       }
     };
 
@@ -1363,8 +1364,8 @@ angular.module('myApp.directives', ['myApp.filters'])
         getSendOnEnter: function () {
           return sendOnEnter;
         },
-        getPeerImage: function (element, peerID) {
-          if (cachedPeerPhotos[peerID]) {
+        getPeerImage: function (element, peerID, noReplace) {
+          if (cachedPeerPhotos[peerID] && !noReplace) {
             element.replaceWith(cachedPeerPhotos[peerID]);
             return;
           }
@@ -1376,6 +1377,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           });
         },
         mentions: $scope.mentions,
+        commands: $scope.commands,
         onMessageSubmit: onMessageSubmit,
         onFilePaste: onFilePaste
       });

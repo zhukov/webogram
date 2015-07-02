@@ -837,7 +837,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppProfileManager', function (AppBotsManager, AppUsersManager, AppPhotosManager, NotificationsManager, MtpApiManager, RichTextProcessor) {
+.service('AppProfileManager', function ($q, AppUsersManager, AppChatsManager, AppPhotosManager, NotificationsManager, MtpApiManager, RichTextProcessor) {
 
   var botInfos = {};
 
@@ -851,6 +851,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       commands[botCommand.command] = botCommand.description;
     })
     return botInfos[botID] = {
+      id: botID,
       version: botInfo.version,
       shareText: botInfo.share_text,
       description: botInfo.description,
@@ -884,40 +885,35 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  return {
-    getProfile: getProfile
-  }
-
-})
-
-.service('AppBotsManager', function (AppUsersManager, AppChatsManager) {
-
-  return {
-    getPeerBots: function (peerID) {
-      var peerBots = [];
-      if (peerID > 0) {
-        var user = AppUsersManager.getUser(peerID);
-        if (!user.pFlags.bot) {
-          return $q.when(peerBots);
-        }
-        return AppUsersManager.getUserFull(peerID).then(function (userFull) {
-          var botInfo = userFull.bot_info;
-          if (botInfo && botInfo._ != 'botInfoEmpty') {
-            peerBots.push(botInfo);
-          }
-          return peerBots;
-        });
+  function getPeerBots (peerID) {
+    var peerBots = [];
+    if (peerID >= 0) {
+      if (!AppUsersManager.isBot(peerID)) {
+        return $q.when(peerBots);
       }
-
-      return AppChatsManager.getFullChat(-peerID).then(function (chatFull) {
-        angular.forEach(chatFull.bot_info, function (botInfo) {
+      return getProfile(peerID).then(function (userFull) {
+        var botInfo = userFull.bot_info;
+        if (botInfo && botInfo._ != 'botInfoEmpty') {
           peerBots.push(botInfo);
-        });
+        }
         return peerBots;
       });
-
     }
-  };
+
+    return AppChatsManager.getChatFull(-peerID).then(function (chatFull) {
+      angular.forEach(chatFull.bot_info, function (botInfo) {
+        peerBots.push(saveBotInfo(botInfo));
+      });
+      return peerBots;
+    });
+
+  }
+
+  return {
+    getProfile: getProfile,
+    getPeerBots: getPeerBots
+  }
+
 })
 
 .service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {

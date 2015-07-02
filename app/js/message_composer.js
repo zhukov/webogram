@@ -487,7 +487,13 @@ function MessageComposer (textarea, options) {
 
   this.setUpInput();
 
-  this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu"></ul>').appendTo(document.body);
+  this.autoCompleteWrapEl = $('<div class="composer_dropdown_wrap"></div>').appendTo(document.body);
+  this.autoCompleteScrollerEl = $('<div class="composer_dropdown_scroller nano"></div>').appendTo(this.autoCompleteWrapEl);
+  this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu nano-content"></ul>').appendTo(this.autoCompleteScrollerEl);
+
+  if (!Config.Mobile) {
+    this.autoCompleteScrollerEl.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+  }
 
   var self = this;
   this.autoCompleteEl.on('mousedown', function (e) {
@@ -517,6 +523,7 @@ function MessageComposer (textarea, options) {
   this.getSendOnEnter = options.getSendOnEnter;
   this.onFilePaste = options.onFilePaste;
   this.mentions = options.mentions;
+  this.commands = options.commands;
   this.getPeerImage = options.getPeerImage;
 }
 
@@ -526,7 +533,7 @@ MessageComposer.prototype.setUpInput = function () {
   } else {
     this.setUpPlaintext();
   }
-  this.autoCompleteRegEx = /(?:\s|^)(:|@)([A-Za-z0-9\-\+\*_]*)$/;
+  this.autoCompleteRegEx = /(?:\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
 }
 
 MessageComposer.prototype.setUpRich = function () {
@@ -602,12 +609,18 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           currentSelected.removeClass('composer_autocomplete_option_active');
           if (nextWrap) {
             $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
+            if (!Config.Mobile) {
+              this.autoCompleteScrollerEl.nanoScroller({scrollTop: nextWrap.offsetTop})
+            }
             return cancelEvent(e);
           }
         }
 
         var childNodes = this.autoCompleteEl[0].childNodes;
         var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
+        if (!Config.Mobile) {
+          this.autoCompleteScrollerEl.nanoScroller({scrollTop: nextWrap.offsetTop})
+        }
         $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
 
         return cancelEvent(e);
@@ -735,6 +748,30 @@ MessageComposer.prototype.checkAutocomplete = function () {
         }
         if (foundUsers.length) {
           this.showMentionSuggestions(foundUsers);
+        } else {
+          this.hideSuggestions();
+        }
+      } else {
+        this.hideSuggestions();
+      }
+    }
+    else if (matches[1] == '/') { // commands
+      if (this.commands && this.commands.index) {
+        if (query.length) {
+          var foundObject = SearchIndexManager.search(query, this.commands.index);
+          var foundCommands = [];
+          var command;
+          for (var i = 0, length = this.commands.list.length; i < length; i++) {
+            command = this.commands.list[i];
+            if (foundObject[command.value]) {
+              foundCommands.push(command);
+            }
+          }
+        } else {
+          var foundCommands = this.commands.list;
+        }
+        if (foundCommands.length) {
+          this.showCommandsSuggestions(foundCommands);
         } else {
           this.hideSuggestions();
         }
@@ -1028,6 +1065,21 @@ MessageComposer.prototype.focus = function () {
   }
 }
 
+MessageComposer.prototype.renderSuggestions = function (html) {
+  this.autoCompleteEl.html(html.join(''));
+  this.autoCompleteWrapEl.show();
+
+  var self = this;
+  if (!Config.Mobile) {
+    self.autoCompleteScrollerEl.nanoScroller({scroll: 'top'});
+    setTimeout(function () {
+      self.autoCompleteScrollerEl.nanoScroller();
+    }, 100);
+  }
+
+  this.updatePosition();
+  this.autocompleteShown = true;
+}
 
 MessageComposer.prototype.showEmojiSuggestions = function (codes) {
   var html = [];
@@ -1052,10 +1104,7 @@ MessageComposer.prototype.showEmojiSuggestions = function (codes) {
     }
   }
 
-  this.autoCompleteEl.html(html.join(''));
-  this.autoCompleteEl.show();
-  this.updatePosition();
-  this.autocompleteShown = true;
+  this.renderSuggestions(html);
 }
 
 MessageComposer.prototype.showMentionSuggestions = function (users) {
@@ -1069,27 +1118,49 @@ MessageComposer.prototype.showMentionSuggestions = function (users) {
     html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_photo" data-user-id="' + user.id + '"></span><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
   }
 
-  this.autoCompleteEl.html(html.join(''));
-
+  this.renderSuggestions(html);
   var self = this;
   this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
     self.getPeerImage($(element), element.getAttribute('data-user-id'));
   });
+}
 
-  this.autoCompleteEl.show();
-  this.updatePosition();
-  this.autocompleteShown = true;
+MessageComposer.prototype.showCommandsSuggestions = function (commands) {
+  var html = [];
+  var command;
+  var count = Math.min(5, commands.length);
+  var i;
+
+  for (i = 0; i < count; i++) {
+    command = commands[i];
+    html.push('<li><a class="composer_command_option" data-command="' + command.value + '"><span class="composer_user_photo" data-user-id="' + command.botID + '"></span><span class="composer_command_value">' + command.value + '</span><span class="composer_command_desc">' + command.description + '</span></a></li>');
+  }
+
+  this.renderSuggestions(html);
+
+  var self = this;
+  var usedImages = {};
+  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
+    var noReplace = true;
+    var botID = element.getAttribute('data-user-id');
+    if (!usedImages[botID]) {
+      usedImages[botID] = true;
+      noReplace = false;
+    }
+    self.getPeerImage($(element), botID, noReplace);
+  });
 }
 
 MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
-  var height = this.autoCompleteEl.outerHeight();
+  var height = this.autoCompleteWrapEl.outerHeight();
   var width = (this.richTextareaEl || this.textareaEl).outerWidth();
-  this.autoCompleteEl.css({top: offset.top - height, left: offset.left, width: width - 2});
+  this.autoCompleteWrapEl.css({top: offset.top - height, left: offset.left, width: width - 2});
 }
 
 MessageComposer.prototype.hideSuggestions = function () {
-  this.autoCompleteEl.hide();
+  return;
+  this.autoCompleteWrapEl.hide();
   delete this.autocompleteShown;
 }
 

@@ -2413,15 +2413,33 @@ a.composer_emoji_btn {
   &.emoji-spritesheet-4 { background-size: 884px 182px; }
 }
 
-.composer_dropdown {
+
+.composer_dropdown_wrap {
+  background: #FFF;
   display: none;
-  padding: 6px 0;
+  position: absolute;
   border: 0;
 
   .box-shadow(0px 1px 1px 0px rgba(60,75,87,0.27));
 
   border-radius: 0;
   margin-top: -5px;
+  height: 180px;
+}
+.composer_dropdown_scroller {
+}
+
+.composer_dropdown {
+  position: static;
+  display: block;
+  float: none;
+  top: auto;
+  left: auto;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  z-index: auto;
 
   & > li > a {
     display: block;
@@ -2473,6 +2491,7 @@ a.composer_emoji_btn {
   img& {
     width: 32px;
     height: 32px;
+    vertical-align: top;
   }
 
   span& {
@@ -2489,6 +2508,33 @@ a.composer_emoji_btn {
   line-height: 32px;
   vertical-align: top;
 }
+
+.composer_dropdown a.composer_command_option {
+  color: #808080;
+  line-height: 32px;
+  padding-right: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.composer_dropdown .composer_command_value {
+  color: #52719a;
+  display: inline;
+}
+.composer_dropdown .composer_command_desc {
+  display: inline;
+  color: #808080;
+  padding-left: 7px;
+  font-weight: normal;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+a.composer_command_option:hover .composer_command_desc,
+a.composer_command_option.composer_autocomplete_option_active .composer_command_desc {
+  color: #698192;
+}
+
 
 .composer_stickerset_title {
   display: block;
