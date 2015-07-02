@@ -395,7 +395,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           var peerID = AppMessagesManager.getMessagePeer(message);
           var peerString = AppPeersManager.getPeerString(peerID);
 
-          $rootScope.$broadcast('history_focus',  {peerString: peerString, messageID: message.id});
+          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.id});
 
         })
       }

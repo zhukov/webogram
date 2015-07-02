@@ -398,6 +398,7 @@
 	"im_delete": "Delete {count}",
 	"im_forward": "Forward {count}",
 	"im_reply": "Reply",
+	"im_start": "Start",
 	"im_reply_loading": "Loading{dots}",
 	"im_photos_drop_text": "Drop photos here to send",
 	"im_message_field_placeholder": "Write a message...",

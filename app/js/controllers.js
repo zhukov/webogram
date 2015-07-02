@@ -407,9 +407,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
+    var pendingParams = false;
     $scope.$on('history_focus', function (e, peerData) {
       $modalStack.dismissAll();
-      if (peerData.peerString == $scope.curDialog.peer && peerData.messageID == $scope.curDialog.messageID) {
+      if (peerData.peerString == $scope.curDialog.peer &&
+          peerData.messageID == $scope.curDialog.messageID &&
+          !peerData.startParam) {
         $scope.$broadcast(peerData.messageID ? 'ui_history_change_scroll' : 'ui_history_focus');
       } else {
         var peerID = AppPeersManager.getPeerID(peerData.peerString);
@@ -420,7 +423,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             peer = '@' + username;
           }
         }
-        $location.url('/im?p=' + peer + (peerData.messageID ? '&m=' + peerData.messageID : ''));
+        if (peerData.messageID || peerData.startParam) {
+          pendingParams = {
+            messageID: peerData.messageID,
+            startParam: peerData.startParam
+          };
+        } else {
+          pendingParams = false;
+        }
+        if ($routeParams.p != peer) {
+          $location.url('/im?p=' + peer);
+        } else {
+          updateCurDialog();
+        }
       }
     });
 
@@ -568,21 +583,24 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       } else {
         lastSearch = false;
       }
+      var addParams = pendingParams || {};
+      pendingParams = false;
+      addParams.messageID = parseInt(addParams.messageID) || false;
+      addParams.startParam = addParams.startParam || false;
+
       if ($routeParams.p && $routeParams.p.charAt(0) == '@') {
         if ($scope.curDialog === undefined) {
           $scope.curDialog = {};
         }
         AppUsersManager.resolveUsername($routeParams.p.substr(1)).then(function (userID) {
-          $scope.curDialog = {
-            peer: AppUsersManager.getUserString(userID),
-            messageID: parseInt($routeParams.m) || false
-          };
+          $scope.curDialog = angular.extend({
+            peer: AppUsersManager.getUserString(userID)
+          }, addParams);
         });
       } else {
-        $scope.curDialog = {
-          peer: $routeParams.p || false,
-          messageID: parseInt($routeParams.m) || false
-        };
+        $scope.curDialog = angular.extend({
+          peer: $routeParams.p || false
+        }, addParams);
       }
     }
 
@@ -740,8 +758,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $location.url(
             '/im' +
             ($scope.curDialog.peer
-              ? '?p=' + $scope.curDialog.peer +
-                ($scope.curDialog.messageID ? '&m=' + $scope.curDialog.messageID : '')
+              ? '?p=' + $scope.curDialog.peer
               : ''
             )
           );
@@ -1016,8 +1033,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var newPeer = newDialog.peer || $scope.curDialog.peer || '';
       peerID = AppPeersManager.getPeerID(newPeer);
 
-
-      if (peerID == $scope.curDialog.peerID && oldDialog.messageID == newDialog.messageID) {
+      if (peerID == $scope.curDialog.peerID &&
+          oldDialog.messageID == newDialog.messageID &&
+          oldDialog.startParam == newDialog.startParam) {
         return false;
       }
 
@@ -1025,10 +1043,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.curDialog.peerID = peerID;
       $scope.curDialog.inputPeer = AppPeersManager.getInputPeer(newPeer);
       $scope.historyFilter.mediaType = false;
+      $scope.historyState.startBot = newDialog.startParam ? 1 : false;
 
       selectedCancel(true);
 
-      if (oldDialog.peer && oldDialog.peer == newDialog.peer && newDialog.messageID) {
+      if (oldDialog.peer &&
+          oldDialog.peer == newDialog.peer &&
+          newDialog.messageID) {
         messageFocusHistory();
       }
       else if (peerID) {
@@ -1319,9 +1340,27 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
+        if (!$scope.curDialog.messageID &&
+            !inputMediaFilter &&
+            peerID > 0 &&
+            AppUsersManager.isBot(peerID) &&
+            (!peerHistory.ids.length || peerHistory.ids.length == 1 && peerHistory.ids[0] < 0)
+            ) {
+          $scope.historyState.startBot = 2;
+        }
+
       }, function () {
         safeReplaceObject($scope.state, {error: true});
       });
+    }
+
+    $scope.botStartCancel = function () {
+      delete $scope.curDialog.startParam;
+    }
+
+    $scope.botStart = function () {
+      AppMessagesManager.startBot(peerID, 0, $scope.curDialog.startParam);
+      delete $scope.curDialog.startParam;
     }
 
     function showEmptyHistory () {

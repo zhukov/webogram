@@ -140,7 +140,7 @@
 
           <div class="im_bottom_panel_wrap">
 
-            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
+            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions &amp;&amp; !historyState.startBot">
               <div class="im_edit_panel_border"></div>
               <a class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
               <div class="im_edit_selected_actions" my-i18n>
@@ -151,7 +151,15 @@
               </div>
             </div>
 
-            <div class="im_send_panel_wrap" ng-hide="historyState.selectActions">
+            <div class="im_start_panel_wrap clearfix" ng-show="historyState.startBot">
+              <div class="im_edit_panel_border"></div>
+              <a ng-show="historyState.startBot == 1" class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="botStartCancel()" my-i18n="modal_cancel"></a>
+              <div class="im_edit_selected_actions" my-i18n>
+                <a class="btn btn-primary im_start_btn" ng-click="botStart()" my-i18n-format="im_start"></a>
+              </div>
+            </div>
+
+            <div class="im_send_panel_wrap" ng-show="!historyState.selectActions &amp;&amp; !historyState.startBot">
 
               <div class="im_send_form_wrap1">
 
