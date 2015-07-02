@@ -222,6 +222,22 @@ function setRichFocus(field, selectNode) {
   }
 }
 
+function scrollToNode (scrollable, node, scroller) {
+  var elTop = node.offsetTop - 15,
+      elHeight = node.offsetHeight + 30,
+      scrollTop = scrollable.scrollTop,
+      viewportHeight = scrollable.clientHeight;
+
+  if (scrollTop > elTop) { // we are below the node to scroll
+    scrollable.scrollTop = elTop;
+    $(scroller).nanoScroller({flash: true});
+  }
+  else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the node to scroll
+    scrollable.scrollTop = elTop + elHeight - viewportHeight;
+    $(scroller).nanoScroller({flash: true});
+  }
+}
+
 function onContentLoaded (cb) {
   setZeroTimeout(cb);
 }

@@ -563,7 +563,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           var selectedDialog = $(scrollableWrap).find('.active a.im_dialog')[0];
           if (selectedDialog) {
-            scrollToDialog(selectedDialog.parentNode);
+            scrollToNode(scrollableWrap, selectedDialog.parentNode, dialogsWrap);
           }
         });
       });
@@ -621,7 +621,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (nextDialogWrap) {
             $(nextDialogWrap).find('a').trigger('mousedown');
-            scrollToDialog(nextDialogWrap);
+            scrollToNode(scrollableWrap, nextDialogWrap, dialogsWrap);
           }
 
           return cancelEvent(e);
@@ -681,26 +681,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (nextDialogWrap) {
-            scrollToDialog(nextDialogWrap);
+            scrollToNode(scrollableWrap, nextDialogWrap, dialogsWrap);
           }
 
           return cancelEvent(e);
-        }
-      }
-
-      function scrollToDialog(dialogWrap) {
-        var elTop = dialogWrap.offsetTop - 15,
-            elHeight = dialogWrap.offsetHeight + 30,
-            scrollTop = scrollableWrap.scrollTop,
-            viewportHeight = scrollableWrap.clientHeight;
-
-        if (scrollTop > elTop) { // we are below the dialog to scroll
-          scrollableWrap.scrollTop = elTop;
-          $(dialogsWrap).nanoScroller({flash: true});
-        }
-        else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the dialog to scroll
-          scrollableWrap.scrollTop = elTop + elHeight - viewportHeight;
-          $(dialogsWrap).nanoScroller({flash: true});
         }
       }
 
@@ -1379,7 +1363,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         mentions: $scope.mentions,
         commands: $scope.commands,
         onMessageSubmit: onMessageSubmit,
-        onFilePaste: onFilePaste
+        onFilePaste: onFilePaste,
+        onCommandSend: function (command) {
+          $scope.$apply(function () {
+            $scope.draftMessage.command = command;
+          });
+        }
       });
 
       var richTextarea = composer.richTextareaEl[0];

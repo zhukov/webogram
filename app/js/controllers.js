@@ -1761,6 +1761,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
+    $scope.$watch('draftMessage.command', onCommandSelected);
 
     function sendMessage (e) {
       $scope.$broadcast('ui_message_before_send');
@@ -1866,7 +1867,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           })
         });
 
-        console.log(commandsList, commandsIndex);
         safeReplaceObject($scope.commands, {
           list: commandsList,
           index: commandsIndex
@@ -1969,6 +1969,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_message_send');
       }
       delete $scope.draftMessage.sticker;
+    }
+
+    function onCommandSelected (command) {
+      if (!command) {
+        return;
+      }
+      AppMessagesManager.sendText($scope.curDialog.peerID, command);
+      delete $scope.draftMessage.sticker;
+      delete $scope.draftMessage.text;
+      $scope.$broadcast('ui_message_send');
+      $scope.$broadcast('ui_peer_draft');
     }
   })
 
