@@ -1391,15 +1391,37 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function toggleMessage (messageID, $event) {
-      var target = $event.target,
-          shiftClick = $event.shiftKey;
-
-      if (shiftClick) {
-        $scope.$broadcast('ui_selection_clear');
+      if ($scope.historyState.startBot) {
+        return false;
       }
 
-      if (!$scope.historyState.selectActions && !$(target).hasClass('icon-select-tick') && !$(target).hasClass('im_content_message_select_area')) {
-        return false;
+      if (!$scope.historyState.selectActions) {
+        var sel = (
+          window.getSelection && window.getSelection() ||
+          document.getSelection && document.getSelection() ||
+          document.selection && document.selection.createRange().text || ''
+        ).toString().replace(/^\s+|\s+$/g, '');
+        if (sel) {
+          return false;
+        }
+
+        var target = $event.target;
+        while (target) {
+          if (target.className.indexOf('im_message_outer_wrap') != -1) {
+            break;
+          }
+          if (target.tagName == 'A' ||
+              target.onclick ||
+              target.getAttribute('ng-click')) {
+            return false;
+          }
+          target = target.parentNode;
+        }
+      }
+
+      var shiftClick = $event.shiftKey;
+      if (shiftClick) {
+        $scope.$broadcast('ui_selection_clear');
       }
 
       if ($scope.selectedMsgs[messageID]) {

@@ -911,11 +911,11 @@ a.footer_link.active:active {
 .im_message_selected .im_message_audio_duration,
 .im_message_selected .im_message_audio_size,
 .im_message_selected .im_message_fwd_date,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_date,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_document_size,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_audio_duration,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_audio_size,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_date {
+.im_history_select_active .im_message_outer_wrap:hover .im_message_date,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_document_size,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_audio_duration,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_audio_size,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_fwd_date {
   color: #899daf;
 }
 
@@ -1752,14 +1752,11 @@ a.im_panel_peer_photo .peer_initials {
   background: #f2f6fa;
 }
 
-.im_history_selectable {
-  .im_message_outer_wrap {
-    cursor: pointer;
-
-    &:hover {
-      background: #f2f6fa;
-    }
-  }
+.im_history_selectable .im_message_outer_wrap {
+  cursor: pointer;
+}
+.im_history_select_active .im_message_outer_wrap:hover {
+  background: #f2f6fa;
 }
 
 .im_message_wrap {
