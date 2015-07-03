@@ -1291,11 +1291,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getReplyKeyboard (peerID) {
+    console.log('get', historiesStorage[peerID]);
     return (historiesStorage[peerID] || {}).reply_markup || false;
   }
 
   function mergeReplyKeyboard (historyStorage, message) {
-    console.log('merge', message.reply_markup, historyStorage.reply_markup);
+    console.log('merge', message.id, message.reply_markup, historyStorage.reply_markup);
     if (!message.reply_markup &&
         !(
           historyStorage.reply_markup !== undefined &&
@@ -1321,16 +1322,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         messageReplyMarkup.fromID = message.from_id;
       }
       historyStorage.reply_markup = messageReplyMarkup;
+      console.log('set', historyStorage.reply_markup);
       return true;
     }
 
     if (lastReplyMarkup &&
         lastReplyMarkup.pFlags.one_time &&
-        !lastReplyMarkup.hidden &&
+        !lastReplyMarkup.pFlags.hidden &&
         message.out &&
         (message.id > lastReplyMarkup.id || message.id < 0) &&
         message.message) {
-      lastReplyMarkup.hidden = true;
+      lastReplyMarkup.pFlags.hidden = true;
+      console.log('set', historyStorage.reply_markup);
       return true;
     }
 
@@ -1343,6 +1346,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         id: message.id,
         flags: 0
       };
+      console.log('set', historyStorage.reply_markup);
       return true;
     }
 
@@ -2418,6 +2422,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
       })
     })
+    return replyMarkup;
   }
 
   function fetchSingleMessages () {

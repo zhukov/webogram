@@ -403,7 +403,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myReplyMarkup', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
+  .directive('myReplyMarkup', function() {
 
     return {
       templateUrl: templateUrl('reply_markup'),
@@ -415,7 +415,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
       $scope.buttonSend = function (button) {
-        console.log('buttonSend', button);
         $scope.$emit('reply_button_press', button);
       }
     }

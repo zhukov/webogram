@@ -1391,7 +1391,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (replyKeyboard) {
         replyKeyboard = AppMessagesManager.wrapReplyMarkup(replyKeyboard);
       }
+      console.log('update reply markup', peerID, replyKeyboard);
       $scope.historyState.replyKeyboard = replyKeyboard;
+      $scope.$broadcast('ui_panel_update');
     }
 
     function botStart () {
@@ -1803,7 +1805,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$on('history_reply_markup', function (e, peerData) {
       if (peerData.peerID == $scope.curDialog.peerID) {
-        console.log('update reply markup');
         updateReplyKeyboard();
       }
     });
