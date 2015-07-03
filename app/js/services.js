@@ -1150,6 +1150,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       historyStorage.history.splice(offset, historyStorage.history.length - offset);
       angular.forEach(historyResult.messages, function (message) {
+        if (mergeReplyKeyboard(historyStorage, message)) {
+          $rootScope.$broadcast('history_reply_markup', {peerID: AppPeersManager.getPeerID(inputPeer)});
+        }
         historyStorage.history.push(message.id);
       });
 
@@ -1285,6 +1288,65 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         unreadSkip: unreadSkip
       });
     });
+  }
+
+  function getReplyKeyboard (peerID) {
+    return (historiesStorage[peerID] || {}).reply_markup || false;
+  }
+
+  function mergeReplyKeyboard (historyStorage, message) {
+    console.log('merge', message.reply_markup, historyStorage.reply_markup);
+    if (!message.reply_markup &&
+        !(
+          historyStorage.reply_markup !== undefined &&
+          (message.out || message.action)
+        )
+    ) {
+      return false;
+    }
+    var messageReplyMarkup = message.reply_markup;
+    var lastReplyMarkup = historyStorage.reply_markup;
+    if (messageReplyMarkup) {
+      if (lastReplyMarkup && lastReplyMarkup.id >= message.id) {
+        return false;
+      }
+      if (messageReplyMarkup.pFlags.selective &&
+          !(message.flags & 16)) {
+        return false;
+      }
+      messageReplyMarkup = angular.extend({
+        id: message.id
+      }, messageReplyMarkup);
+      if (messageReplyMarkup._ != 'replyKeyboardHide') {
+        messageReplyMarkup.fromID = message.from_id;
+      }
+      historyStorage.reply_markup = messageReplyMarkup;
+      return true;
+    }
+
+    if (lastReplyMarkup &&
+        lastReplyMarkup.pFlags.one_time &&
+        !lastReplyMarkup.hidden &&
+        message.out &&
+        (message.id > lastReplyMarkup.id || message.id < 0) &&
+        message.message) {
+      lastReplyMarkup.hidden = true;
+      return true;
+    }
+
+    if (lastReplyMarkup &&
+        message.action &&
+        message.action._ == 'messageActionChatDeleteUser' &&
+        message.action.user_id == lastReplyMarkup.fromID) {
+      historyStorage.reply_markup = {
+        _: 'replyKeyboardHide',
+        id: message.id,
+        flags: 0
+      };
+      return true;
+    }
+
+    return false;
   }
 
   function getSearch (inputPeer, query, inputFilter, maxID, limit) {
@@ -1587,6 +1649,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
         AppPhotosManager.savePhoto(apiMessage.action.photo);
+      }
+      if (apiMessage.reply_markup) {
+        apiMessage.reply_markup.pFlags = {
+          resize: (apiMessage.reply_markup.flags & 1) > 0,
+          one_time: (apiMessage.reply_markup.flags & 2) > 0,
+          selective: (apiMessage.reply_markup.flags & 4) > 0
+        };
       }
     });
   }
@@ -2339,6 +2408,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return messagesForHistory[msgID] = message;
   }
 
+  function wrapReplyMarkup (replyMarkup) {
+    if (replyMarkup.wrapped) {
+      return replyMarkup;
+    }
+    replyMarkup.wrapped = true;
+    angular.forEach(replyMarkup.rows, function (markupRow) {
+      angular.forEach(markupRow.buttons, function (markupButton) {
+        markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
+      })
+    })
+  }
+
   function fetchSingleMessages () {
     if (fetchSingleMessagesTimeout !== false) {
       clearTimeout(fetchSingleMessagesTimeout);
@@ -2679,6 +2760,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         saveMessages([message]);
 
+        if (mergeReplyKeyboard(historyStorage, message)) {
+          $rootScope.$broadcast('history_reply_markup', {peerID: peerID})
+        }
+
         if (!message.out) {
           AppUsersManager.forceUserOnline(message.from_id);
         }
@@ -2936,6 +3021,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getHistory: getHistory,
     getSearch: getSearch,
     getMessage: getMessage,
+    getReplyKeyboard: getReplyKeyboard,
     readHistory: readHistory,
     readMessages: readMessages,
     flushHistory: flushHistory,
@@ -2950,6 +3036,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getMessagePeer: getMessagePeer,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
+    wrapReplyMarkup: wrapReplyMarkup,
     regroupWrappedHistory: regroupWrappedHistory
   }
 })

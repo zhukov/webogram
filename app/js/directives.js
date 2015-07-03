@@ -403,6 +403,25 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('myReplyMarkup', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
+
+    return {
+      templateUrl: templateUrl('reply_markup'),
+      scope: {
+        'replyMarkup': '=myReplyMarkup'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      $scope.buttonSend = function (button) {
+        console.log('buttonSend', button);
+        $scope.$emit('reply_button_press', button);
+      }
+    }
+
+  })
+
   .directive('myMessagePhoto', function(AppPhotosManager) {
     return {
       scope: {

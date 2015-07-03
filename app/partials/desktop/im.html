@@ -172,6 +172,10 @@
                       <div my-reply-message="draftMessage.replyToMessage"></div>
                     </div>
 
+                    <div class="im_send_keyboard_wrap" ng-if="historyState.replyKeyboard._ == 'replyKeyboardMarkup'">
+                      <div my-reply-markup="historyState.replyKeyboard"></div>
+                    </div>
+
                     <div class="im_send_field_wrap">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
 

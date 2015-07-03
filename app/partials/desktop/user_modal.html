@@ -38,7 +38,7 @@
 
         <div class="md_modal_section_param_wrap" ng-if="user.pFlags.bot &amp;&amp; bot_info.rAbout">
           <div class="md_modal_section_param_value">
-            <span ng-bind="bot_info.rAbout"></span>
+            <span ng-bind-html="bot_info.rAbout"></span>
           </div>
           <div class="md_modal_section_param_name" my-i18n="user_modal_about"></div>
         </div>

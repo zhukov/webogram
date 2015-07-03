@@ -1369,6 +1369,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
         updateStartBot();
+        updateReplyKeyboard();
 
       }, function () {
         safeReplaceObject($scope.state, {error: true});
@@ -1383,6 +1384,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       hasMore = false;
 
       $scope.$broadcast('ui_history_change');
+    }
+
+    function updateReplyKeyboard () {
+      var replyKeyboard = AppMessagesManager.getReplyKeyboard(peerID);
+      if (replyKeyboard) {
+        replyKeyboard = AppMessagesManager.wrapReplyMarkup(replyKeyboard);
+      }
+      $scope.historyState.replyKeyboard = replyKeyboard;
     }
 
     function botStart () {
@@ -1508,7 +1517,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-
     function selectedForward () {
       if ($scope.selectedCount > 0) {
         var selectedMessageIDs = [];
@@ -1583,6 +1591,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         loadHistory();
       }
       loadAfterSync = false;
+    });
+
+    $scope.$on('reply_button_press', function (e, button) {
+      var replyKeyboard = $scope.historyState.replyKeyboard;
+      if (!replyKeyboard) {
+        return;
+      }
+      AppMessagesManager.sendText(peerID, button.text, {
+        replyToMsgID: replyKeyboard.id
+      });
     });
 
 
@@ -1780,6 +1798,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.state.empty = true;
           updateStartBot();
         }
+      }
+    });
+
+    $scope.$on('history_reply_markup', function (e, peerData) {
+      if (peerData.peerID == $scope.curDialog.peerID) {
+        console.log('update reply markup');
+        updateReplyKeyboard();
       }
     });
 
