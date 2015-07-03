@@ -1107,7 +1107,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return AppProfileManager.getProfile(peerID).then(function (userFull) {
         var description = userFull.bot_info && userFull.bot_info.description;
         if (description) {
-          var messageID = tempID--
+          var messageID = tempID--;
           var message = {
             _: 'messageService',
             id: messageID,
@@ -2896,6 +2896,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               }
             }
             historyStorage.history = newHistory;
+            if (updatedData.count &&
+                historyStorage.count !== null &&
+                historyStorage.count > 0) {
+              historyStorage.count -= updatedData.count;
+              if (historyStorage.count < 0) {
+                historyStorage.count = 0;
+              }
+            }
 
             for (var i = 0; i < historyStorage.pending.length; i++) {
               if (!updatedData.msgs[historyStorage.pending[i]]) {
@@ -4293,8 +4301,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         syncPending.ptsAwaiting = true;
         return false;
       }
-      curState.pts = update.pts;
-      popPts = true;
+      if (update.pts > curState.pts) {
+        curState.pts = update.pts;
+        popPts = true;
+      }
     }
     else if (options.seq > 0) {
       var seq = options.seq;

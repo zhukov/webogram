@@ -973,7 +973,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, ErrorService) {
 
-    $scope.$watch('curDialog', applyDialogSelect);
+    $scope.$watchCollection('curDialog', applyDialogSelect);
 
     ApiUpdatesManager.attach();
     IdleManager.start();
@@ -993,6 +993,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedReply = selectedReply;
     $scope.selectedCancel = selectedCancel;
     $scope.selectedFlush = selectedFlush;
+    $scope.botStart = botStart;
 
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
@@ -1043,8 +1044,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.curDialog.peerID = peerID;
       $scope.curDialog.inputPeer = AppPeersManager.getInputPeer(newPeer);
       $scope.historyFilter.mediaType = false;
-      $scope.historyState.startBot = newDialog.startParam ? 1 : false;
 
+      updateStartBot();
       selectedCancel(true);
 
       if (oldDialog.peer &&
@@ -1136,6 +1137,33 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_history_change');
         safeReplaceObject($scope.state, {loaded: true, empty: !peerHistory.messages.length});
       }
+    }
+
+    function updateStartBot () {
+      if (!peerID ||
+          peerID < 0 ||
+          !AppUsersManager.isBot(peerID) ||
+          $scope.historyFilter.mediaType ||
+          $scope.curDialog.messageID) {
+        $scope.historyState.startBot = false;
+      }
+      else if (
+        $scope.state.empty || (
+          peerHistory &&
+          peerHistory.messages.length == 1 &&
+          peerHistory.messages[0].action &&
+          peerHistory.messages[0].action._ == 'messageActionBotIntro'
+        )
+      ) {
+        $scope.historyState.startBot = 2;
+      }
+      else if ($scope.curDialog.startParam) {
+        $scope.historyState.startBot = 1;
+      }
+      else {
+        $scope.historyState.startBot = false;
+      }
+      $scope.$broadcast('ui_panel_update');
     }
 
     function messageFocusHistory () {
@@ -1340,27 +1368,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
-        if (!$scope.curDialog.messageID &&
-            !inputMediaFilter &&
-            peerID > 0 &&
-            AppUsersManager.isBot(peerID) &&
-            (!peerHistory.ids.length || peerHistory.ids.length == 1 && peerHistory.ids[0] < 0)
-            ) {
-          $scope.historyState.startBot = 2;
-        }
+        updateStartBot();
 
       }, function () {
         safeReplaceObject($scope.state, {error: true});
       });
-    }
-
-    $scope.botStartCancel = function () {
-      delete $scope.curDialog.startParam;
-    }
-
-    $scope.botStart = function () {
-      AppMessagesManager.startBot(peerID, 0, $scope.curDialog.startParam);
-      delete $scope.curDialog.startParam;
     }
 
     function showEmptyHistory () {
@@ -1371,6 +1383,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       hasMore = false;
 
       $scope.$broadcast('ui_history_change');
+    }
+
+    function botStart () {
+      AppMessagesManager.startBot(peerID, 0, $scope.curDialog.startParam);
+      $scope.curDialog.startParam = false;
     }
 
     function toggleMessage (messageID, $event) {
@@ -1430,6 +1447,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function selectedCancel (noBroadcast) {
+      if (!noBroadcast &&
+          $scope.curDialog.startParam) {
+        delete $scope.curDialog.startParam;
+        return;
+      }
       $scope.selectedMsgs = {};
       $scope.selectedCount = 0;
       $scope.historyState.selectActions = false;
@@ -1692,6 +1714,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               AppMessagesManager.readHistory($scope.curDialog.inputPeer);
             });
           }
+
+          updateStartBot();
         }
       });
 
@@ -1721,6 +1745,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$broadcast('messages_regroup');
       if (historyUpdate.peerID == $scope.curDialog.peerID) {
         $scope.state.empty = !newMessages.length;
+        updateStartBot();
       }
     });
 
@@ -1731,6 +1756,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         history.ids = [];
         if (dialog.peerID == $scope.curDialog.peerID) {
           $scope.state.empty = true;
+          updateStartBot();
         }
       }
     });
