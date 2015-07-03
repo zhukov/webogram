@@ -173,31 +173,34 @@
                     </div>
 
 
-                    <div class="im_send_field_wrap" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' && !historyState.replyKeyboard.pFlags.hidden ? 'im_send_field_wkeyboard' : ''">
-                      <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
+                    <div  ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' && !historyState.replyKeyboard.pFlags.hidden ? 'im_send_field_wkeyboard' : ''">
 
-                      <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
-                      <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline" dir="auto"></textarea>
-                    </div>
+                      <div class="im_send_field_wrap">
+                        <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
 
-                    <div class="im_send_keyboard_wrap" ng-if="historyState.replyKeyboard._ == 'replyKeyboardMarkup'">
-                      <div my-reply-markup="historyState.replyKeyboard"></div>
-                    </div>
-
-                    <div class="clearfix">
-                      <button type="submit" class="btn btn-md im_submit" my-i18n="im_submit_message"></button>
-
-                      <div class="im_attach pull-left">
-                        <input type="file" class="im_attach_input" size="28" multiple="true" title="{{'im_attach_file_title' | i18n}}" />
-                        <i class="icon icon-paperclip"></i>
+                        <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
+                        <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline" dir="auto"></textarea>
                       </div>
 
-                      <div class="im_media_attach pull-left">
-                        <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
-                        <i class="icon icon-camera"></i>
+                      <div class="im_send_keyboard_wrap" ng-if="historyState.replyKeyboard._ == 'replyKeyboardMarkup'">
+                        <div my-reply-markup="historyState.replyKeyboard"></div>
                       </div>
 
-                      <div class="composer_emoji_panel"></div>
+                      <div class="im_send_buttons_wrap clearfix">
+                        <button type="submit" class="btn btn-md im_submit" my-i18n="im_submit_message"></button>
+
+                        <div class="im_attach pull-left">
+                          <input type="file" class="im_attach_input" size="28" multiple="true" title="{{'im_attach_file_title' | i18n}}" />
+                          <i class="icon icon-paperclip"></i>
+                        </div>
+
+                        <div class="im_media_attach pull-left">
+                          <input type="file" class="im_media_attach_input" size="28" multiple="true" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
+                          <i class="icon icon-camera"></i>
+                        </div>
+
+                        <div class="composer_emoji_panel"></div>
+                      </div>
 
                     </div>
                   </form>
