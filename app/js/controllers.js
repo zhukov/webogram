@@ -995,6 +995,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedFlush = selectedFlush;
     $scope.botStart = botStart;
 
+    $scope.replyKeyboardToggle = replyKeyboardToggle;
+
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
     $scope.returnToRecent = returnToRecent;
@@ -1393,7 +1395,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       console.log('update reply markup', peerID, replyKeyboard);
       $scope.historyState.replyKeyboard = replyKeyboard;
-      $scope.$broadcast('ui_panel_update');
+      $scope.$broadcast('ui_keyboard_update');
+    }
+
+    function replyKeyboardToggle () {
+      var replyKeyboard = $scope.historyState.replyKeyboard;
+      if (!replyKeyboard) {
+        return;
+      }
+      replyKeyboard.pFlags.hidden = !replyKeyboard.pFlags.hidden;
+      console.log('toggle reply markup', peerID, replyKeyboard);
+      $scope.$broadcast('ui_keyboard_update');
     }
 
     function botStart () {
@@ -1859,7 +1871,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager, RichTextProcessor) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -1875,6 +1887,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
     $scope.$watch('draftMessage.command', onCommandSelected);
+
+    $scope.enterSlash = enterSlash;
 
     function sendMessage (e) {
       $scope.$broadcast('ui_message_before_send');
@@ -1974,7 +1988,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             commandsList.push({
               botID: peerBot.id,
               value: value,
-              description: description
+              rDescription: RichTextProcessor.wrapRichText(description, {noLinks: true, noLineBreaks: true})
             });
             SearchIndexManager.indexObject(value, botSearchText + ' ' + command + ' ' + description, commandsIndex);
           })
@@ -2015,6 +2029,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function replyClear() {
       delete $scope.draftMessage.replyToMessage;
       $scope.$broadcast('ui_peer_reply');
+    }
+
+    function enterSlash (event) {
+      $scope.draftMessage.text = '/';
+      $scope.$broadcast('ui_peer_draft');
+      return cancelEvent(event);
     }
 
     function onMessageChange(newVal) {

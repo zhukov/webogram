@@ -2062,11 +2062,14 @@ a.im_message_fwd_photo {
 
 .im_send_field_wkeyboard {
   .im_send_buttons_wrap {
-    display: none;
+    // display: none;
   }
 }
 .reply_markup_wrap {
-  margin: 5px -2px 0;
+  margin: 7px -2px 0;
+}
+.reply_markup_scrollable_wrap.has-scrollbar .reply_markup_row {
+  margin-right: 6px;
 }
 .reply_markup_button_wrap {
   display: inline-block;
@@ -2075,11 +2078,12 @@ a.im_message_fwd_photo {
 .reply_markup_button {
   display: block;
   width: 100%;
-  background: #EEE;
+  background: #EFEFEF;
   margin: 0;
 }
 .reply_markup_button:hover {
-  background: #DDD;
+  // background: #DDD;
+  background: #f2f6fa;
 }
 .reply_markup_button_w1 {width: 100%;}
 .reply_markup_button_w2 {width: 50%;}
@@ -2093,6 +2097,8 @@ a.im_message_fwd_photo {
 .reply_markup_button_w10 {width: 10%;}
 .reply_markup_button_w11 {width: 9.09090909%;}
 .reply_markup_button_w12 {width: 8.33333333%;}
+
+
 
 .im_history_not_selected,
 .im_history_empty {
@@ -2360,14 +2366,11 @@ img.img_fullsize {
 .composer_emoji_tooltip_tab_stickers {background-position: -9px -361px; }
 .composer_emoji_tooltip_tab_stickers.active {background-position: -9px -333px; }
 
-.nano.composer_emoji_tooltip_content_wrap {
+.composer_emoji_tooltip_scrollable_container {
   height: 174px;
   position: relative;
 }
 .composer_emoji_tooltip_content {
-  /*position: relative;*/
-  /*overflow: hidden;
-  overflow-y: auto;*/
   padding-right: 8px;
   outline: 0!important;
 }
@@ -2568,6 +2571,9 @@ a.composer_command_option:hover .composer_command_desc,
 a.composer_command_option.composer_autocomplete_option_active .composer_command_desc {
   color: #698192;
 }
+.composer_command_desc .emoji {
+  vertical-align: text-bottom;
+}
 
 
 .composer_stickerset_title {
@@ -2653,6 +2659,57 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
     margin: -3px 0 0 0;
   }
 }
+
+.composer_command_btn {
+  display: block;
+  position: absolute;
+  right: 23px;
+  top: 2px;
+  cursor: pointer;
+  padding: 0;
+
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+}
+.icon-slash {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  vertical-align: top;
+  opacity: 0.8;
+
+  .image-2x('../img/icons/General.png', 40px, 778px);
+  background-position: -9px -335px;
+}
+
+.composer_keyboard_btn {
+  display: block;
+  position: absolute;
+  right: 28px;
+  top: -2px;
+  cursor: pointer;
+  padding: 0;
+
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+}
+.icon-hide-keyboard {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #BBB;
+  border-top: 0;
+  border-left: 0;
+  .transform(rotate(45deg));
+  vertical-align: top;
+  opacity: 0.8;
+}
+.composer_keyboard_btn:hover .icon-hide-keyboard {
+  opacity: 1.0;
+}
+
 
 .error_modal_window {
   .modal-dialog {

@@ -1055,7 +1055,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         });
 
         if (historiesStorage[peerID] === undefined) {
-          historiesStorage[peerID] = {count: null, history: [dialog.top_message], pending: []}
+          var historyStorage = {count: null, history: [dialog.top_message], pending: []};
+          historiesStorage[peerID] = historyStorage;
+          var message = getMessage(dialog.top_message);
+          if (mergeReplyKeyboard(historyStorage, message)) {
+            $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
+          }
         }
 
         NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
@@ -1291,7 +1296,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getReplyKeyboard (peerID) {
-    console.log('get', historiesStorage[peerID]);
     return (historiesStorage[peerID] || {}).reply_markup || false;
   }
 
@@ -2413,6 +2417,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function wrapReplyMarkup (replyMarkup) {
+    if (!replyMarkup ||
+        replyMarkup._ == 'replyKeyboardHide') {
+      return false;
+    }
     if (replyMarkup.wrapped) {
       return replyMarkup;
     }
@@ -2422,6 +2430,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
       })
     })
+
+    if (nextRandomInt(1)) {
+      replyMarkup.rows = replyMarkup.rows.slice(0, 2);
+    }
     return replyMarkup;
   }
 

@@ -414,9 +414,26 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
+      var scrollable = $('.reply_markup', element);
+      var scroller = new Scroller(scrollable, {
+        classPrefix: 'reply_markup',
+        maxHeight: 170
+      });
       $scope.buttonSend = function (button) {
         $scope.$emit('reply_button_press', button);
       }
+
+      $scope.$on('ui_keyboard_update', function () {
+        onContentLoaded(function () {
+          scroller.updateHeight();
+          scroller.scrollTo(0);
+          $scope.$emit('ui_panel_update');
+        })
+      });
+      onContentLoaded(function () {
+        scroller.updateHeight();
+        $scope.$emit('ui_panel_update');
+      });
     }
 
   })
@@ -1474,6 +1491,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!Config.Navigator.touch) {
           composer.focus();
         }
+        onContentLoaded(function () {
+          composer.checkAutocomplete(true);
+        });
         if (emojiTooltip) {
           emojiTooltip.hide();
         }
