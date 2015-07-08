@@ -7,8 +7,12 @@
 			<span ng-switch-when="true" class="audio_player_duration" ng-bind="mediaPlayer.player.currentTime | durationRemains : (mediaPlayer.player.duration || audio.duration)"></span>
 			<span ng-switch-default class="audio_player_duration" ng-bind="mediaPlayer.player.duration || audio.duration | duration"></span>
 		</div>
-		<a ng-click="download()" class="audio_player_title" ng-switch="::audio.file_name.length > 0">
-			<span ng-switch-when="true" ng-bind="::audio.file_name"></span>
+		<a ng-click="download()" class="audio_player_title" ng-switch="::audio.audioTitle.length > 0 ? 2 : (audio.file_name.length > 0 ? 1 : 0)">
+			<span ng-switch-when="2">
+				<strong ng-bind="::audio.audioPerformer"></strong>
+				<span ng-bind="::(audio.audioPerformer ? '– ' : '') + audio.audioTitle"></span>
+			</span>
+			<span ng-switch-when="1" ng-bind="::audio.file_name"></span>
 			<span ng-switch-default my-i18n="message_attach_audio_message"></span>
 		</a>
 		<i ng-if="::message.media_unread || false" ng-show="message.media_unread" class="icon icon-audio-unread"></i>
