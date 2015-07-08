@@ -858,7 +858,7 @@ a.tg_radio_on:hover i.icon-radio {
   vertical-align: top;
   margin-right: 18px;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -5px -10px;
 }
 .icon-tg-title {
@@ -899,7 +899,7 @@ a.tg_radio_on:hover i.icon-radio {
   margin-left: 12px;
   margin-top: -1px;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -18px -50px;
 }
 
@@ -1617,7 +1617,7 @@ div.im_message_video_thumb {
   height: 18px;
   margin: 12px 15px;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -14px -509px;
 
   .im_message_file_button_dl_doc & {
@@ -1638,7 +1638,7 @@ div.im_message_video_thumb {
     height: 16px;
     margin: 13px 16px;
 
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: -13px -611px;
   }
 
@@ -2056,34 +2056,40 @@ a.im_message_fwd_photo {
 }
 .im_message_mymention {
   background: #fff8cc;
-  /*border-bottom: 1px solid #ffe222;*/
-  /*font-weight: bold;*/
 }
 
-.im_send_field_wkeyboard {
-  .im_send_buttons_wrap {
-    // display: none;
-  }
-}
 .reply_markup_wrap {
-  margin: 7px -2px 0;
+  margin: 15px -2px 0;
 }
-.reply_markup_scrollable_wrap.has-scrollbar .reply_markup_row {
-  margin-right: 6px;
+.reply_markup_row {
+  padding: 4px 0;
+  &:first-child {
+    padding-top: 0;
+  }
+  &:last-child {
+    padding-bottom: 0;
+  }
+  .reply_markup_scrollable_wrap.active-scrollbar & {
+    margin-right: 6px;
+  }
 }
 .reply_markup_button_wrap {
   display: inline-block;
-  padding: 2px 2px;
+  padding: 0 4px;
 }
 .reply_markup_button {
+  color: #3a6d99;
   display: block;
   width: 100%;
-  background: #EFEFEF;
+  background: #f0f4f7;
+  height: 30px;
+  font-size: 13px;
   margin: 0;
+  padding: 6px 6px;
 }
 .reply_markup_button:hover {
-  // background: #DDD;
-  background: #f2f6fa;
+  color: #3a6d99;
+  background: #dfe8f0;
 }
 .reply_markup_button_w1 {width: 100%;}
 .reply_markup_button_w2 {width: 50%;}
@@ -2262,7 +2268,7 @@ img.img_fullsize {
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -9px -335px;
 }
 
@@ -2679,35 +2685,38 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -9px -335px;
 }
 
 .composer_keyboard_btn {
   display: block;
   position: absolute;
-  right: 28px;
-  top: -2px;
+  right: 37px;
+  top: 4px;
   cursor: pointer;
   padding: 0;
 
-  width: 22px;
-  height: 22px;
-  margin-top: 1px;
+  width: 20px;
+  height: 20px;
 }
-.icon-hide-keyboard {
+.icon-keyboard {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #BBB;
-  border-top: 0;
-  border-left: 0;
-  .transform(rotate(45deg));
+  width: 20px;
+  height: 20px;
   vertical-align: top;
   opacity: 0.8;
-}
-.composer_keyboard_btn:hover .icon-hide-keyboard {
-  opacity: 1.0;
+
+  .image-2x('../img/icons/General.png', 40px, 798px);
+  background-position: -10px -730px;
+
+  .composer_keyboard_btn.active & {
+    background-position: -10px -760px;
+  }
+
+  .composer_keyboard_btn:hover & {
+    opacity: 1.0;
+  }
 }
 
 

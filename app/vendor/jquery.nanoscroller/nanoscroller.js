@@ -743,6 +743,7 @@
       } else {
         this.slider.show();
       }
+      this.$el.toggleClass('active-scrollbar', this.isActive);
       this.pane.css({
         opacity: (this.options.alwaysVisible ? 1 : ''),
         visibility: (this.options.alwaysVisible ? 'visible' : '')

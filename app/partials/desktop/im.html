@@ -175,7 +175,7 @@
                     <div class="im_send_field_wrap">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
                       <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && !draftMessage.text.length" ng-mousedown="enterSlash($event)"><i class="icon icon-slash"></i></a>
-                      <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-click="replyKeyboardToggle()"><i class="icon" ng-class="historyState.replyKeyboard.pFlags.hidden ? 'icon-keyboard' : 'icon-hide-keyboard'"></i></a>
+                      <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
                       <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline" dir="auto"></textarea>

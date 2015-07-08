@@ -205,7 +205,7 @@
     display: inline-block;
     vertical-align: top;
     margin-top: 3px;
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: -10px -111px;
 
   }
@@ -217,7 +217,7 @@
     margin-top: 2px;
     display: inline-block;
     vertical-align: top;
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: -11px -135px;
   }
 
@@ -228,7 +228,7 @@
     margin-top: 1px;
     display: inline-block;
     vertical-align: top;
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: -10px -163px;
   }
 
@@ -239,7 +239,7 @@
     margin-top: 1px;
     display: inline-block;
     vertical-align: top;
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: -10px -637px;
   }
 
@@ -250,7 +250,7 @@
     display: inline-block;
     vertical-align: top;
 
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: -10px -193px;
   }
 }
@@ -378,7 +378,7 @@
     margin-right: 12px;
     vertical-align: top;
 
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 798px);
     background-position: 0 0;
   }
 
@@ -707,8 +707,8 @@ a.footer_link.active:active {
     background: rgba(137, 160, 179, 0.1);
     right: 2px;
     width: 3px;
-    top: 2px;
-    bottom: 2px;
+    top: 0;
+    bottom: 0;
     .rounded(1px);
 
     & > .nano-slider {
@@ -852,7 +852,7 @@ a.footer_link.active:active {
   }
 
   &_edit_panel_wrap {
-    padding: 0px 0 43px;
+    padding: 0px 0 41px;
     margin: 0 24px 0 12px;
   }
 
@@ -1096,7 +1096,7 @@ a.footer_link.active:active {
 
 .im_send_panel_wrap {
   max-width: 554px;
-  padding-bottom: 23px;
+  padding-bottom: 21px;
 }
 .im_send_form {
   max-width: 382px;
@@ -1190,7 +1190,7 @@ a.im_panel_peer_photo .peer_initials {
   opacity: 0.8;
   margin: 0;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -11px -455px;
 }
 
@@ -1239,7 +1239,7 @@ a.im_panel_peer_photo .peer_initials {
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 798px);
   background-position: -10px -399px;
 }
 
@@ -1411,107 +1411,6 @@ a.im_panel_peer_photo .peer_initials {
     padding-top: 5px;
     padding-bottom: 5px;
   }
-}
-
-.im_send_field_wkeyboard {
-
-  a {
-    &.im_panel_peer_photo,
-    &.im_panel_own_photo {
-      display: none;
-    }
-  }
-
-  .im_send_field_wrap {
-    margin-bottom: 0;
-  }
-
-  .composer {
-    &_rich_textarea,
-    &_textarea {
-      min-height: 25px;
-      padding-right: 25px;
-    }
-
-    &_emoji_insert_btn {
-      top: 0;
-      right: 0px;
-      margin-top: -3px;
-    }
-
-    &_emoji_panel {
-      display: none;
-    }
-  }
-
-  .im_submit {
-    position: absolute;
-    top: 0;
-    left: 100%;
-    margin: 0 0 0 15px;
-  }
-  .im_media_attach {
-    position: absolute;
-    top: -6px;
-    left: -43px;
-    width: 19px;
-    height: 24px;
-  }
-
-  .icon-camera {
-    display: inline-block;
-    width: 19px;
-    height: 23px;
-    vertical-align: text-top;
-    opacity: 0.8;
-    margin-top: -1px;
-
-    .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
-    background-position: -12px -68px;
-  }
-
-  .im_media_attach {
-    &:hover .icon-camera,
-    &:active .icon-camera {
-      background-position: -12px -100px;
-      opacity: 1;
-    }
-  }
-
-  .im_attach {
-    display: none;
-    position: absolute;
-    top: 0;
-    right: 100%;
-    margin: 0;
-    margin-right: 45px;
-    margin-top: 1px;
-  }
-
-  .icon-emoji {
-    display: inline-block;
-    width: 22px;
-    height: 22px;
-    vertical-align: text-top;
-    opacity: 1;
-    margin: 0;
-
-    .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
-    background-position: -10px -771px;
-  }
-
-  .composer_emoji_insert_btn:active .icon-emoji,
-  .is_1x .composer_emoji_insert_btn:active .icon-emoji,
-  .composer_emoji_insert_btn.composer_emoji_insert_btn_on .icon-emoji,
-  .is_1x .composer_emoji_insert_btn.composer_emoji_insert_btn_on .icon-emoji {
-    background-position: -10px -803px;
-  }
-
-  .im_send_dropbox_wrap {
-    display: none;
-  }
-
-
 }
 
 /* Peer modals */

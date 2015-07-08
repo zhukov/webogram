@@ -1398,7 +1398,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$broadcast('ui_keyboard_update');
     }
 
-    function replyKeyboardToggle () {
+    function replyKeyboardToggle ($event) {
       var replyKeyboard = $scope.historyState.replyKeyboard;
       if (!replyKeyboard) {
         return;
@@ -1406,6 +1406,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       replyKeyboard.pFlags.hidden = !replyKeyboard.pFlags.hidden;
       console.log('toggle reply markup', peerID, replyKeyboard);
       $scope.$broadcast('ui_keyboard_update');
+
+      return cancelEvent($event);
     }
 
     function botStart () {
@@ -2031,10 +2033,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$broadcast('ui_peer_reply');
     }
 
-    function enterSlash (event) {
+    function enterSlash ($event) {
       $scope.draftMessage.text = '/';
       $scope.$broadcast('ui_peer_draft');
-      return cancelEvent(event);
+      return cancelEvent($event);
     }
 
     function onMessageChange(newVal) {
