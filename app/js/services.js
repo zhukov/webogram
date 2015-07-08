@@ -2424,6 +2424,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (replyMarkup.wrapped) {
       return replyMarkup;
     }
+    var count = replyMarkup.rows && replyMarkup.rows.length || 0;
+    if (count > 0 && count <= 4 && !replyMarkup.pFlags.resize) {
+      replyMarkup.splitCount = count;
+    }
     replyMarkup.wrapped = true;
     angular.forEach(replyMarkup.rows, function (markupRow) {
       angular.forEach(markupRow.buttons, function (markupButton) {
