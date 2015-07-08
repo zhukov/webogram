@@ -110,14 +110,14 @@ messageActionChatDeleteUser#b2ae9b0c user_id:int = MessageAction;
 dialog#c1dd804a peer:Peer top_message:int read_inbox_max_id:int unread_count:int notify_settings:PeerNotifySettings = Dialog;
 
 photoEmpty#2331b22d id:long = Photo;
-photo#690cc3a6 id:long access_hash:long sizes:Vector<PhotoSize> = Photo;
+photo#cded42fe id:long access_hash:long date:int sizes:Vector<PhotoSize> = Photo;
 
 photoSizeEmpty#e17e23c type:string = PhotoSize;
 photoSize#77bfb61b type:string location:FileLocation w:int h:int size:int = PhotoSize;
 photoCachedSize#e9a734fa type:string location:FileLocation w:int h:int bytes:bytes = PhotoSize;
 
 videoEmpty#c10658a8 id:long = Video;
-video#954cc1cc id:long access_hash:long duration:int mime_type:string size:int thumb:PhotoSize dc_id:int w:int h:int = Video;
+video#f72887d3 id:long access_hash:long date:int duration:int mime_type:string size:int thumb:PhotoSize dc_id:int w:int h:int = Video;
 
 geoPointEmpty#1117dd5f = GeoPoint;
 geoPoint#2049d70c long:double lat:double = GeoPoint;
@@ -327,10 +327,10 @@ inputAudioFileLocation#74dc404d id:long access_hash:long = InputFileLocation;
 inputDocumentFileLocation#4e45abe9 id:long access_hash:long = InputFileLocation;
 
 audioEmpty#586988d8 id:long = Audio;
-audio#a5e11d9c id:long access_hash:long duration:int mime_type:string size:int dc_id:int = Audio;
+audio#f9e35055 id:long access_hash:long date:int duration:int mime_type:string size:int dc_id:int = Audio;
 
 documentEmpty#36f8c871 id:long = Document;
-document#902db111 id:long access_hash:long mime_type:string size:int thumb:PhotoSize dc_id:int attributes:Vector<DocumentAttribute> = Document;
+document#f9a39f4f id:long access_hash:long date:int mime_type:string size:int thumb:PhotoSize dc_id:int attributes:Vector<DocumentAttribute> = Document;
 
 help.support#17c6b5f6 phone_number:string user:User = help.Support;
 
@@ -483,6 +483,9 @@ replyKeyboardMarkup#3502758c flags:# rows:Vector<KeyboardButtonRow> = ReplyMarku
 inputPeerUser#7b8e7de6 user_id:int access_hash:long = InputPeer;
 
 inputUser#d8292816 user_id:int access_hash:long = InputUser;
+
+help.appChangelogEmpty#af7e0394 = help.AppChangelog;
+help.appChangelog#4668e6bd text:string = help.AppChangelog;
 
 ---functions---
 
@@ -647,3 +650,5 @@ messages.getStickerSet#2619a90e stickerset:InputStickerSet = messages.StickerSet
 messages.installStickerSet#7b30c3a6 stickerset:InputStickerSet disabled:Bool = Bool;
 messages.uninstallStickerSet#f96e55de stickerset:InputStickerSet = Bool;
 messages.startBot#1b3e0ffc bot:InputUser chat_id:int random_id:long start_param:string = Updates;
+
+help.getAppChangelog#5bab7fb2 device_model:string system_version:string app_version:string lang_code:string = help.AppChangelog;

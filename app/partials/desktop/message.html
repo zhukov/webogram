@@ -24,9 +24,7 @@
     </div>
 
     <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.out ? 'im_message_out' : 'im_message_in', historyMessage.fwd_from_id > 0 ? 'im_message_fwd' : '']">
-      <div class="im_content_message_select_area">
-        <i class="icon icon-select-tick"></i>
-      </div>
+      <i class="icon icon-select-tick"></i>
 
       <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
         <i class="icon-message-status" tooltip="Try again"></i>

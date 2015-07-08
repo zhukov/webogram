@@ -339,6 +339,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
+      if (attrs.watch) {
+        $scope.$watch('replyMessage', function () {
+          checkMessage($scope, element);
+        });
+      } else {
+        checkMessage($scope, element);
+      }
+    }
+
+    function checkMessage ($scope, element) {
       var message = $scope.replyMessage;
       if (!message.loading) {
         updateMessage($scope, element);

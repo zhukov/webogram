@@ -82,7 +82,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
     var dateFilter = $filter('date');
 
     return function (timestamp, extended) {
-
+      if (!timestamp) {
+        return '';
+      }
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks),
           format = 'shortTime';

@@ -49,6 +49,21 @@ function cancelEvent (event) {
   return false;
 }
 
+function getScrollWidth() {
+  var outer = $('<div>').css({
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    overflow: 'scroll',
+    top: -9999
+  }).appendTo($(document.body));
+
+  var scrollbarWidth = outer[0].offsetWidth - outer[0].clientWidth;
+  outer.remove();
+
+  return scrollbarWidth;
+};
+
 function onCtrlEnter (textarea, cb) {
   $(textarea).on('keydown', function (e) {
     if (e.keyCode == 13 && (e.ctrlKey || e.metaKey)) {

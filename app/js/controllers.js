@@ -995,8 +995,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedFlush = selectedFlush;
     $scope.botStart = botStart;
 
-    $scope.replyKeyboardToggle = replyKeyboardToggle;
-
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
     $scope.returnToRecent = returnToRecent;
@@ -1371,7 +1369,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
         updateStartBot();
-        updateReplyKeyboard();
 
       }, function () {
         safeReplaceObject($scope.state, {error: true});
@@ -1386,28 +1383,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       hasMore = false;
 
       $scope.$broadcast('ui_history_change');
-    }
-
-    function updateReplyKeyboard () {
-      var replyKeyboard = AppMessagesManager.getReplyKeyboard(peerID);
-      if (replyKeyboard) {
-        replyKeyboard = AppMessagesManager.wrapReplyMarkup(replyKeyboard);
-      }
-      console.log('update reply markup', peerID, replyKeyboard);
-      $scope.historyState.replyKeyboard = replyKeyboard;
-      $scope.$broadcast('ui_keyboard_update');
-    }
-
-    function replyKeyboardToggle ($event) {
-      var replyKeyboard = $scope.historyState.replyKeyboard;
-      if (!replyKeyboard) {
-        return;
-      }
-      replyKeyboard.pFlags.hidden = !replyKeyboard.pFlags.hidden;
-      console.log('toggle reply markup', peerID, replyKeyboard);
-      $scope.$broadcast('ui_keyboard_update');
-
-      return cancelEvent($event);
     }
 
     function botStart () {
@@ -1615,7 +1590,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       AppMessagesManager.sendText(peerID, button.text, {
-        replyToMsgID: replyKeyboard.id
+        replyToMsgID: peerID < 0 && replyKeyboard.id
       });
     });
 
@@ -1678,6 +1653,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             AppMessagesManager.readHistory($scope.curDialog.inputPeer);
           });
         }
+
+        updateStartBot();
       }
     });
 
@@ -1817,12 +1794,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     });
 
-    $scope.$on('history_reply_markup', function (e, peerData) {
-      if (peerData.peerID == $scope.curDialog.peerID) {
-        updateReplyKeyboard();
-      }
-    });
-
     $scope.$on('history_focus', function (e, peerData) {
       if ($scope.historyFilter.mediaType) {
         toggleMedia();
@@ -1882,7 +1853,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
     $scope.$on('ui_typing', onTyping);
 
-    $scope.draftMessage = {text: '', send: sendMessage, replyClear: replyClear};
+    $scope.draftMessage = {
+      text: '',
+      send: sendMessage,
+      replyClear: replyClear
+    };
     $scope.mentions = {};
     $scope.commands = {};
     $scope.$watch('draftMessage.text', onMessageChange);
@@ -1890,7 +1865,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$watch('draftMessage.sticker', onStickerSelected);
     $scope.$watch('draftMessage.command', onCommandSelected);
 
-    $scope.enterSlash = enterSlash;
+    $scope.$on('history_reply_markup', function (e, peerData) {
+      if (peerData.peerID == $scope.curDialog.peerID) {
+        updateReplyKeyboard();
+      }
+    });
+
+    $scope.replyKeyboardToggle = replyKeyboardToggle;
+    $scope.toggleSlash = toggleSlash;
+
+    var replyToMarkup = false;
 
     function sendMessage (e) {
       $scope.$broadcast('ui_message_before_send');
@@ -2008,6 +1992,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       updateMentions();
       updateCommands();
       replyClear();
+      updateReplyKeyboard();
 
       if (newPeer) {
         Storage.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
@@ -2026,16 +2011,64 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function replySelect(messageID) {
       $scope.draftMessage.replyToMessage = AppMessagesManager.wrapForDialog(messageID);
       $scope.$broadcast('ui_peer_reply');
+      replyToMarkup = false;
     }
 
     function replyClear() {
+      var message = $scope.draftMessage.replyToMessage;
+      if (message &&
+          $scope.historyState.replyKeyboard &&
+          $scope.historyState.replyKeyboard.id == message.id &&
+          !$scope.historyState.replyKeyboard.pFlags.hidden) {
+        $scope.historyState.replyKeyboard.pFlags.hidden = true;
+        $scope.$broadcast('ui_keyboard_update');
+      }
       delete $scope.draftMessage.replyToMessage;
       $scope.$broadcast('ui_peer_reply');
     }
 
-    function enterSlash ($event) {
-      $scope.draftMessage.text = '/';
+    function toggleSlash ($event) {
+      if ($scope.draftMessage.text &&
+          $scope.draftMessage.text.charAt(0) == '/') {
+        $scope.draftMessage.text = '';
+      } else {
+        $scope.draftMessage.text = '/';
+      }
       $scope.$broadcast('ui_peer_draft');
+      return cancelEvent($event);
+    }
+
+    function updateReplyKeyboard () {
+      var peerID = $scope.curDialog.peerID;
+      var replyKeyboard = AppMessagesManager.getReplyKeyboard(peerID);
+      if (replyKeyboard) {
+        replyKeyboard = AppMessagesManager.wrapReplyMarkup(replyKeyboard);
+      }
+      // console.log('update reply markup', peerID, replyKeyboard);
+      $scope.historyState.replyKeyboard = replyKeyboard;
+
+      var addReplyMessage =
+          replyKeyboard &&
+          !replyKeyboard.hidden &&
+          (replyKeyboard._ == 'replyKeyboardForceReply' ||
+          (replyKeyboard._ == 'replyKeyboardMarkup' && peerID < 0));
+
+      if (addReplyMessage) {
+        replySelect(replyKeyboard.id);
+        replyToMarkup = true;
+      }
+      else if (replyToMarkup) {
+        replyClear();
+      }
+      $scope.$broadcast('ui_keyboard_update');
+    }
+
+    function replyKeyboardToggle ($event) {
+      var replyKeyboard = $scope.historyState.replyKeyboard;
+      if (replyKeyboard) {
+        replyKeyboard.pFlags.hidden = !replyKeyboard.pFlags.hidden;
+        updateReplyKeyboard();
+      }
       return cancelEvent($event);
     }
 
@@ -2356,8 +2389,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.nav = {};
     $scope.canForward = true;
 
-    var inputUser = AppUsersManager.getUserInput($scope.userID),
-        list = [$scope.photoID],
+    var list = [$scope.photoID],
         maxID = $scope.photoID,
         preloaded = {},
         myID = 0,
@@ -2365,7 +2397,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     updatePrevNext();
 
-    AppPhotosManager.getUserPhotos(inputUser, 0, 1000).then(function (userpicCachedResult) {
+    AppPhotosManager.getUserPhotos($scope.userID, 0, 1000).then(function (userpicCachedResult) {
       if (userpicCachedResult.photos.indexOf($scope.photoID) >= 0) {
         list = userpicCachedResult.photos;
         maxID = list[list.length - 1];
@@ -2434,7 +2466,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function loadMore () {
       if (loadingPromise) return loadingPromise;
 
-      return loadingPromise = AppPhotosManager.getUserPhotos(inputUser, maxID).then(function (userpicResult) {
+      return loadingPromise = AppPhotosManager.getUserPhotos($scope.userID, maxID).then(function (userpicResult) {
         if (userpicResult.photos.length) {
           maxID = userpicResult.photos[userpicResult.photos.length - 1];
           list = list.concat(userpicResult.photos);
@@ -2984,7 +3016,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       id: {_: 'inputUserSelf'}
     }).then(function (userFullResult) {
       AppUsersManager.saveApiUser(userFullResult.user);
-      AppPhotosManager.savePhoto(userFullResult.profile_photo);
+      AppPhotosManager.savePhoto(userFullResult.profile_photo, {
+        user_id: userFullResult.user.id
+      });
     });
 
     $scope.notify = {volume: 0.5};
@@ -3055,8 +3089,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           crop: {_: 'inputPhotoCropAuto'}
         }).then(function (updateResult) {
           AppUsersManager.saveApiUsers(updateResult.users);
-          AppPhotosManager.savePhoto(updateResult.photo);
           MtpApiManager.getUserID().then(function (id) {
+            AppPhotosManager.savePhoto(updateResult.photo, {
+              user_id: id
+            });
             ApiUpdatesManager.processUpdateMessage({
               _: 'updateShort',
               update: {

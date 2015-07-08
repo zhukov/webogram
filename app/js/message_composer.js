@@ -498,13 +498,20 @@ function MessageComposer (textarea, options) {
   this.onCommandSend = options.onCommandSend;
 }
 
+MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
+
+
 MessageComposer.prototype.setUpInput = function () {
   if ('contentEditable' in document.body) {
     this.setUpRich();
   } else {
     this.setUpPlaintext();
   }
-  this.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
+
+  var sbWidth = getScrollWidth();
+  if (sbWidth) {
+    (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
+  }
 }
 
 MessageComposer.prototype.setUpRich = function () {
@@ -696,7 +703,7 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
     value = value.substr(0, pos);
   }
 
-  var matches = value.match(this.autoCompleteRegEx);
+  var matches = value.match(MessageComposer.autoCompleteRegEx);
   if (matches) {
     if (this.previousQuery == matches[0]) {
       return;
@@ -1172,6 +1179,7 @@ function Scroller(content, options) {
 
   this.useNano = options.nano !== undefined ? options.nano : !Config.Mobile;
   this.maxHeight = options.maxHeight;
+  this.minHeight = options.minHeight;
 
   if (this.useNano) {
     this.scrollable.addClass('nano-content');
@@ -1180,6 +1188,9 @@ function Scroller(content, options) {
   } else {
     if (this.maxHeight) {
       this.wrap.css({maxHeight: this.maxHeight});
+    }
+    if (this.minHeight) {
+      this.wrap.css({minHeight: this.minHeight});
     }
   }
   this.updateHeight();
@@ -1202,9 +1213,14 @@ Scroller.prototype.reinit = function () {
 
 Scroller.prototype.updateHeight = function () {
   var height;
-  if (this.maxHeight) {
-    var contentHeight = this.content[0].offsetHeight;
-    height = Math.min(this.maxHeight, contentHeight);
+  if (this.maxHeight || this.minHeight) {
+    height = this.content[0].offsetHeight;
+    if (this.maxHeight && height > this.maxHeight) {
+      height = this.maxHeight;
+    }
+    if (this.minHeight && height < this.minHeight) {
+      height = this.minHeight;
+    }
     this.wrap.css({height: height});
   } else {
     height = this.scroller[0].offsetHeight;

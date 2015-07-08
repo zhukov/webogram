@@ -158,7 +158,7 @@
 
               <div class="im_send_form_wrap1">
 
-                <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController" ng-class="{im_send_reply_form_wrap: draftMessage.replyToMessage != null, im_send_field_wkeyboard: false && historyState.replyKeyboard._ == 'replyKeyboardMarkup' && !historyState.replyKeyboard.pFlags.hidden}">
+                <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController" ng-class="{im_send_reply_form_wrap: draftMessage.replyToMessage != null}">
 
                   <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true">
                     <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
@@ -169,12 +169,12 @@
 
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
                       <a class="im_send_reply_cancel" ng-click="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
-                      <div my-reply-message="draftMessage.replyToMessage"></div>
+                      <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMessage" watch="true"></a>
                     </div>
 
-                    <div class="im_send_field_wrap">
+                    <div class="im_send_field_wrap" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
-                      <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && !draftMessage.text.length" ng-mousedown="enterSlash($event)"><i class="icon icon-slash"></i></a>
+                      <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && !draftMessage.text.length || draftMessage.text[0] == '/'" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
                       <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>

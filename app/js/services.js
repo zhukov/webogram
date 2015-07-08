@@ -875,7 +875,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         AppUsersManager.saveApiUser(userFull.user, true);
       }
 
-      AppPhotosManager.savePhoto(userFull.profile_photo);
+      AppPhotosManager.savePhoto(userFull.profile_photo, {
+        user_id: id
+      });
 
       NotificationsManager.savePeerSettings(id, userFull.notify_settings);
 
@@ -1300,13 +1302,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function mergeReplyKeyboard (historyStorage, message) {
-    console.log('merge', message.id, message.reply_markup, historyStorage.reply_markup);
+    // console.log('merge', message.id, message.reply_markup, historyStorage.reply_markup);
     if (!message.reply_markup &&
-        !(
-          historyStorage.reply_markup !== undefined &&
-          (message.out || message.action)
-        )
-    ) {
+        !message.out &&
+        !message.action) {
       return false;
     }
     var messageReplyMarkup = message.reply_markup;
@@ -1319,6 +1318,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           !(message.flags & 16)) {
         return false;
       }
+      if (historyStorage.maxOutID &&
+          message.id < historyStorage.maxOutID &&
+          messageReplyMarkup.pFlags.one_time) {
+        messageReplyMarkup.pFlags.hidden = true;
+      }
       messageReplyMarkup = angular.extend({
         id: message.id
       }, messageReplyMarkup);
@@ -1326,31 +1330,40 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         messageReplyMarkup.fromID = message.from_id;
       }
       historyStorage.reply_markup = messageReplyMarkup;
-      console.log('set', historyStorage.reply_markup);
+      // console.log('set', historyStorage.reply_markup);
       return true;
     }
 
-    if (lastReplyMarkup &&
-        lastReplyMarkup.pFlags.one_time &&
-        !lastReplyMarkup.pFlags.hidden &&
-        message.out &&
-        (message.id > lastReplyMarkup.id || message.id < 0) &&
-        message.message) {
-      lastReplyMarkup.pFlags.hidden = true;
-      console.log('set', historyStorage.reply_markup);
-      return true;
+    if (message.out) {
+      if (lastReplyMarkup) {
+        if (lastReplyMarkup.pFlags.one_time &&
+            !lastReplyMarkup.pFlags.hidden &&
+            (message.id > lastReplyMarkup.id || message.id < 0) &&
+            message.message) {
+          lastReplyMarkup.pFlags.hidden = true;
+          // console.log('set', historyStorage.reply_markup);
+          return true;
+        }
+      } else if (!historyStorage.maxOutID ||
+                  message.id > historyStorage.maxOutID) {
+        historyStorage.maxOutID = message.id;
+      }
     }
 
-    if (lastReplyMarkup &&
-        message.action &&
+    if (message.action &&
         message.action._ == 'messageActionChatDeleteUser' &&
-        message.action.user_id == lastReplyMarkup.fromID) {
+        (lastReplyMarkup
+          ? message.action.user_id == lastReplyMarkup.fromID
+          : AppUsersManager.isBot(message.action.user_id)
+        )
+      ) {
       historyStorage.reply_markup = {
         _: 'replyKeyboardHide',
         id: message.id,
-        flags: 0
+        flags: 0,
+        pFlags: {}
       };
-      console.log('set', historyStorage.reply_markup);
+      // console.log('set', historyStorage.reply_markup);
       return true;
     }
 
@@ -1633,30 +1646,35 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       apiMessage.date -= serverTimeOffset;
 
+      var mediaContext = {
+        user_id: apiMessage.from_id,
+        date: apiMessage.date
+      };
+
       if (apiMessage.media) {
         switch (apiMessage.media._) {
           case 'messageMediaEmpty':
             delete apiMessage.media;
             break;
           case 'messageMediaPhoto':
-            AppPhotosManager.savePhoto(apiMessage.media.photo);
+            AppPhotosManager.savePhoto(apiMessage.media.photo, mediaContext);
             break;
           case 'messageMediaVideo':
-            AppVideoManager.saveVideo(apiMessage.media.video);
+            AppVideoManager.saveVideo(apiMessage.media.video, mediaContext);
             break;
           case 'messageMediaDocument':
-            AppDocsManager.saveDoc(apiMessage.media.document);
+            AppDocsManager.saveDoc(apiMessage.media.document, mediaContext);
             break;
           case 'messageMediaAudio':
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
           case 'messageMediaWebPage':
-            AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.id);
+            AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.id, mediaContext);
             break;
         }
       }
       if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
-        AppPhotosManager.savePhoto(apiMessage.action.photo);
+        AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
       }
       if (apiMessage.reply_markup) {
         apiMessage.reply_markup.pFlags = {
@@ -3067,8 +3085,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       windowW = $(window).width(),
       windowH = $(window).height();
 
-  function savePhoto (apiPhoto) {
+  function savePhoto (apiPhoto, context) {
+    if (context) {
+      angular.extend(apiPhoto, context);
+    }
     photos[apiPhoto.id] = apiPhoto;
+
     angular.forEach(apiPhoto.sizes, function (photoSize) {
       if (photoSize._ == 'photoCachedSize') {
         MtpApiFileManager.saveSmallFile(photoSize.location, photoSize.bytes);
@@ -3102,7 +3124,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return bestPhotoSize;
   }
 
-  function getUserPhotos (inputUser, maxID, limit) {
+  function getUserPhotos (userID, maxID, limit) {
+    var inputUser = AppUsersManager.getUserInput(userID);
     return MtpApiManager.invokeApi('photos.getUserPhotos', {
       user_id: inputUser,
       offset: 0,
@@ -3111,8 +3134,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }).then(function (photosResult) {
       AppUsersManager.saveApiUsers(photosResult.users);
       var photoIDs = [];
+      var context = {user_id: userID};
       for (var i = 0; i < photosResult.photos.length; i++) {
-        savePhoto(photosResult.photos[i]);
+        savePhoto(photosResult.photos[i], context);
         photoIDs.push(photosResult.photos[i].id)
       }
 
@@ -3312,9 +3336,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var webpages = {};
   var pendingWebPages = {};
 
-  function saveWebPage (apiWebPage, messageID) {
+  function saveWebPage (apiWebPage, messageID, mediaContext) {
     if (apiWebPage.photo && apiWebPage.photo._ === 'photo') {
-      AppPhotosManager.savePhoto(apiWebPage.photo);
+      AppPhotosManager.savePhoto(apiWebPage.photo, mediaContext);
     } else {
       delete apiWebPage.photo;
     }
@@ -3453,7 +3477,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       windowW = $(window).width(),
       windowH = $(window).height();
 
-  function saveVideo (apiVideo) {
+  function saveVideo (apiVideo, context) {
+    if (context) {
+      angular.extend(apiVideo, context);
+    }
     videos[apiVideo.id] = apiVideo;
 
     if (apiVideo.thumb && apiVideo.thumb._ == 'photoCachedSize') {
@@ -3646,9 +3673,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       windowW = $(window).width(),
       windowH = $(window).height();
 
-  function saveDoc (apiDoc) {
+  function saveDoc (apiDoc, context) {
     docs[apiDoc.id] = apiDoc;
 
+    if (context) {
+      angular.extend(apiDoc, context);
+    }
     if (apiDoc.thumb && apiDoc.thumb._ == 'photoCachedSize') {
       MtpApiFileManager.saveSmallFile(apiDoc.thumb.location, apiDoc.thumb.bytes);
 
