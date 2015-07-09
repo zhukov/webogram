@@ -1657,7 +1657,8 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .stickerset_modal_window .modal-dialog{max-width:474px}
 .stickerset_modal_stickers_list{padding:25px}
 .stickerset_modal_sticker_wrap{list-style:none;margin:0 10px 10px 0;padding:0;position:relative;display:block;width:96px;height:96px;float:left}
-.stickerset_modal_sticker,.stickerset_modal_sticker img{width:96px;height:96px}
+.stickerset_modal_sticker{width:96px;height:96px}
+.stickerset_modal_sticker img{max-width:96px;max-height:96px}
 .stickerset_modal_sticker_alt{position:absolute;bottom:0;right:0}
 .stickerset_actions{padding:10px 20px;height:50px;text-align:center}
 .stickerset_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
