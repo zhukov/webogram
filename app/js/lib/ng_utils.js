@@ -423,6 +423,10 @@ angular.module('izhukov.utils', [])
         return saveFileBase64(db, fileName, blob);
       }
 
+      if (!(blob instanceof Blob)) {
+        blob = blobConstruct([blob]);
+      }
+
       try {
         var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
             request = objectStore.put(blob, fileName);

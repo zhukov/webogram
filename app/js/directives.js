@@ -1877,8 +1877,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if ($scope.document.url) {
-          $scope.isActive = !$scope.isActive;
-          $scope.$emit('ui_height');
+          onContentLoaded(function () {
+            $scope.isActive = !$scope.isActive;
+            $scope.$emit('ui_height');
+          })
           return;
         }
 

@@ -1140,6 +1140,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function updateStartBot () {
+      var wasStartBot = $scope.historyState.startBot;
       if (!peerID ||
           peerID < 0 ||
           !AppUsersManager.isBot(peerID) ||
@@ -1163,7 +1164,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       else {
         $scope.historyState.startBot = false;
       }
-      $scope.$broadcast('ui_panel_update');
+      if (wasStartBot != $scope.historyState.startBot) {
+        $scope.$broadcast('ui_panel_update');
+      }
     }
 
     function messageFocusHistory () {
