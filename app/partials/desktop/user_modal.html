@@ -4,7 +4,7 @@
     <div class="md_modal_title_wrap">
       <div class="md_modal_actions_wrap clearfix">
         <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
-        <a class="md_modal_action" ng-if="user._ == 'userContact'" ng-click="importContact(true)" my-i18n="modal_edit"></a>
+        <a class="md_modal_action" ng-if="user.pFlags.contact" ng-click="importContact(true)" my-i18n="modal_edit"></a>
       </div>
       <div class="md_modal_title" my-i18n="user_modal_contact_info"></div>
     </div>
@@ -36,6 +36,13 @@
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username">
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
 
+        <div class="md_modal_section_param_wrap" ng-if="user.pFlags.bot &amp;&amp; bot_info.rAbout">
+          <div class="md_modal_section_param_value">
+            <span ng-bind-html="bot_info.rAbout"></span>
+          </div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_about"></div>
+        </div>
+
         <div class="md_modal_section_param_wrap" ng-if="user.phone">
           <div class="md_modal_section_param_value" ng-bind="user.phone | phoneNumber"></div>
           <div class="md_modal_section_param_name" my-i18n="user_modal_phone"></div>
@@ -62,7 +69,19 @@
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-init="f.showMoreActions = !user.phone.length">
         <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
-        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact' &amp;&amp; user._ != 'userSelf'">
+        <div class="md_modal_section_link_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.botNoGroups">
+          <a class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="bot_info.commands.settings != null">
+          <a class="md_modal_section_link" ng-click="sendCommand('settings')" my-i18n="user_modal_bot_settings"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="bot_info.commands.help != null">
+          <a class="md_modal_section_link" ng-click="sendCommand('help')" my-i18n="user_modal_bot_help"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; !user.pFlags.contact &amp;&amp; !user.pFlags.self">
           <a class="md_modal_section_link" ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
         </div>
 
@@ -70,12 +89,12 @@
           <a class="md_modal_section_link" ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
         </div>
 
-        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; user._ == 'userContact'">
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; user.pFlags.contact">
           <a class="md_modal_section_link" ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
         </div>
 
 
-        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; user._ != 'userSelf'">
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; !user.pFlags.self">
           <a class="md_modal_section_link" ng-click="toggleBlock(!blocked)" ng-switch="blocked">
             <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
             <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>

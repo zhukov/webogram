@@ -31,8 +31,11 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
   .filter('userStatus', function($filter, _) {
     var relativeTimeFilter = $filter('relativeTime');
-    return function (user) {
-      var statusType = user && user.status && user.status._ || 'userStatusEmpty';
+    return function (user, botChatPrivacy) {
+      var statusType = user && user.status && user.status._;
+      if (!statusType) {
+        statusType = user.pFlags.bot ? 'userStatusBot' : 'userStatusEmpty';
+      }
       switch (statusType) {
         case 'userStatusOnline':
           return _('user_status_online');
@@ -48,6 +51,16 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
         case 'userStatusLastMonth':
           return _('user_status_last_month');
+
+        case 'userStatusBot':
+          if (botChatPrivacy) {
+            if (user.pFlags.botNoPrivacy) {
+              return _('user_status_bot_noprivacy');
+            } else {
+              return _('user_status_bot_privacy');
+            }
+          }
+          return _('user_status_bot');
 
         case 'userStatusEmpty':
         default:
@@ -69,7 +82,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
     var dateFilter = $filter('date');
 
     return function (timestamp, extended) {
-
+      if (!timestamp) {
+        return '';
+      }
       var ticks = timestamp * 1000,
           diff = Math.abs(tsNow() - ticks),
           format = 'shortTime';
@@ -157,7 +172,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
         return size + ' b';
       }
       else if (size < 1048576) {
-        return Math.round(size / 1024) + ' Kb';
+        return Math.round(size / 1024) + ' KB';
       }
       var mbs = size / 1048576;
       if (progressing) {

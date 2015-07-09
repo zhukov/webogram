@@ -255,7 +255,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 })
 
-.factory('MtpApiFileManager', function (MtpApiManager, $q, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage) {
+.factory('MtpApiFileManager', function (MtpApiManager, $q, qSync, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage, WebpManager) {
 
   var cachedFs = false;
   var cachedFsPromise = false;
@@ -318,17 +318,29 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         return 'video' + location.id + '.mp4';
 
       case 'inputDocumentFileLocation':
+        var fileName = (location.file_name || '').split('.', 2);
+        var ext = fileName[1] || '';
+        if (location.sticker && !WebpManager.isWebpSupported()) {
+          ext += '.png';
+        }
+        if (fileName.length) {
+          return fileName[0] + '_' + location.id + '.' + ext;
+        }
         return 'doc' + location.id;
 
       case 'inputAudioFileLocation':
         return 'audio' + location.id;
-    }
 
-    if (!location.volume_id) {
-      console.trace('Empty location', location);
+      default:
+        if (!location.volume_id) {
+          console.trace('Empty location', location);
+        }
+        var ext = 'jpg';
+        if (location.sticker) {
+          ext = WebpManager.isWebpSupported() ? 'webp' : 'png';
+        }
+        return location.volume_id + '_' + location.local_id + '_' + location.secret + '.' + ext;
     }
-
-    return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
   };
 
   function getTempFileName(file) {
@@ -374,7 +386,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
     // console.log('dload small', location);
     var fileName = getFileName(location),
-        mimeType = 'image/jpeg',
+        mimeType = location.sticker ? 'image/webp' : 'image/jpeg',
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
 
     if (cachedPromise) {
@@ -403,11 +415,20 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         });
       });
 
+      var processDownloaded = function (bytes) {
+        if (!location.sticker || WebpManager.isWebpSupported()) {
+          return qSync.when(bytes);
+        }
+        return WebpManager.getPngBlobFromWebp(bytes);
+      };
+
       return fileStorage.getFileWriter(fileName, mimeType).then(function (fileWriter) {
         return downloadPromise.then(function (result) {
-          return FileManager.write(fileWriter, result.bytes).then(function () {
-            return cachedDownloads[fileName] = fileWriter.finalize();
-          });
+          return processDownloaded(result.bytes).then(function (proccessedResult) {
+            return FileManager.write(fileWriter, proccessedResult).then(function () {
+              return cachedDownloads[fileName] = fileWriter.finalize();
+            });
+          })
         });
       });
     });
@@ -426,6 +447,16 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     options = options || {};
+
+    var processSticker = false;
+    if (location.sticker && !WebpManager.isWebpSupported()) {
+      if (options.toFileEntry || size > 524288) {
+        delete location.sticker;
+      } else {
+        processSticker = true;
+        options.mime = 'image/png';
+      }
+    }
 
     // console.log(dT(), 'Dload file', dcID, location, size);
     var fileName = getFileName(location),
@@ -471,6 +502,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }, function () {
       var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
 
+      var processDownloaded = function (bytes) {
+        if (!processSticker) {
+          return qSync.when(bytes);
+        }
+        return WebpManager.getPngBlobFromWebp(bytes);
+      };
+
       fileWriterPromise.then(function (fileWriter) {
         cacheFileWriter = fileWriter;
         var limit = 524288,
@@ -513,20 +551,22 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 if (canceled) {
                   return $q.when();
                 }
-                return FileManager.write(fileWriter, result.bytes).then(function () {
-                  writeFileDeferred.resolve();
-                }, errorHandler).then(function () {
-                  if (isFinal) {
-                    resolved = true;
-                    if (toFileEntry) {
-                      deferred.resolve();
+                return processDownloaded(result.bytes).then(function (processedResult) {
+                  return FileManager.write(fileWriter, processedResult).then(function () {
+                    writeFileDeferred.resolve();
+                  }, errorHandler).then(function () {
+                    if (isFinal) {
+                      resolved = true;
+                      if (toFileEntry) {
+                        deferred.resolve();
+                      } else {
+                        deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
+                      }
                     } else {
-                      deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
-                    }
-                  } else {
-                    deferred.notify({done: offset + limit, total: size});
-                  };
-                });
+                      deferred.notify({done: offset + limit, total: size});
+                    };
+                  });
+                })
               });
             });
           })(offset + limit >= size, offset, writeFileDeferred, writeFilePromise);

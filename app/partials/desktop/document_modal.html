@@ -16,12 +16,12 @@
       </a>
     </div>
 
-    <div class="media_modal_info_wrap pull-left" ng-switch="messageID > 0">
+    <div class="media_modal_info_wrap pull-left" ng-if="document.user_id > 0" ng-switch="messageID > 0">
       <a class="media_modal_author_photo pull-left" my-peer-photolink="document.user_id" img-class="media_modal_author_photo" watch="true"></a>
       <div class="media_modal_author_name">
         <a class="media_modal_author" my-user-link="document.user_id" user-watch="true"></a>
       </div>
-      <div class="media_modal_date">
+      <div class="media_modal_date" ng-if="document.date > 0">
         <a ng-switch-when="true" class="media_modal_date" ng-click="goToMessage()" ng-bind="document.date | dateOrTime :true"></a>
         <span ng-switch-default ng-bind="document.date | dateOrTime :true"></span>
       </div>

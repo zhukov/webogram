@@ -339,6 +339,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
+      if (attrs.watch) {
+        $scope.$watch('replyMessage', function () {
+          checkMessage($scope, element);
+        });
+      } else {
+        checkMessage($scope, element);
+      }
+    }
+
+    function checkMessage ($scope, element) {
       var message = $scope.replyMessage;
       if (!message.loading) {
         updateMessage($scope, element);
@@ -395,10 +405,45 @@ angular.module('myApp.directives', ['myApp.filters'])
           var peerID = AppMessagesManager.getMessagePeer(message);
           var peerString = AppPeersManager.getPeerString(peerID);
 
-          $rootScope.$broadcast('history_focus',  {peerString: peerString, messageID: message.id});
+          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.id});
 
         })
       }
+    }
+
+  })
+
+  .directive('myReplyMarkup', function() {
+
+    return {
+      templateUrl: templateUrl('reply_markup'),
+      scope: {
+        'replyMarkup': '=myReplyMarkup'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var scrollable = $('.reply_markup', element);
+      var scroller = new Scroller(scrollable, {
+        classPrefix: 'reply_markup',
+        maxHeight: 170
+      });
+      $scope.buttonSend = function (button) {
+        $scope.$emit('reply_button_press', button);
+      }
+
+      $scope.$on('ui_keyboard_update', function () {
+        onContentLoaded(function () {
+          scroller.updateHeight();
+          scroller.scrollTo(0);
+          $scope.$emit('ui_panel_update');
+        })
+      });
+      onContentLoaded(function () {
+        scroller.updateHeight();
+        $scope.$emit('ui_panel_update');
+      });
     }
 
   })
@@ -563,7 +608,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           var selectedDialog = $(scrollableWrap).find('.active a.im_dialog')[0];
           if (selectedDialog) {
-            scrollToDialog(selectedDialog.parentNode);
+            scrollToNode(scrollableWrap, selectedDialog.parentNode, dialogsWrap);
           }
         });
       });
@@ -621,7 +666,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (nextDialogWrap) {
             $(nextDialogWrap).find('a').trigger('mousedown');
-            scrollToDialog(nextDialogWrap);
+            scrollToNode(scrollableWrap, nextDialogWrap, dialogsWrap);
           }
 
           return cancelEvent(e);
@@ -681,26 +726,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
 
           if (nextDialogWrap) {
-            scrollToDialog(nextDialogWrap);
+            scrollToNode(scrollableWrap, nextDialogWrap, dialogsWrap);
           }
 
           return cancelEvent(e);
-        }
-      }
-
-      function scrollToDialog(dialogWrap) {
-        var elTop = dialogWrap.offsetTop - 15,
-            elHeight = dialogWrap.offsetHeight + 30,
-            scrollTop = scrollableWrap.scrollTop,
-            viewportHeight = scrollableWrap.clientHeight;
-
-        if (scrollTop > elTop) { // we are below the dialog to scroll
-          scrollableWrap.scrollTop = elTop;
-          $(dialogsWrap).nanoScroller({flash: true});
-        }
-        else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the dialog to scroll
-          scrollableWrap.scrollTop = elTop + elHeight - viewportHeight;
-          $(dialogsWrap).nanoScroller({flash: true});
         }
       }
 
@@ -1295,7 +1324,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       link: link,
       scope: {
         draftMessage: '=',
-        mentions: '='
+        mentions: '=',
+        commands: '='
       }
     };
 
@@ -1363,8 +1393,8 @@ angular.module('myApp.directives', ['myApp.filters'])
         getSendOnEnter: function () {
           return sendOnEnter;
         },
-        getPeerImage: function (element, peerID) {
-          if (cachedPeerPhotos[peerID]) {
+        getPeerImage: function (element, peerID, noReplace) {
+          if (cachedPeerPhotos[peerID] && !noReplace) {
             element.replaceWith(cachedPeerPhotos[peerID]);
             return;
           }
@@ -1376,8 +1406,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           });
         },
         mentions: $scope.mentions,
+        commands: $scope.commands,
         onMessageSubmit: onMessageSubmit,
-        onFilePaste: onFilePaste
+        onFilePaste: onFilePaste,
+        onCommandSend: function (command) {
+          $scope.$apply(function () {
+            $scope.draftMessage.command = command;
+          });
+        }
       });
 
       var richTextarea = composer.richTextareaEl[0];
@@ -1465,6 +1501,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!Config.Navigator.touch) {
           composer.focus();
         }
+        onContentLoaded(function () {
+          composer.checkAutocomplete(true);
+        });
         if (emojiTooltip) {
           emojiTooltip.hide();
         }
@@ -1838,8 +1877,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if ($scope.document.url) {
-          $scope.isActive = !$scope.isActive;
-          $scope.$emit('ui_height');
+          onContentLoaded(function () {
+            $scope.isActive = !$scope.isActive;
+            $scope.$emit('ui_height');
+          })
           return;
         }
 
@@ -1859,7 +1900,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myLoadSticker', function(MtpApiFileManager, FileManager) {
+  .directive('myLoadSticker', function(MtpApiFileManager, FileManager, AppStickersManager) {
 
     var emptySrc = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
@@ -1876,13 +1917,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                           .addClass(attrs.imgClass);
 
       var setSrc = function (blob) {
-        if (WebpManager.isWebpSupported()) {
-          imgElement.attr('src', FileManager.getUrl(blob, 'image/webp'));
-          return;
-        }
-        FileManager.getByteArray(blob).then(function (bytes) {
-          imgElement.attr('src', WebpManager.getPngUrlFromData(bytes));
-        });
+        imgElement.attr('src', FileManager.getUrl(blob));
       };
 
       imgElement.css({
@@ -1894,12 +1929,16 @@ angular.module('myApp.directives', ['myApp.filters'])
         height: $scope.document.thumb.height
       });
 
-      var smallLocation = $scope.document.thumb.location;
+      var smallLocation = angular.copy($scope.document.thumb.location);
+      smallLocation.sticker = true;
+
       var fullLocation = {
         _: 'inputDocumentFileLocation',
         id: $scope.document.id,
         access_hash: $scope.document.access_hash,
-        dc_id: $scope.document.dc_id
+        dc_id: $scope.document.dc_id,
+        file_name: $scope.document.file_name,
+        sticker: true
       };
 
 
@@ -1931,6 +1970,14 @@ angular.module('myApp.directives', ['myApp.filters'])
         }, function (e) {
           console.log('Download sticker failed', e, fullLocation);
         });
+      }
+
+      if (attrs.open && $scope.document.stickerSetInput) {
+        element
+          .addClass('clickable')
+          .on('click', function () {
+            AppStickersManager.openStickerset($scope.document.stickerSetInput);
+          });
       }
     }
   })
@@ -2415,8 +2462,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           update = function () {
             var user = AppUsersManager.getUser(userID);
             element
-              .html(statusFilter(user))
-              .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline');
+              .html(statusFilter(user, attrs.botChatPrivacy))
+              .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline' || false);
           };
 
       $scope.$watch(attrs.myUserStatus, function (newUserID) {
@@ -2606,7 +2653,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link($scope, element, attrs) {
-
       element.addClass('peer_photo_init');
 
       var peerID, peer, peerPhoto;
@@ -2682,6 +2728,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$watch(attrs.myPeerPhotolink, setPeerID);
+      setPeerID($scope.$eval(attrs.myPeerPhotolink));
 
       if (attrs.watch) {
         $scope.$on('user_update', function (e, updUserID) {

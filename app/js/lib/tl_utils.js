@@ -102,6 +102,9 @@ TLSerialization.prototype.storeLong = function (sLong, field) {
     }
   }
 
+  if (typeof sLong != 'string') {
+    sLong = sLong ? sLong.toString() : '0';
+  }
   var divRem = bigStringInt(sLong).divideAndRemainder(bigint(0x100000000));
 
   this.writeInt(intToUint(divRem[1].intValue()), (field || '') + ':long[low]');

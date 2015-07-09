@@ -49,6 +49,21 @@ function cancelEvent (event) {
   return false;
 }
 
+function getScrollWidth() {
+  var outer = $('<div>').css({
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    overflow: 'scroll',
+    top: -9999
+  }).appendTo($(document.body));
+
+  var scrollbarWidth = outer[0].offsetWidth - outer[0].clientWidth;
+  outer.remove();
+
+  return scrollbarWidth;
+};
+
 function onCtrlEnter (textarea, cb) {
   $(textarea).on('keydown', function (e) {
     if (e.keyCode == 13 && (e.ctrlKey || e.metaKey)) {
@@ -222,6 +237,22 @@ function setRichFocus(field, selectNode) {
   }
 }
 
+function scrollToNode (scrollable, node, scroller) {
+  var elTop = node.offsetTop - 15,
+      elHeight = node.offsetHeight + 30,
+      scrollTop = scrollable.scrollTop,
+      viewportHeight = scrollable.clientHeight;
+
+  if (scrollTop > elTop) { // we are below the node to scroll
+    scrollable.scrollTop = elTop;
+    $(scroller).nanoScroller({flash: true});
+  }
+  else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the node to scroll
+    scrollable.scrollTop = elTop + elHeight - viewportHeight;
+    $(scroller).nanoScroller({flash: true});
+  }
+}
+
 function onContentLoaded (cb) {
   setZeroTimeout(cb);
 }
@@ -365,11 +396,15 @@ function versionCompare (ver1, ver2) {
   }
 
   function cleanSearchText (text) {
+    var hasTag = text.charAt(0) == '%';
     text = text.replace(badCharsRe, ' ').replace(trimRe, '');
     text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
       return Config.LatinizeMap[ch] || ch;
     });
     text = text.toLowerCase();
+    if (hasTag) {
+      text = '%' + text;
+    }
 
     return text;
   }
@@ -450,103 +485,4 @@ function versionCompare (ver1, ver2) {
     search: search
   };
 
-})(window);
-
-
-(function (global) {
-  var nativeWebpSupport = false;
-
-  var image = new Image();
-  image.onload = function () {
-    nativeWebpSupport = this.width === 2 && this.height === 1;
-  };
-  image.onerror = function () {
-    nativeWebpSupport = false;
-  };
-  image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
-
-  var canvas, context;
-
-
-  function getPngUrlFromData(data) {
-    var start = tsNow();
-
-    var decoder = new WebPDecoder();
-
-    var config = decoder.WebPDecoderConfig;
-    var buffer = config.j;
-    var bitstream = config.input;
-
-    if (!decoder.WebPInitDecoderConfig(config)) {
-      console.error('[webpjs] Library version mismatch!');
-      return false;
-    }
-
-    // console.log('[webpjs] status code', decoder.VP8StatusCode);
-
-    status = decoder.WebPGetFeatures(data, data.length, bitstream);
-    if (status != 0) {
-      console.error('[webpjs] status error', status);
-    }
-
-    var mode = decoder.WEBP_CSP_MODE;
-    buffer.J = 4;
-
-    try {
-      status = decoder.WebPDecode(data, data.length, config);
-    } catch (e) {
-      status = e;
-    }
-
-    ok = (status == 0);
-    if (!ok) {
-      console.error('[webpjs] decoding failed', status);
-      return false;
-    }
-
-    // console.log('[webpjs] decoded: ', buffer.width, buffer.height, bitstream.has_alpha, 'Now saving...');
-    var bitmap = buffer.c.RGBA.ma;
-
-    // console.log('[webpjs] done in ', tsNow() - start);
-
-    if (!bitmap) {
-      return false;
-    }
-    var biHeight = buffer.height;
-    var biWidth = buffer.width;
-
-    if (!canvas || !context) {
-      canvas = document.createElement('canvas');
-      context = canvas.getContext('2d');
-    } else {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    canvas.height = biHeight;
-    canvas.width = biWidth;
-
-    var output = context.createImageData(canvas.width, canvas.height);
-    var outputData = output.data;
-
-    for (var h = 0; h < biHeight; h++) {
-      for (var w = 0; w < biWidth; w++) {
-        outputData[0+w*4+(biWidth*4)*h] = bitmap[1+w*4+(biWidth*4)*h];
-        outputData[1+w*4+(biWidth*4)*h] = bitmap[2+w*4+(biWidth*4)*h];
-        outputData[2+w*4+(biWidth*4)*h] = bitmap[3+w*4+(biWidth*4)*h];
-        outputData[3+w*4+(biWidth*4)*h] = bitmap[0+w*4+(biWidth*4)*h];
-
-      };
-    }
-
-    context.putImageData(output, 0, 0);
-
-    return canvas.toDataURL('image/png');
-  }
-
-
-  global.WebpManager = {
-    isWebpSupported: function () {
-      return nativeWebpSupport;
-    },
-    getPngUrlFromData: getPngUrlFromData
-  }
 })(window);

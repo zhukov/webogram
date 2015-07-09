@@ -103,7 +103,7 @@
             <div class="im_history_scrollable_wrap nano-content">
 
               <div class="im_history_scrollable">
-                  <div class="im_history" ng-class="{im_history_selectable: historyState.selectActions}">
+                  <div class="im_history" ng-class="{im_history_selectable: !historyState.startBot, im_history_select_active: historyState.selectActions}">
                     <div ng-if="state.empty"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
                       <span ng-switch-when="true">
                         <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
@@ -140,10 +140,13 @@
 
           <div class="im_bottom_panel_wrap">
 
-            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions">
+            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.selectActions || historyState.startBot" ng-switch="historyState.startBot != false">
               <div class="im_edit_panel_border"></div>
-              <a class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
-              <div class="im_edit_selected_actions" my-i18n>
+              <a ng-show="historyState.startBot != 2" class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
+              <div class="im_edit_start_actions" ng-switch-when="true">
+                <a class="btn btn-primary im_start_btn" ng-click="botStart()" my-i18n="im_start"></a>
+              </div>
+              <div class="im_edit_selected_actions" ng-switch-default my-i18n>
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
                 <a class="btn btn-primary im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete"></a>
                 <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedReply()" ng-show="selectedCount == 1"my-i18n="im_reply"></a>
@@ -151,7 +154,7 @@
               </div>
             </div>
 
-            <div class="im_send_panel_wrap" ng-hide="historyState.selectActions">
+            <div class="im_send_panel_wrap" ng-show="!historyState.selectActions &amp;&amp; !historyState.startBot">
 
               <div class="im_send_form_wrap1">
 
@@ -162,21 +165,23 @@
                   </a>
                   <a class="pull-left im_panel_own_photo" my-peer-photolink="ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
 
-                  <form my-send-form draft-message="draftMessage" mentions="mentions" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
+                  <form my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
-                      <a class="im_send_reply_cancel" ng-click="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
-                      <div my-reply-message="draftMessage.replyToMessage"></div>
+                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+                      <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMessage" watch="true"></a>
                     </div>
 
-                    <div class="im_send_field_wrap">
+                    <div class="im_send_field_wrap" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
+                      <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && !draftMessage.text.length || draftMessage.text[0] == '/'" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
+                      <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
                       <textarea ng-model="draftMessage.text" placeholder="{{'im_message_field_placeholder' | i18n}}" class="form-control im_message_field no_outline" dir="auto"></textarea>
                     </div>
 
-                    <div class="clearfix">
+                    <div class="im_send_buttons_wrap clearfix">
                       <button type="submit" class="btn btn-md im_submit" my-i18n="im_submit_message"></button>
 
                       <div class="im_attach pull-left">
@@ -190,8 +195,12 @@
                       </div>
 
                       <div class="composer_emoji_panel"></div>
-
                     </div>
+
+                    <div class="im_send_keyboard_wrap" ng-if="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-show="!historyState.replyKeyboard.pFlags.hidden">
+                      <div my-reply-markup="historyState.replyKeyboard"></div>
+                    </div>
+
                   </form>
                 </div>
 

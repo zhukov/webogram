@@ -858,7 +858,7 @@ a.tg_radio_on:hover i.icon-radio {
   vertical-align: top;
   margin-right: 18px;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 848px);
   background-position: -5px -10px;
 }
 .icon-tg-title {
@@ -899,7 +899,7 @@ a.tg_radio_on:hover i.icon-radio {
   margin-left: 12px;
   margin-top: -1px;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 848px);
   background-position: -18px -50px;
 }
 
@@ -1617,7 +1617,7 @@ div.im_message_video_thumb {
   height: 18px;
   margin: 12px 15px;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 848px);
   background-position: -14px -509px;
 
   .im_message_file_button_dl_doc & {
@@ -1638,7 +1638,7 @@ div.im_message_video_thumb {
     height: 16px;
     margin: 13px 16px;
 
-    .image-2x('../img/icons/General.png', 40px, 778px);
+    .image-2x('../img/icons/General.png', 40px, 848px);
     background-position: -13px -611px;
   }
 
@@ -1659,8 +1659,9 @@ div.im_message_video_thumb {
   background-position: -2px -542px;
 }
 
-.im_history_selectable {
-  a {
+.im_history_select_active {
+  a,
+  .clickable {
     pointer-events: none;
   }
 }
@@ -1912,6 +1913,22 @@ img.im_message_document_thumb {
 .im_service_message_wrap {
   text-align: center;
 }
+.im_bot_intro_message_wrap {
+  max-width: 300px;
+  padding: 4px 10px;
+  margin: 10px auto;
+  color: #000;
+  line-height: 1.4;
+  text-align: left;
+  font-size: 13px;
+}
+.im_bot_intro_message_header {
+  font-weight: bold;
+  text-align: center;
+}
+.im_bot_intro_message {
+  margin-top: 10px;
+}
 .im_service_message {
   display: inline-block;
   min-width: 10px;
@@ -2040,9 +2057,68 @@ a.im_message_fwd_photo {
 }
 .im_message_mymention {
   background: #fff8cc;
-  /*border-bottom: 1px solid #ffe222;*/
-  /*font-weight: bold;*/
 }
+
+.reply_markup_wrap {
+  margin: 15px -2px 0;
+}
+.reply_markup_row {
+  padding: 4px 0;
+  &:first-child {
+    padding-top: 0;
+  }
+  &:last-child {
+    padding-bottom: 0;
+  }
+  .reply_markup_scrollable_wrap.active-scrollbar & {
+    margin-right: 6px;
+  }
+}
+.reply_markup_button_wrap {
+  display: inline-block;
+  padding: 0 4px;
+}
+.reply_markup_button {
+  color: #3a6d99;
+  display: block;
+  width: 100%;
+  background: #f0f4f7;
+  height: 30px;
+  font-size: 13px;
+  margin: 0;
+  padding: 6px 6px;
+
+  .reply_markup_h1 & {
+    height: 170px;
+  }
+  .reply_markup_h2 & {
+    height: 81px;
+  }
+  .reply_markup_h3 & {
+    height: 51px;
+  }
+  .reply_markup_h4 & {
+    height: 36px;
+  }
+}
+.reply_markup_button:hover {
+  color: #3a6d99;
+  background: #dfe8f0;
+}
+.reply_markup_button_w1 {width: 100%;}
+.reply_markup_button_w2 {width: 50%;}
+.reply_markup_button_w3 {width: 33.3333333%;}
+.reply_markup_button_w4 {width: 25%;}
+.reply_markup_button_w5 {width: 20%;}
+.reply_markup_button_w6 {width: 16.6666666%;}
+.reply_markup_button_w7 {width: 14.2857142%;}
+.reply_markup_button_w8 {width: 12.5%;}
+.reply_markup_button_w9 {width: 11.1111111%;}
+.reply_markup_button_w10 {width: 10%;}
+.reply_markup_button_w11 {width: 9.09090909%;}
+.reply_markup_button_w12 {width: 8.33333333%;}
+
+
 
 .im_history_not_selected,
 .im_history_empty {
@@ -2206,7 +2282,7 @@ img.img_fullsize {
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 778px);
+  .image-2x('../img/icons/General.png', 40px, 848px);
   background-position: -9px -335px;
 }
 
@@ -2310,14 +2386,11 @@ img.img_fullsize {
 .composer_emoji_tooltip_tab_stickers {background-position: -9px -361px; }
 .composer_emoji_tooltip_tab_stickers.active {background-position: -9px -333px; }
 
-.nano.composer_emoji_tooltip_content_wrap {
+.composer_emoji_tooltip_scrollable_container {
   height: 174px;
   position: relative;
 }
 .composer_emoji_tooltip_content {
-  /*position: relative;*/
-  /*overflow: hidden;
-  overflow-y: auto;*/
   padding-right: 8px;
   outline: 0!important;
 }
@@ -2397,15 +2470,33 @@ a.composer_emoji_btn {
   &.emoji-spritesheet-4 { background-size: 884px 182px; }
 }
 
-.composer_dropdown {
+
+.composer_dropdown_wrap {
+  background: #FFF;
   display: none;
-  padding: 6px 0;
+  position: absolute;
   border: 0;
 
   .box-shadow(0px 1px 1px 0px rgba(60,75,87,0.27));
 
   border-radius: 0;
   margin-top: -5px;
+  margin-left: -1px;
+}
+.composer_dropdown_scroller {
+}
+
+.composer_dropdown {
+  position: static;
+  display: block;
+  float: none;
+  top: auto;
+  left: auto;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  z-index: auto;
 
   & > li > a {
     display: block;
@@ -2457,6 +2548,7 @@ a.composer_emoji_btn {
   img& {
     width: 32px;
     height: 32px;
+    vertical-align: top;
   }
 
   span& {
@@ -2473,6 +2565,36 @@ a.composer_emoji_btn {
   line-height: 32px;
   vertical-align: top;
 }
+
+.composer_dropdown a.composer_command_option {
+  color: #808080;
+  line-height: 32px;
+  padding-right: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.composer_dropdown .composer_command_value {
+  color: #52719a;
+  display: inline;
+}
+.composer_dropdown .composer_command_desc {
+  display: inline;
+  color: #808080;
+  padding-left: 7px;
+  font-weight: normal;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+a.composer_command_option:hover .composer_command_desc,
+a.composer_command_option.composer_autocomplete_option_active .composer_command_desc {
+  color: #698192;
+}
+.composer_command_desc .emoji {
+  vertical-align: text-bottom;
+}
+
 
 .composer_stickerset_title {
   display: block;
@@ -2557,6 +2679,67 @@ a.composer_emoji_btn {
     margin: -3px 0 0 0;
   }
 }
+
+.composer_command_btn {
+  display: block;
+  position: absolute;
+  right: 37px;
+  top: 4px;
+  cursor: pointer;
+  padding: 0;
+
+  width: 20px;
+  height: 20px;
+}
+.icon-slash {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: top;
+  opacity: 0.8;
+
+  .image-2x('../img/icons/General.png', 40px, 848px);
+  background-position: -10px -790px;
+
+  .composer_command_btn.active & {
+    background-position: -10px -820px;
+  }
+
+  .composer_command_btn:hover & {
+    opacity: 1.0;
+  }
+}
+
+.composer_keyboard_btn {
+  display: block;
+  position: absolute;
+  right: 37px;
+  top: 4px;
+  cursor: pointer;
+  padding: 0;
+
+  width: 20px;
+  height: 20px;
+}
+.icon-keyboard {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: top;
+  opacity: 0.8;
+
+  .image-2x('../img/icons/General.png', 40px, 848px);
+  background-position: -10px -730px;
+
+  .composer_keyboard_btn.active & {
+    background-position: -10px -760px;
+  }
+
+  .composer_keyboard_btn:hover & {
+    opacity: 1.0;
+  }
+}
+
 
 .error_modal_window {
   .modal-dialog {
@@ -2984,13 +3167,6 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
   }
 }
 
-.im_edit_panel_title {
-  text-align: center;
-  margin: 0;
-  font-size: 14px;
-  line-height: 34px;
-}
-
 .im_message_focus {
   .im_message_date,
   .im_message_document_size,
@@ -3020,6 +3196,8 @@ a.peer_photo_init {
   color: #fff;
   text-align: center;
   text-transform: uppercase;
+
+  .user-select(none);
 }
 
 h5 {
