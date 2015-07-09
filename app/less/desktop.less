@@ -1794,9 +1794,23 @@ a.im_panel_peer_photo .peer_initials {
   max-width: 362px;
   display: inline-block;
 }
-.im_message_selected .im_message_outer_wrap,
-.im_message_focus .im_message_outer_wrap {
+.im_message_selected .im_message_outer_wrap {
   background: #f2f6fa;
+}
+
+.im_message_focus .im_message_outer_wrap {
+  background-color: rgba(242, 246, 250, 1.0);
+  animation-name: im_message_focus_fade;
+  animation-duration: 5s;
+}
+
+@keyframes im_message_focus_fade {
+    from {
+      background-color: rgba(242, 246, 250, 1.0);
+    }
+    to {
+      background-color: rgba(242, 246, 250, 0);
+    }
 }
 
 .im_history_selectable .im_message_outer_wrap {
