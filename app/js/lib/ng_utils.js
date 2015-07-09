@@ -339,7 +339,7 @@ angular.module('izhukov.utils', [])
 
   var dbName = 'cachedFiles';
   var dbStoreName = 'files';
-  var dbVersion = 1;
+  var dbVersion = 2;
   var openDbPromise;
   var storageIsAvailable = $window.indexedDB !== undefined &&
                            $window.IDBTransaction !== undefined;
@@ -387,21 +387,7 @@ angular.module('izhukov.utils', [])
         deferred.reject(error);
       };
 
-      // Interim solution for Google Chrome to create an objectStore. Will be deprecated
-      if (db.setVersion) {
-        if (db.version != dbVersion) {
-          db.setVersion(dbVersion).onsuccess = function () {
-            createObjectStore(db);
-            deferred.resolve(db);
-          };
-        }
-        else {
-          deferred.resolve(db);
-        }
-      }
-      else {
-        deferred.resolve(db);
-      }
+      deferred.resolve(db);
     };
 
     request.onerror = function (event) {
@@ -411,7 +397,12 @@ angular.module('izhukov.utils', [])
     }
 
     request.onupgradeneeded = function (event) {
-      createObjectStore(event.target.result);
+      console.warn('performing idb upgrade from', event.oldVersion, 'to', event.newVersion);
+      var db = event.target.result;
+      if (event.oldVersion == 1) {
+        db.deleteObjectStore(dbStoreName);
+      }
+      createObjectStore(db);
     };
 
     return openDbPromise = deferred.promise;

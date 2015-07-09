@@ -1225,7 +1225,9 @@ Scroller.prototype.updateHeight = function () {
   } else {
     height = this.scroller[0].offsetHeight;
   }
-  $(this.scroller).nanoScroller();
+  if (this.useNano) {
+    $(this.scroller).nanoScroller();
+  }
   return height;
 }
 
