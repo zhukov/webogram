@@ -3707,9 +3707,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             apiDoc.stickerEmojiRaw = attribute.alt;
             apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(apiDoc.stickerEmojiRaw, {noLinks: true, noLinebreaks: true});
           }
-          if (attribute.stickerset &&
-              attribute.stickerset._ == 'inputStickerSetID') {
-            apiDoc.stickerSetID = attribute.stickerset.id;
+          if (attribute.stickerset) {
+            if (attribute.stickerset._ == 'inputStickerSetEmpty') {
+              delete attribute.stickerset;
+            }
+            else if (attribute.stickerset._ == 'inputStickerSetID') {
+              apiDoc.stickerSetInput = attribute.stickerset;
+            }
           }
           break;
         case 'documentAttributeImageSize':
@@ -4017,6 +4021,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   return {
     start: start,
     openStickersetLink: openStickersetLink,
+    openStickerset: openStickerset,
     installStickerset: installStickerset,
     getStickers: getStickers,
     getStickerset: getStickerset,
@@ -4178,11 +4183,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function openStickersetLink (shortName) {
-    var scope = $rootScope.$new(true);
-    scope.inputStickerset = {
+    return openStickerset({
       _: 'inputStickerSetShortName',
       short_name: shortName
-    };
+    });
+  }
+
+  function openStickerset (inputStickerset) {
+    var scope = $rootScope.$new(true);
+    scope.inputStickerset = inputStickerset;
     var modal = $modal.open({
       templateUrl: templateUrl('stickerset_modal'),
       controller: 'StickersetModalController',

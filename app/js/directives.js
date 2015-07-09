@@ -1898,7 +1898,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myLoadSticker', function(MtpApiFileManager, FileManager) {
+  .directive('myLoadSticker', function(MtpApiFileManager, FileManager, AppStickersManager) {
 
     var emptySrc = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
@@ -1968,6 +1968,14 @@ angular.module('myApp.directives', ['myApp.filters'])
         }, function (e) {
           console.log('Download sticker failed', e, fullLocation);
         });
+      }
+
+      if (attrs.open && $scope.document.stickerSetInput) {
+        element
+          .addClass('clickable')
+          .on('click', function () {
+            AppStickersManager.openStickerset($scope.document.stickerSetInput);
+          });
       }
     }
   })

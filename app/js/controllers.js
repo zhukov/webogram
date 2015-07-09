@@ -1415,6 +1415,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               target.getAttribute('ng-click')) {
             return false;
           }
+          var events = $._data(target, 'events');
+          if (events && (events.click || events.mousedown)) {
+            return false;
+          }
           target = target.parentNode;
         }
       }
