@@ -389,7 +389,7 @@ html {
   border: 0;
   overflow: hidden;
 }
-.im_history_selectable .im_message_outer_wrap:hover,
+.im_history_select_active .im_message_outer_wrap:hover,
 .im_message_selected {
   background: #e1e9f0;
 }
@@ -636,10 +636,10 @@ img.im_message_video_thumb,
 .im_message_focus .audio_player_duration,
 .im_message_focus .audio_player_size,
 .im_message_focus .im_message_fwd_date,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_document_size,
-.im_history_selectable .im_message_outer_wrap:hover .audio_player_duration,
-.im_history_selectable .im_message_outer_wrap:hover .audio_player_size,
-.im_history_selectable .im_message_outer_wrap:hover .im_message_fwd_date {
+.im_history_select_active .im_message_outer_wrap:hover .im_message_document_size,
+.im_history_select_active .im_message_outer_wrap:hover .audio_player_duration,
+.im_history_select_active .im_message_outer_wrap:hover .audio_player_size,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_fwd_date {
   color: #68839c;
 }
 .im_message_from_photo,
@@ -834,10 +834,10 @@ a.im_dialog_selected .im_dialog_message_text {
 .im_message_selected .audio_player_title,
 .im_message_selected .audio_player_duration,
 .im_message_selected .audio_player_size,
-.im_history_selectable .im_message_selected:hover .im_message_document_size,
-.im_history_selectable .im_message_selected:hover .audio_player_duration,
-.im_history_selectable .im_message_selected:hover .audio_player_size,
-.im_history_selectable .im_message_selected:hover .im_message_fwd_date {
+.im_history_select_active .im_message_selected:hover .im_message_document_size,
+.im_history_select_active .im_message_selected:hover .audio_player_duration,
+.im_history_select_active .im_message_selected:hover .audio_player_size,
+.im_history_select_active .im_message_selected:hover .im_message_fwd_date {
   color: #fff;
 }
 a.im_message_fwd_author {
