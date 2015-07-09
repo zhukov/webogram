@@ -168,7 +168,7 @@
                   <form my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
 
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
-                      <a class="im_send_reply_cancel" ng-click="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
                       <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMessage" watch="true"></a>
                     </div>
 

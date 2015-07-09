@@ -2653,7 +2653,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link($scope, element, attrs) {
-
       element.addClass('peer_photo_init');
 
       var peerID, peer, peerPhoto;
@@ -2729,6 +2728,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$watch(attrs.myPeerPhotolink, setPeerID);
+      setPeerID($scope.$eval(attrs.myPeerPhotolink));
 
       if (attrs.watch) {
         $scope.$on('user_update', function (e, updUserID) {
