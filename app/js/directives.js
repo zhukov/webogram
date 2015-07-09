@@ -373,6 +373,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var thumbWidth = 42;
       var thumbHeight = 42;
       var thumbPhotoSize;
+      var sticker = false;
       if (message.media) {
         switch (message.media._) {
           case 'messageMediaPhoto':
@@ -381,6 +382,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           case 'messageMediaDocument':
             thumbPhotoSize = message.media.document.thumb;
+            if (message.media.document.sticker) {
+              sticker = true;
+            }
             break;
 
           case 'messageMediaVideo':
@@ -398,6 +402,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           location: thumbPhotoSize.location,
           size: thumbPhotoSize.size
         };
+        if (sticker) {
+          $scope.thumb.location.sticker = true;
+        }
       }
 
       if (element[0].tagName == 'A') {
