@@ -1593,17 +1593,22 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         voiceRecord.on('click', function(){
           if (audioRecorder) {
+            $scope.$parent.$parent.voiceRecorder.processing = true;
+
             audioRecorder.ondataavailable = function(e){
               var blob = e.data;
 
               console.log(blob);
               $scope.draftMessage.files = [blob];
               $scope.draftMessage.isMedia = true;
+
+              audioRecorder = null;
+              $scope.$parent.$parent.voiceRecorder.processing = false;
             }
           }
         });
 
-        voiceRecord.on('touchend', function(){
+        $($window).on('touchend', function(){
           if (audioRecorder) {
             audioRecorder.stop();
             audioStream.stop();
