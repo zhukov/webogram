@@ -17,9 +17,6 @@
             <li ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
               <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
             </li>
-            <li ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
-              <a ng-click="leaveGroup()" my-i18n="group_modal_menu_leave"></a>
-            </li>
             <li>
               <a ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></a>
             </li>
@@ -109,14 +106,15 @@
         <div class="chat_modal_members_list">
 
           <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
-            <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)"  class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
+            <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
+            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_leave"></a>
 
             <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 
             <div class="chat_modal_participant_name">
               <a my-user-link="participant.user_id"></a>
             </div>
-            <div class="chat_modal_participant_status" my-user-status="::participant.user_id"></div>
+            <div class="chat_modal_participant_status" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
           </div>
 
         </div>

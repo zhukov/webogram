@@ -3,8 +3,12 @@
 
   <div class="im_message_wrap clearfix" ng-switch="::historyMessage._ == 'messageService'">
 
-    <div class="im_service_message_wrap" ng-switch-when="true">
-      <div class="im_service_message">
+    <div class="im_service_message_wrap" ng-switch-when="true" ng-switch="historyMessage.action._ == 'messageActionBotIntro'">
+      <div ng-switch-when="true" class="im_bot_intro_message_wrap">
+        <div class="im_bot_intro_message_header" my-i18n="message_service_bot_intro_header"></div>
+        <div class="im_bot_intro_message" ng-bind-html="::historyMessage.action.rDescription"></div>
+      </div>
+      <div ng-switch-default class="im_service_message">
         <a class="im_message_author" my-user-link="historyMessage.from_id" short="!historyMessage.to_id.chat_id" color="historyMessage.to_id.chat_id > 0" no-watch="true"></a>
         <span class="im_message_service" my-service-message></span>
       </div>
@@ -45,7 +49,7 @@
           <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.id"></div>
           <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media.document" message-id="historyMessage.id"></div>
-          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio"></div>
+          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio" message="historyMessage"></div>
           <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
           <div ng-switch-when="messageMediaVenue"     my-message-geo="historyMessage.media"></div>
           <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>

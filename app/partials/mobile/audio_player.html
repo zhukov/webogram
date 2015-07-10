@@ -15,6 +15,7 @@
 			<span ng-switch-when="1" ng-bind="::audio.file_name"></span>
 			<span ng-switch-default my-i18n="message_attach_audio_message"></span>
 		</a>
+		<i ng-if="::message.media_unread || false" ng-show="message.media_unread" class="icon icon-audio-unread"></i>
 		<div class="audio_player_meta" ng-if="!audio.downloaded || !(mediaPlayer.player.duration || audio.duration)" ng-switch="audio.progress.enabled">
 			<span ng-switch-when="true" class="audio_player_size" ng-bind="audio.progress | formatSizeProgress"></span>
 			<span ng-switch-default class="audio_player_size" ng-bind="audio.size | formatSize"></span>

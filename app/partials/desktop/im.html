@@ -174,7 +174,7 @@
 
                     <div class="im_send_field_wrap" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
-                      <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && !draftMessage.text.length || draftMessage.text[0] == '/'" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
+                      <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && (!draftMessage.text.length || draftMessage.text[0] == '/')" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
                       <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>

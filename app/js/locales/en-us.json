@@ -284,6 +284,12 @@
 	"message_service_unsupported_action": "unsupported action {action}",
 	"message_service_bot_intro_header": "What can this bot do?",
 
+	"message_action_reply": "Reply",
+	"message_action_delete": "Delete",
+	"message_action_forward": "Forward",
+	"message_action_select": "Select",
+	"message_action_cancel": "Cancel",
+
 	"error_modal_warning_title": "Warning",
 	"error_modal_bad_request_title": "Error",
 	"error_modal_unauthorized_title": "Unauthorized",

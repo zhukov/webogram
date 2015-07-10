@@ -971,7 +971,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, ErrorService) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, ErrorService) {
 
     $scope.$watchCollection('curDialog', applyDialogSelect);
 
@@ -1411,6 +1411,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var target = $event.target;
         while (target) {
           if (target.className.indexOf('im_message_outer_wrap') != -1) {
+            if (Config.Mobile) {
+              return false;
+            }
+            break;
+          }
+          if (Config.Mobile &&
+              target.className.indexOf('im_message_body') != -1) {
             break;
           }
           if (target.tagName == 'A' ||
@@ -1424,9 +1431,37 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           target = target.parentNode;
         }
+
+        if (Config.Mobile) {
+          $modal.open({
+            templateUrl: templateUrl('message_actions_modal'),
+            windowClass: 'message_actions_modal_window'
+          }).result.then(function (action) {
+            switch (action) {
+              case 'reply':
+                selectedReply(messageID);
+                break;
+
+              case 'delete':
+                selectedDelete(messageID);
+                break;
+
+              case 'forward':
+                selectedForward(messageID);
+                break;
+
+              case 'select':
+                $scope.historyState.selectActions = true;
+                $scope.$broadcast('ui_panel_update');
+                toggleMessage(messageID);
+                break;
+            }
+          });
+          return false;
+        }
       }
 
-      var shiftClick = $event.shiftKey;
+      var shiftClick = $event && $event.shiftKey;
       if (shiftClick) {
         $scope.$broadcast('ui_selection_clear');
       }
@@ -1499,29 +1534,36 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     };
 
-    function selectedDelete () {
-      if ($scope.selectedCount > 0) {
-        var selectedMessageIDs = [];
+    function selectedDelete (selectedMessageID) {
+      var selectedMessageIDs = [];
+      if (selectedMessageID) {
+        selectedMessageIDs.push(selectedMessageID);
+      }
+      else if ($scope.selectedCount > 0) {
         angular.forEach($scope.selectedMsgs, function (t, messageID) {
           selectedMessageIDs.push(messageID);
         });
-        if (selectedMessageIDs.length) {
-          ErrorService.confirm({type: 'MESSAGES_DELETE', count: selectedMessageIDs.length}).then(function () {
-            AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
-              selectedCancel();
-            });
+      }
+      if (selectedMessageIDs.length) {
+        ErrorService.confirm({type: 'MESSAGES_DELETE', count: selectedMessageIDs.length}).then(function () {
+          AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
+            selectedCancel();
           });
-        }
+        });
       }
     }
 
-    function selectedForward () {
-      if ($scope.selectedCount > 0) {
-        var selectedMessageIDs = [];
+    function selectedForward (selectedMessageID) {
+      var selectedMessageIDs = [];
+      if (selectedMessageID) {
+        selectedMessageIDs.push(selectedMessageID);
+      }
+      else if ($scope.selectedCount > 0) {
         angular.forEach($scope.selectedMsgs, function (t, messageID) {
           selectedMessageIDs.push(messageID);
         });
-
+      }
+      if (selectedMessageIDs.length) {
         PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
           angular.forEach(peerStrings, function (peerString) {
             var peerID = AppPeersManager.getPeerID(peerString);
@@ -1533,16 +1575,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             });
           });
         });
-
       }
     }
 
-    function selectedReply () {
-      if ($scope.selectedCount == 1) {
-        var selectedMessageID;
+    function selectedReply (selectedMessageID) {
+      if (!selectedMessageID && $scope.selectedCount == 1) {
         angular.forEach($scope.selectedMsgs, function (t, messageID) {
           selectedMessageID = messageID;
         });
+      }
+      if (selectedMessageID) {
         selectedCancel();
         $scope.$broadcast('reply_selected', selectedMessageID);
       }
@@ -2051,12 +2093,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (replyKeyboard) {
         replyKeyboard = AppMessagesManager.wrapReplyMarkup(replyKeyboard);
       }
-      // console.log('update reply markup', peerID, replyKeyboard);
+      console.log('update reply markup', peerID, replyKeyboard);
       $scope.historyState.replyKeyboard = replyKeyboard;
 
       var addReplyMessage =
           replyKeyboard &&
-          !replyKeyboard.hidden &&
+          !replyKeyboard.pFlags.hidden &&
           (replyKeyboard._ == 'replyKeyboardForceReply' ||
           (replyKeyboard._ == 'replyKeyboardMarkup' && peerID < 0));
 

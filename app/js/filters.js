@@ -16,7 +16,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
       if (!user || !user.first_name && !user.last_name) {
         return _('user_name_deleted');
       }
-      return user.first_name + ' ' + user.last_name;
+      return user.first_name + (user.last_name ? ' ' + user.last_name : '');
     }
   })
 
@@ -34,7 +34,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
     return function (user, botChatPrivacy) {
       var statusType = user && user.status && user.status._;
       if (!statusType) {
-        statusType = user.pFlags.bot ? 'userStatusBot' : 'userStatusEmpty';
+        statusType = user && user.pFlags && user.pFlags.bot ? 'userStatusBot' : 'userStatusEmpty';
       }
       switch (statusType) {
         case 'userStatusOnline':

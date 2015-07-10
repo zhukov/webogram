@@ -684,9 +684,6 @@ MessageComposer.prototype.restoreSelection = function () {
 
 
 MessageComposer.prototype.checkAutocomplete = function (forceFull) {
-  if (Config.Mobile) {
-    return false;
-  }
   var pos, value;
   if (this.richTextareaEl) {
     var textarea = this.richTextareaEl[0];
@@ -1091,7 +1088,7 @@ MessageComposer.prototype.showEmojiSuggestions = function (codes) {
       pos = spritesheet[1];
       x = iconSize * spritesheet[3];
       y = iconSize * spritesheet[2];
-      html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w20 emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
+      html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w', iconSize, ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
     }
   }
 
@@ -1144,12 +1141,13 @@ MessageComposer.prototype.showCommandsSuggestions = function (commands) {
 
 MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
-  var width = (this.richTextareaEl || this.textareaEl).outerWidth();
   var height = this.scroller.updateHeight();
+  var width = $((this.richTextareaEl || this.textareaEl)[0].parentNode).outerWidth();
+  console.log(width);
   this.autoCompleteWrapEl.css({
     top: offset.top - height,
-    left: offset.left,
-    width: width - 2
+    left: Config.Mobile ? 0 : offset.left,
+    width: Config.Mobile ? '100%' : width - 2
   });
   this.scroller.update();
 }
@@ -1171,29 +1169,38 @@ function Scroller(content, options) {
   var classPrefix = options.classPrefix || 'scroller';
 
   this.content = $(content);
-  this.content.wrap('<div class="' + classPrefix + '_scrollable_container"><div class="' + classPrefix + '_scrollable_wrap"><div class="' + classPrefix + '_scrollable"></div></div></div>');
-
-  this.scrollable = $(this.content[0].parentNode);
-  this.scroller = $(this.scrollable[0].parentNode);
-  this.wrap = $(this.scroller[0].parentNode);
-
   this.useNano = options.nano !== undefined ? options.nano : !Config.Mobile;
   this.maxHeight = options.maxHeight;
   this.minHeight = options.minHeight;
 
   if (this.useNano) {
-    this.scrollable.addClass('nano-content');
-    this.scroller.addClass('nano');
-    this.scroller.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+    this.setUpNano();
   } else {
-    if (this.maxHeight) {
-      this.wrap.css({maxHeight: this.maxHeight});
-    }
-    if (this.minHeight) {
-      this.wrap.css({minHeight: this.minHeight});
-    }
+    this.setUpNative();
   }
   this.updateHeight();
+}
+Scroller.prototype.setUpNano = function () {
+  this.content.wrap('<div class="scroller_scrollable_container"><div class="scroller_scrollable_wrap nano"><div class="scroller_scrollable nano-content "></div></div></div>');
+
+  this.scrollable = $(this.content[0].parentNode);
+  this.scroller = $(this.scrollable[0].parentNode);
+  this.wrap = $(this.scroller[0].parentNode);
+
+  this.scroller.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+}
+
+Scroller.prototype.setUpNative = function () {
+  this.content.wrap('<div class="scroller_native_scrollable"></div>');
+  this.scrollable = $(this.content[0].parentNode);
+
+  this.scrollable.css({overflow: 'auto'});
+  if (this.maxHeight) {
+    this.scrollable.css({maxHeight: this.maxHeight});
+  }
+  if (this.minHeight) {
+    this.scrollable.css({minHeight: this.minHeight});
+  }
 }
 
 Scroller.prototype.update = function () {
@@ -1213,20 +1220,22 @@ Scroller.prototype.reinit = function () {
 
 Scroller.prototype.updateHeight = function () {
   var height;
-  if (this.maxHeight || this.minHeight) {
-    height = this.content[0].offsetHeight;
-    if (this.maxHeight && height > this.maxHeight) {
-      height = this.maxHeight;
-    }
-    if (this.minHeight && height < this.minHeight) {
-      height = this.minHeight;
-    }
-    this.wrap.css({height: height});
-  } else {
-    height = this.scroller[0].offsetHeight;
-  }
   if (this.useNano) {
+    if (this.maxHeight || this.minHeight) {
+      height = this.content[0].offsetHeight;
+      if (this.maxHeight && height > this.maxHeight) {
+        height = this.maxHeight;
+      }
+      if (this.minHeight && height < this.minHeight) {
+        height = this.minHeight;
+      }
+      this.wrap.css({height: height});
+    } else {
+      height = this.scroller[0].offsetHeight;
+    }
     $(this.scroller).nanoScroller();
+  } else {
+    height = this.scrollable[0].offsetHeight;
   }
   return height;
 }

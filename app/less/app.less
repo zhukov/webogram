@@ -2176,6 +2176,9 @@ a.im_message_fwd_photo {
   color: #999;
   position: absolute;
 }
+.im_send_field_wrap {
+  position: relative;
+}
 textarea.im_message_field {
   font-size: 12px;
   margin-bottom: 10px;
@@ -2196,6 +2199,56 @@ textarea.im_message_field {
   position: absolute;
   margin-top: -7px;
   margin-left: 33px;
+}
+
+.im_send_reply {
+  &_wrap {
+    margin-bottom: 5px;
+  }
+
+  &_form_wrap {
+    a.im_panel_own_photo,
+    a.im_panel_peer_photo {
+      margin-top: 41px;
+    }
+  }
+
+  &_cancel {
+    float: right;
+    display: block;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    margin-top: 5px;
+    -webkit-transform: translate3d(0,0,0);
+    padding-top: 7px;
+
+    .icon-reply-bar {
+      display: block;
+      background: #999;
+      width: 18px;
+      height: 2px;
+      transform-origin: 50% 50%;
+    }
+
+    &:hover {
+      .icon-reply-bar {
+        background: #44a1e8;
+      }
+    }
+  }
+}
+
+.icon-reply-bar {
+  &:first-child {
+    .transform(rotate(-45deg));
+
+    transform-origin: 50% 50%;
+  }
+
+  &:last-child {
+    .transform(translate3d(0,-2px,0) rotate(45deg));
+  }
 }
 
 a.img_fullsize,
@@ -2391,6 +2444,7 @@ img.img_fullsize {
   height: 174px;
   position: relative;
 }
+
 .composer_emoji_tooltip_content {
   padding-right: 8px;
   outline: 0!important;
@@ -2483,8 +2537,6 @@ a.composer_emoji_btn {
   border-radius: 0;
   margin-top: -5px;
   margin-left: -1px;
-}
-.composer_dropdown_scroller {
 }
 
 .composer_dropdown {
@@ -2607,9 +2659,13 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   font-size: 13px;
   color: #444;
   margin: 10px 0 3px;
-}
-.composer_stickerset_title:hover {
-  color: #444;
+
+  &:first-child {
+    margin-top: 0;
+  }
+  &:hover {
+    color: #444;
+  }
 }
 .composer_sticker_btn {
   width: 78px;
@@ -3176,6 +3232,21 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
   .im_message_fwd_date {
     color: #899daf;
   }
+
+  .im_message_outer_wrap {
+    background-color: rgba(242, 246, 250, 1.0);
+    animation-name: im_message_focus_fade;
+    animation-duration: 5s;
+  }
+}
+
+@keyframes im_message_focus_fade {
+    from {
+      background-color: rgba(242, 246, 250, 1.0);
+    }
+    to {
+      background-color: rgba(242, 246, 250, 0);
+    }
 }
 
 /* Colorized user names */

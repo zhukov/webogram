@@ -64,6 +64,11 @@
 
     </div>
 
+    <div class="mobile_modal_section" ng-if="user.pFlags.bot &amp;&amp; bot_info.rAbout">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_about"></h4>
+      <div class="mobile_modal_section_value" ng-bind-html="bot_info.rAbout"></div>
+    </div>
+
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action" ng-click="goToHistory()" my-i18n="user_modal_send_message"></a>
     </div>
@@ -71,6 +76,19 @@
     <div ng-if="user.phone.length > 0" class="mobile_modal_action_wrap">
       <a class="mobile_modal_action" ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
     </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.botNoGroups">
+      <a class="mobile_modal_action" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="bot_info.commands.settings != null">
+      <a class="mobile_modal_action" ng-click="sendCommand('settings')" my-i18n="user_modal_bot_settings"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="bot_info.commands.help != null">
+      <a class="mobile_modal_action" ng-click="sendCommand('help')" my-i18n="user_modal_bot_help"></a>
+    </div>
+
 
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
