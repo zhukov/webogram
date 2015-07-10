@@ -1541,7 +1541,7 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_tooltip_tab_grid.active{background-position:-9px -222px}
 .composer_emoji_tooltip_tab_stickers{background-position:-9px -361px}
 .composer_emoji_tooltip_tab_stickers.active{background-position:-9px -333px}
-.composer_emoji_tooltip_scrollable_container{height:174px;position:relative}
+.composer_emoji_tooltip .scroller_scrollable_container{height:174px;position:relative}
 .composer_emoji_tooltip_content{padding-right:8px;outline:0!important}
 a.composer_emoji_btn{margin:0 1px 0 0;padding:6px;display:block;float:left;border-radius:2px}
 a.composer_emoji_btn:hover{background-color:#edf2f5}
@@ -1810,6 +1810,7 @@ a.md_modal_list_peer_name{color:inherit}
 .md_modal_list_peer_description{margin-top:4px;color:#999}
 .md_modal_list_peer_description .status_online,.md_modal_list_peer_description.status_online{color:#3a6d99}
 .md_modal_footer{padding:15px 27px}
+.md_modal_footer_empty{padding:15px 27px 0}
 .md_photo_loading{display:block;width:72px;height:72px;border-radius:36px;overflow:hidden;background:#48769b;text-align:center;line-height:72px;padding:0}
 .md_photo_loading i{display:inline-block;background:#fff;width:8px;height:8px;border-radius:4px;vertical-align:middle;border:0;margin-left:6px}
 .md_photo_loading i:first-child{margin-left:0}
