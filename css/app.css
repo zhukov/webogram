@@ -1492,8 +1492,16 @@ a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_send_form{margin:0 auto;position:absolute;bottom:0}
 .im_attach_input,.im_media_attach_input{cursor:pointer;font-size:120px!important;opacity:.01;position:absolute;z-index:100;margin:0;padding:0;top:0;right:0}
 .im_send_dropbox_wrap{background:#fff;display:none;padding:17px 10px 0;border:1px dashed #999;overflow:hidden;text-align:center;color:#999;position:absolute}
+.im_send_field_wrap{position:relative}
 textarea.im_message_field{font-size:12px;margin-bottom:10px;padding:6px;min-height:50px;height:50px;resize:none}
 .icon-online{background:#6ec26d;border:1px solid #fff;display:block;width:11px;height:11px;border-radius:6px;overflow:hidden;position:absolute;margin-top:-7px;margin-left:33px}
+.im_send_reply_wrap{margin-bottom:5px}
+.im_send_reply_form_wrap a.im_panel_own_photo,.im_send_reply_form_wrap a.im_panel_peer_photo{margin-top:41px}
+.im_send_reply_cancel{float:right;display:block;width:18px;height:18px;margin-right:6px;margin-top:5px;-webkit-transform:translate3d(0,0,0);padding-top:7px}
+.im_send_reply_cancel .icon-reply-bar{display:block;background:#999;width:18px;height:2px;transform-origin:50% 50%}
+.im_send_reply_cancel:hover .icon-reply-bar{background:#44a1e8}
+.icon-reply-bar:first-child{-webkit-transform:rotate(-45deg);-moz-transform:rotate(-45deg);-o-transform:rotate(-45deg);-ms-transform:rotate(-45deg);transform:rotate(-45deg);transform-origin:50% 50%}
+.icon-reply-bar:last-child{-webkit-transform:translate3d(0,-2px,0) rotate(45deg);-moz-transform:translate3d(0,-2px,0) rotate(45deg);-o-transform:translate3d(0,-2px,0) rotate(45deg);-ms-transform:translate3d(0,-2px,0) rotate(45deg);transform:translate3d(0,-2px,0) rotate(45deg)}
 .img_fullsize_wrap,a.img_fullsize{display:block;text-align:center}
 img.img_fullsize{margin:0 auto}
 .document_modal_image_wrap{overflow:auto}
@@ -1573,6 +1581,7 @@ span.composer_user_photo .peer_initials{line-height:32px;font-size:14px}
 a.composer_command_option.composer_autocomplete_option_active .composer_command_desc,a.composer_command_option:hover .composer_command_desc{color:#698192}
 .composer_command_desc .emoji{vertical-align:text-bottom}
 .composer_stickerset_title{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:700;font-size:13px;color:#444;margin:10px 0 3px}
+.composer_stickerset_title:first-child{margin-top:0}
 .composer_stickerset_title:hover{color:#444}
 .composer_sticker_btn{width:78px;height:78px;display:block;display:inline-block;text-align:center;padding:3px}
 .composer_sticker_btn:hover{background:#f2f6fa}
@@ -1664,6 +1673,9 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .stickerset_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
 .confirm_modal_window .modal-dialog,.error_modal_window .modal-dialog,.md_simple_modal_window .modal-dialog{max-width:348px}
 .im_message_focus .audio_player_duration,.im_message_focus .audio_player_size,.im_message_focus .im_message_date,.im_message_focus .im_message_document_size,.im_message_focus .im_message_fwd_date{color:#899daf}
+.im_message_focus .im_message_outer_wrap{background-color:#f2f6fa;animation-name:im_message_focus_fade;animation-duration:5s}
+@keyframes im_message_focus_fade{from{background-color:#f2f6fa}
+to{background-color:rgba(242,246,250,0)}}
 .user_color_1,.user_color_1:hover{color:#8365ab}
 .user_color_2,.user_color_2:hover{color:#539e4f}
 .user_color_3,.user_color_3:hover{color:#ae9661}
