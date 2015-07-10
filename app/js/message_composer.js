@@ -303,6 +303,9 @@ EmojiTooltip.prototype.updateTabContents = function () {
 
   if (this.tab == 6) { // Stickers
     var renderStickers = function (stickersets) {
+      if (self.tab != 6) {
+        return;
+      }
       var set, docID, i, j, len1, len2;
       for (i = 0, len1 = stickersets.length; i < len1; i++) {
         set = stickersets[i];

@@ -62,7 +62,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var modal = $modal.open({
         templateUrl: templateUrl('country_select_modal'),
         controller: 'CountrySelectModalController',
-        windowClass: 'countries_modal_window mobile_modal'
+        windowClass: 'countries_modal_window mobile_modal',
+        backdrop: 'single'
       });
 
       modal.result.then(selectCountry);
@@ -462,7 +463,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $modal.open({
         templateUrl: templateUrl('settings_modal'),
         controller: 'SettingsModalController',
-        windowClass: 'settings_modal_window mobile_modal'
+        windowClass: 'settings_modal_window mobile_modal',
+        backdrop: 'single'
       });
     };
 
@@ -499,7 +501,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             templateUrl: templateUrl('chat_create_modal'),
             controller: 'ChatCreateModalController',
             scope: scope,
-            windowClass: 'md_simple_modal_window mobile_modal'
+            windowClass: 'md_simple_modal_window mobile_modal',
+            backdrop: 'single'
           });
         }
 

@@ -5605,7 +5605,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       templateUrl: templateUrl('peer_select'),
       controller: 'PeerSelectController',
       scope: scope,
-      windowClass: 'peer_select_window mobile_modal'
+      windowClass: 'peer_select_window mobile_modal',
+      backdrop: 'single'
     }).result;
   }
 
@@ -5627,7 +5628,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       templateUrl: templateUrl('peer_select'),
       controller: 'PeerSelectController',
       scope: scope,
-      windowClass: 'peer_select_window mobile_modal'
+      windowClass: 'peer_select_window mobile_modal',
+      backdrop: 'single'
     }).result;
   }
 
@@ -5655,7 +5657,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       templateUrl: templateUrl('contacts_modal'),
       controller: 'ContactsModalController',
       scope: scope,
-      windowClass: 'contacts_modal_window mobile_modal'
+      windowClass: 'contacts_modal_window mobile_modal',
+      backdrop: 'single'
     }).result;
   }
 
