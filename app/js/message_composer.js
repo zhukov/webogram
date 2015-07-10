@@ -508,9 +508,11 @@ MessageComposer.prototype.setUpInput = function () {
     this.setUpPlaintext();
   }
 
-  var sbWidth = getScrollWidth();
-  if (sbWidth) {
-    (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
+  if (!Config.Mobile) {
+    var sbWidth = getScrollWidth();
+    if (sbWidth) {
+      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
+    }
   }
 }
 
