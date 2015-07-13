@@ -1402,12 +1402,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       if (!$scope.historyState.selectActions) {
-        var sel = (
-          window.getSelection && window.getSelection() ||
-          document.getSelection && document.getSelection() ||
-          document.selection && document.selection.createRange().text || ''
-        ).toString().replace(/^\s+|\s+$/g, '');
-        if (sel) {
+        if (getSelectedText()) {
           return false;
         }
 

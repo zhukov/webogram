@@ -237,6 +237,16 @@ function setRichFocus(field, selectNode) {
   }
 }
 
+function getSelectedText () {
+  var sel = (
+    window.getSelection && window.getSelection() ||
+    document.getSelection && document.getSelection() ||
+    document.selection && document.selection.createRange().text || ''
+  ).toString().replace(/^\s+|\s+$/g, '');
+
+  return sel;
+}
+
 function scrollToNode (scrollable, node, scroller) {
   var elTop = node.offsetTop - 15,
       elHeight = node.offsetHeight + 30,

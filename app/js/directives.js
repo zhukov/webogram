@@ -1217,7 +1217,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           updateSizes();
           if (data && data.blur) {
             $scope.$broadcast('ui_message_blur');
-          } else {
+          } else if (!getSelectedText()) {
             $scope.$broadcast('ui_message_send');
           }
 
