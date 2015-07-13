@@ -2112,7 +2112,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       else if (replyToMarkup) {
         replyClear();
       }
-      $scope.$broadcast('ui_keyboard_update');
+      $scope.$broadcast('ui_keyboard_update', {
+        enabled: replyKeyboard && !replyKeyboard.pFlags.hidden &&
+          replyKeyboard._ == 'replyKeyboardMarkup'
+      });
     }
 
     function replyKeyboardToggle ($event) {

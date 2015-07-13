@@ -250,10 +250,14 @@ angular.module('myApp.directives')
         });
       });
 
-      $scope.$on('ui_panel_update', function () {
+      $scope.$on('ui_panel_update', function (e, data) {
         onContentLoaded(function () {
           updateSizes();
-          $scope.$broadcast('ui_message_send');
+          if (data && data.blur) {
+            $scope.$broadcast('ui_message_blur');
+          } else {
+            $scope.$broadcast('ui_message_send');
+          }
 
           $timeout(function () {
             $(scrollableWrap).trigger('scroll');

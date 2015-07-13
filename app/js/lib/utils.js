@@ -200,13 +200,13 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
       line.push(node.alt);
     }
   }
-  if (selNode === node) {
-    line.push('\001');
-  }
   var curChild = node.firstChild;
   while (curChild) {
     getRichElementValue(curChild, lines, line, selNode, selOffset);
     curChild = curChild.nextSibling;
+  }
+  if (selNode === node) {
+    line.push('\001');
   }
   if (isBlock && line.length) {
     lines.push(line.join(''));

@@ -1066,6 +1066,14 @@ MessageComposer.prototype.focus = function () {
   }
 }
 
+MessageComposer.prototype.blur = function () {
+  if (this.richTextareaEl) {
+    this.richTextareaEl[0].blur();
+  } else {
+    this.textareaEl[0].blur();
+  }
+}
+
 MessageComposer.prototype.renderSuggestions = function (html) {
   this.autoCompleteEl.html(html.join(''));
   this.autoCompleteWrapEl.show();
@@ -1148,7 +1156,6 @@ MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
   var height = this.scroller.updateHeight();
   var width = $((this.richTextareaEl || this.textareaEl)[0].parentNode).outerWidth();
-  console.log(width);
   this.autoCompleteWrapEl.css({
     top: offset.top - height,
     left: Config.Mobile ? 0 : offset.left,
