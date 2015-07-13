@@ -774,7 +774,7 @@ a.footer_link.active:active {
 .icon-select-tick {
   display: none;
 }
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .im_message_wrap {
     position: relative;
   }
@@ -1126,7 +1126,15 @@ a.im_panel_peer_photo .peer_initials {
   .composer_emoji_insert_btn {
     top: 0;
     right: 0px;
-    margin-top: -3px;
+    margin-top: -1px;
+  }
+  .composer_command_btn {
+    top: 2px;
+    right: 35px;
+  }
+  .composer_keyboard_btn {
+    top: 2px;
+    right: 35px;
   }
   .composer_emoji_panel {
     display: none;
