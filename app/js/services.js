@@ -4594,7 +4594,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     "(?:/(?:\\S{0,255}[^\\s.;,(\\[\\]{}<>\"'])?)?";
 
   var usernameRegExp = "[a-zA-Z\\d_]{5,32}";
-  var botCommandRegExp = "\\/([a-zA-Z\\d_]{1,32})(?:@(" + usernameRegExp + "))?(\\s|$)"
+  var botCommandRegExp = "\\/([a-zA-Z\\d_]{1,32})(?:@(" + usernameRegExp + "))?(\\b|$)"
 
   var fullRegExp = new RegExp('(^| )(@)(' + usernameRegExp + ')|(' + urlRegExp + ')|(\\n)|(' + emojiRegExp + ')|(^|\\s)(#[' + alphaNumericRegExp + ']{2,64})|(^|\\s)' + botCommandRegExp, 'i');
 
