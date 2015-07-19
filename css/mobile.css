@@ -48,6 +48,9 @@ html {
   line-height: 0;
   height: auto;
 }
+.tg_page_head .navbar > .container .navbar-quick-nav .navbar-brand {
+  margin-right: 0;
+}
 .tg_page_head .navbar-menu .navbar-nav.navbar-right {
   margin-right: 0;
 }

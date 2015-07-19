@@ -1458,7 +1458,7 @@ div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_message_fwd_date{padding:0}
 .im_message_text{word-wrap:break-word;line-height:150%}
-.im_message_photo_caption,.im_message_video_caption{word-wrap:break-word;line-height:150%;margin-top:3px}
+.im_message_photo_caption,.im_message_video_caption{clear:both;word-wrap:break-word;line-height:150%;margin-top:3px}
 .im_message_mymention{background:#fff8cc}
 .reply_markup_wrap{margin:15px -2px 0}
 .reply_markup_row{padding:4px 0;line-height:0}
