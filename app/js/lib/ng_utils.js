@@ -258,6 +258,7 @@ angular.module('izhukov.utils', [])
 
     if (window.navigator && navigator.getDeviceStorage) {
       var storageName = 'sdcard';
+      var subdir = 'telegram/';
       switch (mimeType.split('/')[0]) {
         case 'video': storageName = 'videos'; break;
         case 'audio': storageName = 'music'; break;
@@ -265,7 +266,7 @@ angular.module('izhukov.utils', [])
       }
       var deviceStorage = navigator.getDeviceStorage(storageName);
 
-      var request = deviceStorage.addNamed(blob, fileName);
+      var request = deviceStorage.addNamed(blob, subdir + fileName);
 
       request.onsuccess = function () {
         console.log('Device storage save result', this.result);
