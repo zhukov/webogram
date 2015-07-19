@@ -2159,6 +2159,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       delete $scope.draftMessage.replyToMessage;
 
+      if (newVal[0].lastModified) {
+        newVal.sort(function (file1, file2) {
+          return file1.lastModified - file2.lastModified;
+        });
+      }
+
       for (var i = 0; i < newVal.length; i++) {
         AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i], options);
         $scope.$broadcast('ui_message_send');
