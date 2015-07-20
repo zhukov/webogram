@@ -544,6 +544,24 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     this.checkAutocomplete();
 
     var length = false;
+
+    var direction = this.richTextareaEl.css('direction');
+    var sbWidth = getScrollWidth();
+
+    if (sbWidth) {
+      if (direction === 'rtl') {
+        this.richTextareaEl.css({
+            marginLeft: -sbWidth,
+            marginRight: 0
+        });
+      } else {
+        this.richTextareaEl.css({
+            marginLeft: 0,
+            marginRight: -sbWidth
+        });
+      }
+    }
+
     if (this.richTextareaEl) {
       clearTimeout(this.updateValueTO);
       var now = tsNow();
