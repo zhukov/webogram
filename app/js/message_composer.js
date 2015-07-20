@@ -551,13 +551,13 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     if (sbWidth) {
       if (direction === 'rtl') {
         this.richTextareaEl.css({
-            marginLeft: -sbWidth,
-            marginRight: 0
+          marginLeft: -sbWidth,
+          marginRight: 0
         });
       } else {
         this.richTextareaEl.css({
-            marginLeft: 0,
-            marginRight: -sbWidth
+          marginLeft: 0,
+          marginRight: -sbWidth
         });
       }
     }
