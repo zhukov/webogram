@@ -58,7 +58,7 @@ Install [node.js](http://nodejs.org/) and run following commands in the project 
 
 ```
 sudo npm install -g gulp
-sudo npm install
+npm install
 ```
 
 This will install all the needed dependencies.
