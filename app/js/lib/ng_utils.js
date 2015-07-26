@@ -1005,6 +1005,13 @@ angular.module('izhukov.utils', [])
       }, 30000);
     }
 
+    if (e.type == 'focus' && !$rootScope.idle.afterFocus) {
+      $rootScope.idle.afterFocus = true;
+      setTimeout(function () {
+        delete $rootScope.idle.afterFocus;
+      }, 10);
+    }
+
     if ($rootScope.idle.isIDLE == isIDLE) {
       return;
     }

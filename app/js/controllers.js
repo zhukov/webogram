@@ -1397,7 +1397,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function toggleMessage (messageID, $event) {
-      if ($scope.historyState.startBot) {
+      if ($scope.historyState.startBot ||
+          $rootScope.idle.afterFocus) {
         return false;
       }
 
