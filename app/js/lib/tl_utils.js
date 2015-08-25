@@ -599,7 +599,7 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
       }
     }
     if (!constructorData) {
-      throw new Error('Constructor not found: ' + constructor);
+      throw new Error('Constructor not found: ' + constructor +' '+ this.fetchInt()+' '+ this.fetchInt());
     }
   }
 

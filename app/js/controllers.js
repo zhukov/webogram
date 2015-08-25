@@ -360,11 +360,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         switch (error.type) {
           case 'PASSWORD_EMPTY':
             $scope.logIn();
+            error.handled = true;
             break;
           case 'PASSWORD_RECOVERY_NA':
             $timeout(function () {
               $scope.canReset = true;
             }, 1000);
+            error.handled = true;
             break;
         }
       })
