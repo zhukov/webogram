@@ -51,7 +51,8 @@ Config.Navigator = {
 Config.I18n = {
   locale: 'en-us',
   supported: [
-    "en-us"
+    "ca-es"
+    ,"en-us"
     ,"es-es"
     ,"de-de"
     ,"it-it"
@@ -60,6 +61,7 @@ Config.I18n = {
     // ,"ru-ru"
   ], // To be copied to package.json
   languages: {
+    'ca-es': 'Català',
     'en-us': 'English',
     'de-de': 'Deutsch',
     'es-es': 'Español',
@@ -69,6 +71,7 @@ Config.I18n = {
     'pt-br': 'Português (Brazil)'
   },
   aliases: {
+    'ca': 'ca-es',
     'en': 'en-us',
     'de': 'de-de',
     'es': 'es-es',
