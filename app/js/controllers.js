@@ -2671,7 +2671,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       ErrorService.confirm({type: 'PHOTO_DELETE'}).then(function () {
         $scope.photo.updating = true;
         MtpApiManager.invokeApi('messages.editChatPhoto', {
-          chat_id: $scope.chatID,
+          chat_id: AppChatsManager.getChatInput($scope.chatID),
           photo: {_: 'inputChatPhotoEmpty'}
         }).then(function (updates) {
           ApiUpdatesManager.processUpdateMessage(updates);
@@ -2949,14 +2949,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.leaveGroup = function () {
       MtpApiManager.invokeApi('messages.deleteChatUser', {
-        chat_id: $scope.chatID,
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
         user_id: {_: 'inputUserSelf'}
       }).then(onChatUpdated);
     };
 
     $scope.returnToGroup = function () {
       MtpApiManager.invokeApi('messages.addChatUser', {
-        chat_id: $scope.chatID,
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
         user_id: {_: 'inputUserSelf'}
       }).then(onChatUpdated);
     };
@@ -2971,7 +2971,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       ContactsSelectService.selectContacts({disabled: disabled}).then(function (userIDs) {
         angular.forEach(userIDs, function (userID) {
           MtpApiManager.invokeApi('messages.addChatUser', {
-            chat_id: $scope.chatID,
+            chat_id: AppChatsManager.getChatInput($scope.chatID),
             user_id: AppUsersManager.getUserInput(userID),
             fwd_limit: 100
           }).then(function (updates) {
@@ -2985,7 +2985,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.kickFromGroup = function (userID) {
       MtpApiManager.invokeApi('messages.deleteChatUser', {
-        chat_id: $scope.chatID,
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
         user_id: AppUsersManager.getUserInput(userID)
       }).then(onChatUpdated);
     };
@@ -3024,7 +3024,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.photo.updating = true;
       MtpApiFileManager.uploadFile(photo).then(function (inputFile) {
         return MtpApiManager.invokeApi('messages.editChatPhoto', {
-          chat_id: $scope.chatID,
+          chat_id: AppChatsManager.getChatInput($scope.chatID),
           photo: {
             _: 'inputChatUploadedPhoto',
             file: inputFile,
@@ -3039,7 +3039,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.deletePhoto = function () {
       $scope.photo.updating = true;
       MtpApiManager.invokeApi('messages.editChatPhoto', {
-        chat_id: $scope.chatID,
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
         photo: {_: 'inputChatPhotoEmpty'}
       }).then(onChatUpdated)['finally'](function () {
         $scope.photo.updating = false;
@@ -3903,7 +3903,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.group.updating = true;
 
       return MtpApiManager.invokeApi('messages.editChatTitle', {
-        chat_id: $scope.chatID,
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
         title: $scope.group.name
       }).then(function (updates) {
         ApiUpdatesManager.processUpdateMessage(updates);

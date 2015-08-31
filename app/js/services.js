@@ -599,6 +599,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return chats[id] || {id: id, deleted: true};
   }
 
+  function isChannel (id) {
+    return (chats[id] || {})._ == 'channel';
+  }
+
+  function getChatInput (id) {
+    if (!id) {
+      return {_: 'inputChatEmpty'};
+    }
+    if (isChannel(id)) {
+      return {
+        _: 'inputChannel',
+        channel_id: id,
+        access_hash: getChat(id).access_hash || 0
+      }
+    }
+    return {_: 'inputChat', chat_id: id};
+  }
+
   function getChatFull(id) {
     if (chatsFull[id] !== undefined) {
       if (chats[id].version == chatsFull[id].participants.version ||
@@ -610,7 +628,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return chatFullPromises[id];
     }
     return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
-      chat_id: id
+      chat_id: getChatInput(id)
     }).then(function (result) {
       saveApiChats(result.chats);
       AppUsersManager.saveApiUsers(result.users);
@@ -632,7 +650,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return chatFull.exported_invite.link;
       }
       return MtpApiManager.invokeApi('messages.exportChatInvite', {
-        chat_id: id
+        chat_id: getChatInput(id)
       }).then(function (exportedInvite) {
         if (chatsFull[id] !== undefined) {
           chatsFull[id].exported_invite = exportedInvite;
@@ -661,6 +679,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getChatString (id) {
     var chat = getChat(id);
+    if (isChannel(id)) {
+      return 'c' + id + '_' + chat.access_hash;
+    }
     return 'g' + id;
   }
 
@@ -758,6 +779,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiChats: saveApiChats,
     saveApiChat: saveApiChat,
     getChat: getChat,
+    isChannel: isChannel,
+    getChatInput: getChatInput,
     getChatFull: getChatFull,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
@@ -771,12 +794,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 .service('AppPeersManager', function (AppUsersManager, AppChatsManager, MtpApiManager) {
   return {
     getInputPeer: function (peerString) {
-      var isUser = peerString.charAt(0) == 'u',
+      var firstChar = peerString.charAt(0),
           peerParams = peerString.substr(1).split('_');
 
-      return isUser
-            ? {_: 'inputPeerUser', user_id: peerParams[0], access_hash: peerParams[1]}
-            : {_: 'inputPeerChat', chat_id: peerParams[0]};
+      if (firstChar == 'u') {
+        return {
+          _: 'inputPeerUser',
+          user_id: peerParams[0],
+          access_hash: peerParams[1]
+        };
+      }
+      else if (firstChar == 'c') {
+        return {
+          _: 'inputPeerChannel',
+          channel_id: peerParams[0],
+          access_hash: peerParams[1] || 0
+        };
+      }
+      else {
+        return {
+          _: 'inputPeerChat',
+          chat_id: peerParams[0]
+        }
+      }
     },
     getInputPeerByID: function (peerID) {
       if (peerID > 0) {
@@ -786,10 +826,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: AppUsersManager.getUser(peerID).access_hash || 0
         };
       } else if (peerID < 0) {
+        var chatID = -peerID;
+        if (!AppChatsManager.isChannel(chatID)) {
+          return {
+            _: 'inputPeerChat',
+            chat_id: chatID
+          };
+        }
         return {
-          _: 'inputPeerChat',
-          chat_id: -peerID
-        };
+          _: 'inputPeerChannel',
+          channel_id: chatID,
+          access_hash: AppChatsManager.getChat(chatID).access_hash || 0
+        }
       }
     },
     getPeerSearchText: function (peerID) {
@@ -809,9 +857,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return AppChatsManager.getChatString(-peerID);
     },
     getOutputPeer: function (peerID) {
-      return peerID > 0
-            ? {_: 'peerUser', user_id: peerID}
-            : {_: 'peerChat', chat_id: -peerID};
+      if (peerID > 0) {
+        return {_: 'peerUser', user_id: peerID};
+      }
+      var chatID = -peerID;
+      if (AppChatsManager.isChannel(chatID)) {
+        return {_: 'peerChannel', channel_id: chatID}
+      }
+      return {_: 'peerChat', chat_id: chatID}
     },
     getPeerID: function (peerString) {
       if (angular.isObject(peerString)) {
@@ -1759,27 +1812,30 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           message: text,
           random_id: randomID,
           reply_to_msg_id: replyToMsgID
-        }, sentRequestOptions).then(function (sentMessage) {
-          message.date = sentMessage.date;
-          message.id = sentMessage.id;
-          message.media = sentMessage.media;
-
-          ApiUpdatesManager.processUpdateMessage({
-            _: 'updates',
-            users: [],
-            chats: [],
-            seq: 0,
-            updates: [{
-              _: 'updateMessageID',
-              random_id: randomIDS,
-              id: sentMessage.id
-            }, {
-              _: 'updateNewMessage',
-              message: message,
-              pts: sentMessage.pts,
-              pts_count: sentMessage.pts_count
-            }]
-          });
+        }, sentRequestOptions).then(function (updates) {
+          if (updates._ == 'updateShortSentMessage') {
+            message.flags = updates.flags;
+            message.date = updates.date;
+            message.id = updates.id;
+            message.media = updates.media;
+            updates = {
+              _: 'updates',
+              users: [],
+              chats: [],
+              seq: 0,
+              updates: [{
+                _: 'updateMessageID',
+                random_id: randomIDS,
+                id: updates.id
+              }, {
+                _: 'updateNewMessage',
+                message: message,
+                pts: updates.pts,
+                pts_count: updates.pts_count
+              }]
+            };
+          }
+          ApiUpdatesManager.processUpdateMessage(updates);
         }, function (error) {
           toggleError(true);
         })['finally'](function () {
@@ -2102,7 +2158,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       return MtpApiManager.invokeApi('messages.startBot', {
         bot: AppUsersManager.getUserInput(botID),
-        chat_id: chatID,
+        chat_id: AppChatsManager.getChatInput(chatID),
         random_id: randomID,
         start_param: startParam
       });
@@ -2113,7 +2169,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (chatID) {
       return MtpApiManager.invokeApi('messages.addChatUser', {
-        chat_id: chatID,
+        chat_id: AppChatsManager.getChatInput(chatID),
         user_id: AppUsersManager.getUserInput(botID)
       }).then(function (updates) {
         ApiUpdatesManager.processUpdateMessage(updates);
