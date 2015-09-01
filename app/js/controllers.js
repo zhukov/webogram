@@ -2196,6 +2196,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_message_send');
       }
       delete $scope.draftMessage.sticker;
+      resetDraft();
     }
 
     function onCommandSelected (command) {
@@ -2203,8 +2204,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       AppMessagesManager.sendText($scope.curDialog.peerID, command);
+      resetDraft();
       delete $scope.draftMessage.sticker;
       delete $scope.draftMessage.text;
+      delete $scope.draftMessage.command;
       $scope.$broadcast('ui_message_send');
       $scope.$broadcast('ui_peer_draft');
     }
