@@ -52,8 +52,8 @@
           </div>
         </div>
 
-        <div class="im_message_text" ng-if="::historyMessage.message.length || false" ng-bind-html="::historyMessage.richMessage" dir="auto"></div>
-        <!-- <div class="im_message_external_embed_wrap" ng-if="::historyMessage.richUrlEmbed || false" my-external-embed="historyMessage.richUrlEmbed"></div> -->
+        <div class="im_message_text" ng-if="::historyMessage.message.length || false" my-message-text="::historyMessage" dir="auto"></div>
+
         <div ng-if="::historyMessage.media || historyMessage.id < 0 ? true : false" class="im_message_media" ng-switch="historyMessage.media._">
 
           <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.id"></div>

@@ -1736,6 +1736,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           selective: (apiMessage.reply_markup.flags & 4) > 0
         };
       }
+
+      if (apiMessage.message && apiMessage.message.length) {
+        var myEntities = RichTextProcessor.parseEntities(apiMessage.message);
+        var apiEntities = apiMessage.entities || [];
+        apiMessage.totalEntities = RichTextProcessor.mergeEntities(myEntities, apiEntities, !apiMessage.pending);
+      }
     });
   }
 
@@ -1751,7 +1757,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
         replyToMsgID = options.replyToMsgID,
+        entities = [],
         message;
+
+    text = RichTextProcessor.parseMarkdown(text, entities);
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1777,6 +1786,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         message: text,
         random_id: randomIDS,
         reply_to_msg_id: replyToMsgID,
+        entities: entities,
         pending: true
       };
 
@@ -1806,18 +1816,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (replyToMsgID) {
           flags |= 1;
         }
+        if (entities.length) {
+          flags |= 8;
+        }
+        console.log(flags, entities);
         MtpApiManager.invokeApi('messages.sendMessage', {
           flags: flags,
           peer: inputPeer,
           message: text,
           random_id: randomID,
-          reply_to_msg_id: replyToMsgID
+          reply_to_msg_id: replyToMsgID,
+          entities: entities
         }, sentRequestOptions).then(function (updates) {
           if (updates._ == 'updateShortSentMessage') {
             message.flags = updates.flags;
             message.date = updates.date;
             message.id = updates.id;
             message.media = updates.media;
+            message.entities = updates.entities;
             updates = {
               _: 'updates',
               users: [],
@@ -2464,26 +2480,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             fetchSingleMessagesTimeout = setTimeout(fetchSingleMessages, 100);
           }
         }
-      }
-    }
-
-    if (message.message && message.message.length) {
-      var options = {
-        noCommands: !withBot,
-        fromBot: fromBot
-      };
-      if (!Config.Navigator.mobile) {
-        options.extractUrlEmbed = true;
-      }
-      if (message.flags & 16) {
-        var user = AppUsersManager.getSelf();
-        if (user) {
-          options.highlightUsername = user.username;
-        }
-      }
-      message.richMessage = RichTextProcessor.wrapRichText(message.message, options);
-      if (options.extractedUrlEmbed) {
-        message.richUrlEmbed = options.extractedUrlEmbed;
       }
     }
 
@@ -4665,6 +4661,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
   var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
 
+  var markdownRegExp = /(^|\n)```(.{0,16})\n([\s\S]+?)\n```(\n|$)|(^|\s)`([^\n]+?)`/;
+
   var siteHashtags = {
     Telegram: '#/im?q=%23{1}',
     Twitter: 'https://twitter.com/hashtag/{1}',
@@ -4681,7 +4679,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   return {
     wrapRichText: wrapRichText,
-    wrapPlainText: wrapPlainText
+    wrapPlainText: wrapPlainText,
+    parseEntities: parseEntities,
+    parseMarkdown: parseMarkdown,
+    mergeEntities: mergeEntities
   };
 
   function getEmojiSpritesheetCoords(emojiCode) {
@@ -4699,210 +4700,427 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return null;
   }
 
-  function wrapRichText(text, options) {
+  function parseEntities (text, options) {
+    options = options || {};
+
+    var match,
+        raw = text,
+        url,
+        entities = [],
+        emojiCode,
+        emojiCoords,
+        matchIndex,
+        rawOffset = 0;
+
+    // var start = tsNow();
+
+    while ((match = raw.match(fullRegExp))) {
+      matchIndex = rawOffset + match.index;
+
+      if (match[3]) { // mentions
+        entities.push({
+          _: 'messageEntityMention',
+          offset: matchIndex + match[1].length,
+          length: match[2].length + match[3].length
+        });
+      }
+      else if (match[4]) {
+        if (emailRegExp.test(match[4])) { // email
+          entities.push({
+            _: 'messageEntityEmail',
+            offset: matchIndex,
+            length: match[4].length
+          });
+        } else {
+          var url = false,
+              protocol = match[5],
+              tld = match[6],
+              excluded = '';
+
+          if (tld) { // URL
+            if (!protocol && (tld.substr(0, 4) === 'xn--' || Config.TLD.indexOf(tld.toLowerCase()) !== -1)) {
+              protocol = 'http://';
+            }
+
+            if (protocol) {
+              var balanced = checkBrackets(match[4]);
+
+              if (balanced.length !== match[4].length) {
+                excluded = match[4].substring(balanced.length);
+                match[4] = balanced;
+              }
+
+              url = (match[5] ? '' : protocol) + match[4];
+            }
+
+            var tgMeMatch;
+            if (tld == 'me' &&
+                (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+              var path = tgMeMatch[1].split('/');
+              switch (path[0]) {
+                case 'joinchat':
+                  url = 'tg://join?invite=' + path[1];
+                  break;
+                case 'addstickers':
+                  url = 'tg://addstickers?set=' + path[1];
+                  break;
+                default:
+                  var domainQuery = path[0].split('?');
+                  url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
+              }
+            }
+          } else { // IP address
+            url = (match[5] ? '' : 'http://') + match[4];
+          }
+
+          if (url) {
+            entities.push({
+              _: 'messageEntityUrl',
+              offset: matchIndex,
+              length: match[4].length
+            });
+          }
+        }
+      }
+      else if (match[7]) { // New line
+        entities.push({
+          _: 'messageEntityLinebreak',
+          offset: matchIndex,
+          length: 1
+        });
+      }
+      else if (match[8]) { // Emoji
+        if ((emojiCode = emojiMap[match[8]]) &&
+            (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
+
+          entities.push({
+            _: 'messageEntityEmoji',
+            offset: matchIndex,
+            length: match[0].length,
+            coords: emojiCoords,
+            title: emojiData[emojiCode][1][0]
+          });
+        }
+      }
+      else if (match[10]) { // Hashtag
+        entities.push({
+          _: 'messageEntityHashtag',
+          offset: matchIndex + match[9].length,
+          length: match[10].length
+        });
+      }
+      else if (match[12]) { // Bot command
+        entities.push({
+          _: 'messageEntityBotCommand',
+          offset: matchIndex + match[11].length,
+          length: 1 + match[12].length + (match[13] ? 1 + match[13].length : 0)
+        });
+      }
+      raw = raw.substr(match.index + match[0].length);
+      rawOffset += match.index + match[0].length;
+    }
+
+    if (entities.length) {
+      console.log('parse entities', text, entities.slice());
+    }
+
+    return entities;
+  }
+
+  function parseMarkdown (text, entities) {
+    if (text.indexOf('`') == -1) {
+      return text;
+    }
+    var raw = text;
+    var match;
+    var newText = [];
+    while (match = raw.match(markdownRegExp)) {
+      newText.push(raw.substr(0, match.index));
+
+      if (match[3]) { // pre
+        newText.push(match[1] + match[3] + match[4]);
+        entities.push({
+          _: 'messageEntityPre',
+          language: match[2] || '',
+          offset: match.index + match[1].length,
+          length: match[3].length
+        })
+      } else { // code
+        newText.push(match[5] + match[6]);
+        entities.push({
+          _: 'messageEntityCode',
+          offset: match.index + match[5].length,
+          length: match[6].length
+        })
+      }
+      raw = raw.substr(match.index + match[0].length);
+    }
+    newText.push(raw);
+    return newText.join('');
+  }
+
+  function mergeEntities (currentEntities, newEntities, fromApi) {
+    var totalEntities = newEntities.slice();
+
+    var i, len = currentEntities.length;
+    var j, len2 = newEntities.length;
+    var startJ = 0;
+    var curEntity, newEntity;
+    var start, end, cStart, cEnd, bad;
+    for (i = 0; i < len; i++) {
+      curEntity = currentEntities[i];
+      if (fromApi &&
+          curEntity._ != 'messageEntityLinebreak' &&
+          curEntity._ != 'messageEntityEmoji') {
+        continue;
+      }
+      // console.log('s', curEntity, newEntities);
+      start = curEntity.offset;
+      end = start + curEntity.length;
+      bad = false;
+      for (j = startJ; j < len2; j++) {
+        newEntity = newEntities[j];
+        cStart = newEntity.offset;
+        cEnd = cStart + newEntity.length;
+        if (cStart <= start) {
+          startJ = j;
+        }
+        if (start >= cStart && start < cEnd ||
+            end > cStart && end <= cEnd) {
+          // console.log('bad', curEntity, newEntity);
+          bad = true;
+          break;
+        }
+        if (cStart >= end) {
+          break;
+        }
+      }
+      if (bad) {
+        continue;
+      }
+      totalEntities.push(curEntity);
+    }
+
+    totalEntities.sort(function (a, b) {
+      return a.offset - b.offset;
+    });
+
+    // console.log('merge', currentEntities, newEntities, totalEntities);
+
+    return totalEntities;
+  }
+
+  function wrapRichText (text, options) {
     if (!text || !text.length) {
       return '';
     }
 
     options = options || {};
 
-    var match,
-        raw = text,
-        html = [],
-        url,
+    var entities = options.entities,
         contextSite = options.contextSite || 'Telegram',
         contextExternal = contextSite != 'Telegram',
-        emojiFound = false,
-        emojiTitle,
-        emojiCoords;
+        emojiFound = false;
 
-    // var start = tsNow();
+    if (entities === undefined) {
+      entities = parseEntities(text, options);
+    }
 
-    while ((match = raw.match(fullRegExp))) {
-      html.push(encodeEntities(raw.substr(0, match.index)));
-
-      if (match[3]) { // telegram.me links
-        var contextUrl = !options.noLinks && siteMentions[contextSite];
-        if (contextUrl) {
+    var i = 0;
+    var len = entities.length;
+    var entity;
+    var entityText;
+    var skipEntity;
+    var url;
+    var html = [];
+    var lastOffset = 0;
+    for (i = 0; i < len; i++) {
+      entity = entities[i];
+      if (entity.offset > lastOffset) {
+        html.push(
+          encodeEntities(text.substr(lastOffset, entity.offset - lastOffset))
+        );
+      }
+      else if (entity.offset < lastOffset) {
+        continue;
+      }
+      skipEntity = false;
+      entityText = text.substr(entity.offset, entity.length);
+      switch (entity._) {
+        case 'messageEntityMention':
+          var contextUrl = !options.noLinks && siteMentions[contextSite];
+          if (!contextUrl) {
+            skipEntity = true;
+            break;
+          }
+          var username = entityText.substr(1);
           var attr = '';
           if (options.highlightUsername &&
-              options.highlightUsername.toLowerCase() == match[3].toLowerCase()) {
+              options.highlightUsername.toLowerCase() == username.toLowerCase()) {
             attr = 'class="im_message_mymention"';
           }
           html.push(
-            match[1],
             '<a ',
             attr,
             contextExternal ? ' target="_blank" ' : '',
             ' href="',
-            contextUrl.replace('{1}', encodeURIComponent(match[3])),
+            contextUrl.replace('{1}', encodeURIComponent(username)),
             '">',
-            encodeEntities(match[2] + match[3]),
+            encodeEntities(entityText),
             '</a>'
           );
-        } else {
-          html.push(
-            match[1],
-            encodeEntities(match[2] + match[3])
-          );
-        }
-      }
-      else if (match[4]) { // URL & e-mail
-        if (!options.noLinks) {
-          if (emailRegExp.test(match[4])) {
-            html.push(
-              '<a href="',
-              encodeEntities('mailto:' + match[4]),
-              '" target="_blank">',
-              encodeEntities(match[4]),
-              '</a>'
-            );
-          } else {
-            var url = false,
-                protocol = match[5],
-                tld = match[6],
-                excluded = '';
+          break;
 
-            if (tld) {
-              if (!protocol && (tld.substr(0, 4) === 'xn--' || Config.TLD.indexOf(tld.toLowerCase()) !== -1)) {
-                protocol = 'http://';
-              }
-
-              if (protocol) {
-                var balanced = checkBrackets(match[4]);
-
-                if (balanced.length !== match[4].length) {
-                  excluded = match[4].substring(balanced.length);
-                  match[4] = balanced;
-                }
-
-                url = (match[5] ? '' : protocol) + match[4];
-              }
-
-              var tgMeMatch;
-              if (tld == 'me' &&
-                  (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
-                var path = tgMeMatch[1].split('/');
-                switch (path[0]) {
-                  case 'joinchat':
-                    url = 'tg://join?invite=' + path[1];
-                    break;
-                  case 'addstickers':
-                    url = 'tg://addstickers?set=' + path[1];
-                    break;
-                  default:
-                    var domainQuery = path[0].split('?');
-                    url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
-                }
-              }
-            } else { // IP address
-              url = (match[5] ? '' : 'http://') + match[4];
-            }
-
-            if (url) {
-              html.push(
-                '<a href="',
-                encodeEntities(url),
-                '" target="_blank">',
-                encodeEntities(match[4]),
-                '</a>',
-                excluded
-              );
-
-              if (options.extractUrlEmbed &&
-                  !options.extractedUrlEmbed) {
-                options.extractedUrlEmbed = findExternalEmbed(url);
-              }
-            } else {
-              html.push(encodeEntities(match[0]));
-            }
+        case 'messageEntityHashtag':
+          var contextUrl = !options.noLinks && siteHashtags[contextSite];
+          if (!contextUrl) {
+            skipEntity = true;
+            break;
           }
-        } else {
-          html.push(encodeEntities(match[0]));
-        }
-      }
-      else if (match[7]) { // New line
-        if (!options.noLinebreaks) {
-          html.push('<br/>');
-        } else {
-          html.push(' ');
-        }
-      }
-      else if (match[8]) {
-        if ((emojiCode = emojiMap[match[8]]) &&
-            (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
-
-          emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
-          emojiFound = true;
+          var hashtag = entityText.substr(1);
           html.push(
-            '<span class="emoji emoji-',
-            emojiCoords.category,
-            '-',
-            (emojiIconSize * emojiCoords.column),
-            '-',
-            (emojiIconSize * emojiCoords.row),
-            '" ',
-            'title="',emojiTitle, '">',
-            ':', emojiTitle, ':</span>'
-          );
-        } else {
-          html.push(encodeEntities(match[8]));
-        }
-      }
-      else if (match[10]) {
-        var contextUrl = !options.noLinks && siteHashtags[contextSite] || options.contextHashtag;
-        if (contextUrl) {
-          html.push(
-            encodeEntities(match[9]),
             '<a ',
             contextExternal ? ' target="_blank" ' : '',
             'href="',
-            contextUrl.replace('{1}', encodeURIComponent(match[10].substr(1)))
+            contextUrl.replace('{1}', encodeURIComponent(hashtag))
             ,
             '">',
-            encodeEntities(match[10]),
+            encodeEntities(entityText),
             '</a>'
           );
-        } else {
+          break;
+
+        case 'messageEntityEmail':
+          if (options.noLinks) {
+            skipEntity = true;
+            break;
+          }
           html.push(
-            encodeEntities(match[9]),
-            encodeEntities(match[10])
-          );
-        }
-      }
-      else if (match[12]) { // Bot commands
-        if (!options.noLinks &&
-            !options.noCommands &&
-            !contextExternal) {
-          var bot = match[13] || options.fromBot;
-          html.push(
-            encodeEntities(match[11]),
             '<a href="',
-            encodeEntities('tg://bot_command?command=' + encodeURIComponent(match[12]) + (bot ? '&bot=' + encodeURIComponent(bot) : '')),
-            '">',
-            encodeEntities('/' + match[12] + (match[13] ? '@' + match[13] : '')),
-            '</a>',
-            encodeEntities(match[14])
+            encodeEntities('mailto:' + entityText),
+            '" target="_blank">',
+            encodeEntities(entityText),
+            '</a>'
           );
-        } else {
+          break;
+
+        case 'messageEntityUrl':
+        case 'messageEntityTextUrl':
+          if (options.noLinks) {
+            skipEntity = true;
+            break;
+          }
+          var url = entity.url || entityText;
+          if (!url.match(/^https?:\/\//i)) {
+            url = 'http://' + url;
+          }
+          var tgMeMatch;
+          if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+            var path = tgMeMatch[1].split('/');
+            switch (path[0]) {
+              case 'joinchat':
+                url = 'tg://join?invite=' + path[1];
+                break;
+              case 'addstickers':
+                url = 'tg://addstickers?set=' + path[1];
+                break;
+              default:
+                var domainQuery = path[0].split('?');
+                url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
+            }
+          }
           html.push(
-            encodeEntities(match[0])
+            '<a href="',
+            encodeEntities(url),
+            '" target="_blank">',
+            encodeEntities(entityText),
+            '</a>'
           );
-        }
+          break;
+
+        case 'messageEntityLinebreak':
+          html.push(options.noLinebreaks ? ' ' : '<br/>');
+          break;
+
+        case 'messageEntityEmoji':
+          html.push(
+            '<span class="emoji emoji-',
+            entity.coords.category,
+            '-',
+            (emojiIconSize * entity.coords.column),
+            '-',
+            (emojiIconSize * entity.coords.row),
+            '" ',
+            'title="', entity.title, '">',
+            ':', entity.title, ':</span>'
+          );
+          emojiFound = true;
+          break;
+
+        case 'messageEntityBotCommand':
+          if (options.noLinks || options.noCommands || contextExternal) {
+            skipEntity = true;
+            break;
+          }
+          var command = entityText;
+          var bot, atPos;
+          if ((atPos = command.indexOf('@')) != -1) {
+            bot = command.substr(atPos);
+            command = command.substr(0, atPos);
+          } else {
+            bot = options.fromBot;
+          }
+          html.push(
+            '<a href="',
+            encodeEntities('tg://bot_command?command=' + encodeURIComponent(command) + (bot ? '&bot=' + encodeURIComponent(bot) : '')),
+            '">',
+            encodeEntities(entityText),
+            '</a>'
+          );
+          break;
+
+        case 'messageEntityBold':
+          html.push(
+            '<strong>',
+            encodeEntities(entityText),
+            '</strong>'
+          );
+          break;
+
+        case 'messageEntityItalic':
+          html.push(
+            '<em>',
+            encodeEntities(entityText),
+            '</em>'
+          );
+          break;
+
+        case 'messageEntityCode':
+          html.push(
+            '<code>',
+            encodeEntities(entityText),
+            '</code>'
+          );
+          break;
+
+        case 'messageEntityPre':
+          html.push(
+            '<pre><code',(entity.language ? ' class="language-' + encodeEntities(entity.language) +'"' : ''),'>',
+            encodeEntities(entityText),
+            '</code></pre>'
+          );
+          break;
+
+        default:
+          skipEntity = true;
       }
-      raw = raw.substr(match.index + match[0].length);
+      if (!skipEntity) {
+        lastOffset = entity.offset + entity.length;
+      }
     }
-
-    html.push(encodeEntities(raw));
-
-    // var timeDiff = tsNow() - start;
-    // if (timeDiff > 1) {
-    //   console.log(dT(), 'wrap text', text.length, timeDiff);
-    // }
+    html.push(encodeEntities(text.substr(lastOffset)));
 
     text = $sanitize(html.join(''));
-
-    // console.log(3, text, html);
 
     if (emojiFound) {
       text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text);
@@ -4928,53 +5146,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       url = url.replace(/\)+$/, '');
     }
     return url;
-  }
-
-  function findExternalEmbed(url) {
-    var embedUrlMatches,
-        result;
-
-    if (embedUrlMatches = url.match(youtubeRegExp)) {
-      return ['youtube', embedUrlMatches[1]];
-    }
-    if (embedUrlMatches = url.match(vimeoRegExp)) {
-      return ['vimeo', embedUrlMatches[1]];
-    }
-    else if (embedUrlMatches = url.match(instagramRegExp)) {
-      return ['instagram', embedUrlMatches[1]];
-    }
-    else if (embedUrlMatches = url.match(vineRegExp)) {
-      return ['vine', embedUrlMatches[1]];
-    }
-    else if (embedUrlMatches = url.match(soundcloudRegExp)) {
-      var badFolders = 'explore,upload,pages,terms-of-use,mobile,jobs,imprint'.split(',');
-      var badSubfolders = 'sets'.split(',');
-      if (badFolders.indexOf(embedUrlMatches[1]) == -1 &&
-          badSubfolders.indexOf(embedUrlMatches[2]) == -1) {
-        return ['soundcloud', embedUrlMatches[0]];
-      }
-    }
-    else if (embedUrlMatches = url.match(spotifyRegExp)) {
-      return ['spotify', embedUrlMatches[3].replace('/', ':')];
-    }
-
-    if (!Config.Modes.chrome_packed) { // Need external JS
-      if (embedUrlMatches = url.match(twitterRegExp)) {
-        return ['twitter', embedUrlMatches[0]];
-      }
-      else if (embedUrlMatches = url.match(facebookRegExp)) {
-        if (embedUrlMatches[2]!= undefined){
-          return ['facebook', "https://www.facebook.com/"+embedUrlMatches[2]+"/posts/"+embedUrlMatches[1]];
-        }
-        return ['facebook', embedUrlMatches[0]];
-      }
-      // Sorry, GPlus widget has no `xfbml.render` like callback and is too wide.
-      // else if (embedUrlMatches = url.match(gplusRegExp)) {
-      //   return ['gplus', embedUrlMatches[0]];
-      // }
-    }
-
-    return false;
   }
 
   function wrapPlainText (text, options) {

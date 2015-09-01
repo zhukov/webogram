@@ -420,6 +420,61 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('myMessageText', function(AppMessagesManager, AppUsersManager, RichTextProcessor) {
+    return {
+      link: link,
+      scope: {
+        message: '=myMessageText'
+      }
+    };
+
+    function updateHtml (message, element) {
+      var entities = message.totalEntities;
+      var fromUser = AppUsersManager.getUser(message.from_id);
+      var fromBot = fromUser.pFlags.bot && fromUser.username || false;
+      var withBot = (fromBot ||
+                      message.to_id && (
+                        message.to_id.chat_id ||
+                        message.to_id.user_id && AppUsersManager.isBot(message.to_id.user_id)
+                      )
+                    );
+
+      var options = {
+        noCommands: !withBot,
+        fromBot: fromBot,
+        entities: entities
+      };
+      if (message.flags & 16) {
+        var user = AppUsersManager.getSelf();
+        if (user) {
+          options.highlightUsername = user.username;
+        }
+      }
+      var html = RichTextProcessor.wrapRichText(message.message, options);
+      // console.log('dd', entities, html);
+
+      element.html(html.valueOf());
+    }
+
+    function link ($scope, element, attrs) {
+      var message = $scope.message;
+      var msgID = message.id;
+      // var msgID = $scope.$eval(attrs.myMessageText);
+      // var message = AppMessagesManager.getMessage(msgID);
+
+      updateHtml(message, element);
+
+      if (message.pending) {
+        var unlink = $scope.$on('messages_pending', function () {
+          if (message.id != msgID) {
+            updateHtml(message, element);
+            unlink();
+          }
+        })
+      }
+    }
+  })
+
   .directive('myReplyMarkup', function() {
 
     return {
