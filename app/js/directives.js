@@ -1454,6 +1454,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>');
       var cachedStickerImages = {};
       var audioRecorder = null;
+      var audioPromise = null;
       var audioStream = null;
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
@@ -1595,7 +1596,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (audioRecorder) {
             $scope.$parent.$parent.voiceRecorder.processing = true;
 
-            audioRecorder.ondataavailable = function(e){
+            audioPromise.then(function(e) {
               var blob = e.data;
 
               console.log(blob);
@@ -1604,12 +1605,16 @@ angular.module('myApp.directives', ['myApp.filters'])
 
               audioRecorder = null;
               $scope.$parent.$parent.voiceRecorder.processing = false;
-            }
+            });
           }
         });
 
         $($window).on('touchend', function(){
           if (audioRecorder) {
+            audioPromise = new Promise(function(resolve) {
+              audioRecorder.ondataavailable = resolve;
+            });
+
             audioRecorder.stop();
             audioStream.stop();
 
