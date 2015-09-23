@@ -182,7 +182,7 @@ Finally, if there is no message key passed to the `my-i18n` directive it looks f
 ```html
 <div class="im_history_typing"  my-i18n>
 	<span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
-	<my-i18n-param name="name1"><a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a></my-i18n-param>
+	<my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>
 	<my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
 </div>
 ```
@@ -198,8 +198,8 @@ This way it is even possible to group together several formats which take (mostl
 	<span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
 	<span ng-switch-when="2" my-i18n-format="im_two_typing"></span>
 	<span ng-switch-default my-i18n-format="im_many_typing"></span>
-	<my-i18n-param name="name1"><a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a></my-i18n-param>
-	<my-i18n-param name="name2"><a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a></my-i18n-param>
+	<my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>
+	<my-i18n-param name="name2"><a class="im_history_typing_author" my-peer-link="historyState.typing[1]"></a></my-i18n-param>
 	<my-i18n-param name="count">{{historyState.typing.length - 2}}</my-i18n-param>
 	<my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
 </div>
@@ -208,20 +208,20 @@ will evaluate to (whitespace added for readability):
 
 <div class="im_history_typing" my-i18n>
 	<span ng-switch-when="1" my-i18n-format="im_one_typing">
-		<my-i18n-param name="name1"><a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a></my-i18n-param>
+		<my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>
 		is typing
 		<my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
 	</span>
 	<span ng-switch-when="2" my-i18n-format="im_two_typing">
-		<my-i18n-param name="name1"><a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a></my-i18n-param>
+		<my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>
 		and
-		<my-i18n-param name="name2"><a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a></my-i18n-param>
+		<my-i18n-param name="name2"><a class="im_history_typing_author" my-peer-link="historyState.typing[1]"></a></my-i18n-param>
 		are typing
 		<my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
 	</span>
 	<span ng-switch-default my-i18n-format="im_many_typing">
-		<my-i18n-param name="name1"><a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a></my-i18n-param>,
-		<my-i18n-param name="name2"><a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a></my-i18n-param>
+		<my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>,
+		<my-i18n-param name="name2"><a class="im_history_typing_author" my-peer-link="historyState.typing[1]"></a></my-i18n-param>
 		and
 		<my-i18n-param name="count">{{historyState.typing.length - 2}}</my-i18n-param>
 		more are typing

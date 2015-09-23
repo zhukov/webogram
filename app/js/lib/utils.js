@@ -397,7 +397,7 @@ function versionCompare (ver1, ver2) {
 (function (global) {
 
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-        trimRe = /^\s+|\s$/g;
+      trimRe = /^\s+|\s$/g;
 
   function createIndex () {
     return {
@@ -418,6 +418,10 @@ function versionCompare (ver1, ver2) {
     }
 
     return text;
+  }
+
+  function cleanUsername (username) {
+    return username && username.toLowerCase() || '';
   }
 
   function indexObject (id, searchText, searchIndex) {
@@ -493,6 +497,7 @@ function versionCompare (ver1, ver2) {
     createIndex: createIndex,
     indexObject: indexObject,
     cleanSearchText: cleanSearchText,
+    cleanUsername: cleanUsername,
     search: search
   };
 

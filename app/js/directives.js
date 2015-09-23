@@ -420,7 +420,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myMessageText', function(AppMessagesManager, AppUsersManager, RichTextProcessor) {
+  .directive('myMessageText', function(AppPeersManager, AppMessagesManager, AppUsersManager, RichTextProcessor) {
     return {
       link: link,
       scope: {
@@ -430,14 +430,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function updateHtml (message, element) {
       var entities = message.totalEntities;
-      var fromUser = AppUsersManager.getUser(message.from_id);
-      var fromBot = fromUser.pFlags.bot && fromUser.username || false;
+      var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
+      var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
+      var toPeerID = AppPeersManager.getPeerID(message.to_id);
       var withBot = (fromBot ||
-                      message.to_id && (
-                        message.to_id.chat_id ||
-                        message.to_id.user_id && AppUsersManager.isBot(message.to_id.user_id)
-                      )
-                    );
+                    toPeerID < 0 ||
+                    toPeerID > 0 && AppUsersManager.isBot(toPeerID));
 
       var options = {
         noCommands: !withBot,
@@ -2457,56 +2455,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-
-  .directive('myUserLink', function ($timeout, AppUsersManager) {
-
-    return {
-      link: link
-    };
-
-    function link($scope, element, attrs) {
-
-      var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
-      var short = attrs.short && $scope.$eval(attrs.short);
-
-      var userID;
-      var update = function () {
-        var user = AppUsersManager.getUser(userID);
-        var key = short ? 'rFirstName' : 'rFullName';
-
-        element.html(
-          (override[key] || user[key] || '').valueOf()
-        );
-        if (attrs.color && $scope.$eval(attrs.color)) {
-          element.addClass('user_color_' + user.num);
-        }
-      };
-
-      if (element[0].tagName == 'A') {
-        element.on('click', function () {
-          AppUsersManager.openUser(userID, override);
-        });
-      }
-
-      if (attrs.userWatch) {
-        $scope.$watch(attrs.myUserLink, function (newUserID) {
-          userID = newUserID;
-          update();
-        });
-      } else {
-        userID = $scope.$eval(attrs.myUserLink);
-        update();
-      }
-      if (!attrs.noWatch) {
-        $scope.$on('user_update', function (e, updUserID) {
-          if (userID == updUserID) {
-            update();
-          }
-        });
-      }
-    }
-  })
-
   .directive('myUserStatus', function ($filter, AppUsersManager) {
 
     var statusFilter = $filter('userStatus'),
@@ -2547,46 +2495,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       statuses[curInd] = update;
       $scope.$on('$destroy', function () {
         delete statuses[curInd];
-      });
-    }
-  })
-
-  .directive('myChatLink', function ($timeout, AppChatsManager) {
-
-    return {
-      link: link
-    };
-
-    function link($scope, element, attrs) {
-      var chatID;
-      var update = function () {
-        var chat = AppChatsManager.getChat(chatID);
-
-        element.html(
-          (chat.rTitle || '').valueOf()
-        )
-      };
-
-      if (element[0].tagName == 'A') {
-        element.on('click', function () {
-          AppChatsManager.openChat(chatID);
-        });
-      }
-
-      if (attrs.chatWatch) {
-        $scope.$watch(attrs.myChatLink, function (newChatID) {
-          chatID = newChatID;
-          update();
-        });
-      } else {
-        chatID = $scope.$eval(attrs.myChatLink);
-        update();
-      }
-
-      $scope.$on('chat_update', function (e, updChatID) {
-        if (chatID == updChatID) {
-          update();
-        }
       });
     }
   })
@@ -2712,6 +2620,75 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(element[0].firstChild).addClass(attrs.imgClass)
       }
 
+    }
+  })
+
+  .directive('myPeerLink', function (AppChatsManager, AppUsersManager) {
+
+    return {
+      link: link
+    };
+
+    function link($scope, element, attrs) {
+
+      var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
+      var short = attrs.short && $scope.$eval(attrs.short);
+
+      var peerID;
+      var update = function () {
+        if (element[0].className.indexOf('user_color_') != -1) {
+          element[0].className = element[0].className.replace(/user_color_\d+/g, '');
+        }
+        if (peerID > 0) {
+          var user = AppUsersManager.getUser(peerID);
+          var key = short ? 'rFirstName' : 'rFullName';
+
+          element.html(
+            (override[key] || user[key] || '').valueOf()
+          );
+          if (attrs.color && $scope.$eval(attrs.color)) {
+            element.addClass('user_color_' + user.num);
+          }
+        } else {
+          var chat = AppChatsManager.getChat(-peerID);
+
+          element.html(
+            (chat.rTitle || '').valueOf()
+          );
+        }
+      };
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          if (peerID > 0) {
+            AppUsersManager.openUser(peerID, override);
+          } else {
+            AppChatsManager.openChat(-peerID);
+          }
+        });
+      }
+
+      if (attrs.peerWatch) { // userWatch, chatWatch
+        $scope.$watch(attrs.myPeerLink, function (newPeerID) {
+          peerID = newPeerID;
+          update();
+        });
+      } else {
+        peerID = $scope.$eval(attrs.myPeerLink);
+        update();
+      }
+      if (!attrs.noWatch) {
+        $scope.$on('user_update', function (e, updUserID) {
+          if (peerID == updUserID) {
+            update();
+          }
+        });
+        $scope.$on('chat_update', function (e, updChatID) {
+          if (peerID == -updChatID) {
+            update();
+          }
+        });
+      }
     }
   })
 

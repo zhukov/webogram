@@ -597,9 +597,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if ($scope.curDialog === undefined) {
           $scope.curDialog = {};
         }
-        AppUsersManager.resolveUsername($routeParams.p.substr(1)).then(function (userID) {
+        AppPeersManager.resolveUsername($routeParams.p.substr(1)).then(function (peerID) {
           $scope.curDialog = angular.extend({
-            peer: AppUsersManager.getUserString(userID)
+            peer: AppPeersManager.getPeerString(peerID)
           }, addParams);
         });
       } else {

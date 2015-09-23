@@ -35,7 +35,7 @@
                 <div class="im_dialog_photo pull-left" my-user-photolink="contact.userID" img-class="im_dialog_photo" watch="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" my-user-link="contact.userID"></span>
+                    <span class="im_dialog_user" my-peer-link="contact.userID"></span>
                   </div>
                   <div class="im_dialog_message">
                     <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
@@ -54,7 +54,7 @@
                 <div class="im_dialog_photo pull-left" my-user-photolink="foundUser.userID" img-class="im_dialog_photo" watch="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" my-user-link="foundUser.userID"></span>
+                    <span class="im_dialog_user" my-peer-link="foundUser.userID"></span>
                   </div>
                   <div class="im_dialog_message" ng-switch="foundUser.user.username.length > 0">
                     <span ng-switch-when="true" class="im_dialog_message_text" ng-bind="::'@' + foundUser.user.username"></span>

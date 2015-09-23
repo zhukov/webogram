@@ -17,14 +17,13 @@
 
   <div class="im_dialog_message_wrap">
 
-    <div class="im_dialog_peer" ng-switch="::dialogMessage.peerID > 0">
-      <span class="im_dialog_user" ng-switch-when="true" my-user-link="dialogMessage.peerID"></span>
-      <span class="im_dialog_chat" ng-switch-default  my-chat-link="-dialogMessage.peerID"></span>
+    <div class="im_dialog_peer">
+      <span my-peer-link="dialogMessage.peerID"></span>
     </div>
 
     <div ng-if="dialogMessage.typing > 0" class="im_dialog_message">
       <span class="im_dialog_message_service" my-i18n="im_conversation_group_typing">
-        <my-i18n-param name="name"><span my-user-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+        <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
       </span>
     </div>
 
@@ -47,7 +46,7 @@
               <span
                 ng-switch-when="false"
                 class="im_dialog_chat_from"
-                my-user-link="dialogMessage.from_id" short="true" user-watch="true"
+                my-peer-link="dialogMessage.from_id" short="true" peer-watch="true"
               ></span><span
                 ng-switch-when="true"
                 class="im_dialog_chat_from"
@@ -83,14 +82,14 @@
           <span ng-switch-when="messageActionChatAddUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
             <span ng-switch-when="true" my-i18n="conversation_returned_to_group"></span>
             <span ng-switch-default my-i18n="conversation_invited_user">
-              <my-i18n-param name="user"><span my-user-link="dialogMessage.action.user_id"></span></my-i18n-param>
+              <my-i18n-param name="user"><span my-peer-link="dialogMessage.action.user_id"></span></my-i18n-param>
             </span>
           </span>
 
           <span ng-switch-when="messageActionChatDeleteUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
             <span ng-switch-when="true" my-i18n="conversation_left_group"></span>
             <span ng-switch-default my-i18n="conversation_kicked_user">
-              <my-i18n-param name="user"><span my-user-link="dialogMessage.action.user_id"></span></my-i18n-param>
+              <my-i18n-param name="user"><span my-peer-link="dialogMessage.action.user_id"></span></my-i18n-param>
             </span>
           </span>
 

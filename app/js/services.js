@@ -78,21 +78,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   };
 
-  function userNameClean (username) {
-    return username && username.toLowerCase() || '';
-  }
-
   function resolveUsername (username) {
-    var searchUserName = userNameClean(username);
-    var foundUserID = usernames[searchUserName];
-    if (foundUserID &&
-        userNameClean(users[foundUserID].username) == searchUserName) {
-      return qSync.when(foundUserID);
-    }
-    return MtpApiManager.invokeApi('contacts.resolveUsername', {username: username}).then(function (resolveResult) {
-      saveApiUser(resolveResult);
-      return resolveResult.id;
-    });
+    return usernames[username] || 0;
   }
 
   function saveApiUsers (apiUsers) {
@@ -122,7 +109,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (apiUser.username) {
-      usernames[userNameClean(apiUser.username)] = userID;
+      var searchUsername = SearchIndexManager.cleanUsername(apiUser.username);
+      usernames[searchUsername] = userID;
     }
 
     apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
@@ -562,6 +550,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('AppChatsManager', function ($q, $rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, AppPhotosManager, RichTextProcessor) {
   var chats = {},
+      usernames = {},
       chatsFull = {},
       chatFullPromises = {},
       cachedPhotoLocations = {};
@@ -583,6 +572,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     apiChat.num = (Math.abs(apiChat.id >> 1) % (Config.Mobile ? 4 : 8)) + 1;
 
+    if (apiChat.username) {
+      var searchUsername = SearchIndexManager.cleanUsername(apiChat.username);
+      usernames[searchUsername] = apiChat.id;
+    }
+
     if (chats[apiChat.id] === undefined) {
       chats[apiChat.id] = apiChat;
     } else {
@@ -599,22 +593,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return chats[id] || {id: id, deleted: true};
   }
 
+  function resolveUsername (username) {
+    return usernames[username] || 0;
+  }
+
   function isChannel (id) {
     return (chats[id] || {})._ == 'channel';
   }
 
   function getChatInput (id) {
+    return id || 0;
+  }
+
+  function getChannelInput (id) {
     if (!id) {
-      return {_: 'inputChatEmpty'};
+      return {_: 'inputChannelEmpty'};
     }
-    if (isChannel(id)) {
-      return {
-        _: 'inputChannel',
-        channel_id: id,
-        access_hash: getChat(id).access_hash || 0
-      }
+    return {
+      _: 'inputChannel',
+      channel_id: id,
+      access_hash: getChat(id).access_hash || 0
     }
-    return {_: 'inputChat', chat_id: id};
   }
 
   function getChatFull(id) {
@@ -781,112 +780,158 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getChat: getChat,
     isChannel: isChannel,
     getChatInput: getChatInput,
+    getChannelInput: getChannelInput,
     getChatFull: getChatFull,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
     getChatInviteLink: getChatInviteLink,
+    resolveUsername: resolveUsername,
     hasChat: hasChat,
     wrapForFull: wrapForFull,
     openChat: openChat
   }
 })
 
-.service('AppPeersManager', function (AppUsersManager, AppChatsManager, MtpApiManager) {
-  return {
-    getInputPeer: function (peerString) {
-      var firstChar = peerString.charAt(0),
-          peerParams = peerString.substr(1).split('_');
+.service('AppPeersManager', function (qSync, AppUsersManager, AppChatsManager, MtpApiManager) {
 
-      if (firstChar == 'u') {
-        return {
-          _: 'inputPeerUser',
-          user_id: peerParams[0],
-          access_hash: peerParams[1]
-        };
+  var usernames = {};
+
+  function getInputPeer (peerString) {
+    var firstChar = peerString.charAt(0),
+        peerParams = peerString.substr(1).split('_');
+
+    if (firstChar == 'u') {
+      return {
+        _: 'inputPeerUser',
+        user_id: peerParams[0],
+        access_hash: peerParams[1]
+      };
+    }
+    else if (firstChar == 'c') {
+      return {
+        _: 'inputPeerChannel',
+        channel_id: peerParams[0],
+        access_hash: peerParams[1] || 0
+      };
+    }
+    else {
+      return {
+        _: 'inputPeerChat',
+        chat_id: peerParams[0]
       }
-      else if (firstChar == 'c') {
-        return {
-          _: 'inputPeerChannel',
-          channel_id: peerParams[0],
-          access_hash: peerParams[1] || 0
-        };
-      }
-      else {
+    }
+  }
+
+  function getInputPeerByID (peerID) {
+    if (peerID < 0) {
+      var chatID = -peerID;
+      if (!AppChatsManager.isChannel(chatID)) {
         return {
           _: 'inputPeerChat',
-          chat_id: peerParams[0]
-        }
-      }
-    },
-    getInputPeerByID: function (peerID) {
-      if (peerID > 0) {
-        return {
-          _: 'inputPeerUser',
-          user_id: peerID,
-          access_hash: AppUsersManager.getUser(peerID).access_hash || 0
+          chat_id: chatID
         };
-      } else if (peerID < 0) {
-        var chatID = -peerID;
-        if (!AppChatsManager.isChannel(chatID)) {
-          return {
-            _: 'inputPeerChat',
-            chat_id: chatID
-          };
-        }
+      } else {
         return {
           _: 'inputPeerChannel',
           channel_id: chatID,
           access_hash: AppChatsManager.getChat(chatID).access_hash || 0
         }
       }
-    },
-    getPeerSearchText: function (peerID) {
-      var text;
-      if (peerID > 0) {
-        text = '%pu ' + AppUsersManager.getUserSearchText(peerID);
-      } else if (peerID < 0) {
-        var chat = AppChatsManager.getChat(-peerID);
-        text = '%pg ' + (chat.title || '');
-      }
-      return text;
-    },
-    getPeerString: function (peerID) {
-      if (peerID > 0) {
-        return AppUsersManager.getUserString(peerID);
-      }
-      return AppChatsManager.getChatString(-peerID);
-    },
-    getOutputPeer: function (peerID) {
-      if (peerID > 0) {
-        return {_: 'peerUser', user_id: peerID};
-      }
-      var chatID = -peerID;
-      if (AppChatsManager.isChannel(chatID)) {
-        return {_: 'peerChannel', channel_id: chatID}
-      }
-      return {_: 'peerChat', chat_id: chatID}
-    },
-    getPeerID: function (peerString) {
-      if (angular.isObject(peerString)) {
-        return peerString.user_id
-          ? peerString.user_id
-          : -peerString.chat_id;
-      }
-      var isUser = peerString.charAt(0) == 'u',
-          peerParams = peerString.substr(1).split('_');
-
-      return isUser ? peerParams[0] : -peerParams[0] || 0;
-    },
-    getPeer: function (peerID) {
-      return peerID > 0
-        ? AppUsersManager.getUser(peerID)
-        : AppChatsManager.getChat(-peerID);
-    },
-    getPeerPhoto: function (peerID, userPlaceholder, chatPlaceholder) {
-      return peerID > 0
-        ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
-        : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
     }
+    return {
+      _: 'inputPeerUser',
+      user_id: peerID,
+      access_hash: AppUsersManager.getUser(peerID).access_hash || 0
+    };
+  }
+
+  function getPeerSearchText (peerID) {
+    var text;
+    if (peerID > 0) {
+      text = '%pu ' + AppUsersManager.getUserSearchText(peerID);
+    } else if (peerID < 0) {
+      var chat = AppChatsManager.getChat(-peerID);
+      text = '%pg ' + (chat.title || '');
+    }
+    return text;
+  }
+
+  function getPeerString (peerID) {
+    if (peerID > 0) {
+      return AppUsersManager.getUserString(peerID);
+    }
+    return AppChatsManager.getChatString(-peerID);
+  }
+
+  function getOutputPeer (peerID) {
+    if (peerID > 0) {
+      return {_: 'peerUser', user_id: peerID};
+    }
+    var chatID = -peerID;
+    if (AppChatsManager.isChannel(chatID)) {
+      return {_: 'peerChannel', channel_id: chatID}
+    }
+    return {_: 'peerChat', chat_id: chatID}
+  }
+
+  function resolveUsername (username) {
+    var searchUserName = SearchIndexManager.cleanUsername(username);
+    var foundUserID, foundChatID, foundPeerID, foundUsername;
+    if (foundUserID == AppUsersManager.resolveUsername(searchUserName)) {
+      foundUsername = AppUsersManager.getUser(foundUserID).username;
+      if (SearchIndexManager.cleanUsername(foundUsername) == searchUserName) {
+        return qSync.when(foundUserID);
+      }
+    }
+    if (foundChatID == AppChatsManager.resolveUsername(searchUserName)) {
+      foundUsername = AppChatsManager.getChat(foundChatID).username;
+      if (SearchIndexManager.cleanUsername(foundUsername) == searchUserName) {
+        return qSync.when(-foundChatID);
+      }
+    }
+
+    return MtpApiManager.invokeApi('contacts.resolveUsername', {username: username}).then(function (resolveResult) {
+      AppUsersManager.saveApiUsers(resolveResult.users);
+      AppChatsManager.saveApiChats(resolveResult.chats);
+      return getPeerID(resolveResult.peer);
+    });
+  }
+
+  function getPeerID (peerString) {
+    if (angular.isObject(peerString)) {
+      return peerString.user_id
+        ? peerString.user_id
+        : -(peerString.channel_id || peerString.chat_id);
+    }
+    var isUser = peerString.charAt(0) == 'u',
+        peerParams = peerString.substr(1).split('_');
+
+    return isUser ? peerParams[0] : -peerParams[0] || 0;
+  }
+
+  function getPeer (peerID) {
+    return peerID > 0
+      ? AppUsersManager.getUser(peerID)
+      : AppChatsManager.getChat(-peerID);
+  }
+
+  function getPeerPhoto (peerID, userPlaceholder, chatPlaceholder) {
+    return peerID > 0
+      ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
+      : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
+  }
+
+  return {
+    getInputPeer: getInputPeer,
+    getInputPeerByID: getInputPeerByID,
+    getPeerSearchText: getPeerSearchText,
+    getPeerString: getPeerString,
+    getOutputPeer: getOutputPeer,
+    getPeerID: getPeerID,
+    getPeer: getPeer,
+    getPeerPhoto: getPeerPhoto,
+    resolveUsername: resolveUsername,
+    usernames: usernames
   }
 })
 
@@ -1147,9 +1192,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function requestHistory (inputPeer, maxID, limit, offset) {
     return MtpApiManager.invokeApi('messages.getHistory', {
       peer: inputPeer,
-      offset: offset || 0,
+      add_offset: offset || 0,
       limit: limit || 0,
-      max_id: maxID || 0
+      offset_id: maxID || 0
     }, {noErrorBox: true}).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
       AppChatsManager.saveApiChats(historyResult.chats);
@@ -1503,6 +1548,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return MtpApiManager.invokeApi('messages.search', {
+      flags: 0,
       peer: inputPeer,
       q: query || '',
       filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
@@ -1699,6 +1745,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       apiMessage.date -= serverTimeOffset;
 
+      var toPeerID = AppPeersManager.getPeerID(apiMessage.to_id);
+      var isChannel = apiMessage.to_id._ == 'peerChannel';
+      apiMessage.toID = toPeerID;
+      apiMessage.fromID = apiMessage.from_id || toPeerID;
+      if (apiMessage.fwd_from_id) {
+        apiMessage.fwdFromID = AppPeersManager.getPeerID(apiMessage.fwd_from_id);
+      }
+
       var mediaContext = {
         user_id: apiMessage.from_id,
         date: apiMessage.date
@@ -1726,8 +1780,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             break;
         }
       }
-      if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
-        AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
+      if (apiMessage.action) {
+        if (apiMessage.action._ == 'messageActionChatEditPhoto') {
+          AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
+          if (isChannel) {
+            apiMessage.action._ = 'messageActionChannelEditPhoto';
+          }
+        }
+        if (apiMessage.action._ == 'messageActionChatEditTitle' && isChannel) {
+          apiMessage.action._ = 'messageActionChannelEditTitle';
+        }
       }
       if (apiMessage.reply_markup) {
         apiMessage.reply_markup.pFlags = {
@@ -1819,7 +1881,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (entities.length) {
           flags |= 8;
         }
-        console.log(flags, entities);
+        // console.log(flags, entities);
         MtpApiManager.invokeApi('messages.sendMessage', {
           flags: flags,
           peer: inputPeer,
@@ -2379,8 +2441,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       message.media.progress = messagesStorage[msgID].media.progress;
     }
 
-    var fromUser = AppUsersManager.getUser(message.from_id);
-    var fromBot = fromUser.pFlags.bot && fromUser.username || false;
+    var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
+    var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
     var withBot = (fromBot ||
                     message.to_id && (
                       message.to_id.chat_id ||
@@ -2451,11 +2513,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     else if (message.action) {
       switch (message.action._) {
         case 'messageActionChatEditPhoto':
+        case 'messageActionChannelEditPhoto':
           message.action.photo = AppPhotosManager.wrapForHistory(message.action.photo.id);
           break;
 
         case 'messageActionChatCreate':
         case 'messageActionChatEditTitle':
+        case 'messageActionChannelCreate':
+        case 'messageActionChannelEditTitle':
           message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
           break;
 
@@ -2568,29 +2633,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
       }
 
-      if (curMessage.fwd_from_id &&
+      if (curMessage.fwdFromID &&
           curMessage.media &&
           curMessage.media.document &&
           curMessage.media.document.sticker &&
-          (curMessage.from_id != (prevMessage || {}).from_id || !(prevMessage || {}).fwd_from_id)) {
-        delete curMessage.fwd_from_id;
+          (curMessage.from_id != (prevMessage || {}).from_id || !(prevMessage || {}).fwdFromID)) {
+        delete curMessage.fwdFromID;
         curMessage._ = 'message';
       }
 
       if (prevMessage &&
           curMessage.from_id == prevMessage.from_id &&
-          !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
+          !prevMessage.fwdFromID == !curMessage.fwdFromID &&
           !prevMessage.action &&
           !curMessage.action &&
           curMessage.date < prevMessage.date + 900) {
 
         var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1 && !curMessage.reply_to_msg_id;
-        if (groupFwd && curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
+        if (groupFwd && curMessage.fwdFromID && curMessage.fwdFromID == prevMessage.fwdFromID) {
           curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {
-          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 'im_grouped_short' : 'im_grouped';
+          curMessage.grouped = !curMessage.fwdFromID && singleLine ? 'im_grouped_short' : 'im_grouped';
         }
-        if (groupFwd && curMessage.fwd_from_id) {
+        if (groupFwd && curMessage.fwdFromID) {
           if (!prevMessage.grouped) {
             prevMessage.grouped = 'im_grouped_fwd_start';
           }
@@ -2601,7 +2666,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       } else if (prevMessage || !i) {
         delete curMessage.grouped;
 
-        if (groupFwd && prevMessage && prevMessage.grouped && prevMessage.fwd_from_id) {
+        if (groupFwd && prevMessage && prevMessage.grouped && prevMessage.fwdFromID) {
           prevMessage.grouped += ' im_grouped_fwd_end';
         }
       }
@@ -2649,7 +2714,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var notifySettings = NotificationsManager.getNotifySettings();
 
-    if (message.fwd_from_id && options.fwd_count) {
+    if (message.fwdFromID && options.fwd_count) {
       notificationMessage = fwdMessagesPluralize(options.fwd_count);
     } else if (message.message) {
       if (notifySettings.nopreview) {
@@ -2924,7 +2989,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             notifyPeerToHandle.from_id = message.from_id;
             notifyPeerToHandle.fwd_count = 0;
           }
-          if (message.fwd_from_id) {
+          if (message.fwdFromID) {
             notifyPeerToHandle.fwd_count++;
           }
 
@@ -3129,6 +3194,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     wrapForHistory: wrapForHistory,
     wrapReplyMarkup: wrapReplyMarkup,
     regroupWrappedHistory: regroupWrappedHistory
+  }
+})
+
+.service('AppChannelsManager', function () {
+  var AppMessagesManager = {};
+
+  function getDialogs () {
+
+  }
+
+  function setMessagesManager (messagesManager) {
+    AppMessagesManager = messagesManager;
+  }
+
+  return {
+    setMessagesManager: setMessagesManager
   }
 })
 
@@ -4473,10 +4554,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     if (update._ == 'updateNewMessage') {
       var message = update.message;
+      var fwdPeerID = message.fwd_from_id ? AppPeersManager.getPeerID(message.fwd_from_id) : 0;
+      var toPeerID = AppPeersManager.getPeerID(message.to_id);
       if (message.from_id && !AppUsersManager.hasUser(message.from_id) ||
-          message.fwd_from_id && !AppUsersManager.hasUser(message.fwd_from_id) ||
-          message.to_id.user_id && !AppUsersManager.hasUser(message.to_id.user_id) ||
-          message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
+          fwdPeerID > 0 && !AppUsersManager.hasUser(fwdPeerID) ||
+          fwdPeerID < 0 && !AppChatsManager.hasChat(-fwdPeerID) ||
+          toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
+          toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
         console.warn(dT(), 'Short update not enough data', message);
         forceGetDifference();
         return false;
@@ -4820,9 +4904,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       rawOffset += match.index + match[0].length;
     }
 
-    if (entities.length) {
-      console.log('parse entities', text, entities.slice());
-    }
+    // if (entities.length) {
+    //   console.log('parse entities', text, entities.slice());
+    // }
 
     return entities;
   }
@@ -6091,24 +6175,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var matches;
 
     if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup)=(.+))?$/)) {
-      AppUsersManager.resolveUsername(matches[1]).then(function (userID) {
+      AppPeersManager.resolveUsername(matches[1]).then(function (peerID) {
 
-        if (matches[2] == 'startgroup') {
+        if (peerID > 0 && AppUsersManager.isBot(peerID) && matches[2] == 'startgroup') {
           PeersSelectService.selectPeer({
             confirm_type: 'INVITE_TO_GROUP',
             noUsers: true
-          }).then(function (peerString) {
-            var peerID = AppPeersManager.getPeerID(peerString);
-            var chatID = peerID < 0 ? -peerID : 0;
-            AppMessagesManager.startBot(userID, chatID, matches[3]).then(function () {
-              $rootScope.$broadcast('history_focus', {peerString: peerString});
+          }).then(function (toPeerString) {
+            var toPeerID = AppPeersManager.getPeerID(toPeerString);
+            var toChatID = toPeerID < 0 ? -toPeerID : 0;
+            AppMessagesManager.startBot(peerID, toChatID, matches[3]).then(function () {
+              $rootScope.$broadcast('history_focus', {toPeerString: toPeerString});
             });
           });
           return true;
         }
 
         $rootScope.$broadcast('history_focus', {
-          peerString: AppUsersManager.getUserString(userID),
+          peerString: AppPeersManager.getPeerString(peerID),
           startParam: matches[3]
         });
       });

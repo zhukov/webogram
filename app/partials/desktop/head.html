@@ -72,14 +72,13 @@
             <i class="icon icon-filter-audio"></i><span my-i18n="im_media_audio"></span>
           </div>
 
-          <a class="tg_head_btn" ng-switch-default ng-switch="historyPeer.id > 0" ng-click="showPeerInfo()">
-            <div class="tg_head_peer_info" ng-switch-when="true">
-              <span class="tg_head_peer_title" my-user-link="historyPeer.id" user-watch="true" dir="auto"></span>
-              <span class="tg_head_peer_status" my-user-status="historyPeer.id"></span>
-            </div>
-            <div class="tg_head_peer_info" ng-switch-default>
-              <span class="tg_head_peer_title" my-chat-link="-historyPeer.id" chat-watch="true" dir="auto"></span>
-              <span class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
+          <a class="tg_head_btn" ng-switch-default ng-click="showPeerInfo()">
+            <div class="tg_head_peer_info">
+              <span class="tg_head_peer_title" my-peer-link="historyPeer.id" peer-watch="true" dir="auto"></span>
+              <span class="tg_head_peer_status" ng-switch="historyPeer.id > 0">
+                <span ng-switch-when="true" my-user-status="historyPeer.id"></span>
+                <span ng-switch-default my-chat-status="-historyPeer.id"></span>
+              </span>
             </div>
           </a>
 

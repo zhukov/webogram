@@ -37,7 +37,7 @@
                     <div class="im_dialog_photo pull-left" my-peer-photolink="contact.userID" img-class="im_dialog_photo" watch="true"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" my-user-link="contact.userID"></span>
+                        <span class="im_dialog_user" my-peer-link="contact.userID"></span>
                       </div>
                       <div class="im_dialog_message">
                         <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
@@ -56,7 +56,7 @@
                     <div class="im_dialog_photo pull-left" my-peer-photolink="foundUser.userID" img-class="im_dialog_photo" watch="true"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" my-user-link="foundUser.userID"></span>
+                        <span class="im_dialog_user" my-peer-link="foundUser.userID"></span>
                       </div>
                       <div class="im_dialog_message" ng-switch="foundUser.user.username.length > 0">
                         <span ng-switch-when="true" class="im_dialog_message_text" ng-bind="::'@' + foundUser.user.username"></span>
@@ -125,8 +125,8 @@
                       <span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
                       <span ng-switch-when="2" my-i18n-format="im_two_typing"></span>
                       <span ng-switch-default my-i18n-format="im_many_typing"></span>
-                      <my-i18n-param name="name1"><a class="im_history_typing_author" my-user-link="historyState.typing[0]"></a></my-i18n-param>
-                      <my-i18n-param name="name2"><a class="im_history_typing_author" my-user-link="historyState.typing[1]"></a></my-i18n-param>
+                      <my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>
+                      <my-i18n-param name="name2"><a class="im_history_typing_author" my-peer-link="historyState.typing[1]"></a></my-i18n-param>
                       <my-i18n-param name="count">{{historyState.typing.length - 2}}</my-i18n-param>
                       <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
                     </div>

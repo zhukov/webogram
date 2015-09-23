@@ -56,7 +56,7 @@
       </a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" my-chat-link="chatFull.chat.id"></h4>
+        <h4 class="mobile_user_modal_header" my-peer-link="-chatFull.chat.id"></h4>
         <p class="mobile_user_modal_status"  ng-if="chatFull.chat.participants_count > 0">
           <ng-pluralize count="chatFull.chat.participants_count"
                            when="group_modal_pluralize_participants">
@@ -112,7 +112,7 @@
             <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 
             <div class="chat_modal_participant_name">
-              <a my-user-link="participant.user_id"></a>
+              <a my-peer-link="participant.user_id"></a>
             </div>
             <div class="chat_modal_participant_status" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
           </div>

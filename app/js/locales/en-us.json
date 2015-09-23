@@ -284,6 +284,9 @@
 	"message_service_joined_by_link": "joined group via invite link",
 	"message_service_unsupported_action": "unsupported action {action}",
 	"message_service_bot_intro_header": "What can this bot do?",
+	"message_service_created_channel": "Channel {channel-name} created",
+	"message_service_changed_channel_photo": "Channel photo updated",
+	"message_service_removed_channel_photo": "Channel photo removed",
 
 	"message_action_reply": "Reply",
 	"message_action_delete": "Delete",

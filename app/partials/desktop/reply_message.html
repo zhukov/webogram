@@ -12,7 +12,7 @@
     />
   </div>
   <div class="im_message_reply_author" ng-switch-default>
-    <span my-user-link="replyMessage.from_id"></span>
+    <span my-peer-link="replyMessage.from_id"></span>
   </div>
   <div class="im_message_reply_body" ng-switch-default>
     <span class="im_reply_message_media" ng-if="replyMessage.media" ng-switch="replyMessage.media._">
@@ -40,14 +40,14 @@
       <span ng-switch-when="messageActionChatAddUser" ng-switch="replyMessage.from_id == replyMessage.action.user_id">
         <span ng-switch-when="true" my-i18n="conversation_returned_to_group"></span>
         <span ng-switch-default my-i18n="conversation_invited_user">
-          <my-i18n-param name="user"><span my-user-link="replyMessage.action.user_id"></span></my-i18n-param>
+          <my-i18n-param name="user"><span my-peer-link="replyMessage.action.user_id"></span></my-i18n-param>
         </span>
       </span>
 
       <span ng-switch-when="messageActionChatDeleteUser" ng-switch="replyMessage.from_id == replyMessage.action.user_id">
         <span ng-switch-when="true" my-i18n="conversation_left_group"></span>
         <span ng-switch-default my-i18n="conversation_kicked_user">
-          <my-i18n-param name="user"><span my-user-link="replyMessage.action.user_id"></span></my-i18n-param>
+          <my-i18n-param name="user"><span my-peer-link="replyMessage.action.user_id"></span></my-i18n-param>
         </span>
       </span>
 
