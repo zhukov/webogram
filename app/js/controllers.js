@@ -419,13 +419,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast(peerData.messageID ? 'ui_history_change_scroll' : 'ui_history_focus');
       } else {
         var peerID = AppPeersManager.getPeerID(peerData.peerString);
-        var peer = peerData.peerString;
-        if (peerID > 0) {
-          var username = AppUsersManager.getUser(peerID).username;
-          if (username) {
-            peer = '@' + username;
-          }
-        }
+        var username = AppPeersManager.getPeer(peerID).username;
+        var peer = username ? '@' + username : peerData.peerString;
         if (peerData.messageID || peerData.startParam) {
           pendingParams = {
             messageID: peerData.messageID,
@@ -836,6 +831,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function loadDialogs (force) {
       offsetIndex = 0;
+      maxID = 0;
       hasMore = false;
       if (!searchMessages) {
         peersInDialogs = {};
@@ -2104,7 +2100,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (replyKeyboard) {
         replyKeyboard = AppMessagesManager.wrapReplyMarkup(replyKeyboard);
       }
-      console.log('update reply markup', peerID, replyKeyboard);
+      // console.log('update reply markup', peerID, replyKeyboard);
       $scope.historyState.replyKeyboard = replyKeyboard;
 
       var addReplyMessage =

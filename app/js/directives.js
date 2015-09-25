@@ -328,6 +328,15 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myServiceShortMessage', function() {
+    return {
+      scope: {
+        message: '=myServiceShortMessage'
+      },
+      templateUrl: templateUrl('dialog_service')
+    };
+  })
+
   .directive('myReplyMessage', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
 
     return {

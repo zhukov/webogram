@@ -73,29 +73,7 @@
           <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
         </span>
 
-        <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" ng-switch="dialogMessage.action._">
-          <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
-          <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
-          <span ng-switch-when="messageActionChatEditPhoto" my-i18n="conversation_group_photo_updated"></span>
-          <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="conversation_group_photo_removed"></span>
-
-          <span ng-switch-when="messageActionChatAddUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
-            <span ng-switch-when="true" my-i18n="conversation_returned_to_group"></span>
-            <span ng-switch-default my-i18n="conversation_invited_user">
-              <my-i18n-param name="user"><span my-peer-link="dialogMessage.action.user_id"></span></my-i18n-param>
-            </span>
-          </span>
-
-          <span ng-switch-when="messageActionChatDeleteUser" ng-switch="dialogMessage.from_id == dialogMessage.action.user_id">
-            <span ng-switch-when="true" my-i18n="conversation_left_group"></span>
-            <span ng-switch-default my-i18n="conversation_kicked_user">
-              <my-i18n-param name="user"><span my-peer-link="dialogMessage.action.user_id"></span></my-i18n-param>
-            </span>
-          </span>
-
-          <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
-
-        </span>
+        <span class="im_dialog_message_service" ng-if="dialogMessage._ == 'messageService'" my-service-short-message="dialogMessage"></span>
 
         <span class="im_dialog_message_text" ng-if="dialogMessage.message.length" ng-bind-html="dialogMessage.richMessage"></span>
       </div>
