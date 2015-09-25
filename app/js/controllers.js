@@ -632,6 +632,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.phonebookAvailable = PhonebookContactsService.isAvailable();
 
     var searchMessages = false;
+    var offsetIndex = 0;
     var maxID = 0;
     var hasMore = false;
     var jump = 0;
@@ -791,52 +792,50 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     var searchTimeoutPromise;
     function getDialogs(force) {
-      var curJump = ++jump,
-          promise;
+      var curJump = ++jump;
 
       $timeout.cancel(searchTimeoutPromise);
+
       if (searchMessages) {
         searchTimeoutPromise = (force || maxID) ? $q.when() : $timeout(angular.noop, 500);
-        promise = searchTimeoutPromise.then(function () {
-          return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID);
+        return searchTimeoutPromise.then(function () {
+          return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
+            if (curJump != jump) {
+              return $q.reject();
+            }
+            var dialogs = [];
+            angular.forEach(result.history, function (messageID) {
+              var message = AppMessagesManager.getMessage(messageID),
+                  peerID = AppMessagesManager.getMessagePeer(message);
+
+              dialogs.push({
+                peerID: peerID,
+                top_message: messageID,
+                unread_count: -1
+              });
+            });
+
+            return {
+              dialogs: dialogs
+            };
+          })
         });
-      } else {
-        var query = $scope.search.query;
-        if ($scope.noUsers) {
-          query = '%pg ' + (query || '');
-        }
-        promise = AppMessagesManager.getDialogs(query, maxID);
       }
 
-      return promise.then(function (result) {
+      var query = $scope.search.query || '';
+      if ($scope.noUsers) {
+        query = '%pg ' + query;
+      }
+      return AppMessagesManager.getConversations(query, offsetIndex).then(function (result) {
         if (curJump != jump) {
           return $q.reject();
         }
-        if (searchMessages) {
-          var dialogs = [];
-          angular.forEach(result.history, function (messageID) {
-            var message = AppMessagesManager.getMessage(messageID),
-                peerID = AppMessagesManager.getMessagePeer(message);
-
-            dialogs.push({
-              peerID: peerID,
-              top_message: messageID,
-              unread_count: -1
-            });
-          });
-
-          result = {
-            count: result.count,
-            dialogs: dialogs
-          };
-        }
-
         return result;
       });
     };
 
     function loadDialogs (force) {
-      maxID = 0;
+      offsetIndex = 0;
       hasMore = false;
       if (!searchMessages) {
         peersInDialogs = {};
@@ -862,18 +861,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             dialogsList.push(wrappedDialog);
           });
 
-          maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
-          hasMore = dialogsResult.count === null || dialogsList.length < dialogsResult.count;
-
-          if (!searchMessages) {
+          if (searchMessages) {
+            maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
+          } else {
+            offsetIndex = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].index;
             delete $scope.isEmpty.dialogs;
           }
+          hasMore = true;
+        } else {
+          hasMore = false;
         }
 
         $scope.$broadcast('ui_dialogs_change');
 
         if (!$scope.search.query) {
-          AppMessagesManager.getDialogs('', maxID, 100);
+          AppMessagesManager.getConversations('', offsetIndex, 100);
           if (!dialogsResult.dialogs.length) {
             $scope.isEmpty.dialogs = true;
             showMoreDialogs();
@@ -886,7 +888,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function showMoreDialogs () {
-      if (contactsShown && (!hasMore || !maxID)) {
+      if (contactsShown && (!hasMore || !offsetIndex && !maxID)) {
         return;
       }
 
@@ -910,10 +912,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             dialogsList.push(wrappedDialog);
           });
 
-          maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
-          hasMore = dialogsResult.count === null || dialogsList.length < dialogsResult.count;
+          if (searchMessages) {
+            maxID = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].top_message;
+          } else {
+            offsetIndex = dialogsResult.dialogs[dialogsResult.dialogs.length - 1].index;
+          }
 
           $scope.$broadcast('ui_dialogs_append');
+
+          hasMore = true;
+        }
+        else {
+          hasMore = false;
         }
       });
     };

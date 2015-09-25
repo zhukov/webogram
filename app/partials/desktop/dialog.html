@@ -32,7 +32,7 @@
         <span class="im_dialog_message_text" my-i18n="conversation_message_deleted"></span>
       </div>
       <div ng-switch-default class="im_dialog_message">
-        <span ng-switch="::dialogMessage.peerID > 0">
+        <span ng-switch="dialogMessage.peerID > 0 || dialogMessage.fromID < 0">
           <span ng-switch-when="true">
             <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.out">
               <span
@@ -59,7 +59,7 @@
         <span class="im_dialog_message_media" ng-if="dialogMessage.media" ng-switch="dialogMessage.media._">
           <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
           <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
-          <span ng-switch-when="messageMediaDocument" ng-switch="::dialogMessage.media.document.sticker || false">
+          <span ng-switch-when="messageMediaDocument" ng-switch="dialogMessage.media.document.sticker || false">
             <span ng-switch-when="1" my-i18n="conversation_media_sticker"></span>
             <span ng-switch-when="2">
               <span ng-bind-html="dialogMessage.media.document.stickerEmoji"></span>
