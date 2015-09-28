@@ -71,7 +71,7 @@
             <div class="im_dialogs_messages_wrap" ng-show="foundMessages.length > 0">
               <h5 my-i18n="im_messages"></h5>
               <ul class="nav nav-pills nav-stacked">
-                <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in foundMessages track by dialogMessage.id" ng-class="{active: curDialog.peerID == dialogMessage.peerID &amp;&amp; curDialog.messageID == dialogMessage.id}"></li>
+                <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in foundMessages track by dialogMessage.mid" ng-class="{active: curDialog.peerID == dialogMessage.peerID &amp;&amp; curDialog.messageID == dialogMessage.id}"></li>
               </ul>
             </div>
 

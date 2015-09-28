@@ -65,7 +65,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           needDate = false,
           unreadAfter = false,
           applySelected = function () {
-            if (selected != ($scope.selectedMsgs[$scope.historyMessage.id] || false)) {
+            if (selected != ($scope.selectedMsgs[$scope.historyMessage.mid] || false)) {
               selected = !selected;
               element.toggleClass(selectedClass, selected);
             }
@@ -109,7 +109,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('messages_regroup', applyGrouped);
 
       $scope.$on('messages_focus', function (e, focusedMsgID) {
-        if ((focusedMsgID == $scope.historyMessage.id) != focused) {
+        if ((focusedMsgID == $scope.historyMessage.mid) != focused) {
           focused = !focused;
           element.toggleClass(focusClass, focused);
         }
@@ -122,7 +122,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if ($scope.peerHistory.peerID != $scope.historyPeer.id) {
             return;
           }
-          if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.id)) {
+          if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.mid)) {
             unreadAfter = !unreadAfter;
             if (unreadAfter) {
               if (unreadAfterSplit) {
@@ -362,10 +362,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (!message.loading) {
         updateMessage($scope, element);
       } else {
-        var messageID = message.id;
-        var stopWaiting = $scope.$on('messages_downloaded', function (e, msgIDs) {
-          if (msgIDs.indexOf(messageID) != -1) {
-            $scope.replyMessage = AppMessagesManager.wrapForDialog(messageID);
+        var mid = message.mid;
+        var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
+          if (mids.indexOf(mid) != -1) {
+            $scope.replyMessage = AppMessagesManager.wrapForDialog(mid);
             updateMessage($scope, element);
             stopWaiting();
           }
@@ -379,6 +379,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(element).remove();
         return;
       }
+      console.log(element[0], message, AppPeersManager.getPeer(message.fromID));
       var thumbWidth = 42;
       var thumbHeight = 42;
       var thumbPhotoSize;
@@ -421,10 +422,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           var peerID = AppMessagesManager.getMessagePeer(message);
           var peerString = AppPeersManager.getPeerString(peerID);
 
-          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.id});
+          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.mid});
 
         })
       }
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      })
     }
 
   })
@@ -465,7 +470,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
       var message = $scope.message;
-      var msgID = message.id;
+      var msgID = message.mid;
       // var msgID = $scope.$eval(attrs.myMessageText);
       // var message = AppMessagesManager.getMessage(msgID);
 
@@ -473,7 +478,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       if (message.pending) {
         var unlink = $scope.$on('messages_pending', function () {
-          if (message.id != msgID) {
+          if (message.mid != msgID) {
             updateHtml(message, element);
             unlink();
           }
@@ -2546,6 +2551,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         AppChatsManager.getChatFull(chatID).then(function (chatFull) {
+          if (chatFull.participants_count) {
+            participantsCount = chatFull.participants_count;
+          }
           var participantsVector = (chatFull.participants || {}).participants || [];
           participantsCount = participantsVector.length;
           angular.forEach(participantsVector, function (participant) {
@@ -2920,7 +2928,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                 if ($scope.message &&
                     !$scope.message.out &&
                     $scope.message.media_unread) {
-                  AppMessagesManager.readMessages([$scope.message.id]);
+                  AppMessagesManager.readMessages([$scope.message.mid]);
                 }
               }, 300);
             });

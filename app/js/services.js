@@ -113,8 +113,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       usernames[searchUsername] = userID;
     }
 
-    apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
-
     apiUser.pFlags = {
       self: (apiUser.flags & (1 << 10)) > 0,
       contact: (apiUser.flags & (1 << 11)) > 0,
@@ -124,6 +122,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       botNoPrivacy: (apiUser.flags & (1 << 15)) > 0,
       botNoGroups: (apiUser.flags & (1 << 16)) > 0
     };
+
+    apiUser.sortName = apiUser.pFlags.deleted ? '' : SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
 
     var nameWords = apiUser.sortName.split(' ');
     var firstWord = nameWords.shift();
@@ -553,6 +553,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       usernames = {},
       chatsFull = {},
       chatFullPromises = {},
+      channelAccess = {},
       cachedPhotoLocations = {};
 
   function saveApiChats (apiChats) {
@@ -564,6 +565,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return;
     }
     apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
+
+    var flags = apiChat.flags;
+    apiChat.pFlags = {
+      creator: (flags & (1 << 0)) > 0,
+      kicked: (flags & (1 << 1)) > 0,
+      left: (flags & (1 << 2)) > 0
+    };
+
+    if (apiChat._ == 'channel') {
+      angular.extend(apiChat.pFlags, {
+        editor: (apiChat.flags & (1 << 3)) > 0,
+        moderator: (apiChat.flags & (1 << 4)) > 0,
+        broadcast: (apiChat.flags & (1 << 5)) > 0,
+        username: (apiChat.flags & (1 << 6)) > 0,
+        verified: (apiChat.flags & (1 << 7)) > 0
+      });
+    };
 
     var titleWords = SearchIndexManager.cleanSearchText(apiChat.title || '').split(' ');
     var firstWord = titleWords.shift();
@@ -597,8 +615,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return usernames[username] || 0;
   }
 
+  function saveChannelAccess (id, accessHash) {
+    channelAccess[id] = accessHash;
+  }
+
   function isChannel (id) {
-    return (chats[id] || {})._ == 'channel';
+    var chat = chats[id];
+    if (chat && chat._ == 'channel' ||
+        channelAccess[id]) {
+      return true;
+    }
+    return false;
   }
 
   function getChatInput (id) {
@@ -612,11 +639,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return {
       _: 'inputChannel',
       channel_id: id,
-      access_hash: getChat(id).access_hash || 0
+      access_hash: getChat(id).access_hash || channelAccess[id] || 0
     }
   }
 
   function getChatFull(id) {
+    if (isChannel(id)) {
+      return getChannelFull(id);
+    }
     if (chatsFull[id] !== undefined) {
       if (chats[id].version == chatsFull[id].participants.version ||
           chats[id].left) {
@@ -631,13 +661,72 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }).then(function (result) {
       saveApiChats(result.chats);
       AppUsersManager.saveApiUsers(result.users);
-      if (result.full_chat && result.full_chat.chat_photo.id) {
-        AppPhotosManager.savePhoto(result.full_chat.chat_photo);
+      var fullChat = result.full_chat;
+      if (fullChat && fullChat.chat_photo.id) {
+        AppPhotosManager.savePhoto(fullChat.chat_photo);
       }
       delete chatFullPromises[id];
+      chatsFull[id] = fullChat;
       $rootScope.$broadcast('chat_full_update', id);
 
-      return chatsFull[id] = result.full_chat;
+      return fullChat;
+    });
+  }
+
+  function getChannelFull (id, force) {
+    if (chatsFull[id] !== undefined && !force) {
+      return $q.when(chatsFull[id]);
+    }
+    if (chatFullPromises[id] !== undefined) {
+      return chatFullPromises[id];
+    }
+
+    return chatFullPromises[id] = MtpApiManager.invokeApi('channels.getFullChannel', {
+      channel: getChannelInput(id)
+    }).then(function (result) {
+      saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+      var fullChannel = result.full_chat;
+      var chat = getChat(id);
+      if (fullChannel && fullChannel.chat_photo.id) {
+        AppPhotosManager.savePhoto(fullChannel.chat_photo);
+      }
+      var participantsPromise;
+      if ((fullChannel.flags & 8) ||
+          chat.pFlags.creator ||
+          chat.pFlags.editor ||
+          chat.pFlags.moderator) {
+        participantsPromise = getChannelParticipants(id).then(function (participants) {
+          delete chatFullPromises[id];
+          fullChannel.participants = {
+            _: 'channelParticipants',
+            participants: participants
+          };
+        }, function (error) {
+          error.handled = true;
+        });
+      } else {
+        participantsPromise = $q.when();
+      }
+      return participantsPromise.then(function () {
+        delete chatFullPromises[id];
+        chatsFull[id] = fullChannel;
+        $rootScope.$broadcast('chat_full_update', id);
+
+        return fullChannel;
+      });
+    });
+  }
+
+  function getChannelParticipants (id) {
+    return MtpApiManager.invokeApi('channels.getParticipants', {
+      channel: getChannelInput(id),
+      filter: {_: 'channelParticipantsRecent'},
+      offset: 0,
+      limit: 200
+    }).then(function (result) {
+      AppUsersManager.saveApiUsers(result.users);
+      return result.participants;
     });
   }
 
@@ -688,25 +777,33 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var chatFull = angular.copy(fullChat),
         chat = getChat(id);
 
-
     if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
       MtpApiManager.getUserID().then(function (myID) {
         chatFull.isAdmin = (myID == chatFull.participants.admin_id);
         angular.forEach(chatFull.participants.participants, function(participant){
-          participant.user = AppUsersManager.getUser(participant.user_id);
           participant.canLeave = myID == participant.user_id;
           participant.canKick = !participant.canLeave && (chatFull.isAdmin || myID == participant.inviter_id);
+
+          // just for order by last seen
+          participant.user = AppUsersManager.getUser(participant.user_id);
         });
       });
     }
+    if (chatFull.participants && chatFull.participants._ == 'channelParticipants') {
+      var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator;
+      angular.forEach(chatFull.participants.participants, function(participant) {
+        participant.canLeave = !chat.pFlags.creator && participant._ == 'channelParticipantSelf';
+        participant.canKick = isAdmin && participant._ == 'channelParticipant';
 
-    chatFull.thumb = {
-      placeholder: 'img/placeholders/GroupAvatar'+(Config.Mobile ? chat.num : Math.ceil(chat.num / 2))+'@2x.png',
-      location: chat && chat.photo && chat.photo.photo_small,
-      width: 72,
-      height: 72,
-      size: 0
-    };
+        // just for order by last seen
+        participant.user = AppUsersManager.getUser(participant.user_id);
+      });
+    }
+
+    if (chatFull.about) {
+      chatFull.rAbout = RichTextProcessor.wrapRichText(chatFull.about, {noLinebreaks: true});
+    }
+
     chatFull.peerString = getChatString(id);
     chatFull.chat = chat;
 
@@ -717,12 +814,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var scope = $rootScope.$new();
     scope.chatID = chatID;
 
-    var modalInstance = $modal.open({
-      templateUrl: templateUrl('chat_modal'),
-      controller: 'ChatModalController',
-      scope: scope,
-      windowClass: 'chat_modal_window mobile_modal'
-    });
+    if (isChannel(chatID)) {
+      var modalInstance = $modal.open({
+        templateUrl: templateUrl('channel_modal'),
+        controller: 'ChannelModalController',
+        scope: scope,
+        windowClass: 'chat_modal_window channel_modal_window mobile_modal'
+      });
+    } else {
+      var modalInstance = $modal.open({
+        templateUrl: templateUrl('chat_modal'),
+        controller: 'ChatModalController',
+        scope: scope,
+        windowClass: 'chat_modal_window mobile_modal'
+      });
+    }
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
@@ -779,9 +885,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiChat: saveApiChat,
     getChat: getChat,
     isChannel: isChannel,
+    saveChannelAccess: saveChannelAccess,
     getChatInput: getChatInput,
     getChannelInput: getChannelInput,
     getChatFull: getChatFull,
+    getChannelFull: getChannelFull,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
     getChatInviteLink: getChatInviteLink,
@@ -806,6 +914,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       };
     }
     else if (firstChar == 'c') {
+      AppChatsManager.saveChannelAccess(peerParams[0], peerParams[1]);
       return {
         _: 'inputPeerChannel',
         channel_id: peerParams[0],
@@ -875,13 +984,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function resolveUsername (username) {
     var searchUserName = SearchIndexManager.cleanUsername(username);
     var foundUserID, foundChatID, foundPeerID, foundUsername;
-    if (foundUserID == AppUsersManager.resolveUsername(searchUserName)) {
+    if (foundUserID = AppUsersManager.resolveUsername(searchUserName)) {
       foundUsername = AppUsersManager.getUser(foundUserID).username;
       if (SearchIndexManager.cleanUsername(foundUsername) == searchUserName) {
         return qSync.when(foundUserID);
       }
     }
-    if (foundChatID == AppChatsManager.resolveUsername(searchUserName)) {
+    if (foundChatID = AppChatsManager.resolveUsername(searchUserName)) {
       foundUsername = AppChatsManager.getChat(foundChatID).username;
       if (SearchIndexManager.cleanUsername(foundUsername) == searchUserName) {
         return qSync.when(-foundChatID);
@@ -1171,8 +1280,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         var peerText = AppPeersManager.getPeerSearchText(peerID);
         SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
-        var messageID = dialog.top_important_message;
-        dialog.top_message = peerID + '_' + messageID;
+        var mid = getFullMessageID(dialog.top_important_message, -peerID);
+        dialog.top_message = mid;
 
         var message = getMessage(dialog.top_message);
         var topDate = message.date;
@@ -1187,7 +1296,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         pushDialogToStorage(dialog);
 
         if (historiesStorage[peerID] === undefined) {
-          var historyStorage = {count: null, history: [messageID], pending: []};
+          var historyStorage = {count: null, history: [mid], pending: []};
           historiesStorage[peerID] = historyStorage;
         }
 
@@ -1305,15 +1414,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var promise;
     if (AppPeersManager.isChannel(peerID)) {
       promise = MtpApiManager.invokeApi('channels.getImportantHistory', {
-        peer: inputPeer,
-        offset_id: maxID || 0,
+        channel: AppChatsManager.getChannelInput(-peerID),
+        offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
       }, {noErrorBox: true});
     } else {
       promise = MtpApiManager.invokeApi('messages.getHistory', {
         peer: inputPeer,
-        offset_id: maxID || 0,
+        offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
       }, {noErrorBox: true});
@@ -1359,6 +1468,40 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  var channelLocals = {};
+  var channelsByLocals = {};
+  var channelCurLocal = 0;
+  var fullMsgIDModulus = 4294967296;
+
+  function getFullMessageID (msgID, channelID) {
+    if (!channelID) {
+      return msgID;
+    }
+    msgID = getMessageLocalID(msgID);
+    var localStart = channelLocals[channelID];
+    if (!localStart) {
+      localStart = (++channelCurLocal) * fullMsgIDModulus;
+      channelsByLocals[localStart] = channelID;
+      channelLocals[channelID] = localStart;
+    }
+
+    return localStart + msgID;
+  }
+
+  function getMessageIDInfo (fullMsgID) {
+    if (fullMsgID < fullMsgIDModulus) {
+      return [fullMsgID, 0];
+    }
+    var msgID = fullMsgID % fullMsgIDModulus;
+    var channelID = channelsByLocals[fullMsgID - msgID];
+
+    return [msgID, channelID];
+  }
+
+  function getMessageLocalID (fullMsgID) {
+    return fullMsgID % fullMsgIDModulus;
+  }
+
   function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
     // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
     return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
@@ -1366,7 +1509,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       var offset = 0;
       if (!maxID && historyResult.messages.length) {
-        maxID = historyResult.messages[0].id + 1;
+        maxID = historyResult.messages[0].mid + 1;
       }
       if (maxID > 0) {
         for (offset = 0; offset < historyStorage.history.length; offset++) {
@@ -1381,7 +1524,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (mergeReplyKeyboard(historyStorage, message)) {
           $rootScope.$broadcast('history_reply_markup', {peerID: AppPeersManager.getPeerID(inputPeer)});
         }
-        historyStorage.history.push(message.id);
+        historyStorage.history.push(message.mid);
       });
 
       fullLimit -= historyResult.messages.length;
@@ -1479,7 +1622,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         var history = [];
         angular.forEach(historyResult.messages, function (message) {
-          history.push(message.id);
+          history.push(message.mid);
         });
         if (!maxID && historyStorage.pending.length) {
           history = historyStorage.pending.slice().concat(history);
@@ -1523,7 +1666,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function mergeReplyKeyboard (historyStorage, message) {
-    // console.log('merge', message.id, message.reply_markup, historyStorage.reply_markup);
+    // console.log('merge', message.mid, message.reply_markup, historyStorage.reply_markup);
     if (!message.reply_markup &&
         !message.out &&
         !message.action) {
@@ -1532,7 +1675,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var messageReplyMarkup = message.reply_markup;
     var lastReplyMarkup = historyStorage.reply_markup;
     if (messageReplyMarkup) {
-      if (lastReplyMarkup && lastReplyMarkup.id >= message.id) {
+      if (lastReplyMarkup && lastReplyMarkup.mid >= message.mid) {
         return false;
       }
       if (messageReplyMarkup.pFlags.selective &&
@@ -1540,12 +1683,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return false;
       }
       if (historyStorage.maxOutID &&
-          message.id < historyStorage.maxOutID &&
+          message.mid < historyStorage.maxOutID &&
           messageReplyMarkup.pFlags.one_time) {
         messageReplyMarkup.pFlags.hidden = true;
       }
       messageReplyMarkup = angular.extend({
-        id: message.id
+        id: message.mid
       }, messageReplyMarkup);
       if (messageReplyMarkup._ != 'replyKeyboardHide') {
         messageReplyMarkup.fromID = message.from_id;
@@ -1559,15 +1702,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (lastReplyMarkup) {
         if (lastReplyMarkup.pFlags.one_time &&
             !lastReplyMarkup.pFlags.hidden &&
-            (message.id > lastReplyMarkup.id || message.id < 0) &&
+            (message.mid > lastReplyMarkup.mid || message.mid < 0) &&
             message.message) {
           lastReplyMarkup.pFlags.hidden = true;
           // console.log('set', historyStorage.reply_markup);
           return true;
         }
       } else if (!historyStorage.maxOutID ||
-                  message.id > historyStorage.maxOutID) {
-        historyStorage.maxOutID = message.id;
+                  message.mid > historyStorage.maxOutID) {
+        historyStorage.maxOutID = message.mid;
       }
     }
 
@@ -1580,7 +1723,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       ) {
       historyStorage.reply_markup = {
         _: 'replyKeyboardHide',
-        id: message.id,
+        mid: message.mid,
         flags: 0,
         pFlags: {}
       };
@@ -1636,7 +1779,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         for (i = 0; i < historyStorage.history.length; i++) {
           message = messagesStorage[historyStorage.history[i]];
           if (message.media && neededContents[message.media._]) {
-            foundMsgs.push(message.id);
+            foundMsgs.push(message.mid);
             if (foundMsgs.length >= neededLimit) {
               break;
             }
@@ -1688,7 +1831,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       foundMsgs = [];
       angular.forEach(searchResult.messages, function (message) {
-        foundMsgs.push(message.id);
+        foundMsgs.push(message.mid);
       });
 
       if (useSearchCache) {
@@ -1753,6 +1896,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function readHistory (inputPeer) {
     // console.trace('start read');
     var peerID = AppPeersManager.getPeerID(inputPeer),
+        isChannel = AppPeersManager.isChannel(peerID),
         historyStorage = historiesStorage[peerID],
         foundDialog = getDialogByPeerID(peerID);
 
@@ -1783,13 +1927,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return historyStorage.readPromise;
     }
 
-    historyStorage.readPromise = MtpApiManager.invokeApi('messages.readHistory', {
-      peer: inputPeer,
-      offset: 0,
-      max_id: 0
-    }).then(function (affectedHistory) {
-      return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
-    }).then(function () {
+    var apiPromise;
+    if (isChannel) {
+      apiPromise = MtpApiManager.invokeApi('channels.readHistory', {
+        channel: AppChatsManager.getChannelInput(-peerID),
+        max_id: 0
+      });
+    } else {
+      apiPromise = MtpApiManager.invokeApi('messages.readHistory', {
+        peer: inputPeer,
+        offset: 0,
+        max_id: 0
+      }).then(function (affectedHistory) {
+        return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
+      });
+    }
+
+    historyStorage.readPromise = apiPromise.then(function () {
       if (foundDialog[0]) {
         // console.log('done read history', peerID);
         foundDialog[0].unread_count = 0;
@@ -1861,16 +2015,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function saveMessages (apiMessages) {
     angular.forEach(apiMessages, function (apiMessage) {
+      if (apiMessage._ == 'messageEmpty') {
+        return;
+      }
       apiMessage.unread = apiMessage.flags & 1 ? true : false;
       apiMessage.out = apiMessage.flags & 2 ? true : false;
       apiMessage.media_unread = apiMessage.flags & 32 ? true : false;
 
       var toPeerID = AppPeersManager.getPeerID(apiMessage.to_id);
       var isChannel = apiMessage.to_id._ == 'peerChannel';
-      var mid = isChannel ? toPeerID + '_' + apiMessage.id : apiMessage.id;
-      apiMessage.mid = mid;
+      var channelID = isChannel ? -toPeerID : 0;
 
+      var mid = getFullMessageID(apiMessage.id, channelID);
+      apiMessage.mid = mid;
       messagesStorage[mid] = apiMessage;
+
+      if (apiMessage.reply_to_msg_id) {
+        apiMessage.reply_to_mid = getFullMessageID(apiMessage.reply_to_msg_id, channelID);
+      }
 
       apiMessage.date -= serverTimeOffset;
       apiMessage.toID = toPeerID;
@@ -1902,7 +2064,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
           case 'messageMediaWebPage':
-            AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.id, mediaContext);
+            AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.mid, mediaContext);
             break;
         }
       }
@@ -1913,8 +2075,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             apiMessage.action._ = 'messageActionChannelEditPhoto';
           }
         }
-        if (apiMessage.action._ == 'messageActionChatEditTitle' && isChannel) {
-          apiMessage.action._ = 'messageActionChannelEditTitle';
+        else if (isChannel) {
+          if (apiMessage.action._ == 'messageActionChatEditTitle') {
+            apiMessage.action._ = 'messageActionChannelEditTitle';
+          }
+          if (apiMessage.action._ == 'messageActionChatDeletePhoto') {
+            apiMessage.action._ = 'messageActionChannelDeletePhoto';
+          }
         }
       }
       if (apiMessage.reply_markup) {
@@ -2013,7 +2180,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           peer: inputPeer,
           message: text,
           random_id: randomID,
-          reply_to_msg_id: replyToMsgID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
           entities: entities
         }, sentRequestOptions).then(function (updates) {
           if (updates._ == 'updateShortSentMessage') {
@@ -2187,7 +2354,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               peer: inputPeer,
               media: inputMedia,
               random_id: randomID,
-              reply_to_msg_id: replyToMsgID
+              reply_to_msg_id: getMessageLocalID(replyToMsgID)
             }).then(function (updates) {
               ApiUpdatesManager.processUpdateMessage(updates);
             }, function (error) {
@@ -2319,7 +2486,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           peer: inputPeer,
           media: inputMedia,
           random_id: randomID,
-          reply_to_msg_id: replyToMsgID
+          reply_to_msg_id: getMessageLocalID(replyToMsgID)
         }).then(function (updates) {
           ApiUpdatesManager.processUpdateMessage(updates);
         }, function (error) {
@@ -2337,20 +2504,26 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
-  function forwardMessages (peerID, msgIDs) {
-    msgIDs = msgIDs.sort();
+  function forwardMessages (peerID, mids) {
+    mids = mids.sort();
 
+    var flags = 0;
+    var msgIDs = [];
     var randomIDs = [];
-    var i;
-    var len = msgIDs.length;
-    for (var i = 0; i < msgIDs.length; i++) {
+    var len = mids.length;
+    var i, mid, msgID;
+    var fromChannel = getMessageIDInfo(mids[0])[1];
+    for (i = 0; i < len; i++) {
+      msgIDs.push(getMessageLocalID(mids[i]));
       randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
     }
 
     return MtpApiManager.invokeApi('messages.forwardMessages', {
-      peer: AppPeersManager.getInputPeerByID(peerID),
+      flags: flags,
+      from_peer: AppPeersManager.getInputPeerByID(-fromChannel),
       id: msgIDs,
-      random_id: randomIDs
+      random_id: randomIDs,
+      to_peer: AppPeersManager.getInputPeerByID(peerID),
     }).then(function (updates) {
       ApiUpdatesManager.processUpdateMessage(updates);
     });
@@ -2446,7 +2619,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       if (historyMessage = messagesForHistory[tempID]) {
-        messagesForHistory[finalMessage.id] = angular.extend(historyMessage, wrapForHistory(finalMessage.id));
+        messagesForHistory[finalMessage.mid] = angular.extend(historyMessage, wrapForHistory(finalMessage.mid));
         delete historyMessage.pending;
         delete historyMessage.error;
         delete historyMessage.random_id;
@@ -2654,12 +2827,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
 
-    var replyToMsgID = message.reply_to_msg_id;
+    var replyToMsgID = message.reply_to_mid;
     if (replyToMsgID) {
-      if (messagesStorage[replyToMsgID] && false) {
+      if (messagesStorage[replyToMsgID]) {
         message.reply_to_msg = wrapForDialog(replyToMsgID);
       } else {
-        message.reply_to_msg = {id: replyToMsgID, loading: true};
+        message.reply_to_msg = {mid: replyToMsgID, loading: true};
         if (needSingleMessages.indexOf(replyToMsgID) == -1) {
           needSingleMessages.push(replyToMsgID);
           if (fetchSingleMessagesTimeout === false) {
@@ -2705,16 +2878,43 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (!needSingleMessages.length) {
       return;
     }
-    var msgIDs = needSingleMessages.slice();
+    var mids = needSingleMessages.slice();
     needSingleMessages = [];
-    MtpApiManager.invokeApi('messages.getMessages', {
-      id: msgIDs
-    }).then(function (getMessagesResult) {
-      AppUsersManager.saveApiUsers(getMessagesResult.users);
-      AppChatsManager.saveApiChats(getMessagesResult.chats);
-      saveMessages(getMessagesResult.messages);
 
-      $rootScope.$broadcast('messages_downloaded', msgIDs);
+    var msgIDsByChannels = {};
+    var midsByChannels = {};
+    var i, mid, msgChannel, channelID;
+    for (i = 0; i < mids.length; i++) {
+      mid = mids[i];
+      msgChannel = getMessageIDInfo(mid);
+      channelID = msgChannel[1];
+      if (msgIDsByChannels[channelID] === undefined) {
+        msgIDsByChannels[channelID] = [];
+        midsByChannels[channelID] = [];
+      }
+      msgIDsByChannels[channelID].push(msgChannel[0]);
+      midsByChannels[channelID].push(mid);
+    }
+    angular.forEach(msgIDsByChannels, function (msgIDs, channelID) {
+      var promise;
+      if (channelID > 0) {
+        promise = MtpApiManager.invokeApi('channels.getMessages', {
+          channel: AppChatsManager.getChannelInput(channelID),
+          id: msgIDs
+        });
+      } else {
+        promise = MtpApiManager.invokeApi('messages.getMessages', {
+          id: msgIDs
+        });
+      }
+
+      promise.then(function (getMessagesResult) {
+        AppUsersManager.saveApiUsers(getMessagesResult.users);
+        AppChatsManager.saveApiChats(getMessagesResult.chats);
+        saveMessages(getMessagesResult.messages);
+
+        $rootScope.$broadcast('messages_downloaded', midsByChannels[channelID]);
+      })
     })
   }
 
@@ -2757,20 +2957,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (curMessage.fwdFromID &&
           curMessage.media &&
           curMessage.media.document &&
-          curMessage.media.document.sticker &&
-          (curMessage.from_id != (prevMessage || {}).from_id || !(prevMessage || {}).fwdFromID)) {
+          (curMessage.media.document.sticker || curMessage.media.document.audioTitle) &&
+          (curMessage.fromID != (prevMessage || {}).fromID || !(prevMessage || {}).fwdFromID)) {
         delete curMessage.fwdFromID;
         curMessage._ = 'message';
       }
 
       if (prevMessage &&
-          curMessage.from_id == prevMessage.from_id &&
+          curMessage.fromID == prevMessage.fromID &&
           !prevMessage.fwdFromID == !curMessage.fwdFromID &&
           !prevMessage.action &&
           !curMessage.action &&
           curMessage.date < prevMessage.date + 900) {
 
-        var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1 && !curMessage.reply_to_msg_id;
+        var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1 && !curMessage.reply_to_mid;
         if (groupFwd && curMessage.fwdFromID && curMessage.fwdFromID == prevMessage.fwdFromID) {
           curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {
@@ -2922,13 +3122,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     notification.onclick = function () {
       $rootScope.$broadcast('history_focus', {
         peerString: peerString,
-        messageID: message.flags & 16 ? message.id : 0,
+        messageID: message.flags & 16 ? message.mid : 0,
       });
     };
 
     notification.message = notificationMessage;
     notification.image = notificationPhoto.placeholder;
-    notification.key = 'msg' + message.id;
+    notification.key = 'msg' + message.mid;
     notification.tag = peerString;
 
     if (notificationPhoto.location && !notificationPhoto.location.empty) {
@@ -3025,14 +3225,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             peerID = getMessagePeer(message),
             historyStorage = historiesStorage[peerID];
 
+        saveMessages([message]);
+
         if (historyStorage !== undefined) {
           var history = historyStorage.history;
-          if (history.indexOf(message.id) != -1) {
+          if (history.indexOf(message.mid) != -1) {
             return false;
           }
           var topMsgID = history[0];
-          history.unshift(message.id);
-          if (message.id > 0 && message.id < topMsgID) {
+          history.unshift(message.mid);
+          if (message.mid > 0 && message.mid < topMsgID) {
             history.sort(function (a, b) {
               return b - a;
             });
@@ -3043,12 +3245,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         } else {
           historyStorage = historiesStorage[peerID] = {
             count: null,
-            history: [message.id],
+            history: [message.mid],
             pending: []
           };
         }
 
-        saveMessages([message]);
 
         if (mergeReplyKeyboard(historyStorage, message)) {
           $rootScope.$broadcast('history_reply_markup', {peerID: peerID})
@@ -3058,21 +3259,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           AppUsersManager.forceUserOnline(message.from_id);
         }
 
-        var randomID = pendingByMessageID[message.id],
+        var randomID = pendingByMessageID[message.mid],
             pendingMessage;
 
         if (randomID) {
           if (pendingMessage = finalizePendingMessage(randomID, message)) {
             $rootScope.$broadcast('history_update', {peerID: peerID});
           }
-          delete pendingByMessageID[message.id];
+          delete pendingByMessageID[message.mid];
         }
 
         if (!pendingMessage) {
           if (newMessagesToHandle[peerID] === undefined) {
             newMessagesToHandle[peerID] = [];
           }
-          newMessagesToHandle[peerID].push(message.id);
+          newMessagesToHandle[peerID].push(message.mid);
           if (!newMessagesHandlePromise) {
             newMessagesHandlePromise = $timeout(handleNewMessages, 0);
           }
@@ -3088,7 +3289,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             dialogsStorage.dialogs.splice(foundDialog[1], 1);
             dialogsStorage.dialogs.unshift(dialog);
           }
-          dialog.top_message = message.id;
+          dialog.top_message = message.mid;
           if (inboxUnread) {
             dialog.unread_count++;
           }
@@ -3098,7 +3299,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           dialog = {
             peerID: peerID,
             unread_count: inboxUnread ? 1 : 0,
-            top_message: message.id
+            top_message: message.mid
           };
           dialogsStorage.dialogs.unshift(dialog);
         }
@@ -4586,7 +4787,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             message: updateMessage.message,
             fwd_from_id: updateMessage.fwd_from_id,
             fwd_date: updateMessage.fwd_date,
-            reply_to_msg_id: updateMessage.reply_to_msg_id,
+            reply_to_msg_id: updateMessage.reply_to_msg_id
           },
           pts: updateMessage.pts,
           pts_count: updateMessage.pts_count

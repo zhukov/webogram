@@ -27,6 +27,14 @@
 	"group_modal_members": "Members",
 	"group_modal_members_kick": "Remove",
 
+	"channel_modal_info": "Channel info",
+	"channel_modal_share_link": "Share link",
+	"channel_modal_share_loading": "Loading{dots}",
+	"channel_modal_join": "Join channel",
+	"channel_modal_add_member": "Invite members",
+	"channel_modal_leave_channel": "Leave channel",
+	"channel_modal_delete_channel": "Delete channel",
+
 	"country_select_modal_title": "Country",
 
 	"settings_modal_title": "Settings",
@@ -173,6 +181,12 @@
 	"group_edit_submit": "Save",
 	"group_edit_submit_active": "Saving...",
 
+	"channel_edit_modal_title": "Edit channel",
+	"channel_edit_name": "Channel name",
+	"channel_edit_about": "Channel description",
+	"channel_edit_submit": "Save",
+	"channel_edit_submit_active": "Saving...",
+
 	"group_invite_link_modal_title": "Invite link",
 	"group_invite_link_link_label": "Copy link",
 	"group_invite_link_loading": "Loading...",
@@ -204,6 +218,9 @@
 	"confirm_modal_reset_account_md": "Are you sure?\nThis action can not be undone.\n\nYou will lose all your chats and messages, along with any media and files you shared, if you proceed with resetting your account.",
 	"confirm_modal_join_group_link": "Do you want to join the group «{title}»?",
 	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
+	"confirm_modal_revoke_channel_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the channel using it.",
+	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll messages will be removed and all messages will be lost.",
+
 	"confirm_modal_are_u_sure": "Are you sure?",
 
 	"confirm_modal_logout_submit": "Log out",

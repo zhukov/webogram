@@ -12,7 +12,7 @@
     />
   </div>
   <div class="im_message_reply_author" ng-switch-default>
-    <span my-peer-link="replyMessage.from_id"></span>
+    <span my-peer-link="replyMessage.fromID" peer-watch="true"></span>
   </div>
   <div class="im_message_reply_body" ng-switch-default>
     <span class="im_reply_message_media" ng-if="replyMessage.media" ng-switch="replyMessage.media._">
