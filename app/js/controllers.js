@@ -654,16 +654,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return false;
       }
 
-      var topMessages = [];
-      var topToDialogs = {};
+      var indexes = [];
+      var indexesToDialogs = {};
       angular.forEach(dialogsUpdated, function (dialog, peerID) {
         if ($scope.noUsers && peerID > 0) {
           return;
         }
-        topToDialogs[dialog.top_message] = dialog;
-        topMessages.push(dialog.top_message);
+        indexesToDialogs[dialog.index] = dialog;
+        indexes.push(dialog.index);
       });
-      topMessages.sort();
+      indexes.sort();
 
       var i, dialog;
       var len = $scope.dialogs.length;
@@ -675,9 +675,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           len--;
         }
       }
-      len = topMessages.length;
+      len = indexes.length;
       for (i = 0; i < len; i++) {
-        dialog = topToDialogs[topMessages[i]];
+        dialog = indexesToDialogs[indexes[i]];
         $scope.dialogs.unshift(
           AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count)
         );
@@ -1654,6 +1654,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     });
 
+    $scope.$on('history_reload', function (e, updPeerID) {
+      if (updPeerID == $scope.curDialog.peerID) {
+        loadHistory();
+      }
+    });
 
     var typingTimeouts = {};
     $scope.$on('history_append', function (e, addedMessage) {

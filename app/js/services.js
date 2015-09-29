@@ -2254,21 +2254,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
 
-  var curState = {};
+  var updatesState = {
+    pendingPtsUpdates: [],
+    pendingSeqUpdates: {},
+    syncPending: false,
+    syncLoading: true
+  };
+  var channelStates = {};
 
   var myID = 0;
   MtpApiManager.getUserID().then(function (id) {
     myID = id;
   });
 
-  var syncPending = false;
-  var syncLoading = true;
-  var pendingSeqUpdates = {};
-  var pendingPtsUpdates = [];
 
   function popPendingSeqUpdate () {
-    var nextSeq = curState.seq + 1,
-        pendingUpdatesData = pendingSeqUpdates[nextSeq];
+    var nextSeq = updatesState.seq + 1,
+        pendingUpdatesData = updatesState.pendingSeqUpdates[nextSeq];
     if (!pendingUpdatesData) {
       return false;
     }
@@ -2277,32 +2279,33 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     for (var i = 0, length = updates.length; i < length; i++) {
       saveUpdate(updates[i]);
     }
-    curState.seq = pendingUpdatesData.seq;
-    if (pendingUpdatesData.date && curState.date < pendingUpdatesData.date) {
-      curState.date = pendingUpdatesData.date;
+    updatesState.seq = pendingUpdatesData.seq;
+    if (pendingUpdatesData.date && updatesState.date < pendingUpdatesData.date) {
+      updatesState.date = pendingUpdatesData.date;
     }
-    delete pendingSeqUpdates[nextSeq];
+    delete updatesState.pendingSeqUpdates[nextSeq];
 
     if (!popPendingSeqUpdate() &&
-        syncPending &&
-        syncPending.seqAwaiting &&
-        curState.seq >= syncPending.seqAwaiting) {
-      if (!syncPending.ptsAwaiting) {
-        clearTimeout(syncPending.timeout);
-        syncPending = false;
+        updatesState.syncPending &&
+        updatesState.syncPending.seqAwaiting &&
+        updatesState.seq >= updatesState.syncPending.seqAwaiting) {
+      if (!updatesState.syncPending.ptsAwaiting) {
+        clearTimeout(updatesState.syncPending.timeout);
+        updatesState.syncPending = false;
       } else {
-        delete syncPending.seqAwaiting;
+        delete updatesState.syncPending.seqAwaiting;
       }
     }
 
     return true;
   }
 
-  function popPendingPtsUpdate () {
-    if (!pendingPtsUpdates.length) {
+  function popPendingPtsUpdate (channelID) {
+    var curState = channelID ? getChannelState(channelID) : updatesState;
+    if (!curState.pendingPtsUpdates.length) {
       return false;
     }
-    pendingPtsUpdates.sort(function (a, b) {
+    curState.pendingPtsUpdates.sort(function (a, b) {
       return a.pts - b.pts;
     });
 
@@ -2310,8 +2313,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var goodPts = false;
     var goodIndex = false;
     var update;
-    for (var i = 0, length = pendingPtsUpdates.length; i < length; i++) {
-      update = pendingPtsUpdates[i];
+    for (var i = 0, length = curState.pendingPtsUpdates.length; i < length; i++) {
+      update = curState.pendingPtsUpdates[i];
       curPts += update.pts_count;
       if (curPts >= update.pts) {
         goodPts = update.pts;
@@ -2325,17 +2328,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     curState.pts = goodPts;
     for (i = 0; i <= goodIndex; i++) {
-      update = pendingPtsUpdates[i];
+      update = curState.pendingPtsUpdates[i];
       saveUpdate(update);
     }
-    pendingPtsUpdates.splice(goodIndex, length - goodIndex);
+    curState.pendingPtsUpdates.splice(0, goodIndex + 1);
 
-    if (!pendingPtsUpdates.length && syncPending) {
-      if (!syncPending.seqAwaiting) {
-        clearTimeout(syncPending.timeout);
-        syncPending = false;
+    if (!curState.pendingPtsUpdates.length && curState.syncPending) {
+      if (!curState.syncPending.seqAwaiting) {
+        clearTimeout(curState.syncPending.timeout);
+        curState.syncPending = false;
       } else {
-        delete syncPending.ptsAwaiting;
+        delete curState.syncPending.ptsAwaiting;
       }
     }
 
@@ -2343,7 +2346,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function forceGetDifference () {
-    if (!syncLoading) {
+    if (!updatesState.syncLoading) {
       getDifference();
     }
   }
@@ -2409,23 +2412,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getDifference () {
-    if (!syncLoading) {
-      syncLoading = true;
-      pendingSeqUpdates = {};
-      pendingPtsUpdates = [];
+    if (!updatesState.syncLoading) {
+      updatesState.syncLoading = true;
+      updatesState.pendingSeqUpdates = {};
+      updatesState.pendingPtsUpdates = [];
     }
 
-    if (syncPending) {
-      clearTimeout(syncPending.timeout);
-      syncPending = false;
+    if (updatesState.syncPending) {
+      clearTimeout(updatesState.syncPending.timeout);
+      updatesState.syncPending = false;
     }
 
-    MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: -1}).then(function (differenceResult) {
+    MtpApiManager.invokeApi('updates.getDifference', {pts: updatesState.pts, date: updatesState.date, qts: -1}).then(function (differenceResult) {
       if (differenceResult._ == 'updates.differenceEmpty') {
         console.log(dT(), 'apply empty diff', differenceResult.seq);
-        curState.date = differenceResult.date;
-        curState.seq = differenceResult.seq;
-        syncLoading = false;
+        updatesState.date = differenceResult.date;
+        updatesState.seq = differenceResult.seq;
+        updatesState.syncLoading = false;
         $rootScope.$broadcast('stateSynchronized');
         return false;
       }
@@ -2435,7 +2438,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       // Should be first because of updateMessageID
       // console.log(dT(), 'applying', differenceResult.other_updates.length, 'other updates');
-      angular.forEach(differenceResult.other_updates, function(update){
+      angular.forEach(differenceResult.other_updates, function(update) {
+        if (update._ == 'updateChannelTooLong') {
+          var channelID = update.channel_id;
+          var channelState = channelStates[channelID];
+          if (channelState !== undefined && !channelState.syncLoading) {
+            getChannelDifference(channelID);
+          }
+          return;
+        }
         saveUpdate(update);
       });
 
@@ -2444,32 +2455,129 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         saveUpdate({
           _: 'updateNewMessage',
           message: apiMessage,
-          pts: curState.pts,
+          pts: updatesState.pts,
           pts_count: 0
         });
       });
 
       var nextState = differenceResult.intermediate_state || differenceResult.state;
-      curState.seq = nextState.seq;
-      curState.pts = nextState.pts;
-      curState.date = nextState.date;
+      updatesState.seq = nextState.seq;
+      updatesState.pts = nextState.pts;
+      updatesState.date = nextState.date;
 
-      console.log(dT(), 'apply diff', curState.seq, curState.pts);
+      console.log(dT(), 'apply diff', updatesState.seq, updatesState.pts);
 
       if (differenceResult._ == 'updates.differenceSlice') {
         getDifference();
       } else {
         // console.log(dT(), 'finished get diff');
         $rootScope.$broadcast('stateSynchronized');
-        syncLoading = false;
+        updatesState.syncLoading = false;
       }
     });
   }
 
+  function getChannelDifference (channelID) {
+    var channelState = getChannelState(channelID);
+    if (!channelState.syncLoading) {
+      channelState.syncLoading = true;
+      channelState.pendingPtsUpdates = [];
+    }
+    MtpApiManager.invokeApi('updates.getChannelDifference', {
+      channel: AppChatsManager.getChannelInput(channelID),
+      filter: {_: 'channelMessagesFilterEmpty'},
+      pts: channelState.pts,
+      limit: 10
+    }).then(function (differenceResult) {
+      channelState.pts = differenceResult.pts;
+
+      if (differenceResult._ == 'updates.channelDifferenceEmpty') {
+        console.log(dT(), 'apply channel empty diff', differenceResult);
+        channelState.syncLoading = false;
+        $rootScope.$broadcast('stateSynchronized');
+        return false;
+      }
+
+      if (differenceResult._ == 'updates.channelDifferenceTooLong') {
+        console.log(dT(), 'channel diff too long', differenceResult);
+        channelState.syncLoading = false;
+        delete channelStates[channelID];
+        saveUpdate({_: 'updateChannelReload', channel_id: channelID});
+        return false;
+      }
+
+      AppUsersManager.saveApiUsers(differenceResult.users);
+      AppChatsManager.saveApiChats(differenceResult.chats);
+
+      // Should be first because of updateMessageID
+      console.log(dT(), 'applying', differenceResult.other_updates.length, 'channel other updates');
+      angular.forEach(differenceResult.other_updates, function(update){
+        saveUpdate(update);
+      });
+
+      console.log(dT(), 'applying', differenceResult.new_messages.length, 'channel new messages');
+      angular.forEach(differenceResult.new_messages, function (apiMessage) {
+        saveUpdate({
+          _: 'updateNewChannelMessage',
+          message: apiMessage,
+          pts: channelState.pts,
+          pts_count: 0
+        });
+      });
+
+      console.log(dT(), 'apply channel diff', channelState.pts);
+
+      if (differenceResult._ == 'updates.channelDifference' && !(differenceResult.flags & 1)) {
+        getChannelDifference(channelID);
+      } else {
+        console.log(dT(), 'finished channel get diff');
+        $rootScope.$broadcast('stateSynchronized');
+        channelState.syncLoading = false;
+      }
+    });
+  }
+
+  function addChannelState (channelID, pts) {
+    if (channelStates[channelID] === undefined) {
+      channelStates[channelID] = {
+        pts: pts,
+        pendingPtsUpdates: [],
+        syncPending: false,
+        syncLoading: false
+      };
+      return true;
+    }
+    return false;
+  }
+
+  function getChannelState (channelID, pts) {
+    if (channelStates[channelID] === undefined) {
+      if (!pts) {
+        throw new Error('Get channel empty state without pts ' + channelID);
+      }
+      addChannelState(channelID, pts);
+    }
+    return channelStates[channelID];
+  }
+
   function processUpdate (update, options) {
-    if (syncLoading) {
+    var channelID = false;
+    switch (update._) {
+      case 'updateNewChannelMessage':
+        channelID = -AppPeersManager.getPeerID(update.message.to_id);
+        break;
+      case 'updateDeleteChannelMessages':
+        channelID = update.channel_id;
+        break;
+    }
+    var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
+
+    console.log('process', channelID, curState, update);
+
+    if (curState.syncLoading) {
       return false;
     }
+
     if (update._ == 'updateNewMessage') {
       var message = update.message;
       var fwdPeerID = message.fwd_from_id ? AppPeersManager.getPeerID(message.fwd_from_id) : 0;
@@ -2491,15 +2599,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var newPts = curState.pts + (update.pts_count || 0);
       if (newPts < update.pts) {
         console.log(dT(), 'Pts hole', curState, update);
-        pendingPtsUpdates.push(update);
-        if (!syncPending) {
-          syncPending = {
+        curState.pendingPtsUpdates.push(update);
+        if (!curState.syncPending) {
+          curState.syncPending = {
             timeout: setTimeout(function () {
-              getDifference();
+              if (channelID) {
+                getChannelDifference(channelID);
+              } else {
+                getDifference();
+              }
             }, 5000)
           };
         }
-        syncPending.ptsAwaiting = true;
+        curState.syncPending.ptsAwaiting = true;
         return false;
       }
       if (update.pts > curState.pts) {
@@ -2507,29 +2619,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         popPts = true;
       }
     }
-    else if (options.seq > 0) {
+    else if (!channelID && options.seq > 0) {
       var seq = options.seq;
       var seqStart = options.seqStart || seq;
 
       if (seqStart != curState.seq + 1) {
         if (seqStart > curState.seq) {
-          console.warn(dT(), 'Seq hole', curState, syncPending && syncPending.seqAwaiting);
+          console.warn(dT(), 'Seq hole', curState, curState.syncPending && curState.syncPending.seqAwaiting);
 
-          if (pendingSeqUpdates[seqStart] === undefined) {
-            pendingSeqUpdates[seqStart] = {seq: seq, date: options.date, updates: []};
+          if (curState.pendingSeqUpdates[seqStart] === undefined) {
+            curState.pendingSeqUpdates[seqStart] = {seq: seq, date: options.date, updates: []};
           }
-          pendingSeqUpdates[seqStart].updates.push(update);
+          curState.pendingSeqUpdates[seqStart].updates.push(update);
 
-          if (!syncPending) {
-            syncPending = {
+          if (!curState.syncPending) {
+            curState.syncPending = {
               timeout: setTimeout(function () {
                 getDifference();
               }, 5000)
             };
           }
-          if (!syncPending.seqAwaiting ||
-              syncPending.seqAwaiting < seqStart) {
-            syncPending.seqAwaiting = seqStart;
+          if (!curState.syncPending.seqAwaiting ||
+              curState.syncPending.seqAwaiting < seqStart) {
+            curState.syncPending.seqAwaiting = seqStart;
           }
           return false;
         }
@@ -2544,12 +2656,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
 
-
-    saveUpdate (update);
-
+    saveUpdate(update);
 
     if (popPts) {
-      popPendingPtsUpdate();
+      popPendingPtsUpdate(channelID);
     }
     else if (popSeq) {
       popPendingSeqUpdate();
@@ -2563,16 +2673,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function attach () {
     MtpNetworkerFactory.setUpdatesProcessor(processUpdateMessage);
     MtpApiManager.invokeApi('updates.getState', {}, {noErrorBox: true}).then(function (stateResult) {
-      curState.seq = stateResult.seq;
-      curState.pts = stateResult.pts;
-      curState.date = stateResult.date;
+      updatesState.seq = stateResult.seq;
+      updatesState.pts = stateResult.pts;
+      updatesState.date = stateResult.date;
       setTimeout(function () {
-        syncLoading = false;
+        updatesState.syncLoading = false;
       }, 1000);
 
-      // curState.seq = 1;
-      // curState.pts = stateResult.pts - 5000;
-      // curState.date = 1;
+      // updatesState.seq = 1;
+      // updatesState.pts = stateResult.pts - 5000;
+      // updatesState.date = 1;
       // getDifference();
     })
   }
@@ -2580,6 +2690,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   return {
     processUpdateMessage: processUpdateMessage,
+    addChannelState: addChannelState,
     attach: attach
   }
 })
