@@ -379,7 +379,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(element).remove();
         return;
       }
-      console.log(element[0], message, AppPeersManager.getPeer(message.fromID));
       var thumbWidth = 42;
       var thumbHeight = 42;
       var thumbPhotoSize;
@@ -2551,14 +2550,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         AppChatsManager.getChatFull(chatID).then(function (chatFull) {
-          if (chatFull.participants_count) {
-            participantsCount = chatFull.participants_count;
-          }
           var participantsVector = (chatFull.participants || {}).participants || [];
           participantsCount = participantsVector.length;
           angular.forEach(participantsVector, function (participant) {
             participants[participant.user_id] = true;
           });
+          if (chatFull.participants_count) {
+            participantsCount = chatFull.participants_count || 0;
+          }
           update();
         });
       };

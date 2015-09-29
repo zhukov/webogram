@@ -1409,6 +1409,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $rootScope.idle.afterFocus) {
         return false;
       }
+      var message = AppMessagesManager.getMessage(messageID);
+      if (message._ == 'messageService') {
+        return false;
+      }
 
       if (!$scope.historyState.selectActions) {
         if (getSelectedText()) {
