@@ -1806,16 +1806,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           width: width,
           height: height
         };
+    var dim;
 
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+      if (isGif && doc.w && doc.h) {
+        dim = {
+          w: doc.w,
+          h: doc.h
+        };
+      } else {
+        dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+      }
       thumb.width = dim.w;
       thumb.height = dim.h;
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
     }
     else if (isSticker) {
-      var dim = calcImageInBox(doc.w, doc.h, width, height);
+      dim = calcImageInBox(doc.w, doc.h, width, height);
       thumb.width = dim.w;
       thumb.height = dim.h;
     }
