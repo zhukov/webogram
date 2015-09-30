@@ -2572,7 +2572,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
 
-    console.log('process', channelID, curState, update);
+    // console.log('process', channelID, curState, update);
 
     if (curState.syncLoading) {
       return false;

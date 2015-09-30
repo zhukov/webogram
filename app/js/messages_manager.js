@@ -374,7 +374,7 @@ angular.module('myApp.services')
   var fullMsgIDModulus = 4294967296;
 
   function getFullMessageID (msgID, channelID) {
-    if (!channelID) {
+    if (!channelID || msgID < 0) {
       return msgID;
     }
     msgID = getMessageLocalID(msgID);
@@ -1020,6 +1020,8 @@ angular.module('myApp.services')
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
         replyToMsgID = options.replyToMsgID,
+        isChannel = AppPeersManager.isChannel(peerID),
+        asChannel = isChannel ? true : false,
         entities = [],
         message;
 
@@ -1032,12 +1034,17 @@ angular.module('myApp.services')
     MtpApiManager.getUserID().then(function (fromID) {
       if (peerID != fromID) {
         flags |= 2;
-        if (!AppUsersManager.isBot(peerID)) {
+        if (!isChannel && !AppUsersManager.isBot(peerID)) {
           flags |= 1;
         }
       }
       if (replyToMsgID) {
         flags |= 8;
+      }
+      if (asChannel) {
+        fromID = 0;
+      } else {
+        flags |= 256;
       }
       message = {
         _: 'message',
@@ -1082,6 +1089,9 @@ angular.module('myApp.services')
         if (entities.length) {
           flags |= 8;
         }
+        if (asChannel) {
+          flags |= 16;
+        }
         // console.log(flags, entities);
         MtpApiManager.invokeApi('messages.sendMessage', {
           flags: flags,
@@ -1107,7 +1117,7 @@ angular.module('myApp.services')
                 random_id: randomIDS,
                 id: updates.id
               }, {
-                _: 'updateNewMessage',
+                _: isChannel ? 'updateNewChannelMessage' : 'updateNewMessage',
                 message: message,
                 pts: updates.pts,
                 pts_count: updates.pts_count
@@ -1147,6 +1157,8 @@ angular.module('myApp.services')
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
         replyToMsgID = options.replyToMsgID,
+        isChannel = AppPeersManager.isChannel(peerID),
+        asChannel = isChannel ? true : false,
         attachType, apiFileName, realFileName;
 
     if (!options.isMedia) {
@@ -1173,12 +1185,17 @@ angular.module('myApp.services')
     MtpApiManager.getUserID().then(function (fromID) {
       if (peerID != fromID) {
         flags |= 2;
-        if (!AppUsersManager.isBot(peerID)) {
+        if (!isChannel && !AppUsersManager.isBot(peerID)) {
           flags |= 1;
         }
       }
       if (replyToMsgID) {
         flags |= 8;
+      }
+      if (asChannel) {
+        fromID = 0;
+      } else {
+        flags |= 256;
       }
       var media = {
         _: 'messageMediaPending',
@@ -1319,7 +1336,9 @@ angular.module('myApp.services')
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        replyToMsgID = options.replyToMsgID;
+        replyToMsgID = options.replyToMsgID,
+        isChannel = AppPeersManager.isChannel(peerID),
+        asChannel = isChannel ? true : false;
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1354,6 +1373,14 @@ angular.module('myApp.services')
           flags |= 1;
         }
       }
+      if (replyToMsgID) {
+        flags |= 8;
+      }
+      if (asChannel) {
+        fromID = 0;
+      } else {
+        flags |= 256;
+      }
 
       var message = {
         _: 'message',
@@ -1365,6 +1392,7 @@ angular.module('myApp.services')
         message: '',
         media: media,
         random_id: randomIDS,
+        reply_to_msg_id: replyToMsgID,
         pending: true
       };
 
@@ -1425,14 +1453,17 @@ angular.module('myApp.services')
       msgIDs.push(getMessageLocalID(mids[i]));
       randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
     }
-
+    var sentRequestOptions = {};
+    if (pendingAfterMsgs[peerID]) {
+      sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
+    }
     return MtpApiManager.invokeApi('messages.forwardMessages', {
       flags: flags,
       from_peer: AppPeersManager.getInputPeerByID(-fromChannel),
       id: msgIDs,
       random_id: randomIDs,
       to_peer: AppPeersManager.getInputPeerByID(peerID),
-    }).then(function (updates) {
+    }, sentRequestOptions).then(function (updates) {
       ApiUpdatesManager.processUpdateMessage(updates);
     });
   };
@@ -2015,6 +2046,7 @@ angular.module('myApp.services')
       notification.title = AppChatsManager.getChat(-peerID).title || _('conversation_unknown_chat_raw');
 
       if (message.from_id > 0) {
+        var fromUser = AppUsersManager.getUser(message.from_id);
         notification.title = (fromUser.first_name || fromUser.last_name || _('conversation_unknown_user_raw')) +
                              ' @ ' +
                              notification.title;
@@ -2123,12 +2155,18 @@ angular.module('myApp.services')
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    if (update._ != 'updateUserStatus') {
-      console.log('on apiUpdate', update);
-    }
+    // if (update._ != 'updateUserStatus') {
+    //   console.log('on apiUpdate', update);
+    // }
     switch (update._) {
       case 'updateMessageID':
-        pendingByMessageID[update.id] = update.random_id;
+        var randomID = update.random_id;
+        var pendingData = pendingByRandomID[randomID];
+        if (pendingData) {
+          var peerID = pendingData[0];
+          var channelID = AppPeersManager.isChannel(peerID) ? -peerID : 0;
+          pendingByMessageID[getFullMessageID(update.id, channelID)] = randomID;
+        }
         break;
 
       case 'updateNewMessage':

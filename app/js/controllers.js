@@ -1332,7 +1332,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       // console.log(dT(), 'start load history', $scope.curDialog);
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
-        // console.log(dT(), 'history loaded', historyResult);
+        // console.log(dT(), 'history loaded', angular.copy(historyResult));
 
         var fetchedLength = historyResult.history.length;
 
@@ -1724,7 +1724,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
     $scope.$on('history_multiappend', function (e, historyMultiAdded) {
-      // console.log(dT(), 'multiappend', historyMultiAdded);
+      // console.log(dT(), 'multiappend', angular.copy(historyMultiAdded));
       var regroupped = false;
       var unreadAfterChanged = false;
       var isIDLE = $rootScope.idle.isIDLE;
@@ -1769,7 +1769,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var lastIsRead = !historyMessage || !historyMessage.unread;
         for (i = 0; i < len; i++) {
           messageID = msgs[i];
-          if (history.ids.indexOf(messageID) !== -1) {
+          if (messageID < maxID ||
+              history.ids.indexOf(messageID) !== -1) {
             continue;
           }
           historyMessage = AppMessagesManager.wrapForHistory(messageID);
@@ -1788,6 +1789,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             hasOut = true;
           }
         }
+        // console.log('after append', angular.copy(history.messages), angular.copy(history.ids));
 
         if (AppMessagesManager.regroupWrappedHistory(history.messages, -len - 2)) {
           regroupped = true;
