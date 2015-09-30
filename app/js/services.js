@@ -877,6 +877,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
         }
         break;
+
+      case 'updateChannel':
+        var channelID = update.channel_id;
+        $rootScope.$broadcast('channel_settings', {channelID: channelID});
+        break;
     }
   });
 
@@ -2926,6 +2931,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function savePeerSettings (peerID, settings) {
     // console.trace(dT(), 'peer settings', peerID, settings);
     peerSettings[peerID] = $q.when(settings);
+    $rootScope.$broadcast('notify_settings', {peerID: peerID});
   }
 
   function updatePeerSettings (peerID, settings) {

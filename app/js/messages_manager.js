@@ -2448,41 +2448,75 @@ angular.module('myApp.services')
         });
         break;
 
+      case 'updateChannel':
+        var channelID = update.channel_id;
+        var peerID = -channelID;
+        var channel = AppChatsManager.getChat(channelID);
+
+        var needDialog = channel._ == 'channel' && (!channel.pFlags.left && !channel.pFlags.kicked);
+        var foundDialog = getDialogByPeerID(peerID);
+        var hasDialog = foundDialog.length > 0;
+
+        var canViewHistory = channel._ == 'channel' && (channel.username || !channel.pFlags.left && !channel.pFlags.kicked);
+        var hasHistory = historiesStorage[peerID] !== undefined;
+
+        if (canViewHistory != hasHistory) {
+          delete historiesStorage[peerID];
+          $rootScope.$broadcast('history_forbidden', peerID);
+        }
+        if (hasDialog != needDialog) {
+          if (needDialog) {
+            reloadChannelDialog(channelID);
+          } else {
+            if (foundDialog[0]) {
+              dialogsStorage.dialogs.splice(foundDialog[1], 1);
+              $rootScope.$broadcast('dialog_drop', {peerID: peerID});
+            }
+          }
+        }
+        break;
+
       case 'updateChannelReload':
         var channelID = update.channel_id;
         var peerID = -channelID;
-        delete historiesStorage[peerID];
         var foundDialog = getDialogByPeerID(peerID);
         if (foundDialog[0]) {
           dialogsStorage.dialogs.splice(foundDialog[1], 1);
         }
-
-        var inputPeer = AppPeersManager.getInputPeerByID(peerID);
-        $q.all([
-          getHistory(inputPeer, 0),
-          AppChatsManager.getChannelFull(channelID, true)
-        ]).then(function (results) {
-          var historyResult = results[0];
-          var channelResult = results[1];
-          var dialog = {
-            _: 'dialogChannel',
-            peer: AppPeersManager.getOutputPeer(peerID),
-            top_message: historyResult.history[0],
-            top_important_message: historyResult.history[0],
-            read_inbox_max_id: channelResult.read_inbox_max_id,
-            unread_count: channelResult.unread_count,
-            unread_important_count: channelResult.unread_important_count
-          };
-          saveChannelDialog(channelID, dialog);
-
-          var updatedDialogs = {};
-          updatedDialogs[peerID] = dialog;
-          $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs);
+        delete historiesStorage[peerID];
+        reloadChannelDialog(channelID).then(function () {
           $rootScope.$broadcast('history_reload', peerID);
         });
         break;
     }
   });
+
+  function reloadChannelDialog (channelID) {
+    var peerID = -channelID;
+    var inputPeer = AppPeersManager.getInputPeerByID(peerID);
+    return $q.all([
+      AppChatsManager.getChannelFull(channelID, true),
+      getHistory(inputPeer, 0)
+    ]).then(function (results) {
+      var channelResult = results[0];
+      var historyResult = results[1];
+      var topMsgID = historyResult.history[0];
+      var dialog = {
+        _: 'dialogChannel',
+        peer: AppPeersManager.getOutputPeer(peerID),
+        top_message: topMsgID,
+        top_important_message: topMsgID,
+        read_inbox_max_id: channelResult.read_inbox_max_id,
+        unread_count: channelResult.unread_count,
+        unread_important_count: channelResult.unread_important_count
+      };
+      saveChannelDialog(channelID, dialog);
+
+      var updatedDialogs = {};
+      updatedDialogs[peerID] = dialog;
+      $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs);
+    });
+  }
 
   $rootScope.$on('webpage_updated', function (e, eventData) {
     angular.forEach(eventData.msgs, function (msgID) {

@@ -451,6 +451,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.historyPeer = {};
     $scope.historyState = {
       selectActions: false,
+      botActions: false,
+      channelActions: false,
+      actions: function () {
+        return $scope.historyState.selectActions ? 'selected' : ($scope.historyState.botActions ? 'bot' : ($scope.historyState.channelActions ? 'channel' : false));
+      },
       typing: [],
       missedCount: 0,
       skipped: false
@@ -694,13 +699,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     });
 
-    $scope.$on('dialog_flush', function (e, dialog) {
+    function deleteDialog (peerID) {
       for (var i = 0; i < $scope.dialogs.length; i++) {
-        if ($scope.dialogs[i].peerID == dialog.peerID) {
+        if ($scope.dialogs[i].peerID == peerID) {
           $scope.dialogs.splice(i, 1);
           break;
         }
       }
+    }
+
+    $scope.$on('dialog_flush', function (e, dialog) {
+      deleteDialog(dialog.peerID);
+    });
+    $scope.$on('dialog_drop', function (e, dialog) {
+      deleteDialog(dialog.peerID);
     });
 
     $scope.$on('history_delete', function (e, historyUpdate) {
@@ -982,7 +994,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, ErrorService) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, NotificationsManager, ErrorService) {
 
     $scope.$watchCollection('curDialog', applyDialogSelect);
 
@@ -994,6 +1006,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedMsgs = {};
     $scope.selectedCount = 0;
     $scope.historyState.selectActions = false;
+    $scope.historyState.botActions = false;
+    $scope.historyState.channelActions = false;
     $scope.historyState.missedCount = 0;
     $scope.historyState.skipped = false;
     $scope.state = {};
@@ -1004,7 +1018,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedReply = selectedReply;
     $scope.selectedCancel = selectedCancel;
     $scope.selectedFlush = selectedFlush;
-    $scope.botStart = botStart;
+
+    $scope.startBot = startBot;
+    $scope.cancelBot = cancelBot;
+    $scope.joinChannel = joinChannel;
+    $scope.togglePeerMuted = togglePeerMuted;
+
 
     $scope.toggleEdit = toggleEdit;
     $scope.toggleMedia = toggleMedia;
@@ -1056,7 +1075,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.curDialog.inputPeer = AppPeersManager.getInputPeer(newPeer);
       $scope.historyFilter.mediaType = false;
 
-      updateStartBot();
+      updateBotActions();
       selectedCancel(true);
 
       if (oldDialog.peer &&
@@ -1150,14 +1169,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-    function updateStartBot () {
-      var wasStartBot = $scope.historyState.startBot;
+    function updateBotActions () {
+      var wasBotActions = $scope.historyState.botActions;
       if (!peerID ||
           peerID < 0 ||
           !AppUsersManager.isBot(peerID) ||
           $scope.historyFilter.mediaType ||
           $scope.curDialog.messageID) {
-        $scope.historyState.startBot = false;
+        $scope.historyState.botActions = false;
       }
       else if (
         $scope.state.empty || (
@@ -1167,15 +1186,43 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           peerHistory.messages[0].action._ == 'messageActionBotIntro'
         )
       ) {
-        $scope.historyState.startBot = 2;
+        $scope.historyState.botActions = 'start';
       }
       else if ($scope.curDialog.startParam) {
-        $scope.historyState.startBot = 1;
+        $scope.historyState.botActions = 'param';
       }
       else {
-        $scope.historyState.startBot = false;
+        $scope.historyState.botActions = false;
       }
-      if (wasStartBot != $scope.historyState.startBot) {
+      if (wasBotActions != $scope.historyState.botActions) {
+        $scope.$broadcast('ui_panel_update');
+      }
+    }
+
+    function updateChannelActions () {
+      var wasChannelActions = $scope.historyState.channelActions;
+      var channel;
+      if (peerID &&
+          AppPeersManager.isChannel(peerID) &&
+          (channel = AppChatsManager.getChat(-peerID)) &&
+          !channel.pFlags.creator &&
+          !channel.pFlags.editor) {
+
+        if (channel.pFlags.left) {
+          $scope.historyState.channelActions = 'join';
+        } else {
+          if (!$scope.historyState.channelActions) {
+            $scope.historyState.channelActions = 'mute';
+          }
+          NotificationsManager.getPeerMuted(peerID).then(function (muted) {
+            $scope.historyState.channelActions = muted ? 'unmute' : 'mute';
+          });
+        }
+      }
+      else {
+        $scope.historyState.channelActions = false;
+      }
+      if (wasChannelActions != $scope.historyState.channelActions) {
         $scope.$broadcast('ui_panel_update');
       }
     }
@@ -1382,7 +1429,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
-        updateStartBot();
+        updateBotActions();
+        updateChannelActions();
 
       }, function () {
         safeReplaceObject($scope.state, {error: true});
@@ -1399,13 +1447,32 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$broadcast('ui_history_change');
     }
 
-    function botStart () {
+    function startBot () {
       AppMessagesManager.startBot(peerID, 0, $scope.curDialog.startParam);
       $scope.curDialog.startParam = false;
     }
 
+    function cancelBot () {
+      delete $scope.curDialog.startParam;
+    }
+
+    function joinChannel () {
+      MtpApiManager.invokeApi('channels.joinChannel', {
+        channel: AppChatsManager.getChannelInput(-peerID)
+      }).then(function (result) {
+        ApiUpdatesManager.processUpdateMessage(result);
+      });
+    }
+
+    function togglePeerMuted (muted) {
+      NotificationsManager.getPeerSettings(peerID).then(function (settings) {
+        settings.mute_until = !muted ? 0 : 2000000000;
+        NotificationsManager.updatePeerSettings(peerID, settings);
+      });
+    }
+
     function toggleMessage (messageID, $event) {
-      if ($scope.historyState.startBot ||
+      if ($scope.historyState.botActions ||
           $rootScope.idle.afterFocus) {
         return false;
       }
@@ -1462,7 +1529,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                 break;
 
               case 'select':
-                $scope.historyState.selectActions = true;
+                $scope.historyState.selectActions = 'selected';
                 $scope.$broadcast('ui_panel_update');
                 toggleMessage(messageID);
                 break;
@@ -1514,7 +1581,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.selectedMsgs[messageID] = true;
         $scope.selectedCount++;
         if (!$scope.historyState.selectActions) {
-          $scope.historyState.selectActions = true;
+          $scope.historyState.selectActions = 'selected';
           $scope.$broadcast('ui_panel_update');
         }
       }
@@ -1522,11 +1589,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function selectedCancel (noBroadcast) {
-      if (!noBroadcast &&
-          $scope.curDialog.startParam) {
-        delete $scope.curDialog.startParam;
-        return;
-      }
       $scope.selectedMsgs = {};
       $scope.selectedCount = 0;
       $scope.historyState.selectActions = false;
@@ -1605,7 +1667,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if ($scope.historyState.selectActions) {
         selectedCancel();
       } else {
-        $scope.historyState.selectActions = true;
+        $scope.historyState.selectActions = 'selected';
         $scope.$broadcast('ui_panel_update');
       }
     }
@@ -1657,6 +1719,26 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('history_reload', function (e, updPeerID) {
       if (updPeerID == $scope.curDialog.peerID) {
         loadHistory();
+      }
+    });
+
+    $scope.$on('history_forbidden', function (e, updPeerID) {
+      if (updPeerID == $scope.curDialog.peerID) {
+        $rootScope.$apply(function () {
+          $location.url('/im');
+        })
+      }
+    });
+
+    $scope.$on('notify_settings', function (e, data) {
+      if (data.peerID == $scope.curDialog.peerID) {
+        updateChannelActions();
+      }
+    });
+
+    $scope.$on('channel_settings', function (e, data) {
+      if (data.channelID == -$scope.curDialog.peerID) {
+        updateChannelActions();
       }
     });
 
@@ -1719,7 +1801,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           });
         }
 
-        updateStartBot();
+        updateBotActions();
+        updateChannelActions();
       }
     });
 
@@ -1815,7 +1898,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             });
           }
 
-          updateStartBot();
+          updateBotActions();
+          updateChannelActions();
         }
       });
 
@@ -1845,7 +1929,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$broadcast('messages_regroup');
       if (historyUpdate.peerID == $scope.curDialog.peerID) {
         $scope.state.empty = !newMessages.length;
-        updateStartBot();
+        updateBotActions();
       }
     });
 
@@ -1856,7 +1940,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         history.ids = [];
         if (dialog.peerID == $scope.curDialog.peerID) {
           $scope.state.empty = true;
-          updateStartBot();
+          updateBotActions();
         }
       }
     });
