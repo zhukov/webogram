@@ -616,7 +616,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     AppStickersManager.start();
   })
 
-  .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, PhonebookContactsService, ErrorService, AppRuntimeManager) {
+  .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppProfileManager, AppPeersManager, PhonebookContactsService, ErrorService, AppRuntimeManager) {
 
     $scope.dialogs = [];
     $scope.contacts = [];
@@ -732,7 +732,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         case 'updateChatUserTyping':
           if (!AppUsersManager.hasUser(update.user_id)) {
             if (update.chat_id) {
-              AppChatsManager.getChatFull(update.chat_id);
+              AppProfileManager.getChatFull(update.chat_id);
             }
             return;
           }
@@ -1724,9 +1724,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$on('history_forbidden', function (e, updPeerID) {
       if (updPeerID == $scope.curDialog.peerID) {
-        $rootScope.$apply(function () {
-          $location.url('/im');
-        })
+        $location.url('/im');
       }
     });
 
@@ -2075,7 +2073,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('mentions_update');
         return;
       }
-      AppChatsManager.getChatFull(-peerID).then(function (chatFull) {
+      AppProfileManager.getChatFull(-peerID).then(function (chatFull) {
         var participantsVector = (chatFull.participants || {}).participants || [];
 
         var mentionUsers = [];
@@ -3026,12 +3024,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
+  .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
     $scope.settings = {notifications: true};
 
-    AppChatsManager.getChatFull($scope.chatID).then(function (chatFull) {
+    AppProfileManager.getChatFull($scope.chatID).then(function (chatFull) {
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull);
       $scope.$broadcast('ui_height');
 
@@ -3176,12 +3174,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('ChannelModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
+  .controller('ChannelModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
     $scope.settings = {notifications: true};
 
-    AppChatsManager.getChannelFull($scope.chatID, true).then(function (chatFull) {
+    AppProfileManager.getChannelFull($scope.chatID, true).then(function (chatFull) {
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull);
       $scope.$broadcast('ui_height');
 
@@ -3317,6 +3315,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         windowClass: 'md_simple_modal_window mobile_modal'
       });
     }
+
+    $scope.goToHistory = function () {
+      $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+    };
 
   })
 
@@ -3694,7 +3696,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$watch('profile.username', function (newVal) {
-      if (!newVal.length) {
+      if (!newVal || !newVal.length) {
         $scope.checked = {};
         return;
       }
@@ -4185,13 +4187,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
   })
 
-  .controller('ChannelEditModalController', function ($q, $scope, $modalInstance, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, ApiUpdatesManager) {
+  .controller('ChannelEditModalController', function ($q, $scope, $modalInstance, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppProfileManager, ApiUpdatesManager) {
 
     var channel = AppChatsManager.getChat($scope.chatID);
     var initial = {title: channel.title};
     $scope.channel = {title: channel.title};
 
-    AppChatsManager.getChannelFull($scope.chatID).then(function (channelFull) {
+    AppProfileManager.getChannelFull($scope.chatID).then(function (channelFull) {
       initial.about = channelFull.about;
       $scope.channel.about = channelFull.about;
     });

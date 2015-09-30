@@ -2512,7 +2512,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myChatStatus', function ($rootScope, _, MtpApiManager, AppChatsManager, AppUsersManager) {
+  .directive('myChatStatus', function ($rootScope, _, MtpApiManager, AppChatsManager, AppUsersManager, AppProfileManager) {
 
     var ind = 0;
     var statuses = {};
@@ -2549,7 +2549,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!chatID) {
           return;
         }
-        AppChatsManager.getChatFull(chatID).then(function (chatFull) {
+        AppProfileManager.getChatFull(chatID).then(function (chatFull) {
           var participantsVector = (chatFull.participants || {}).participants || [];
           participantsCount = participantsVector.length;
           angular.forEach(participantsVector, function (participant) {

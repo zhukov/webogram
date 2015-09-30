@@ -551,8 +551,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 .service('AppChatsManager', function ($q, $rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, AppPhotosManager, RichTextProcessor) {
   var chats = {},
       usernames = {},
-      chatsFull = {},
-      chatFullPromises = {},
       channelAccess = {},
       cachedPhotoLocations = {};
 
@@ -641,93 +639,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       channel_id: id,
       access_hash: getChat(id).access_hash || channelAccess[id] || 0
     }
-  }
-
-  function getChatFull(id) {
-    if (isChannel(id)) {
-      return getChannelFull(id);
-    }
-    if (chatsFull[id] !== undefined) {
-      if (chats[id].version == chatsFull[id].participants.version ||
-          chats[id].left) {
-        return $q.when(chatsFull[id]);
-      }
-    }
-    if (chatFullPromises[id] !== undefined) {
-      return chatFullPromises[id];
-    }
-    return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
-      chat_id: getChatInput(id)
-    }).then(function (result) {
-      saveApiChats(result.chats);
-      AppUsersManager.saveApiUsers(result.users);
-      var fullChat = result.full_chat;
-      if (fullChat && fullChat.chat_photo.id) {
-        AppPhotosManager.savePhoto(fullChat.chat_photo);
-      }
-      delete chatFullPromises[id];
-      chatsFull[id] = fullChat;
-      $rootScope.$broadcast('chat_full_update', id);
-
-      return fullChat;
-    });
-  }
-
-  function getChannelFull (id, force) {
-    if (chatsFull[id] !== undefined && !force) {
-      return $q.when(chatsFull[id]);
-    }
-    if (chatFullPromises[id] !== undefined) {
-      return chatFullPromises[id];
-    }
-
-    return chatFullPromises[id] = MtpApiManager.invokeApi('channels.getFullChannel', {
-      channel: getChannelInput(id)
-    }).then(function (result) {
-      saveApiChats(result.chats);
-      AppUsersManager.saveApiUsers(result.users);
-      var fullChannel = result.full_chat;
-      var chat = getChat(id);
-      if (fullChannel && fullChannel.chat_photo.id) {
-        AppPhotosManager.savePhoto(fullChannel.chat_photo);
-      }
-      var participantsPromise;
-      if ((fullChannel.flags & 8) ||
-          chat.pFlags.creator ||
-          chat.pFlags.editor ||
-          chat.pFlags.moderator) {
-        participantsPromise = getChannelParticipants(id).then(function (participants) {
-          delete chatFullPromises[id];
-          fullChannel.participants = {
-            _: 'channelParticipants',
-            participants: participants
-          };
-        }, function (error) {
-          error.handled = true;
-        });
-      } else {
-        participantsPromise = $q.when();
-      }
-      return participantsPromise.then(function () {
-        delete chatFullPromises[id];
-        chatsFull[id] = fullChannel;
-        $rootScope.$broadcast('chat_full_update', id);
-
-        return fullChannel;
-      });
-    });
-  }
-
-  function getChannelParticipants (id) {
-    return MtpApiManager.invokeApi('channels.getParticipants', {
-      channel: getChannelInput(id),
-      filter: {_: 'channelParticipantsRecent'},
-      offset: 0,
-      limit: 200
-    }).then(function (result) {
-      AppUsersManager.saveApiUsers(result.users);
-      return result.participants;
-    });
   }
 
   function getChatInviteLink (id, force) {
@@ -893,8 +804,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveChannelAccess: saveChannelAccess,
     getChatInput: getChatInput,
     getChannelInput: getChannelInput,
-    getChatFull: getChatFull,
-    getChannelFull: getChannelFull,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
     getChatInviteLink: getChatInviteLink,
@@ -1056,9 +965,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppProfileManager', function ($q, AppUsersManager, AppChatsManager, AppPhotosManager, NotificationsManager, MtpApiManager, RichTextProcessor) {
+.service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, RichTextProcessor) {
 
   var botInfos = {};
+  var chatsFull = {};
+  var chatFullPromises = {};
 
   function saveBotInfo (botInfo) {
     var botID = botInfo && botInfo.user_id;
@@ -1108,10 +1019,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getPeerBots (peerID) {
     var peerBots = [];
+    if (peerID >= 0 && !AppUsersManager.isBot(peerID) ||
+        AppPeersManager.isChannel(peerID)) {
+      return $q.when(peerBots);
+    }
     if (peerID >= 0) {
-      if (!AppUsersManager.isBot(peerID)) {
-        return $q.when(peerBots);
-      }
       return getProfile(peerID).then(function (userFull) {
         var botInfo = userFull.bot_info;
         if (botInfo && botInfo._ != 'botInfoEmpty') {
@@ -1121,7 +1033,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       });
     }
 
-    return AppChatsManager.getChatFull(-peerID).then(function (chatFull) {
+    return getChatFull(-peerID).then(function (chatFull) {
       angular.forEach(chatFull.bot_info, function (botInfo) {
         peerBots.push(saveBotInfo(botInfo));
       });
@@ -1130,9 +1042,101 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   }
 
+  function getChatFull(id) {
+    if (AppChatsManager.isChannel(id)) {
+      return getChannelFull(id);
+    }
+    if (chatsFull[id] !== undefined) {
+      var chat = AppChatsManager.getChat(id);
+      if (chat.version == chatsFull[id].participants.version ||
+          chat.left) {
+        return $q.when(chatsFull[id]);
+      }
+    }
+    if (chatFullPromises[id] !== undefined) {
+      return chatFullPromises[id];
+    }
+    return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
+      chat_id: AppChatsManager.getChatInput(id)
+    }).then(function (result) {
+      AppChatsManager.saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+      var fullChat = result.full_chat;
+      if (fullChat && fullChat.chat_photo.id) {
+        AppPhotosManager.savePhoto(fullChat.chat_photo);
+      }
+      NotificationsManager.savePeerSettings(-id, fullChat.notify_settings);
+      delete chatFullPromises[id];
+      chatsFull[id] = fullChat;
+      $rootScope.$broadcast('chat_full_update', id);
+
+      return fullChat;
+    });
+  }
+
+  function getChannelParticipants (id) {
+    return MtpApiManager.invokeApi('channels.getParticipants', {
+      channel: AppChatsManager.getChannelInput(id),
+      filter: {_: 'channelParticipantsRecent'},
+      offset: 0,
+      limit: 200
+    }).then(function (result) {
+      AppUsersManager.saveApiUsers(result.users);
+      return result.participants;
+    });
+  }
+
+  function getChannelFull (id, force) {
+    if (chatsFull[id] !== undefined && !force) {
+      return $q.when(chatsFull[id]);
+    }
+    if (chatFullPromises[id] !== undefined) {
+      return chatFullPromises[id];
+    }
+
+    return chatFullPromises[id] = MtpApiManager.invokeApi('channels.getFullChannel', {
+      channel: AppChatsManager.getChannelInput(id)
+    }).then(function (result) {
+      AppChatsManager.saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+      var fullChannel = result.full_chat;
+      var chat = AppChatsManager.getChat(id);
+      if (fullChannel && fullChannel.chat_photo.id) {
+        AppPhotosManager.savePhoto(fullChannel.chat_photo);
+      }
+      NotificationsManager.savePeerSettings(-id, fullChannel.notify_settings);
+      var participantsPromise;
+      if ((fullChannel.flags & 8) ||
+          chat.pFlags.creator ||
+          chat.pFlags.editor ||
+          chat.pFlags.moderator) {
+        participantsPromise = getChannelParticipants(id).then(function (participants) {
+          delete chatFullPromises[id];
+          fullChannel.participants = {
+            _: 'channelParticipants',
+            participants: participants
+          };
+        }, function (error) {
+          error.handled = true;
+        });
+      } else {
+        participantsPromise = $q.when();
+      }
+      return participantsPromise.then(function () {
+        delete chatFullPromises[id];
+        chatsFull[id] = fullChannel;
+        $rootScope.$broadcast('chat_full_update', id);
+
+        return fullChannel;
+      });
+    });
+  }
+
   return {
+    getPeerBots: getPeerBots,
     getProfile: getProfile,
-    getPeerBots: getPeerBots
+    getChatFull: getChatFull,
+    getChannelFull: getChannelFull
   }
 })
 

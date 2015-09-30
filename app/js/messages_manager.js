@@ -1274,6 +1274,9 @@ angular.module('myApp.services')
             if (replyToMsgID) {
               flags |= 1;
             }
+            if (asChannel) {
+              flags |= 16;
+            }
             MtpApiManager.invokeApi('messages.sendMedia', {
               flags: flags,
               peer: inputPeer,
@@ -1416,6 +1419,9 @@ angular.module('myApp.services')
         var flags = 0;
         if (replyToMsgID) {
           flags |= 1;
+        }
+        if (asChannel) {
+          flags |= 16;
         }
         MtpApiManager.invokeApi('messages.sendMedia', {
           flags: flags,
@@ -1601,7 +1607,11 @@ angular.module('myApp.services')
         }).then(function (updates) {
           ApiUpdatesManager.processUpdateMessage(updates);
 
-          if (updates.updates && updates.updates.length) {
+          if (updates.chats && updates.chats.length == 1) {
+            $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(updates.chats[0].id)
+            });
+          }
+          else if (updates.updates && updates.updates.length) {
             for (var i = 0, len = updates.updates.length, update; i < len; i++) {
               update = updates.updates[i];
               if (update._ == 'updateNewMessage') {
@@ -2457,7 +2467,7 @@ angular.module('myApp.services')
         var foundDialog = getDialogByPeerID(peerID);
         var hasDialog = foundDialog.length > 0;
 
-        var canViewHistory = channel._ == 'channel' && (channel.username || !channel.pFlags.left && !channel.pFlags.kicked);
+        var canViewHistory = channel._ == 'channel' && (channel.username || !channel.pFlags.left && !channel.pFlags.kicked) && true || false;
         var hasHistory = historiesStorage[peerID] !== undefined;
 
         if (canViewHistory != hasHistory) {
@@ -2495,7 +2505,7 @@ angular.module('myApp.services')
     var peerID = -channelID;
     var inputPeer = AppPeersManager.getInputPeerByID(peerID);
     return $q.all([
-      AppChatsManager.getChannelFull(channelID, true),
+      AppProfileManager.getChannelFull(channelID, true),
       getHistory(inputPeer, 0)
     ]).then(function (results) {
       var channelResult = results[0];
@@ -2508,7 +2518,8 @@ angular.module('myApp.services')
         top_important_message: topMsgID,
         read_inbox_max_id: channelResult.read_inbox_max_id,
         unread_count: channelResult.unread_count,
-        unread_important_count: channelResult.unread_important_count
+        unread_important_count: channelResult.unread_important_count,
+        notify_settings: channelResult.notify_settings
       };
       saveChannelDialog(channelID, dialog);
 
