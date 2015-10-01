@@ -314,7 +314,7 @@ angular.module('myApp.services')
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
-      }, {noErrorBox: true});
+      });
     } else {
       promise = MtpApiManager.invokeApi('messages.getHistory', {
         peer: inputPeer,
@@ -365,6 +365,23 @@ angular.module('myApp.services')
         }
         return historyResult;
       });
+    }, function (error) {
+      switch (error.type) {
+        case 'CHANNEL_PRIVATE':
+          var channel = AppChatsManager.getChat(-peerID);
+          channel = {_: 'channelForbidden', access_hash: channel.access_hash, title: channel.title};
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updates',
+            updates: [{
+              _: 'updateChannel',
+              channel_id: -peerID
+            }],
+            chats: [channel],
+            users: []
+          });
+          break;
+      }
+      return $q.reject(error);
     });
   }
 
@@ -1599,7 +1616,7 @@ angular.module('myApp.services')
         chatTitle = chatInvite.title;
       }
       ErrorService.confirm({
-        type: 'JOIN_GROUP_BY_LINK',
+        type:  chatInvite.flags & 1 ? 'JOIN_CHANNEL_BY_LINK' : 'JOIN_GROUP_BY_LINK',
         title: chatTitle
       }).then(function () {
         return MtpApiManager.invokeApi('messages.importChatInvite', {

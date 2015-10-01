@@ -48,19 +48,18 @@
               </ul>
             </div>
 
-            <div class="im_dialogs_contacts_wrap" ng-show="foundUsers.length > 0">
+            <div class="im_dialogs_contacts_wrap" ng-show="foundPeers.length > 0">
               <h5 my-i18n="im_found_title"></h5>
               <ul class="nav nav-pills nav-stacked">
-                <li class="im_dialog_wrap" ng-repeat="foundUser in foundUsers track by foundUser.userID" ng-class="{active: curDialog.peerID == foundUser.userID}">
-                  <a class="im_dialog" ng-mousedown="dialogSelect(foundUser.peerString)">
-                    <div class="im_dialog_photo pull-left" my-peer-photolink="foundUser.userID" img-class="im_dialog_photo" watch="true"></div>
+                <li class="im_dialog_wrap" ng-repeat="foundPeer in foundPeers track by foundPeer.id" ng-class="{active: curDialog.peerID == foundPeer.id}">
+                  <a class="im_dialog" ng-mousedown="dialogSelect(foundPeer.peerString)">
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" my-peer-link="foundUser.userID"></span>
+                        <span class="im_dialog_user" my-peer-link="foundPeer.id"></span>
                       </div>
-                      <div class="im_dialog_message" ng-switch="foundUser.user.username.length > 0">
-                        <span ng-switch-when="true" class="im_dialog_message_text" ng-bind="::'@' + foundUser.user.username"></span>
-                        <span ng-switch-default class="im_dialog_message_text" my-user-status="::foundUser.userID"></span>
+                      <div class="im_dialog_message">
+                        <span class="im_dialog_message_text" ng-bind="::'@' + foundPeer.username"></span>
                       </div>
                     </div>
                   </a>

@@ -418,9 +418,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       case 'updateUserPhoto':
         var userID = update.user_id;
-        if (users[userID]) {
+        var user = users[userID];
+        if (user) {
           forceUserOnline(userID);
-          safeReplaceObject(users[userID].photo, update.photo);
+          if (!user.photo) {
+            user.photo = update.photo;
+          } else {
+            safeReplaceObject(user.photo, update.photo);
+          }
 
           if (cachedPhotoLocations[userID] !== undefined) {
             safeReplaceObject(cachedPhotoLocations[userID], update.photo && update.photo.photo_small || {empty: true});
@@ -619,7 +624,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function isChannel (id) {
     var chat = chats[id];
-    if (chat && chat._ == 'channel' ||
+    if (chat && (chat._ == 'channel' || chat._ == 'channelForbidden') ||
         channelAccess[id]) {
       return true;
     }
@@ -965,7 +970,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, RichTextProcessor) {
+.service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, ApiUpdatesManager, RichTextProcessor) {
 
   var botInfos = {};
   var chatsFull = {};
@@ -1129,6 +1134,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         return fullChannel;
       });
+    }, function (error) {
+      switch (error.type) {
+        case 'CHANNEL_PRIVATE':
+          var channel = AppChatsManager.getChat(id);
+          channel = {_: 'channelForbidden', access_hash: channel.access_hash, title: channel.title};
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updates',
+            updates: [{
+              _: 'updateChannel',
+              channel_id: id
+            }],
+            chats: [channel],
+            users: []
+          });
+          break;
+      }
     });
   }
 

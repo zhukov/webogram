@@ -620,7 +620,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.dialogs = [];
     $scope.contacts = [];
-    $scope.foundUsers = [];
+    $scope.foundPeers = [];
     $scope.foundMessages = [];
 
     if ($scope.search === undefined) {
@@ -854,7 +854,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (!searchMessages) {
           $scope.dialogs = [];
           $scope.contacts = [];
-          $scope.foundUsers = [];
+          $scope.foundPeers = [];
         }
         $scope.foundMessages = [];
 
@@ -966,15 +966,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           if (curJump != contactsJump) return;
           MtpApiManager.invokeApi('contacts.search', {q: $scope.search.query, limit: 10}).then(function (result) {
             AppUsersManager.saveApiUsers(result.users);
+            AppChatsManager.saveApiChats(result.chats);
             if (curJump != contactsJump) return;
-            $scope.foundUsers = [];
+            $scope.foundPeers = [];
             angular.forEach(result.results, function(contactFound) {
-              var userID = contactFound.user_id;
-              if (peersInDialogs[userID] === undefined) {
-                $scope.foundUsers.push({
-                  userID: userID,
-                  user: AppUsersManager.getUser(userID),
-                  peerString: AppUsersManager.getUserString(userID)
+              var peerID = AppPeersManager.getPeerID(contactFound);
+              if (peersInDialogs[peerID] === undefined) {
+                $scope.foundPeers.push({
+                  id: peerID,
+                  username: AppPeersManager.getPeer(peerID).username,
+                  peerString: AppUsersManager.getUserString(peerID)
                 });
               }
             });
@@ -1726,6 +1727,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (updPeerID == $scope.curDialog.peerID) {
         $location.url('/im');
       }
+      historiesQueuePop(updPeerID);
     });
 
     $scope.$on('notify_settings', function (e, data) {
@@ -3926,7 +3928,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   .controller('ContactsModalController', function ($scope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
 
     $scope.contacts = [];
-    $scope.foundUsers = [];
+    $scope.foundPeers = [];
     $scope.search = {};
     $scope.slice = {limit: 20, limitDelta: 20};
 

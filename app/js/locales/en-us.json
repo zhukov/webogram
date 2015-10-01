@@ -217,6 +217,7 @@
 	"confirm_modal_abort_password_setup": "Abort two-step verification setup?",
 	"confirm_modal_reset_account_md": "Are you sure?\nThis action can not be undone.\n\nYou will lose all your chats and messages, along with any media and files you shared, if you proceed with resetting your account.",
 	"confirm_modal_join_group_link": "Do you want to join the group «{title}»?",
+	"confirm_modal_join_channel_link": "Do you want to join the channel «{title}»?",
 	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
 	"confirm_modal_revoke_channel_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the channel using it.",
 	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll messages will be removed and all messages will be lost.",
@@ -363,6 +364,8 @@
 	"error_modal_password_disabled_descripion": "You have disabled Two-Step Verification.",
 	"error_modal_user_not_mutual_contact": "The user can be invited by his contact only",
 	"error_modal_invite_link_invalid": "The invite link is invalid",
+	"error_modal_channel_not_accessible": "Sorry, this channel is not accessible.",
+	"error_modal_not_contact_flood": "Sorry, you can only send messages to mutual contacts at the moment. {more-info-link: More info »}",
 
 
 	"head_telegram": "Telegram",

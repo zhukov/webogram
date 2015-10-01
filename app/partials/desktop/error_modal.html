@@ -42,7 +42,10 @@
       <span ng-switch-when="INVITE_HASH_INVALID" my-i18n="error_modal_invite_link_invalid"></span>
       <span ng-switch-when="INVITE_HASH_EXPIRED" my-i18n="error_modal_invite_link_invalid"></span>
       <span ng-switch-when="INVITE_HASH_EMPTY" my-i18n="error_modal_invite_link_invalid"></span>
-
+      <span ng-switch-when="CHANNEL_PRIVATE" my-i18n="error_modal_channel_not_accessible"></span>
+      <span ng-switch-when="PEER_FLOOD" my-i18n="error_modal_not_contact_flood">
+        <my-i18n-param name="more-info-link"><a href="https://telegram.org/faq#can-39t-send-messages-to-non-contacts" target="_blank">{0}</a></my-i18n-param>
+      </span>
 
 
       <div ng-switch-default ng-switch="error.code">
