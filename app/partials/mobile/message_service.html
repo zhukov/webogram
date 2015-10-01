@@ -20,7 +20,8 @@
   </span>
   <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="message_service_joined_by_link"></span>
 
-  <span ng-switch-when="messageActionChannelCreate" my-i18n="message_service_created_channel">
+  <span ng-switch-when="messageActionChannelCreate" my-i18n="message_service_created_channel"></span>
+  <span ng-switch-when="messageActionChannelEditTitle" my-i18n="message_service_changed_channel_name">
     <my-i18n-param name="channel-name">&laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;</my-i18n-param>
   </span>
   <span ng-switch-when="messageActionChannelEditPhoto" my-i18n="message_service_changed_channel_photo"></span>

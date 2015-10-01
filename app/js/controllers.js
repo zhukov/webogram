@@ -3299,7 +3299,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.deletePhoto = function () {
       $scope.photo.updating = true;
-      MtpApiManager.invokeApi('messages.editChatPhoto', {
+      MtpApiManager.invokeApi('channels.editPhoto', {
         channel: AppChatsManager.getChannelInput($scope.chatID),
         photo: {_: 'inputChatPhotoEmpty'}
       }).then(onChatUpdated)['finally'](function () {

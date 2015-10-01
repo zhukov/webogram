@@ -1606,7 +1606,7 @@ angular.module('myApp.services')
       var chatTitle;
       if (chatInvite._ == 'chatInviteAlready') {
         AppChatsManager.saveApiChat(chatInvite.chat);
-        if (!chatInvite.chat.left) {
+        if (!chatInvite.chat.pFlags.left) {
           return $rootScope.$broadcast('history_focus', {
             peerString: AppChatsManager.getChatString(chatInvite.chat.id)
           });

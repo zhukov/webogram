@@ -323,7 +323,9 @@ function templateUrl (tplName) {
     slider: 'desktop',
     reply_message: 'desktop',
     chat_invite_link_modal: 'desktop',
-    reply_markup: 'desktop'
+    reply_markup: 'desktop',
+    dialog_service: 'desktop',
+    channel_edit_modal: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';

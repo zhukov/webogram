@@ -1010,7 +1010,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (chatsFull[id] !== undefined) {
       var chat = AppChatsManager.getChat(id);
       if (chat.version == chatsFull[id].participants.version ||
-          chat.left) {
+          chat.pFlags.left) {
         return $q.when(chatsFull[id]);
       }
     }
@@ -2433,7 +2433,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             message: updateMessage.message,
             fwd_from_id: updateMessage.fwd_from_id,
             fwd_date: updateMessage.fwd_date,
-            reply_to_msg_id: updateMessage.reply_to_msg_id
+            reply_to_msg_id: updateMessage.reply_to_msg_id,
+            entities: updateMessage.entities
           },
           pts: updateMessage.pts,
           pts_count: updateMessage.pts_count
