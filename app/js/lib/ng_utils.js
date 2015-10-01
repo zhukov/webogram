@@ -1540,7 +1540,7 @@ angular.module('izhukov.utils', [])
             skipEntity = true;
             break;
           }
-          var command = entityText;
+          var command = entityText.substr(1);
           var bot, atPos;
           if ((atPos = command.indexOf('@')) != -1) {
             bot = command.substr(atPos);
