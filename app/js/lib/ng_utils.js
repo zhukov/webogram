@@ -348,8 +348,8 @@ angular.module('izhukov.utils', [])
   // IndexedDB is REALLY slow without blob support in Safari 8, no point in it
   if (storageIsAvailable &&
       navigator.userAgent.indexOf('Safari') != -1 &&
-      navigator.userAgent.indexOf('Chrome') == -1
-      // && navigator.userAgent.match(/Version\/([67]|8.0.[012])/)
+      navigator.userAgent.indexOf('Chrome') == -1 &&
+      navigator.userAgent.match(/Version\/[678]/)
   ) {
     storageIsAvailable = false;
   }
@@ -446,6 +446,9 @@ angular.module('izhukov.utils', [])
   };
 
   function saveFileBase64(db, fileName, blob) {
+    if (getBlobSize(blob) > 10 * 1024 * 1024) {
+      return $q.reject();
+    }
     try {
       var reader = new FileReader();
       reader.readAsDataURL(blob);
@@ -475,6 +478,10 @@ angular.module('izhukov.utils', [])
     }
 
     return deferred.promise;
+  }
+
+  function getBlobSize (blob) {
+    return blob.size || blob.byteLength || blob.length;
   }
 
   function getFile (fileName) {
