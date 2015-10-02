@@ -405,6 +405,13 @@ html {
     overflow: hidden;
   }
 
+  .peer_initials {
+    line-height: 36px;
+    font-size: 15px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
   .navbar_peer_not_selected & {
     display: none;
   }
@@ -1010,6 +1017,11 @@ a.im_dialog {
 
   div& {
     margin: 0 12px 0 0;
+
+    .peer_initials {
+      line-height: 54px;
+      font-size: 18px;
+    }
   }
 }
 
@@ -1104,6 +1116,10 @@ a.im_message_fwd_author {
     padding: 0;
   }
 
+  &.md_simple_modal_window .modal-dialog {
+    max-width: none;
+  }
+
   .modal-content {
     border-radius: 0;
     box-shadow: none;
@@ -1141,6 +1157,11 @@ a.im_message_fwd_author {
     width: 64px;
     height: 64px;
     margin-right: 14px;
+
+    .peer_initials {
+      line-height: 64px;
+      font-size: 18px;
+    }
   }
 
   &_chat_modal_image {

@@ -323,7 +323,9 @@ function templateUrl (tplName) {
     slider: 'desktop',
     reply_message: 'desktop',
     chat_invite_link_modal: 'desktop',
-    reply_markup: 'desktop'
+    reply_markup: 'desktop',
+    dialog_service: 'desktop',
+    channel_edit_modal: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';
@@ -397,7 +399,7 @@ function versionCompare (ver1, ver2) {
 (function (global) {
 
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-        trimRe = /^\s+|\s$/g;
+      trimRe = /^\s+|\s$/g;
 
   function createIndex () {
     return {
@@ -418,6 +420,10 @@ function versionCompare (ver1, ver2) {
     }
 
     return text;
+  }
+
+  function cleanUsername (username) {
+    return username && username.toLowerCase() || '';
   }
 
   function indexObject (id, searchText, searchIndex) {
@@ -493,6 +499,7 @@ function versionCompare (ver1, ver2) {
     createIndex: createIndex,
     indexObject: indexObject,
     cleanSearchText: cleanSearchText,
+    cleanUsername: cleanUsername,
     search: search
   };
 

@@ -4,7 +4,7 @@
     <div class="md_modal_title_wrap">
       <div class="md_modal_actions_wrap clearfix">
         <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
-        <a class="md_modal_action" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left" ng-click="editTitle()" my-i18n="modal_edit"></a>
+        <a class="md_modal_action" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left" ng-click="editTitle()" my-i18n="modal_edit"></a>
       </div>
       <div class="md_modal_title" my-i18n="group_modal_info"></div>
     </div>
@@ -17,7 +17,7 @@
         <a ng-switch-default ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})" class="peer_modal_photo" my-peer-photolink="::-chatFull.chat.id" img-class="peer_modal_photo" no-open="true" watch="true" ng-class="{disabled: !chatFull.chat.photo.photo_small}" ng-disabled="!chatFull.chat.photo.photo_small"></a>
       </div>
       <div class="peer_modal_profile">
-        <div class="peer_modal_profile_name" my-chat-link="chatFull.chat.id"></div>
+        <div class="peer_modal_profile_name" my-peer-link="-chatFull.chat.id"></div>
         <div class="peer_modal_profile_description" ng-if="chatFull.chat.participants_count > 0">
           <ng-pluralize count="chatFull.chat.participants_count"
                         when="group_modal_pluralize_participants">
@@ -38,12 +38,12 @@
 
   <div class="md_modal_body">
 
-    <div class="md_modal_sections">
+    <div class="md_modal_sections clearfix">
 
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="chatFull.chat._ != 'chatForbidden'">
         <i class="md_modal_section_icon md_modal_section_icon_person"></i>
 
-        <div class="md_modal_section_link_wrap" ng-switch="chatFull.chat.left">
+        <div class="md_modal_section_link_wrap" ng-switch="chatFull.chat.pFlags.left">
 
           <a ng-switch-when="true" class="md_modal_section_link" ng-click="returnToGroup()" my-i18n="group_modal_return"></a>
           <a ng-switch-default class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
@@ -51,7 +51,7 @@
 
       </div>
 
-      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.left && chatFull.isAdmin">
+      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.pFlags.left && chatFull.isAdmin">
         <!-- <i class="md_modal_section_icon md_modal_section_icon_more"></i> -->
 
         <div class="md_modal_section_link_wrap">
@@ -81,7 +81,7 @@
 
     </div>
 
-    <div ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; chatFull.participants.participants.length > 0">
+    <div ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left &amp;&amp; chatFull.participants.participants.length > 0">
 
       <div class="md_modal_section_splitter"></div>
 
@@ -98,7 +98,7 @@
             <a class="md_modal_list_peer_photo pull-left" my-peer-photolink="::participant.user_id" img-class="md_modal_list_peer_photo"></a>
 
             <div class="md_modal_list_peer_name">
-              <a class="md_modal_list_peer_name" my-user-link="participant.user_id"></a>
+              <a class="md_modal_list_peer_name" my-peer-link="participant.user_id"></a>
             </div>
             <div class="md_modal_list_peer_description" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
           </div>

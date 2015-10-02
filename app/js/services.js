@@ -78,21 +78,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   };
 
-  function userNameClean (username) {
-    return username && username.toLowerCase() || '';
-  }
-
   function resolveUsername (username) {
-    var searchUserName = userNameClean(username);
-    var foundUserID = usernames[searchUserName];
-    if (foundUserID &&
-        userNameClean(users[foundUserID].username) == searchUserName) {
-      return qSync.when(foundUserID);
-    }
-    return MtpApiManager.invokeApi('contacts.resolveUsername', {username: username}).then(function (resolveResult) {
-      saveApiUser(resolveResult);
-      return resolveResult.id;
-    });
+    return usernames[username] || 0;
   }
 
   function saveApiUsers (apiUsers) {
@@ -122,10 +109,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (apiUser.username) {
-      usernames[userNameClean(apiUser.username)] = userID;
+      var searchUsername = SearchIndexManager.cleanUsername(apiUser.username);
+      usernames[searchUsername] = userID;
     }
-
-    apiUser.sortName = SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
 
     apiUser.pFlags = {
       self: (apiUser.flags & (1 << 10)) > 0,
@@ -136,6 +122,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       botNoPrivacy: (apiUser.flags & (1 << 15)) > 0,
       botNoGroups: (apiUser.flags & (1 << 16)) > 0
     };
+
+    apiUser.sortName = apiUser.pFlags.deleted ? '' : SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
 
     var nameWords = apiUser.sortName.split(' ');
     var firstWord = nameWords.shift();
@@ -200,7 +188,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return angular.isObject(users[id]);
   }
 
-  function getUserPhoto(id, placeholder) {
+  function getUserPhoto(id) {
     var user = getUser(id);
 
     if (id == 333000) {
@@ -215,7 +203,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     return {
       num: user.num,
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + user.num + '@2x.png',
+      placeholder: 'img/placeholders/UserAvatar' + user.num + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
@@ -430,9 +418,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       case 'updateUserPhoto':
         var userID = update.user_id;
-        if (users[userID]) {
+        var user = users[userID];
+        if (user) {
           forceUserOnline(userID);
-          safeReplaceObject(users[userID].photo, update.photo);
+          if (!user.photo) {
+            user.photo = update.photo;
+          } else {
+            safeReplaceObject(user.photo, update.photo);
+          }
 
           if (cachedPhotoLocations[userID] !== undefined) {
             safeReplaceObject(cachedPhotoLocations[userID], update.photo && update.photo.photo_small || {empty: true});
@@ -562,8 +555,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('AppChatsManager', function ($q, $rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, AppPhotosManager, RichTextProcessor) {
   var chats = {},
-      chatsFull = {},
-      chatFullPromises = {},
+      usernames = {},
+      channelAccess = {},
       cachedPhotoLocations = {};
 
   function saveApiChats (apiChats) {
@@ -576,12 +569,34 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
 
+    var flags = apiChat.flags;
+    apiChat.pFlags = {
+      creator: (flags & (1 << 0)) > 0,
+      kicked: (flags & (1 << 1)) > 0,
+      left: (flags & (1 << 2)) > 0
+    };
+
+    if (apiChat._ == 'channel') {
+      angular.extend(apiChat.pFlags, {
+        editor: (apiChat.flags & (1 << 3)) > 0,
+        moderator: (apiChat.flags & (1 << 4)) > 0,
+        broadcast: (apiChat.flags & (1 << 5)) > 0,
+        username: (apiChat.flags & (1 << 6)) > 0,
+        verified: (apiChat.flags & (1 << 7)) > 0
+      });
+    };
+
     var titleWords = SearchIndexManager.cleanSearchText(apiChat.title || '').split(' ');
     var firstWord = titleWords.shift();
     var lastWord = titleWords.pop();
     apiChat.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
 
-    apiChat.num = (Math.abs(apiChat.id >> 1) % (Config.Mobile ? 4 : 8)) + 1;
+    apiChat.num = (Math.abs(apiChat.id >> 1) % 8) + 1;
+
+    if (apiChat.username) {
+      var searchUsername = SearchIndexManager.cleanUsername(apiChat.username);
+      usernames[searchUsername] = apiChat.id;
+    }
 
     if (chats[apiChat.id] === undefined) {
       chats[apiChat.id] = apiChat;
@@ -599,54 +614,43 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return chats[id] || {id: id, deleted: true};
   }
 
-  function getChatFull(id) {
-    if (chatsFull[id] !== undefined) {
-      if (chats[id].version == chatsFull[id].participants.version ||
-          chats[id].left) {
-        return $q.when(chatsFull[id]);
-      }
-    }
-    if (chatFullPromises[id] !== undefined) {
-      return chatFullPromises[id];
-    }
-    return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
-      chat_id: id
-    }).then(function (result) {
-      saveApiChats(result.chats);
-      AppUsersManager.saveApiUsers(result.users);
-      if (result.full_chat && result.full_chat.chat_photo.id) {
-        AppPhotosManager.savePhoto(result.full_chat.chat_photo);
-      }
-      delete chatFullPromises[id];
-      $rootScope.$broadcast('chat_full_update', id);
-
-      return chatsFull[id] = result.full_chat;
-    });
+  function resolveUsername (username) {
+    return usernames[username] || 0;
   }
 
-  function getChatInviteLink (id, force) {
-    return getChatFull(id).then(function (chatFull) {
-      if (!force &&
-          chatFull.exported_invite &&
-          chatFull.exported_invite._ == 'chatInviteExported') {
-        return chatFull.exported_invite.link;
-      }
-      return MtpApiManager.invokeApi('messages.exportChatInvite', {
-        chat_id: id
-      }).then(function (exportedInvite) {
-        if (chatsFull[id] !== undefined) {
-          chatsFull[id].exported_invite = exportedInvite;
-        }
-        return exportedInvite.link;
-      });
-    });
+  function saveChannelAccess (id, accessHash) {
+    channelAccess[id] = accessHash;
+  }
+
+  function isChannel (id) {
+    var chat = chats[id];
+    if (chat && (chat._ == 'channel' || chat._ == 'channelForbidden') ||
+        channelAccess[id]) {
+      return true;
+    }
+    return false;
+  }
+
+  function getChatInput (id) {
+    return id || 0;
+  }
+
+  function getChannelInput (id) {
+    if (!id) {
+      return {_: 'inputChannelEmpty'};
+    }
+    return {
+      _: 'inputChannel',
+      channel_id: id,
+      access_hash: getChat(id).access_hash || channelAccess[id] || 0
+    }
   }
 
   function hasChat (id) {
     return angular.isObject(chats[id]);
   }
 
-  function getChatPhoto(id, placeholder) {
+  function getChatPhoto(id) {
     var chat = getChat(id);
 
     if (cachedPhotoLocations[id] === undefined) {
@@ -654,13 +658,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return {
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + (Config.Mobile ? chat.num : Math.ceil(chat.num / 2)) + '@2x.png',
+      placeholder: 'img/placeholders/GroupAvatar' + Math.ceil(chat.num / 2) + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
 
   function getChatString (id) {
     var chat = getChat(id);
+    if (isChannel(id)) {
+      return 'c' + id + '_' + chat.access_hash;
+    }
     return 'g' + id;
   }
 
@@ -668,25 +675,33 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var chatFull = angular.copy(fullChat),
         chat = getChat(id);
 
-
     if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
       MtpApiManager.getUserID().then(function (myID) {
         chatFull.isAdmin = (myID == chatFull.participants.admin_id);
         angular.forEach(chatFull.participants.participants, function(participant){
-          participant.user = AppUsersManager.getUser(participant.user_id);
           participant.canLeave = myID == participant.user_id;
           participant.canKick = !participant.canLeave && (chatFull.isAdmin || myID == participant.inviter_id);
+
+          // just for order by last seen
+          participant.user = AppUsersManager.getUser(participant.user_id);
         });
       });
     }
+    if (chatFull.participants && chatFull.participants._ == 'channelParticipants') {
+      var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator;
+      angular.forEach(chatFull.participants.participants, function(participant) {
+        participant.canLeave = !chat.pFlags.creator && participant._ == 'channelParticipantSelf';
+        participant.canKick = isAdmin && participant._ == 'channelParticipant';
 
-    chatFull.thumb = {
-      placeholder: 'img/placeholders/GroupAvatar'+(Config.Mobile ? chat.num : Math.ceil(chat.num / 2))+'@2x.png',
-      location: chat && chat.photo && chat.photo.photo_small,
-      width: 72,
-      height: 72,
-      size: 0
-    };
+        // just for order by last seen
+        participant.user = AppUsersManager.getUser(participant.user_id);
+      });
+    }
+
+    if (chatFull.about) {
+      chatFull.rAbout = RichTextProcessor.wrapRichText(chatFull.about, {noLinebreaks: true});
+    }
+
     chatFull.peerString = getChatString(id);
     chatFull.chat = chat;
 
@@ -697,59 +712,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var scope = $rootScope.$new();
     scope.chatID = chatID;
 
-    var modalInstance = $modal.open({
-      templateUrl: templateUrl('chat_modal'),
-      controller: 'ChatModalController',
-      scope: scope,
-      windowClass: 'chat_modal_window mobile_modal'
-    });
+    if (isChannel(chatID)) {
+      var modalInstance = $modal.open({
+        templateUrl: templateUrl('channel_modal'),
+        controller: 'ChannelModalController',
+        scope: scope,
+        windowClass: 'chat_modal_window channel_modal_window mobile_modal'
+      });
+    } else {
+      var modalInstance = $modal.open({
+        templateUrl: templateUrl('chat_modal'),
+        controller: 'ChatModalController',
+        scope: scope,
+        windowClass: 'chat_modal_window mobile_modal'
+      });
+    }
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
     // console.log('on apiUpdate', update);
     switch (update._) {
-      case 'updateChatParticipants':
-        var participants = update.participants;
-        var chatFull = chatsFull[participants.id];
-        if (chatFull !== undefined) {
-          chatFull.participants = update.participants;
-          $rootScope.$broadcast('chat_full_update', chatID);
-        }
-        break;
-
-      case 'updateChatParticipantAdd':
-        var chatFull = chatsFull[update.chat_id];
-        if (chatFull !== undefined) {
-          var participants = chatFull.participants.participants || [];
-          for (var i = 0, length = participants.length; i < length; i++) {
-            if (participants[i].user_id == update.user_id) {
-              return;
-            }
-          }
-          participants.push({
-            _: 'chatParticipant',
-            user_id: update.user_id,
-            inviter_id: update.inviter_id,
-            date: tsNow(true)
-          });
-          chatFull.participants.version = update.version;
-          $rootScope.$broadcast('chat_full_update', update.chat_id);
-        }
-        break;
-
-      case 'updateChatParticipantDelete':
-        var chatFull = chatsFull[update.chat_id];
-        if (chatFull !== undefined) {
-          var participants = chatFull.participants.participants || [];
-          for (var i = 0, length = participants.length; i < length; i++) {
-            if (participants[i].user_id == update.user_id) {
-              participants.splice(i, 1);
-              chatFull.participants.version = update.version;
-              $rootScope.$broadcast('chat_full_update', update.chat_id);
-              return;
-            }
-          }
-        }
+      case 'updateChannel':
+        var channelID = update.channel_id;
+        $rootScope.$broadcast('channel_settings', {channelID: channelID});
         break;
     }
   });
@@ -758,88 +743,175 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiChats: saveApiChats,
     saveApiChat: saveApiChat,
     getChat: getChat,
-    getChatFull: getChatFull,
+    isChannel: isChannel,
+    saveChannelAccess: saveChannelAccess,
+    getChatInput: getChatInput,
+    getChannelInput: getChannelInput,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
-    getChatInviteLink: getChatInviteLink,
+    resolveUsername: resolveUsername,
     hasChat: hasChat,
     wrapForFull: wrapForFull,
     openChat: openChat
   }
 })
 
-.service('AppPeersManager', function (AppUsersManager, AppChatsManager, MtpApiManager) {
-  return {
-    getInputPeer: function (peerString) {
-      var isUser = peerString.charAt(0) == 'u',
-          peerParams = peerString.substr(1).split('_');
+.service('AppPeersManager', function (qSync, AppUsersManager, AppChatsManager, MtpApiManager) {
 
-      return isUser
-            ? {_: 'inputPeerUser', user_id: peerParams[0], access_hash: peerParams[1]}
-            : {_: 'inputPeerChat', chat_id: peerParams[0]};
-    },
-    getInputPeerByID: function (peerID) {
-      if (peerID > 0) {
-        return {
-          _: 'inputPeerUser',
-          user_id: peerID,
-          access_hash: AppUsersManager.getUser(peerID).access_hash || 0
-        };
-      } else if (peerID < 0) {
+  function getInputPeer (peerString) {
+    var firstChar = peerString.charAt(0),
+        peerParams = peerString.substr(1).split('_');
+
+    if (firstChar == 'u') {
+      return {
+        _: 'inputPeerUser',
+        user_id: peerParams[0],
+        access_hash: peerParams[1]
+      };
+    }
+    else if (firstChar == 'c') {
+      AppChatsManager.saveChannelAccess(peerParams[0], peerParams[1]);
+      return {
+        _: 'inputPeerChannel',
+        channel_id: peerParams[0],
+        access_hash: peerParams[1] || 0
+      };
+    }
+    else {
+      return {
+        _: 'inputPeerChat',
+        chat_id: peerParams[0]
+      }
+    }
+  }
+
+  function getInputPeerByID (peerID) {
+    if (peerID < 0) {
+      var chatID = -peerID;
+      if (!AppChatsManager.isChannel(chatID)) {
         return {
           _: 'inputPeerChat',
-          chat_id: -peerID
+          chat_id: chatID
         };
+      } else {
+        return {
+          _: 'inputPeerChannel',
+          channel_id: chatID,
+          access_hash: AppChatsManager.getChat(chatID).access_hash || 0
+        }
       }
-    },
-    getPeerSearchText: function (peerID) {
-      var text;
-      if (peerID > 0) {
-        text = '%pu ' + AppUsersManager.getUserSearchText(peerID);
-      } else if (peerID < 0) {
-        var chat = AppChatsManager.getChat(-peerID);
-        text = '%pg ' + (chat.title || '');
-      }
-      return text;
-    },
-    getPeerString: function (peerID) {
-      if (peerID > 0) {
-        return AppUsersManager.getUserString(peerID);
-      }
-      return AppChatsManager.getChatString(-peerID);
-    },
-    getOutputPeer: function (peerID) {
-      return peerID > 0
-            ? {_: 'peerUser', user_id: peerID}
-            : {_: 'peerChat', chat_id: -peerID};
-    },
-    getPeerID: function (peerString) {
-      if (angular.isObject(peerString)) {
-        return peerString.user_id
-          ? peerString.user_id
-          : -peerString.chat_id;
-      }
-      var isUser = peerString.charAt(0) == 'u',
-          peerParams = peerString.substr(1).split('_');
-
-      return isUser ? peerParams[0] : -peerParams[0] || 0;
-    },
-    getPeer: function (peerID) {
-      return peerID > 0
-        ? AppUsersManager.getUser(peerID)
-        : AppChatsManager.getChat(-peerID);
-    },
-    getPeerPhoto: function (peerID, userPlaceholder, chatPlaceholder) {
-      return peerID > 0
-        ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
-        : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
     }
+    return {
+      _: 'inputPeerUser',
+      user_id: peerID,
+      access_hash: AppUsersManager.getUser(peerID).access_hash || 0
+    };
+  }
+
+  function getPeerSearchText (peerID) {
+    var text;
+    if (peerID > 0) {
+      text = '%pu ' + AppUsersManager.getUserSearchText(peerID);
+    } else if (peerID < 0) {
+      var chat = AppChatsManager.getChat(-peerID);
+      text = '%pg ' + (chat.title || '');
+    }
+    return text;
+  }
+
+  function getPeerString (peerID) {
+    if (peerID > 0) {
+      return AppUsersManager.getUserString(peerID);
+    }
+    return AppChatsManager.getChatString(-peerID);
+  }
+
+  function getOutputPeer (peerID) {
+    if (peerID > 0) {
+      return {_: 'peerUser', user_id: peerID};
+    }
+    var chatID = -peerID;
+    if (AppChatsManager.isChannel(chatID)) {
+      return {_: 'peerChannel', channel_id: chatID}
+    }
+    return {_: 'peerChat', chat_id: chatID}
+  }
+
+  function resolveUsername (username) {
+    var searchUserName = SearchIndexManager.cleanUsername(username);
+    var foundUserID, foundChatID, foundPeerID, foundUsername;
+    if (foundUserID = AppUsersManager.resolveUsername(searchUserName)) {
+      foundUsername = AppUsersManager.getUser(foundUserID).username;
+      if (SearchIndexManager.cleanUsername(foundUsername) == searchUserName) {
+        return qSync.when(foundUserID);
+      }
+    }
+    if (foundChatID = AppChatsManager.resolveUsername(searchUserName)) {
+      foundUsername = AppChatsManager.getChat(foundChatID).username;
+      if (SearchIndexManager.cleanUsername(foundUsername) == searchUserName) {
+        return qSync.when(-foundChatID);
+      }
+    }
+
+    return MtpApiManager.invokeApi('contacts.resolveUsername', {username: username}).then(function (resolveResult) {
+      AppUsersManager.saveApiUsers(resolveResult.users);
+      AppChatsManager.saveApiChats(resolveResult.chats);
+      return getPeerID(resolveResult.peer);
+    });
+  }
+
+  function getPeerID (peerString) {
+    if (angular.isObject(peerString)) {
+      return peerString.user_id
+        ? peerString.user_id
+        : -(peerString.channel_id || peerString.chat_id);
+    }
+    var isUser = peerString.charAt(0) == 'u',
+        peerParams = peerString.substr(1).split('_');
+
+    return isUser ? peerParams[0] : -peerParams[0] || 0;
+  }
+
+  function getPeer (peerID) {
+    return peerID > 0
+      ? AppUsersManager.getUser(peerID)
+      : AppChatsManager.getChat(-peerID);
+  }
+
+  function getPeerPhoto (peerID) {
+    return peerID > 0
+      ? AppUsersManager.getUserPhoto(peerID)
+      : AppChatsManager.getChatPhoto(-peerID)
+  }
+
+  function isChannel (peerID) {
+    return (peerID < 0) && AppChatsManager.isChannel(-peerID);
+  }
+
+  function isBot (peerID) {
+    return (peerID > 0) && AppUsersManager.isBot(peerID);
+  }
+
+  return {
+    getInputPeer: getInputPeer,
+    getInputPeerByID: getInputPeerByID,
+    getPeerSearchText: getPeerSearchText,
+    getPeerString: getPeerString,
+    getOutputPeer: getOutputPeer,
+    getPeerID: getPeerID,
+    getPeer: getPeer,
+    getPeerPhoto: getPeerPhoto,
+    resolveUsername: resolveUsername,
+    isChannel: isChannel,
+    isBot: isBot
   }
 })
 
-.service('AppProfileManager', function ($q, AppUsersManager, AppChatsManager, AppPhotosManager, NotificationsManager, MtpApiManager, RichTextProcessor) {
+.service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, ApiUpdatesManager, RichTextProcessor) {
 
   var botInfos = {};
+  var chatsFull = {};
+  var chatFullPromises = {};
 
   function saveBotInfo (botInfo) {
     var botID = botInfo && botInfo.user_id;
@@ -889,10 +961,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getPeerBots (peerID) {
     var peerBots = [];
+    if (peerID >= 0 && !AppUsersManager.isBot(peerID) ||
+        AppPeersManager.isChannel(peerID)) {
+      return $q.when(peerBots);
+    }
     if (peerID >= 0) {
-      if (!AppUsersManager.isBot(peerID)) {
-        return $q.when(peerBots);
-      }
       return getProfile(peerID).then(function (userFull) {
         var botInfo = userFull.bot_info;
         if (botInfo && botInfo._ != 'botInfoEmpty') {
@@ -902,7 +975,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       });
     }
 
-    return AppChatsManager.getChatFull(-peerID).then(function (chatFull) {
+    return getChatFull(-peerID).then(function (chatFull) {
       angular.forEach(chatFull.bot_info, function (botInfo) {
         peerBots.push(saveBotInfo(botInfo));
       });
@@ -911,2172 +984,186 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   }
 
-  return {
-    getProfile: getProfile,
-    getPeerBots: getPeerBots
-  }
-
-})
-
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
-
-  var messagesStorage = {};
-  var messagesForHistory = {};
-  var messagesForDialogs = {};
-  var historiesStorage = {};
-  var dialogsStorage = {count: null, dialogs: []};
-  var pendingByRandomID = {};
-  var pendingByMessageID = {};
-  var pendingAfterMsgs = {};
-  var sendFilePromise = $q.when();
-  var tempID = -1;
-
-  var dialogsIndex = SearchIndexManager.createIndex(),
-      cachedResults = {query: false};
-
-  var lastSearchFilter = {},
-      lastSearchResults = [];
-
-  var needSingleMessages = [],
-      fetchSingleMessagesTimeout = false;
-
-  var serverTimeOffset = 0,
-      timestampNow = tsNow(true),
-      midnightNoOffset = timestampNow - (timestampNow % 86400),
-      midnightOffseted = new Date(),
-      midnightOffset;
-
-  Storage.get('server_time_offset').then(function (to) {
-    if (to) {
-      serverTimeOffset = to;
+  function getChatFull(id) {
+    if (AppChatsManager.isChannel(id)) {
+      return getChannelFull(id);
     }
-  });
+    if (chatsFull[id] !== undefined) {
+      var chat = AppChatsManager.getChat(id);
+      if (chat.version == chatsFull[id].participants.version ||
+          chat.pFlags.left) {
+        return $q.when(chatsFull[id]);
+      }
+    }
+    if (chatFullPromises[id] !== undefined) {
+      return chatFullPromises[id];
+    }
+    return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
+      chat_id: AppChatsManager.getChatInput(id)
+    }).then(function (result) {
+      AppChatsManager.saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+      var fullChat = result.full_chat;
+      if (fullChat && fullChat.chat_photo.id) {
+        AppPhotosManager.savePhoto(fullChat.chat_photo);
+      }
+      NotificationsManager.savePeerSettings(-id, fullChat.notify_settings);
+      delete chatFullPromises[id];
+      chatsFull[id] = fullChat;
+      $rootScope.$broadcast('chat_full_update', id);
 
-  var maxSeenID = false;
-  if (Config.Modes.packed) {
-    Storage.get('max_seen_msg').then(function (maxID) {
-      maxSeenID = maxID || 0;
+      return fullChat;
     });
   }
 
-
-  var dateOrTimeFilter = $filter('dateOrTime');
-  var fwdMessagesPluralize = _.pluralize('conversation_forwarded_X_messages');
-
-  midnightOffseted.setHours(0);
-  midnightOffseted.setMinutes(0);
-  midnightOffseted.setSeconds(0);
-  midnightOffset = midnightNoOffset - (Math.floor(+midnightOffseted / 1000));
-
-  NotificationsManager.start();
-
-  function getDialogs (query, maxID, limit) {
-    var curDialogStorage = dialogsStorage;
-
-    if (angular.isString(query) && query.length) {
-      if (!limit || cachedResults.query !== query) {
-        cachedResults.query = query;
-
-        var results = SearchIndexManager.search(query, dialogsIndex);
-
-        cachedResults.dialogs = [];
-        angular.forEach(dialogsStorage.dialogs, function (dialog) {
-          if (results[dialog.peerID]) {
-            cachedResults.dialogs.push(dialog);
-          }
-        });
-        cachedResults.count = cachedResults.dialogs.length;
+  function getChatInviteLink (id, force) {
+    return getChatFull(id).then(function (chatFull) {
+      if (!force &&
+          chatFull.exported_invite &&
+          chatFull.exported_invite._ == 'chatInviteExported') {
+        return chatFull.exported_invite.link;
       }
-      curDialogStorage = cachedResults;
-    } else {
-      cachedResults.query = false;
-    }
-
-    var offset = 0;
-    if (maxID > 0) {
-      for (offset = 0; offset < curDialogStorage.dialogs.length; offset++) {
-        if (maxID > curDialogStorage.dialogs[offset].top_message) {
-          break;
+      return MtpApiManager.invokeApi('messages.exportChatInvite', {
+        chat_id: getChatInput(id)
+      }).then(function (exportedInvite) {
+        if (chatsFull[id] !== undefined) {
+          chatsFull[id].exported_invite = exportedInvite;
         }
-      }
-    }
-
-    if (curDialogStorage.count !== null && curDialogStorage.dialogs.length == curDialogStorage.count ||
-        curDialogStorage.dialogs.length >= offset + (limit || 1)
-    ) {
-      return $q.when({
-        count: curDialogStorage.count,
-        dialogs: curDialogStorage.dialogs.slice(offset, offset + (limit || 20))
-      });
-    }
-
-    limit = limit || 20;
-
-    return MtpApiManager.invokeApi('messages.getDialogs', {
-      offset: offset,
-      limit: limit,
-      max_id: maxID || 0
-    }).then(function (dialogsResult) {
-      TelegramMeWebService.setAuthorized(true);
-
-      AppUsersManager.saveApiUsers(dialogsResult.users);
-      AppChatsManager.saveApiChats(dialogsResult.chats);
-
-      // return {
-      //   count: 0,
-      //   dialogs: []
-      // };
-
-      saveMessages(dialogsResult.messages);
-
-      if (maxID > 0) {
-        for (offset = 0; offset < curDialogStorage.dialogs.length; offset++) {
-          if (maxID > curDialogStorage.dialogs[offset].top_message) {
-            break;
-          }
-        }
-      }
-
-      curDialogStorage.count = dialogsResult.count || dialogsResult.dialogs.length;
-
-      if (!maxID && curDialogStorage.dialogs.length) {
-        incrementMaxSeenID(curDialogStorage.dialogs[0].top_message);
-      }
-
-      curDialogStorage.dialogs.splice(offset, curDialogStorage.dialogs.length - offset);
-      angular.forEach(dialogsResult.dialogs, function (dialog) {
-        var peerID = AppPeersManager.getPeerID(dialog.peer),
-            peerText = AppPeersManager.getPeerSearchText(peerID);
-
-        SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
-
-        curDialogStorage.dialogs.push({
-          peerID: peerID,
-          top_message: dialog.top_message,
-          unread_count: dialog.unread_count
-        });
-
-        if (historiesStorage[peerID] === undefined) {
-          var historyStorage = {count: null, history: [dialog.top_message], pending: []};
-          historiesStorage[peerID] = historyStorage;
-          var message = getMessage(dialog.top_message);
-          if (mergeReplyKeyboard(historyStorage, message)) {
-            $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
-          }
-        }
-
-        NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
-
-        if (
-          dialog.unread_count > 0 &&
-          maxSeenID &&
-          dialog.top_message > maxSeenID
-        ) {
-          var message = getMessage(dialog.top_message);
-          var notifyPeer = message.flags & 16 ? message.from_id : peerID;
-          if (message.unread && !message.out) {
-            NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
-              if (!muted) {
-                notifyAboutMessage(message);
-              }
-            });
-          }
-        }
-      });
-
-      return {
-        count: curDialogStorage.count,
-        dialogs: curDialogStorage.dialogs.slice(offset, offset + limit)
-      };
-    });
-  }
-
-  function requestHistory (inputPeer, maxID, limit, offset) {
-    return MtpApiManager.invokeApi('messages.getHistory', {
-      peer: inputPeer,
-      offset: offset || 0,
-      limit: limit || 0,
-      max_id: maxID || 0
-    }, {noErrorBox: true}).then(function (historyResult) {
-      AppUsersManager.saveApiUsers(historyResult.users);
-      AppChatsManager.saveApiChats(historyResult.chats);
-      saveMessages(historyResult.messages);
-
-      var peerID = AppPeersManager.getPeerID(inputPeer);
-      if (
-        peerID < 0 ||
-        !AppUsersManager.isBot(peerID) ||
-        (historyResult.messages.length == limit && limit < historyResult.count)
-      ) {
-        return historyResult;
-      }
-
-      return AppProfileManager.getProfile(peerID).then(function (userFull) {
-        var description = userFull.bot_info && userFull.bot_info.description;
-        if (description) {
-          var messageID = tempID--;
-          var message = {
-            _: 'messageService',
-            id: messageID,
-            from_id: peerID,
-            to_id: AppPeersManager.getOutputPeer(peerID),
-            flags: 0,
-            date: tsNow(true) + serverTimeOffset,
-            action: {
-              _: 'messageActionBotIntro',
-              description: description
-            }
-          };
-          saveMessages([message]);
-          historyResult.messages.push(message);
-          if (historyResult.count) {
-            historyResult.count++;
-          }
-        }
-        return historyResult;
+        return exportedInvite.link;
       });
     });
   }
 
-  function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
-    // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
-    return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
-      historyStorage.count = historyResult.count || historyResult.messages.length;
-
-      var offset = 0;
-      if (!maxID && historyResult.messages.length) {
-        maxID = historyResult.messages[0].id + 1;
-      }
-      if (maxID > 0) {
-        for (offset = 0; offset < historyStorage.history.length; offset++) {
-          if (maxID > historyStorage.history[offset]) {
-            break;
-          }
-        }
-      }
-
-      historyStorage.history.splice(offset, historyStorage.history.length - offset);
-      angular.forEach(historyResult.messages, function (message) {
-        if (mergeReplyKeyboard(historyStorage, message)) {
-          $rootScope.$broadcast('history_reply_markup', {peerID: AppPeersManager.getPeerID(inputPeer)});
-        }
-        historyStorage.history.push(message.id);
-      });
-
-      fullLimit -= historyResult.messages.length;
-
-      if (fullLimit > 0 && historyStorage.history.length < historyStorage.count) {
-        maxID = historyStorage.history[historyStorage.history.length - 1];
-        return fillHistoryStorage(inputPeer, maxID, fullLimit, historyStorage);
-      }
-
-      return true;
-    });
-  };
-
-  function wrapHistoryResult (peerID, result) {
-    return $q.when(result);
-  }
-
-  function getHistory (inputPeer, maxID, limit, backLimit, prerendered) {
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        historyStorage = historiesStorage[peerID],
-        offset = 0,
-        offsetNotFound = false,
-        unreadOffset = false,
-        unreadSkip = false;
-
-    prerendered = prerendered ? Math.min(50, prerendered) : 0;
-
-    if (historyStorage === undefined) {
-      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
-    }
-
-    if (!limit && !maxID) {
-      var foundDialog = getDialogByPeerID(peerID);
-      if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 1) {
-        var unreadCount = foundDialog[0].unread_count;
-        if (unreadSkip = (unreadCount > 50)) {
-          limit = 20;
-          unreadOffset = 16;
-          offset = unreadCount - unreadOffset;
-        } else {
-          limit = Math.max(10, prerendered, unreadCount + 2);
-          unreadOffset = unreadCount;
-        }
-      }
-      else if (Config.Mobile) {
-        limit = 20;
-      }
-    }
-    else if (maxID > 0) {
-      offsetNotFound = true;
-      for (offset = 0; offset < historyStorage.history.length; offset++) {
-        if (maxID > historyStorage.history[offset]) {
-          offsetNotFound = false;
-          break;
-        }
-      }
-    }
-
-    if (!offsetNotFound && (
-          historyStorage.count !== null && historyStorage.history.length == historyStorage.count ||
-          historyStorage.history.length >= offset + (limit || 1)
-    )) {
-      if (backLimit) {
-        backLimit = Math.min(offset, backLimit);
-        offset = Math.max(0, offset - backLimit);
-        limit += backLimit;
-      } else {
-        limit = limit || (offset ? 20 : (prerendered || 5));
-      }
-      var history = historyStorage.history.slice(offset, offset + limit);
-      if (!maxID && historyStorage.pending.length) {
-        history = historyStorage.pending.slice().concat(history);
-      }
-      return wrapHistoryResult(peerID, {
-        count: historyStorage.count,
-        history: history,
-        unreadOffset: unreadOffset,
-        unreadSkip: unreadSkip
-      });
-    }
-
-    if (!backLimit && !limit) {
-      limit = prerendered || 20;
-    }
-    if (offsetNotFound) {
-      offset = 0;
-    }
-    if (backLimit || unreadSkip || maxID && historyStorage.history.indexOf(maxID) == -1) {
-      if (backLimit) {
-        offset = -backLimit;
-        limit += backLimit;
-      }
-      return requestHistory(inputPeer, maxID, limit, offset).then(function (historyResult) {
-        historyStorage.count = historyResult.count || historyResult.messages.length;
-
-        var history = [];
-        angular.forEach(historyResult.messages, function (message) {
-          history.push(message.id);
-        });
-        if (!maxID && historyStorage.pending.length) {
-          history = historyStorage.pending.slice().concat(history);
-        }
-
-        return wrapHistoryResult(peerID, {
-          count: historyStorage.count,
-          history: history,
-          unreadOffset: unreadOffset,
-          unreadSkip: unreadSkip
-        });
-      })
-    }
-
-    return fillHistoryStorage(inputPeer, maxID, limit, historyStorage).then(function () {
-      offset = 0;
-      if (maxID > 0) {
-        for (offset = 0; offset < historyStorage.history.length; offset++) {
-          if (maxID > historyStorage.history[offset]) {
-            break;
-          }
-        }
-      }
-
-      var history = historyStorage.history.slice(offset, offset + limit);
-      if (!maxID && historyStorage.pending.length) {
-        history = historyStorage.pending.slice().concat(history);
-      }
-
-      return wrapHistoryResult(peerID, {
-        count: historyStorage.count,
-        history: history,
-        unreadOffset: unreadOffset,
-        unreadSkip: unreadSkip
-      });
-    });
-  }
-
-  function getReplyKeyboard (peerID) {
-    return (historiesStorage[peerID] || {}).reply_markup || false;
-  }
-
-  function mergeReplyKeyboard (historyStorage, message) {
-    // console.log('merge', message.id, message.reply_markup, historyStorage.reply_markup);
-    if (!message.reply_markup &&
-        !message.out &&
-        !message.action) {
-      return false;
-    }
-    var messageReplyMarkup = message.reply_markup;
-    var lastReplyMarkup = historyStorage.reply_markup;
-    if (messageReplyMarkup) {
-      if (lastReplyMarkup && lastReplyMarkup.id >= message.id) {
-        return false;
-      }
-      if (messageReplyMarkup.pFlags.selective &&
-          !(message.flags & 16)) {
-        return false;
-      }
-      if (historyStorage.maxOutID &&
-          message.id < historyStorage.maxOutID &&
-          messageReplyMarkup.pFlags.one_time) {
-        messageReplyMarkup.pFlags.hidden = true;
-      }
-      messageReplyMarkup = angular.extend({
-        id: message.id
-      }, messageReplyMarkup);
-      if (messageReplyMarkup._ != 'replyKeyboardHide') {
-        messageReplyMarkup.fromID = message.from_id;
-      }
-      historyStorage.reply_markup = messageReplyMarkup;
-      // console.log('set', historyStorage.reply_markup);
-      return true;
-    }
-
-    if (message.out) {
-      if (lastReplyMarkup) {
-        if (lastReplyMarkup.pFlags.one_time &&
-            !lastReplyMarkup.pFlags.hidden &&
-            (message.id > lastReplyMarkup.id || message.id < 0) &&
-            message.message) {
-          lastReplyMarkup.pFlags.hidden = true;
-          // console.log('set', historyStorage.reply_markup);
-          return true;
-        }
-      } else if (!historyStorage.maxOutID ||
-                  message.id > historyStorage.maxOutID) {
-        historyStorage.maxOutID = message.id;
-      }
-    }
-
-    if (message.action &&
-        message.action._ == 'messageActionChatDeleteUser' &&
-        (lastReplyMarkup
-          ? message.action.user_id == lastReplyMarkup.fromID
-          : AppUsersManager.isBot(message.action.user_id)
-        )
-      ) {
-      historyStorage.reply_markup = {
-        _: 'replyKeyboardHide',
-        id: message.id,
-        flags: 0,
-        pFlags: {}
-      };
-      // console.log('set', historyStorage.reply_markup);
-      return true;
-    }
-
-    return false;
-  }
-
-  function getSearch (inputPeer, query, inputFilter, maxID, limit) {
-    var foundMsgs = [],
-        useSearchCache = !query,
-        peerID = AppPeersManager.getPeerID(inputPeer),
-        newSearchFilter = {peer: peerID, filter: inputFilter},
-        sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, newSearchFilter);
-
-    if (useSearchCache && !sameSearchCache) {
-      lastSearchFilter = newSearchFilter;
-      lastSearchResults = [];
-    }
-
-    if (!maxID && !query) {
-      var historyStorage = historiesStorage[peerID];
-
-      if (historyStorage !== undefined && historyStorage.history.length) {
-        var neededContents = {},
-            neededLimit = limit || 20,
-            i, message;
-
-        switch (inputFilter._) {
-          case 'inputMessagesFilterPhotos':
-            neededContents['messageMediaPhoto'] = true;
-            break;
-
-          case 'inputMessagesFilterVideo':
-            neededContents['messageMediaVideo'] = true;
-            break;
-
-          case 'inputMessagesFilterPhotoVideo':
-            neededContents['messageMediaPhoto'] = true;
-            neededContents['messageMediaVideo'] = true;
-            break;
-
-          case 'inputMessagesFilterDocument':
-            neededContents['messageMediaDocument'] = true;
-            break;
-
-          case 'inputMessagesFilterAudio':
-            neededContents['messageMediaAudio'] = true;
-            break;
-        }
-        for (i = 0; i < historyStorage.history.length; i++) {
-          message = messagesStorage[historyStorage.history[i]];
-          if (message.media && neededContents[message.media._]) {
-            foundMsgs.push(message.id);
-            if (foundMsgs.length >= neededLimit) {
-              break;
-            }
-          }
-        }
-      }
-
-      // console.log(dT(), sameSearchCache, foundMsgs, lastSearchResults);
-      if (foundMsgs.length < neededLimit && lastSearchResults.length && sameSearchCache) {
-        var minID = foundMsgs.length ? foundMsgs[foundMsgs.length - 1] : 0xFFFFFFFF;
-        for (var i = 0; i < lastSearchResults.length; i++) {
-          if (lastSearchResults[i] < minID) {
-            foundMsgs.push(lastSearchResults[i]);
-            if (foundMsgs.length >= neededLimit) {
-              break;
-            }
-          }
-        }
-      }
-      // console.log(dT(), foundMsgs);
-    }
-
-    if (foundMsgs.length || limit == 1000) {
-      if (useSearchCache) {
-        lastSearchResults = listMergeSorted(lastSearchResults, foundMsgs);
-      }
-
-      return $q.when({
-        count: null,
-        history: foundMsgs
-      });
-    }
-
-    return MtpApiManager.invokeApi('messages.search', {
-      peer: inputPeer,
-      q: query || '',
-      filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
-      min_date: 0,
-      max_date: 0,
-      limit: limit || 20,
-      max_id: maxID || 0
-    }).then(function (searchResult) {
-      AppUsersManager.saveApiUsers(searchResult.users);
-      AppChatsManager.saveApiChats(searchResult.chats);
-      saveMessages(searchResult.messages);
-
-      var foundCount = searchResult.count || searchResult.messages.length;
-
-      foundMsgs = [];
-      angular.forEach(searchResult.messages, function (message) {
-        foundMsgs.push(message.id);
-      });
-
-      if (useSearchCache) {
-        lastSearchResults = listMergeSorted(lastSearchResults, foundMsgs);
-      }
-
-      return {
-        count: foundCount,
-        history: foundMsgs
-      };
-    }, function (error) {
-      if (error.code == 400) {
-        error.handled = true;
-      }
-      return $q.reject(error);
-    });
-  }
-
-  function getMessage (messageID) {
-    return messagesStorage[messageID] || {deleted: true};
-  }
-
-  function deleteMessages (messageIDs) {
-    return MtpApiManager.invokeApi('messages.deleteMessages', {
-      id: messageIDs
-    }).then(function (affectedMessages) {
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updateDeleteMessages',
-          messages: messageIDs,
-          pts: affectedMessages.pts,
-          pts_count: affectedMessages.pts_count
-        }
-      });
-      return messageIDs;
-    });
-  }
-
-  function processAffectedHistory (inputPeer, affectedHistory, method) {
-    ApiUpdatesManager.processUpdateMessage({
-      _: 'updateShort',
-      update: {
-        _: 'updatePts',
-        pts: affectedHistory.pts,
-        pts_count: affectedHistory.pts_count
-      }
-    });
-    if (!affectedHistory.offset) {
-      return $q.when();
-    }
-
-    return MtpApiManager.invokeApi(method, {
-      peer: inputPeer,
-      offset: affectedHistory.offset,
-      max_id: 0
-    }).then(function (affectedHistory) {
-      return processAffectedHistory(inputPeer, affectedHistory, method);
-    });
-  }
-
-  function readHistory (inputPeer) {
-    // console.trace('start read');
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        historyStorage = historiesStorage[peerID],
-        foundDialog = getDialogByPeerID(peerID);
-
-    if (!foundDialog[0] || !foundDialog[0].unread_count) {
-
-      if (!historyStorage || !historyStorage.history.length) {
-        return false;
-      }
-
-      var messageID,
-          message,
-          foundUnread = false;
-      for (i = historyStorage.history.length; i >= 0; i--) {
-        messageID = historyStorage.history[i];
-        message = messagesStorage[messageID];
-        // console.log('ms', message);
-        if (message && !message.out && message.unread) {
-          foundUnread = true;
-          break;
-        }
-      }
-      if (!foundUnread) {
-        return false;
-      }
-    }
-
-    if (historyStorage.readPromise) {
-      return historyStorage.readPromise;
-    }
-
-    historyStorage.readPromise = MtpApiManager.invokeApi('messages.readHistory', {
-      peer: inputPeer,
+  function getChannelParticipants (id) {
+    return MtpApiManager.invokeApi('channels.getParticipants', {
+      channel: AppChatsManager.getChannelInput(id),
+      filter: {_: 'channelParticipantsRecent'},
       offset: 0,
-      max_id: 0
-    }).then(function (affectedHistory) {
-      return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
-    }).then(function () {
-      if (foundDialog[0]) {
-        // console.log('done read history', peerID);
-        foundDialog[0].unread_count = 0;
-        $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0});
-        $rootScope.$broadcast('messages_read');
-      }
-    })['finally'](function () {
-      delete historyStorage.readPromise;
+      limit: 200
+    }).then(function (result) {
+      AppUsersManager.saveApiUsers(result.users);
+      return result.participants;
     });
-
-    if (historyStorage && historyStorage.history.length) {
-      var messageID, message, i, peerID, foundDialog, dialog;
-      for (i = 0; i < historyStorage.history.length; i++) {
-        messageID = historyStorage.history[i];
-        message = messagesStorage[messageID];
-        if (message && !message.out) {
-          message.unread = false;
-          if (messagesForHistory[messageID]) {
-            messagesForHistory[messageID].unread = false;
-          }
-          if (messagesForDialogs[messageID]) {
-            messagesForDialogs[messageID].unread = false;
-          }
-          NotificationsManager.cancel('msg' + messageID);
-        }
-      }
-    }
-
-    NotificationsManager.soundReset(AppPeersManager.getPeerString(peerID))
-
-    return historyStorage.readPromise;
   }
 
-  function readMessages (messageIDs) {
-    MtpApiManager.invokeApi('messages.readMessageContents', {
-      id: messageIDs
-    }).then(function (affectedMessages) {
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updateReadMessagesContents',
-          messages: messageIDs,
-          pts: affectedMessages.pts,
-          pts_count: affectedMessages.pts_count
-        }
+  function getChannelFull (id, force) {
+    if (chatsFull[id] !== undefined && !force) {
+      return $q.when(chatsFull[id]);
+    }
+    if (chatFullPromises[id] !== undefined) {
+      return chatFullPromises[id];
+    }
+
+    return chatFullPromises[id] = MtpApiManager.invokeApi('channels.getFullChannel', {
+      channel: AppChatsManager.getChannelInput(id)
+    }).then(function (result) {
+      AppChatsManager.saveApiChats(result.chats);
+      AppUsersManager.saveApiUsers(result.users);
+      var fullChannel = result.full_chat;
+      var chat = AppChatsManager.getChat(id);
+      if (fullChannel && fullChannel.chat_photo.id) {
+        AppPhotosManager.savePhoto(fullChannel.chat_photo);
+      }
+      NotificationsManager.savePeerSettings(-id, fullChannel.notify_settings);
+      var participantsPromise;
+      if ((fullChannel.flags & 8) ||
+          chat.pFlags.creator ||
+          chat.pFlags.editor ||
+          chat.pFlags.moderator) {
+        participantsPromise = getChannelParticipants(id).then(function (participants) {
+          delete chatFullPromises[id];
+          fullChannel.participants = {
+            _: 'channelParticipants',
+            participants: participants
+          };
+        }, function (error) {
+          error.handled = true;
+        });
+      } else {
+        participantsPromise = $q.when();
+      }
+      return participantsPromise.then(function () {
+        delete chatFullPromises[id];
+        chatsFull[id] = fullChannel;
+        $rootScope.$broadcast('chat_full_update', id);
+
+        return fullChannel;
       });
-    });
-  }
-
-  function flushHistory (inputPeer) {
-    // console.log('start flush');
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        historyStorage = historiesStorage[peerID];
-
-    return MtpApiManager.invokeApi('messages.deleteHistory', {
-      peer: inputPeer,
-      offset: 0
-    }).then(function (affectedHistory) {
-      return processAffectedHistory(inputPeer, affectedHistory, 'messages.deleteHistory');
-    }).then(function () {
-      var foundDialog = getDialogByPeerID(peerID);
-      if (foundDialog[0]) {
-        dialogsStorage.dialogs.splice(foundDialog[1], 1);
-      }
-      delete historiesStorage[peerID];
-      $rootScope.$broadcast('dialog_flush', {peerID: peerID});
-    });
-  }
-
-  function saveMessages (apiMessages) {
-    angular.forEach(apiMessages, function (apiMessage) {
-      apiMessage.unread = apiMessage.flags & 1 ? true : false;
-      apiMessage.out = apiMessage.flags & 2 ? true : false;
-      apiMessage.media_unread = apiMessage.flags & 32 ? true : false;
-      messagesStorage[apiMessage.id] = apiMessage;
-
-      apiMessage.date -= serverTimeOffset;
-
-      var mediaContext = {
-        user_id: apiMessage.from_id,
-        date: apiMessage.date
-      };
-
-      if (apiMessage.media) {
-        switch (apiMessage.media._) {
-          case 'messageMediaEmpty':
-            delete apiMessage.media;
-            break;
-          case 'messageMediaPhoto':
-            AppPhotosManager.savePhoto(apiMessage.media.photo, mediaContext);
-            break;
-          case 'messageMediaVideo':
-            AppVideoManager.saveVideo(apiMessage.media.video, mediaContext);
-            break;
-          case 'messageMediaDocument':
-            AppDocsManager.saveDoc(apiMessage.media.document, mediaContext);
-            break;
-          case 'messageMediaAudio':
-            AppAudioManager.saveAudio(apiMessage.media.audio);
-            break;
-          case 'messageMediaWebPage':
-            AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.id, mediaContext);
-            break;
-        }
-      }
-      if (apiMessage.action && apiMessage.action._ == 'messageActionChatEditPhoto') {
-        AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
-      }
-      if (apiMessage.reply_markup) {
-        apiMessage.reply_markup.pFlags = {
-          resize: (apiMessage.reply_markup.flags & 1) > 0,
-          one_time: (apiMessage.reply_markup.flags & 2) > 0,
-          selective: (apiMessage.reply_markup.flags & 4) > 0
-        };
-      }
-    });
-  }
-
-  function sendText(peerID, text, options) {
-    if (!angular.isString(text) || !text.length) {
-      return;
-    }
-    options = options || {};
-    var messageID = tempID--,
-        randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
-        randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
-        historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        flags = 0,
-        replyToMsgID = options.replyToMsgID,
-        message;
-
-    if (historyStorage === undefined) {
-      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
-    }
-
-    MtpApiManager.getUserID().then(function (fromID) {
-      if (peerID != fromID) {
-        flags |= 2;
-        if (!AppUsersManager.isBot(peerID)) {
-          flags |= 1;
-        }
-      }
-      if (replyToMsgID) {
-        flags |= 8;
-      }
-      message = {
-        _: 'message',
-        id: messageID,
-        from_id: fromID,
-        to_id: AppPeersManager.getOutputPeer(peerID),
-        flags: flags,
-        date: tsNow(true) + serverTimeOffset,
-        message: text,
-        random_id: randomIDS,
-        reply_to_msg_id: replyToMsgID,
-        pending: true
-      };
-
-      var toggleError = function (on) {
-        var historyMessage = messagesForHistory[messageID];
-        if (on) {
-          message.error = true;
-          if (historyMessage) {
-            historyMessage.error = true;
-          }
-        } else {
-          delete message.error;
-          if (historyMessage) {
-            delete historyMessage.error;
-          }
-        }
-        $rootScope.$broadcast('messages_pending');
-      }
-
-      message.send = function () {
-        toggleError(false);
-        var sentRequestOptions = {};
-        if (pendingAfterMsgs[peerID]) {
-          sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
-        }
-        var flags = 0;
-        if (replyToMsgID) {
-          flags |= 1;
-        }
-        MtpApiManager.invokeApi('messages.sendMessage', {
-          flags: flags,
-          peer: inputPeer,
-          message: text,
-          random_id: randomID,
-          reply_to_msg_id: replyToMsgID
-        }, sentRequestOptions).then(function (sentMessage) {
-          message.date = sentMessage.date;
-          message.id = sentMessage.id;
-          message.media = sentMessage.media;
-
+    }, function (error) {
+      switch (error.type) {
+        case 'CHANNEL_PRIVATE':
+          var channel = AppChatsManager.getChat(id);
+          channel = {_: 'channelForbidden', access_hash: channel.access_hash, title: channel.title};
           ApiUpdatesManager.processUpdateMessage({
             _: 'updates',
-            users: [],
-            chats: [],
-            seq: 0,
             updates: [{
-              _: 'updateMessageID',
-              random_id: randomIDS,
-              id: sentMessage.id
-            }, {
-              _: 'updateNewMessage',
-              message: message,
-              pts: sentMessage.pts,
-              pts_count: sentMessage.pts_count
-            }]
-          });
-        }, function (error) {
-          toggleError(true);
-        })['finally'](function () {
-          if (pendingAfterMsgs[peerID] === sentRequestOptions) {
-            delete pendingAfterMsgs[peerID];
-          }
-        });
-
-        pendingAfterMsgs[peerID] = sentRequestOptions;
-      };
-
-      saveMessages([message]);
-      historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
-
-      // setTimeout(function () {
-        message.send();
-      // }, 5000);
-    });
-
-    pendingByRandomID[randomIDS] = [peerID, messageID];
-  };
-
-  function sendFile(peerID, file, options) {
-    options = options || {};
-    var messageID = tempID--,
-        randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
-        randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
-        historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        flags = 0,
-        replyToMsgID = options.replyToMsgID,
-        attachType, apiFileName, realFileName;
-
-    if (!options.isMedia) {
-      attachType = 'document';
-      apiFileName = 'document.' + file.type.split('/')[1];
-    } else if (['image/jpeg', 'image/png', 'image/bmp'].indexOf(file.type) >= 0) {
-      attachType = 'photo';
-      apiFileName = 'photo.' + file.type.split('/')[1];
-    } else if (file.type.substr(0, 6) == 'audio/' || ['video/ogg'].indexOf(file.type) >= 0) {
-      attachType = 'audio';
-      apiFileName = 'audio.' + (file.type.split('/')[1] == 'ogg' ? 'ogg' : 'mp3');
-    } else if (file.type.substr(0, 6) == 'video/') {
-      attachType = 'video';
-      apiFileName = 'video.mp4';
-    } else {
-      attachType = 'document';
-      apiFileName = 'document.' + file.type.split('/')[1];
-    }
-
-    if (historyStorage === undefined) {
-      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
-    }
-
-    MtpApiManager.getUserID().then(function (fromID) {
-      if (peerID != fromID) {
-        flags |= 2;
-        if (!AppUsersManager.isBot(peerID)) {
-          flags |= 1;
-        }
-      }
-      if (replyToMsgID) {
-        flags |= 8;
-      }
-      var media = {
-        _: 'messageMediaPending',
-        type: attachType,
-        file_name: file.name || apiFileName,
-        size: file.size,
-        progress: {percent: 1, total: file.size}
-      };
-
-      var message = {
-        _: 'message',
-        id: messageID,
-        from_id: fromID,
-        to_id: AppPeersManager.getOutputPeer(peerID),
-        flags: flags,
-        date: tsNow(true) + serverTimeOffset,
-        message: '',
-        media: media,
-        random_id: randomIDS,
-        reply_to_msg_id: replyToMsgID,
-        pending: true
-      };
-
-      var toggleError = function (on) {
-        var historyMessage = messagesForHistory[messageID];
-        if (on) {
-          message.error = true;
-          if (historyMessage) {
-            historyMessage.error = true;
-          }
-        } else {
-          delete message.error;
-          if (historyMessage) {
-            delete historyMessage.error;
-          }
-        }
-        $rootScope.$broadcast('messages_pending');
-      }
-
-      var uploaded = false,
-          uploadPromise;
-
-      message.send = function () {
-        var sendFileDeferred = $q.defer();
-
-        sendFilePromise.then(function () {
-          if (!uploaded || message.error) {
-            uploaded = false;
-            uploadPromise = MtpApiFileManager.uploadFile(file);
-          }
-
-          uploadPromise.then(function (inputFile) {
-            inputFile.name = apiFileName;
-            uploaded = true;
-            var inputMedia;
-            switch (attachType) {
-              case 'photo':
-                inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
-                break;
-
-              case 'video':
-                inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0, mime_type: file.type};
-                break;
-
-              case 'audio':
-                inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0, mime_type: file.type};
-                break;
-
-              case 'document':
-              default:
-                inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, mime_type: file.type, attributes: [
-                  {_: 'documentAttributeFilename', file_name: file.name}
-                ]};
-            }
-            var flags = 0;
-            if (replyToMsgID) {
-              flags |= 1;
-            }
-            MtpApiManager.invokeApi('messages.sendMedia', {
-              flags: flags,
-              peer: inputPeer,
-              media: inputMedia,
-              random_id: randomID,
-              reply_to_msg_id: replyToMsgID
-            }).then(function (updates) {
-              ApiUpdatesManager.processUpdateMessage(updates);
-            }, function (error) {
-              if (attachType == 'photo' &&
-                  error.code == 400 &&
-                  error.type == 'PHOTO_INVALID_DIMENSIONS') {
-                error.handled = true;
-                attachType = 'document';
-                message.send();
-                return;
-              }
-              toggleError(true);
-            });
-          }, function (error) {
-            toggleError(true);
-          }, function (progress) {
-            // console.log('upload progress', progress);
-            media.progress.done = progress.done;
-            media.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-            $rootScope.$broadcast('history_update', {peerID: peerID});
-          });
-
-          media.progress.cancel = function () {
-            if (!uploaded) {
-              sendFileDeferred.resolve();
-              uploadPromise.cancel();
-              cancelPendingMessage(randomIDS);
-            }
-          }
-
-          uploadPromise['finally'](function () {
-            sendFileDeferred.resolve();
-          });
-        });
-
-        sendFilePromise = sendFileDeferred.promise;
-      };
-
-      saveMessages([message]);
-      historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
-
-      message.send();
-    });
-
-    pendingByRandomID[randomIDS] = [peerID, messageID];
-  }
-
-  function sendOther(peerID, inputMedia, options) {
-    options = options || {};
-
-    var messageID = tempID--,
-        randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
-        randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
-        historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
-        replyToMsgID = options.replyToMsgID;
-
-    if (historyStorage === undefined) {
-      historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
-    }
-
-    MtpApiManager.getUserID().then(function (fromID) {
-      var media;
-      switch (inputMedia._) {
-        case 'inputMediaContact':
-          media = angular.extend({}, inputMedia, {_: 'messageMediaContact'});
-          break;
-
-        case 'inputMediaPhoto':
-          media = {
-            _: 'messageMediaPhoto',
-            photo: AppPhotosManager.getPhoto(inputMedia.id.id)
-          };
-          break;
-
-        case 'inputMediaDocument':
-          media = {
-            _: 'messageMediaDocument',
-            'document': AppDocsManager.getDoc(inputMedia.id.id)
-          };
-          break;
-      }
-
-      var flags = 0;
-      if (peerID != fromID) {
-        flags |= 2;
-        if (!AppUsersManager.isBot(peerID)) {
-          flags |= 1;
-        }
-      }
-
-      var message = {
-        _: 'message',
-        id: messageID,
-        from_id: fromID,
-        to_id: AppPeersManager.getOutputPeer(peerID),
-        flags: flags,
-        date: tsNow(true) + serverTimeOffset,
-        message: '',
-        media: media,
-        random_id: randomIDS,
-        pending: true
-      };
-
-      var toggleError = function (on) {
-        var historyMessage = messagesForHistory[messageID];
-        if (on) {
-          message.error = true;
-          if (historyMessage) {
-            historyMessage.error = true;
-          }
-        } else {
-          delete message.error;
-          if (historyMessage) {
-            delete historyMessage.error;
-          }
-        }
-        $rootScope.$broadcast('messages_pending');
-      }
-
-      message.send = function () {
-        var flags = 0;
-        if (replyToMsgID) {
-          flags |= 1;
-        }
-        MtpApiManager.invokeApi('messages.sendMedia', {
-          flags: flags,
-          peer: inputPeer,
-          media: inputMedia,
-          random_id: randomID,
-          reply_to_msg_id: replyToMsgID
-        }).then(function (updates) {
-          ApiUpdatesManager.processUpdateMessage(updates);
-        }, function (error) {
-          toggleError(true);
-        });
-      };
-
-      saveMessages([message]);
-      historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
-
-      message.send();
-    });
-
-    pendingByRandomID[randomIDS] = [peerID, messageID];
-  }
-
-  function forwardMessages (peerID, msgIDs) {
-    msgIDs = msgIDs.sort();
-
-    var randomIDs = [];
-    var i;
-    var len = msgIDs.length;
-    for (var i = 0; i < msgIDs.length; i++) {
-      randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
-    }
-
-    return MtpApiManager.invokeApi('messages.forwardMessages', {
-      peer: AppPeersManager.getInputPeerByID(peerID),
-      id: msgIDs,
-      random_id: randomIDs
-    }).then(function (updates) {
-      ApiUpdatesManager.processUpdateMessage(updates);
-    });
-  };
-
-  function startBot (botID, chatID, startParam) {
-    if (startParam) {
-      var randomID = bigint(nextRandomInt(0xFFFFFFFF)).shiftLeft(32).add(bigint(nextRandomInt(0xFFFFFFFF))).toString();
-
-      return MtpApiManager.invokeApi('messages.startBot', {
-        bot: AppUsersManager.getUserInput(botID),
-        chat_id: chatID,
-        random_id: randomID,
-        start_param: startParam
-      });
-    }
-
-    var peerID = chatID ? -chatID : botID;
-    var inputPeer = AppPeersManager.getInputPeerByID(peerID);
-
-    if (chatID) {
-      return MtpApiManager.invokeApi('messages.addChatUser', {
-        chat_id: chatID,
-        user_id: AppUsersManager.getUserInput(botID)
-      }).then(function (updates) {
-        ApiUpdatesManager.processUpdateMessage(updates);
-      }, function (error) {
-        if (error && error.type == 'USER_ALREADY_PARTICIPANT') {
-          var bot = AppUsersManager.getUser(botID);
-          sendText(-chatID, '/start@' + bot.username);
-          error.handled = true;
-        }
-      });
-    }
-
-    return sendText(botID, '/start');
-  }
-
-  function cancelPendingMessage (randomID) {
-    var pendingData = pendingByRandomID[randomID];
-
-    console.log('pending', randomID, pendingData);
-
-    if (pendingData) {
-      var peerID = pendingData[0],
-          tempID = pendingData[1],
-          historyStorage = historiesStorage[peerID],
-          pos = historyStorage.pending.indexOf(tempID);
-
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updateDeleteMessages',
-          messages: [tempID]
-        }
-      });
-
-      if (pos != -1) {
-        historyStorage.pending.splice(pos, 1);
-      }
-
-      delete messagesForHistory[tempID];
-      delete messagesStorage[tempID];
-
-      return true;
-    }
-
-    return false;
-  }
-
-  function finalizePendingMessage(randomID, finalMessage) {
-    var pendingData = pendingByRandomID[randomID];
-    // console.log('pdata', randomID, pendingData);
-
-    if (pendingData) {
-      var peerID = pendingData[0],
-          tempID = pendingData[1],
-          historyStorage = historiesStorage[peerID],
-          message,
-          historyMessage;
-
-      // console.log('pending', randomID, historyStorage.pending);
-      var pos = historyStorage.pending.indexOf(tempID);
-      if (pos != -1) {
-        historyStorage.pending.splice(pos, 1);
-      }
-
-      if (message = messagesStorage[tempID]) {
-        delete message.pending;
-        delete message.error;
-        delete message.random_id;
-        delete message.send;
-      }
-
-      if (historyMessage = messagesForHistory[tempID]) {
-        messagesForHistory[finalMessage.id] = angular.extend(historyMessage, wrapForHistory(finalMessage.id));
-        delete historyMessage.pending;
-        delete historyMessage.error;
-        delete historyMessage.random_id;
-        delete historyMessage.send;
-
-        $rootScope.$broadcast('messages_pending');
-      }
-
-      delete messagesForHistory[tempID];
-      delete messagesStorage[tempID];
-
-      return message;
-    }
-
-    return false;
-  }
-
-  function openChatInviteLink (hash) {
-    return MtpApiManager.invokeApi('messages.checkChatInvite', {
-      hash: hash
-    }).then(function (chatInvite) {
-      var chatTitle;
-      if (chatInvite._ == 'chatInviteAlready') {
-        AppChatsManager.saveApiChat(chatInvite.chat);
-        if (!chatInvite.chat.left) {
-          return $rootScope.$broadcast('history_focus', {
-            peerString: AppChatsManager.getChatString(chatInvite.chat.id)
-          });
-        }
-        chatTitle = chatInvite.chat.title;
-      } else {
-        chatTitle = chatInvite.title;
-      }
-      ErrorService.confirm({
-        type: 'JOIN_GROUP_BY_LINK',
-        title: chatTitle
-      }).then(function () {
-        return MtpApiManager.invokeApi('messages.importChatInvite', {
-          hash: hash
-        }).then(function (updates) {
-          ApiUpdatesManager.processUpdateMessage(updates);
-
-          if (updates.updates && updates.updates.length) {
-            for (var i = 0, len = updates.updates.length, update; i < len; i++) {
-              update = updates.updates[i];
-              if (update._ == 'updateNewMessage') {
-                $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(update.message.to_id.chat_id)
-                });
-                break;
-              }
-            }
-          }
-        });
-      });
-    });
-  }
-
-  function getMessagePeer (message) {
-    var toID = message.to_id && AppPeersManager.getPeerID(message.to_id) || 0;
-
-    if (toID < 0) {
-      return toID;
-    } else if (message.out || message.flags & 2) {
-      return toID;
-    }
-    return message.from_id;
-  }
-
-  function wrapForDialog (msgID, unreadCount) {
-    var useCache = unreadCount != -1;
-
-    if (useCache && messagesForDialogs[msgID] !== undefined) {
-      return messagesForDialogs[msgID];
-    }
-
-    var message = angular.copy(messagesStorage[msgID]);
-
-    if (!message || !message.to_id) {
-      return message;
-    }
-
-    if (message.chatID = message.to_id.chat_id) {
-      message.peerID = -message.chatID;
-      message.peerData = AppChatsManager.getChat(message.chatID);
-    } else {
-      message.peerID = message.out ? message.to_id.user_id : message.from_id;
-      message.peerData = AppUsersManager.getUser(message.peerID);
-    }
-    message.peerString = AppPeersManager.getPeerString(message.peerID);
-    message.peerPhoto = AppPeersManager.getPeerPhoto(message.peerID, 'User', 'Group');
-    message.unreadCount = unreadCount;
-
-    if (message._ == 'messageService' && message.action.user_id) {
-      message.action.user = AppUsersManager.getUser(message.action.user_id);
-    }
-
-    if (message.message && message.message.length) {
-      message.richMessage = RichTextProcessor.wrapRichText(message.message.substr(0, 64), {noLinks: true, noLinebreaks: true});
-    }
-
-    message.dateText = dateOrTimeFilter(message.date);
-
-    if (useCache) {
-      messagesForDialogs[msgID] = message;
-    }
-
-    return message;
-  }
-
-  function wrapForHistory (msgID) {
-    if (messagesForHistory[msgID] !== undefined) {
-      return messagesForHistory[msgID];
-    }
-
-    var message = angular.copy(messagesStorage[msgID]) || {id: msgID};
-
-    if (message.media && message.media.progress !== undefined) {
-      message.media.progress = messagesStorage[msgID].media.progress;
-    }
-
-    var fromUser = AppUsersManager.getUser(message.from_id);
-    var fromBot = fromUser.pFlags.bot && fromUser.username || false;
-    var withBot = (fromBot ||
-                    message.to_id && (
-                      message.to_id.chat_id ||
-                      message.to_id.user_id && AppUsersManager.isBot(message.to_id.user_id)
-                    )
-                  );
-
-    if (message.media) {
-      if (message.media.caption &&
-          message.media.caption.length) {
-        message.media.rCaption = RichTextProcessor.wrapRichText(message.media.caption, {
-          noCommands: !withBot,
-          fromBot: fromBot
-        });
-      }
-
-      switch (message.media._) {
-        case 'messageMediaPhoto':
-          message.media.photo = AppPhotosManager.wrapForHistory(message.media.photo.id);
-          break;
-
-        case 'messageMediaVideo':
-          message.media.video = AppVideoManager.wrapForHistory(message.media.video.id);
-          break;
-
-        case 'messageMediaDocument':
-          message.media.document = AppDocsManager.wrapForHistory(message.media.document.id);
-          break;
-
-        case 'messageMediaAudio':
-          message.media.audio = AppAudioManager.wrapForHistory(message.media.audio.id);
-          break;
-
-        case 'messageMediaGeo':
-          var mapUrl = 'https://maps.google.com/?q=' + message.media.geo['lat'] + ',' + message.media.geo['long'];
-          message.media.mapUrl = $sce.trustAsResourceUrl(mapUrl);
-          break;
-
-        case 'messageMediaVenue':
-          var mapUrl;
-          if (message.media.provider == 'foursquare' &&
-              message.media.venue_id) {
-            mapUrl = 'https://foursquare.com/v/' + encodeURIComponent(message.media.venue_id);
-          } else {
-            mapUrl = 'https://maps.google.com/?q=' + message.media.geo['lat'] + ',' + message.media.geo['long'];
-          }
-          message.media.mapUrl = $sce.trustAsResourceUrl(mapUrl);
-          break;
-
-        case 'messageMediaContact':
-          message.media.rFullName = RichTextProcessor.wrapRichText(
-            message.media.first_name + ' ' + (message.media.last_name || ''),
-            {noLinks: true, noLinebreaks: true}
-          );
-          break;
-
-        case 'messageMediaWebPage':
-          if (!message.media.webpage ||
-              message.media.webpage._ == 'webPageEmpty' ||
-              Config.Mobile) {
-            delete message.media;
-            break;
-          }
-          message.media.webpage = AppWebPagesManager.wrapForHistory(message.media.webpage.id);
-          break;
-      }
-    }
-    else if (message.action) {
-      switch (message.action._) {
-        case 'messageActionChatEditPhoto':
-          message.action.photo = AppPhotosManager.wrapForHistory(message.action.photo.id);
-          break;
-
-        case 'messageActionChatCreate':
-        case 'messageActionChatEditTitle':
-          message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
-          break;
-
-        case 'messageActionBotIntro':
-          message.action.rDescription = RichTextProcessor.wrapRichText(message.action.description, {
-            noCommands: !withBot,
-            fromBot: fromBot
+              _: 'updateChannel',
+              channel_id: id
+            }],
+            chats: [channel],
+            users: []
           });
           break;
       }
-    }
-
-    var replyToMsgID = message.reply_to_msg_id;
-    if (replyToMsgID) {
-      if (messagesStorage[replyToMsgID]) {
-        message.reply_to_msg = wrapForDialog(replyToMsgID);
-      } else {
-        message.reply_to_msg = {id: replyToMsgID, loading: true};
-        if (needSingleMessages.indexOf(replyToMsgID) == -1) {
-          needSingleMessages.push(replyToMsgID);
-          if (fetchSingleMessagesTimeout === false) {
-            fetchSingleMessagesTimeout = setTimeout(fetchSingleMessages, 100);
-          }
-        }
-      }
-    }
-
-    if (message.message && message.message.length) {
-      var options = {
-        noCommands: !withBot,
-        fromBot: fromBot
-      };
-      if (!Config.Navigator.mobile) {
-        options.extractUrlEmbed = true;
-      }
-      if (message.flags & 16) {
-        var user = AppUsersManager.getSelf();
-        if (user) {
-          options.highlightUsername = user.username;
-        }
-      }
-      message.richMessage = RichTextProcessor.wrapRichText(message.message, options);
-      if (options.extractedUrlEmbed) {
-        message.richUrlEmbed = options.extractedUrlEmbed;
-      }
-    }
-
-    return messagesForHistory[msgID] = message;
-  }
-
-  function wrapReplyMarkup (replyMarkup) {
-    if (!replyMarkup ||
-        replyMarkup._ == 'replyKeyboardHide') {
-      return false;
-    }
-    if (replyMarkup.wrapped) {
-      return replyMarkup;
-    }
-    var count = replyMarkup.rows && replyMarkup.rows.length || 0;
-    if (count > 0 && count <= 4 && !replyMarkup.pFlags.resize) {
-      replyMarkup.splitCount = count;
-    }
-    replyMarkup.wrapped = true;
-    angular.forEach(replyMarkup.rows, function (markupRow) {
-      angular.forEach(markupRow.buttons, function (markupButton) {
-        markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
-      })
-    })
-
-    if (nextRandomInt(1)) {
-      replyMarkup.rows = replyMarkup.rows.slice(0, 2);
-    }
-    return replyMarkup;
-  }
-
-  function fetchSingleMessages () {
-    if (fetchSingleMessagesTimeout !== false) {
-      clearTimeout(fetchSingleMessagesTimeout);
-      fetchSingleMessagesTimeout = false;
-    }
-    if (!needSingleMessages.length) {
-      return;
-    }
-    var msgIDs = needSingleMessages.slice();
-    needSingleMessages = [];
-    MtpApiManager.invokeApi('messages.getMessages', {
-      id: msgIDs
-    }).then(function (getMessagesResult) {
-      AppUsersManager.saveApiUsers(getMessagesResult.users);
-      AppChatsManager.saveApiChats(getMessagesResult.chats);
-      saveMessages(getMessagesResult.messages);
-
-      $rootScope.$broadcast('messages_downloaded', msgIDs);
-    })
-  }
-
-  function regroupWrappedHistory (history, limit) {
-    if (!history || !history.length) {
-      return false;
-    }
-    var start = 0,
-        len = history.length,
-        end = len,
-        i, curDay, prevDay, curMessage, prevMessage, curGrouped, prevGrouped,
-        wasUpdated = false,
-        groupFwd = !Config.Mobile;
-
-    if (limit > 0) {
-      end = Math.min(limit, len);
-    } else if (limit < 0) {
-      start = Math.max(0, end + limit);
-    }
-
-    for (i = start; i < end; i++) {
-      curMessage = history[i];
-      curDay = Math.floor((curMessage.date + midnightOffset) / 86400);
-
-      prevGrouped = prevMessage && prevMessage.grouped;
-      curGrouped = curMessage.grouped;
-
-      if (curDay === prevDay) {
-        if (curMessage.needDate) {
-          delete curMessage.needDate;
-          wasUpdated = true;
-        }
-      } else if (!i || prevMessage) {
-        if (!curMessage.needDate) {
-          curMessage.needDate = true;
-          wasUpdated = true;
-        }
-      }
-
-      if (curMessage.fwd_from_id &&
-          curMessage.media &&
-          curMessage.media.document &&
-          curMessage.media.document.sticker &&
-          (curMessage.from_id != (prevMessage || {}).from_id || !(prevMessage || {}).fwd_from_id)) {
-        delete curMessage.fwd_from_id;
-        curMessage._ = 'message';
-      }
-
-      if (prevMessage &&
-          curMessage.from_id == prevMessage.from_id &&
-          !prevMessage.fwd_from_id == !curMessage.fwd_from_id &&
-          !prevMessage.action &&
-          !curMessage.action &&
-          curMessage.date < prevMessage.date + 900) {
-
-        var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1 && !curMessage.reply_to_msg_id;
-        if (groupFwd && curMessage.fwd_from_id && curMessage.fwd_from_id == prevMessage.fwd_from_id) {
-          curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
-        } else {
-          curMessage.grouped = !curMessage.fwd_from_id && singleLine ? 'im_grouped_short' : 'im_grouped';
-        }
-        if (groupFwd && curMessage.fwd_from_id) {
-          if (!prevMessage.grouped) {
-            prevMessage.grouped = 'im_grouped_fwd_start';
-          }
-          if (curMessage.grouped && i == len - 1) {
-            curMessage.grouped += ' im_grouped_fwd_end';
-          }
-        }
-      } else if (prevMessage || !i) {
-        delete curMessage.grouped;
-
-        if (groupFwd && prevMessage && prevMessage.grouped && prevMessage.fwd_from_id) {
-          prevMessage.grouped += ' im_grouped_fwd_end';
-        }
-      }
-      if (!wasUpdated && prevGrouped != (prevMessage && prevMessage.grouped)) {
-        wasUpdated = true;
-      }
-      prevMessage = curMessage;
-      prevDay = curDay;
-    }
-    if (!wasUpdated && curGrouped != (prevMessage && prevMessage.grouped)) {
-      wasUpdated = true;
-    }
-
-    return wasUpdated;
-  }
-
-  function getDialogByPeerID (peerID) {
-    for (var i = 0; i < dialogsStorage.dialogs.length; i++) {
-      if (dialogsStorage.dialogs[i].peerID == peerID) {
-        return [dialogsStorage.dialogs[i], i];
-      }
-    }
-
-    return [];
-  }
-
-  function incrementMaxSeenID (maxID) {
-    if (maxSeenID !== false && maxID && maxID > maxSeenID) {
-      Storage.set({
-        max_seen_msg: maxID
-      });
-    }
-  }
-
-  function notifyAboutMessage (message, options) {
-    options = options || {};
-
-    var peerID = getMessagePeer(message);
-    var fromUser = AppUsersManager.getUser(message.from_id);
-    var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
-    var peerString;
-    var notification = {},
-        notificationMessage = false,
-        notificationPhoto;
-
-    var notifySettings = NotificationsManager.getNotifySettings();
-
-    if (message.fwd_from_id && options.fwd_count) {
-      notificationMessage = fwdMessagesPluralize(options.fwd_count);
-    } else if (message.message) {
-      if (notifySettings.nopreview) {
-        notificationMessage = _('conversation_message_sent');
-      } else {
-        notificationMessage = RichTextProcessor.wrapPlainText(message.message);
-      }
-    } else if (message.media) {
-      switch (message.media._) {
-        case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo_raw'); break;
-        case 'messageMediaVideo': notificationMessage = _('conversation_media_video_raw'); break;
-        case 'messageMediaDocument':
-          if (message.media.document.sticker) {
-            notificationMessage = _('conversation_media_sticker');
-            var stickerEmoji = message.media.document.stickerEmojiRaw;
-            if (stickerEmoji !== undefined) {
-              notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' (' + notificationMessage + ')';
-            }
-          } else {
-            notificationMessage = message.media.document.file_name || _('conversation_media_document_raw');
-          }
-          break;
-        case 'messageMediaAudio': notificationMessage = _('conversation_media_audio_raw'); break;
-        case 'messageMediaGeo':
-        case 'messageMediaVenue': notificationMessage = _('conversation_media_location_raw'); break;
-        case 'messageMediaContact': notificationMessage = _('conversation_media_contact_raw'); break;
-        default: notificationMessage = _('conversation_media_attachment_raw'); break;
-      }
-    } else if (message._ == 'messageService') {
-      switch (message.action._) {
-        case 'messageActionChatCreate': notificationMessage = _('conversation_group_created_raw'); break;
-        case 'messageActionChatEditTitle': notificationMessage = _('conversation_group_renamed_raw'); break;
-        case 'messageActionChatEditPhoto': notificationMessage = _('conversation_group_photo_updated_raw'); break;
-        case 'messageActionChatDeletePhoto': notificationMessage = _('conversation_group_photo_removed_raw'); break;
-        case 'messageActionChatAddUser':
-          notificationMessage = message.action.user_id == message.from_id ? _('conversation_returned_to_group') : _('conversation_invited_user_message_raw');
-          break;
-        case 'messageActionChatDeleteUser':
-          notificationMessage = message.action.user_id == message.from_id ? _('conversation_left_group') : _('conversation_kicked_user_message_raw');
-          break;
-        case 'messageActionChatJoinedByLink':
-          notificationMessage = _('conversation_joined_by_link');
-          break;
-      }
-    }
-
-    if (peerID > 0) {
-      notification.title = (fromUser.first_name || '') +
-                           (fromUser.first_name && fromUser.last_name ? ' ' : '') +
-                           (fromUser.last_name || '');
-      if (!notification.title) {
-        notification.title = fromUser.phone || _('conversation_unknown_user_raw');
-      }
-
-      notificationPhoto = fromPhoto;
-
-      peerString = AppUsersManager.getUserString(peerID);
-
-    } else {
-      notification.title = (fromUser.first_name || fromUser.last_name || _('conversation_unknown_user_raw')) +
-                           ' @ ' +
-                           (AppChatsManager.getChat(-peerID).title || _('conversation_unknown_chat_raw'));
-
-      notificationPhoto = AppChatsManager.getChatPhoto(-peerID, 'Group');
-
-      peerString = AppChatsManager.getChatString(-peerID);
-    }
-
-    notification.title = RichTextProcessor.wrapPlainText(notification.title);
-
-    notification.onclick = function () {
-      $rootScope.$broadcast('history_focus', {
-        peerString: peerString,
-        messageID: message.flags & 16 ? message.id : 0,
-      });
-    };
-
-    notification.message = notificationMessage;
-    notification.image = notificationPhoto.placeholder;
-    notification.key = 'msg' + message.id;
-    notification.tag = peerString;
-
-    if (notificationPhoto.location && !notificationPhoto.location.empty) {
-      MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (blob) {
-        notification.image = FileManager.getUrl(blob, 'image/jpeg');
-
-        if (message.unread) {
-          NotificationsManager.notify(notification);
-        }
-      });
-    } else {
-      NotificationsManager.notify(notification);
-    }
-  }
-
-  if (window.navigator.mozSetMessageHandler) {
-    window.navigator.mozSetMessageHandler('activity', function(activityRequest) {
-      var source = activityRequest.source;
-      console.log(dT(), 'Received activity', source.name, source.data);
-
-      if (source.name === 'share' && source.data.blobs.length > 0) {
-        PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
-          angular.forEach(peerStrings, function (peerString) {
-            var peerID = AppPeersManager.getPeerID(peerString);
-            angular.forEach(source.data.blobs, function (blob) {
-              sendFile(peerID, blob, {isMedia: true});
-            });
-          })
-          if (peerStrings.length == 1) {
-            $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
-          }
-        });
-      }
     });
-  }
-
-  var newMessagesHandlePromise = false;
-  var newMessagesToHandle = {};
-  var newDialogsHandlePromise = false;
-  var newDialogsToHandle = {};
-  var notificationsHandlePromise = false;
-  var notificationsToHandle = {};
-
-  function handleNewMessages () {
-    $timeout.cancel(newMessagesHandlePromise);
-    newMessagesHandlePromise = false;
-    $rootScope.$broadcast('history_multiappend', newMessagesToHandle);
-    newMessagesToHandle = {};
-  }
-
-  function handleNewDialogs () {
-    $timeout.cancel(newDialogsHandlePromise);
-    newDialogsHandlePromise = false;
-    $rootScope.$broadcast('dialogs_multiupdate', newDialogsToHandle);
-    newDialogsToHandle = {};
-  }
-
-  function handleNotifications () {
-    $timeout.cancel(notificationsHandlePromise);
-    notificationsHandlePromise = false;
-
-    var timeout = $rootScope.idle.isIDLE && StatusManager.isOtherDeviceActive() ? 30000 : 1000;
-    angular.forEach(notificationsToHandle, function (notifyPeerToHandle) {
-      notifyPeerToHandle.isMutedPromise.then(function (muted) {
-        var topMessage = notifyPeerToHandle.top_message;
-        if (muted ||
-            !topMessage.unread) {
-          return;
-        }
-        setTimeout(function () {
-          if (topMessage.unread) {
-            notifyAboutMessage(topMessage, {
-              fwd_count: notifyPeerToHandle.fwd_count
-            });
-          }
-        }, timeout);
-      });
-    });
-
-    notificationsToHandle = {};
   }
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    // if (update._ != 'updateUserStatus') {
-    //   console.log('on apiUpdate', update);
-    // }
+    // console.log('on apiUpdate', update);
     switch (update._) {
-      case 'updateMessageID':
-        pendingByMessageID[update.id] = update.random_id;
-        break;
-
-      case 'updateNewMessage':
-        var message = update.message,
-            peerID = getMessagePeer(message),
-            historyStorage = historiesStorage[peerID];
-
-        if (historyStorage !== undefined) {
-          var history = historyStorage.history;
-          if (history.indexOf(message.id) != -1) {
-            return false;
-          }
-          var topMsgID = history[0];
-          history.unshift(message.id);
-          if (message.id > 0 && message.id < topMsgID) {
-            history.sort(function (a, b) {
-              return b - a;
-            });
-          }
-          if (historyStorage.count !== null) {
-            historyStorage.count++;
-          }
-        } else {
-          historyStorage = historiesStorage[peerID] = {
-            count: null,
-            history: [message.id],
-            pending: []
-          };
-        }
-
-        saveMessages([message]);
-
-        if (mergeReplyKeyboard(historyStorage, message)) {
-          $rootScope.$broadcast('history_reply_markup', {peerID: peerID})
-        }
-
-        if (!message.out) {
-          AppUsersManager.forceUserOnline(message.from_id);
-        }
-
-        var randomID = pendingByMessageID[message.id],
-            pendingMessage;
-
-        if (randomID) {
-          if (pendingMessage = finalizePendingMessage(randomID, message)) {
-            $rootScope.$broadcast('history_update', {peerID: peerID});
-          }
-          delete pendingByMessageID[message.id];
-        }
-
-        if (!pendingMessage) {
-          if (newMessagesToHandle[peerID] === undefined) {
-            newMessagesToHandle[peerID] = [];
-          }
-          newMessagesToHandle[peerID].push(message.id);
-          if (!newMessagesHandlePromise) {
-            newMessagesHandlePromise = $timeout(handleNewMessages, 0);
-          }
-        }
-
-        var foundDialog = getDialogByPeerID(peerID);
-        var dialog;
-        var inboxUnread = !message.out && message.unread;
-
-        if (foundDialog.length) {
-          dialog = foundDialog[0];
-          if (foundDialog[1] > 0) {
-            dialogsStorage.dialogs.splice(foundDialog[1], 1);
-            dialogsStorage.dialogs.unshift(dialog);
-          }
-          dialog.top_message = message.id;
-          if (inboxUnread) {
-            dialog.unread_count++;
-          }
-        } else {
-          SearchIndexManager.indexObject(peerID, AppPeersManager.getPeerSearchText(peerID), dialogsIndex);
-
-          dialog = {
-            peerID: peerID,
-            unread_count: inboxUnread ? 1 : 0,
-            top_message: message.id
-          };
-          dialogsStorage.dialogs.unshift(dialog);
-        }
-        newDialogsToHandle[peerID] = dialog;
-        if (!newDialogsHandlePromise) {
-          newDialogsHandlePromise = $timeout(handleNewDialogs, 0);
-        }
-
-        if (inboxUnread && ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE)) {
-
-          var notifyPeer = message.flags & 16 ? message.from_id : peerID;
-          var notifyPeerToHandle = notificationsToHandle[notifyPeer];
-          if (notifyPeerToHandle === undefined) {
-            notifyPeerToHandle = notificationsToHandle[notifyPeer] = {
-              isMutedPromise: NotificationsManager.getPeerMuted(notifyPeer),
-              fwd_count: 0,
-              from_id: 0
-            };
-          }
-
-          if (notifyPeerToHandle.from_id != message.from_id) {
-            notifyPeerToHandle.from_id = message.from_id;
-            notifyPeerToHandle.fwd_count = 0;
-          }
-          if (message.fwd_from_id) {
-            notifyPeerToHandle.fwd_count++;
-          }
-
-          notifyPeerToHandle.top_message = message;
-
-          if (!notificationsHandlePromise) {
-            notificationsHandlePromise = $timeout(handleNotifications, 1000);
-          }
-        }
-
-        incrementMaxSeenID(message.id);
-        break;
-
-      case 'updateReadHistoryInbox':
-      case 'updateReadHistoryOutbox':
-        var maxID = update.max_id;
-        var isOut = update._ == 'updateReadHistoryOutbox';
-        var peerID = AppPeersManager.getPeerID(update.peer);
-        var foundDialog = getDialogByPeerID(peerID);
-        var history = (historiesStorage[peerID] || {}).history || [];
-        var newUnreadCount = false;
-        var length = history.length;
-        var foundAffected = false;
-        var messageID, message, i;
-
-        if (peerID > 0 && isOut) {
-          AppUsersManager.forceUserOnline(peerID);
-        }
-
-        for (i = 0; i < length; i++) {
-          messageID = history[i];
-          if (messageID > maxID) {
-            continue;
-          }
-          message = messagesStorage[messageID];
-
-          if (message.out != isOut) {
-            continue;
-          }
-          if (!message.unread) {
-            break;
-          }
-          // console.log('read', messageID, message.unread, message);
-          if (message && message.unread) {
-            message.unread = false;
-            if (messagesForHistory[messageID]) {
-              messagesForHistory[messageID].unread = false;
-              if (!foundAffected) {
-                foundAffected = true;
-              }
-            }
-            if (messagesForDialogs[messageID]) {
-              messagesForDialogs[messageID].unread = false;
-            }
-            if (!message.out) {
-              if (foundDialog) {
-                newUnreadCount = --foundDialog[0].unread_count;
-              }
-              NotificationsManager.cancel('msg' + messageID);
-            }
-          }
-        }
-
-        if (newUnreadCount !== false) {
-          $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: newUnreadCount});
-        }
-        if (foundAffected) {
-          $rootScope.$broadcast('messages_read');
+      case 'updateChatParticipants':
+        var participants = update.participants;
+        var chatFull = chatsFull[participants.id];
+        if (chatFull !== undefined) {
+          chatFull.participants = update.participants;
+          $rootScope.$broadcast('chat_full_update', chatID);
         }
         break;
 
-      case 'updateReadMessagesContents':
-        var messages = update.messages;
-        var len = messages.length;
-        var i, messageID, message, historyMessage;
-        for (i = 0; i < len; i++) {
-          messageID = messages[i];
-          if (message = messagesStorage[messageID]) {
-            delete message.media_unread;
+      case 'updateChatParticipantAdd':
+        var chatFull = chatsFull[update.chat_id];
+        if (chatFull !== undefined) {
+          var participants = chatFull.participants.participants || [];
+          for (var i = 0, length = participants.length; i < length; i++) {
+            if (participants[i].user_id == update.user_id) {
+              return;
+            }
           }
-          if (historyMessage = messagesForHistory[messageID]) {
-            delete historyMessage.media_unread;
+          participants.push({
+            _: 'chatParticipant',
+            user_id: update.user_id,
+            inviter_id: update.inviter_id,
+            date: tsNow(true)
+          });
+          chatFull.participants.version = update.version;
+          $rootScope.$broadcast('chat_full_update', update.chat_id);
+        }
+        break;
+
+      case 'updateChatParticipantDelete':
+        var chatFull = chatsFull[update.chat_id];
+        if (chatFull !== undefined) {
+          var participants = chatFull.participants.participants || [];
+          for (var i = 0, length = participants.length; i < length; i++) {
+            if (participants[i].user_id == update.user_id) {
+              participants.splice(i, 1);
+              chatFull.participants.version = update.version;
+              $rootScope.$broadcast('chat_full_update', update.chat_id);
+              return;
+            }
           }
         }
         break;
 
-      case 'updateDeleteMessages':
-        var dialogsUpdated = {},
-            historiesUpdated = {},
-            messageID, message, i, peerID, foundDialog, history;
-
-        for (i = 0; i < update.messages.length; i++) {
-          messageID = update.messages[i];
-          message = messagesStorage[messageID];
-          if (message) {
-            peerID = getMessagePeer(message);
-            history = historiesUpdated[peerID] || (historiesUpdated[peerID] = {count: 0, unread: 0, msgs: {}});
-
-            if (!message.out && message.unread) {
-              history.unread++;
-              NotificationsManager.cancel('msg' + messageID);
-            }
-            history.count++;
-            history.msgs[messageID] = true;
-
-            if (messagesForHistory[messageID]) {
-              messagesForHistory[messageID].deleted = true;
-              delete messagesForHistory[messageID];
-            }
-            if (messagesForDialogs[messageID]) {
-              messagesForDialogs[messageID].deleted = true;
-              delete messagesForDialogs[messageID];
-            }
-            message.deleted = true;
-            messagesStorage[messageID] = {
-              deleted: true,
-              id: messageID,
-              from_id: message.from_id,
-              to_id: message.to_id,
-              flags: message.flags,
-              out: message.out,
-              unread: message.unread,
-              date: message.date
-            };
-          }
-        }
-
-        angular.forEach(historiesUpdated, function (updatedData, peerID) {
-          var foundDialog = getDialogByPeerID(peerID);
-          if (foundDialog) {
-            if (updatedData.unread) {
-              foundDialog[0].unread_count -= updatedData.unread;
-
-              $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: foundDialog[0].unread_count});
-            }
-          }
-
-          var historyStorage = historiesStorage[peerID];
-          if (historyStorage !== undefined) {
-            var newHistory = [],
-                newPending = [];
-            for (var i = 0; i < historyStorage.history.length; i++) {
-              if (!updatedData.msgs[historyStorage.history[i]]) {
-                newHistory.push(historyStorage.history[i]);
-              }
-            }
-            historyStorage.history = newHistory;
-            if (updatedData.count &&
-                historyStorage.count !== null &&
-                historyStorage.count > 0) {
-              historyStorage.count -= updatedData.count;
-              if (historyStorage.count < 0) {
-                historyStorage.count = 0;
-              }
-            }
-
-            for (var i = 0; i < historyStorage.pending.length; i++) {
-              if (!updatedData.msgs[historyStorage.pending[i]]) {
-                newPending.push(historyStorage.pending[i]);
-              }
-            }
-            historyStorage.pending = newPending;
-
-            $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: updatedData.msgs});
-          }
-        });
-        break;
     }
   });
 
-  $rootScope.$on('webpage_updated', function (e, eventData) {
-    angular.forEach(eventData.msgs, function (msgID) {
-      var historyMessage = messagesForHistory[msgID];
-      if (historyMessage) {
-        historyMessage.media = {
-          _: 'messageMediaWebPage',
-          webpage: AppWebPagesManager.wrapForHistory(eventData.id)
-        };
-      }
-    })
-  })
-
   return {
-    getDialogs: getDialogs,
-    getHistory: getHistory,
-    getSearch: getSearch,
-    getMessage: getMessage,
-    getReplyKeyboard: getReplyKeyboard,
-    readHistory: readHistory,
-    readMessages: readMessages,
-    flushHistory: flushHistory,
-    deleteMessages: deleteMessages,
-    saveMessages: saveMessages,
-    sendText: sendText,
-    sendFile: sendFile,
-    sendOther: sendOther,
-    forwardMessages: forwardMessages,
-    startBot: startBot,
-    openChatInviteLink: openChatInviteLink,
-    getMessagePeer: getMessagePeer,
-    wrapForDialog: wrapForDialog,
-    wrapForHistory: wrapForHistory,
-    wrapReplyMarkup: wrapReplyMarkup,
-    regroupWrappedHistory: regroupWrappedHistory
+    getPeerBots: getPeerBots,
+    getProfile: getProfile,
+    getChatInviteLink: getChatInviteLink,
+    getChatFull: getChatFull,
+    getChannelFull: getChannelFull
   }
 })
 
@@ -3755,16 +1842,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           width: width,
           height: height
         };
+    var dim;
 
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+      if (isGif && doc.w && doc.h) {
+        dim = {
+          w: doc.w,
+          h: doc.h
+        };
+      } else {
+        dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+      }
       thumb.width = dim.w;
       thumb.height = dim.h;
       thumb.location = thumbPhotoSize.location;
       thumb.size = thumbPhotoSize.size;
     }
     else if (isSticker) {
-      var dim = calcImageInBox(doc.w, doc.h, width, height);
+      dim = calcImageInBox(doc.w, doc.h, width, height);
       thumb.width = dim.w;
       thumb.height = dim.h;
     }
@@ -4203,21 +2298,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {
 
-  var curState = {};
+  var updatesState = {
+    pendingPtsUpdates: [],
+    pendingSeqUpdates: {},
+    syncPending: false,
+    syncLoading: true
+  };
+  var channelStates = {};
 
   var myID = 0;
   MtpApiManager.getUserID().then(function (id) {
     myID = id;
   });
 
-  var syncPending = false;
-  var syncLoading = true;
-  var pendingSeqUpdates = {};
-  var pendingPtsUpdates = [];
 
   function popPendingSeqUpdate () {
-    var nextSeq = curState.seq + 1,
-        pendingUpdatesData = pendingSeqUpdates[nextSeq];
+    var nextSeq = updatesState.seq + 1,
+        pendingUpdatesData = updatesState.pendingSeqUpdates[nextSeq];
     if (!pendingUpdatesData) {
       return false;
     }
@@ -4226,32 +2323,33 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     for (var i = 0, length = updates.length; i < length; i++) {
       saveUpdate(updates[i]);
     }
-    curState.seq = pendingUpdatesData.seq;
-    if (pendingUpdatesData.date && curState.date < pendingUpdatesData.date) {
-      curState.date = pendingUpdatesData.date;
+    updatesState.seq = pendingUpdatesData.seq;
+    if (pendingUpdatesData.date && updatesState.date < pendingUpdatesData.date) {
+      updatesState.date = pendingUpdatesData.date;
     }
-    delete pendingSeqUpdates[nextSeq];
+    delete updatesState.pendingSeqUpdates[nextSeq];
 
     if (!popPendingSeqUpdate() &&
-        syncPending &&
-        syncPending.seqAwaiting &&
-        curState.seq >= syncPending.seqAwaiting) {
-      if (!syncPending.ptsAwaiting) {
-        clearTimeout(syncPending.timeout);
-        syncPending = false;
+        updatesState.syncPending &&
+        updatesState.syncPending.seqAwaiting &&
+        updatesState.seq >= updatesState.syncPending.seqAwaiting) {
+      if (!updatesState.syncPending.ptsAwaiting) {
+        clearTimeout(updatesState.syncPending.timeout);
+        updatesState.syncPending = false;
       } else {
-        delete syncPending.seqAwaiting;
+        delete updatesState.syncPending.seqAwaiting;
       }
     }
 
     return true;
   }
 
-  function popPendingPtsUpdate () {
-    if (!pendingPtsUpdates.length) {
+  function popPendingPtsUpdate (channelID) {
+    var curState = channelID ? getChannelState(channelID) : updatesState;
+    if (!curState.pendingPtsUpdates.length) {
       return false;
     }
-    pendingPtsUpdates.sort(function (a, b) {
+    curState.pendingPtsUpdates.sort(function (a, b) {
       return a.pts - b.pts;
     });
 
@@ -4259,8 +2357,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var goodPts = false;
     var goodIndex = false;
     var update;
-    for (var i = 0, length = pendingPtsUpdates.length; i < length; i++) {
-      update = pendingPtsUpdates[i];
+    for (var i = 0, length = curState.pendingPtsUpdates.length; i < length; i++) {
+      update = curState.pendingPtsUpdates[i];
       curPts += update.pts_count;
       if (curPts >= update.pts) {
         goodPts = update.pts;
@@ -4274,17 +2372,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     curState.pts = goodPts;
     for (i = 0; i <= goodIndex; i++) {
-      update = pendingPtsUpdates[i];
+      update = curState.pendingPtsUpdates[i];
       saveUpdate(update);
     }
-    pendingPtsUpdates.splice(goodIndex, length - goodIndex);
+    curState.pendingPtsUpdates.splice(0, goodIndex + 1);
 
-    if (!pendingPtsUpdates.length && syncPending) {
-      if (!syncPending.seqAwaiting) {
-        clearTimeout(syncPending.timeout);
-        syncPending = false;
+    if (!curState.pendingPtsUpdates.length && curState.syncPending) {
+      if (!curState.syncPending.seqAwaiting) {
+        clearTimeout(curState.syncPending.timeout);
+        curState.syncPending = false;
       } else {
-        delete syncPending.ptsAwaiting;
+        delete curState.syncPending.ptsAwaiting;
       }
     }
 
@@ -4292,7 +2390,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function forceGetDifference () {
-    if (!syncLoading) {
+    if (!updatesState.syncLoading) {
       getDifference();
     }
   }
@@ -4336,6 +2434,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             fwd_from_id: updateMessage.fwd_from_id,
             fwd_date: updateMessage.fwd_date,
             reply_to_msg_id: updateMessage.reply_to_msg_id,
+            entities: updateMessage.entities
           },
           pts: updateMessage.pts,
           pts_count: updateMessage.pts_count
@@ -4358,23 +2457,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getDifference () {
-    if (!syncLoading) {
-      syncLoading = true;
-      pendingSeqUpdates = {};
-      pendingPtsUpdates = [];
+    if (!updatesState.syncLoading) {
+      updatesState.syncLoading = true;
+      updatesState.pendingSeqUpdates = {};
+      updatesState.pendingPtsUpdates = [];
     }
 
-    if (syncPending) {
-      clearTimeout(syncPending.timeout);
-      syncPending = false;
+    if (updatesState.syncPending) {
+      clearTimeout(updatesState.syncPending.timeout);
+      updatesState.syncPending = false;
     }
 
-    MtpApiManager.invokeApi('updates.getDifference', {pts: curState.pts, date: curState.date, qts: -1}).then(function (differenceResult) {
+    MtpApiManager.invokeApi('updates.getDifference', {pts: updatesState.pts, date: updatesState.date, qts: -1}).then(function (differenceResult) {
       if (differenceResult._ == 'updates.differenceEmpty') {
         console.log(dT(), 'apply empty diff', differenceResult.seq);
-        curState.date = differenceResult.date;
-        curState.seq = differenceResult.seq;
-        syncLoading = false;
+        updatesState.date = differenceResult.date;
+        updatesState.seq = differenceResult.seq;
+        updatesState.syncLoading = false;
         $rootScope.$broadcast('stateSynchronized');
         return false;
       }
@@ -4384,7 +2483,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       // Should be first because of updateMessageID
       // console.log(dT(), 'applying', differenceResult.other_updates.length, 'other updates');
-      angular.forEach(differenceResult.other_updates, function(update){
+      angular.forEach(differenceResult.other_updates, function(update) {
+        if (update._ == 'updateChannelTooLong') {
+          var channelID = update.channel_id;
+          var channelState = channelStates[channelID];
+          if (channelState !== undefined && !channelState.syncLoading) {
+            getChannelDifference(channelID);
+          }
+          return;
+        }
         saveUpdate(update);
       });
 
@@ -4393,38 +2500,138 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         saveUpdate({
           _: 'updateNewMessage',
           message: apiMessage,
-          pts: curState.pts,
+          pts: updatesState.pts,
           pts_count: 0
         });
       });
 
       var nextState = differenceResult.intermediate_state || differenceResult.state;
-      curState.seq = nextState.seq;
-      curState.pts = nextState.pts;
-      curState.date = nextState.date;
+      updatesState.seq = nextState.seq;
+      updatesState.pts = nextState.pts;
+      updatesState.date = nextState.date;
 
-      console.log(dT(), 'apply diff', curState.seq, curState.pts);
+      console.log(dT(), 'apply diff', updatesState.seq, updatesState.pts);
 
       if (differenceResult._ == 'updates.differenceSlice') {
         getDifference();
       } else {
         // console.log(dT(), 'finished get diff');
         $rootScope.$broadcast('stateSynchronized');
-        syncLoading = false;
+        updatesState.syncLoading = false;
       }
     });
   }
 
+  function getChannelDifference (channelID) {
+    var channelState = getChannelState(channelID);
+    if (!channelState.syncLoading) {
+      channelState.syncLoading = true;
+      channelState.pendingPtsUpdates = [];
+    }
+    MtpApiManager.invokeApi('updates.getChannelDifference', {
+      channel: AppChatsManager.getChannelInput(channelID),
+      filter: {_: 'channelMessagesFilterEmpty'},
+      pts: channelState.pts,
+      limit: 10
+    }).then(function (differenceResult) {
+      channelState.pts = differenceResult.pts;
+
+      if (differenceResult._ == 'updates.channelDifferenceEmpty') {
+        console.log(dT(), 'apply channel empty diff', differenceResult);
+        channelState.syncLoading = false;
+        $rootScope.$broadcast('stateSynchronized');
+        return false;
+      }
+
+      if (differenceResult._ == 'updates.channelDifferenceTooLong') {
+        console.log(dT(), 'channel diff too long', differenceResult);
+        channelState.syncLoading = false;
+        delete channelStates[channelID];
+        saveUpdate({_: 'updateChannelReload', channel_id: channelID});
+        return false;
+      }
+
+      AppUsersManager.saveApiUsers(differenceResult.users);
+      AppChatsManager.saveApiChats(differenceResult.chats);
+
+      // Should be first because of updateMessageID
+      console.log(dT(), 'applying', differenceResult.other_updates.length, 'channel other updates');
+      angular.forEach(differenceResult.other_updates, function(update){
+        saveUpdate(update);
+      });
+
+      console.log(dT(), 'applying', differenceResult.new_messages.length, 'channel new messages');
+      angular.forEach(differenceResult.new_messages, function (apiMessage) {
+        saveUpdate({
+          _: 'updateNewChannelMessage',
+          message: apiMessage,
+          pts: channelState.pts,
+          pts_count: 0
+        });
+      });
+
+      console.log(dT(), 'apply channel diff', channelState.pts);
+
+      if (differenceResult._ == 'updates.channelDifference' && !(differenceResult.flags & 1)) {
+        getChannelDifference(channelID);
+      } else {
+        console.log(dT(), 'finished channel get diff');
+        $rootScope.$broadcast('stateSynchronized');
+        channelState.syncLoading = false;
+      }
+    });
+  }
+
+  function addChannelState (channelID, pts) {
+    if (channelStates[channelID] === undefined) {
+      channelStates[channelID] = {
+        pts: pts,
+        pendingPtsUpdates: [],
+        syncPending: false,
+        syncLoading: false
+      };
+      return true;
+    }
+    return false;
+  }
+
+  function getChannelState (channelID, pts) {
+    if (channelStates[channelID] === undefined) {
+      if (!pts) {
+        throw new Error('Get channel empty state without pts ' + channelID);
+      }
+      addChannelState(channelID, pts);
+    }
+    return channelStates[channelID];
+  }
+
   function processUpdate (update, options) {
-    if (syncLoading) {
+    var channelID = false;
+    switch (update._) {
+      case 'updateNewChannelMessage':
+        channelID = -AppPeersManager.getPeerID(update.message.to_id);
+        break;
+      case 'updateDeleteChannelMessages':
+        channelID = update.channel_id;
+        break;
+    }
+    var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
+
+    // console.log('process', channelID, curState, update);
+
+    if (curState.syncLoading) {
       return false;
     }
+
     if (update._ == 'updateNewMessage') {
       var message = update.message;
+      var fwdPeerID = message.fwd_from_id ? AppPeersManager.getPeerID(message.fwd_from_id) : 0;
+      var toPeerID = AppPeersManager.getPeerID(message.to_id);
       if (message.from_id && !AppUsersManager.hasUser(message.from_id) ||
-          message.fwd_from_id && !AppUsersManager.hasUser(message.fwd_from_id) ||
-          message.to_id.user_id && !AppUsersManager.hasUser(message.to_id.user_id) ||
-          message.to_id.chat_id && !AppChatsManager.hasChat(message.to_id.chat_id)) {
+          fwdPeerID > 0 && !AppUsersManager.hasUser(fwdPeerID) ||
+          fwdPeerID < 0 && !AppChatsManager.hasChat(-fwdPeerID) ||
+          toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
+          toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
         console.warn(dT(), 'Short update not enough data', message);
         forceGetDifference();
         return false;
@@ -4437,15 +2644,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var newPts = curState.pts + (update.pts_count || 0);
       if (newPts < update.pts) {
         console.log(dT(), 'Pts hole', curState, update);
-        pendingPtsUpdates.push(update);
-        if (!syncPending) {
-          syncPending = {
+        curState.pendingPtsUpdates.push(update);
+        if (!curState.syncPending) {
+          curState.syncPending = {
             timeout: setTimeout(function () {
-              getDifference();
+              if (channelID) {
+                getChannelDifference(channelID);
+              } else {
+                getDifference();
+              }
             }, 5000)
           };
         }
-        syncPending.ptsAwaiting = true;
+        curState.syncPending.ptsAwaiting = true;
         return false;
       }
       if (update.pts > curState.pts) {
@@ -4453,29 +2664,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         popPts = true;
       }
     }
-    else if (options.seq > 0) {
+    else if (!channelID && options.seq > 0) {
       var seq = options.seq;
       var seqStart = options.seqStart || seq;
 
       if (seqStart != curState.seq + 1) {
         if (seqStart > curState.seq) {
-          console.warn(dT(), 'Seq hole', curState, syncPending && syncPending.seqAwaiting);
+          console.warn(dT(), 'Seq hole', curState, curState.syncPending && curState.syncPending.seqAwaiting);
 
-          if (pendingSeqUpdates[seqStart] === undefined) {
-            pendingSeqUpdates[seqStart] = {seq: seq, date: options.date, updates: []};
+          if (curState.pendingSeqUpdates[seqStart] === undefined) {
+            curState.pendingSeqUpdates[seqStart] = {seq: seq, date: options.date, updates: []};
           }
-          pendingSeqUpdates[seqStart].updates.push(update);
+          curState.pendingSeqUpdates[seqStart].updates.push(update);
 
-          if (!syncPending) {
-            syncPending = {
+          if (!curState.syncPending) {
+            curState.syncPending = {
               timeout: setTimeout(function () {
                 getDifference();
               }, 5000)
             };
           }
-          if (!syncPending.seqAwaiting ||
-              syncPending.seqAwaiting < seqStart) {
-            syncPending.seqAwaiting = seqStart;
+          if (!curState.syncPending.seqAwaiting ||
+              curState.syncPending.seqAwaiting < seqStart) {
+            curState.syncPending.seqAwaiting = seqStart;
           }
           return false;
         }
@@ -4490,12 +2701,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
 
-
-    saveUpdate (update);
-
+    saveUpdate(update);
 
     if (popPts) {
-      popPendingPtsUpdate();
+      popPendingPtsUpdate(channelID);
     }
     else if (popSeq) {
       popPendingSeqUpdate();
@@ -4509,16 +2718,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function attach () {
     MtpNetworkerFactory.setUpdatesProcessor(processUpdateMessage);
     MtpApiManager.invokeApi('updates.getState', {}, {noErrorBox: true}).then(function (stateResult) {
-      curState.seq = stateResult.seq;
-      curState.pts = stateResult.pts;
-      curState.date = stateResult.date;
+      updatesState.seq = stateResult.seq;
+      updatesState.pts = stateResult.pts;
+      updatesState.date = stateResult.date;
       setTimeout(function () {
-        syncLoading = false;
+        updatesState.syncLoading = false;
       }, 1000);
 
-      // curState.seq = 1;
-      // curState.pts = stateResult.pts - 5000;
-      // curState.date = 1;
+      // updatesState.seq = 1;
+      // updatesState.pts = stateResult.pts - 5000;
+      // updatesState.date = 1;
       // getDifference();
     })
   }
@@ -4526,438 +2735,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   return {
     processUpdateMessage: processUpdateMessage,
+    addChannelState: addChannelState,
     attach: attach
   }
-})
-
-.service('RichTextProcessor', function ($sce, $sanitize) {
-
-  var emojiMap = {},
-      emojiData = Config.Emoji,
-      emojiIconSize = 18,
-      emojiSupported = navigator.userAgent.search(/OS X|iPhone|iPad|iOS|Android/i) != -1,
-      emojiCode;
-
-  var emojiRegExp = "\\u0023\\u20E3|\\u00a9|\\u00ae|\\u203c|\\u2049|\\u2139|[\\u2194-\\u2199]|\\u21a9|\\u21aa|\\u231a|\\u231b|\\u23e9|[\\u23ea-\\u23ec]|\\u23f0|\\u24c2|\\u25aa|\\u25ab|\\u25b6|\\u2611|\\u2614|\\u26fd|\\u2705|\\u2709|[\\u2795-\\u2797]|\\u27a1|\\u27b0|\\u27bf|\\u2934|\\u2935|[\\u2b05-\\u2b07]|\\u2b1b|\\u2b1c|\\u2b50|\\u2b55|\\u3030|\\u303d|\\u3297|\\u3299|[\\uE000-\\uF8FF\\u270A-\\u2764\\u2122\\u25C0\\u25FB-\\u25FE\\u2615\\u263a\\u2648-\\u2653\\u2660-\\u2668\\u267B\\u267F\\u2693\\u261d\\u26A0-\\u26FA\\u2708\\u2702\\u2601\\u260E]|[\\u2600\\u26C4\\u26BE\\u23F3\\u2764]|\\uD83D[\\uDC00-\\uDFFF]|\\uD83C[\\uDDE8-\\uDDFA\uDDEC]\\uD83C[\\uDDEA-\\uDDFA\uDDE7]|[0-9]\\u20e3|\\uD83C[\\uDC00-\\uDFFF]";
-
-  for (emojiCode in emojiData) {
-    emojiMap[emojiData[emojiCode][0]] = emojiCode;
-  }
-
-  var alphaCharsRegExp = "a-z" +
-                        "\\u00c0-\\u00d6\\u00d8-\\u00f6\\u00f8-\\u00ff" + // Latin-1
-                        "\\u0100-\\u024f" + // Latin Extended A and B
-                        "\\u0253\\u0254\\u0256\\u0257\\u0259\\u025b\\u0263\\u0268\\u026f\\u0272\\u0289\\u028b" + // IPA Extensions
-                        "\\u02bb" + // Hawaiian
-                        "\\u0300-\\u036f" + // Combining diacritics
-                        "\\u1e00-\\u1eff" + // Latin Extended Additional (mostly for Vietnamese)
-                        "\\u0400-\\u04ff\\u0500-\\u0527" +  // Cyrillic
-                        "\\u2de0-\\u2dff\\ua640-\\ua69f" +  // Cyrillic Extended A/B
-                        "\\u0591-\\u05bf\\u05c1-\\u05c2\\u05c4-\\u05c5\\u05c7" +
-                        "\\u05d0-\\u05ea\\u05f0-\\u05f4" + // Hebrew
-                        "\\ufb1d-\\ufb28\\ufb2a-\\ufb36\\ufb38-\\ufb3c\\ufb3e\\ufb40-\\ufb41" +
-                        "\\ufb43-\\ufb44\\ufb46-\\ufb4f" + // Hebrew Pres. Forms
-                        "\\u0610-\\u061a\\u0620-\\u065f\\u066e-\\u06d3\\u06d5-\\u06dc" +
-                        "\\u06de-\\u06e8\\u06ea-\\u06ef\\u06fa-\\u06fc\\u06ff" + // Arabic
-                        "\\u0750-\\u077f\\u08a0\\u08a2-\\u08ac\\u08e4-\\u08fe" + // Arabic Supplement and Extended A
-                        "\\ufb50-\\ufbb1\\ufbd3-\\ufd3d\\ufd50-\\ufd8f\\ufd92-\\ufdc7\\ufdf0-\\ufdfb" + // Pres. Forms A
-                        "\\ufe70-\\ufe74\\ufe76-\\ufefc" + // Pres. Forms B
-                        "\\u200c" +                        // Zero-Width Non-Joiner
-                        "\\u0e01-\\u0e3a\\u0e40-\\u0e4e" + // Thai
-                        "\\u1100-\\u11ff\\u3130-\\u3185\\uA960-\\uA97F\\uAC00-\\uD7AF\\uD7B0-\\uD7FF" + // Hangul (Korean)
-                        "\\u3003\\u3005\\u303b" +           // Kanji/Han iteration marks
-                        "\\uff21-\\uff3a\\uff41-\\uff5a" +  // full width Alphabet
-                        "\\uff66-\\uff9f" +                 // half width Katakana
-                        "\\uffa1-\\uffdc";                  // half width Hangul (Korean)
-
-  var alphaNumericRegExp  = "0-9\_" + alphaCharsRegExp;
-
-  // Based on Regular Expression for URL validation by Diego Perini
-  var urlRegExp =  "((?:https?|ftp)://|mailto:)?" +
-    // user:pass authentication
-    "(?:\\S{1,64}(?::\\S{0,64})?@)?" +
-    "(?:" +
-      // sindresorhus/ip-regexp
-      "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}" +
-    "|" +
-      // host name
-      "[" + alphaCharsRegExp + "0-9][" + alphaCharsRegExp + "0-9\-]{0,64}" +
-      // domain name
-      "(?:\\.[" + alphaCharsRegExp + "0-9][" + alphaCharsRegExp + "0-9\-]{0,64}){0,10}" +
-
-      // TLD identifier
-      "(?:\\.(xn--[0-9a-z]{2,16}|[" + alphaCharsRegExp + "]{2,24}))" +
-    ")" +
-    // port number
-    "(?::\\d{2,5})?" +
-    // resource path
-    "(?:/(?:\\S{0,255}[^\\s.;,(\\[\\]{}<>\"'])?)?";
-
-  var usernameRegExp = "[a-zA-Z\\d_]{5,32}";
-  var botCommandRegExp = "\\/([a-zA-Z\\d_]{1,32})(?:@(" + usernameRegExp + "))?(\\b|$)"
-
-  var fullRegExp = new RegExp('(^| )(@)(' + usernameRegExp + ')|(' + urlRegExp + ')|(\\n)|(' + emojiRegExp + ')|(^|\\s)(#[' + alphaNumericRegExp + ']{2,64})|(^|\\s)' + botCommandRegExp, 'i');
-
-  var emailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  var youtubeRegExp = /^(?:https?:\/\/)?(?:www\.)?youtu(?:|\.be|be\.com|\.b)(?:\/v\/|\/watch\\?v=|e\/|(?:\/\??#)?\/watch(?:.+)v=)(.{11})(?:\&[^\s]*)?/;
-  var vimeoRegExp = /^(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
-  var instagramRegExp = /^https?:\/\/(?:instagr\.am\/p\/|instagram\.com\/p\/)([a-zA-Z0-9\-\_]+)/i;
-  var vineRegExp = /^https?:\/\/vine\.co\/v\/([a-zA-Z0-9\-\_]+)/i;
-  var twitterRegExp = /^https?:\/\/twitter\.com\/.+?\/status\/\d+/i;
-  var facebookRegExp = /^https?:\/\/(?:www\.|m\.)?facebook\.com\/(?:.+?\/posts\/\d+|(?:story\.php|permalink\.php)\?story_fbid=(\d+)(?:&substory_index=\d+)?&id=(\d+))/i;
-  var gplusRegExp = /^https?:\/\/plus\.google\.com\/\d+\/posts\/[a-zA-Z0-9\-\_]+/i;
-  var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
-  var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
-
-  var siteHashtags = {
-    Telegram: '#/im?q=%23{1}',
-    Twitter: 'https://twitter.com/hashtag/{1}',
-    Instagram: 'https://instagram.com/explore/tags/{1}/',
-    'Google Plus': 'https://plus.google.com/explore/{1}'
-  };
-
-  var siteMentions = {
-    Telegram: '#/im?p=%40{1}',
-    Twitter: 'https://twitter.com/{1}',
-    Instagram: 'https://instagram.com/{1}/',
-    GitHub: 'https://github.com/{1}'
-  };
-
-  return {
-    wrapRichText: wrapRichText,
-    wrapPlainText: wrapPlainText
-  };
-
-  function getEmojiSpritesheetCoords(emojiCode) {
-    var i, row, column, totalColumns;
-    for (var cat = 0; cat < Config.EmojiCategories.length; cat++) {
-      totalColumns = Config.EmojiCategorySpritesheetDimens[cat][1];
-      i = Config.EmojiCategories[cat].indexOf(emojiCode);
-      if (i > -1) {
-        row = Math.floor(i / totalColumns);
-        column = (i % totalColumns);
-        return { category: cat, row: row, column: column };
-      }
-    }
-    console.error('emoji not found in spritesheet', emojiCode);
-    return null;
-  }
-
-  function wrapRichText(text, options) {
-    if (!text || !text.length) {
-      return '';
-    }
-
-    options = options || {};
-
-    var match,
-        raw = text,
-        html = [],
-        url,
-        contextSite = options.contextSite || 'Telegram',
-        contextExternal = contextSite != 'Telegram',
-        emojiFound = false,
-        emojiTitle,
-        emojiCoords;
-
-    // var start = tsNow();
-
-    while ((match = raw.match(fullRegExp))) {
-      html.push(encodeEntities(raw.substr(0, match.index)));
-
-      if (match[3]) { // telegram.me links
-        var contextUrl = !options.noLinks && siteMentions[contextSite];
-        if (contextUrl) {
-          var attr = '';
-          if (options.highlightUsername &&
-              options.highlightUsername.toLowerCase() == match[3].toLowerCase()) {
-            attr = 'class="im_message_mymention"';
-          }
-          html.push(
-            match[1],
-            '<a ',
-            attr,
-            contextExternal ? ' target="_blank" ' : '',
-            ' href="',
-            contextUrl.replace('{1}', encodeURIComponent(match[3])),
-            '">',
-            encodeEntities(match[2] + match[3]),
-            '</a>'
-          );
-        } else {
-          html.push(
-            match[1],
-            encodeEntities(match[2] + match[3])
-          );
-        }
-      }
-      else if (match[4]) { // URL & e-mail
-        if (!options.noLinks) {
-          if (emailRegExp.test(match[4])) {
-            html.push(
-              '<a href="',
-              encodeEntities('mailto:' + match[4]),
-              '" target="_blank">',
-              encodeEntities(match[4]),
-              '</a>'
-            );
-          } else {
-            var url = false,
-                protocol = match[5],
-                tld = match[6],
-                excluded = '';
-
-            if (tld) {
-              if (!protocol && (tld.substr(0, 4) === 'xn--' || Config.TLD.indexOf(tld.toLowerCase()) !== -1)) {
-                protocol = 'http://';
-              }
-
-              if (protocol) {
-                var balanced = checkBrackets(match[4]);
-
-                if (balanced.length !== match[4].length) {
-                  excluded = match[4].substring(balanced.length);
-                  match[4] = balanced;
-                }
-
-                url = (match[5] ? '' : protocol) + match[4];
-              }
-
-              var tgMeMatch;
-              if (tld == 'me' &&
-                  (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
-                var path = tgMeMatch[1].split('/');
-                switch (path[0]) {
-                  case 'joinchat':
-                    url = 'tg://join?invite=' + path[1];
-                    break;
-                  case 'addstickers':
-                    url = 'tg://addstickers?set=' + path[1];
-                    break;
-                  default:
-                    var domainQuery = path[0].split('?');
-                    url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
-                }
-              }
-            } else { // IP address
-              url = (match[5] ? '' : 'http://') + match[4];
-            }
-
-            if (url) {
-              html.push(
-                '<a href="',
-                encodeEntities(url),
-                '" target="_blank">',
-                encodeEntities(match[4]),
-                '</a>',
-                excluded
-              );
-
-              if (options.extractUrlEmbed &&
-                  !options.extractedUrlEmbed) {
-                options.extractedUrlEmbed = findExternalEmbed(url);
-              }
-            } else {
-              html.push(encodeEntities(match[0]));
-            }
-          }
-        } else {
-          html.push(encodeEntities(match[0]));
-        }
-      }
-      else if (match[7]) { // New line
-        if (!options.noLinebreaks) {
-          html.push('<br/>');
-        } else {
-          html.push(' ');
-        }
-      }
-      else if (match[8]) {
-        if ((emojiCode = emojiMap[match[8]]) &&
-            (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
-
-          emojiTitle = encodeEntities(emojiData[emojiCode][1][0]);
-          emojiFound = true;
-          html.push(
-            '<span class="emoji emoji-',
-            emojiCoords.category,
-            '-',
-            (emojiIconSize * emojiCoords.column),
-            '-',
-            (emojiIconSize * emojiCoords.row),
-            '" ',
-            'title="',emojiTitle, '">',
-            ':', emojiTitle, ':</span>'
-          );
-        } else {
-          html.push(encodeEntities(match[8]));
-        }
-      }
-      else if (match[10]) {
-        var contextUrl = !options.noLinks && siteHashtags[contextSite] || options.contextHashtag;
-        if (contextUrl) {
-          html.push(
-            encodeEntities(match[9]),
-            '<a ',
-            contextExternal ? ' target="_blank" ' : '',
-            'href="',
-            contextUrl.replace('{1}', encodeURIComponent(match[10].substr(1)))
-            ,
-            '">',
-            encodeEntities(match[10]),
-            '</a>'
-          );
-        } else {
-          html.push(
-            encodeEntities(match[9]),
-            encodeEntities(match[10])
-          );
-        }
-      }
-      else if (match[12]) { // Bot commands
-        if (!options.noLinks &&
-            !options.noCommands &&
-            !contextExternal) {
-          var bot = match[13] || options.fromBot;
-          html.push(
-            encodeEntities(match[11]),
-            '<a href="',
-            encodeEntities('tg://bot_command?command=' + encodeURIComponent(match[12]) + (bot ? '&bot=' + encodeURIComponent(bot) : '')),
-            '">',
-            encodeEntities('/' + match[12] + (match[13] ? '@' + match[13] : '')),
-            '</a>',
-            encodeEntities(match[14])
-          );
-        } else {
-          html.push(
-            encodeEntities(match[0])
-          );
-        }
-      }
-      raw = raw.substr(match.index + match[0].length);
-    }
-
-    html.push(encodeEntities(raw));
-
-    // var timeDiff = tsNow() - start;
-    // if (timeDiff > 1) {
-    //   console.log(dT(), 'wrap text', text.length, timeDiff);
-    // }
-
-    text = $sanitize(html.join(''));
-
-    // console.log(3, text, html);
-
-    if (emojiFound) {
-      text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text);
-      text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
-                          '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
-    }
-
-    return $sce.trustAs('html', text);
-  }
-
-  function checkBrackets(url) {
-    var urlLength = url.length,
-        urlOpenBrackets = url.split('(').length - 1,
-        urlCloseBrackets = url.split(')').length - 1;
-
-    while (urlCloseBrackets > urlOpenBrackets &&
-           url.charAt(urlLength - 1) === ')') {
-      url = url.substr(0, urlLength - 1);
-      urlCloseBrackets--;
-      urlLength--;
-    }
-    if (urlOpenBrackets > urlCloseBrackets) {
-      url = url.replace(/\)+$/, '');
-    }
-    return url;
-  }
-
-  function findExternalEmbed(url) {
-    var embedUrlMatches,
-        result;
-
-    if (embedUrlMatches = url.match(youtubeRegExp)) {
-      return ['youtube', embedUrlMatches[1]];
-    }
-    if (embedUrlMatches = url.match(vimeoRegExp)) {
-      return ['vimeo', embedUrlMatches[1]];
-    }
-    else if (embedUrlMatches = url.match(instagramRegExp)) {
-      return ['instagram', embedUrlMatches[1]];
-    }
-    else if (embedUrlMatches = url.match(vineRegExp)) {
-      return ['vine', embedUrlMatches[1]];
-    }
-    else if (embedUrlMatches = url.match(soundcloudRegExp)) {
-      var badFolders = 'explore,upload,pages,terms-of-use,mobile,jobs,imprint'.split(',');
-      var badSubfolders = 'sets'.split(',');
-      if (badFolders.indexOf(embedUrlMatches[1]) == -1 &&
-          badSubfolders.indexOf(embedUrlMatches[2]) == -1) {
-        return ['soundcloud', embedUrlMatches[0]];
-      }
-    }
-    else if (embedUrlMatches = url.match(spotifyRegExp)) {
-      return ['spotify', embedUrlMatches[3].replace('/', ':')];
-    }
-
-    if (!Config.Modes.chrome_packed) { // Need external JS
-      if (embedUrlMatches = url.match(twitterRegExp)) {
-        return ['twitter', embedUrlMatches[0]];
-      }
-      else if (embedUrlMatches = url.match(facebookRegExp)) {
-        if (embedUrlMatches[2]!= undefined){
-          return ['facebook', "https://www.facebook.com/"+embedUrlMatches[2]+"/posts/"+embedUrlMatches[1]];
-        }
-        return ['facebook', embedUrlMatches[0]];
-      }
-      // Sorry, GPlus widget has no `xfbml.render` like callback and is too wide.
-      // else if (embedUrlMatches = url.match(gplusRegExp)) {
-      //   return ['gplus', embedUrlMatches[0]];
-      // }
-    }
-
-    return false;
-  }
-
-  function wrapPlainText (text, options) {
-    if (emojiSupported) {
-      return text;
-    }
-    if (!text || !text.length) {
-      return '';
-    }
-
-    options = options || {};
-
-    text = text.replace(/\ufe0f/g, '', text);
-
-    var match,
-        raw = text,
-        text = [],
-        emojiTitle;
-
-    while ((match = raw.match(fullRegExp))) {
-      text.push(raw.substr(0, match.index));
-
-      if (match[8]) {
-        if ((emojiCode = emojiMap[match[8]]) &&
-            (emojiTitle = emojiData[emojiCode][1][0])) {
-          text.push(':' + emojiTitle + ':');
-        } else {
-          text.push(match[0]);
-        }
-      } else {
-        text.push(match[0]);
-      }
-      raw = raw.substr(match.index + match[0].length);
-    }
-    text.push(raw);
-
-    return text.join('');
-  }
-
 })
 
 .service('StatusManager', function ($timeout, $rootScope, MtpApiManager, AppUsersManager, IdleManager) {
@@ -5183,6 +2963,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function savePeerSettings (peerID, settings) {
     // console.trace(dT(), 'peer settings', peerID, settings);
     peerSettings[peerID] = $q.when(settings);
+    $rootScope.$broadcast('notify_settings', {peerID: peerID});
   }
 
   function updatePeerSettings (peerID, settings) {
@@ -5864,24 +3645,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var matches;
 
     if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup)=(.+))?$/)) {
-      AppUsersManager.resolveUsername(matches[1]).then(function (userID) {
+      AppPeersManager.resolveUsername(matches[1]).then(function (peerID) {
 
-        if (matches[2] == 'startgroup') {
+        if (peerID > 0 && AppUsersManager.isBot(peerID) && matches[2] == 'startgroup') {
           PeersSelectService.selectPeer({
             confirm_type: 'INVITE_TO_GROUP',
             noUsers: true
-          }).then(function (peerString) {
-            var peerID = AppPeersManager.getPeerID(peerString);
-            var chatID = peerID < 0 ? -peerID : 0;
-            AppMessagesManager.startBot(userID, chatID, matches[3]).then(function () {
-              $rootScope.$broadcast('history_focus', {peerString: peerString});
+          }).then(function (toPeerString) {
+            var toPeerID = AppPeersManager.getPeerID(toPeerString);
+            var toChatID = toPeerID < 0 ? -toPeerID : 0;
+            AppMessagesManager.startBot(peerID, toChatID, matches[3]).then(function () {
+              $rootScope.$broadcast('history_focus', {toPeerString: toPeerString});
             });
           });
           return true;
         }
 
         $rootScope.$broadcast('history_focus', {
-          peerString: AppUsersManager.getUserString(userID),
+          peerString: AppPeersManager.getPeerString(peerID),
           startParam: matches[3]
         });
       });

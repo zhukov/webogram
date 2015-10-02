@@ -14,7 +14,7 @@
         <a ng-click="openPhoto(user.photo.photo_id, {p: user.id})" class="peer_modal_photo" ng-class="{disabled: !user.photo.photo_id}" ng-disabled="!user.photo.photo_id" my-peer-photolink="::user.id" img-class="peer_modal_photo" no-open="true"></a>
       </div>
       <div class="peer_modal_profile">
-        <div class="peer_modal_profile_name" my-user-link="user.id"></div>
+        <div class="peer_modal_profile_name" my-peer-link="user.id"></div>
         <div class="peer_modal_profile_description" my-user-status="::user.id"></div>
       </div>
     </div>
@@ -31,7 +31,7 @@
 
   <div class="md_modal_body">
 
-    <div class="md_modal_sections">
+    <div class="md_modal_sections clearfix">
 
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username">
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>

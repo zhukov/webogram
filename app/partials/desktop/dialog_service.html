@@ -1,0 +1,24 @@
+<span ng-switch="message.action._">
+  <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
+  <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
+  <span ng-switch-when="messageActionChatEditPhoto" my-i18n="conversation_group_photo_updated"></span>
+  <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="conversation_group_photo_removed"></span>
+  <span ng-switch-when="messageActionChatAddUser" ng-switch="::message.fromID != message.action.user_id">
+    <span ng-switch-when="true" my-i18n="conversation_invited_user">
+      <my-i18n-param name="user"><span my-peer-link="message.action.user_id"></span></my-i18n-param>
+    </span>
+    <span ng-switch-default my-i18n="conversation_returned_to_group"></span>
+  </span>
+  <span ng-switch-when="messageActionChatDeleteUser" ng-switch="::message.fromID != message.action.user_id">
+    <span ng-switch-when="true" my-i18n="conversation_kicked_user">
+      <my-i18n-param name="user"><span my-peer-link="message.action.user_id"></span></my-i18n-param>
+    </span>
+    <span ng-switch-default my-i18n="conversation_left_group"></span>
+  </span>
+  <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
+
+  <span ng-switch-when="messageActionChannelCreate" my-i18n="conversation_created_channel"></span>
+  <span ng-switch-when="messageActionChannelEditTitle" my-i18n="conversation_changed_channel_name"></span>
+  <span ng-switch-when="messageActionChannelEditPhoto" my-i18n="conversation_changed_channel_photo"></span>
+  <span ng-switch-when="messageActionChannelDeletePhoto" my-i18n="conversation_removed_channel_photo"></span>
+</span>

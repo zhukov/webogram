@@ -2,13 +2,8 @@
   <div class="navbar navbar-static-top  navbar-inverse" role="navigation" ng-class="{navbar_peer_not_selected: !curDialog.peer, navbar_offline: offline, navbar_history_select: historyState.selectActions}">
     <div class="container">
 
-      <a class="navbar-peer-wrap" ng-click="showPeerInfo()">
-        <img
-          my-load-thumb
-          watch="true"
-          thumb="historyPeer.photo"
-        />
-      </a>
+
+      <a class="navbar-peer-wrap" my-peer-photolink="historyPeer.id" peer-watch="true"></a>
 
       <div class="navbar-toggle-wrap dropdown" dropdown>
         <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
@@ -72,7 +67,7 @@
                 <a href="#/im" class="navbar-quick-profile-back">
                   <i class="icon icon-back"></i>
                   <div class="navbar-quick-back-title">
-                    <h4 my-user-link="historyPeer.id" user-watch="true"></h4>
+                    <h4 my-peer-link="historyPeer.id" peer-watch="true"></h4>
                     <small ng-switch="historyState.typing.length">
                       <span ng-switch-when="1" class="status_online">
                         <my-i18n msgid="head_typing"></my-i18n><span my-loading-dots></span>
@@ -86,15 +81,15 @@
                 <a href="#/im" class="navbar-quick-group-back">
                   <i class="icon icon-back"></i>
                   <div class="navbar-quick-back-title">
-                    <h4 my-chat-link="-historyPeer.id" chat-watch="true"></h4>
+                    <h4 my-peer-link="historyPeer.id" peer-watch="true"></h4>
                     <small ng-switch="historyState.typing.length">
                       <span ng-switch-when="0" class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
                       <my-i18n>
                         <span ng-switch-when="1" class="status_online" my-i18n-format="head_one_typing"></span>
                         <span ng-switch-when="2" class="status_online" my-i18n-format="head_two_typing"></span>
                         <span ng-switch-default class="status_online" my-i18n-format="head_many_typing"></span>
-                        <my-i18n-param name="name1"><span my-user-link="historyState.typing[0]" short="true"></span></my-i18n-param>
-                        <my-i18n-param name="name2"><span my-user-link="historyState.typing[1]" short="true"></span></my-i18n-param>
+                        <my-i18n-param name="name1"><span my-peer-link="historyState.typing[0]" short="true"></span></my-i18n-param>
+                        <my-i18n-param name="name2"><span my-peer-link="historyState.typing[1]" short="true"></span></my-i18n-param>
                         <my-i18n-param name="names" ng-bind="historyState.typing.length - 1"></my-i18n-param>
                         <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
                       </my-i18n>

@@ -787,6 +787,11 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
         element.addClass(attrs.windowClass || '');
         scope.size = attrs.size;
 
+        // moved from template to fix issue #2280
+        element.on('click', function(evt) {
+          scope.close(evt);
+        });
+
         $modalStack.registerObserverCallback(function(hiddenBySingle) {
           scope.hiddenBySingle = hiddenBySingle || false;
         });
@@ -1257,7 +1262,7 @@ angular.module("template/modal/backdrop.html", []).run(["$templateCache", functi
 
 angular.module("template/modal/window.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/modal/window.html",
-    "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: hiddenBySingle ? 'none' : 'block'}\" ng-click=\"close($event)\">\n" +
+    "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: hiddenBySingle ? 'none' : 'block'}\">\n" +
     "  <div class=\"modal_close_wrap\" ng-click=\"close($event)\">\n" +
     "    <div class=\"modal_close\"></div>\n" +
     "  </div>\n" +

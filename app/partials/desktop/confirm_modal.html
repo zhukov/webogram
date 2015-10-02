@@ -35,10 +35,7 @@
         <span ng-switch-when="EXT_SHARE_PEER" my-i18n-format="confirm_modal_share_file_peer"></span>
         <span ng-switch-when="INVITE_TO_GROUP" my-i18n-format="confirm_modal_invite_peer"></span>
         <my-i18n-param name="peer">
-          <strong ng-switch="peer_id > 0">
-            <span ng-switch-when="true" my-user-link="peer_id"></span>
-            <span ng-switch-default my-chat-link="-peer_id"></span>
-          </strong>
+          <strong my-peer-link="peer_id"></strong>
         </my-i18n-param>
       </my-i18n>
       <div ng-switch-when="APPLY_LANG_WITH_RELOAD" my-i18n="confirm_modal_apply_lang_with_reload_md"></div>
@@ -51,7 +48,12 @@
       <div ng-switch-when="JOIN_GROUP_BY_LINK" my-i18n="confirm_modal_join_group_link">
         <my-i18n-param name="title"><strong ng-bind="title"></strong></my-i18n-param>
       </div>
+      <div ng-switch-when="JOIN_CHANNEL_BY_LINK" my-i18n="confirm_modal_join_channel_link">
+        <my-i18n-param name="title"><strong ng-bind="title"></strong></my-i18n-param>
+      </div>
       <div ng-switch-when="REVOKE_GROUP_INVITE_LINK" my-i18n="confirm_modal_revoke_group_link"></div>
+      <div ng-switch-when="REVOKE_CHANNEL_INVITE_LINK" my-i18n="confirm_modal_revoke_channel_link"></div>
+      <div ng-switch-when="CHANNEL_DELETE" my-i18n="confirm_modal_delete_channel_md"></div>
 
 
       <span ng-switch-default ng-switch="message.length > 0">

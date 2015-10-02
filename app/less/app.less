@@ -665,7 +665,7 @@ a.tg_checkbox {
     border-radius: 10px;
     overflow: hidden;
     float: left;
-    margin-left: -6px;
+    margin-left: -1px;
     margin-top: -3px;
     -webkit-transition: all ease 0.1s;
     transition: all ease 0.1s;
@@ -1930,7 +1930,7 @@ img.im_message_document_thumb {
   margin-top: 10px;
 }
 .im_service_message {
-  display: inline-block;
+  display: block;
   min-width: 10px;
   padding: 4px 7px;
   line-height: 1.4;
@@ -1940,7 +1940,7 @@ img.im_message_document_thumb {
   margin: 5px 0;
 }
 .im_service_message_photo_thumb {
-  display: block;
+  display: inline-block;
   margin: 0 auto;
 }
 
@@ -2048,6 +2048,12 @@ a.im_message_fwd_photo {
 .im_message_text {
   word-wrap: break-word;
   line-height: 150%;
+}
+.im_message_text pre {
+  margin-bottom: 0;
+  max-height: 300px;
+  overflow: auto;
+  padding: 4px;
 }
 .im_message_photo_caption,
 .im_message_video_caption {
@@ -3021,7 +3027,12 @@ a.contacts_modal_search_clear {
   height: 40px;
   margin-right: 10px;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 20px;
+
+  .peer_initials {
+    line-height: 40px;
+    font-size: 15px;
+  }
 }
 .contacts_modal_contact_status {
   color: #999;
@@ -3067,12 +3078,16 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
     width: 40px;
     height: 40px;
     margin-right: 10px;
-    border-radius: 2px;
+    border-radius: 20px;
     overflow: hidden;
   }
   img& {
     width: 40px;
     height: 40px;
+  }
+  .peer_initials {
+    line-height: 40px;
+    font-size: 15px;
   }
 }
 
@@ -3293,15 +3308,16 @@ h5 {
 }
 
 .img_gif_thumb {
-  -webkit-filter: blur(2px);
-  -moz-filter: blur(2px);
-  -o-filter: blur(2px);
-  -ms-filter: blur(2px);
-  filter: blur(2px);
-  filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');
+  -webkit-filter: blur(3px);
+  -moz-filter: blur(3px);
+  -o-filter: blur(3px);
+  -ms-filter: blur(3px);
+  filter: blur(3px);
+  filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='3');
   margin: -1px;
   padding: 1px;
   max-width: 100%;
+  height: auto;
 }
 .img_gif_image {
   max-width: 100%;
@@ -3646,7 +3662,7 @@ a.countries_modal_search_clear {
     height: 18px;
     margin: 17px 0 0 16px;
 
-    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 420px);
     background-position: -10px -164px;
   }
 
@@ -3661,7 +3677,7 @@ a.countries_modal_search_clear {
     height: 22px;
     margin: 17px 0 0 13px;
 
-    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 420px);
     background-position: -7px -280px;
   }
 
@@ -3676,7 +3692,7 @@ a.countries_modal_search_clear {
     height: 20px;
     margin: 18px 0 0 16px;
 
-    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 420px);
     background-position: -10px -220px;
   }
 
@@ -3713,7 +3729,7 @@ a.countries_modal_search_clear {
 
 .md_modal_section {
   &s {
-    padding-top: 17px
+    padding-top: 17px;
   }
 
   &_icon {
@@ -3722,7 +3738,7 @@ a.countries_modal_search_clear {
     margin-top: 5px;
     position: absolute;
 
-    .image-2x('../img/icons/ProfileIcons.png', 40px, 360px);
+    .image-2x('../img/icons/ProfileIcons.png', 40px, 420px);
     background-position: 0 0;
 
     .md_modal_iconed_section_toggle & {
@@ -3740,6 +3756,13 @@ a.countries_modal_search_clear {
       height: 18px;
       background-position: -12px -10px;
       margin-top: 3px;
+    }
+
+    &_about {
+      width: 20px;
+      height: 20px;
+      background-position: -10px -344px;
+      margin-top: 0px;
     }
 
     &_notification {

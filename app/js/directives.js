@@ -65,7 +65,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           needDate = false,
           unreadAfter = false,
           applySelected = function () {
-            if (selected != ($scope.selectedMsgs[$scope.historyMessage.id] || false)) {
+            if (selected != ($scope.selectedMsgs[$scope.historyMessage.mid] || false)) {
               selected = !selected;
               element.toggleClass(selectedClass, selected);
             }
@@ -109,7 +109,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('messages_regroup', applyGrouped);
 
       $scope.$on('messages_focus', function (e, focusedMsgID) {
-        if ((focusedMsgID == $scope.historyMessage.id) != focused) {
+        if ((focusedMsgID == $scope.historyMessage.mid) != focused) {
           focused = !focused;
           element.toggleClass(focusClass, focused);
         }
@@ -122,7 +122,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if ($scope.peerHistory.peerID != $scope.historyPeer.id) {
             return;
           }
-          if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.id)) {
+          if (unreadAfter != ($scope.historyUnreadAfter == $scope.historyMessage.mid)) {
             unreadAfter = !unreadAfter;
             if (unreadAfter) {
               if (unreadAfterSplit) {
@@ -328,6 +328,15 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myServiceShortMessage', function() {
+    return {
+      scope: {
+        message: '=myServiceShortMessage'
+      },
+      templateUrl: templateUrl('dialog_service')
+    };
+  })
+
   .directive('myReplyMessage', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
 
     return {
@@ -353,10 +362,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (!message.loading) {
         updateMessage($scope, element);
       } else {
-        var messageID = message.id;
-        var stopWaiting = $scope.$on('messages_downloaded', function (e, msgIDs) {
-          if (msgIDs.indexOf(messageID) != -1) {
-            $scope.replyMessage = AppMessagesManager.wrapForDialog(messageID);
+        var mid = message.mid;
+        var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
+          if (mids.indexOf(mid) != -1) {
+            $scope.replyMessage = AppMessagesManager.wrapForDialog(mid);
             updateMessage($scope, element);
             stopWaiting();
           }
@@ -412,12 +421,69 @@ angular.module('myApp.directives', ['myApp.filters'])
           var peerID = AppMessagesManager.getMessagePeer(message);
           var peerString = AppPeersManager.getPeerString(peerID);
 
-          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.id});
+          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.mid});
 
         })
       }
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      })
     }
 
+  })
+
+  .directive('myMessageText', function(AppPeersManager, AppMessagesManager, AppUsersManager, RichTextProcessor) {
+    return {
+      link: link,
+      scope: {
+        message: '=myMessageText'
+      }
+    };
+
+    function updateHtml (message, element) {
+      var entities = message.totalEntities;
+      var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
+      var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
+      var toPeerID = AppPeersManager.getPeerID(message.to_id);
+      var withBot = (fromBot ||
+                    toPeerID < 0 ||
+                    toPeerID > 0 && AppUsersManager.isBot(toPeerID));
+
+      var options = {
+        noCommands: !withBot,
+        fromBot: fromBot,
+        entities: entities
+      };
+      if (message.flags & 16) {
+        var user = AppUsersManager.getSelf();
+        if (user) {
+          options.highlightUsername = user.username;
+        }
+      }
+      var html = RichTextProcessor.wrapRichText(message.message, options);
+      // console.log('dd', entities, html);
+
+      element.html(html.valueOf());
+    }
+
+    function link ($scope, element, attrs) {
+      var message = $scope.message;
+      var msgID = message.mid;
+      // var msgID = $scope.$eval(attrs.myMessageText);
+      // var message = AppMessagesManager.getMessage(msgID);
+
+      updateHtml(message, element);
+
+      if (message.pending) {
+        var unlink = $scope.$on('messages_pending', function () {
+          if (message.mid != msgID) {
+            updateHtml(message, element);
+            unlink();
+          }
+        })
+      }
+    }
   })
 
   .directive('myReplyMarkup', function() {
@@ -2402,56 +2468,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-
-  .directive('myUserLink', function ($timeout, AppUsersManager) {
-
-    return {
-      link: link
-    };
-
-    function link($scope, element, attrs) {
-
-      var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
-      var short = attrs.short && $scope.$eval(attrs.short);
-
-      var userID;
-      var update = function () {
-        var user = AppUsersManager.getUser(userID);
-        var key = short ? 'rFirstName' : 'rFullName';
-
-        element.html(
-          (override[key] || user[key] || '').valueOf()
-        );
-        if (attrs.color && $scope.$eval(attrs.color)) {
-          element.addClass('user_color_' + user.num);
-        }
-      };
-
-      if (element[0].tagName == 'A') {
-        element.on('click', function () {
-          AppUsersManager.openUser(userID, override);
-        });
-      }
-
-      if (attrs.userWatch) {
-        $scope.$watch(attrs.myUserLink, function (newUserID) {
-          userID = newUserID;
-          update();
-        });
-      } else {
-        userID = $scope.$eval(attrs.myUserLink);
-        update();
-      }
-      if (!attrs.noWatch) {
-        $scope.$on('user_update', function (e, updUserID) {
-          if (userID == updUserID) {
-            update();
-          }
-        });
-      }
-    }
-  })
-
   .directive('myUserStatus', function ($filter, AppUsersManager) {
 
     var statusFilter = $filter('userStatus'),
@@ -2496,47 +2512,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myChatLink', function ($timeout, AppChatsManager) {
-
-    return {
-      link: link
-    };
-
-    function link($scope, element, attrs) {
-      var chatID;
-      var update = function () {
-        var chat = AppChatsManager.getChat(chatID);
-
-        element.html(
-          (chat.rTitle || '').valueOf()
-        )
-      };
-
-      if (element[0].tagName == 'A') {
-        element.on('click', function () {
-          AppChatsManager.openChat(chatID);
-        });
-      }
-
-      if (attrs.chatWatch) {
-        $scope.$watch(attrs.myChatLink, function (newChatID) {
-          chatID = newChatID;
-          update();
-        });
-      } else {
-        chatID = $scope.$eval(attrs.myChatLink);
-        update();
-      }
-
-      $scope.$on('chat_update', function (e, updChatID) {
-        if (chatID == updChatID) {
-          update();
-        }
-      });
-    }
-  })
-
-  .directive('myChatStatus', function ($rootScope, _, MtpApiManager, AppChatsManager, AppUsersManager) {
+  .directive('myChatStatus', function ($rootScope, _, MtpApiManager, AppChatsManager, AppUsersManager, AppProfileManager) {
 
     var ind = 0;
     var statuses = {};
@@ -2573,12 +2549,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!chatID) {
           return;
         }
-        AppChatsManager.getChatFull(chatID).then(function (chatFull) {
+        AppProfileManager.getChatFull(chatID).then(function (chatFull) {
           var participantsVector = (chatFull.participants || {}).participants || [];
           participantsCount = participantsVector.length;
           angular.forEach(participantsVector, function (participant) {
             participants[participant.user_id] = true;
           });
+          if (chatFull.participants_count) {
+            participantsCount = chatFull.participants_count || 0;
+          }
           update();
         });
       };
@@ -2629,34 +2608,72 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-
-  .directive('myUserPhotolink', function (AppUsersManager) {
+  .directive('myPeerLink', function (AppChatsManager, AppUsersManager) {
 
     return {
-      link: link,
-      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus || false" ng-show="user.status._ == \'userStatusOnline\'"></i>'
+      link: link
     };
 
     function link($scope, element, attrs) {
 
-      var userID = $scope.$eval(attrs.myUserPhotolink);
+      var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
+      var short = attrs.short && $scope.$eval(attrs.short);
 
-      $scope.photo = AppUsersManager.getUserPhoto(userID, 'User');
+      var peerID;
+      var update = function () {
+        if (element[0].className.indexOf('user_color_') != -1) {
+          element[0].className = element[0].className.replace(/user_color_\d+/g, '');
+        }
+        if (peerID > 0) {
+          var user = AppUsersManager.getUser(peerID);
+          var key = short ? 'rFirstName' : 'rFullName';
 
-      if ($scope.showStatus = attrs.status && $scope.$eval(attrs.status)) {
-        $scope.user = AppUsersManager.getUser(userID);
-      }
+          element.html(
+            (override[key] || user[key] || '').valueOf()
+          );
+          if (attrs.color && $scope.$eval(attrs.color)) {
+            element.addClass('user_color_' + user.num);
+          }
+        } else {
+          var chat = AppChatsManager.getChat(-peerID);
+
+          element.html(
+            (chat.rTitle || '').valueOf()
+          );
+        }
+      };
 
       if (element[0].tagName == 'A') {
-        element.on('click', function (e) {
-          AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
+        element.on('click', function () {
+          if (peerID > 0) {
+            AppUsersManager.openUser(peerID, override);
+          } else {
+            AppChatsManager.openChat(-peerID);
+          }
         });
       }
 
-      if (attrs.imgClass) {
-        $(element[0].firstChild).addClass(attrs.imgClass)
+      if (attrs.peerWatch) { // userWatch, chatWatch
+        $scope.$watch(attrs.myPeerLink, function (newPeerID) {
+          peerID = newPeerID;
+          update();
+        });
+      } else {
+        peerID = $scope.$eval(attrs.myPeerLink);
+        update();
       }
-
+      if (!attrs.noWatch) {
+        $scope.$on('user_update', function (e, updUserID) {
+          if (peerID == updUserID) {
+            update();
+          }
+        });
+        $scope.$on('chat_update', function (e, updChatID) {
+          if (peerID == -updChatID) {
+            update();
+          }
+        });
+      }
     }
   })
 
@@ -2879,7 +2896,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                 if ($scope.message &&
                     !$scope.message.out &&
                     $scope.message.media_unread) {
-                  AppMessagesManager.readMessages([$scope.message.id]);
+                  AppMessagesManager.readMessages([$scope.message.mid]);
                 }
               }, 300);
             });

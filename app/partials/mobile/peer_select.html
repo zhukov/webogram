@@ -47,16 +47,10 @@
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
               <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
-                <div class="im_dialog_photo pull-left">
-                  <img
-                    class="im_dialog_photo"
-                    my-load-thumb
-                    thumb="contact.userPhoto"
-                  />
-                </div>
+                <div class="im_dialog_photo pull-left" my-peer-photolink="::contact.userID" img-class="im_dialog_photo" watch="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" my-user-link="contact.userID"></span>
+                    <span class="im_dialog_user" my-peer-link="contact.userID"></span>
                   </div>
                   <div class="im_dialog_message">
                     <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>

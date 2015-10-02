@@ -1,9 +1,9 @@
 <a class="img_gif_with_progress_wrap" ng-click="toggle($event)">
 
-  <div class="img_gif_image_wrap" ng-switch="document.downloaded &amp;&amp; isActive">
+  <div class="img_gif_image_wrap">
 
-    <img ng-switch-when="true" class="img_gif_image" ng-src="{{document.url}}" />
-    <img ng-switch-default class="img_gif_thumb" my-load-thumb thumb="document.thumb" />
+    <img ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" class="img_gif_image" ng-src="{{document.url}}" />
+    <img ng-hide="document.downloaded &amp;&amp; isActive" class="img_gif_thumb" my-load-thumb thumb="document.thumb" />
 
   </div>
 

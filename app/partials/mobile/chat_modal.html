@@ -11,10 +11,10 @@
             <span class="icon-bar"></span>
           </a>
           <ul class="dropdown-menu">
-            <li ng-if="chatFull.thumb.location" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+            <li ng-if="chatFull.thumb.location" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left">
               <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
             </li>
-            <li ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left">
+            <li ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left">
               <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
             </li>
             <li>
@@ -46,17 +46,10 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !chatFull.chat.photo.photo_small}">
-        <img
-          class="mobile_user_modal_image mobile_chat_modal_image"
-          my-load-thumb
-          watch="true"
-          thumb="chatFull.thumb"
-        />
-      </a>
+      <a ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::-chatFull.chat.id" img-class="mobile_user_modal_image mobile_chat_modal_image" no-open="true" watch="true" ng-class="{disabled: !chatFull.chat.photo.photo_small}" ng-disabled="!chatFull.chat.photo.photo_small"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" my-chat-link="chatFull.chat.id"></h4>
+        <h4 class="mobile_user_modal_header" my-peer-link="-chatFull.chat.id"></h4>
         <p class="mobile_user_modal_status"  ng-if="chatFull.chat.participants_count > 0">
           <ng-pluralize count="chatFull.chat.participants_count"
                            when="group_modal_pluralize_participants">
@@ -66,20 +59,20 @@
 
     </div>
 
-    <div class="mobile_modal_action_wrap" ng-if="!chatFull.chat.left &amp;&amp; chatFull.participants.participants.length">
+    <div class="mobile_modal_action_wrap" ng-if="!chatFull.chat.pFlags.left &amp;&amp; chatFull.participants.participants.length">
       <a class="mobile_modal_action" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
     </div>
-    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.left && chatFull.isAdmin">
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.pFlags.left && chatFull.isAdmin">
       <a class="mobile_modal_action" ng-click="inviteViaLink()" my-i18n="group_modal_menu_share_link"></a>
     </div>
 
-    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.left">
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.pFlags.left">
       <a class="mobile_modal_action" ng-click="returnToGroup()" my-i18n="group_modal_return"></a>
     </div>
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ == 'chatForbidden'">
       <a class="mobile_modal_action" ng-click="flushHistory()" my-i18n="group_modal_return"></a>
     </div>
-    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.left &amp;&amp; !photo.updating">
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left &amp;&amp; !photo.updating">
       <span class="mobile_modal_action mobile_modal_upload_action">
         <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
         <my-i18n="group_modal_update_photo"></my-i18n>
@@ -109,17 +102,17 @@
             <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
             <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_leave"></a>
 
-            <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
+            <a class="chat_modal_participant_photo pull-left" my-peer-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 
             <div class="chat_modal_participant_name">
-              <a my-user-link="participant.user_id"></a>
+              <a my-peer-link="participant.user_id"></a>
             </div>
             <div class="chat_modal_participant_status" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
           </div>
 
         </div>
 
-        <div class="chat_modal_members_forbidden" ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.left" my-i18n="group_modal_members_unavailable"></div>
+        <div class="chat_modal_members_forbidden" ng-if="chatFull.chat._ == 'chatForbidden' || chatFull.chat.pFlags.left" my-i18n="group_modal_members_unavailable"></div>
 
       </div>
     </div>
