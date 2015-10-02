@@ -436,7 +436,7 @@
 	"im_forward": "Forward {count}",
 	"im_reply": "Reply",
 	"im_start": "Start",
-	"im_channel_join": "+Join",
+	"im_channel_join": "+ Join",
 	"im_channel_mute": "Mute",
 	"im_channel_unmute": "Unmute",
 	"im_reply_loading": "Loading{dots}",
