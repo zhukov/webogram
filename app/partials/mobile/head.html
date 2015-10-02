@@ -2,13 +2,8 @@
   <div class="navbar navbar-static-top  navbar-inverse" role="navigation" ng-class="{navbar_peer_not_selected: !curDialog.peer, navbar_offline: offline, navbar_history_select: historyState.selectActions}">
     <div class="container">
 
-      <a class="navbar-peer-wrap" ng-click="showPeerInfo()">
-        <img
-          my-load-thumb
-          watch="true"
-          thumb="historyPeer.photo"
-        />
-      </a>
+
+      <a class="navbar-peer-wrap" my-peer-photolink="historyPeer.id" peer-watch="true"></a>
 
       <div class="navbar-toggle-wrap dropdown" dropdown>
         <a class="dropdown-toggle navbar-toggle" dropdown-toggle>

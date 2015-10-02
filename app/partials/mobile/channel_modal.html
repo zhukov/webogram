@@ -49,14 +49,7 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !chatFull.chat.photo.photo_small}">
-        <img
-          class="mobile_user_modal_image mobile_chat_modal_image"
-          my-load-thumb
-          watch="true"
-          thumb="chatFull.thumb"
-        />
-      </a>
+      <a ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::-chatFull.chat.id" img-class="mobile_user_modal_image mobile_chat_modal_image" no-open="true" watch="true" ng-class="{disabled: !chatFull.chat.photo.photo_small}" ng-disabled="!chatFull.chat.photo.photo_small"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
         <h4 class="mobile_user_modal_header" my-peer-link="-chatFull.chat.id"></h4>
@@ -122,7 +115,7 @@
             <a ng-if="participant.canKick" ng-click="kickFromChannel(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
             <a ng-if="participant.canLeave" ng-click="leaveChannel()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_leave"></a>
 
-            <a class="chat_modal_participant_photo pull-left" my-user-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
+            <a class="chat_modal_participant_photo pull-left" my-peer-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 
             <div class="chat_modal_participant_name">
               <a my-peer-link="participant.user_id"></a>

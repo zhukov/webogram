@@ -1670,7 +1670,6 @@ angular.module('myApp.services')
     message.peerID = getMessagePeer(message);
     message.peerData = AppPeersManager.getPeer(message.peerID);
     message.peerString = AppPeersManager.getPeerString(message.peerID);
-    message.peerPhoto = AppPeersManager.getPeerPhoto(message.peerID, 'User', 'Group');
     message.unreadCount = unreadCount;
 
     if (message._ == 'messageService' && message.action.user_id) {
@@ -2056,7 +2055,7 @@ angular.module('myApp.services')
 
     if (peerID > 0) {
       var fromUser = AppUsersManager.getUser(message.from_id);
-      var fromPhoto = AppUsersManager.getUserPhoto(message.from_id, 'User');
+      var fromPhoto = AppUsersManager.getUserPhoto(message.from_id);
 
       notification.title = (fromUser.first_name || '') +
                            (fromUser.first_name && fromUser.last_name ? ' ' : '') +
@@ -2079,7 +2078,7 @@ angular.module('myApp.services')
                              notification.title;
       }
 
-      notificationPhoto = AppChatsManager.getChatPhoto(-peerID, 'Group');
+      notificationPhoto = AppChatsManager.getChatPhoto(-peerID);
 
       peerString = AppChatsManager.getChatString(-peerID);
     }

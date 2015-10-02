@@ -1153,13 +1153,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       safeReplaceObject($scope.historyPeer, {
         id: peerID,
-        data: peerData,
-        photo: AppPeersManager.getPeerPhoto(peerID, 'User', 'Group')
+        data: peerData
       });
 
       MtpApiManager.getUserID().then(function (id) {
         $scope.ownID = id;
-        $scope.ownPhoto = AppUsersManager.getUserPhoto(id, 'User');
       });
 
       if (preload) {
@@ -2916,7 +2914,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var peerString = AppUsersManager.getUserString($scope.userID);
 
     $scope.user = AppUsersManager.getUser($scope.userID);
-    $scope.userPhoto = AppUsersManager.getUserPhoto($scope.userID, 'User');
     $scope.blocked = false;
 
     $scope.settings = {notifications: true};
@@ -3333,7 +3330,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     MtpApiManager.getUserID().then(function (id) {
       $scope.profile = AppUsersManager.getUser(id);
-      $scope.photo = AppUsersManager.getUserPhoto(id, 'User');
     });
 
     MtpApiManager.invokeApi('users.getFullUser', {
@@ -3427,7 +3423,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                 previous: true
               }
             });
-            $scope.photo = AppUsersManager.getUserPhoto(id, 'User');
+            $scope.photo = {};
           });
         });
       })['finally'](function () {
@@ -3452,7 +3448,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               previous: true
             }
           });
-          $scope.photo = AppUsersManager.getUserPhoto(id, 'User');
+          $scope.photo = {};
         });
       })['finally'](function () {
         delete $scope.photo.updating;
@@ -3969,8 +3965,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         angular.forEach(contactsList, function(userID) {
           var contact = {
             userID: userID,
-            user: AppUsersManager.getUser(userID),
-            userPhoto: AppUsersManager.getUserPhoto(userID, 'User')
+            user: AppUsersManager.getUser(userID)
           }
           doneIDs.push(userID);
           $scope.contacts.push(contact);
@@ -4238,7 +4233,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ChatInviteLinkModalController', function (_, $scope, $timeout, $modalInstance, AppChatsManager, ErrorService) {
+  .controller('ChatInviteLinkModalController', function (_, $scope, $timeout, $modalInstance, AppChatsManager, AppProfileManager, ErrorService) {
 
     $scope.exportedInvite = {link: _('group_invite_link_loading_raw')};
 
@@ -4260,7 +4255,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (force) {
         $scope.exportedInvite.revoking = true;
       }
-      AppChatsManager.getChatInviteLink($scope.chatID, force).then(function (link) {
+      AppProfileManager.getChatInviteLink($scope.chatID, force).then(function (link) {
         $scope.exportedInvite = {link: link, canRevoke: true};
         selectLink();
 

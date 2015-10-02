@@ -2608,37 +2608,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-
-  .directive('myUserPhotolink', function (AppUsersManager) {
-
-    return {
-      link: link,
-      template: '<img my-load-thumb thumb="photo" /><i class="icon icon-online" ng-if="::showStatus || false" ng-show="user.status._ == \'userStatusOnline\'"></i>'
-    };
-
-    function link($scope, element, attrs) {
-
-      var userID = $scope.$eval(attrs.myUserPhotolink);
-
-      $scope.photo = AppUsersManager.getUserPhoto(userID, 'User');
-
-      if ($scope.showStatus = attrs.status && $scope.$eval(attrs.status)) {
-        $scope.user = AppUsersManager.getUser(userID);
-      }
-
-      if (element[0].tagName == 'A') {
-        element.on('click', function (e) {
-          AppUsersManager.openUser(userID, attrs.userOverride && $scope.$eval(attrs.userOverride));
-        });
-      }
-
-      if (attrs.imgClass) {
-        $(element[0].firstChild).addClass(attrs.imgClass)
-      }
-
-    }
-  })
-
   .directive('myPeerLink', function (AppChatsManager, AppUsersManager) {
 
     return {

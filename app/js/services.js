@@ -188,7 +188,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return angular.isObject(users[id]);
   }
 
-  function getUserPhoto(id, placeholder) {
+  function getUserPhoto(id) {
     var user = getUser(id);
 
     if (id == 333000) {
@@ -203,7 +203,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     return {
       num: user.num,
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + user.num + '@2x.png',
+      placeholder: 'img/placeholders/UserAvatar' + user.num + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
@@ -591,7 +591,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var lastWord = titleWords.pop();
     apiChat.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
 
-    apiChat.num = (Math.abs(apiChat.id >> 1) % (Config.Mobile ? 4 : 8)) + 1;
+    apiChat.num = (Math.abs(apiChat.id >> 1) % 8) + 1;
 
     if (apiChat.username) {
       var searchUsername = SearchIndexManager.cleanUsername(apiChat.username);
@@ -646,29 +646,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
-  function getChatInviteLink (id, force) {
-    return getChatFull(id).then(function (chatFull) {
-      if (!force &&
-          chatFull.exported_invite &&
-          chatFull.exported_invite._ == 'chatInviteExported') {
-        return chatFull.exported_invite.link;
-      }
-      return MtpApiManager.invokeApi('messages.exportChatInvite', {
-        chat_id: getChatInput(id)
-      }).then(function (exportedInvite) {
-        if (chatsFull[id] !== undefined) {
-          chatsFull[id].exported_invite = exportedInvite;
-        }
-        return exportedInvite.link;
-      });
-    });
-  }
-
   function hasChat (id) {
     return angular.isObject(chats[id]);
   }
 
-  function getChatPhoto(id, placeholder) {
+  function getChatPhoto(id) {
     var chat = getChat(id);
 
     if (cachedPhotoLocations[id] === undefined) {
@@ -676,7 +658,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     return {
-      placeholder: 'img/placeholders/' + placeholder + 'Avatar' + (Config.Mobile ? chat.num : Math.ceil(chat.num / 2)) + '@2x.png',
+      placeholder: 'img/placeholders/GroupAvatar' + Math.ceil(chat.num / 2) + '@2x.png',
       location: cachedPhotoLocations[id]
     };
   }
@@ -767,7 +749,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getChannelInput: getChannelInput,
     getChatPhoto: getChatPhoto,
     getChatString: getChatString,
-    getChatInviteLink: getChatInviteLink,
     resolveUsername: resolveUsername,
     hasChat: hasChat,
     wrapForFull: wrapForFull,
@@ -897,10 +878,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       : AppChatsManager.getChat(-peerID);
   }
 
-  function getPeerPhoto (peerID, userPlaceholder, chatPlaceholder) {
+  function getPeerPhoto (peerID) {
     return peerID > 0
-      ? AppUsersManager.getUserPhoto(peerID, userPlaceholder)
-      : AppChatsManager.getChatPhoto(-peerID, chatPlaceholder)
+      ? AppUsersManager.getUserPhoto(peerID)
+      : AppChatsManager.getChatPhoto(-peerID)
   }
 
   function isChannel (peerID) {
@@ -1035,6 +1016,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  function getChatInviteLink (id, force) {
+    return getChatFull(id).then(function (chatFull) {
+      if (!force &&
+          chatFull.exported_invite &&
+          chatFull.exported_invite._ == 'chatInviteExported') {
+        return chatFull.exported_invite.link;
+      }
+      return MtpApiManager.invokeApi('messages.exportChatInvite', {
+        chat_id: getChatInput(id)
+      }).then(function (exportedInvite) {
+        if (chatsFull[id] !== undefined) {
+          chatsFull[id].exported_invite = exportedInvite;
+        }
+        return exportedInvite.link;
+      });
+    });
+  }
+
   function getChannelParticipants (id) {
     return MtpApiManager.invokeApi('channels.getParticipants', {
       channel: AppChatsManager.getChannelInput(id),
@@ -1162,6 +1161,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   return {
     getPeerBots: getPeerBots,
     getProfile: getProfile,
+    getChatInviteLink: getChatInviteLink,
     getChatFull: getChatFull,
     getChannelFull: getChannelFull
   }
