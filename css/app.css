@@ -1,6 +1,8 @@
 @charset "UTF-8";
 .ng-cloak,.ng-hide:not(.ng-hide-animate),.x-ng-cloak,[data-ng-cloak],[ng-cloak],[ng\:cloak],[x-ng-cloak]{display:none!important}
 ng\:form{display:block}
+.ng-animate-shim{visibility:hidden}
+.ng-anchor{position:absolute}
 /*!
  * Bootstrap v3.2.0 (http://getbootstrap.com)
  * Copyright 2011-2014 Twitter, Inc.
@@ -1226,7 +1228,7 @@ a.tg_checkbox{color:#000;display:block;line-height:18px;padding:8px 0;margin:9px
 a.tg_checkbox:hover{text-decoration:none}
 .tg_checkbox span.icon-checkbox-outer{float:right;display:inline-block;background-color:#e6e6e6;width:36px;height:14px;line-height:14px;vertical-align:middle;border-radius:8px;margin:3px 0;-webkit-transition:background-color ease-in-out .1s;transition:background-color ease-in-out .1s}
 .tg_checkbox.tg_checkbox_on span.icon-checkbox-outer{background-color:#bfd9ed}
-.tg_checkbox i.icon-checkbox-inner{display:inline-block;background:#fff;width:20px;height:20px;border-radius:10px;overflow:hidden;float:left;margin-left:-6px;margin-top:-3px;-webkit-transition:all ease .1s;transition:all ease .1s;border:1px solid #E7E7E7;-webkit-box-shadow:0 0 1px rgba(0,0,0,.05);-moz-box-shadow:0 0 1px rgba(0,0,0,.05);box-shadow:0 0 1px rgba(0,0,0,.05)}
+.tg_checkbox i.icon-checkbox-inner{display:inline-block;background:#fff;width:20px;height:20px;border-radius:10px;overflow:hidden;float:left;margin-left:-1px;margin-top:-3px;-webkit-transition:all ease .1s;transition:all ease .1s;border:1px solid #E7E7E7;-webkit-box-shadow:0 0 1px rgba(0,0,0,.05);-moz-box-shadow:0 0 1px rgba(0,0,0,.05);box-shadow:0 0 1px rgba(0,0,0,.05)}
 .tg_checkbox.tg_checkbox_on i.icon-checkbox-inner{background:#6b9bc2;margin-left:16px;border:0;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
 .tg_checkbox_label{display:inline-block;line-height:18px;vertical-align:middle}
 .tg_radios_wrap{margin:15px 0}
@@ -1436,8 +1438,8 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .im_bot_intro_message_wrap{max-width:300px;padding:4px 10px;margin:10px auto;color:#000;line-height:1.4;text-align:left;font-size:13px}
 .im_bot_intro_message_header{font-weight:700;text-align:center}
 .im_bot_intro_message{margin-top:10px}
-.im_service_message{display:inline-block;min-width:10px;padding:4px 7px;line-height:1.4;color:#999;text-align:center;border-radius:10px;margin:5px 0}
-.im_service_message_photo_thumb{display:block;margin:0 auto}
+.im_service_message{display:block;min-width:10px;padding:4px 7px;line-height:1.4;color:#999;text-align:center;border-radius:10px;margin:5px 0}
+.im_service_message_photo_thumb{display:inline-block;margin:0 auto}
 .im_message_date,.im_message_fwd_date{color:#adadad;font-size:.85em;padding:0 0 20px 10px}
 div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 .im_message_body,.im_message_meta{-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
@@ -1458,6 +1460,7 @@ div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_message_fwd_date{padding:0}
 .im_message_text{word-wrap:break-word;line-height:150%}
+.im_message_text pre{margin-bottom:0;max-height:300px;overflow:auto;padding:4px}
 .im_message_photo_caption,.im_message_video_caption{clear:both;word-wrap:break-word;line-height:150%;margin-top:3px}
 .im_message_mymention{background:#fff8cc}
 .reply_markup_wrap{margin:15px -2px 0}
@@ -1632,7 +1635,8 @@ a.contacts_modal_search_clear{right:9px;margin-top:-24px}
 .contacts_modal_members_list .active a.contacts_modal_contact,.contacts_modal_members_list .active a.contacts_modal_contact:hover,.contacts_modal_members_list a.contacts_modal_contact:hover{background:#f2f6fa}
 .contacts_modal_contact_name{display:block;color:#3C6E97;font-weight:700;margin:1px 0 2px}
 .non_osx .contacts_modal_contact_name{font-size:12px}
-.contacts_modal_contact_photo{width:40px;height:40px;margin-right:10px;overflow:hidden;border-radius:2px}
+.contacts_modal_contact_photo{width:40px;height:40px;margin-right:10px;overflow:hidden;border-radius:20px}
+.contacts_modal_contact_photo .peer_initials{line-height:40px;font-size:15px}
 .contacts_modal_contact_status{color:#999}
 .contacts_modal_members_list .active a.contacts_modal_contact .contacts_modal_contact_status,.contacts_modal_members_list .active a.contacts_modal_contact .md_modal_list_peer_description,a.contacts_modal_contact:hover .contacts_modal_contact_status,a.contacts_modal_contact:hover .md_modal_list_peer_description{color:#91a6ba}
 .chat_modal_participant_wrap{padding:8px 0;border-top:1px solid #F0F0F0}
@@ -1641,8 +1645,9 @@ a.contacts_modal_search_clear{right:9px;margin-top:-24px}
 .chat_modal_participant_name{display:block;color:#3C6E97;font-weight:700;margin:1px 0 2px}
 .non_osx .chat_modal_participant_name{font-size:12px}
 .chat_modal_participant_status{color:#999}
-a.chat_modal_participant_photo{width:40px;height:40px;margin-right:10px;border-radius:2px;overflow:hidden}
+a.chat_modal_participant_photo{width:40px;height:40px;margin-right:10px;border-radius:20px;overflow:hidden}
 img.chat_modal_participant_photo{width:40px;height:40px}
+.chat_modal_participant_photo .peer_initials{line-height:40px;font-size:15px}
 .chat_modal_members_forbidden{color:#999}
 .icon-contact-tick{position:absolute;right:10px;top:17px;display:inline-block;width:25px;height:25px;opacity:.5;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-9px -516px}
 .is_2x .icon-contact-tick{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
@@ -1696,7 +1701,7 @@ a.peer_photo_init:active,a.peer_photo_init:focus,a.peer_photo_init:hover{text-de
 .peer_initials{display:block;color:#fff;text-align:center;text-transform:uppercase;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 .im_dialogs_contacts_wrap h5,.im_dialogs_messages_wrap h5{color:#999;font-size:13px;margin-left:20px;font-weight:700}
 .img_gif_with_progress_wrap{position:relative;overflow:hidden;float:left;margin-top:3px;max-width:100%}
-.img_gif_thumb{-webkit-filter:blur(2px);-moz-filter:blur(2px);-o-filter:blur(2px);-ms-filter:blur(2px);filter:blur(2px);filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='2');margin:-1px;padding:1px;max-width:100%}
+.img_gif_thumb{-webkit-filter:blur(3px);-moz-filter:blur(3px);-o-filter:blur(3px);-ms-filter:blur(3px);filter:blur(3px);filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='3');margin:-1px;padding:1px;max-width:100%;height:auto}
 .img_gif_image{max-width:100%}
 .img_gif_info_wrap{color:#fff;font-size:10px;position:absolute;bottom:0;left:0;right:0;padding:4px}
 .img_gif_label,.img_gif_size{padding:1px 8px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden}
@@ -1758,13 +1763,13 @@ a.peer_modal_photo,div.peer_modal_photo{display:block;margin-right:19px}
 .md_modal_split_actions{position:absolute;right:25px;top:-26px}
 .md_modal_split_actions_wrap{position:relative}
 .md_modal_split_action_camera{display:inline-block;width:20px;height:18px;margin:17px 0 0 16px;background-image:url(../img/icons/ProfileIcons.png);background-repeat:no-repeat;background-position:-10px -164px}
-.is_2x .md_modal_split_action_camera{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 360px}
+.is_2x .md_modal_split_action_camera{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 420px}
 .md_modal_split_action:active .md_modal_split_action_camera,.md_modal_split_action:hover .md_modal_split_action_camera{background-position:-10px -192px}
 .md_modal_split_action_twitter{display:inline-block;width:27px;height:22px;margin:17px 0 0 13px;background-image:url(../img/icons/ProfileIcons.png);background-repeat:no-repeat;background-position:-7px -280px}
-.is_2x .md_modal_split_action_twitter{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 360px}
+.is_2x .md_modal_split_action_twitter{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 420px}
 .md_modal_split_action:active .md_modal_split_action_twitter,.md_modal_split_action:hover .md_modal_split_action_twitter{background-position:-7px -312px}
 .md_modal_split_action_msg{display:inline-block;width:20px;height:20px;margin:18px 0 0 16px;background-image:url(../img/icons/ProfileIcons.png);background-repeat:no-repeat;background-position:-10px -220px}
-.is_2x .md_modal_split_action_msg{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 360px}
+.is_2x .md_modal_split_action_msg{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 420px}
 .md_modal_split_action:active .md_modal_split_action_msg,.md_modal_split_action:hover .md_modal_split_action_msg{background-position:-10px -250px}
 .md_modal_iconed_section_wrap{position:relative;border-bottom:1px solid #ebebeb;margin:19px 0 0 120px;padding-right:28px}
 .md_modal_iconed_section_wrap:last-child{border-bottom:0}
@@ -1773,11 +1778,12 @@ a.peer_modal_photo,div.peer_modal_photo{display:block;margin-right:19px}
 .md_modal_iconed_section_radio{margin-top:1px}
 .md_modal_sections{padding-top:17px}
 .md_modal_section_icon{display:inline-block;margin-left:-64px;margin-top:5px;position:absolute;background-image:url(../img/icons/ProfileIcons.png);background-repeat:no-repeat;background-position:0 0}
-.is_2x .md_modal_section_icon{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 360px}
+.is_2x .md_modal_section_icon{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 420px}
 .md_modal_iconed_section_toggle .md_modal_section_icon{margin-top:8px}
 .md_modal_iconed_section_radio .md_modal_section_icon{margin-top:10px}
 .md_modal_iconed_section_link .md_modal_section_icon{margin-top:4px}
 .md_modal_section_icon_phone{width:18px;height:18px;background-position:-12px -10px;margin-top:3px}
+.md_modal_section_icon_about{width:20px;height:20px;background-position:-10px -344px;margin-top:0}
 .md_modal_section_icon_notification{width:17px;height:20px;background-position:-12px -38px}
 .md_modal_section_icon_keyboard{width:20px;height:14px;background-position:-10px -140px;margin-left:-66px}
 .md_modal_section_icon_person{width:16px;height:16px;background-position:-12px -90px}

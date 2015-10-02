@@ -307,6 +307,12 @@ html {
   border-radius: 18px;
   overflow: hidden;
 }
+.navbar-peer-wrap .peer_initials {
+  line-height: 36px;
+  font-size: 15px;
+  border-radius: 18px;
+  overflow: hidden;
+}
 .navbar_peer_not_selected .navbar-peer-wrap {
   display: none;
 }
@@ -787,6 +793,10 @@ a.im_message_from_photo {
 div.im_dialog_photo {
   margin: 0 12px 0 0;
 }
+div.im_dialog_photo .peer_initials {
+  line-height: 54px;
+  font-size: 18px;
+}
 .im_dialog_peer,
 .im_dialog_message {
   font-size: 1.3em;
@@ -861,6 +871,9 @@ a.im_message_fwd_author {
   background: #fff;
   padding: 0;
 }
+.mobile_modal.md_simple_modal_window .modal-dialog {
+  max-width: none;
+}
 .mobile_modal .modal-content {
   border-radius: 0;
   box-shadow: none;
@@ -890,6 +903,10 @@ a.im_message_fwd_author {
   width: 64px;
   height: 64px;
   margin-right: 14px;
+}
+.mobile_user_modal_image_wrap .peer_initials {
+  line-height: 64px;
+  font-size: 18px;
 }
 .mobile_chat_modal_image {
   margin-right: 14px;

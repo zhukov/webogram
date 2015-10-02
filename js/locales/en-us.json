@@ -27,6 +27,14 @@
 	"group_modal_members": "Members",
 	"group_modal_members_kick": "Remove",
 
+	"channel_modal_info": "Channel info",
+	"channel_modal_share_link": "Share link",
+	"channel_modal_share_loading": "Loading{dots}",
+	"channel_modal_join": "Join channel",
+	"channel_modal_add_member": "Invite members",
+	"channel_modal_leave_channel": "Leave channel",
+	"channel_modal_delete_channel": "Delete channel",
+
 	"country_select_modal_title": "Country",
 
 	"settings_modal_title": "Settings",
@@ -173,6 +181,12 @@
 	"group_edit_submit": "Save",
 	"group_edit_submit_active": "Saving...",
 
+	"channel_edit_modal_title": "Edit channel",
+	"channel_edit_name": "Channel name",
+	"channel_edit_about": "Channel description",
+	"channel_edit_submit": "Save",
+	"channel_edit_submit_active": "Saving...",
+
 	"group_invite_link_modal_title": "Invite link",
 	"group_invite_link_link_label": "Copy link",
 	"group_invite_link_loading": "Loading...",
@@ -203,7 +217,11 @@
 	"confirm_modal_abort_password_setup": "Abort two-step verification setup?",
 	"confirm_modal_reset_account_md": "Are you sure?\nThis action can not be undone.\n\nYou will lose all your chats and messages, along with any media and files you shared, if you proceed with resetting your account.",
 	"confirm_modal_join_group_link": "Do you want to join the group «{title}»?",
+	"confirm_modal_join_channel_link": "Do you want to join the channel «{title}»?",
 	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
+	"confirm_modal_revoke_channel_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the channel using it.",
+	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll messages will be removed and all messages will be lost.",
+
 	"confirm_modal_are_u_sure": "Are you sure?",
 
 	"confirm_modal_logout_submit": "Log out",
@@ -256,6 +274,7 @@
 	"conversation_media_location": "Location",
 	"conversation_media_contact": "Contact",
 	"conversation_media_attachment": "Attachment",
+
 	"conversation_group_created": "created the group",
 	"conversation_group_renamed": "changed group name",
 	"conversation_group_photo_updated": "changed group photo",
@@ -267,6 +286,11 @@
 	"conversation_invited_user_message": "invited user",
 	"conversation_kicked_user_message": "removed user",
 	"conversation_joined_by_link": "joined group",
+	"conversation_created_channel": "Channel created",
+	"conversation_changed_channel_name": "Channel renamed",
+	"conversation_changed_channel_photo": "Channel photo updated",
+	"conversation_removed_channel_photo": "Channel photo removed",
+
 	"conversation_message_sent": "sent you a message",
 	"conversation_forwarded_X_messages": "{'one': 'forwarded {} message', 'other': 'forwarded {} messages'}",
 
@@ -284,6 +308,10 @@
 	"message_service_joined_by_link": "joined group via invite link",
 	"message_service_unsupported_action": "unsupported action {action}",
 	"message_service_bot_intro_header": "What can this bot do?",
+	"message_service_created_channel": "Channel created",
+	"message_service_changed_channel_name": "Channel renamed to {channel-name}",
+	"message_service_changed_channel_photo": "Channel photo updated",
+	"message_service_removed_channel_photo": "Channel photo removed",
 
 	"message_action_reply": "Reply",
 	"message_action_delete": "Delete",
@@ -336,6 +364,8 @@
 	"error_modal_password_disabled_descripion": "You have disabled Two-Step Verification.",
 	"error_modal_user_not_mutual_contact": "The user can be invited by his contact only",
 	"error_modal_invite_link_invalid": "The invite link is invalid",
+	"error_modal_channel_not_accessible": "Sorry, this channel is not accessible.",
+	"error_modal_not_contact_flood": "Sorry, you can only send messages to mutual contacts at the moment. {more-info-link: More info »}",
 
 
 	"head_telegram": "Telegram",
@@ -406,6 +436,9 @@
 	"im_forward": "Forward {count}",
 	"im_reply": "Reply",
 	"im_start": "Start",
+	"im_channel_join": "+ Join",
+	"im_channel_mute": "Mute",
+	"im_channel_unmute": "Unmute",
 	"im_reply_loading": "Loading{dots}",
 	"im_photos_drop_text": "Drop photos here to send",
 	"im_message_field_placeholder": "Write a message...",
@@ -423,8 +456,8 @@
 	"login_generating_key": "Generating keys",
 	"login_generating_keys_info": "Keys are only generated once. This can take a few minutes on slower devices, please be patient.",
 	"login_edit_number": "Edit phone number",
-	"login_enter_code_label_md": "Please enter the code you've just received in your other **Telegram** app",
-	"login_code_not_received": "Haven't received the code?",
+	"login_enter_code_label_md": "We've sent you a code via **Telegram** (not SMS).\nPlease check your Telegram messages and enter the code below.",
+	"login_code_not_received": "Send code via SMS",
 	"login_enter_sms_code_label_md": "We have sent you a code via SMS.\nPlease enter it below.",
 	"login_call_remaining": "Telegram will call you in {remaining}",
 	"login_calling": "Telegram is calling you",
