@@ -151,8 +151,8 @@
               <div ng-switch-when="channel">
                 <div class="im_edit_start_actions" ng-switch="historyState.channelActions">
                   <a ng-switch-when="join" class="btn btn-primary im_start_btn" ng-click="joinChannel()" my-i18n="im_channel_join"></a>
-                  <a ng-switch-when="mute" class="btn btn-primary im_start_btn" ng-click="togglePeerMuted(true)" my-i18n="im_channel_mute"></a>
-                  <a ng-switch-when="unmute" class="btn btn-primary im_start_btn" ng-click="togglePeerMuted(false)" my-i18n="im_channel_unmute"></a>
+                  <a ng-switch-when="mute" class="btn btn-link im_start_btn" ng-click="togglePeerMuted(true)" my-i18n="im_channel_mute"></a>
+                  <a ng-switch-when="unmute" class="btn btn-link im_start_btn" ng-click="togglePeerMuted(false)" my-i18n="im_channel_unmute"></a>
                 </div>
               </div>
               <div ng-switch-when="selected" class="im_edit_selected_actions" my-i18n>
