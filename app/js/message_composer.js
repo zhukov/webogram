@@ -1174,6 +1174,11 @@ MessageComposer.prototype.resetTyping = function () {
   this.lastLength = 0;
 }
 
+MessageComposer.prototype.setPlaceholder = function (newPlaceholder) {
+  (this.richTextareaEl || this.textareaEl).attr('placeholder', newPlaceholder);
+}
+
+
 
 
 function Scroller(content, options) {

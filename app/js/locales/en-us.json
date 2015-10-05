@@ -442,6 +442,7 @@
 	"im_reply_loading": "Loading{dots}",
 	"im_photos_drop_text": "Drop photos here to send",
 	"im_message_field_placeholder": "Write a message...",
+	"im_broadcast_field_placeholder": "Broadcast a message...",
 	"im_media_attach_title": "Send media",
 	"im_attach_file_title": "Send file",
 	"im_emoji_btn_title": "Insert emoticon",

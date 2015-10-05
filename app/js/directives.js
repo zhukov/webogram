@@ -1395,7 +1395,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function ($timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService) {
+  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService) {
 
     return {
       link: link,
@@ -1495,9 +1495,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var richTextarea = composer.richTextareaEl[0];
       if (richTextarea) {
-        $(richTextarea)
-          .attr('placeholder', $interpolate($(messageField).attr('placeholder'))($scope))
-          .on('keydown keyup', updateHeight);
+        $(richTextarea).on('keydown keyup', updateHeight);
       }
 
       fileSelects.on('change', function () {
@@ -1571,6 +1569,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_peer_change', composer.resetTyping.bind(composer));
       $scope.$on('ui_peer_draft', function () {
+        var isBroadcast = $scope.draftMessage.isBroadcast;
+        composer.setPlaceholder(_(isBroadcast ? 'im_broadcast_field_placeholder_raw' : 'im_message_field_placeholder_raw'));
+
         if (richTextarea) {
           composer.setValue($scope.draftMessage.text || '');
           updateHeight();

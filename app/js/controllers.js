@@ -1156,8 +1156,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         data: peerData
       });
 
-      MtpApiManager.getUserID().then(function (id) {
-        $scope.ownID = id;
+      MtpApiManager.getUserID().then(function (myID) {
+        $scope.ownID = myID;
       });
 
       if (preload) {
@@ -2147,6 +2147,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         Storage.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
           // console.log('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
           $scope.draftMessage.text = draftText || '';
+          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID);
           // console.log('send broadcast', $scope.draftMessage);
           $scope.$broadcast('ui_peer_draft');
         });
