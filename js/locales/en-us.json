@@ -220,7 +220,7 @@
 	"confirm_modal_join_channel_link": "Do you want to join the channel «{title}»?",
 	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
 	"confirm_modal_revoke_channel_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the channel using it.",
-	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll messages will be removed and all messages will be lost.",
+	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll members will be removed and all messages will be lost.",
 
 	"confirm_modal_are_u_sure": "Are you sure?",
 
@@ -442,6 +442,7 @@
 	"im_reply_loading": "Loading{dots}",
 	"im_photos_drop_text": "Drop photos here to send",
 	"im_message_field_placeholder": "Write a message...",
+	"im_broadcast_field_placeholder": "Broadcast a message...",
 	"im_media_attach_title": "Send media",
 	"im_attach_file_title": "Send file",
 	"im_emoji_btn_title": "Insert emoticon",

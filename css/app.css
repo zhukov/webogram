@@ -1820,3 +1820,9 @@ a.md_modal_list_peer_name{color:inherit}
 .md_photo_loading{display:block;width:72px;height:72px;border-radius:36px;overflow:hidden;background:#48769b;text-align:center;line-height:72px;padding:0}
 .md_photo_loading i{display:inline-block;background:#fff;width:8px;height:8px;border-radius:4px;vertical-align:middle;border:0;margin-left:6px}
 .md_photo_loading i:first-child{margin-left:0}
+@media print{body,html{background:#fff}
+body .im_page_wrap{border:0;box-shadow:none;overflow:visible}
+.im_bottom_panel_wrap,.im_dialogs_col_wrap,.tg_head_logo_wrap,.tg_head_msgs_edit_btn,.tg_head_peer_dropdown,.tg_head_peer_return_btn{display:none}
+body .im_history_wrap{height:auto!important}
+body .nano-pane{display:none}
+body .nano>.nano-content{position:static}}
