@@ -1373,6 +1373,14 @@ angular.module('izhukov.utils', [])
         if (start >= cStart && start < cEnd ||
             end > cStart && end <= cEnd) {
           // console.log('bad', curEntity, newEntity);
+          if (fromApi &&
+              start >= cStart && end <= cEnd) {
+            if (newEntity.nested === undefined) {
+              newEntity.nested = [];
+            }
+            curEntity.offset -= cStart;
+            newEntity.nested.push(angular.copy(curEntity));
+          }
           bad = true;
           break;
         }
@@ -1393,6 +1401,14 @@ angular.module('izhukov.utils', [])
     // console.log('merge', currentEntities, newEntities, totalEntities);
 
     return totalEntities;
+  }
+
+  function wrapRichNestedText (text, nested, options) {
+    if (nested === undefined) {
+      return encodeEntities(text);
+    }
+
+    return wrapRichText(text, {entities: nested, nested: true});
   }
 
   function wrapRichText (text, options) {
@@ -1518,7 +1534,7 @@ angular.module('izhukov.utils', [])
             '<a href="',
             encodeEntities(url),
             '" target="_blank">',
-            encodeEntities(entityText),
+            wrapRichNestedText(entityText, entity.nested, options),
             '</a>'
           );
           break;
@@ -1567,7 +1583,7 @@ angular.module('izhukov.utils', [])
         case 'messageEntityBold':
           html.push(
             '<strong>',
-            encodeEntities(entityText),
+            wrapRichNestedText(entityText, entity.nested, options),
             '</strong>'
           );
           break;
@@ -1575,7 +1591,7 @@ angular.module('izhukov.utils', [])
         case 'messageEntityItalic':
           html.push(
             '<em>',
-            encodeEntities(entityText),
+            wrapRichNestedText(entityText, entity.nested, options),
             '</em>'
           );
           break;
@@ -1607,7 +1623,7 @@ angular.module('izhukov.utils', [])
 
     text = $sanitize(html.join(''));
 
-    if (emojiFound) {
+    if (emojiFound && !options.nested) {
       text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text);
       text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
                           '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
