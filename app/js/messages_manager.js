@@ -456,6 +456,17 @@ angular.module('myApp.services')
   };
 
   function wrapHistoryResult (peerID, result) {
+    var unreadOffset = result.unreadOffset;
+    if (unreadOffset) {
+      var i, message;
+      for (i = result.history.length - 1; i >= 0; i--) {
+        message = messagesStorage[result.history[i]];
+        if (message && !message.out && message.unread) {
+          result.unreadOffset = i + 1;
+          break;
+        }
+      }
+    }
     return $q.when(result);
   }
 
@@ -474,13 +485,20 @@ angular.module('myApp.services')
     }
 
     if (!limit && !maxID) {
-      var foundDialog = getDialogByPeerID(peerID);
-      if (foundDialog && foundDialog[0] && foundDialog[0].unread_count > 1) {
-        var unreadCount = foundDialog[0].unread_count;
+      var foundDialog = getDialogByPeerID(peerID)[0];
+      if (foundDialog && foundDialog.unread_count > 1) {
+        var unreadCount = foundDialog.unread_count;
         if (unreadSkip = (unreadCount > 50)) {
-          limit = 20;
-          unreadOffset = 16;
-          offset = unreadCount - unreadOffset;
+          if (foundDialog.read_inbox_max_id) {
+            maxID = foundDialog.read_inbox_max_id;
+            backLimit = 16;
+            unreadOffset = 16;
+            limit = 4;
+          } else {
+            limit = 20;
+            unreadOffset = 16;
+            offset = unreadCount - unreadOffset;
+          }
         } else {
           limit = Math.max(10, prerendered, unreadCount + 2);
           unreadOffset = unreadCount;
@@ -490,7 +508,7 @@ angular.module('myApp.services')
         limit = 20;
       }
     }
-    else if (maxID > 0) {
+    if (maxID > 0) {
       offsetNotFound = true;
       for (offset = 0; offset < historyStorage.history.length; offset++) {
         if (maxID > historyStorage.history[offset]) {
@@ -815,9 +833,9 @@ angular.module('myApp.services')
     var peerID = AppPeersManager.getPeerID(inputPeer),
         isChannel = AppPeersManager.isChannel(peerID),
         historyStorage = historiesStorage[peerID],
-        foundDialog = getDialogByPeerID(peerID);
+        foundDialog = getDialogByPeerID(peerID)[0];
 
-    if (!foundDialog[0] || !foundDialog[0].unread_count) {
+    if (!foundDialog || !foundDialog.unread_count) {
 
       if (!historyStorage || !historyStorage.history.length) {
         return false;
@@ -860,13 +878,13 @@ angular.module('myApp.services')
     }
 
     historyStorage.readPromise = apiPromise.then(function () {
-      if (foundDialog[0]) {
+      if (foundDialog) {
         // console.log('done read history', peerID);
-        foundDialog[0].unread_count = 0;
+        foundDialog.unread_count = 0;
         $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0});
         $rootScope.$broadcast('messages_read');
         if (historyStorage && historyStorage.history.length) {
-          foundDialog[0].read_inbox_max_id = historyStorage.history[0];
+          foundDialog.read_inbox_max_id = historyStorage.history[0];
         }
       }
     })['finally'](function () {
