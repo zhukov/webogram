@@ -1146,7 +1146,7 @@ angular.module('izhukov.utils', [])
   var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
   var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
 
-  var markdownRegExp = /(^|\n)```(.{0,16})\n([\s\S]+?)\n```(\n|$)|(^|\s)`([^\n]+?)`/;
+  var markdownRegExp = /(^|\s)```([\s\S]+?)```|(^|\s)`([^\n]+?)`/;
 
   var siteHashtags = {
     Telegram: '#/im?q=%23{1}',
@@ -1319,26 +1319,32 @@ angular.module('izhukov.utils', [])
     var raw = text;
     var match;
     var newText = [];
+    var rawOffset = 0;
+    var matchIndex;
     while (match = raw.match(markdownRegExp)) {
+      matchIndex = rawOffset + match.index;
       newText.push(raw.substr(0, match.index));
 
-      if (match[3]) { // pre
-        newText.push(match[1] + match[3] + match[4]);
+      if (match[2]) { // pre
+        newText.push(match[1] + match[2]);
         entities.push({
           _: 'messageEntityPre',
-          language: match[2] || '',
-          offset: match.index + match[1].length,
-          length: match[3].length
-        })
+          language: '',
+          offset: matchIndex + match[1].length,
+          length: match[2].length
+        });
+        rawOffset -= 6;
       } else { // code
-        newText.push(match[5] + match[6]);
+        newText.push(match[3] + match[4]);
         entities.push({
           _: 'messageEntityCode',
-          offset: match.index + match[5].length,
-          length: match[6].length
-        })
+          offset: matchIndex + match[3].length,
+          length: match[4].length
+        });
+        rawOffset -= 2;
       }
       raw = raw.substr(match.index + match[0].length);
+      rawOffset += match.index + match[0].length;
     }
     newText.push(raw);
     return newText.join('');

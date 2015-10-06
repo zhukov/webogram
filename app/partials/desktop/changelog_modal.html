@@ -31,6 +31,18 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.4.8')">
+        <div class="md_modal_section_version">0.4.8</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Introducing Channels – a great new way to broadcast your messages to unlimited audiences.</li>
+            <li>Check out the <a href="https://telegram.org/blog/channels" target="_blank">Telegram Blog</a> for more info</li>
+            <li>Improved performance in Safari on OS X El Capitan.</li>
+            <li>Added formatting for fixed-width code, surround text with `single backticks` for inline text and ```triple backticks``` for blocks of pre-formatted text.</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.4.7')">
         <div class="md_modal_section_version">0.4.7</div>
         <div class="md_modal_section_description changelog_version_changes">

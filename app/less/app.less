@@ -38,6 +38,14 @@ h1, h2, h3, h4, h5 {
   .user-select(text);
 }
 
+pre {
+  margin-bottom: 0;
+  max-height: 300px;
+  overflow: auto;
+  padding: 3px;
+  border: 1px solid #dedede;
+}
+
 a {
   cursor: pointer;
 
@@ -2049,12 +2057,6 @@ a.im_message_fwd_photo {
   word-wrap: break-word;
   line-height: 150%;
 }
-.im_message_text pre {
-  margin-bottom: 0;
-  max-height: 300px;
-  overflow: auto;
-  padding: 4px;
-}
 .im_message_photo_caption,
 .im_message_video_caption {
   clear: both;
@@ -3984,12 +3986,12 @@ a.countries_modal_search_clear {
     box-shadow: none;
     overflow: visible;
   }
-  .im_dialogs_col_wrap,
-  .im_bottom_panel_wrap,
-  .tg_head_logo_wrap,
-  .tg_head_msgs_edit_btn,
-  .tg_head_peer_return_btn,
-  .tg_head_peer_dropdown {
+  body .im_dialogs_col_wrap,
+  body .im_bottom_panel_wrap,
+  body .tg_head_logo_wrap,
+  body .tg_head_msgs_edit_btn,
+  body .tg_head_peer_return_btn,
+  body .tg_head_peer_dropdown {
     display: none;
   }
   body .im_history_wrap {
@@ -4000,6 +4002,16 @@ a.countries_modal_search_clear {
   }
   body .nano > .nano-content {
     position: static;
+  }
+  body .tg_head_peer_info {
+    text-align: center;
+  }
+  body .im_history_col_wrap,
+  body .tg_head_main_wrap {
+    width: auto;
+    max-width: 700px;
+    float: none;
+    margin: 0 auto;
   }
 }
 
