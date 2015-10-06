@@ -453,6 +453,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       selectActions: false,
       botActions: false,
       channelActions: false,
+      canReply: false,
+      canDelete: false,
       actions: function () {
         return $scope.historyState.selectActions ? 'selected' : ($scope.historyState.botActions ? 'bot' : ($scope.historyState.channelActions ? 'channel' : false));
       },
@@ -1009,6 +1011,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.historyState.selectActions = false;
     $scope.historyState.botActions = false;
     $scope.historyState.channelActions = false;
+    $scope.historyState.canDelete = false;
+    $scope.historyState.canReply = false;
     $scope.historyState.missedCount = 0;
     $scope.historyState.skipped = false;
     $scope.state = {};
@@ -1203,23 +1207,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var channel;
       if (peerID &&
           AppPeersManager.isChannel(peerID) &&
-          (channel = AppChatsManager.getChat(-peerID)) &&
-          !channel.pFlags.creator &&
-          !channel.pFlags.editor) {
+          (channel = AppChatsManager.getChat(-peerID))) {
 
-        if (channel.pFlags.left) {
-          $scope.historyState.channelActions = 'join';
-        } else {
-          if (!$scope.historyState.channelActions) {
-            $scope.historyState.channelActions = 'mute';
+        var canSend = channel.pFlags.creator || channel.pFlags.editor;
+        if (!canSend) {
+          if (channel.pFlags.left) {
+            $scope.historyState.channelActions = 'join';
+          } else {
+            if (!$scope.historyState.channelActions) {
+              $scope.historyState.channelActions = 'mute';
+            }
+            NotificationsManager.getPeerMuted(peerID).then(function (muted) {
+              $scope.historyState.channelActions = muted ? 'unmute' : 'mute';
+            });
           }
-          NotificationsManager.getPeerMuted(peerID).then(function (muted) {
-            $scope.historyState.channelActions = muted ? 'unmute' : 'mute';
-          });
+        } else {
+          $scope.historyState.channelActions = false;
         }
+        $scope.historyState.canReply = canSend;
+        $scope.historyState.canDelete = canSend || channel.pFlags.moderator;
       }
       else {
         $scope.historyState.channelActions = false;
+        $scope.historyState.canReply = true;
+        $scope.historyState.canDelete = true;
       }
       if (wasChannelActions != $scope.historyState.channelActions) {
         $scope.$broadcast('ui_panel_update');
