@@ -216,6 +216,10 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
 
 function setRichFocus(field, selectNode) {
   field.focus();
+  if (selectNode && selectNode.parentNode == field && !selectNode.nextSibling) {
+    field.removeChild(selectNode);
+    selectNode = null;
+  }
   if (window.getSelection && document.createRange) {
     var range = document.createRange();
     if (selectNode) {

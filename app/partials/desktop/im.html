@@ -139,7 +139,7 @@
 
           <div class="im_bottom_panel_wrap">
 
-            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.actions()" ng-switch="historyState.actions()">
+            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.actions()" ng-switch="historyState.actions()" ng-class="historyState.channelActions !== false ? 'im_edit_small_panel_wrap' : ''">
               <div class="im_edit_panel_border"></div>
 
               <div ng-switch-when="bot">

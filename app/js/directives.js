@@ -1568,7 +1568,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('ui_peer_change', composer.resetTyping.bind(composer));
-      $scope.$on('ui_peer_draft', function () {
+      $scope.$on('ui_peer_draft', function (e, options) {
         var isBroadcast = $scope.draftMessage.isBroadcast;
         composer.setPlaceholder(_(isBroadcast ? 'im_broadcast_field_placeholder_raw' : 'im_message_field_placeholder_raw'));
 
@@ -1576,7 +1576,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           composer.setValue($scope.draftMessage.text || '');
           updateHeight();
         }
-        if (!Config.Navigator.touch) {
+        if (!Config.Navigator.touch || options && options.focus) {
           composer.focus();
         }
         onContentLoaded(function () {

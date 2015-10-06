@@ -2184,7 +2184,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       } else {
         $scope.draftMessage.text = '/';
       }
-      $scope.$broadcast('ui_peer_draft');
+      $scope.$broadcast('ui_peer_draft', {focus: true});
       return cancelEvent($event);
     }
 

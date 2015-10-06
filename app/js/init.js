@@ -96,6 +96,13 @@
           }
         };
 
+    if (Config.Modes.force_mobile) {
+      layout = 'mobile';
+    }
+    else if (Config.Modes.force_desktop) {
+      layout = 'desktop';
+    }
+
     switch (layout) {
       case 'mobile': Config.Mobile = true; break;
       case 'desktop': Config.Mobile = false; break;

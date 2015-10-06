@@ -30,6 +30,8 @@ Config.Modes = {
   debug: location.search.indexOf('debug=1') > 0,
   http: location.search.indexOf('http=1') > 0,
   ssl: location.search.indexOf('ssl=1') > 0 || location.protocol == 'https:' && location.search.indexOf('ssl=0') == -1,
+  force_mobile: location.search.indexOf('mobile=1') > 0,
+  force_desktop: location.search.indexOf('desktop=1') > 0,
   nacl: location.search.indexOf('nacl=0')== -1,
   webcrypto: location.search.indexOf('webcrypto=0')== -1,
   packed: location.protocol == 'app:' || location.protocol == 'chrome-extension:',

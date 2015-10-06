@@ -880,11 +880,17 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
       }
       textarea.value = newValue;
 
-      this.selId = (this.selId || 0) + 1;
-      var html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
-
-      this.richTextareaEl.html(html);
-      setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+      var html;
+      if (suffix.length) {
+        this.selId = (this.selId || 0) + 1;
+        html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
+        this.richTextareaEl.html(html);
+        setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+      } else {
+        html = this.getRichHtml(newValuePrefix) + '&nbsp;';
+        this.richTextareaEl.html(html);
+        setRichFocus(textarea);
+      }
     } else {
       var html = this.getEmojiHtml(code);
       if (window.getSelection) {
@@ -967,11 +973,17 @@ MessageComposer.prototype.onMentionSelected = function (username) {
     }
     textarea.value = newValue;
 
-    this.selId = (this.selId || 0) + 1;
-    var html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
-
-    this.richTextareaEl.html(html);
-    setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+    var html;
+    if (suffix.length) {
+      this.selId = (this.selId || 0) + 1;
+      html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
+      this.richTextareaEl.html(html);
+      setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+    } else {
+      html = this.getRichHtml(newValuePrefix) + '&nbsp;';
+      this.richTextareaEl.html(html);
+      setRichFocus(textarea);
+    }
   }
   else {
     var textarea = this.textareaEl[0];
