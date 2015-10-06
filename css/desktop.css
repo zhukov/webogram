@@ -1213,6 +1213,12 @@ a.im_panel_peer_photo .peer_initials {
     padding-bottom: 5px;
   }
 }
+.im_edit_panel_wrap.im_edit_small_panel_wrap {
+  padding-bottom: 8px;
+}
+.im_edit_small_panel_wrap .im_edit_panel_border {
+  margin-bottom: 7px;
+}
 /* Peer modals */
 .user_modal_window .modal-dialog {
   max-width: 480px;

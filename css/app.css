@@ -31,7 +31,6 @@ sub{bottom:-.25em}
 img{border:0}
 svg:not(:root){overflow:hidden}
 hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
-pre{overflow:auto}
 code,kbd,pre,samp{font-size:1em}
 button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}
 button{overflow:visible}
@@ -154,7 +153,7 @@ code,kbd,pre,samp{font-family:Menlo,Monaco,Consolas,"Courier New",monospace}
 code{padding:2px 4px;font-size:90%;color:#c7254e;background-color:#f9f2f4;border-radius:4px}
 kbd{padding:2px 4px;font-size:90%;color:#fff;background-color:#333;border-radius:3px;box-shadow:inset 0 -1px 0 rgba(0,0,0,.25)}
 kbd kbd{padding:0;font-size:100%;box-shadow:none}
-pre{display:block;padding:9.5px;margin:0 0 10px;font-size:13px;line-height:1.42857143;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border:1px solid #ccc;border-radius:4px}
+pre{display:block;margin:0 0 10px;font-size:13px;line-height:1.42857143;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border-radius:4px}
 pre code{padding:0;font-size:inherit;color:inherit;white-space:pre-wrap;background-color:transparent;border-radius:0}
 .pre-scrollable{max-height:340px;overflow-y:scroll}
 .container,.container-fluid{margin-right:auto;margin-left:auto;padding-left:0;padding-right:0}
@@ -1132,6 +1131,7 @@ h1,h2,h3,h4,h5{color:#222}
 .non_osx h4{font-size:17px}
 .noselect{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 .hasselect{-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
+pre{margin-bottom:0;max-height:300px;overflow:auto;padding:3px;border:1px solid #dedede}
 a{cursor:pointer}
 a.disabled{cursor:default;pointer-events:none}
 .form-control{border:1px solid #d9dbde;border-radius:2px;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s}
@@ -1460,7 +1460,6 @@ div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_message_fwd_date{padding:0}
 .im_message_text{word-wrap:break-word;line-height:150%}
-.im_message_text pre{margin-bottom:0;max-height:300px;overflow:auto;padding:4px}
 .im_message_photo_caption,.im_message_video_caption{clear:both;word-wrap:break-word;line-height:150%;margin-top:3px}
 .im_message_mymention{background:#fff8cc}
 .reply_markup_wrap{margin:15px -2px 0}
@@ -1822,7 +1821,9 @@ a.md_modal_list_peer_name{color:inherit}
 .md_photo_loading i:first-child{margin-left:0}
 @media print{body,html{background:#fff}
 body .im_page_wrap{border:0;box-shadow:none;overflow:visible}
-.im_bottom_panel_wrap,.im_dialogs_col_wrap,.tg_head_logo_wrap,.tg_head_msgs_edit_btn,.tg_head_peer_dropdown,.tg_head_peer_return_btn{display:none}
+body .im_bottom_panel_wrap,body .im_dialogs_col_wrap,body .tg_head_logo_wrap,body .tg_head_msgs_edit_btn,body .tg_head_peer_dropdown,body .tg_head_peer_return_btn{display:none}
 body .im_history_wrap{height:auto!important}
 body .nano-pane{display:none}
-body .nano>.nano-content{position:static}}
+body .nano>.nano-content{position:static}
+body .tg_head_peer_info{text-align:center}
+body .im_history_col_wrap,body .tg_head_main_wrap{width:auto;max-width:700px;float:none;margin:0 auto}}

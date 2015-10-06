@@ -28,6 +28,7 @@
 	"group_modal_members_kick": "Remove",
 
 	"channel_modal_info": "Channel info",
+	"channel_modal_description": "Description",
 	"channel_modal_share_link": "Share link",
 	"channel_modal_share_loading": "Loading{dots}",
 	"channel_modal_join": "Join channel",
