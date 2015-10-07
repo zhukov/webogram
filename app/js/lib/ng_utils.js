@@ -1146,7 +1146,7 @@ angular.module('izhukov.utils', [])
   var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
   var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
 
-  var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)|(^|\s)`([^\n]+?)`/;
+  var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)/;
 
   var siteHashtags = {
     Telegram: '#/im?q=%23{1}',
@@ -1325,21 +1325,25 @@ angular.module('izhukov.utils', [])
       matchIndex = rawOffset + match.index;
       newText.push(raw.substr(0, match.index));
 
-      if (match[3]) { // pre
-        newText.push(match[1] + match[3]);
+      var text = (match[3] || match[7]).replace(/^\s+|\s+$/g, '');
+      if (text.match(/^`*$/)) {
+        newText.push(match[0]);
+      }
+      else if (match[3]) { // pre
+        newText.push(match[1] + text + match[5]);
         entities.push({
           _: 'messageEntityPre',
           language: '',
           offset: matchIndex + match[1].length,
-          length: match[3].length
+          length: text.length
         });
         rawOffset -= match[2].length + match[4].length;
       } else { // code
-        newText.push(match[5] + match[6]);
+        newText.push(match[6] + text + match[8]);
         entities.push({
           _: 'messageEntityCode',
-          offset: matchIndex + match[5].length,
-          length: match[6].length
+          offset: matchIndex + match[6].length,
+          length: text.length
         });
         rawOffset -= 2;
       }
@@ -1347,7 +1351,13 @@ angular.module('izhukov.utils', [])
       rawOffset += match.index + match[0].length;
     }
     newText.push(raw);
-    return newText.join('');
+    newText = newText.join('');
+
+    if (!newText.replace(/\s+/g, '').length) {
+      newText = text;
+      entities.splice(0, entities.length);
+    }
+    return newText;
   }
 
   function mergeEntities (currentEntities, newEntities, fromApi) {
