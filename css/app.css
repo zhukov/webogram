@@ -1589,8 +1589,8 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
 .composer_sticker_btn:hover{background:#f2f6fa}
 .composer_sticker_image{max-width:72px;max-height:72px;vertical-align:top}
 .composer_rich_textarea{font-size:12px;margin-bottom:10px;padding:6px;min-height:38px;height:auto;width:auto;max-height:284px;overflow:auto;line-height:17px;border:1px solid #d2dbe3;border-radius:2px;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;-ms-box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;word-wrap:break-word;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
-.composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab}
-.composer_rich_textarea:active:before,.composer_rich_textarea:focus:before{content:none}
+.composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab;display:block;margin-top:-1px;margin-left:1px}
+.composer_rich_textarea:empty:active:before,.composer_rich_textarea:empty:focus:before{opacity:.75}
 .composer_rich_textarea img{width:20px;height:20px;vertical-align:middle;margin:-3px 0 0}
 .composer_command_btn{display:block;position:absolute;right:37px;top:4px;cursor:pointer;padding:0;width:20px;height:20px}
 .icon-slash{display:inline-block;width:20px;height:20px;vertical-align:top;opacity:.8;background-image:url(../img/icons/General.png);background-repeat:no-repeat;background-position:-10px -790px}
