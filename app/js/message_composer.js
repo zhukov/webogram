@@ -510,18 +510,11 @@ MessageComposer.prototype.setUpInput = function () {
   } else {
     this.setUpPlaintext();
   }
-
-  if (!Config.Mobile) {
-    var sbWidth = getScrollWidth();
-    if (sbWidth) {
-      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
-    }
-  }
 }
 
 MessageComposer.prototype.setUpRich = function () {
   this.textareaEl.hide();
-  this.richTextareaEl = $('<div class="composer_rich_textarea" contenteditable="true" dir="auto"></div>');
+  this.richTextareaEl = $('<div class="composer_rich_textarea" contenteditable="true"></div>');
 
   this.textareaEl[0].parentNode.insertBefore(this.richTextareaEl[0], this.textareaEl[0]);
 
@@ -542,6 +535,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
   var self = this;
   if (e.type == 'keyup') {
     this.checkAutocomplete();
+    this.checkDir();
 
     var length = false;
     if (this.richTextareaEl) {
@@ -580,6 +574,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     }
   }
   if (e.type == 'keydown') {
+    this.checkDir();
     var checkSubmit = !this.autocompleteShown;
     if (this.autocompleteShown) {
       if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
@@ -686,7 +681,20 @@ MessageComposer.prototype.restoreSelection = function () {
   return result;
 }
 
-
+MessageComposer.prototype.checkDir = function (forceFull) {
+  var pos, value;
+  if (this.richTextareaEl) {
+    var textarea = this.richTextareaEl[0];
+    var valueCaret = getRichValueWithCaret(textarea);
+    var value = valueCaret[0];
+  } else {
+    var textarea = this.textareaEl[0];
+    var value = textarea.value;
+  }
+  var cls = ['rtl-dir', 'ltr-dir'];
+  var ltr = !value.match(/[^a-z]*[^\x00-\x7E]/ig);
+  $(this.richTextareaEl || this.textareaEl).parent().removeClass(cls[+!ltr]).addClass(cls[+ltr]);
+}
 
 MessageComposer.prototype.checkAutocomplete = function (forceFull) {
   var pos, value;
@@ -832,6 +840,7 @@ MessageComposer.prototype.onRichPaste = function (e) {
   setZeroTimeout(this.onChange.bind(this), 0);
   if (text.length) {
     document.execCommand('insertText', false, text);
+    this.checkDir();
     return cancelEvent(e);
   }
   return true;
@@ -1314,5 +1323,3 @@ Scroller.prototype.scrollToNode = function (node) {
     this.scrollTo(elTop + elHeight - viewportHeight);
   }
 }
-
-
