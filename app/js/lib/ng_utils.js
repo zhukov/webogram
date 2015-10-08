@@ -1631,9 +1631,7 @@ angular.module('izhukov.utils', [])
         default:
           skipEntity = true;
       }
-      if (!skipEntity) {
-        lastOffset = entity.offset + entity.length;
-      }
+      lastOffset = entity.offset + (skipEntity ? 0 : entity.length);
     }
     html.push(encodeEntities(text.substr(lastOffset)));
 
