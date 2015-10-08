@@ -204,27 +204,26 @@ EmojiTooltip.prototype.createTooltip = function () {
   }
 
   var self = this;
-  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"></div><div class="composer_emoji_tooltip_content clearfix"></div><div class="composer_emoji_tooltip_footer"><a class="composer_emoji_tooltip_settings"></a></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
+  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"><a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_emoji">Emoji</a><a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_stickers">Stickers</a><div class="composer_emoji_tooltip_tab_shadow"></div></div><div class="composer_emoji_tooltip_content clearfix"></div><div class="composer_emoji_tooltip_categories"></div><div class="composer_emoji_tooltip_stickers_categories"></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
 
   this.tabsEl = $('.composer_emoji_tooltip_tabs', this.tooltipEl);
+  this.categoriesEl = $('.composer_emoji_tooltip_categories', this.tooltipEl);
   this.contentEl = $('.composer_emoji_tooltip_content', this.tooltipEl);
-  this.footerEl = $('.composer_emoji_tooltip_footer', this.tooltipEl);
-  this.settingsEl = $('.composer_emoji_tooltip_settings', this.tooltipEl);
 
-  angular.forEach(['recent', 'smile', 'flower', 'bell', 'car', 'grid', 'stickers'], function (tabName, tabIndex) {
-    var tab = $('<a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_' + tabName + '"></a>')
+  angular.forEach(['recent', 'smile', 'flower', 'bell', 'car', 'grid'], function (tabName, tabIndex) {
+    var tab = $('<a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_' + tabName + '"></a>')
       .on('mousedown', function (e) {
-        self.selectTab(tabIndex);
+        self.selectCategory(tabIndex);
         return cancelEvent(e);
       })
-      .appendTo(self.tabsEl);
+      .appendTo(self.categoriesEl);
 
     if (!Config.Navigator.touch) {
       tab.on('mouseenter mouseleave', function (e) {
-        clearTimeout(self.selectTabTimeout);
+        clearTimeout(self.selectCategoryTimeout);
         if (e.type == 'mouseenter') {
-          self.selectTabTimeout = setTimeout(function () {
-            self.selectTab(tabIndex);
+          self.selectCategoryTimeout = setTimeout(function () {
+            self.selectCategory(tabIndex);
           }, 300);
         }
       });
@@ -272,7 +271,7 @@ EmojiTooltip.prototype.createTooltip = function () {
     });
   }
 
-  this.selectTab(0);
+  this.selectCategory(0);
 
   $(window).on('resize', this.updatePosition.bind(this));
 
@@ -280,13 +279,13 @@ EmojiTooltip.prototype.createTooltip = function () {
 }
 
 
-EmojiTooltip.prototype.selectTab = function (tab) {
+EmojiTooltip.prototype.selectCategory = function (tab) {
   if (this.tab === tab && tab != 6) {
     return false;
   }
-  $('.active', this.tabsEl).removeClass('active');
+  $('.active', this.categoriesEl).removeClass('active');
   this.tab = tab;
-  $(this.tabsEl[0].childNodes[tab]).addClass('active');
+  $(this.categoriesEl[0].childNodes[tab]).addClass('active');
 
   this.updateTabContents();
 };
@@ -294,7 +293,7 @@ EmojiTooltip.prototype.selectTab = function (tab) {
 EmojiTooltip.prototype.updateTabContents = function () {
   var html = [];
   var self = this;
-  var iconSize = Config.Mobile ? 26 : 20;
+  var iconSize = 26;//Config.Mobile ? 26 : 20;
 
   var renderContent = function () {
     self.contentEl.html(html.join(''));
@@ -389,6 +388,7 @@ EmojiTooltip.prototype.show = function () {
 };
 
 EmojiTooltip.prototype.hide = function () {
+  return;
   if (this.tooltipEl) {
     this.tooltipEl.removeClass('composer_emoji_tooltip_shown');
     this.btnEl.removeClass('composer_emoji_insert_btn_on');

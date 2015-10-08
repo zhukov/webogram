@@ -2370,7 +2370,7 @@ img.img_fullsize {
   display: none;
   position: absolute;
   z-index: 999;
-  width: 254px;
+  width: 284px;
   margin-left: -116px;
   margin-top: -245px;
 
@@ -2416,68 +2416,106 @@ img.img_fullsize {
 }
 
 .composer_emoji_tooltip_tabs {
-  width: 100%;
-  margin: 5px 0 2px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.composer_emoji_tooltip_tab {
+  display: inline-block;
+  line-height: 36px;
+  text-align: center;
+  width: 50%;
+  text-transform: uppercase;
+  font-weight: bold;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+.composer_emoji_tooltip_tab_emoji,
+.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_stickers {
+  color: #53a9ea;
+}
+.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_emoji,
+.composer_emoji_tooltip_tab_stickers {
+  color: #999;
+}
+.composer_emoji_tooltip_tab_shadow {
+  width: 50%;
+  height: 2px;
+  background: #53a9ea;
+
+  .composer_emoji_tooltip_tabs_stickers_active & {
+    left: 50%;
+  }
 }
 
-.composer_emoji_tooltip_tab {
+.composer_emoji_tooltip_categories {
+  width: 100%;
+  margin: 9px 0 4px;
+}
+
+.composer_emoji_tooltip_category {
   line-height: 0;
   color: white;
   display: inline-block;
-  width: 24px;
-  height: 29px;
+  width: 21px;
+  height: 21px;
   cursor: pointer;
-  opacity: 0.7;
-  margin: 0 5px 0 4px;
+  opacity: 0.3;
+  margin: 0 12px 0 12px;
 
-  .image-2x('../img/icons/IconsetSmiles.png', 42px, 470px);
+  .image-2x('../img/icons/IconsetSmiles.png', 27px, 362px);
 
-  &.active {
+  &:hover {
+    opacity: 0.4;
+  }
+  &.active,
+  &.active:hover {
     opacity: 1;
   }
 }
 
 /* Recent */
-.composer_emoji_tooltip_tab_recent {background-position: -9px -306px; }
-.composer_emoji_tooltip_tab_recent.active {background-position: -9px -277px; }
+.composer_emoji_tooltip_category_recent {background-position: -3px 0; }
+.composer_emoji_tooltip_category_recent.active {background-position: -3px -31px; }
 
 /* Smile */
-.composer_emoji_tooltip_tab_smile {background-position: -9px -34px; }
-.composer_emoji_tooltip_tab_smile.active {background-position: -9px -5px; }
+.composer_emoji_tooltip_category_smile {background-position: -3px -62px; }
+.composer_emoji_tooltip_category_smile.active {background-position: -3px -93px; }
 
 /* Flower */
-.composer_emoji_tooltip_tab_flower {background-position: -9px -145px; }
-.composer_emoji_tooltip_tab_flower.active {background-position: -9px -118px; }
+.composer_emoji_tooltip_category_flower {background-position: -3px -124px; }
+.composer_emoji_tooltip_category_flower.active {background-position: -3px -155px; }
 
 /* Bell */
-.composer_emoji_tooltip_tab_bell {background-position: -9px -89px; }
-.composer_emoji_tooltip_tab_bell.active {background-position: -9px -61px; }
+.composer_emoji_tooltip_category_bell {background-position: -3px -186px; }
+.composer_emoji_tooltip_category_bell.active {background-position: -3px -217px; }
 
 /* Car */
-.composer_emoji_tooltip_tab_car {background-position: -9px -196px; }
-.composer_emoji_tooltip_tab_car.active {background-position: -9px -170px; }
+.composer_emoji_tooltip_category_car {background-position: -3px -245px; }
+.composer_emoji_tooltip_category_car.active {background-position: -3px -276px; }
 
 /* Grid */
-.composer_emoji_tooltip_tab_grid {background-position: -9px -248px; }
-.composer_emoji_tooltip_tab_grid.active {background-position: -9px -222px; }
+.composer_emoji_tooltip_category_grid {background-position: -3px -304px; }
+.composer_emoji_tooltip_category_grid.active {background-position: -3px -335px; }
 
-/* Stickers */
-.composer_emoji_tooltip_tab_stickers {background-position: -9px -361px; }
-.composer_emoji_tooltip_tab_stickers.active {background-position: -9px -333px; }
 
 .composer_emoji_tooltip .scroller_scrollable_container {
-  height: 174px;
+  height: 233px;
   position: relative;
 }
 
 .composer_emoji_tooltip_content {
+  padding-top: 10px;
   padding-right: 8px;
   outline: 0!important;
 }
 
 a.composer_emoji_btn {
   margin: 0 1px 0 0;
-  padding: 6px;
+  padding: 5px;
   display: block;
   float: left;
   border-radius: 2px;
