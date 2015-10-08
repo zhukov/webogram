@@ -189,6 +189,7 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
   if (node.nodeType != 1) { // NON-ELEMENT
     return;
   }
+  var isSelected = (selNode === node);
   var isBlock = node.tagName == 'DIV' || node.tagName == 'P';
   var curChild;
   if (isBlock && line.length || node.tagName == 'BR') {
@@ -200,12 +201,15 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
       line.push(node.alt);
     }
   }
+  if (isSelected && !selOffset) {
+    line.push('\001');
+  }
   var curChild = node.firstChild;
   while (curChild) {
     getRichElementValue(curChild, lines, line, selNode, selOffset);
     curChild = curChild.nextSibling;
   }
-  if (selNode === node) {
+  if (isSelected && selOffset) {
     line.push('\001');
   }
   if (isBlock && line.length) {

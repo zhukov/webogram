@@ -695,6 +695,10 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
     var valueCaret = getRichValueWithCaret(textarea);
     var value = valueCaret[0];
     var pos = valueCaret[1] >= 0 ? valueCaret[1] : value.length;
+
+    if (!pos) {
+      this.cleanRichTextarea(value, true);
+    }
   } else {
     var textarea = this.textareaEl[0];
     var pos = getFieldSelection(textarea);
@@ -799,6 +803,7 @@ MessageComposer.prototype.onFocusBlur = function (e) {
   this.isActive = e.type == 'focus';
 
   if (!this.isActive) {
+    this.cleanRichTextarea();
     this.hideSuggestions();
   } else {
     setTimeout(this.checkAutocomplete.bind(this), 100);
@@ -830,6 +835,24 @@ MessageComposer.prototype.onRichPaste = function (e) {
     return cancelEvent(e);
   }
   return true;
+}
+
+MessageComposer.prototype.cleanRichTextarea = function (value, focused) {
+  if (value === undefined) {
+    value = getRichValue(this.richTextareaEl[0]);
+  }
+  if (value.match(/^\s*$/) && this.richTextareaEl.html().length > 0) {
+    this.richTextareaEl.html('');
+    this.lastLength = 0;
+    this.wasEmpty = true;
+
+    if (focused) {
+      var self = this;
+      setZeroTimeout(function () {
+        self.focus();
+      });
+    }
+  }
 }
 
 MessageComposer.prototype.onRichPasteNode = function (e) {

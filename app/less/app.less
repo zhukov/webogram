@@ -2723,20 +2723,15 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   &:empty:before {
     content: attr(placeholder);
     color: #9aa2ab;
+    display: block;
+    margin-top: -1px;
+    margin-left: 1px;
   }
-
-  &:active:before,
-  &:focus:before {
-    content: none;
-  }
-
-  /*
   &:empty:active:before,
   &:empty:focus:before {
-    content: attr(placeholder);
-    color: #9aa2ab;
+    opacity: 0.75;
   }
-  */
+
 
   img {
     width: 20px;
