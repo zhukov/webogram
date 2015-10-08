@@ -623,7 +623,7 @@ angular.module('myApp.services')
         messageReplyMarkup.pFlags.hidden = true;
       }
       messageReplyMarkup = angular.extend({
-        id: message.mid
+        mid: message.mid
       }, messageReplyMarkup);
       if (messageReplyMarkup._ != 'replyKeyboardHide') {
         messageReplyMarkup.fromID = message.from_id;
