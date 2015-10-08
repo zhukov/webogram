@@ -11,7 +11,7 @@
 
   <div class="md_modal_body">
 
-    <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController" my-dialogs>
+    <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController" my-dialogs ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
           <input my-focused class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>

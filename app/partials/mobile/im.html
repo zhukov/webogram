@@ -4,7 +4,7 @@
 
   <div class="im_page_split clearfix">
 
-    <div ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}" class="im_dialogs_col_wrap">
+    <div ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}" class="im_dialogs_col_wrap" ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
           <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>

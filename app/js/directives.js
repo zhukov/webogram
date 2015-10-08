@@ -1279,6 +1279,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $scope.$on('ui_panel_update', function (e, data) {
+        updateSizes();
         onContentLoaded(function () {
           updateSizes();
           if (data && data.blur) {
@@ -2639,7 +2640,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           var chat = AppChatsManager.getChat(-peerID);
 
           element.html(
-            (chat.rTitle || '').valueOf()
+            (chat.rTitle || '').valueOf() +
+            (attrs.verified && chat.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
           );
         }
       };

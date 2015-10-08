@@ -12,8 +12,7 @@ body {
   color: #000;
   background: none;
   font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
-  overflow: visible;
-  overflow-x: hidden;
+  overflow: hidden;
 
   &.non_osx {
     font: 13px/18px Tahoma, sans-serif, Arial, Helvetica;
@@ -1117,6 +1116,23 @@ i.icon-search-clear {
   vertical-align: text-top;
   .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
   background-position: -15px -192px;
+}
+
+i.icon-verified {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  vertical-align: text-top;
+  .image-2x('../img/icons/ProfileIcons.png', 40px, 420px);
+  background-position: -10px -373px;
+
+  .im_dialogs_scrollable_wrap & {
+    display: none;
+  }
+  .im_dialogs_col_search & {
+    display: inline-block;
+  }
+
 }
 
 .im_dialogs_tabs_wrap {
