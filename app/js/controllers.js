@@ -101,11 +101,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function selectPhoneCountryByIso2 (countryIso2) {
-      var i, country;
-      for (i = 0; i < Config.CountryCodes.length; i++) {
-        country = Config.CountryCodes[i];
-        if (country[0] == countryIso2) {
-          return selectCountry({name: _(country[1] + '_raw'), code: country[2]});
+      if (countryIso2) {
+        var i, country;
+        for (i = 0; i < Config.CountryCodes.length; i++) {
+          country = Config.CountryCodes[i];
+          if (country[0] == countryIso2) {
+            return selectCountry({name: _(country[1] + '_raw'), code: country[2]});
+          }
         }
       }
       return selectCountry({name: _('country_select_modal_country_us_raw'), code: '+1'});
