@@ -602,7 +602,6 @@ EmojiTooltip.prototype.show = function () {
 };
 
 EmojiTooltip.prototype.hide = function () {
-  return;
   if (this.tooltipEl) {
     this.tooltipEl.removeClass('composer_emoji_tooltip_shown');
     this.btnEl.removeClass('composer_emoji_insert_btn_on');
@@ -1293,6 +1292,31 @@ MessageComposer.prototype.setValue = function (text) {
     this.textareaEl.val(text);
   }
 }
+
+MessageComposer.prototype.setFocusedValue = function (parts) {
+  var prefix = parts[0];
+  var selection = parts[1];
+  var suffix = parts[2];
+
+  if (this.richTextareaEl) {
+    this.selId = (this.selId || 0) + 1;
+    var html =
+      this.getRichHtml(prefix) +
+      '<span id="composer_sel' + this.selId + '">' +
+        this.getRichHtml(selection) +
+      '</span>' +
+      this.getRichHtml(suffix);
+
+    this.richTextareaEl.html(html);
+
+    setRichFocus(this.richTextareaEl[0], $('#composer_sel' + this.selId)[0], true);
+  } else {
+    this.textareaEl.val(prefix + selection + suffix);
+    setFieldSelection(this.textareaEl[0], prefix.length, prefix.length + selection.length);
+  }
+}
+
+
 
 MessageComposer.prototype.getRichHtml = function (text) {
   return $('<div>').text(text).html().replace(/\n/g, '<br/>').replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {

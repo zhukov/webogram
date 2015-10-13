@@ -3715,7 +3715,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             var toPeerID = AppPeersManager.getPeerID(toPeerString);
             var toChatID = toPeerID < 0 ? -toPeerID : 0;
             AppMessagesManager.startBot(peerID, toChatID, matches[3]).then(function () {
-              $rootScope.$broadcast('history_focus', {toPeerString: toPeerString});
+              $rootScope.$broadcast('history_focus', {peerString: toPeerString});
             });
           });
           return true;
@@ -3736,6 +3736,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (matches = url.match(/^addstickers\?set=(.+)$/)) {
       AppStickersManager.openStickersetLink(matches[1]);
+      return true;
+    }
+
+    if (matches = url.match(/^msg_url\?url=(.+)(?:&text=(.*))?$/)) {
+      PeersSelectService.selectPeer({
+        confirm_type: 'SHARE_URL'
+      }).then(function (toPeerString) {
+        var url = decodeURIComponent(matches[1]);
+        var text = matches[3] ? decodeURIComponent(matches[3]) : '';
+        $rootScope.$broadcast('history_focus', {peerString: toPeerString, shareUrl: url, shareText: text});
+      });
       return true;
     }
 

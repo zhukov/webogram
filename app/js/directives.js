@@ -1578,15 +1578,21 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_peer_change', composer.resetTyping.bind(composer));
       $scope.$on('ui_peer_draft', function (e, options) {
+        options = options || {};
         var isBroadcast = $scope.draftMessage.isBroadcast;
         composer.setPlaceholder(_(isBroadcast ? 'im_broadcast_field_placeholder_raw' : 'im_message_field_placeholder_raw'));
 
-        if (richTextarea) {
-          composer.setValue($scope.draftMessage.text || '');
+        if (options.customSelection) {
+          composer.setFocusedValue(options.customSelection);
           updateHeight();
-        }
-        if (!Config.Navigator.touch || options && options.focus) {
-          composer.focus();
+        } else {
+          if (richTextarea) {
+            composer.setValue($scope.draftMessage.text || '');
+            updateHeight();
+          }
+          if (!Config.Navigator.touch || options && options.focus) {
+            composer.focus();
+          }
         }
         onContentLoaded(function () {
           composer.checkAutocomplete(true);

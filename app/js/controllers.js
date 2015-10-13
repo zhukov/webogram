@@ -408,11 +408,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start();
   })
 
-  .controller('AppIMController', function ($scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
+  .controller('AppIMController', function ($q, qSync, $scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
     var pendingParams = false;
+    var pendingShare = false;
     $scope.$on('history_focus', function (e, peerData) {
       $modalStack.dismissAll();
       if (peerData.peerString == $scope.curDialog.peer &&
@@ -423,13 +424,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var peerID = AppPeersManager.getPeerID(peerData.peerString);
         var username = AppPeersManager.getPeer(peerID).username;
         var peer = username ? '@' + username : peerData.peerString;
-        if (peerData.messageID || peerData.startParam) {
+        if (peerData.messageID || peerData.startParam || peerData.shareUrl) {
           pendingParams = {
             messageID: peerData.messageID,
             startParam: peerData.startParam
           };
         } else {
           pendingParams = false;
+        }
+        if (peerData.shareUrl) {
+          pendingShare = {
+            url: peerData.shareUrl,
+            text: peerData.shareText
+          };
         }
         if ($routeParams.p != peer) {
           $location.url('/im?p=' + peer);
@@ -595,22 +602,28 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var addParams = pendingParams || {};
       pendingParams = false;
       addParams.messageID = parseInt(addParams.messageID) || false;
-      addParams.startParam = addParams.startParam || false;
+      addParams.startParam = addParams.startParam;
 
+      var peerStringPromise;
       if ($routeParams.p && $routeParams.p.charAt(0) == '@') {
         if ($scope.curDialog === undefined) {
           $scope.curDialog = {};
         }
-        AppPeersManager.resolveUsername($routeParams.p.substr(1)).then(function (peerID) {
-          $scope.curDialog = angular.extend({
-            peer: AppPeersManager.getPeerString(peerID)
-          }, addParams);
+        peerStringPromise = AppPeersManager.resolveUsername($routeParams.p.substr(1)).then(function (peerID) {
+          return qSync.when(AppPeersManager.getPeerString(peerID));
         });
       } else {
-        $scope.curDialog = angular.extend({
-          peer: $routeParams.p || false
-        }, addParams);
+        peerStringPromise = qSync.when($routeParams.p);
       }
+      peerStringPromise.then(function (peerString) {
+        $scope.curDialog = angular.extend({
+          peer: peerString
+        }, addParams);
+        if (pendingShare) {
+          $scope.$broadcast('peer_share', pendingShare);
+          pendingShare = false;
+        }
+      });
     }
 
     ChangelogNotifyService.checkUpdate();
@@ -2010,6 +2023,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
+    $scope.$on('peer_share', applyShare);
     $scope.$on('reply_selected', function (e, messageID) {
       replySelect(messageID);
     });
@@ -2171,6 +2185,23 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
+    function applyShare (e, shareData) {
+      console.log('apply share', shareData);
+      var url = shareData.url;
+      var text = shareData.text || '';
+
+      $timeout(function () {
+        $scope.draftMessage.text = url + "\n" + text;
+        $scope.$broadcast('ui_peer_draft', {
+          customSelection: [
+            url + "\n",
+            text,
+            ''
+          ]
+        });
+      }, 100);
+    }
+
     function replySelect(messageID) {
       $scope.draftMessage.replyToMessage = AppMessagesManager.wrapForDialog(messageID);
       $scope.$broadcast('ui_peer_reply');
@@ -2259,6 +2290,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function onTyping () {
+      if ($scope.curDialog.inputPeer._ == 'inputPeerChannel') {
+        return false;
+      }
       MtpApiManager.invokeApi('messages.setTyping', {
         peer: $scope.curDialog.inputPeer,
         action: {_: 'sendMessageTypingAction'}

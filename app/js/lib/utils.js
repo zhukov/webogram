@@ -229,9 +229,12 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
   }
 }
 
-function setRichFocus(field, selectNode) {
+function setRichFocus(field, selectNode, noCollapse) {
   field.focus();
-  if (selectNode && selectNode.parentNode == field && !selectNode.nextSibling) {
+  if (selectNode &&
+      selectNode.parentNode == field &&
+      !selectNode.nextSibling &&
+      !noCollapse) {
     field.removeChild(selectNode);
     selectNode = null;
   }
@@ -242,7 +245,9 @@ function setRichFocus(field, selectNode) {
     } else {
       range.selectNodeContents(field);
     }
-    range.collapse(false);
+    if (!noCollapse) {
+      range.collapse(false);
+    }
 
     var sel = window.getSelection();
     sel.removeAllRanges();
@@ -251,7 +256,9 @@ function setRichFocus(field, selectNode) {
   else if (document.body.createTextRange !== undefined) {
     var textRange = document.body.createTextRange();
     textRange.moveToElementText(selectNode || field);
-    textRange.collapse(false);
+    if (!noCollapse) {
+      textRange.collapse(false);
+    }
     textRange.select();
   }
 }
