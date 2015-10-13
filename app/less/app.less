@@ -2872,6 +2872,13 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   }
 }
 
+@-moz-document url-prefix() {
+  .composer_rich_textarea:empty:active:before,
+  .composer_rich_textarea:empty:focus:before {
+    display: none;
+  }
+}
+
 .composer_command_btn {
   display: block;
   position: absolute;
