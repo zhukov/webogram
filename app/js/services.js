@@ -3739,12 +3739,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return true;
     }
 
-    if (matches = url.match(/^msg_url\?url=(.+)(?:&text=(.*))?$/)) {
+    if (matches = url.match(/^msg_url\?url=([^&]+)(?:&text=(.*))?$/)) {
       PeersSelectService.selectPeer({
         confirm_type: 'SHARE_URL'
       }).then(function (toPeerString) {
         var url = decodeURIComponent(matches[1]);
-        var text = matches[3] ? decodeURIComponent(matches[3]) : '';
+        var text = matches[2] ? decodeURIComponent(matches[2]) : '';
         $rootScope.$broadcast('history_focus', {peerString: toPeerString, shareUrl: url, shareText: text});
       });
       return true;

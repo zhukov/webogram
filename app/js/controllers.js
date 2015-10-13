@@ -2186,7 +2186,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function applyShare (e, shareData) {
-      console.log('apply share', shareData);
       var url = shareData.url;
       var text = shareData.text || '';
 
@@ -2199,7 +2198,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             ''
           ]
         });
-      }, 100);
+      }, 1000);
     }
 
     function replySelect(messageID) {
