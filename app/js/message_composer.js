@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.8 - messaging web application for MTProto
+ * Webogram v0.4.9 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -602,7 +602,6 @@ EmojiTooltip.prototype.show = function () {
 };
 
 EmojiTooltip.prototype.hide = function () {
-  return;
   if (this.tooltipEl) {
     this.tooltipEl.removeClass('composer_emoji_tooltip_shown');
     this.btnEl.removeClass('composer_emoji_insert_btn_on');
