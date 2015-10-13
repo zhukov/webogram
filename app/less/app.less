@@ -2869,12 +2869,22 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   }
 }
 
+// Mozilla hack
 @-moz-document url-prefix() {
   .composer_rich_textarea:empty:active:before,
   .composer_rich_textarea:empty:focus:before {
     display: none;
   }
 }
+
+// IE hack
+_:-ms-lang(x), .composer_rich_textarea:empty:active:before {
+  display: none;
+}
+_:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
+  display: none;
+}
+
 
 .composer_command_btn {
   display: block;
