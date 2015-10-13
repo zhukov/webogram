@@ -18,7 +18,7 @@
         <div class="im_dialogs_wrap nano">
           <div class="im_dialogs_scrollable_wrap nano-content">
 
-            <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts">
+            <div class="im_dialogs_empty_wrap" ng-if="isEmpty.dialogs && isEmpty.contacts">
               <h3 class="im_dialogs_empty_header" my-i18n="im_no_contacts"></h3>
               <p class="im_dialogs_empty_lead" my-i18n="im_get_started_long"></p>
               <button type="button" class="btn btn-primary btn-sm" ng-click="importContact()" my-i18n="im_add_contact"></button>

@@ -1024,7 +1024,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return chatFull.exported_invite.link;
       }
       return MtpApiManager.invokeApi('messages.exportChatInvite', {
-        chat_id: getChatInput(id)
+        chat_id: AppChatsManager.getChatInput(id)
       }).then(function (exportedInvite) {
         if (chatsFull[id] !== undefined) {
           chatsFull[id].exported_invite = exportedInvite;

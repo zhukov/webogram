@@ -2008,12 +2008,23 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
-      var imgElement = $('<img />')
-                          .appendTo(element)
-                          .addClass(attrs.imgClass);
+      var imgElement = $('<img />').addClass(attrs.imgClass);
+      var wasAdded = false;
+
+      if (attrs.open && $scope.document.stickerSetInput) {
+        element
+          .addClass('clickable')
+          .on('click', function () {
+            AppStickersManager.openStickerset($scope.document.stickerSetInput);
+          });
+      }
 
       var setSrc = function (blob) {
         imgElement.attr('src', FileManager.getUrl(blob));
+        if (!wasAdded) {
+          wasAdded = true;
+          imgElement.appendTo(element);
+        }
       };
 
       imgElement.css({
@@ -2051,7 +2062,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
       } else {
-        imgElement.attr('src', emptySrc);
+        wasAdded = true;
+        imgElement.attr('src', emptySrc).appendTo(element);
       }
 
       if (attrs.thumb) {
@@ -2066,14 +2078,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         }, function (e) {
           console.log('Download sticker failed', e, fullLocation);
         });
-      }
-
-      if (attrs.open && $scope.document.stickerSetInput) {
-        element
-          .addClass('clickable')
-          .on('click', function () {
-            AppStickersManager.openStickerset($scope.document.stickerSetInput);
-          });
       }
     }
   })
