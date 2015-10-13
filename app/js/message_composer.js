@@ -140,6 +140,7 @@ function EmojiTooltip (btnEl, options) {
   this.getStickers = options.getStickers;
   this.getStickerImage = options.getStickerImage;
   this.onStickersetSelected = options.onStickersetSelected;
+  this.langpack = options.langpack || {};
 
   if (!Config.Navigator.touch) {
     $(this.btnEl).on('mouseenter mouseleave', function (e) {
@@ -203,34 +204,117 @@ EmojiTooltip.prototype.createTooltip = function () {
     return false;
   }
 
+  var html =
+'<div class="composer_emoji_tooltip noselect">\
+  <div class="composer_emoji_tooltip_tabs">\
+    <div class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_emoji">' +this.langpack.im_emoji_tab + '</div>\
+    <div class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_stickers">' +this.langpack.im_stickers_tab + '</div>\
+    <div class="composer_emoji_tooltip_tab_shadow"></div>\
+  </div>\
+  <div class="composer_emoji_tooltip_tabs_wrap">\
+    <div class="composer_emoji_tooltip_tabs_contents clearfix">\
+      <div class="composer_emoji_tooltip_tab_emoji_content">\
+        <div class="composer_emoji_tooltip_content_wrap">\
+          <div class="composer_emoji_tooltip_content composer_emoji_tooltip_content_emoji clearfix"></div>\
+        </div>\
+        <div class="composer_emoji_tooltip_categories">\
+          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_recent active" data-category="0"></a>\
+          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_smile" data-category="1"></a>\
+          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_flower" data-category="2"></a>\
+          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_bell" data-category="3"></a>\
+          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_car" data-category="4"></a>\
+          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_grid" data-category="5"></a>\
+        </div>\
+      </div>\
+      <div class="composer_emoji_tooltip_tab_stickers_content">\
+        <div class="composer_emoji_tooltip_content_wrap">\
+            <div class="composer_emoji_tooltip_content composer_emoji_tooltip_content_stickers clearfix"></div>\
+          </div>\
+          <div class="composer_emoji_tooltip_categories"></div>\
+      </div>\
+    </div>\
+  </div>\
+  <div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div>\
+</div>';
+
+  html = html.replace(/>\s+</g, '><');
+
   var self = this;
-  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"><a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_emoji">Emoji</a><a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_stickers">Stickers</a><div class="composer_emoji_tooltip_tab_shadow"></div></div><div class="composer_emoji_tooltip_content clearfix"></div><div class="composer_emoji_tooltip_categories"></div><div class="composer_emoji_tooltip_stickers_categories"></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
+  this.tooltipEl = $(html).appendTo(document.body);
 
   this.tabsEl = $('.composer_emoji_tooltip_tabs', this.tooltipEl);
   this.categoriesEl = $('.composer_emoji_tooltip_categories', this.tooltipEl);
-  this.contentEl = $('.composer_emoji_tooltip_content', this.tooltipEl);
+  this.stickersCategoriesEl = $('.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories', this.tooltipEl);
 
-  angular.forEach(['recent', 'smile', 'flower', 'bell', 'car', 'grid'], function (tabName, tabIndex) {
-    var tab = $('<a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_' + tabName + '"></a>')
+  this.contentEl = $('.composer_emoji_tooltip_content', this.tooltipEl);
+  this.emojiContentEl = $('.composer_emoji_tooltip_content_emoji', this.tooltipEl);
+  this.stickersContentEl = $('.composer_emoji_tooltip_content_stickers', this.tooltipEl);
+
+  // Tabs
+  angular.forEach(['emoji', 'stickers'], function (tabName, tabIndex) {
+    var tab = $('.composer_emoji_tooltip_tab_' + tabName, self.tabsEl)
       .on('mousedown', function (e) {
-        self.selectCategory(tabIndex);
+        self.selectTab(tabIndex);
         return cancelEvent(e);
-      })
-      .appendTo(self.categoriesEl);
+      });
 
     if (!Config.Navigator.touch) {
       tab.on('mouseenter mouseleave', function (e) {
-        clearTimeout(self.selectCategoryTimeout);
+        clearTimeout(self.selectTabTimeout);
         if (e.type == 'mouseenter') {
-          self.selectCategoryTimeout = setTimeout(function () {
-            self.selectCategory(tabIndex);
+          self.selectTabTimeout = setTimeout(function () {
+            self.selectTab(tabIndex);
           }, 300);
         }
       });
     }
   });
 
-  this.scroller = new Scroller(this.contentEl, {classPrefix: 'composer_emoji_tooltip'});
+  // Categories
+  var handleEvents = 'mousedown';
+  if (!Config.Navigator.touch) {
+    handleEvents += ' mouseover mouseout';
+  }
+  this.categoriesEl.on(handleEvents, function (e) {
+    e = e.originalEvent || e;
+    var target = e.target;
+    if (target.tagName != 'A') {
+      target = target.parentNode;
+    }
+    if (target.tagName != 'A') {
+      return;
+    }
+    var catIndex = parseInt(target.getAttribute('data-category'));
+    if (e.type == 'mousedown') {
+      self.selectCategory(catIndex);
+      return cancelEvent(e);
+    }
+    if (self.tab) {
+      return;
+    }
+    var isOver = e.type == 'mouseover';
+    if (isOver && self.selectCategoryIndex == catIndex) {
+      return;
+    }
+    clearTimeout(self.selectCategoryTimeout);
+    delete self.selectCategoryTimeout;
+    if (isOver) {
+      self.selectCategoryIndex = catIndex;
+      self.selectCategoryTimeout = setTimeout(function () {
+        delete self.selectCategoryIndex;
+        delete self.selectCategoryTimeout;
+        self.selectCategory(catIndex);
+      }, 300);
+    } else {
+      delete self.selectCategoryIndex;
+    }
+  });
+
+  this.emojiScroller = new Scroller(this.emojiContentEl, {classPrefix: 'composer_emoji_tooltip'});
+  this.stickersScroller = new Scroller(this.stickersContentEl, {classPrefix: 'composer_emoji_tooltip'});
+  this.stickersScroller.onScroll(function (el, st) {
+    self.onStickersScroll(el, st);
+  });
 
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
@@ -271,7 +355,7 @@ EmojiTooltip.prototype.createTooltip = function () {
     });
   }
 
-  this.selectCategory(0);
+  this.selectTab(0);
 
   $(window).on('resize', this.updatePosition.bind(this));
 
@@ -279,64 +363,48 @@ EmojiTooltip.prototype.createTooltip = function () {
 }
 
 
-EmojiTooltip.prototype.selectCategory = function (tab) {
-  if (this.tab === tab && tab != 6) {
+EmojiTooltip.prototype.selectCategory = function (cat, force) {
+  if (this.cat === cat && !force) {
     return false;
   }
   $('.active', this.categoriesEl).removeClass('active');
-  this.tab = tab;
-  $(this.categoriesEl[0].childNodes[tab]).addClass('active');
+  this.cat = cat;
 
-  this.updateTabContents();
+  if (this.tab) {
+    this.activateStickerCategory();
+    this.updateStickersContents(force);
+  } else {
+    $(this.categoriesEl[this.tab].childNodes[cat]).addClass('active');
+    this.updateEmojiContents();
+  }
 };
 
-EmojiTooltip.prototype.updateTabContents = function () {
+EmojiTooltip.prototype.selectTab = function (tab, force) {
+  if (this.tab === tab && !force) {
+    return false;
+  }
+
+  this.tab = tab;
+  this.selectCategory(0, true);
+
+  var self = this;
+  setTimeout(function () {
+    $(self.tooltipEl).toggleClass('composer_emoji_tooltip_tabs_stickers_active', tab == 1);
+  }, 0);
+};
+
+EmojiTooltip.prototype.updateEmojiContents = function () {
   var html = [];
   var self = this;
-  var iconSize = 26;//Config.Mobile ? 26 : 20;
+  var iconSize = 26;
 
   var renderContent = function () {
-    self.contentEl.html(html.join(''));
-    self.scroller.reinit();
+    self.emojiContentEl.html(html.join(''));
+    self.emojiScroller.reinit();
   }
 
-  if (this.tab == 6) { // Stickers
-    var renderStickers = function (stickersets) {
-      if (self.tab != 6) {
-        return;
-      }
-      var set, docID, i, j, len1, len2;
-      for (i = 0, len1 = stickersets.length; i < len1; i++) {
-        set = stickersets[i];
-        if (!set.docIDs.length) {
-          continue;
-        }
-        html.push('<div class="composer_stickerset_wrap clearfix">');
-        if (set.id && set.title) {
-          html.push(
-            '<a class="composer_stickerset_title" data-stickerset="',
-            encodeEntities(set.short_name),
-            '">',
-            encodeEntities(set.title),
-            '</a>'
-          );
-        }
-        for (j = 0, len2 = set.docIDs.length; j < len2; j++) {
-          docID = set.docIDs[j];
-          html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
-        }
-        html.push('</div>');
-      }
-      renderContent();
-
-      self.contentEl.find('.composer_sticker_btn').each(function (k, element) {
-        self.getStickerImage($(element), element.getAttribute('data-sticker'));
-      });
-    };
-    this.getStickers(renderStickers);
-  }
-  else if (this.tab > 0) {
-    var categoryIndex = this.tab - 1;
+  if (this.cat > 0) {
+    var categoryIndex = this.cat - 1;
     var emoticonCodes = Config.EmojiCategories[categoryIndex];
     var totalColumns = Config.EmojiCategorySpritesheetDimens[categoryIndex][1];
     var count = emoticonCodes.length;
@@ -373,6 +441,148 @@ EmojiTooltip.prototype.updateTabContents = function () {
   }
 };
 
+EmojiTooltip.prototype.updateStickersContents = function (force) {
+  var html = [];
+  var categoriesHtml = [];
+  var self = this;
+  var iconSize = 26;
+
+  var scrollStickers = function () {
+    var scrollTop = self.cat ? self.stickersetPositions[self.cat][0] : 0;
+    self.stickersScroller.scrollTo(scrollTop, force ? 0 : 100);
+  }
+
+  if (!force && self.stickersetPositions.length) {
+    scrollStickers();
+    return;
+  }
+
+  var renderStickers = function (stickersets) {
+    var set, docID, i, j, len1, len2;
+    for (i = 0, len1 = stickersets.length; i < len1; i++) {
+      set = stickersets[i];
+      if (!set.docIDs.length) {
+        continue;
+      }
+      html.push('<div class="composer_stickerset_wrap clearfix">');
+      if (set.title) {
+        html.push(
+          '<a class="composer_stickerset_title',
+          set.id ? '' : ' disabled',
+          '" data-stickerset="',
+          encodeEntities(set.short_name),
+          '">',
+          encodeEntities(set.title),
+          '</a>'
+        );
+      }
+      if (!set.id) {
+        categoriesHtml.push('<a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_recent" data-category="0"></a>');
+      } else {
+        categoriesHtml.push('<a class="composer_sticker_btn" data-sticker="' + set.docIDs[0] + '" data-category="' + i + '"></a>');
+      }
+      for (j = 0, len2 = set.docIDs.length; j < len2; j++) {
+        docID = set.docIDs[j];
+        html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
+      }
+      html.push('</div>');
+    }
+
+    self.stickersContentEl.html(html.join(''));
+    self.stickersCategoriesEl.html(categoriesHtml.join(''));
+    self.stickersScroller.reinit();
+
+    var scrollPositions = [];
+    $('.composer_stickerset_wrap', self.stickersContentEl).each(function (k, stickerSetEl) {
+      var height = stickerSetEl.offsetHeight;
+      var top = stickerSetEl.offsetTop;
+      scrollPositions.push([top, height]);
+    });
+    self.stickersetPositions = scrollPositions;
+    scrollStickers();
+
+    var preload = [];
+    self.contentEl.find('.composer_sticker_btn').each(function (k, element) {
+      if (k < 12) {
+        self.replaceStickerImage(element);
+      } else {
+        preload.push([element.offsetTop, element]);
+      }
+    });
+    self.stickersPreload = preload;
+
+    self.stickersCategoriesEl.find('.composer_sticker_btn').each(function (k, element) {
+      self.replaceStickerImage(element);
+    });
+  };
+  this.getStickers(renderStickers);
+};
+
+EmojiTooltip.prototype.replaceStickerImage = function (element) {
+  element = $(element);
+  this.getStickerImage(element, element.attr('data-sticker'));
+}
+
+EmojiTooltip.prototype.onStickersScroll = function (scrollable, scrollTop) {
+  var ch = scrollable.clientHeight;
+  var sh = scrollable.scrollHeight;
+  var len = this.stickersetPositions.length;
+  var currentCat = false;
+  var currentPos, i;
+
+  if (scrollTop < 20) {
+    currentCat = 0;
+  } else if (scrollTop > sh - ch - 20) {
+    currentCat = len - 1;
+  } else {
+    for (i = 0; i < len; i++) {
+      currentPos = this.stickersetPositions[i];
+      if (scrollTop >= currentPos[0] &&
+          scrollTop < (currentPos[0] + currentPos[1])) {
+        currentCat = i;
+        break;
+      }
+    }
+  }
+  var len = this.stickersPreload.length;
+  if (len) {
+    for (i = 0; i < len; i++) {
+      currentPos = this.stickersPreload[i];
+      if (currentPos[0] >= scrollTop && currentPos[0] <= scrollTop + ch) {
+        // console.log('replace', currentPos[1], i);
+        this.replaceStickerImage(currentPos[1]);
+        this.stickersPreload.splice(i, 1);
+        i--;
+        len--;
+      }
+    }
+  }
+  // console.log('on sticker scroll', scrollTop, ch, sh, currentCat, this.stickersetPositions);
+  if (this.cat === currentCat || currentCat === false) {
+    return;
+  }
+  $('.active', this.categoriesEl).removeClass('active');
+  this.cat = currentCat;
+  this.activateStickerCategory();
+};
+
+EmojiTooltip.prototype.activateStickerCategory = function () {
+  var categoriesEl = this.categoriesEl[1];
+  var categoryEl = categoriesEl.childNodes[this.cat];
+  if (!categoryEl) {
+    return;
+  }
+  $(categoryEl).addClass('active');
+
+  var left = categoryEl.offsetLeft;
+  var width = categoryEl.offsetWidth;
+  var viewportWidth = categoriesEl.clientWidth;
+
+  // console.log('current cat el', categoryEl, left, width, viewportWidth);
+  $(categoriesEl).animate({scrollLeft: left - (viewportWidth - width) / 2}, 200);
+}
+
+
 EmojiTooltip.prototype.updatePosition = function () {
   var offset = this.btnEl.offset();
   this.tooltipEl.css({top: offset.top, left: offset.left});
@@ -380,7 +590,11 @@ EmojiTooltip.prototype.updatePosition = function () {
 
 EmojiTooltip.prototype.show = function () {
   this.updatePosition();
-  this.updateTabContents();
+  if (this.tab) {
+    this.updateStickersContents(true);
+  } else {
+    this.updateEmojiContents();
+  }
   this.tooltipEl.addClass('composer_emoji_tooltip_shown');
   this.btnEl.addClass('composer_emoji_insert_btn_on');
   delete this.showTimeout;
@@ -1255,6 +1469,18 @@ Scroller.prototype.setUpNative = function () {
   }
 }
 
+Scroller.prototype.onScroll = function (cb) {
+  var self = this;
+  var scrollable = this.scrollable[0];
+  this.scrollable.on('scroll', function (e) {
+    if (self.isAnimatedScroll) {
+      return;
+    }
+    cb(scrollable, scrollable.scrollTop);
+  })
+
+}
+
 Scroller.prototype.update = function () {
   if (this.useNano) {
     $(this.scroller).nanoScroller();
@@ -1293,10 +1519,28 @@ Scroller.prototype.updateHeight = function () {
 }
 
 
-Scroller.prototype.scrollTo = function (scrollTop) {
-  this.scrollable[0].scrollTop = scrollTop;
-  if (this.useNano) {
-    $(this.scroller).nanoScroller({flash: true});
+Scroller.prototype.scrollTo = function (scrollTop, animation, cb) {
+  if (animation > 0) {
+    var self = this;
+    this.isAnimatedScroll = true;
+    this.scrollable.animate({scrollTop: scrollTop}, function () {
+      delete self.isAnimatedScroll;
+      if (self.useNano) {
+        $(self.scroller).nanoScroller({flash: true});
+      }
+      self.scrollable.trigger('scroll');
+      if (cb) {
+        cb();
+      }
+    });
+  } else {
+    this.scrollable[0].scrollTop = scrollTop;
+    if (this.useNano) {
+      $(this.scroller).nanoScroller({flash: true});
+    }
+    if (cb) {
+      cb();
+    }
   }
 }
 

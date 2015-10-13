@@ -2370,9 +2370,9 @@ img.img_fullsize {
   display: none;
   position: absolute;
   z-index: 999;
-  width: 284px;
-  margin-left: -116px;
-  margin-top: -245px;
+  width: 286px;
+  margin-left: -133px;
+  margin-top: -330px;
 
   border: 1px #dfdfdf solid;
 
@@ -2380,7 +2380,7 @@ img.img_fullsize {
   .box-shadow(0px 1px 1px rgba(0, 0, 0, 0.1));
 
   background: #fff;
-  padding: 5px 2px 5px 8px;
+  padding: 0;
 
   &_shown {
     display: block;
@@ -2416,20 +2416,26 @@ img.img_fullsize {
 }
 
 .composer_emoji_tooltip_tabs {
-  border-bottom: 1px solid #e5e5e5;
+  -webkit-box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1);
+  box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1);
+
+  // border-bottom: 1px solid #e5e5e5;
+  // border-color: rgba(0,0,0,0.1);
 }
 .composer_emoji_tooltip_tab {
+  cursor: pointer;
   display: inline-block;
-  line-height: 36px;
+  line-height: 35px;
   text-align: center;
   width: 50%;
   text-transform: uppercase;
   font-weight: bold;
+  transition: color ease-in-out 0.2s;
 
   &:hover,
   &:active,
   &:focus {
-    color: inherit;
     text-decoration: none;
   }
 }
@@ -2443,17 +2449,60 @@ img.img_fullsize {
 }
 .composer_emoji_tooltip_tab_shadow {
   width: 50%;
-  height: 2px;
+  height: 1px;
   background: #53a9ea;
+  -webkit-box-shadow: 0px 1px 0px 0px rgba(83,169,234,1);
+  -moz-box-shadow: 0px 1px 0px 0px rgba(83,169,234,1);
+  box-shadow: 0px 1px 0px 0px rgba(83,169,234,1);
+  transform: translateX(0);
+  transition: transform ease-in-out 0.2s;
 
   .composer_emoji_tooltip_tabs_stickers_active & {
-    left: 50%;
+    transform: translateX(100%);
   }
 }
 
 .composer_emoji_tooltip_categories {
   width: 100%;
-  margin: 9px 0 4px;
+  line-height: 0;
+
+  .composer_emoji_tooltip_tab_emoji_content & {
+    width: 100%;
+    margin: 9px 0 12px;
+    padding: 0 5px;
+    line-height: 0;
+  }
+
+  .composer_emoji_tooltip_tab_stickers_content & {
+    vertical-align: top;
+    padding: 2px 10px 2px;
+    overflow-x: scroll;
+    white-space: nowrap;
+    position: relative;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .composer_emoji_tooltip_category_recent {
+      margin: 7px 10px 7px 7px;
+    }
+    .composer_sticker_btn {
+      width: 42px;
+      height: 38px;
+      padding: 3px 5px;
+      vertical-align: top;
+      margin-right: 2px;
+
+      &.active {
+        background: #f2f6fa;
+      }
+    }
+    .composer_sticker_image {
+      max-width: 32px;
+      max-height: 32px;
+    }
+  }
 }
 
 .composer_emoji_tooltip_category {
@@ -2490,8 +2539,8 @@ img.img_fullsize {
 .composer_emoji_tooltip_category_flower.active {background-position: -3px -155px; }
 
 /* Bell */
-.composer_emoji_tooltip_category_bell {background-position: -3px -186px; }
-.composer_emoji_tooltip_category_bell.active {background-position: -3px -217px; }
+.composer_emoji_tooltip_category_bell {background-position: -3px -184px; }
+.composer_emoji_tooltip_category_bell.active {background-position: -3px -215px; }
 
 /* Car */
 .composer_emoji_tooltip_category_car {background-position: -3px -245px; }
@@ -2502,11 +2551,37 @@ img.img_fullsize {
 .composer_emoji_tooltip_category_grid.active {background-position: -3px -335px; }
 
 
+.composer_emoji_tooltip_tabs_wrap {
+  height: 275px;
+  position: relative;
+  overflow: hidden;
+}
+.composer_emoji_tooltip_tabs_contents {
+  position: absolute;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform ease-in-out 0.2s;
+
+  .composer_emoji_tooltip_tabs_stickers_active & {
+    transform: translateX(-284px);
+  }
+}
+.composer_emoji_tooltip_tab_emoji_content,
+.composer_emoji_tooltip_tab_stickers_content {
+  width: 284px;
+  height: 275px;
+  float: left;
+}
+.composer_emoji_tooltip_content_stickers {
+  position: relative;
+}
+.composer_emoji_tooltip_content_wrap {
+  padding: 0 2px 0 8px;
+}
 .composer_emoji_tooltip .scroller_scrollable_container {
   height: 233px;
   position: relative;
 }
-
 .composer_emoji_tooltip_content {
   padding-top: 10px;
   padding-right: 8px;
@@ -2514,7 +2589,7 @@ img.img_fullsize {
 }
 
 a.composer_emoji_btn {
-  margin: 0 1px 0 0;
+  margin: 0 2px 0 0;
   padding: 5px;
   display: block;
   float: left;
@@ -2722,8 +2797,9 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   font-size: 13px;
   color: #444;
   margin: 10px 0 3px;
+  padding: 0 6px;
 
-  &:first-child {
+  .composer_stickerset_wrap:first-child & {
     margin-top: 0;
   }
   &:hover {
@@ -2731,12 +2807,12 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
   }
 }
 .composer_sticker_btn {
-  width: 78px;
-  height: 78px;
-  display: block;
+  width: 66px;
+  height: 66px;
   display: inline-block;
   text-align: center;
   padding: 3px;
+  vertical-align: top;
 
   &:hover {
     background: #f2f6fa;
@@ -2744,9 +2820,9 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
 }
 
 .composer_sticker_image {
-  max-width: 72px;
-  max-height: 72px;
-  vertical-align: top;
+  max-width: 60px;
+  max-height: 60px;
+  vertical-align: middle;
 }
 
 .composer_rich_textarea {

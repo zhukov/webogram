@@ -22,6 +22,17 @@ function checkClick (e, noprevent) {
   return false;
 }
 
+function isInDOM (element, parentNode) {
+  if (!element) {
+    return false;
+  }
+  parentNode = parentNode || document.body;
+  if (element == parentNode) {
+    return true;
+  }
+  return isInDOM(element.parentNode, parentNode)
+}
+
 function checkDragEvent(e) {
   if (!e || e.target && (e.target.tagName == 'IMG' || e.target.tagName == 'A')) return false;
   if (e.dataTransfer && e.dataTransfer.types) {

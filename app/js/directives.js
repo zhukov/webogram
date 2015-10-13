@@ -1426,14 +1426,18 @@ angular.module('myApp.directives', ['myApp.filters'])
           AppStickersManager.getStickers().then(callback);
         },
         getStickerImage: function (element, docID) {
-          if (cachedStickerImages[docID]) {
-            element.replaceWith(cachedStickerImages[docID]);
+          var category = element.attr('data-category');
+          var cached = cachedStickerImages[docID];
+          if (cached && !isInDOM(cached[0])) {
+            cached.attr('data-category', category);
+            element.replaceWith(cached);
             return;
           }
           var scope = $scope.$new(true);
           scope.document = AppDocsManager.getDoc(docID);
           stickerImageCompiled(scope, function (clonedElement) {
             cachedStickerImages[docID] = clonedElement;
+            clonedElement.attr('data-category', category);
             element.replaceWith(clonedElement);
           });
         },
@@ -1449,6 +1453,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$apply(function () {
             $scope.draftMessage.sticker = docID;
           });
+        },
+        langpack: {
+          im_emoji_tab: _('im_emoji_tab'),
+          im_stickers_tab: _('im_stickers_tab')
         }
       });
 
