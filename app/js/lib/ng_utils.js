@@ -1109,6 +1109,8 @@ angular.module('izhukov.utils', [])
 
   var alphaNumericRegExp  = "0-9\_" + alphaCharsRegExp;
 
+  var domainAddChars = "\u00b7";
+
   // Based on Regular Expression for URL validation by Diego Perini
   var urlRegExp =  "((?:https?|ftp)://|mailto:)?" +
     // user:pass authentication
@@ -1118,9 +1120,9 @@ angular.module('izhukov.utils', [])
       "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}" +
     "|" +
       // host name
-      "[" + alphaCharsRegExp + "0-9][" + alphaCharsRegExp + "0-9\-]{0,64}" +
+      "[" + alphaCharsRegExp + "0-9][" + alphaCharsRegExp + domainAddChars + "0-9\-]{0,64}" +
       // domain name
-      "(?:\\.[" + alphaCharsRegExp + "0-9][" + alphaCharsRegExp + "0-9\-]{0,64}){0,10}" +
+      "(?:\\.[" + alphaCharsRegExp + "0-9][" + alphaCharsRegExp + domainAddChars + "0-9\-]{0,64}){0,10}" +
 
       // TLD identifier
       "(?:\\.(xn--[0-9a-z]{2,16}|[" + alphaCharsRegExp + "]{2,24}))" +
