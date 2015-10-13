@@ -9,7 +9,7 @@
 
 angular.module('myApp.services')
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppStickersManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -1397,9 +1397,13 @@ angular.module('myApp.services')
           break;
 
         case 'inputMediaDocument':
+          var doc = AppDocsManager.getDoc(inputMedia.id.id);
+          if (doc.sticker && doc.stickerSetInput) {
+            AppStickersManager.pushPopularSticker(doc.id);
+          };
           media = {
             _: 'messageMediaDocument',
-            'document': AppDocsManager.getDoc(inputMedia.id.id)
+            'document': doc
           };
           break;
       }

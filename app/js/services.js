@@ -2118,6 +2118,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     openStickersetLink: openStickersetLink,
     openStickerset: openStickerset,
     installStickerset: installStickerset,
+    pushPopularSticker: pushPopularSticker,
     getStickers: getStickers,
     getStickerset: getStickerset,
     getStickersImages: getStickersImages
@@ -2128,6 +2129,44 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       started = true;
       setTimeout(getStickers, 1000);
     }
+  }
+
+  function getPopularStickers () {
+    return Storage.get('stickers_popular').then(function (popStickers) {
+      var result = [];
+      if (popStickers && popStickers.length) {
+        for (var i = 0, len = popStickers.length; i < len; i++) {
+          result.push({id: popStickers[i][0], rate: popStickers[i][1]});
+        }
+      };
+      return result;
+    });
+  }
+
+  function pushPopularSticker (id) {
+    getPopularStickers().then(function (popularStickers) {
+      var exists = false;
+      var count = popularStickers.length;
+      var result = [];
+      for (var i = 0; i < count; i++) {
+        if (popularStickers[i].id == id) {
+          exists = true;
+          popularStickers[i].rate++;
+        }
+        result.push([popularStickers[i].id, popularStickers[i].rate]);
+      }
+      if (exists) {
+        result.sort(function (a, b) {
+          return b[1] - a[1];
+        });
+      } else {
+        if (result.length > 15) {
+          result = result.slice(0, 15);
+        }
+        result.push([id, 1]);
+      }
+      ConfigStorage.set({stickers_popular: result});
+    });
   }
 
   function processRawStickers(stickers) {
@@ -2162,7 +2201,28 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
 
-    return currentStickersets;
+    return getPopularStickers().then(function (popularStickers) {
+      var resultStickersets = currentStickersets;
+      if (popularStickers.length) {
+        resultStickersets = currentStickersets.slice();
+        var setItems = [];
+        var i, len;
+        for (i = 0, len = popularStickers.length; i < len; i++) {
+          setItems.push(popularStickers[i].id);
+        }
+        resultStickersets.unshift({
+          id: 0,
+          title: _('im_stickers_tab_recent'),
+          short_name: '',
+          installed: true,
+          disabled: false,
+          official: false,
+          docIDs: setItems
+        })
+      }
+
+      return resultStickersets;
+    });
   }
 
   function getStickers (force) {
@@ -3655,7 +3715,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             var toPeerID = AppPeersManager.getPeerID(toPeerString);
             var toChatID = toPeerID < 0 ? -toPeerID : 0;
             AppMessagesManager.startBot(peerID, toChatID, matches[3]).then(function () {
-              $rootScope.$broadcast('history_focus', {toPeerString: toPeerString});
+              $rootScope.$broadcast('history_focus', {peerString: toPeerString});
             });
           });
           return true;
@@ -3676,6 +3736,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (matches = url.match(/^addstickers\?set=(.+)$/)) {
       AppStickersManager.openStickersetLink(matches[1]);
+      return true;
+    }
+
+    if (matches = url.match(/^msg_url\?url=(.+)(?:&text=(.*))?$/)) {
+      PeersSelectService.selectPeer({
+        confirm_type: 'SHARE_URL'
+      }).then(function (toPeerString) {
+        var url = decodeURIComponent(matches[1]);
+        var text = matches[3] ? decodeURIComponent(matches[3]) : '';
+        $rootScope.$broadcast('history_focus', {peerString: toPeerString, shareUrl: url, shareText: text});
+      });
       return true;
     }
 

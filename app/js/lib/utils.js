@@ -22,6 +22,17 @@ function checkClick (e, noprevent) {
   return false;
 }
 
+function isInDOM (element, parentNode) {
+  if (!element) {
+    return false;
+  }
+  parentNode = parentNode || document.body;
+  if (element == parentNode) {
+    return true;
+  }
+  return isInDOM(element.parentNode, parentNode)
+}
+
 function checkDragEvent(e) {
   if (!e || e.target && (e.target.tagName == 'IMG' || e.target.tagName == 'A')) return false;
   if (e.dataTransfer && e.dataTransfer.types) {
@@ -218,9 +229,12 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
   }
 }
 
-function setRichFocus(field, selectNode) {
+function setRichFocus(field, selectNode, noCollapse) {
   field.focus();
-  if (selectNode && selectNode.parentNode == field && !selectNode.nextSibling) {
+  if (selectNode &&
+      selectNode.parentNode == field &&
+      !selectNode.nextSibling &&
+      !noCollapse) {
     field.removeChild(selectNode);
     selectNode = null;
   }
@@ -231,7 +245,9 @@ function setRichFocus(field, selectNode) {
     } else {
       range.selectNodeContents(field);
     }
-    range.collapse(false);
+    if (!noCollapse) {
+      range.collapse(false);
+    }
 
     var sel = window.getSelection();
     sel.removeAllRanges();
@@ -240,7 +256,9 @@ function setRichFocus(field, selectNode) {
   else if (document.body.createTextRange !== undefined) {
     var textRange = document.body.createTextRange();
     textRange.moveToElementText(selectNode || field);
-    textRange.collapse(false);
+    if (!noCollapse) {
+      textRange.collapse(false);
+    }
     textRange.select();
   }
 }

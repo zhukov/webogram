@@ -1426,14 +1426,18 @@ angular.module('myApp.directives', ['myApp.filters'])
           AppStickersManager.getStickers().then(callback);
         },
         getStickerImage: function (element, docID) {
-          if (cachedStickerImages[docID]) {
-            element.replaceWith(cachedStickerImages[docID]);
+          var category = element.attr('data-category');
+          var cached = cachedStickerImages[docID];
+          if (cached && !isInDOM(cached[0])) {
+            cached.attr('data-category', category);
+            element.replaceWith(cached);
             return;
           }
           var scope = $scope.$new(true);
           scope.document = AppDocsManager.getDoc(docID);
           stickerImageCompiled(scope, function (clonedElement) {
             cachedStickerImages[docID] = clonedElement;
+            clonedElement.attr('data-category', category);
             element.replaceWith(clonedElement);
           });
         },
@@ -1449,6 +1453,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$apply(function () {
             $scope.draftMessage.sticker = docID;
           });
+        },
+        langpack: {
+          im_emoji_tab: _('im_emoji_tab'),
+          im_stickers_tab: _('im_stickers_tab')
         }
       });
 
@@ -1570,15 +1578,21 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('ui_peer_change', composer.resetTyping.bind(composer));
       $scope.$on('ui_peer_draft', function (e, options) {
+        options = options || {};
         var isBroadcast = $scope.draftMessage.isBroadcast;
         composer.setPlaceholder(_(isBroadcast ? 'im_broadcast_field_placeholder_raw' : 'im_message_field_placeholder_raw'));
 
-        if (richTextarea) {
-          composer.setValue($scope.draftMessage.text || '');
+        if (options.customSelection) {
+          composer.setFocusedValue(options.customSelection);
           updateHeight();
-        }
-        if (!Config.Navigator.touch || options && options.focus) {
-          composer.focus();
+        } else {
+          if (richTextarea) {
+            composer.setValue($scope.draftMessage.text || '');
+            updateHeight();
+          }
+          if (!Config.Navigator.touch || options && options.focus) {
+            composer.focus();
+          }
         }
         onContentLoaded(function () {
           composer.checkAutocomplete(true);
