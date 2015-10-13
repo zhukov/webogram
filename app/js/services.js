@@ -2897,6 +2897,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   var titleBackup = document.title,
       titleChanged = false,
+      titleCnt = 0,
       titlePromise;
   var prevFavicon;
 
@@ -2916,8 +2917,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         titleBackup = document.title;
 
         titlePromise = $interval(function () {
-          var time = tsNow();
-          if (!notificationsCount || time % 2000 > 1000) {
+          if (!notificationsCount || ((titleCnt++) % 2)) {
             if (titleChanged) {
               titleChanged = false;
               document.title = titleBackup;
@@ -3148,14 +3148,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     };
 
     notification.onclose = function () {
-      delete notificationsShown[key];
-      notificationsClear();
+      if (!notification.hidden) {
+        delete notificationsShown[key];
+        notificationsClear();
+      }
     };
 
     if (notification.show) {
       notification.show();
     }
     notificationsShown[key] = notification;
+
+    if (!Config.Navigator.mobile) {
+      setTimeout(function () {
+        notificationHide(key)
+      }, 8000);
+    }
   };
 
   function playSound (volume) {
@@ -3186,6 +3194,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         else if (notificationsMsSiteMode &&
                  notification.index == notificationIndex) {
           window.external.msSiteModeClearIconOverlay();
+        }
+      } catch (e) {}
+      delete notificationsCount[key];
+    }
+  }
+
+  function notificationHide (key) {
+    var notification = notificationsShown[key];
+    if (notification) {
+      try {
+        if (notification.close) {
+          notification.hidden = true;
+          notification.close();
         }
       } catch (e) {}
       delete notificationsCount[key];
