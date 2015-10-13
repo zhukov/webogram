@@ -1125,7 +1125,7 @@ td.visible-print,th.visible-print{display:table-cell!important}}
 @media print{.visible-print-inline-block{display:inline-block!important}}
 @media print{.hidden-print{display:none!important}}
 html{display:none;background:#e7ebf0;overflow:visible}
-body{color:#000;background:0 0;font:12px/18px 'Open Sans',"Lucida Grande","Lucida Sans Unicode",Arial,Helvetica,Verdana,sans-serif;overflow:visible;overflow-x:hidden}
+body{color:#000;background:0 0;font:12px/18px 'Open Sans',"Lucida Grande","Lucida Sans Unicode",Arial,Helvetica,Verdana,sans-serif;overflow:hidden}
 body.non_osx{font:13px/18px Tahoma,sans-serif,Arial,Helvetica}
 h1,h2,h3,h4,h5{color:#222}
 .non_osx h4{font-size:17px}
@@ -1303,6 +1303,10 @@ a.tg_search_clear{position:absolute;right:0;margin-top:-40px;width:34px;height:3
 a.tg_search_clear:hover{opacity:1}
 i.icon-search-clear{display:inline-block;color:#999;width:13px;height:13px;margin:10px 0 0 11px;vertical-align:text-top;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-15px -192px}
 .is_2x i.icon-search-clear{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
+i.icon-verified{display:inline-block;width:17px;height:17px;vertical-align:text-top;background-image:url(../img/icons/ProfileIcons.png);background-repeat:no-repeat;background-position:-10px -373px}
+.is_2x i.icon-verified{background-image:url(../img/icons/ProfileIcons_2x.png);background-size:40px 420px}
+.im_dialogs_scrollable_wrap i.icon-verified{display:none}
+.im_dialogs_col_search i.icon-verified{display:inline-block}
 .im_dialogs_tabs_wrap{display:none}
 .im_dialogs_tabs{padding:4px 0;position:relative}
 .im_dialogs_tab{color:#8c8c8c;background:#f2f2f2;height:30px;text-align:center;overflow:hidden;width:50%;float:left;padding:7px 0}
@@ -1521,31 +1525,50 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_insert_btn{display:block;position:absolute;right:3px;top:2px;cursor:pointer;padding:0;width:22px;height:22px;margin-top:1px}
 .icon-emoji{display:inline-block;width:22px;height:22px;vertical-align:top;opacity:.8;background-image:url(../img/icons/General.png);background-repeat:no-repeat;background-position:-9px -335px}
 .is_2x .icon-emoji{background-image:url(../img/icons/General_2x.png);background-size:40px 848px}
-.composer_emoji_tooltip{display:none;position:absolute;z-index:999;width:254px;margin-left:-116px;margin-top:-245px;border:1px solid #dfdfdf;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.1);-moz-box-shadow:0 1px 1px rgba(0,0,0,.1);box-shadow:0 1px 1px rgba(0,0,0,.1);background:#fff;padding:5px 2px 5px 8px}
+.composer_emoji_tooltip{display:none;position:absolute;z-index:999;width:286px;margin-left:-133px;margin-top:-330px;border:1px solid #dfdfdf;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.1);-moz-box-shadow:0 1px 1px rgba(0,0,0,.1);box-shadow:0 1px 1px rgba(0,0,0,.1);background:#fff;padding:0}
 .composer_emoji_tooltip_shown{display:block}
 .composer_emoji_tooltip_tail{position:absolute;bottom:-14px;left:50%;margin-left:-13px;overflow:hidden;width:26px;height:14px}
 .icon-tooltip-tail{background:#fff;width:18px;height:18px;display:inline-block;border:1px solid #dfdfdf;border-width:0 1px 1px 0;-webkit-border-radius:2px;-moz-border-radius:2px;border-radius:2px;position:relative;top:-8px;left:4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg);-webkit-box-shadow:1px 1px 1px rgba(0,0,0,.1);-moz-box-shadow:1px 1px 1px rgba(0,0,0,.1);box-shadow:1px 1px 1px rgba(0,0,0,.1)}
-.composer_emoji_tooltip_tabs{width:100%;margin:5px 0 2px}
-.composer_emoji_tooltip_tab{line-height:0;color:#fff;display:inline-block;width:24px;height:29px;cursor:pointer;opacity:.7;margin:0 5px 0 4px;background-image:url(../img/icons/IconsetSmiles.png);background-repeat:no-repeat}
-.is_2x .composer_emoji_tooltip_tab{background-image:url(../img/icons/IconsetSmiles_2x.png);background-size:42px 470px}
-.composer_emoji_tooltip_tab.active{opacity:1}
-.composer_emoji_tooltip_tab_recent{background-position:-9px -306px}
-.composer_emoji_tooltip_tab_recent.active{background-position:-9px -277px}
-.composer_emoji_tooltip_tab_smile{background-position:-9px -34px}
-.composer_emoji_tooltip_tab_smile.active{background-position:-9px -5px}
-.composer_emoji_tooltip_tab_flower{background-position:-9px -145px}
-.composer_emoji_tooltip_tab_flower.active{background-position:-9px -118px}
-.composer_emoji_tooltip_tab_bell{background-position:-9px -89px}
-.composer_emoji_tooltip_tab_bell.active{background-position:-9px -61px}
-.composer_emoji_tooltip_tab_car{background-position:-9px -196px}
-.composer_emoji_tooltip_tab_car.active{background-position:-9px -170px}
-.composer_emoji_tooltip_tab_grid{background-position:-9px -248px}
-.composer_emoji_tooltip_tab_grid.active{background-position:-9px -222px}
-.composer_emoji_tooltip_tab_stickers{background-position:-9px -361px}
-.composer_emoji_tooltip_tab_stickers.active{background-position:-9px -333px}
-.composer_emoji_tooltip .scroller_scrollable_container{height:174px;position:relative}
-.composer_emoji_tooltip_content{padding-right:8px;outline:0!important}
-a.composer_emoji_btn{margin:0 1px 0 0;padding:6px;display:block;float:left;border-radius:2px}
+.composer_emoji_tooltip_tabs{-webkit-box-shadow:0 1px 0 0 rgba(0,0,0,.1);-moz-box-shadow:0 1px 0 0 rgba(0,0,0,.1);box-shadow:0 1px 0 0 rgba(0,0,0,.1)}
+.composer_emoji_tooltip_tab{cursor:pointer;display:inline-block;line-height:35px;text-align:center;width:50%;text-transform:uppercase;font-weight:700;transition:color ease-in-out .2s}
+.composer_emoji_tooltip_tab:active,.composer_emoji_tooltip_tab:focus,.composer_emoji_tooltip_tab:hover{text-decoration:none}
+.composer_emoji_tooltip_tab_emoji,.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_stickers{color:#53a9ea}
+.composer_emoji_tooltip_tab_stickers,.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_emoji{color:#999}
+.composer_emoji_tooltip_tab_shadow{width:50%;height:1px;background:#53a9ea;-webkit-box-shadow:0 1px 0 0 #53a9ea;-moz-box-shadow:0 1px 0 0 #53a9ea;box-shadow:0 1px 0 0 #53a9ea;transform:translateX(0);transition:transform ease-in-out .2s}
+.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_shadow{transform:translateX(100%)}
+.composer_emoji_tooltip_categories{width:100%;line-height:0}
+.composer_emoji_tooltip_tab_emoji_content .composer_emoji_tooltip_categories{width:100%;margin:9px 0 12px;padding:0 5px;line-height:0}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories{vertical-align:top;padding:2px 10px;overflow-x:scroll;white-space:nowrap;position:relative}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories::-webkit-scrollbar{display:none}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_emoji_tooltip_category_recent{margin:7px 10px 7px 7px}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn{width:42px;height:38px;padding:3px 5px;vertical-align:top;margin-right:2px}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn.active{background:#f2f6fa}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_image{max-width:32px;max-height:32px}
+.composer_emoji_tooltip_category{line-height:0;color:#fff;display:inline-block;width:21px;height:21px;cursor:pointer;opacity:.3;margin:0 12px;background-image:url(../img/icons/IconsetSmiles.png);background-repeat:no-repeat}
+.is_2x .composer_emoji_tooltip_category{background-image:url(../img/icons/IconsetSmiles_2x.png);background-size:27px 362px}
+.composer_emoji_tooltip_category:hover{opacity:.4}
+.composer_emoji_tooltip_category.active,.composer_emoji_tooltip_category.active:hover{opacity:1}
+.composer_emoji_tooltip_category_recent{background-position:-3px 0}
+.composer_emoji_tooltip_category_recent.active{background-position:-3px -31px}
+.composer_emoji_tooltip_category_smile{background-position:-3px -62px}
+.composer_emoji_tooltip_category_smile.active{background-position:-3px -93px}
+.composer_emoji_tooltip_category_flower{background-position:-3px -124px}
+.composer_emoji_tooltip_category_flower.active{background-position:-3px -155px}
+.composer_emoji_tooltip_category_bell{background-position:-3px -184px}
+.composer_emoji_tooltip_category_bell.active{background-position:-3px -215px}
+.composer_emoji_tooltip_category_car{background-position:-3px -245px}
+.composer_emoji_tooltip_category_car.active{background-position:-3px -276px}
+.composer_emoji_tooltip_category_grid{background-position:-3px -304px}
+.composer_emoji_tooltip_category_grid.active{background-position:-3px -335px}
+.composer_emoji_tooltip_tabs_wrap{height:275px;position:relative;overflow:hidden}
+.composer_emoji_tooltip_tabs_contents{position:absolute;width:200%;transform:translateX(0);transition:transform ease-in-out .2s}
+.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tabs_contents{transform:translateX(-284px)}
+.composer_emoji_tooltip_tab_emoji_content,.composer_emoji_tooltip_tab_stickers_content{width:284px;height:275px;float:left}
+.composer_emoji_tooltip_content_stickers{position:relative}
+.composer_emoji_tooltip_content_wrap{padding:0 2px 0 8px}
+.composer_emoji_tooltip .scroller_scrollable_container{height:233px;position:relative}
+.composer_emoji_tooltip_content{padding-top:10px;padding-right:8px;outline:0!important}
+a.composer_emoji_btn{margin:0 2px 0 0;padding:5px;display:block;float:left;border-radius:2px}
 a.composer_emoji_btn:hover{background-color:#edf2f5}
 .emoji{-moz-box-orient:vertical;display:inline-block;vertical-align:baseline;height:18px;width:18px;background-repeat:no-repeat;text-indent:-9999px;border:0}
 .emoji-spritesheet-0{background-size:486px 126px;background-image:url(../img/emojisprite_0.png)}
@@ -1582,16 +1605,17 @@ span.composer_user_photo .peer_initials{line-height:32px;font-size:14px}
 .composer_dropdown .composer_command_desc{display:inline;color:grey;padding-left:7px;font-weight:400;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 a.composer_command_option.composer_autocomplete_option_active .composer_command_desc,a.composer_command_option:hover .composer_command_desc{color:#698192}
 .composer_command_desc .emoji{vertical-align:text-bottom}
-.composer_stickerset_title{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:700;font-size:13px;color:#444;margin:10px 0 3px}
-.composer_stickerset_title:first-child{margin-top:0}
+.composer_stickerset_title{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:700;font-size:13px;color:#444;margin:10px 0 3px;padding:0 6px}
+.composer_stickerset_wrap:first-child .composer_stickerset_title{margin-top:0}
 .composer_stickerset_title:hover{color:#444}
-.composer_sticker_btn{width:78px;height:78px;display:block;display:inline-block;text-align:center;padding:3px}
+.composer_sticker_btn{width:66px;height:66px;display:inline-block;text-align:center;padding:3px;vertical-align:top}
 .composer_sticker_btn:hover{background:#f2f6fa}
-.composer_sticker_image{max-width:72px;max-height:72px;vertical-align:top}
+.composer_sticker_image{max-width:60px;max-height:60px;vertical-align:middle}
 .composer_rich_textarea{font-size:12px;margin-bottom:10px;padding:6px;min-height:38px;height:auto;width:auto;max-height:284px;overflow:auto;line-height:17px;border:1px solid #d2dbe3;border-radius:2px;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;-ms-box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;word-wrap:break-word;-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
-.composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab;display:block;margin-top:-1px;margin-left:1px}
+.composer_rich_textarea:empty:before{content:attr(placeholder);color:#9aa2ab;display:block;margin-top:-1px;margin-left:1px;pointer-events:none}
 .composer_rich_textarea:empty:active:before,.composer_rich_textarea:empty:focus:before{opacity:.75}
 .composer_rich_textarea img{width:20px;height:20px;vertical-align:middle;margin:-3px 0 0}
+@-moz-document url-prefix(){.composer_rich_textarea:empty:active:before,.composer_rich_textarea:empty:focus:before{display:none}}
 .composer_command_btn{display:block;position:absolute;right:37px;top:4px;cursor:pointer;padding:0;width:20px;height:20px}
 .icon-slash{display:inline-block;width:20px;height:20px;vertical-align:top;opacity:.8;background-image:url(../img/icons/General.png);background-repeat:no-repeat;background-position:-10px -790px}
 .is_2x .icon-slash{background-image:url(../img/icons/General_2x.png);background-size:40px 848px}

@@ -432,6 +432,8 @@
 .composer_dropdown_wrap .nano > .nano-pane {
   background: rgba(255, 255, 255, 0);
   right: -2px;
+  top: 5px;
+  bottom: 5px;
 }
 .composer_emoji_tooltip .nano > .nano-pane > .nano-slider,
 .composer_dropdown_wrap .nano > .nano-pane > .nano-slider {

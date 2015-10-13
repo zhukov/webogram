@@ -1,13 +1,10 @@
 CACHE MANIFEST
-# Time: Thu Oct 08 2015 14:48:27 GMT+0300 (MSK)
+# Time: Tue Oct 13 2015 17:34:15 GMT+0200 (CEST)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
-css/app.css
-css/desktop.css
-css/mobile.css
 img/Telegram.png
 img/Telegram72.png
 img/Telegram72_2x.png
@@ -22,9 +19,12 @@ img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
 img/sound_a.mp3
-js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
+css/app.css
+css/desktop.css
+css/mobile.css
+js/app.js
 img/changelog/card_wecandoit.png
 img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
