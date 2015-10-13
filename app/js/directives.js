@@ -1597,7 +1597,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           composer.checkAutocomplete(true);
         });
-        if (emojiTooltip) {
+        if (emojiTooltip && Config.Mobile) {
           emojiTooltip.hide();
         }
       });

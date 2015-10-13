@@ -180,7 +180,7 @@ EmojiTooltip.prototype.onMouseEnter = function (triggerShow) {
     delete this.hideTimeout;
   }
   else if (triggerShow && !this.showTimeout) {
-    this.showTimeout = setTimeout(this.show.bind(this), 200);
+    this.showTimeout = setTimeout(this.show.bind(this), 100);
   }
 };
 
@@ -189,7 +189,7 @@ EmojiTooltip.prototype.onMouseLeave = function (triggerUnshow) {
     var self = this;
     this.hideTimeout = setTimeout(function () {
       self.hide();
-    }, 400);
+    }, 600);
   }
   else if (triggerUnshow && this.showTimeout) {
     clearTimeout(this.showTimeout);
@@ -218,12 +218,12 @@ EmojiTooltip.prototype.createTooltip = function () {
           <div class="composer_emoji_tooltip_content composer_emoji_tooltip_content_emoji clearfix"></div>\
         </div>\
         <div class="composer_emoji_tooltip_categories">\
-          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_recent active" data-category="0"></a>\
-          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_smile" data-category="1"></a>\
-          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_flower" data-category="2"></a>\
-          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_bell" data-category="3"></a>\
-          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_car" data-category="4"></a>\
-          <a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_grid" data-category="5"></a>\
+          <a class="composer_emoji_tooltip_category active" data-category="0"><i class="composer_emoji_tooltip_category_recent"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="1"><i class="composer_emoji_tooltip_category_smile"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="2"><i class="composer_emoji_tooltip_category_flower"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="3"><i class="composer_emoji_tooltip_category_bell"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="4"><i class="composer_emoji_tooltip_category_car"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="5"><i class="composer_emoji_tooltip_category_grid"></i></a>\
         </div>\
       </div>\
       <div class="composer_emoji_tooltip_tab_stickers_content">\
@@ -449,7 +449,7 @@ EmojiTooltip.prototype.updateStickersContents = function (force) {
 
   var scrollStickers = function () {
     var scrollTop = self.cat ? self.stickersetPositions[self.cat][0] : 0;
-    self.stickersScroller.scrollTo(scrollTop, force ? 0 : 100);
+    self.stickersScroller.scrollTo(scrollTop, force ? 0 : 200);
   }
 
   if (!force && self.stickersetPositions.length) {
@@ -477,7 +477,7 @@ EmojiTooltip.prototype.updateStickersContents = function (force) {
         );
       }
       if (!set.id) {
-        categoriesHtml.push('<a class="composer_emoji_tooltip_category composer_emoji_tooltip_category_recent" data-category="0"></a>');
+        categoriesHtml.push('<a class="composer_emoji_tooltip_category active" data-category="0"><i class="composer_emoji_tooltip_category_recent"></i></a>');
       } else {
         categoriesHtml.push('<a class="composer_sticker_btn" data-sticker="' + set.docIDs[0] + '" data-category="' + i + '"></a>');
       }
@@ -602,6 +602,7 @@ EmojiTooltip.prototype.show = function () {
 };
 
 EmojiTooltip.prototype.hide = function () {
+  return;
   if (this.tooltipEl) {
     this.tooltipEl.removeClass('composer_emoji_tooltip_shown');
     this.btnEl.removeClass('composer_emoji_insert_btn_on');
@@ -1547,7 +1548,7 @@ Scroller.prototype.scrollTo = function (scrollTop, animation, cb) {
   if (animation > 0) {
     var self = this;
     this.isAnimatedScroll = true;
-    this.scrollable.animate({scrollTop: scrollTop}, function () {
+    this.scrollable.animate({scrollTop: scrollTop}, animation, function () {
       delete self.isAnimatedScroll;
       if (self.useNano) {
         $(self.scroller).nanoScroller({flash: true});

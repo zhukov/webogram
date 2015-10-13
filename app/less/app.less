@@ -2419,14 +2419,12 @@ img.img_fullsize {
   -webkit-box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1);
   -moz-box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1);
   box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.1);
-
-  // border-bottom: 1px solid #e5e5e5;
-  // border-color: rgba(0,0,0,0.1);
+  padding-top: 2px;
 }
 .composer_emoji_tooltip_tab {
   cursor: pointer;
   display: inline-block;
-  line-height: 35px;
+  line-height: 33px;
   text-align: center;
   width: 50%;
   text-transform: uppercase;
@@ -2468,14 +2466,15 @@ img.img_fullsize {
 
   .composer_emoji_tooltip_tab_emoji_content & {
     width: 100%;
-    margin: 9px 0 12px;
+    margin: 0 0 3px;
     padding: 0 5px;
     line-height: 0;
   }
 
   .composer_emoji_tooltip_tab_stickers_content & {
     vertical-align: top;
-    padding: 2px 10px 2px;
+    padding: 0 5px;
+    margin: 0 0 3px;
     overflow-x: scroll;
     white-space: nowrap;
     position: relative;
@@ -2484,23 +2483,16 @@ img.img_fullsize {
       display: none;
     }
 
-    .composer_emoji_tooltip_category_recent {
-      margin: 7px 10px 7px 7px;
-    }
     .composer_sticker_btn {
-      width: 42px;
-      height: 38px;
-      padding: 3px 5px;
+      width: 36px;
+      height: 34px;
+      padding: 3px 4px;
       vertical-align: top;
-      margin-right: 2px;
-
-      &.active {
-        background: #f2f6fa;
-      }
+      margin: 4px 2px 0 0;
     }
     .composer_sticker_image {
-      max-width: 32px;
-      max-height: 32px;
+      max-width: 28px;
+      max-height: 28px;
     }
   }
 }
@@ -2509,13 +2501,10 @@ img.img_fullsize {
   line-height: 0;
   color: white;
   display: inline-block;
-  width: 21px;
-  height: 21px;
   cursor: pointer;
   opacity: 0.3;
-  margin: 0 12px 0 12px;
-
-  .image-2x('../img/icons/IconsetSmiles.png', 27px, 362px);
+  padding: 9px 12px;
+  // margin: 0 12px 0 12px;
 
   &:hover {
     opacity: 0.4;
@@ -2526,29 +2515,37 @@ img.img_fullsize {
   }
 }
 
+.composer_emoji_tooltip_category i {
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+
+  .image-2x('../img/icons/IconsetSmiles.png', 27px, 362px);
+}
+
 /* Recent */
 .composer_emoji_tooltip_category_recent {background-position: -3px 0; }
-.composer_emoji_tooltip_category_recent.active {background-position: -3px -31px; }
+.active .composer_emoji_tooltip_category_recent {background-position: -3px -31px; }
 
 /* Smile */
 .composer_emoji_tooltip_category_smile {background-position: -3px -62px; }
-.composer_emoji_tooltip_category_smile.active {background-position: -3px -93px; }
+.active .composer_emoji_tooltip_category_smile {background-position: -3px -93px; }
 
 /* Flower */
 .composer_emoji_tooltip_category_flower {background-position: -3px -124px; }
-.composer_emoji_tooltip_category_flower.active {background-position: -3px -155px; }
+.active .composer_emoji_tooltip_category_flower {background-position: -3px -155px; }
 
 /* Bell */
 .composer_emoji_tooltip_category_bell {background-position: -3px -184px; }
-.composer_emoji_tooltip_category_bell.active {background-position: -3px -215px; }
+.active .composer_emoji_tooltip_category_bell {background-position: -3px -215px; }
 
 /* Car */
 .composer_emoji_tooltip_category_car {background-position: -3px -245px; }
-.composer_emoji_tooltip_category_car.active {background-position: -3px -276px; }
+.active .composer_emoji_tooltip_category_car {background-position: -3px -276px; }
 
 /* Grid */
 .composer_emoji_tooltip_category_grid {background-position: -3px -304px; }
-.composer_emoji_tooltip_category_grid.active {background-position: -3px -335px; }
+.active .composer_emoji_tooltip_category_grid {background-position: -3px -335px; }
 
 
 .composer_emoji_tooltip_tabs_wrap {
