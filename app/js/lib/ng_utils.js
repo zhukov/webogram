@@ -1532,7 +1532,10 @@ angular.module('izhukov.utils', [])
             url = 'http://' + url;
           }
           var tgMeMatch;
-          if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+          if (entity._ == 'messageEntityTextUrl') {
+            url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
+          }
+          else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
             var path = tgMeMatch[1].split('/');
             switch (path[0]) {
               case 'joinchat':

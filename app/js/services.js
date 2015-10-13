@@ -3684,7 +3684,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, PeersSelectService, AppStickersManager) {
+.service('LocationParamsService', function ($rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, PeersSelectService, AppStickersManager, ErrorService) {
 
   var tgAddrRegExp = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -3746,6 +3746,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         var url = decodeURIComponent(matches[1]);
         var text = matches[2] ? decodeURIComponent(matches[2]) : '';
         $rootScope.$broadcast('history_focus', {peerString: toPeerString, shareUrl: url, shareText: text});
+      });
+      return true;
+    }
+
+    if (inner &&
+        (matches = url.match(/^unsafe_url\?url=([^&]+)/))) {
+      var url = decodeURIComponent(matches[1]);
+      ErrorService.confirm({
+        type: 'JUMP_EXT_URL',
+        url: url
+      }).then(function () {
+        window.open(url, '_blank');
       });
       return true;
     }
