@@ -441,6 +441,14 @@
   background: rgba(0, 0, 0, 0.17);
   margin: 0 3px 0 4px;
 }
+@media (max-width: 940px) {
+  .composer_emoji_tooltip {
+    margin-left: -245px;
+  }
+  .composer_emoji_tooltip_tail {
+    left: 90%;
+  }
+}
 .composer_dropdown_wrap .nano > .nano-pane {
   top: 3px;
   bottom: 3px;

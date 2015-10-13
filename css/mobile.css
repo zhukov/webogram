@@ -1141,38 +1141,20 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .composer_emoji_tooltip {
   margin-left: 6px;
-  margin-top: -170px;
-  width: 262px;
+  margin-top: -230px;
   z-index: 10000;
-  padding: 5px 2px 5px 5px;
-}
-.composer_emoji_tooltip .composer_emoji_tooltip_content_wrap {
-  height: 106px;
-}
-.composer_emoji_tooltip_tabs {
-  margin-bottom: 3px;
-}
-.composer_emoji_tooltip .composer_emoji_tooltip_content .composer_emoji_btn {
-  padding: 5px;
-  margin: -1px 0 0 -1px;
-}
-.composer_emoji_tooltip_tab {
-  margin: 0 5px;
 }
 .composer_emoji_tooltip .scroller_native_scrollable {
-  height: 106px;
+  height: 140px;
 }
-.icon-tooltip-tail {
+.composer_emoji_tooltip_tabs_wrap,
+.composer_emoji_tooltip_tab_emoji_content,
+.composer_emoji_tooltip_tab_stickers_content {
+  height: 182px;
+}
+.composer_emoji_tooltip_tail {
   display: none;
-}
-.composer_sticker_btn {
-  width: 80px;
-  height: 80px;
-  padding: 3px;
-}
-.composer_sticker_image {
-  max-width: 64px;
-  max-height: 64px;
+  left: 18px;
 }
 .composer_dropdown_wrap {
   box-shadow: none;

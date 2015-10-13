@@ -222,6 +222,7 @@
 	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
 	"confirm_modal_revoke_channel_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the channel using it.",
 	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll members will be removed and all messages will be lost.",
+	"confirm_modal_jump_ext_url_md": "Open this link?\n\n{url}",
 
 	"confirm_modal_are_u_sure": "Are you sure?",
 

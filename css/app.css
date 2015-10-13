@@ -1529,37 +1529,36 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_tooltip_shown{display:block}
 .composer_emoji_tooltip_tail{position:absolute;bottom:-14px;left:50%;margin-left:-13px;overflow:hidden;width:26px;height:14px}
 .icon-tooltip-tail{background:#fff;width:18px;height:18px;display:inline-block;border:1px solid #dfdfdf;border-width:0 1px 1px 0;-webkit-border-radius:2px;-moz-border-radius:2px;border-radius:2px;position:relative;top:-8px;left:4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg);-webkit-box-shadow:1px 1px 1px rgba(0,0,0,.1);-moz-box-shadow:1px 1px 1px rgba(0,0,0,.1);box-shadow:1px 1px 1px rgba(0,0,0,.1)}
-.composer_emoji_tooltip_tabs{-webkit-box-shadow:0 1px 0 0 rgba(0,0,0,.1);-moz-box-shadow:0 1px 0 0 rgba(0,0,0,.1);box-shadow:0 1px 0 0 rgba(0,0,0,.1)}
-.composer_emoji_tooltip_tab{cursor:pointer;display:inline-block;line-height:35px;text-align:center;width:50%;text-transform:uppercase;font-weight:700;transition:color ease-in-out .2s}
+.composer_emoji_tooltip_tabs{-webkit-box-shadow:0 1px 0 0 rgba(0,0,0,.1);-moz-box-shadow:0 1px 0 0 rgba(0,0,0,.1);box-shadow:0 1px 0 0 rgba(0,0,0,.1);padding-top:2px}
+.composer_emoji_tooltip_tab{cursor:pointer;display:inline-block;line-height:33px;text-align:center;width:50%;text-transform:uppercase;font-weight:700;transition:color ease-in-out .2s}
 .composer_emoji_tooltip_tab:active,.composer_emoji_tooltip_tab:focus,.composer_emoji_tooltip_tab:hover{text-decoration:none}
 .composer_emoji_tooltip_tab_emoji,.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_stickers{color:#53a9ea}
 .composer_emoji_tooltip_tab_stickers,.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_emoji{color:#999}
 .composer_emoji_tooltip_tab_shadow{width:50%;height:1px;background:#53a9ea;-webkit-box-shadow:0 1px 0 0 #53a9ea;-moz-box-shadow:0 1px 0 0 #53a9ea;box-shadow:0 1px 0 0 #53a9ea;transform:translateX(0);transition:transform ease-in-out .2s}
 .composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_shadow{transform:translateX(100%)}
 .composer_emoji_tooltip_categories{width:100%;line-height:0}
-.composer_emoji_tooltip_tab_emoji_content .composer_emoji_tooltip_categories{width:100%;margin:9px 0 12px;padding:0 5px;line-height:0}
-.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories{vertical-align:top;padding:2px 10px;overflow-x:scroll;white-space:nowrap;position:relative}
+.composer_emoji_tooltip_tab_emoji_content .composer_emoji_tooltip_categories{width:100%;margin:0 0 3px;padding:0 5px 15px;line-height:0}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories{vertical-align:top;padding:0 5px 15px;margin:0 0 3px;overflow-x:scroll;white-space:nowrap;position:relative}
 .composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories::-webkit-scrollbar{display:none}
-.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_emoji_tooltip_category_recent{margin:7px 10px 7px 7px}
-.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn{width:42px;height:38px;padding:3px 5px;vertical-align:top;margin-right:2px}
-.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn.active{background:#f2f6fa}
-.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_image{max-width:32px;max-height:32px}
-.composer_emoji_tooltip_category{line-height:0;color:#fff;display:inline-block;width:21px;height:21px;cursor:pointer;opacity:.3;margin:0 12px;background-image:url(../img/icons/IconsetSmiles.png);background-repeat:no-repeat}
-.is_2x .composer_emoji_tooltip_category{background-image:url(../img/icons/IconsetSmiles_2x.png);background-size:27px 362px}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn{width:36px;height:34px;padding:3px 4px;vertical-align:top;margin:4px 2px 0 0}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_image{max-width:28px;max-height:28px}
+.composer_emoji_tooltip_category{line-height:0;color:#fff;display:inline-block;cursor:pointer;opacity:.3;padding:9px 12px}
 .composer_emoji_tooltip_category:hover{opacity:.4}
 .composer_emoji_tooltip_category.active,.composer_emoji_tooltip_category.active:hover{opacity:1}
+.composer_emoji_tooltip_category i{display:inline-block;width:21px;height:21px;background-image:url(../img/icons/IconsetSmiles.png);background-repeat:no-repeat}
+.is_2x .composer_emoji_tooltip_category i{background-image:url(../img/icons/IconsetSmiles_2x.png);background-size:27px 362px}
 .composer_emoji_tooltip_category_recent{background-position:-3px 0}
-.composer_emoji_tooltip_category_recent.active{background-position:-3px -31px}
+.active .composer_emoji_tooltip_category_recent{background-position:-3px -31px}
 .composer_emoji_tooltip_category_smile{background-position:-3px -62px}
-.composer_emoji_tooltip_category_smile.active{background-position:-3px -93px}
+.active .composer_emoji_tooltip_category_smile{background-position:-3px -93px}
 .composer_emoji_tooltip_category_flower{background-position:-3px -124px}
-.composer_emoji_tooltip_category_flower.active{background-position:-3px -155px}
+.active .composer_emoji_tooltip_category_flower{background-position:-3px -155px}
 .composer_emoji_tooltip_category_bell{background-position:-3px -184px}
-.composer_emoji_tooltip_category_bell.active{background-position:-3px -215px}
+.active .composer_emoji_tooltip_category_bell{background-position:-3px -215px}
 .composer_emoji_tooltip_category_car{background-position:-3px -245px}
-.composer_emoji_tooltip_category_car.active{background-position:-3px -276px}
+.active .composer_emoji_tooltip_category_car{background-position:-3px -276px}
 .composer_emoji_tooltip_category_grid{background-position:-3px -304px}
-.composer_emoji_tooltip_category_grid.active{background-position:-3px -335px}
+.active .composer_emoji_tooltip_category_grid{background-position:-3px -335px}
 .composer_emoji_tooltip_tabs_wrap{height:275px;position:relative;overflow:hidden}
 .composer_emoji_tooltip_tabs_contents{position:absolute;width:200%;transform:translateX(0);transition:transform ease-in-out .2s}
 .composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tabs_contents{transform:translateX(-284px)}
