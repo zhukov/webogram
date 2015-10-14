@@ -1816,6 +1816,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return docs[docID] || {_: 'documentEmpty'};
   }
 
+  function hasDoc (docID) {
+    return docs[docID] !== undefined;
+  }
+
   function wrapForHistory (docID) {
     if (docsForHistory[docID] !== undefined) {
       return docsForHistory[docID];
@@ -1984,6 +1988,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   return {
     saveDoc: saveDoc,
     getDoc: getDoc,
+    hasDoc: hasDoc,
     wrapForHistory: wrapForHistory,
     updateDocDownloaded: updateDocDownloaded,
     downloadDoc: downloadDoc,
@@ -2134,9 +2139,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function getPopularStickers () {
     return Storage.get('stickers_popular').then(function (popStickers) {
       var result = [];
+      var i, len, docID;
       if (popStickers && popStickers.length) {
-        for (var i = 0, len = popStickers.length; i < len; i++) {
-          result.push({id: popStickers[i][0], rate: popStickers[i][1]});
+        for (i = 0, len = popStickers.length; i < len; i++) {
+          docID = popStickers[i][0];
+          if (AppDocsManager.hasDoc(docID)) {
+            result.push({id: docID, rate: popStickers[i][1]});
+          }
         }
       };
       return result;
@@ -2212,7 +2221,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         resultStickersets.unshift({
           id: 0,
-          title: _('im_stickers_tab_recent'),
+          title: _('im_stickers_tab_recent_raw'),
           short_name: '',
           installed: true,
           disabled: false,
@@ -2333,7 +2342,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       } else {
         installedStickersets[set.id] = true;
       }
-      getStickers(true);
+      Storage.remove('all_stickers').then(function () {
+        getStickers(true);
+      });
     });
   }
 
