@@ -1534,8 +1534,8 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_tooltip_tab:active,.composer_emoji_tooltip_tab:focus,.composer_emoji_tooltip_tab:hover{text-decoration:none}
 .composer_emoji_tooltip_tab_emoji,.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_stickers{color:#53a9ea}
 .composer_emoji_tooltip_tab_stickers,.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_emoji{color:#999}
-.composer_emoji_tooltip_tab_shadow{width:50%;height:1px;background:#53a9ea;-webkit-box-shadow:0 1px 0 0 #53a9ea;-moz-box-shadow:0 1px 0 0 #53a9ea;box-shadow:0 1px 0 0 #53a9ea;transform:translateX(0);transition:transform ease-in-out .2s}
-.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_shadow{transform:translateX(100%)}
+.composer_emoji_tooltip_tab_shadow{width:50%;height:1px;background:#53a9ea;-webkit-box-shadow:0 1px 0 0 #53a9ea;-moz-box-shadow:0 1px 0 0 #53a9ea;box-shadow:0 1px 0 0 #53a9ea;-webkit-transform:translate3d(0,0,0);-moz-transform:translate3d(0,0,0);-o-transform:translate3d(0,0,0);-ms-transform:translate3d(0,0,0);transform:translate3d(0,0,0);transition:transform ease-in-out .2s}
+.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tab_shadow{-webkit-transform:translate3d(100%,0,0);-moz-transform:translate3d(100%,0,0);-o-transform:translate3d(100%,0,0);-ms-transform:translate3d(100%,0,0);transform:translate3d(100%,0,0)}
 .composer_emoji_tooltip_categories{width:100%;line-height:0}
 .composer_emoji_tooltip_tab_emoji_content .composer_emoji_tooltip_categories{width:100%;margin:0 0 3px;padding:0 5px 15px;line-height:0}
 .composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories{vertical-align:top;padding:0 5px 15px;margin:0 0 3px;overflow-x:scroll;white-space:nowrap;position:relative}
@@ -1560,8 +1560,8 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_tooltip_category_grid{background-position:-3px -304px}
 .active .composer_emoji_tooltip_category_grid{background-position:-3px -335px}
 .composer_emoji_tooltip_tabs_wrap{height:275px;position:relative;overflow:hidden}
-.composer_emoji_tooltip_tabs_contents{position:absolute;width:200%;transform:translateX(0);transition:transform ease-in-out .2s}
-.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tabs_contents{transform:translateX(-284px)}
+.composer_emoji_tooltip_tabs_contents{position:absolute;width:200%;-webkit-transform:translate3d(0,0,0);-moz-transform:translate3d(0,0,0);-o-transform:translate3d(0,0,0);-ms-transform:translate3d(0,0,0);transform:translate3d(0,0,0);transition:transform ease-in-out .2s}
+.composer_emoji_tooltip_tabs_stickers_active .composer_emoji_tooltip_tabs_contents{-webkit-transform:translate3d(-284px,0,0);-moz-transform:translate3d(-284px,0,0);-o-transform:translate3d(-284px,0,0);-ms-transform:translate3d(-284px,0,0);transform:translate3d(-284px,0,0)}
 .composer_emoji_tooltip_tab_emoji_content,.composer_emoji_tooltip_tab_stickers_content{width:284px;height:275px;float:left}
 .composer_emoji_tooltip_content_stickers{position:relative}
 .composer_emoji_tooltip_content_wrap{padding:0 2px 0 8px}
