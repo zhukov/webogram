@@ -1540,7 +1540,7 @@ img.img_fullsize{margin:0 auto}
 .composer_emoji_tooltip_tab_emoji_content .composer_emoji_tooltip_categories{width:100%;margin:0 0 3px;padding:0 5px 15px;line-height:0}
 .composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories{vertical-align:top;padding:0 5px 15px;margin:0 0 3px;overflow-x:scroll;white-space:nowrap;position:relative}
 .composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories::-webkit-scrollbar{display:none}
-.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn{width:36px;height:34px;padding:3px 4px;vertical-align:top;margin:4px 2px 0 0}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn{width:36px;height:34px;padding:3px 4px;vertical-align:top;margin:4px 0 0}
 .composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_image{max-width:28px;max-height:28px}
 .composer_emoji_tooltip_category{line-height:0;color:#fff;display:inline-block;cursor:pointer;opacity:.3;padding:9px 12px}
 .composer_emoji_tooltip_category:hover{opacity:.4}
@@ -1615,6 +1615,8 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
 .composer_rich_textarea:empty:active:before,.composer_rich_textarea:empty:focus:before{opacity:.75}
 .composer_rich_textarea img{width:20px;height:20px;vertical-align:middle;margin:-3px 0 0}
 @-moz-document url-prefix(){.composer_rich_textarea:empty:active:before,.composer_rich_textarea:empty:focus:before{display:none}}
+.composer_rich_textarea:empty:active:before,_:-ms-lang(x){display:none}
+.composer_rich_textarea:empty:focus:before,_:-ms-lang(x){display:none}
 .composer_command_btn{display:block;position:absolute;right:37px;top:4px;cursor:pointer;padding:0;width:20px;height:20px}
 .icon-slash{display:inline-block;width:20px;height:20px;vertical-align:top;opacity:.8;background-image:url(../img/icons/General.png);background-repeat:no-repeat;background-position:-10px -790px}
 .is_2x .icon-slash{background-image:url(../img/icons/General_2x.png);background-size:40px 848px}

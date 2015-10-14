@@ -199,6 +199,7 @@
     "confirm_modal_revoke_group_link": "Deze link echt intrekken? Na intrekken kan niemand meer lid worden met de oude link.",
     "confirm_modal_revoke_channel_link": "Deze link echt intrekken? Na intrekken kan niemand meer lid worden met de oude link.",
     "confirm_modal_delete_channel_md": "Kanaal echt verwijderen?\n\nBerichten worden gewist en alle deelnemers verwijderd.",
+    "confirm_modal_jump_ext_url_md": "Link openen?\n\n{url}",
     "confirm_modal_are_u_sure": "Weet je het zeker?",
     "confirm_modal_logout_submit": "Uitloggen",
     "confirm_modal_history_flush_submit": "Chat verwijderen",

@@ -1130,6 +1130,7 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .composer_rich_textarea:empty:before {
   color: #999;
+  margin-top: 1px;
 }
 .composer_rich_textarea:active,
 .composer_rich_textarea:focus {
@@ -1141,16 +1142,29 @@ a.mobile_modal_action .tg_checkbox_label {
 }
 .composer_emoji_tooltip {
   margin-left: 6px;
-  margin-top: -230px;
+  margin-top: -176px;
   z-index: 10000;
 }
+.composer_emoji_tooltip_tab {
+  line-height: 15px;
+  font-size: 11px;
+}
 .composer_emoji_tooltip .scroller_native_scrollable {
-  height: 140px;
+  height: 117px;
 }
 .composer_emoji_tooltip_tabs_wrap,
 .composer_emoji_tooltip_tab_emoji_content,
 .composer_emoji_tooltip_tab_stickers_content {
-  height: 182px;
+  height: 147px;
+}
+.composer_emoji_tooltip_category {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories .composer_sticker_btn {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
 }
 .composer_emoji_tooltip_tail {
   display: none;

@@ -199,6 +199,7 @@
     "confirm_modal_revoke_group_link": "Bist du sicher, dass du diesen Link widerrufen willst? Dadurch kann ihn niemand mehr nutzen.",
     "confirm_modal_revoke_channel_link": "Bist du sicher, dass du diesen Link widerrufen willst? Dadurch kann ihn niemand mehr nutzen.",
     "confirm_modal_delete_channel_md": "Sicher, dass du diesen Kanal löschen willst?\n\nAlle Mitglieder und Nachrichten werden entfernt.",
+    "confirm_modal_jump_ext_url_md": "Link öffnen?\n\n{url}",
     "confirm_modal_are_u_sure": "Bist du sicher?",
     "confirm_modal_logout_submit": "Abmelden",
     "confirm_modal_history_flush_submit": "Chat löschen",
