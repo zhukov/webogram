@@ -105,7 +105,7 @@ gulp.task('compress-dist', ['build'], function() {
 });
 
 gulp.task('cleanup-dist', ['compress-dist'], function() {
-  return gulp.src(['releases/**/*', '!releases/*.zip']).pipe($.clean());
+  return del(['releases/**/*', '!releases/*.zip']);
 });
 
 gulp.task('update-version-manifests', function() {
