@@ -199,6 +199,7 @@
     "confirm_modal_revoke_group_link": "Você tem certeza que deseja desativar o link? Uma vez feito, ninguém conseguirá entrar no grupo usando-o.",
     "confirm_modal_revoke_channel_link": "Você tem certeza que deseja desativar o link? Uma vez feito, ninguém conseguirá entrar no canal usando-o.",
     "confirm_modal_delete_channel_md": "Vocẽ tem certeza que deseja apagar o canal?\n\nTodos os membros serão removidos e todas as mensagens serão perdidas.",
+    "confirm_modal_jump_ext_url_md": "Abrir esse link?\n\n{url}",
     "confirm_modal_are_u_sure": "Você tem certeza?",
     "confirm_modal_logout_submit": "Sair",
     "confirm_modal_history_flush_submit": "Apagar chat",

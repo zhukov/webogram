@@ -199,6 +199,7 @@
     "confirm_modal_revoke_group_link": "¿Quieres anular este enlace? Una vez hecho, nadie podrá usarlo para unirse al grupo.",
     "confirm_modal_revoke_channel_link": "¿Quieres anular este enlace? Una vez hecho, nadie podrá usarlo para unirse al grupo.",
     "confirm_modal_delete_channel_md": "¿Quieres eliminar este canal?\n\nTodos los miembros y mensajes serán eliminados.",
+    "confirm_modal_jump_ext_url_md": "¿Abrir este enlace?\n\n{url}",
     "confirm_modal_are_u_sure": "¿Confirmar?",
     "confirm_modal_logout_submit": "Cerrar sesión",
     "confirm_modal_history_flush_submit": "Eliminar chat",
