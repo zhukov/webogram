@@ -252,3 +252,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
       return dateOrTimeFilter(timestamp, true);
     }
   })
+
+.filter('document', function ($filter, AppDocsManager) {
+  return function(docId) {
+      return AppDocsManager.getDoc(docId);
+    }
+  })
