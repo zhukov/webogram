@@ -18,6 +18,7 @@ The locale string which is also part of the filenames consists of the lower case
 * en-us
 * en-au
 * de-de
+* fa-ir
 
 #### Step 1: the angular locale
 The files in `vendor/angular/i18n/` contain the `ngLocale` module in its various localizations which provides the `$locale` service which in turn is used by many angular functions especially for formatting times and dates and a little pluralization.
