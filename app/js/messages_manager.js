@@ -192,7 +192,6 @@ angular.module('myApp.services')
         var peerID = AppPeersManager.getPeerID(dialog.peer);
         var channelID = -peerID;
         saveChannelDialog(channelID, dialog);
-        NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
         ApiUpdatesManager.addChannelState(channelID, dialog.pts);
       });
       allChannelsLoaded = true;

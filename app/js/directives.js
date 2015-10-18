@@ -2659,7 +2659,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           element.html(
             (chat.rTitle || '').valueOf() +
-            (attrs.verified && chat.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
+            (attrs.verified && chat.pFlags && chat.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
           );
         }
       };
