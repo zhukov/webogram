@@ -390,7 +390,7 @@ angular.module('myApp.services')
   var fullMsgIDModulus = 4294967296;
 
   function getFullMessageID (msgID, channelID) {
-    if (!channelID || msgID < 0) {
+    if (!channelID || msgID <= 0) {
       return msgID;
     }
     msgID = getMessageLocalID(msgID);
@@ -1675,8 +1675,9 @@ angular.module('myApp.services')
     return message.from_id;
   }
 
-  function wrapForDialog (msgID, unreadCount) {
-    var useCache = unreadCount != -1;
+  function wrapForDialog (msgID, dialog) {
+    var useCache = dialog === undefined;
+    var unreadCount = dialog && dialog.unread_count;
 
     if (useCache && messagesForDialogs[msgID] !== undefined) {
       return messagesForDialogs[msgID];
@@ -1685,7 +1686,12 @@ angular.module('myApp.services')
     var message = angular.copy(messagesStorage[msgID]);
 
     if (!message || !message.to_id) {
-      return message;
+      if (dialog && dialog.peerID) {
+        message = {_: 'message', to_id: AppPeersManager.getOutputPeer(dialog.peerID), deleted: true, date: tsNow(true)};
+        message.deleted = true;
+      } else {
+        return message;
+      }
     }
 
     message.peerID = getMessagePeer(message);

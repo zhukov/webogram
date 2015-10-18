@@ -701,7 +701,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       for (i = 0; i < len; i++) {
         dialog = indexesToDialogs[indexes[i]];
         $scope.dialogs.unshift(
-          AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count)
+          AppMessagesManager.wrapForDialog(dialog.top_message, dialog)
         );
       }
 
@@ -879,7 +879,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (dialogsResult.dialogs.length) {
           angular.forEach(dialogsResult.dialogs, function (dialog) {
-            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count);
+            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
             if (!searchMessages) {
               peersInDialogs[dialog.peerID] = true;
             }
@@ -930,7 +930,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           var dialogsList = searchMessages ? $scope.foundMessages : $scope.dialogs;
 
           angular.forEach(dialogsResult.dialogs, function (dialog) {
-            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog.unread_count);
+            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
             if (!searchMessages) {
               peersInDialogs[dialog.peerID] = true;
             }
