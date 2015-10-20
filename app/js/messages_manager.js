@@ -1676,7 +1676,7 @@ angular.module('myApp.services')
   }
 
   function wrapForDialog (msgID, dialog) {
-    var useCache = dialog === undefined;
+    var useCache = dialog !== undefined;
     var unreadCount = dialog && dialog.unread_count;
 
     if (useCache && messagesForDialogs[msgID] !== undefined) {
