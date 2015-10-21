@@ -2908,13 +2908,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   var titleBackup = document.title,
       titleChanged = false,
-      titleCnt = 0,
       titlePromise;
   var prevFavicon;
+  var stopped = false;
 
   var settings = {};
 
+  $rootScope.$watch('idle.deactivated', function (newVal) {
+    if (newVal) {
+      stop();
+    }
+  });
+
   $rootScope.$watch('idle.isIDLE', function (newVal) {
+    if (stopped) {
+      return;
+    }
     if (!newVal) {
       notificationsClear();
     }
@@ -2928,12 +2937,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         titleBackup = document.title;
 
         titlePromise = $interval(function () {
-          if (!notificationsCount || ((titleCnt++) % 2)) {
-            if (titleChanged) {
-              titleChanged = false;
-              document.title = titleBackup;
-              setFavicon();
-            }
+          if (titleChanged || !notificationsCount) {
+            titleChanged = false;
+            document.title = titleBackup;
+            setFavicon();
           } else {
             titleChanged = true;
             document.title = langNotificationsPluralize(notificationsCount);
@@ -3028,7 +3035,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     faviconEl.parentNode.replaceChild(link, faviconEl);
     faviconEl = link;
 
-    prevFavicon = href
+    prevFavicon = href;
   }
 
   function savePeerSettings (peerID, settings) {
@@ -3080,12 +3087,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     } catch (e) {}
   }
 
+  function stop () {
+    notificationsClear();
+    $interval.cancel(titlePromise);
+    setFavicon();
+    stopped = true;
+  }
+
   function requestPermission() {
     Notification.requestPermission();
     $($window).off('click', requestPermission);
   }
 
   function notify (data) {
+    if (stopped) {
+      return;
+    }
     // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
 
     // FFOS Notification blob src bug workaround

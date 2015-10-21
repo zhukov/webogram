@@ -698,13 +698,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   };
 })
 
-.service('MtpSingleInstanceService', function (_, $rootScope, $interval, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
+.service('MtpSingleInstanceService', function (_, $rootScope, $compile, $timeout, $interval, $modalStack, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
 
   var instanceID = nextRandomInt(0xFFFFFFFF);
   var started = false;
   var masterInstance  = false;
-  var startTime       = tsNow();
-  var errorShowTime = 0;
+  var deactivatePromise = false;
+  var deactivated = false;
 
   function start() {
     if (!started && !Config.Navigator.mobile && !Config.Modes.packed) {
@@ -712,7 +712,6 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
       IdleManager.start();
 
-      startTime = tsNow();
       $rootScope.$watch('idle.isIDLE', checkInstance);
       $interval(checkInstance, 5000);
       checkInstance();
@@ -727,7 +726,38 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance');
   }
 
+  function deactivateInstance () {
+    if (masterInstance || deactivated) {
+      return false;
+    }
+    console.log(dT(), 'deactivate');
+    deactivatePromise = false;
+    deactivated = true;
+    clearInstance();
+    $modalStack.dismissAll();
+
+    document.title = _('inactive_tab_title_raw');
+
+    var inactivePageCompiled = $compile('<ng-include src="\'partials/desktop/inactive.html\'"></ng-include>');
+
+    var scope = $rootScope.$new(true);
+    scope.close = function () {
+      AppRuntimeManager.close();
+    };
+    scope.reload = function () {
+      AppRuntimeManager.reload();
+    };
+    inactivePageCompiled(scope, function (clonedElement) {
+      $('.page_wrap').hide();
+      $(clonedElement).appendTo($('body'));
+    });
+    $rootScope.idle.deactivated = true;
+  }
+
   function checkInstance() {
+    if (deactivated) {
+      return false;
+    }
     var time = tsNow();
     var idle = $rootScope.idle && $rootScope.idle.isIDLE;
     var newInstance = {id: instanceID, idle: idle, time: time};
@@ -736,38 +766,36 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       var curInstance = result[0],
           idleInstance = result[1];
 
-      if (!curInstance ||
-          curInstance.time < time - 60000 ||
+      // console.log(dT(), 'check instance', newInstance, curInstance, idleInstance);
+      if (!idle ||
+          !curInstance ||
           curInstance.id == instanceID ||
-          curInstance.idle ||
-          !idle) {
+          curInstance.time < time - 60000) {
 
-        if (idleInstance) {
-          if (idleInstance.id == instanceID) {
-            Storage.remove('xt_idle_instance');
-          }
-          else if (idleInstance.time > time - 10000 &&
-                   time > errorShowTime) {
-
-            ErrorService.alert(
-              _('error_modal_warning_title_raw'),
-              _('error_modal_multiple_open_tabs_raw')
-            );
-            errorShowTime += tsNow() + 60000;
-          }
+        if (idleInstance &&
+            idleInstance.id == instanceID) {
+          Storage.remove('xt_idle_instance');
         }
         Storage.set({xt_instance: newInstance});
         if (!masterInstance) {
           MtpNetworkerFactory.startAll();
+          console.warn(dT(), 'now master instance', newInstance);
         }
         masterInstance = true;
+        if (deactivatePromise) {
+          $timeout.cancel(deactivatePromise);
+          deactivatePromise = false;
+        }
       } else {
         Storage.set({xt_idle_instance: newInstance});
         if (masterInstance) {
           MtpNetworkerFactory.stopAll();
+          console.warn(dT(), 'now idle instance', newInstance);
+          if (!deactivatePromise) {
+            deactivatePromise = $timeout(deactivateInstance, 30000);
+          }
         }
         masterInstance = false;
-
       }
     });
   }
