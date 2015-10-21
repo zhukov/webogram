@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sun Oct 18 2015 15:53:10 GMT+0200 (CEST)
+# Time: Wed Oct 21 2015 16:01:30 GMT+0200 (CEST)
 
 
 CACHE:
@@ -8,6 +8,7 @@ favicon_unread.ico
 css/app.css
 css/desktop.css
 css/mobile.css
+img/Manytabs.png
 img/Telegram.png
 img/Telegram72.png
 img/Telegram72_2x.png

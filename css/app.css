@@ -1844,6 +1844,11 @@ a.md_modal_list_peer_name{color:inherit}
 .md_photo_loading{display:block;width:72px;height:72px;border-radius:36px;overflow:hidden;background:#48769b;text-align:center;line-height:72px;padding:0}
 .md_photo_loading i{display:inline-block;background:#fff;width:8px;height:8px;border-radius:4px;vertical-align:middle;border:0;margin-left:6px}
 .md_photo_loading i:first-child{margin-left:0}
+.inactive_page_content{max-width:400px;margin:0 auto;text-align:center}
+.inactive_image{display:block;background:url(../img/Manytabs.png) no-repeat;width:341px;height:262px;margin:0 auto}
+.inactive_title{font-size:18px;color:#444}
+.inactive_description{color:#666;font-size:15px;line-height:150%}
+.inactive_actions{margin-top:15px}
 @media print{body,html{background:#fff}
 body .im_page_wrap{border:0;box-shadow:none;overflow:visible}
 body .im_bottom_panel_wrap,body .im_dialogs_col_wrap,body .tg_head_logo_wrap,body .tg_head_msgs_edit_btn,body .tg_head_peer_dropdown,body .tg_head_peer_return_btn{display:none}

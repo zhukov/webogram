@@ -360,7 +360,6 @@
 	"error_modal_flood_description": "You are performing too many actions. Please try again later.",
 	"error_modal_internal_description": "Internal server error occured. Please try again later.",
 	"error_modal_tech_details": "Technical details here",
-	"error_modal_multiple_open_tabs": "Please close other Telegram app tabs.",
 	"error_modal_recovery_na_description": "Since you haven't provided a recovery e-mail when setting up your password, your remaining options are either to remember your password or to reset your account.",
 	"error_modal_password_success_descripion": "Your password for Two-Step Verification is now active.",
 	"error_modal_password_disabled_descripion": "You have disabled Two-Step Verification.",
@@ -530,6 +529,12 @@
 	"phonebook_modal_empty": "Your phonebook is empty.",
 	"phonebook_modal_submit_active": "Importing",
 	"phonebook_modal_submit": "Import contacts",
+
+	"inactive_tab_title": "Telegram: Zzz...",
+	"inactive_title": "Such error, many tabs",
+	"inactive_description_md": "Telegram supports only one active tab with the app.\nPlease reload this page to continue using this tab or close it",
+	"inactive_reload_btn": "Reload App",
+
 
 	"country_select_modal_country_ab": "Abkhazia",
 	"country_select_modal_country_af": "Afghanistan",
