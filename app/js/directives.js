@@ -502,6 +502,33 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myMessageViews', function($filter, AppMessagesManager) {
+
+    var formatNumberFilter = $filter('formatShortNumber');
+
+    return {
+      link: link
+    };
+
+    function updateHtml (views, element) {
+      element.html(formatNumberFilter(views));
+    }
+
+    function link ($scope, element, attrs) {
+      var mid = $scope.$eval(attrs.myMessageViews);
+      // console.log(element[0], mid);
+      var views = AppMessagesManager.getMessage(mid).views || 0;
+
+      updateHtml(views, element);
+
+      $scope.$on('message_views', function (e, viewData) {
+        if (viewData.mid == mid) {
+          updateHtml(viewData.views, element);
+        }
+      })
+    }
+  })
+
   .directive('myReplyMarkup', function() {
 
     return {

@@ -31,6 +31,10 @@ angular.module('myApp.services')
   var needSingleMessages = [],
       fetchSingleMessagesTimeout = false;
 
+  var incrementedMessageViews = {},
+      needIncrementMessageViews = [],
+      incrementMessageViewsTimeout = false;
+
   var serverTimeOffset = 0,
       timestampNow = tsNow(true),
       midnightNoOffset = timestampNow - (timestampNow % 86400),
@@ -419,6 +423,28 @@ angular.module('myApp.services')
       return 0;
     }
     return fullMsgID % fullMsgIDModulus;
+  }
+
+  function splitMessageIDsByChannels (mids) {
+    var msgIDsByChannels = {};
+    var midsByChannels = {};
+    var i, mid, msgChannel, channelID;
+    for (i = 0; i < mids.length; i++) {
+      mid = mids[i];
+      msgChannel = getMessageIDInfo(mid);
+      channelID = msgChannel[1];
+      if (msgIDsByChannels[channelID] === undefined) {
+        msgIDsByChannels[channelID] = [];
+        midsByChannels[channelID] = [];
+      }
+      msgIDsByChannels[channelID].push(msgChannel[0]);
+      midsByChannels[channelID].push(mid);
+    }
+
+    return {
+      msgIDs: msgIDsByChannels,
+      mids: midsByChannels
+    };
   }
 
   function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
@@ -1094,6 +1120,7 @@ angular.module('myApp.services')
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
       entities: entities,
+      views: asChannel && 1,
       pending: true
     };
 
@@ -1252,6 +1279,7 @@ angular.module('myApp.services')
       media: media,
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
+      views: asChannel && 1,
       pending: true
     };
 
@@ -1435,6 +1463,7 @@ angular.module('myApp.services')
       media: media,
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
+      views: asChannel && 1,
       pending: true
     };
 
@@ -1503,6 +1532,13 @@ angular.module('myApp.services')
     var len = mids.length;
     var i, mid, msgID;
     var fromChannel = getMessageIDInfo(mids[0])[1];
+    var isChannel = AppPeersManager.isChannel(peerID);
+    var asChannel = isChannel ? true : false;
+
+    if (asChannel) {
+      flags |= 16;
+    }
+
     for (i = 0; i < len; i++) {
       msgIDs.push(getMessageLocalID(mids[i]));
       randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
@@ -1888,21 +1924,8 @@ angular.module('myApp.services')
     var mids = needSingleMessages.slice();
     needSingleMessages = [];
 
-    var msgIDsByChannels = {};
-    var midsByChannels = {};
-    var i, mid, msgChannel, channelID;
-    for (i = 0; i < mids.length; i++) {
-      mid = mids[i];
-      msgChannel = getMessageIDInfo(mid);
-      channelID = msgChannel[1];
-      if (msgIDsByChannels[channelID] === undefined) {
-        msgIDsByChannels[channelID] = [];
-        midsByChannels[channelID] = [];
-      }
-      msgIDsByChannels[channelID].push(msgChannel[0]);
-      midsByChannels[channelID].push(mid);
-    }
-    angular.forEach(msgIDsByChannels, function (msgIDs, channelID) {
+    var splitted = splitMessageIDsByChannels(mids);
+    angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
       var promise;
       if (channelID > 0) {
         promise = MtpApiManager.invokeApi('channels.getMessages', {
@@ -1920,7 +1943,48 @@ angular.module('myApp.services')
         AppChatsManager.saveApiChats(getMessagesResult.chats);
         saveMessages(getMessagesResult.messages);
 
-        $rootScope.$broadcast('messages_downloaded', midsByChannels[channelID]);
+        $rootScope.$broadcast('messages_downloaded', splitted.mids[channelID]);
+      })
+    })
+  }
+
+  function incrementMessageViews () {
+    if (incrementMessageViewsTimeout !== false) {
+      clearTimeout(incrementMessageViewsTimeout);
+      incrementMessageViewsTimeout = false;
+    }
+    if (!needIncrementMessageViews.length) {
+      return;
+    }
+    var mids = needIncrementMessageViews.slice();
+    needIncrementMessageViews = [];
+
+    var splitted = splitMessageIDsByChannels(mids);
+    angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
+      console.log('increment', msgIDs, channelID);
+      MtpApiManager.invokeApi('messages.getMessagesViews', {
+        peer: AppPeersManager.getInputPeerByID(-channelID),
+        id: msgIDs,
+        increment: true
+      }).then(function (views) {
+        if (channelID) {
+          var mids = splitted.mids[channelID];
+          var updates = [];
+          for (var i = 0; i < mids.length; i++) {
+            updates.push({
+              _: 'updateChannelMessageViews',
+              channel_id: channelID,
+              id: mids[i],
+              views: views[i]
+            });
+          }
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updates',
+            updates: updates,
+            chats: [],
+            users: []
+          });
+        }
       })
     })
   }
@@ -1970,7 +2034,17 @@ angular.module('myApp.services')
         curMessage._ = 'message';
       }
 
+      if (curMessage.views &&
+          !incrementedMessageViews[curMessage.mid]) {
+        incrementedMessageViews[curMessage.mid] = true;
+        needIncrementMessageViews.push(curMessage.mid);
+        if (incrementMessageViewsTimeout === false) {
+          incrementMessageViewsTimeout = setTimeout(incrementMessageViews, 10000);
+        }
+      }
+
       if (prevMessage &&
+          // !curMessage.views &&
           curMessage.fromID == prevMessage.fromID &&
           !prevMessage.fwdFromID == !curMessage.fwdFromID &&
           !prevMessage.action &&
@@ -2596,6 +2670,19 @@ angular.module('myApp.services')
         reloadChannelDialog(channelID).then(function () {
           $rootScope.$broadcast('history_reload', peerID);
         });
+        break;
+
+      case 'updateChannelMessageViews':
+        var views = update.views;
+        var mid = getFullMessageID(update.id, update.channel_id);
+        var message = getMessage(mid);
+        if (message && message.views && message.views < views) {
+          message.views = views;
+          $rootScope.$broadcast('message_views', {
+            mid: mid,
+            views: views
+          });
+        }
         break;
     }
   });

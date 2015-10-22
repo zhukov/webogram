@@ -28,6 +28,11 @@
       <a class="im_message_from_photo pull-left" my-peer-photolink="::historyMessage.fromID" img-class="im_message_from_photo"></a>
 
       <div class="im_message_meta">
+        <div class="im_message_views_wrap" ng-if="::historyMessage.views > 0">
+          <div class="im_message_views">
+            <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
+          </div>
+        </div>
         <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
           <i class="icon-message-status" tooltip="Try again"></i>
         </a>

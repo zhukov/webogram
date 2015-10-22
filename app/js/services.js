@@ -786,6 +786,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getInputPeerByID (peerID) {
+    if (!peerID) {
+      return {_: 'inputPeerEmpty'};
+    }
     if (peerID < 0) {
       var chatID = -peerID;
       if (!AppChatsManager.isChannel(chatID)) {

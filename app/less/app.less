@@ -865,7 +865,7 @@ a.tg_radio_on:hover i.icon-radio {
   vertical-align: top;
   margin-right: 18px;
 
-  .image-2x('../img/icons/General.png', 40px, 848px);
+  .image-2x('../img/icons/General.png', 40px, 948px);
   background-position: -5px -10px;
 }
 .icon-tg-title {
@@ -906,7 +906,7 @@ a.tg_radio_on:hover i.icon-radio {
   margin-left: 12px;
   margin-top: -1px;
 
-  .image-2x('../img/icons/General.png', 40px, 848px);
+  .image-2x('../img/icons/General.png', 40px, 948px);
   background-position: -18px -50px;
 }
 
@@ -1599,7 +1599,7 @@ div.im_message_video_thumb {
   height: 18px;
   margin: 12px 15px;
 
-  .image-2x('../img/icons/General.png', 40px, 848px);
+  .image-2x('../img/icons/General.png', 40px, 948px);
   background-position: -14px -509px;
 
   .im_message_file_button_dl_doc & {
@@ -1620,7 +1620,7 @@ div.im_message_video_thumb {
     height: 16px;
     margin: 13px 16px;
 
-    .image-2x('../img/icons/General.png', 40px, 848px);
+    .image-2x('../img/icons/General.png', 40px, 948px);
     background-position: -13px -611px;
   }
 
@@ -1636,7 +1636,7 @@ div.im_message_video_thumb {
 }
 
 .im_message_selected .icon-document,
-.im_history_selectable .im_message_outer_wrap:hover .icon-document {
+.im_history_select_active .im_message_outer_wrap:hover .icon-document {
   background-color: #dae6f0;
   background-position: -2px -542px;
 }
@@ -1942,6 +1942,62 @@ div.im_message_body {
 .im_message_meta,
 .im_message_body {
   .user-select(text);
+}
+
+.im_message_error_btn {
+  display: none;
+
+  .im_message_error & {
+    display: inline;
+  }
+
+  .icon-message-status {
+    background: #da564d;
+    opacity: 0.85;
+    pointer-events: auto;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+
+.im_message_views_wrap {
+  position: relative;
+}
+.im_message_views {
+  display: inline-block;
+  position: absolute;
+  white-space: nowrap;
+  line-height: normal;
+}
+.im_message_views_inline {
+  display: inline-block;
+  white-space: nowrap;
+  // line-height: normal;
+  font-size: 0.85em;
+  margin-left: 5px;
+}
+.icon-message-views {
+  display: inline-block;
+  width: 16px;
+  height: 11px;
+  .image-2x('../img/icons/General.png', 40px, 948px);
+  background-position: -12px -850px;
+  vertical-align: text-bottom;
+  margin-right: 0.3rem;
+
+  .message_focus &,
+  .im_message_selected &,
+  .im_history_select_active .im_message_outer_wrap:hover & {
+    background-position: -12px -871px;
+  }
+}
+.im_message_views_cnt {
+  color: #adadad;
+  font-weight: bold;
+  vertical-align: top;
 }
 
 .im_message_reply_wrap {
@@ -2319,7 +2375,7 @@ img.img_fullsize {
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 848px);
+  .image-2x('../img/icons/General.png', 40px, 948px);
   background-position: -9px -335px;
 }
 
@@ -2865,7 +2921,7 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 848px);
+  .image-2x('../img/icons/General.png', 40px, 948px);
   background-position: -10px -790px;
 
   .composer_command_btn.active & {
@@ -2895,7 +2951,7 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
   vertical-align: top;
   opacity: 0.8;
 
-  .image-2x('../img/icons/General.png', 40px, 848px);
+  .image-2x('../img/icons/General.png', 40px, 948px);
   background-position: -10px -730px;
 
   .composer_keyboard_btn.active & {
@@ -3351,7 +3407,8 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
   .im_message_document_size,
   .audio_player_duration,
   .audio_player_size,
-  .im_message_fwd_date {
+  .im_message_fwd_date,
+  .im_message_views_cnt {
     color: #899daf;
   }
 

@@ -34,6 +34,11 @@
       <a class="im_message_from_photo pull-left" my-peer-photolink="::historyMessage.fromID" img-class="im_message_from_photo"></a>
 
       <div class="im_message_meta pull-right text-right">
+        <div class="im_message_views_wrap" ng-if="::!historyMessage.fwdFromID && historyMessage.views > 0">
+          <div class="im_message_views">
+            <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
+          </div>
+        </div>
         <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
       </div>
 
@@ -47,6 +52,9 @@
           <a class="im_message_fwd_photo pull-left" my-peer-photolink="::historyMessage.fwdFromID" img-class="im_message_fwd_photo"></a>
           <div class="im_message_fwd_author_wrap">
             <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID"></a><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
+            <span class="im_message_views_inline" ng-if="::historyMessage.views > 0">
+              <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
+            </span>
           </div>
         </div>
 

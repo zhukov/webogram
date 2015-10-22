@@ -199,6 +199,23 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   })
 
+  .filter('formatShortNumber', [function () {
+    return function (num) {
+      if (!num) {
+        return '0';
+      }
+      else if (num < 1000) {
+        return num.toString();
+      }
+      else if (num < 900000) {
+        var mult = num > 10000 ? 1 : 10;
+        return (Math.round(num / 1000 * mult) / mult) + 'K';
+      }
+      var mult = num > 10000000 ? 1 : 10;
+      return (Math.round(num / 1000000 * mult) / mult) + 'M';
+    }
+  }])
+
   .filter('nl2br', [function () {
     return function (text) {
       return text.replace(/\n/g, '<br/>');
