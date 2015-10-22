@@ -609,7 +609,6 @@ img.im_message_video_thumb,
   margin-left: -60px;
   width: 60px;
   padding: 0 0 0 8px;
-  overflow: hidden;
 }
 .im_message_out .im_message_meta {
   width: 80px;
@@ -617,6 +616,13 @@ img.im_message_video_thumb,
   text-align: right;
   margin-left: 0;
   padding: 0 8px 0 0;
+}
+.im_message_views {
+  top: -12px;
+  font-size: 10px;
+}
+.im_message_out .im_message_views {
+  right: 0;
 }
 .im_message_date {
   font-size: 10px;
@@ -685,7 +691,7 @@ a.im_message_from_photo {
 .im_message_wrap {
   padding: 0 7px;
 }
-.im_message_out .icon-message-status-tick {
+.im_message_out .icon-message-status {
   border: 0;
   display: inline-block;
   width: 10px;
@@ -699,10 +705,10 @@ a.im_message_from_photo {
   margin-top: 6px;
   background: none;
 }
-.im_message_unread .icon-message-status-tick {
+.im_message_unread .icon-message-status {
   background: #43A4DB;
 }
-.im_message_pending .icon-message-status-tick {
+.im_message_pending .icon-message-status {
   background: #9fd2ee;
 }
 .im_dialogs_search_field,
