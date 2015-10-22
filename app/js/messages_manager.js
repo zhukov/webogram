@@ -1961,7 +1961,7 @@ angular.module('myApp.services')
 
     var splitted = splitMessageIDsByChannels(mids);
     angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
-      console.log('increment', msgIDs, channelID);
+      // console.log('increment', msgIDs, channelID);
       MtpApiManager.invokeApi('messages.getMessagesViews', {
         peer: AppPeersManager.getInputPeerByID(-channelID),
         id: msgIDs,
