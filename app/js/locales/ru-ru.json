@@ -477,7 +477,7 @@
     "phonebook_modal_submit": "Импортировать контакты",
     "inactive_tab_title": "Telegram: Zzz...",
     "inactive_title": "Such error, many tabs",
-    "inactive_description_md": "Telegram supports only one active tab with the app.\nPlease reload this page to continue using this tab or close it",
+    "inactive_description_md": "Telegram supports only one active tab with the app.\nPlease reload this page to continue using this tab or close it.",
     "inactive_reload_btn": "Reload App",
     "country_select_modal_country_ab": "Абхазия",
     "country_select_modal_country_af": "Афганистан",

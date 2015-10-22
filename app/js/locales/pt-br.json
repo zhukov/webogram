@@ -477,7 +477,7 @@
     "phonebook_modal_submit": "Importar contatos",
     "inactive_tab_title": "Telegram: Zzz...",
     "inactive_title": "Erro, muitas abas",
-    "inactive_description_md": "Telegram suporta apenas uma aba ativa com o app\nPor favor, recarregue para continuar usando essa aba ou feche-a",
+    "inactive_description_md": "Telegram supports only one active tab with the app.\nPlease reload this page to continue using this tab or close it.",
     "inactive_reload_btn": "Recarregar App",
     "country_select_modal_country_ab": "Abcássia",
     "country_select_modal_country_af": "Afeganistão",
