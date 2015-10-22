@@ -539,9 +539,6 @@ a.footer_link.active:active {
   -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
 }
-.im_dialogs_modal_col_wrap .im_dialogs_scrollable_wrap {
-  padding: 0;
-}
 .im_dialogs_col .nano > .nano-pane {
   background: rgba(0, 0, 0, 0);
   width: 12px;
@@ -592,6 +589,7 @@ a.footer_link.active:active {
 .contacts_modal_col .nano > .nano-pane {
   width: 5px;
   right: 4px;
+  top: 10px;
 }
 .sessions_modal_col .nano > .nano-pane,
 .stickerset_modal_col .nano > .nano-pane {
@@ -603,6 +601,7 @@ a.footer_link.active:active {
 .im_dialogs_modal_col .nano > .nano-pane {
   width: 6px;
   right: 2px;
+  top: 10px;
 }
 .im_history_col .nano > .nano-pane {
   top: 10px;
@@ -672,9 +671,8 @@ a.footer_link.active:active {
 .contacts_modal_window .modal-dialog {
   max-width: 420px;
 }
-.contacts_modal_search {
-  padding: 15px 12px 12px;
-  position: relative;
+.contacts_modal_members_list {
+  padding-top: 10px;
 }
 .contacts_modal_members_list a.contacts_modal_contact {
   padding: 8px 16px;
@@ -880,9 +878,6 @@ a.footer_link.active:active {
 /* Dialogs modal */
 .peer_select_window .modal-dialog {
   max-width: 420px;
-}
-.peer_select_window .im_dialogs_panel {
-  padding-top: 15px;
 }
 .peer_select_modal_footer {
   padding: 15px 10px 15px;

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Wed Oct 21 2015 16:01:30 GMT+0200 (CEST)
+# Time: Thu Oct 22 2015 14:39:17 GMT+0200 (CEST)
 
 
 CACHE:
@@ -9,6 +9,7 @@ css/app.css
 css/desktop.css
 css/mobile.css
 img/Manytabs.png
+img/Manytabs_2x.png
 img/Telegram.png
 img/Telegram72.png
 img/Telegram72_2x.png
@@ -73,8 +74,8 @@ js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
 vendor/closure/long.js
-vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
+vendor/cryptoJS/crypto.js
 vendor/leemon_bigint/bigint.js
 vendor/rusha/rusha.js
 vendor/angular/i18n/angular-locale_de-de.js

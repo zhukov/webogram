@@ -1200,7 +1200,7 @@ img.composer_user_photo {
   line-height: 26px;
 }
 .contacts_modal_search {
-  padding: 3px 0 12px;
+  margin: -9px -9px 0;
 }
 .contacts_modal_col {
   margin: 0 -9px;
