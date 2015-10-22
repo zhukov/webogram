@@ -1055,8 +1055,13 @@ a.tg_radio_on:hover i.icon-radio {
   margin-top: 10px;
 }
 .im_dialogs_panel {
-  padding: 12px 12px 6px;
+  padding: 12px 12px 12px;
   position: relative;
+  .im_dialogs_modal_col_wrap & {
+    padding: 7px 12px 6px;
+    .box-shadow(0px 1px 1px rgba(0,0,0,0.15));
+    z-index: 1;
+  }
 }
 .im_dialogs_search {
   position: relative;
@@ -1068,7 +1073,7 @@ a.tg_radio_on:hover i.icon-radio {
   border: 1px solid #F2F2F2;
   border-radius: 2px;
   padding: 6px 20px 6px 30px;
-  margin: 0 0 6px;
+  margin: 0 0 0;
 
   background-color: #F2F2F2;
   .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
@@ -1076,7 +1081,7 @@ a.tg_radio_on:hover i.icon-radio {
 
   .im_dialogs_modal_col_wrap & {
     background-color: #fff;
-    border-color: #d9dbde;
+    border-color: #fff !important;
   }
 
   &:focus,
@@ -1092,14 +1097,13 @@ a.tg_radio_on:hover i.icon-radio {
 a.tg_search_clear {
   position: absolute;
   right: 0;
-  margin-top: -40px;
+  margin-top: -34px;
   width: 34px;
   height: 34px;
   opacity: 0.6;
 
   .contacts_modal_search & {
     right: 12px;
-    margin-top: -34px;
   }
 
   &:hover {
@@ -1133,56 +1137,6 @@ i.icon-verified {
     display: inline-block;
   }
 
-}
-
-.im_dialogs_tabs_wrap {
-  display: none;
-}
-.im_dialogs_tabs {
-  padding: 4px 0;
-  position: relative;
-}
-
-.im_dialogs_tab {
-  color: #8c8c8c;
-  background: #f2f2f2;
-  height: 30px;
-  text-align: center;
-  overflow: hidden;
-  width: 50%;
-  float: left;
-  padding: 7px 0;
-
-  &:hover,
-  &:active,
-  &:focus {
-    color: #8c8c8c;
-    text-decoration: none;
-  }
-
-  &.active {
-    color: #fff;
-    background: #6490b1;
-  }
-
-  &:first-child {
-    border-radius: 2px 0 0 2px;
-  }
-
-  &:last-child {
-    border-radius: 0 2px 2px 0;
-  }
-}
-
-.im_dialogs_panel_dropdown {
-  position: absolute;
-  right: 12px;
-
-  .dropdown-menu {
-    right: auto;
-    left: 0;
-    margin-top: 8px;
-  }
 }
 
 .im_dialogs_scrollable_wrap {
@@ -1222,6 +1176,10 @@ i.icon-verified {
       }
     }
   }
+}
+
+.im_dialogs_modal_list {
+  padding-top: 10px;
 }
 
 .im_dialog_message_wrap {
@@ -3089,14 +3047,16 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
 
 /* Contacts modal */
 .contacts_modal_search {
-  padding: 0 0 14px;
   position: relative;
+  padding: 7px 12px 6px;
+  .box-shadow(0px 1px 1px rgba(0,0,0,0.15));
+  z-index: 1;
 }
 
 .contacts_modal_search_field {
   font-size: 12px;
   line-height: normal;
-  border: 1px solid #d9dbde;
+  border: 1px solid #fff  !important;
   border-radius: 2px;
   padding: 6px 15px 6px 30px;
   margin: 0;
@@ -3130,6 +3090,7 @@ a.contacts_modal_search_clear {
 }
 
 .contacts_modal_members_list {
+
   .contacts_modal_contact_wrap {
     margin-top: 0;
   }
@@ -3395,9 +3356,12 @@ a.contacts_modal_contact:hover .md_modal_list_peer_description,
   }
 
   .im_message_outer_wrap {
-    background-color: rgba(242, 246, 250, 1.0);
+    // background-color: rgba(242, 246, 250, 1.0);
+    background-color: rgba(242, 246, 250, 0);
     animation-name: im_message_focus_fade;
-    animation-duration: 5s;
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-out;
+    animation-duration: 4s;
   }
 }
 
@@ -4088,7 +4052,7 @@ a.countries_modal_search_clear {
   padding: 15px 27px 15px;
 }
 .md_modal_footer_empty {
-  padding: 15px 27px 0;
+  padding: 10px 27px 0;
 }
 
 .md_photo_loading {

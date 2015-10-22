@@ -4,7 +4,7 @@
 
   <div class="im_page_split clearfix">
 
-    <div ng-controller="AppImDialogsController" my-dialogs has-tabs="{{search.query.length > 0}}" class="im_dialogs_col_wrap" ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
+    <div ng-controller="AppImDialogsController" my-dialogs class="im_dialogs_col_wrap" ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
           <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
@@ -125,10 +125,7 @@
                 </div>
               </div>
               <div ng-switch-when="selected" class="im_edit_selected_actions" my-i18n>
-                <a class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
-                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
-                <a class="btn btn-primary im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete" ng-show="historyState.canDelete"></a>
-                <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedReply()" ng-show="selectedCount == 1 &amp;&amp; historyState.canReply" my-i18n="im_reply"></a>
+                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a><a class="btn btn-primary im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete" ng-show="historyState.canDelete"></a>
                 <my-i18n-param name="count"><strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong></my-i18n-param>
               </div>
             </div>
@@ -143,6 +140,11 @@
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
                       <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
                       <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMessage" watch="true"></a>
+                    </div>
+
+                    <div class="im_send_reply_wrap im_send_fwds_wrap" ng-if="draftMessage.fwdMessages.length > 0">
+                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.fwdsClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+                      <div class="im_message_reply_wrap" my-forwarded-messages="draftMessage.fwdMessages"></div>
                     </div>
 
                     <div class="im_send_field_panel">

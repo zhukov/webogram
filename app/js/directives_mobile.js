@@ -27,13 +27,8 @@ angular.module('myApp.directives')
                               ? '.mobile_modal_body .im_dialogs_panel'
                               : '.im_dialogs_panel',
           panelWrap = $(panelWrapSelector)[0],
-          hasTabs = false,
           moreNotified = false;
 
-      $scope.$on('ui_dialogs_tabs', function (e, newHasTabs) {
-        hasTabs = newHasTabs;
-        updateSizes();
-      });
       $scope.$on('ui_dialogs_search', updateSizes);
       $scope.$on('ui_dialogs_update', updateSizes);
 

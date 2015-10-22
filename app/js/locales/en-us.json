@@ -441,6 +441,7 @@
 	"im_channel_mute": "Mute",
 	"im_channel_unmute": "Unmute",
 	"im_reply_loading": "Loading{dots}",
+	"im_X_forwarded_messages": "{'one': '{} forwarded message', 'other': '{} forwarded messages'}",
 	"im_photos_drop_text": "Drop photos here to send",
 	"im_message_field_placeholder": "Write a message...",
 	"im_broadcast_field_placeholder": "Broadcast a message...",

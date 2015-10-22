@@ -415,6 +415,9 @@ angular.module('myApp.services')
   }
 
   function getMessageLocalID (fullMsgID) {
+    if (!fullMsgID) {
+      return 0;
+    }
     return fullMsgID % fullMsgIDModulus;
   }
 
@@ -1065,119 +1068,118 @@ angular.module('myApp.services')
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
     }
 
-    MtpApiManager.getUserID().then(function (fromID) {
-      if (peerID != fromID) {
-        flags |= 2;
-        if (!isChannel && !AppUsersManager.isBot(peerID)) {
-          flags |= 1;
+    var fromID = AppUsersManager.getSelf().id;
+    if (peerID != fromID) {
+      flags |= 2;
+      if (!isChannel && !AppUsersManager.isBot(peerID)) {
+        flags |= 1;
+      }
+    }
+    if (replyToMsgID) {
+      flags |= 8;
+    }
+    if (asChannel) {
+      fromID = 0;
+    } else {
+      flags |= 256;
+    }
+    message = {
+      _: 'message',
+      id: messageID,
+      from_id: fromID,
+      to_id: AppPeersManager.getOutputPeer(peerID),
+      flags: flags,
+      date: tsNow(true) + serverTimeOffset,
+      message: text,
+      random_id: randomIDS,
+      reply_to_msg_id: replyToMsgID,
+      entities: entities,
+      pending: true
+    };
+
+    var toggleError = function (on) {
+      var historyMessage = messagesForHistory[messageID];
+      if (on) {
+        message.error = true;
+        if (historyMessage) {
+          historyMessage.error = true;
+        }
+      } else {
+        delete message.error;
+        if (historyMessage) {
+          delete historyMessage.error;
         }
       }
+      $rootScope.$broadcast('messages_pending');
+    }
+
+    message.send = function () {
+      toggleError(false);
+      var sentRequestOptions = {};
+      if (pendingAfterMsgs[peerID]) {
+        sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
+      }
+      var flags = 0;
       if (replyToMsgID) {
+        flags |= 1;
+      }
+      if (entities.length) {
         flags |= 8;
       }
       if (asChannel) {
-        fromID = 0;
-      } else {
-        flags |= 256;
+        flags |= 16;
       }
-      message = {
-        _: 'message',
-        id: messageID,
-        from_id: fromID,
-        to_id: AppPeersManager.getOutputPeer(peerID),
+      // console.log(flags, entities);
+      MtpApiManager.invokeApi('messages.sendMessage', {
         flags: flags,
-        date: tsNow(true) + serverTimeOffset,
+        peer: inputPeer,
         message: text,
-        random_id: randomIDS,
-        reply_to_msg_id: replyToMsgID,
-        entities: entities,
-        pending: true
-      };
-
-      var toggleError = function (on) {
-        var historyMessage = messagesForHistory[messageID];
-        if (on) {
-          message.error = true;
-          if (historyMessage) {
-            historyMessage.error = true;
-          }
-        } else {
-          delete message.error;
-          if (historyMessage) {
-            delete historyMessage.error;
-          }
+        random_id: randomID,
+        reply_to_msg_id: getMessageLocalID(replyToMsgID),
+        entities: entities
+      }, sentRequestOptions).then(function (updates) {
+        if (updates._ == 'updateShortSentMessage') {
+          message.flags = updates.flags;
+          message.date = updates.date;
+          message.id = updates.id;
+          message.media = updates.media;
+          message.entities = updates.entities;
+          updates = {
+            _: 'updates',
+            users: [],
+            chats: [],
+            seq: 0,
+            updates: [{
+              _: 'updateMessageID',
+              random_id: randomIDS,
+              id: updates.id
+            }, {
+              _: isChannel ? 'updateNewChannelMessage' : 'updateNewMessage',
+              message: message,
+              pts: updates.pts,
+              pts_count: updates.pts_count
+            }]
+          };
         }
-        $rootScope.$broadcast('messages_pending');
-      }
-
-      message.send = function () {
-        toggleError(false);
-        var sentRequestOptions = {};
-        if (pendingAfterMsgs[peerID]) {
-          sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
+        ApiUpdatesManager.processUpdateMessage(updates);
+      }, function (error) {
+        toggleError(true);
+      })['finally'](function () {
+        if (pendingAfterMsgs[peerID] === sentRequestOptions) {
+          delete pendingAfterMsgs[peerID];
         }
-        var flags = 0;
-        if (replyToMsgID) {
-          flags |= 1;
-        }
-        if (entities.length) {
-          flags |= 8;
-        }
-        if (asChannel) {
-          flags |= 16;
-        }
-        // console.log(flags, entities);
-        MtpApiManager.invokeApi('messages.sendMessage', {
-          flags: flags,
-          peer: inputPeer,
-          message: text,
-          random_id: randomID,
-          reply_to_msg_id: getMessageLocalID(replyToMsgID),
-          entities: entities
-        }, sentRequestOptions).then(function (updates) {
-          if (updates._ == 'updateShortSentMessage') {
-            message.flags = updates.flags;
-            message.date = updates.date;
-            message.id = updates.id;
-            message.media = updates.media;
-            message.entities = updates.entities;
-            updates = {
-              _: 'updates',
-              users: [],
-              chats: [],
-              seq: 0,
-              updates: [{
-                _: 'updateMessageID',
-                random_id: randomIDS,
-                id: updates.id
-              }, {
-                _: isChannel ? 'updateNewChannelMessage' : 'updateNewMessage',
-                message: message,
-                pts: updates.pts,
-                pts_count: updates.pts_count
-              }]
-            };
-          }
-          ApiUpdatesManager.processUpdateMessage(updates);
-        }, function (error) {
-          toggleError(true);
-        })['finally'](function () {
-          if (pendingAfterMsgs[peerID] === sentRequestOptions) {
-            delete pendingAfterMsgs[peerID];
-          }
-        });
+      });
 
-        pendingAfterMsgs[peerID] = sentRequestOptions;
-      };
+      pendingAfterMsgs[peerID] = sentRequestOptions;
+    };
 
-      saveMessages([message]);
-      historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
+    saveMessages([message]);
+    historyStorage.pending.unshift(messageID);
+    $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
-      // setTimeout(function () {
-        message.send();
-      // }, 5000);
-    });
+    // setTimeout(function () {
+      message.send();
+    // }, 5000);
 
     pendingByRandomID[randomIDS] = [peerID, messageID];
   };
@@ -1216,151 +1218,150 @@ angular.module('myApp.services')
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
     }
 
-    MtpApiManager.getUserID().then(function (fromID) {
-      if (peerID != fromID) {
-        flags |= 2;
-        if (!isChannel && !AppUsersManager.isBot(peerID)) {
-          flags |= 1;
+    var fromID = AppUsersManager.getSelf().id;
+    if (peerID != fromID) {
+      flags |= 2;
+      if (!isChannel && !AppUsersManager.isBot(peerID)) {
+        flags |= 1;
+      }
+    }
+    if (replyToMsgID) {
+      flags |= 8;
+    }
+    if (asChannel) {
+      fromID = 0;
+    } else {
+      flags |= 256;
+    }
+    var media = {
+      _: 'messageMediaPending',
+      type: attachType,
+      file_name: file.name || apiFileName,
+      size: file.size,
+      progress: {percent: 1, total: file.size}
+    };
+
+    var message = {
+      _: 'message',
+      id: messageID,
+      from_id: fromID,
+      to_id: AppPeersManager.getOutputPeer(peerID),
+      flags: flags,
+      date: tsNow(true) + serverTimeOffset,
+      message: '',
+      media: media,
+      random_id: randomIDS,
+      reply_to_msg_id: replyToMsgID,
+      pending: true
+    };
+
+    var toggleError = function (on) {
+      var historyMessage = messagesForHistory[messageID];
+      if (on) {
+        message.error = true;
+        if (historyMessage) {
+          historyMessage.error = true;
         }
-      }
-      if (replyToMsgID) {
-        flags |= 8;
-      }
-      if (asChannel) {
-        fromID = 0;
       } else {
-        flags |= 256;
-      }
-      var media = {
-        _: 'messageMediaPending',
-        type: attachType,
-        file_name: file.name || apiFileName,
-        size: file.size,
-        progress: {percent: 1, total: file.size}
-      };
-
-      var message = {
-        _: 'message',
-        id: messageID,
-        from_id: fromID,
-        to_id: AppPeersManager.getOutputPeer(peerID),
-        flags: flags,
-        date: tsNow(true) + serverTimeOffset,
-        message: '',
-        media: media,
-        random_id: randomIDS,
-        reply_to_msg_id: replyToMsgID,
-        pending: true
-      };
-
-      var toggleError = function (on) {
-        var historyMessage = messagesForHistory[messageID];
-        if (on) {
-          message.error = true;
-          if (historyMessage) {
-            historyMessage.error = true;
-          }
-        } else {
-          delete message.error;
-          if (historyMessage) {
-            delete historyMessage.error;
-          }
+        delete message.error;
+        if (historyMessage) {
+          delete historyMessage.error;
         }
-        $rootScope.$broadcast('messages_pending');
       }
+      $rootScope.$broadcast('messages_pending');
+    }
 
-      var uploaded = false,
-          uploadPromise;
+    var uploaded = false,
+        uploadPromise;
 
-      message.send = function () {
-        var sendFileDeferred = $q.defer();
+    message.send = function () {
+      var sendFileDeferred = $q.defer();
 
-        sendFilePromise.then(function () {
-          if (!uploaded || message.error) {
-            uploaded = false;
-            uploadPromise = MtpApiFileManager.uploadFile(file);
+      sendFilePromise.then(function () {
+        if (!uploaded || message.error) {
+          uploaded = false;
+          uploadPromise = MtpApiFileManager.uploadFile(file);
+        }
+
+        uploadPromise.then(function (inputFile) {
+          inputFile.name = apiFileName;
+          uploaded = true;
+          var inputMedia;
+          switch (attachType) {
+            case 'photo':
+              inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
+              break;
+
+            case 'video':
+              inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0, mime_type: file.type};
+              break;
+
+            case 'audio':
+              inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0, mime_type: file.type};
+              break;
+
+            case 'document':
+            default:
+              inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, mime_type: file.type, attributes: [
+                {_: 'documentAttributeFilename', file_name: file.name}
+              ]};
           }
-
-          uploadPromise.then(function (inputFile) {
-            inputFile.name = apiFileName;
-            uploaded = true;
-            var inputMedia;
-            switch (attachType) {
-              case 'photo':
-                inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
-                break;
-
-              case 'video':
-                inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0, mime_type: file.type};
-                break;
-
-              case 'audio':
-                inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0, mime_type: file.type};
-                break;
-
-              case 'document':
-              default:
-                inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, mime_type: file.type, attributes: [
-                  {_: 'documentAttributeFilename', file_name: file.name}
-                ]};
-            }
-            var flags = 0;
-            if (replyToMsgID) {
-              flags |= 1;
-            }
-            if (asChannel) {
-              flags |= 16;
-            }
-            MtpApiManager.invokeApi('messages.sendMedia', {
-              flags: flags,
-              peer: inputPeer,
-              media: inputMedia,
-              random_id: randomID,
-              reply_to_msg_id: getMessageLocalID(replyToMsgID)
-            }).then(function (updates) {
-              ApiUpdatesManager.processUpdateMessage(updates);
-            }, function (error) {
-              if (attachType == 'photo' &&
-                  error.code == 400 &&
-                  error.type == 'PHOTO_INVALID_DIMENSIONS') {
-                error.handled = true;
-                attachType = 'document';
-                message.send();
-                return;
-              }
-              toggleError(true);
-            });
+          var flags = 0;
+          if (replyToMsgID) {
+            flags |= 1;
+          }
+          if (asChannel) {
+            flags |= 16;
+          }
+          MtpApiManager.invokeApi('messages.sendMedia', {
+            flags: flags,
+            peer: inputPeer,
+            media: inputMedia,
+            random_id: randomID,
+            reply_to_msg_id: getMessageLocalID(replyToMsgID)
+          }).then(function (updates) {
+            ApiUpdatesManager.processUpdateMessage(updates);
           }, function (error) {
-            toggleError(true);
-          }, function (progress) {
-            // console.log('upload progress', progress);
-            media.progress.done = progress.done;
-            media.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-            $rootScope.$broadcast('history_update', {peerID: peerID});
-          });
-
-          media.progress.cancel = function () {
-            if (!uploaded) {
-              sendFileDeferred.resolve();
-              uploadPromise.cancel();
-              cancelPendingMessage(randomIDS);
+            if (attachType == 'photo' &&
+                error.code == 400 &&
+                error.type == 'PHOTO_INVALID_DIMENSIONS') {
+              error.handled = true;
+              attachType = 'document';
+              message.send();
+              return;
             }
-          }
-
-          uploadPromise['finally'](function () {
-            sendFileDeferred.resolve();
+            toggleError(true);
           });
+        }, function (error) {
+          toggleError(true);
+        }, function (progress) {
+          // console.log('upload progress', progress);
+          media.progress.done = progress.done;
+          media.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
+          $rootScope.$broadcast('history_update', {peerID: peerID});
         });
 
-        sendFilePromise = sendFileDeferred.promise;
-      };
+        media.progress.cancel = function () {
+          if (!uploaded) {
+            sendFileDeferred.resolve();
+            uploadPromise.cancel();
+            cancelPendingMessage(randomIDS);
+          }
+        }
 
-      saveMessages([message]);
-      historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
+        uploadPromise['finally'](function () {
+          sendFileDeferred.resolve();
+        });
+      });
 
-      message.send();
-    });
+      sendFilePromise = sendFileDeferred.promise;
+    };
+
+    saveMessages([message]);
+    historyStorage.pending.unshift(messageID);
+    $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
+
+    message.send();
 
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
@@ -1381,106 +1382,115 @@ angular.module('myApp.services')
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
     }
 
-    MtpApiManager.getUserID().then(function (fromID) {
-      var media;
-      switch (inputMedia._) {
-        case 'inputMediaContact':
-          media = angular.extend({}, inputMedia, {_: 'messageMediaContact'});
-          break;
+    var fromID = AppUsersManager.getSelf().id;
+    var media;
+    switch (inputMedia._) {
+      case 'inputMediaContact':
+        media = angular.extend({}, inputMedia, {_: 'messageMediaContact'});
+        break;
 
-        case 'inputMediaPhoto':
-          media = {
-            _: 'messageMediaPhoto',
-            photo: AppPhotosManager.getPhoto(inputMedia.id.id)
-          };
-          break;
+      case 'inputMediaPhoto':
+        media = {
+          _: 'messageMediaPhoto',
+          photo: AppPhotosManager.getPhoto(inputMedia.id.id)
+        };
+        break;
 
-        case 'inputMediaDocument':
-          var doc = AppDocsManager.getDoc(inputMedia.id.id);
-          if (doc.sticker && doc.stickerSetInput) {
-            AppStickersManager.pushPopularSticker(doc.id);
-          };
-          media = {
-            _: 'messageMediaDocument',
-            'document': doc
-          };
-          break;
+      case 'inputMediaDocument':
+        var doc = AppDocsManager.getDoc(inputMedia.id.id);
+        if (doc.sticker && doc.stickerSetInput) {
+          AppStickersManager.pushPopularSticker(doc.id);
+        };
+        media = {
+          _: 'messageMediaDocument',
+          'document': doc
+        };
+        break;
+    }
+
+    var flags = 0;
+    if (peerID != fromID) {
+      flags |= 2;
+      if (!AppUsersManager.isBot(peerID)) {
+        flags |= 1;
       }
+    }
+    if (replyToMsgID) {
+      flags |= 8;
+    }
+    if (asChannel) {
+      fromID = 0;
+    } else {
+      flags |= 256;
+    }
 
-      var flags = 0;
-      if (peerID != fromID) {
-        flags |= 2;
-        if (!AppUsersManager.isBot(peerID)) {
-          flags |= 1;
+    var message = {
+      _: 'message',
+      id: messageID,
+      from_id: fromID,
+      to_id: AppPeersManager.getOutputPeer(peerID),
+      flags: flags,
+      date: tsNow(true) + serverTimeOffset,
+      message: '',
+      media: media,
+      random_id: randomIDS,
+      reply_to_msg_id: replyToMsgID,
+      pending: true
+    };
+
+    var toggleError = function (on) {
+      var historyMessage = messagesForHistory[messageID];
+      if (on) {
+        message.error = true;
+        if (historyMessage) {
+          historyMessage.error = true;
+        }
+      } else {
+        delete message.error;
+        if (historyMessage) {
+          delete historyMessage.error;
         }
       }
+      $rootScope.$broadcast('messages_pending');
+    }
+
+    message.send = function () {
+      var flags = 0;
       if (replyToMsgID) {
-        flags |= 8;
+        flags |= 1;
       }
       if (asChannel) {
-        fromID = 0;
-      } else {
-        flags |= 256;
+        flags |= 16;
       }
 
-      var message = {
-        _: 'message',
-        id: messageID,
-        from_id: fromID,
-        to_id: AppPeersManager.getOutputPeer(peerID),
+      var sentRequestOptions = {};
+      if (pendingAfterMsgs[peerID]) {
+        sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
+      }
+
+      MtpApiManager.invokeApi('messages.sendMedia', {
         flags: flags,
-        date: tsNow(true) + serverTimeOffset,
-        message: '',
-        media: media,
-        random_id: randomIDS,
-        reply_to_msg_id: replyToMsgID,
-        pending: true
-      };
-
-      var toggleError = function (on) {
-        var historyMessage = messagesForHistory[messageID];
-        if (on) {
-          message.error = true;
-          if (historyMessage) {
-            historyMessage.error = true;
-          }
-        } else {
-          delete message.error;
-          if (historyMessage) {
-            delete historyMessage.error;
-          }
+        peer: inputPeer,
+        media: inputMedia,
+        random_id: randomID,
+        reply_to_msg_id: getMessageLocalID(replyToMsgID)
+      }, sentRequestOptions).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
+      }, function (error) {
+        toggleError(true);
+      })['finally'](function () {
+        if (pendingAfterMsgs[peerID] === sentRequestOptions) {
+          delete pendingAfterMsgs[peerID];
         }
-        $rootScope.$broadcast('messages_pending');
-      }
+      });
+      pendingAfterMsgs[peerID] = sentRequestOptions;
+    };
 
-      message.send = function () {
-        var flags = 0;
-        if (replyToMsgID) {
-          flags |= 1;
-        }
-        if (asChannel) {
-          flags |= 16;
-        }
-        MtpApiManager.invokeApi('messages.sendMedia', {
-          flags: flags,
-          peer: inputPeer,
-          media: inputMedia,
-          random_id: randomID,
-          reply_to_msg_id: getMessageLocalID(replyToMsgID)
-        }).then(function (updates) {
-          ApiUpdatesManager.processUpdateMessage(updates);
-        }, function (error) {
-          toggleError(true);
-        });
-      };
+    saveMessages([message]);
+    historyStorage.pending.unshift(messageID);
+    $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
-      saveMessages([message]);
-      historyStorage.pending.unshift(messageID);
-      $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
-
-      message.send();
-    });
-
+    message.send();
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
@@ -1509,7 +1519,12 @@ angular.module('myApp.services')
       to_peer: AppPeersManager.getInputPeerByID(peerID),
     }, sentRequestOptions).then(function (updates) {
       ApiUpdatesManager.processUpdateMessage(updates);
+    })['finally'](function () {
+      if (pendingAfterMsgs[peerID] === sentRequestOptions) {
+        delete pendingAfterMsgs[peerID];
+      }
     });
+    pendingAfterMsgs[peerID] = sentRequestOptions;
   };
 
   function startBot (botID, chatID, startParam) {
@@ -1994,6 +2009,47 @@ angular.module('myApp.services')
     }
 
     return wasUpdated;
+  }
+
+  function getMessageThumb (message, thumbWidth, thumbHeight) {
+    var thumbPhotoSize;
+    var sticker = false;
+    if (message.media) {
+      switch (message.media._) {
+        case 'messageMediaPhoto':
+          thumbPhotoSize = AppPhotosManager.choosePhotoSize(message.media.photo, thumbWidth, thumbHeight);
+          break;
+
+        case 'messageMediaDocument':
+          thumbPhotoSize = message.media.document.thumb;
+          if (message.media.document.sticker) {
+            sticker = true;
+          }
+          break;
+
+        case 'messageMediaVideo':
+          thumbPhotoSize = message.media.video.thumb;
+          break;
+      }
+    }
+
+    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
+      var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, thumbWidth, thumbHeight, true);
+
+      var thumb = {
+        width: dim.w,
+        height: dim.h,
+        location: thumbPhotoSize.location,
+        size: thumbPhotoSize.size
+      };
+      if (sticker) {
+        thumb.location.sticker = true;
+      }
+
+      return thumb;
+    }
+
+    return false;
   }
 
   function incrementMaxSeenID (maxID) {
@@ -2602,6 +2658,7 @@ angular.module('myApp.services')
     startBot: startBot,
     openChatInviteLink: openChatInviteLink,
     getMessagePeer: getMessagePeer,
+    getMessageThumb: getMessageThumb,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
     wrapReplyMarkup: wrapReplyMarkup,

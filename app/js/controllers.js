@@ -413,7 +413,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('$routeUpdate', updateCurDialog);
 
     var pendingParams = false;
-    var pendingShare = false;
+    var pendingAttachment = false;
     $scope.$on('history_focus', function (e, peerData) {
       $modalStack.dismissAll();
       if (peerData.peerString == $scope.curDialog.peer &&
@@ -424,7 +424,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var peerID = AppPeersManager.getPeerID(peerData.peerString);
         var username = AppPeersManager.getPeer(peerID).username;
         var peer = username ? '@' + username : peerData.peerString;
-        if (peerData.messageID || peerData.startParam || peerData.shareUrl) {
+        if (peerData.messageID || peerData.startParam) {
           pendingParams = {
             messageID: peerData.messageID,
             startParam: peerData.startParam
@@ -432,11 +432,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else {
           pendingParams = false;
         }
-        if (peerData.shareUrl) {
-          pendingShare = {
-            url: peerData.shareUrl,
-            text: peerData.shareText
-          };
+        if (peerData.attachment) {
+          pendingAttachment = peerData.attachment;
         }
         if ($routeParams.p != peer) {
           $location.url('/im?p=' + peer);
@@ -619,9 +616,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.curDialog = angular.extend({
           peer: peerString
         }, addParams);
-        if (pendingShare) {
-          $scope.$broadcast('peer_share', pendingShare);
-          pendingShare = false;
+        if (pendingAttachment) {
+          $scope.$broadcast('peer_draft_attachment', pendingAttachment);
+          pendingAttachment = false;
         }
       });
     }
@@ -1072,6 +1069,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           documents: 'inputMessagesFilterDocument',
           audio: 'inputMessagesFilterAudio'
         },
+        unfocusMessagePromise,
         jump = 0,
         moreJump = 0,
         moreActive = false,
@@ -1258,8 +1256,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (history &&
           history.ids.indexOf($scope.curDialog.messageID) != -1) {
         $scope.historyUnread = {};
-        $scope.$broadcast('messages_focus', $scope.curDialog.messageID);
+        var focusedMsgID = $scope.curDialog.messageID || 0;
+        $scope.$broadcast('messages_focus', focusedMsgID);
         $scope.$broadcast('ui_history_change_scroll', true);
+
+        $timeout.cancel(unfocusMessagePromise);
+        if (focusedMsgID) {
+          unfocusMessagePromise = $timeout(function () {
+            if ($scope.curDialog.messageID == focusedMsgID) {
+              $scope.$broadcast('messages_focus', 0);
+            }
+          }, 2800);
+        }
       } else {
         loadHistory();
       }
@@ -1447,10 +1455,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           delete $scope.historyUnreadAfter;
         }
         $scope.$broadcast('messages_unread_after');
+        var focusedMsgID = $scope.curDialog.messageID || 0;
         onContentLoaded(function () {
-          $scope.$broadcast('messages_focus', $scope.curDialog.messageID || 0);
+          $scope.$broadcast('messages_focus', focusedMsgID);
         });
         $scope.$broadcast('ui_history_change');
+
+        $timeout.cancel(unfocusMessagePromise);
+        if (focusedMsgID) {
+          unfocusMessagePromise = $timeout(function () {
+            if ($scope.curDialog.messageID == focusedMsgID) {
+              $scope.$broadcast('messages_focus', 0);
+            }
+          }, 2800);
+        }
 
         AppMessagesManager.readHistory($scope.curDialog.inputPeer);
 
@@ -1538,7 +1556,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (Config.Mobile) {
           $modal.open({
             templateUrl: templateUrl('message_actions_modal'),
-            windowClass: 'message_actions_modal_window'
+            windowClass: 'message_actions_modal_window',
+            scope: $scope.$new()
           }).result.then(function (action) {
             switch (action) {
               case 'reply':
@@ -1662,15 +1681,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         });
       }
       if (selectedMessageIDs.length) {
-        PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-          angular.forEach(peerStrings, function (peerString) {
-            var peerID = AppPeersManager.getPeerID(peerString);
-            AppMessagesManager.forwardMessages(peerID, selectedMessageIDs).then(function () {
-              selectedCancel();
-              if (peerStrings.length == 1) {
-                $rootScope.$broadcast('history_focus', {peerString: peerString});
-              }
-            });
+        PeersSelectService.selectPeer().then(function (peerString) {
+          selectedCancel();
+          $rootScope.$broadcast('history_focus', {
+            peerString: peerString,
+            attachment: {
+              _: 'fwd_messages',
+              id: selectedMessageIDs
+            }
           });
         });
       }
@@ -2023,7 +2041,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
-    $scope.$on('peer_share', applyShare);
+    $scope.$on('peer_draft_attachment', applyDraftAttachment);
     $scope.$on('reply_selected', function (e, messageID) {
       replySelect(messageID);
     });
@@ -2032,7 +2050,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.draftMessage = {
       text: '',
       send: sendMessage,
-      replyClear: replyClear
+      replyClear: replyClear,
+      fwdsClear: fwdsClear
     };
     $scope.mentions = {};
     $scope.commands = {};
@@ -2051,6 +2070,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.toggleSlash = toggleSlash;
 
     var replyToMarkup = false;
+    var forceDraft = false;
 
     function sendMessage (e) {
       $scope.$broadcast('ui_message_before_send');
@@ -2084,6 +2104,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
           } while (text.length);
         }
+        fwdsSend();
 
         resetDraft();
         $scope.$broadcast('ui_message_send');
@@ -2170,6 +2191,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       replyClear();
       updateReplyKeyboard();
 
+      // console.log(dT(), 'reset draft', $scope.curDialog.peer, forceDraft);
+      if (forceDraft) {
+        if (forceDraft == $scope.curDialog.peer) {
+          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID);
+          $scope.$broadcast('ui_peer_draft');
+          return;
+        } else {
+          forceDraft = false;
+        }
+      }
+
+      fwdsClear();
+
       if (newPeer) {
         Storage.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
           // console.log('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
@@ -2185,20 +2219,33 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-    function applyShare (e, shareData) {
-      var url = shareData.url;
-      var text = shareData.text || '';
+    function applyDraftAttachment (e, attachment) {
+      // console.log('apply draft attach', attachment);
+      if (!attachment || !attachment._) {
+        return;
+      }
 
-      $timeout(function () {
-        $scope.draftMessage.text = url + "\n" + text;
-        $scope.$broadcast('ui_peer_draft', {
-          customSelection: [
-            url + "\n",
-            text,
-            ''
-          ]
-        });
-      }, 1000);
+      if (attachment._ == 'share_url') {
+        var url = attachment.url;
+        var text = attachment.text || '';
+        forceDraft = $scope.curDialog.peer;
+
+        $timeout(function () {
+          $scope.draftMessage.text = url + "\n" + text;
+          $scope.$broadcast('ui_peer_draft', {
+            customSelection: [
+              url + "\n",
+              text,
+              ''
+            ]
+          });
+        }, 1000);
+      }
+      else if (attachment._ == 'fwd_messages') {
+        forceDraft = $scope.curDialog.peer;
+        $scope.draftMessage.fwdMessages = attachment.id;
+        $scope.$broadcast('ui_peer_reply');
+      }
     }
 
     function replySelect(messageID) {
@@ -2218,6 +2265,29 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       delete $scope.draftMessage.replyToMessage;
       $scope.$broadcast('ui_peer_reply');
+    }
+
+    function fwdsClear () {
+      if ($scope.draftMessage.fwdMessages &&
+          $scope.draftMessage.fwdMessages.length) {
+        delete $scope.draftMessage.fwdMessages;
+        $scope.$broadcast('ui_peer_reply');
+
+        if (forceDraft == $scope.curDialog.peer) {
+          forceDraft = false;
+        }
+      }
+    }
+
+    function fwdsSend () {
+      if ($scope.draftMessage.fwdMessages &&
+          $scope.draftMessage.fwdMessages.length) {
+        var ids = $scope.draftMessage.fwdMessages.slice();
+        fwdsClear();
+        setTimeout(function () {
+          AppMessagesManager.forwardMessages($scope.curDialog.peerID, ids);
+        }, 0);
+      }
     }
 
     function toggleSlash ($event) {
@@ -2319,6 +2389,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppMessagesManager.sendFile($scope.curDialog.peerID, newVal[i], options);
         $scope.$broadcast('ui_message_send');
       }
+      fwdsSend();
     }
 
     function onStickerSelected (newVal) {
@@ -2341,6 +2412,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         };
         AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options);
         $scope.$broadcast('ui_message_send');
+
+        fwdsSend();
       }
       delete $scope.draftMessage.sticker;
       resetDraft();
@@ -2402,14 +2475,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
-            if (peerStrings.length == 1) {
-              $rootScope.$broadcast('history_focus', {peerString: peerString});
-            }
-          });
+
+      PeersSelectService.selectPeer().then(function (peerString) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: peerString,
+          attachment: {
+            _: 'fwd_messages',
+            id: [messageID]
+          }
         });
       });
     };
@@ -2727,21 +2800,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.forward = function () {
-      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.sendOther(peerID, {
-            _: 'inputMediaPhoto',
-            id: {
-              _: 'inputPhoto',
-              id: $scope.photoID,
-              access_hash: $scope.photo.access_hash,
-            }
-          });
-          if (peerStrings.length == 1) {
-            $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.sendOther(peerID, {
+          _: 'inputMediaPhoto',
+          id: {
+            _: 'inputPhoto',
+            id: $scope.photoID,
+            access_hash: $scope.photo.access_hash,
           }
         });
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
       });
     };
 
@@ -2802,21 +2871,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.canDelete = isChannel ? chat.pFlags.creator : true;
 
     $scope.forward = function () {
-      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.sendOther(peerID, {
-            _: 'inputMediaPhoto',
-            id: {
-              _: 'inputPhoto',
-              id: $scope.photoID,
-              access_hash: $scope.photo.access_hash,
-            }
-          });
-          if (peerStrings.length == 1) {
-            $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.sendOther(peerID, {
+          _: 'inputMediaPhoto',
+          id: {
+            _: 'inputPhoto',
+            id: $scope.photoID,
+            access_hash: $scope.photo.access_hash,
           }
         });
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
       });
     };
 
@@ -2861,14 +2926,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
-            if (peerStrings.length == 1) {
-              $rootScope.$broadcast('history_focus', {peerString: peerString});
-            }
-          });
+      PeersSelectService.selectPeer().then(function (peerString) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: peerString,
+          attachment: {
+            _: 'fwd_messages',
+            id: [messageID]
+          }
         });
       });
     };
@@ -2897,14 +2961,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
-            if (peerStrings.length == 1) {
-              $rootScope.$broadcast('history_focus', {peerString: peerString});
-            }
-          });
+      PeersSelectService.selectPeer().then(function (peerString) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: peerString,
+          attachment: {
+            _: 'fwd_messages',
+            id: [messageID]
+          }
         });
       });
     };
@@ -2935,14 +2998,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeers({confirm_type: 'FORWARD_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.forwardMessages(peerID, [messageID]).then(function () {
-            if (peerStrings.length == 1) {
-              $rootScope.$broadcast('history_focus', {peerString: peerString});
-            }
-          });
+      PeersSelectService.selectPeer().then(function (peerString) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: peerString,
+          attachment: {
+            _: 'fwd_messages',
+            id: [messageID]
+          }
         });
       });
     };
@@ -3052,20 +3114,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.shareContact = function () {
-      PeersSelectService.selectPeers({confirm_type: 'SHARE_CONTACT_PEER'}).then(function (peerStrings) {
-        angular.forEach(peerStrings, function (peerString) {
-          var peerID = AppPeersManager.getPeerID(peerString);
-          AppMessagesManager.sendOther(peerID, {
-            _: 'inputMediaContact',
-            phone_number: $scope.user.phone,
-            first_name: $scope.user.first_name,
-            last_name: $scope.user.last_name,
-            user_id: $scope.user.id
-          });
-          if (peerStrings.length == 1) {
-            $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
-          }
+      PeersSelectService.selectPeer({confirm_type: 'SHARE_CONTACT_PEER'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString);
+        AppMessagesManager.sendOther(peerID, {
+          _: 'inputMediaContact',
+          phone_number: $scope.user.phone,
+          first_name: $scope.user.first_name,
+          last_name: $scope.user.last_name,
+          user_id: $scope.user.id
         });
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
       });
     }
 

@@ -379,42 +379,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(element).remove();
         return;
       }
-      var thumbWidth = 42;
-      var thumbHeight = 42;
-      var thumbPhotoSize;
-      var sticker = false;
-      if (message.media) {
-        switch (message.media._) {
-          case 'messageMediaPhoto':
-            thumbPhotoSize = AppPhotosManager.choosePhotoSize(message.media.photo, thumbWidth, thumbHeight);
-            break;
-
-          case 'messageMediaDocument':
-            thumbPhotoSize = message.media.document.thumb;
-            if (message.media.document.sticker) {
-              sticker = true;
-            }
-            break;
-
-          case 'messageMediaVideo':
-            thumbPhotoSize = message.media.video.thumb;
-            break;
-        }
-      }
-
-      if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-        var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, thumbWidth, thumbHeight, true);
-
-        $scope.thumb = {
-          width: dim.w,
-          height: dim.h,
-          location: thumbPhotoSize.location,
-          size: thumbPhotoSize.size
-        };
-        if (sticker) {
-          $scope.thumb.location.sticker = true;
-        }
-      }
+      $scope.thumb = AppMessagesManager.getMessageThumb(message, 42, 42);
 
       if (element[0].tagName == 'A') {
         element.on('click', function () {
@@ -425,6 +390,57 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         })
       }
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      })
+    }
+
+  })
+
+  .directive('myForwardedMessages', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
+
+    return {
+      templateUrl: templateUrl('forwarded_messages'),
+      scope: {
+        'forwardMessages': '=myForwardedMessages'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      if (attrs.watch) {
+        $scope.$watch('forwardMessages', function () {
+          updateMessages($scope, element);
+        });
+      } else {
+        updateMessages($scope, element);
+      }
+    }
+
+    function updateMessages ($scope, element) {
+      var mids = $scope.forwardMessages;
+      var length = mids.length;
+      var fromID = false;
+      var single = length == 1;
+      $scope.thumb = false;
+      $scope.singleMessage = false;
+      angular.forEach(mids, function (mid) {
+        var message = AppMessagesManager.getMessage(mid);
+        if (fromID === false) {
+          fromID = message.fromID;
+        } else {
+          if (fromID !== message.fromID) {
+            fromID = AppMessagesManager.getMessagePeer(message);
+          }
+        }
+        if (single) {
+          $scope.thumb = AppMessagesManager.getMessageThumb(message, 42, 42);
+          $scope.singleMessage = AppMessagesManager.wrapForDialog(mid);
+        }
+      });
+      $scope.fromID = fromID;
+      $scope.count = length;
 
       onContentLoaded(function () {
         $scope.$emit('ui_height');
@@ -636,7 +652,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           searchField = $('.im_dialogs_search_field', element)[0],
           panelWrap = $('.im_dialogs_panel', element)[0],
           searchClear = $('.im_dialogs_search_clear', element)[0],
-          tabsWrap = $('.im_dialogs_tabs_wrap', element)[0],
           searchFocused = false;
 
 
@@ -663,12 +678,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('search_clear', function () {
         $(panelWrap).removeClass('im_dialogs_panel_search');
         $scope.$broadcast('ui_dialogs_search');
-      })
-
-      attrs.$observe('hasTabs', function (newValue) {
-        newValue = newValue == 'true';
-        $(tabsWrap).toggle(newValue);
-        $scope.$broadcast('ui_dialogs_tabs', newValue);
       });
 
       $(document).on('keydown', onKeyDown);
@@ -828,7 +837,6 @@ angular.module('myApp.directives', ['myApp.filters'])
                               : '.im_dialogs_panel',
           panelWrap = $(panelWrapSelector)[0],
           footer = $('.footer_wrap')[0],
-          hasTabs = false,
           moreNotified = false;
 
       onContentLoaded(function () {
@@ -842,11 +850,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('ui_dialogs_prepend', updateScroller);
-
-      $scope.$on('ui_dialogs_tabs', function (e, newHasTabs) {
-        hasTabs = newHasTabs;
-        updateSizes();
-      });
       $scope.$on('ui_dialogs_search', updateSizes);
       $scope.$on('ui_dialogs_update', updateSizes);
 
@@ -891,9 +894,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (attrs.modal) {
           var height = $($window).height() -
-                        (panelWrap ? panelWrap.offsetHeight : 58) -
-                        (Config.Mobile ? 46 : 200);
-          height = Math.min(350, height);
+                        (panelWrap ? panelWrap.offsetHeight : 49) -
+                        (Config.Mobile ? 46 : 100);
+          height = Math.min(Config.Mobile ? 350 : 450, height);
           $(element).css({height: height});
           updateScroller();
           return;

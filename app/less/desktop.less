@@ -622,10 +622,6 @@ a.footer_link.active:active {
   -webkit-transform: translateZ(0);
   -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
-
-  .im_dialogs_modal_col_wrap & {
-    padding: 0;
-  }
 }
 
 .im_dialogs_col {
@@ -680,6 +676,7 @@ a.footer_link.active:active {
   .contacts_modal_col .nano > & {
     width: 5px;
     right: 4px;
+    top: 10px;
   }
 
   .sessions_modal_col .nano > &,
@@ -693,6 +690,7 @@ a.footer_link.active:active {
   .im_dialogs_modal_col .nano > & {
     width: 6px;
     right: 2px;
+    top: 10px;
   }
 
   .im_history_col .nano > & {
@@ -777,12 +775,9 @@ a.footer_link.active:active {
     }
   }
 
-  &_search {
-    padding: 15px 12px 12px;
-    position: relative;
-  }
-
   &_members_list {
+    padding-top: 10px;
+
     a.contacts_modal_contact {
       padding: 8px 16px;
     }
@@ -1019,9 +1014,6 @@ a.footer_link.active:active {
   &_window {
     .modal-dialog {
       max-width: 420px;
-    }
-    .im_dialogs_panel {
-      padding-top: 15px;
     }
   }
 

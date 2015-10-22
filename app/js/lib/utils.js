@@ -348,6 +348,7 @@ function templateUrl (tplName) {
     media_modal_layout: 'desktop',
     slider: 'desktop',
     reply_message: 'desktop',
+    forwarded_messages: 'desktop',
     chat_invite_link_modal: 'desktop',
     reply_markup: 'desktop',
     dialog_service: 'desktop',

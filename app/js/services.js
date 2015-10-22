@@ -3794,7 +3794,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }).then(function (toPeerString) {
         var url = decodeURIComponent(matches[1]);
         var text = matches[2] ? decodeURIComponent(matches[2]) : '';
-        $rootScope.$broadcast('history_focus', {peerString: toPeerString, shareUrl: url, shareText: text});
+        $rootScope.$broadcast('history_focus', {
+          peerString: toPeerString,
+          attachment: {
+            _: 'share_url',
+            url: url,
+            text: text
+          }
+        });
       });
       return true;
     }

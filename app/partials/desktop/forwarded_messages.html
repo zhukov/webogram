@@ -1,0 +1,45 @@
+<div class="im_message_reply clearfix" ng-class="{im_message_reply_thumbed: thumb !== false}">
+  <div class="im_message_reply_border"></div>
+  <div class="im_message_reply_thumb_wrap pull-left" ng-if="thumb !== false">
+    <img
+      class="im_message_reply_thumb"
+      my-load-thumb
+      thumb="thumb"
+      watch="true"
+    />
+  </div>
+  <div class="im_message_reply_author">
+    <span my-peer-link="fromID" peer-watch="true"></span>
+  </div>
+  <div class="im_message_reply_body" ng-switch="singleMessage !== false">
+    <div ng-switch-when="true">
+      <span class="im_reply_message_media" ng-if="singleMessage.media" ng-switch="singleMessage.media._">
+        <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
+        <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
+        <span ng-switch-when="messageMediaDocument" ng-switch="::singleMessage.media.document.sticker || false">
+          <span ng-switch-when="1" my-i18n="conversation_media_sticker"></span>
+          <span ng-switch-when="2">
+            <span ng-bind-html="singleMessage.media.document.stickerEmoji"></span>
+            (<my-i18n msgid="conversation_media_sticker"></my-i18n>)
+          </span>
+          <span ng-switch-default ng-bind="singleMessage.media.document.file_name"></span>
+        </span>
+        <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
+        <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
+        <span ng-switch-when="messageMediaVenue" my-i18n="conversation_media_location"></span>
+        <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
+      </span>
+
+      <span class="im_reply_message_service" ng-if="singleMessage._ == 'messageService'" my-service-short-message="singleMessage"></span>
+
+      <span class="im_reply_message_text" ng-if="singleMessage.message.length" ng-bind-html="singleMessage.richMessage"></span>
+    </div>
+    <div ng-switch-default>
+      <span class="im_reply_message_service">
+        <ng-pluralize count="count"
+                      when="im_X_forwarded_messages">
+        </ng-pluralize>
+      </span>
+    </div>
+  </div>
+</div>
