@@ -1059,49 +1059,6 @@ a.footer_link.active:active {
   }
 }
 
-@media (max-width: 900px) {
-  /* Status ticks */
-  .icon-message-status,
-  .im_message_error_btn,
-  .icon-message-status-tick {
-    display: none;
-  }
-
-  .im_message {
-    &_out {
-      .icon-message-status-tick {
-        display: inline-block;
-        width: 16px;
-        height: 10px;
-        top: 2px;
-        position: relative;
-
-        .image-2x('../img/icons/Checks2.png', 16px, 10px);
-        background-size: 16px 10px;
-        background-position: 0 0;
-      }
-    }
-
-    &_pending {
-      .icon-message-status-tick {
-        display: none;
-      }
-    }
-
-    &_unread {
-      .icon-message-status-tick {
-        .image-2x('../img/icons/Checks1.png', 16px, 10px);
-        background-size: 16px 10px;
-        background-position: 0 0;
-      }
-    }
-
-    &_date {
-      padding: 0;
-    }
-  }
-}
-
 .im_message_fwd {
   &_author_wrap {
     margin: 1px 0 4px;
