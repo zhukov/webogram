@@ -1425,6 +1425,7 @@ angular.module('izhukov.utils', [])
     if (nested === undefined) {
       return encodeEntities(text);
     }
+    options.hasNested = true;
 
     return wrapRichText(text, {entities: nested, nested: true});
   }
@@ -1642,7 +1643,7 @@ angular.module('izhukov.utils', [])
 
     text = $sanitize(html.join(''));
 
-    if (emojiFound && !options.nested) {
+    if (!options.nested && (emojiFound || options.hasNested)) {
       text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text);
       text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
                           '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
