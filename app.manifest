@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Fri Oct 23 2015 17:00:02 GMT+0200 (CEST)
+# Time: Fri Oct 23 2015 18:38:58 GMT+0200 (CEST)
 
 
 CACHE:
@@ -8,6 +8,7 @@ favicon_unread.ico
 css/app.css
 css/desktop.css
 css/mobile.css
+js/app.js
 img/Manytabs.png
 img/Manytabs_2x.png
 img/Telegram.png
@@ -24,9 +25,18 @@ img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
 img/sound_a.mp3
-js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
+js/lib/bin_utils.js
+js/lib/crypto_worker.js
+js/lib/polyfill.js
+js/locales/de-de.json
+js/locales/en-us.json
+js/locales/es-es.json
+js/locales/it-it.json
+js/locales/nl-nl.json
+js/locales/pt-br.json
+js/locales/ru-ru.json
 img/changelog/card_wecandoit.png
 img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
@@ -61,21 +71,11 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-js/lib/bin_utils.js
-js/lib/crypto_worker.js
-js/lib/polyfill.js
-js/locales/de-de.json
-js/locales/en-us.json
-js/locales/es-es.json
-js/locales/it-it.json
-js/locales/nl-nl.json
-js/locales/pt-br.json
-js/locales/ru-ru.json
-vendor/closure/long.js
 vendor/cryptoJS/crypto.js
+vendor/leemon_bigint/bigint.js
 vendor/jsbn/jsbn_combined.js
 vendor/rusha/rusha.js
-vendor/leemon_bigint/bigint.js
+vendor/closure/long.js
 vendor/angular/i18n/angular-locale_de-de.js
 vendor/angular/i18n/angular-locale_en-us.js
 vendor/angular/i18n/angular-locale_es-es.js
