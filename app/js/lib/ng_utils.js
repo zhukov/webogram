@@ -449,9 +449,16 @@ angular.module('izhukov.utils', [])
     if (getBlobSize(blob) > 10 * 1024 * 1024) {
       return $q.reject();
     }
+    if (!(blob instanceof Blob)) {
+      var mimeType = blob.type || 'image/jpeg';
+      var address = 'data:' + mimeType + ';base64,' + bytesToBase64(blob);
+      return storagePutB64String(db, fileName, address).then(function () {
+        return blob;
+      });
+    }
+
     try {
       var reader = new FileReader();
-      reader.readAsDataURL(blob);
     } catch (e) {
       storageIsAvailable = false;
       return $q.reject();
@@ -460,22 +467,45 @@ angular.module('izhukov.utils', [])
     var deferred = $q.defer();
 
     reader.onloadend = function() {
-      try {
-        var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
-            request = objectStore.put(reader.result, fileName);
-      } catch (error) {
-        storageIsAvailable = false;
-        deferred.reject(error);
-        return;
-      };
-      request.onsuccess = function (event) {
+      storagePutB64String(db, fileName, reader.result).then(function () {
         deferred.resolve(blob);
-      };
-
-      request.onerror = function (error) {
+      }, function (error) {
         deferred.reject(error);
-      };
+      });
     }
+
+    reader.onerror = function (error) {
+      deferred.reject(error);
+    }
+
+    try {
+      reader.readAsDataURL(blob);
+    } catch (e) {
+      storageIsAvailable = false;
+      return $q.reject();
+    }
+
+    return deferred.promise;
+  }
+
+  function storagePutB64String (db, fileName, b64string) {
+    try {
+      var objectStore = db.transaction([dbStoreName], IDBTransaction.READ_WRITE || 'readwrite').objectStore(dbStoreName),
+          request = objectStore.put(b64string, fileName);
+    } catch (error) {
+      storageIsAvailable = false;
+      return $q.reject(error);
+    };
+
+    var deferred = $q.defer();
+
+    request.onsuccess = function (event) {
+      deferred.resolve();
+    };
+
+    request.onerror = function (error) {
+      deferred.reject(error);
+    };
 
     return deferred.promise;
   }

@@ -375,6 +375,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     if (!cachedSavePromises[fileName]) {
       cachedSavePromises[fileName] = getFileStorage().saveFile(fileName, bytes).then(function (blob) {
         return cachedDownloads[fileName] = blob;
+      }, function (error) {
+        delete cachedSavePromises[fileName];
       });
     }
     return cachedSavePromises[fileName];
@@ -384,7 +386,6 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     if (!FileManager.isAvailable()) {
       return $q.reject({type: 'BROWSER_BLOB_NOT_SUPPORTED'});
     }
-    // console.log('dload small', location);
     var fileName = getFileName(location),
         mimeType = location.sticker ? 'image/webp' : 'image/jpeg',
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
