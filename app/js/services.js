@@ -614,6 +614,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return chats[id] || {id: id, deleted: true};
   }
 
+  function hasRights (id, action) {
+    if (chats[id] === undefined) {
+      return false;
+    }
+    var chat = getChat(id);
+    if (chat._ == 'chatForbidden' ||
+        chat._ == 'channelForbidden' ||
+        chat.pFlags.kicked ||
+        chat.pFlags.left) {
+      return false;
+    }
+    if (isChannel(id) && action == 'send') {
+      if (!chat.pFlags.creator && !chat.pFlags.editor) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   function resolveUsername (username) {
     return usernames[username] || 0;
   }
@@ -744,6 +763,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiChat: saveApiChat,
     getChat: getChat,
     isChannel: isChannel,
+    hasRights: hasRights,
     saveChannelAccess: saveChannelAccess,
     getChatInput: getChatInput,
     getChannelInput: getChannelInput,

@@ -876,6 +876,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (dialogsResult.dialogs.length) {
           angular.forEach(dialogsResult.dialogs, function (dialog) {
+            if ($scope.canSend &&
+                AppPeersManager.isChannel(dialog.peerID) &&
+                !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
+              return;
+            }
             var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
             if (!searchMessages) {
               peersInDialogs[dialog.peerID] = true;
@@ -927,6 +932,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           var dialogsList = searchMessages ? $scope.foundMessages : $scope.dialogs;
 
           angular.forEach(dialogsResult.dialogs, function (dialog) {
+            if ($scope.canSend &&
+                AppPeersManager.isChannel(dialog.peerID) &&
+                !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
+              return;
+            }
             var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
             if (!searchMessages) {
               peersInDialogs[dialog.peerID] = true;
@@ -986,6 +996,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             angular.forEach(result.results, function(contactFound) {
               var peerID = AppPeersManager.getPeerID(contactFound);
               if (peersInDialogs[peerID] === undefined) {
+                if ($scope.canSend &&
+                    AppPeersManager.isChannel(peerID) &&
+                    !AppChatsManager.hasRights(-peerID, 'send')) {
+                  return;
+                }
                 $scope.foundPeers.push({
                   id: peerID,
                   username: AppPeersManager.getPeer(peerID).username,
@@ -1681,7 +1696,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         });
       }
       if (selectedMessageIDs.length) {
-        PeersSelectService.selectPeer().then(function (peerString) {
+        PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
           selectedCancel();
           $rootScope.$broadcast('history_focus', {
             peerString: peerString,
@@ -2106,6 +2121,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         fwdsSend();
 
+        if (forceDraft == $scope.curDialog.peer) {
+          forceDraft = false;
+        }
+
         resetDraft();
         $scope.$broadcast('ui_message_send');
       });
@@ -2476,7 +2495,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.forward = function () {
       var messageID = $scope.messageID;
 
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
         $rootScope.$broadcast('history_focus', {
           peerString: peerString,
           attachment: {
@@ -2800,7 +2819,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.forward = function () {
-      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER', canSend: true}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.sendOther(peerID, {
           _: 'inputMediaPhoto',
@@ -2871,7 +2890,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.canDelete = isChannel ? chat.pFlags.creator : true;
 
     $scope.forward = function () {
-      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER'}).then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'FORWARD_PEER', canSend: true}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.sendOther(peerID, {
           _: 'inputMediaPhoto',
@@ -2926,7 +2945,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
         $rootScope.$broadcast('history_focus', {
           peerString: peerString,
           attachment: {
@@ -2961,7 +2980,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
         $rootScope.$broadcast('history_focus', {
           peerString: peerString,
           attachment: {
@@ -2998,7 +3017,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.forward = function () {
       var messageID = $scope.messageID;
-      PeersSelectService.selectPeer().then(function (peerString) {
+      PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
         $rootScope.$broadcast('history_focus', {
           peerString: peerString,
           attachment: {
@@ -3114,7 +3133,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.shareContact = function () {
-      PeersSelectService.selectPeer({confirm_type: 'SHARE_CONTACT_PEER'}).then(function (peerString) {
+      PeersSelectService.selectPeer({confirm_type: 'SHARE_CONTACT_PEER', canSend: true}).then(function (peerString) {
         var peerID = AppPeersManager.getPeerID(peerString);
         AppMessagesManager.sendOther(peerID, {
           _: 'inputMediaContact',

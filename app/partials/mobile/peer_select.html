@@ -60,6 +60,24 @@
             </li>
           </ul>
         </div>
+        <div class="im_dialogs_contacts_wrap" ng-show="foundPeers.length > 0">
+          <h5 my-i18n="im_found_title"></h5>
+          <ul class="nav nav-pills nav-stacked">
+            <li class="im_dialog_wrap" ng-repeat="foundPeer in foundPeers track by foundPeer.id" ng-class="{active: selectedPeers[foundPeer.id] !== undefined}">
+              <a class="im_dialog" ng-click="dialogSelect(foundPeer.peerString)">
+                <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true"></div>
+                <div class="im_dialog_message_wrap">
+                  <div class="im_dialog_peer">
+                    <span class="im_dialog_user" my-peer-link="foundPeer.id"></span>
+                  </div>
+                  <div class="im_dialog_message">
+                    <span class="im_dialog_message_text" ng-bind="::'@' + foundPeer.username"></span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
