@@ -2679,7 +2679,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           var key = short ? 'rFirstName' : 'rFullName';
 
           element.html(
-            (override[key] || user[key] || '').valueOf()
+            (override[key] || user[key] || '').valueOf() +
+            (attrs.verified && user.pFlags && user.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
           );
           if (attrs.color && $scope.$eval(attrs.color)) {
             element.addClass('user_color_' + user.num);

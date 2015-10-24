@@ -52,7 +52,7 @@
       <a ng-click="openPhoto(user.photo.photo_id, {u: user.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::user.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !user.photo.photo_id}" ng-disabled="!user.photo.photo_id"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" ng-bind="user | userName"></h4>
+        <h4 class="mobile_user_modal_header" my-peer-link="user.id" verified="true"></h4>
         <p class="mobile_user_modal_status" ng-if="user.status" my-user-status="::user.id"></p>
       </div>
 

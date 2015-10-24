@@ -1731,6 +1731,7 @@ angular.module('myApp.services')
     var unreadCount = dialog && dialog.unread_count;
 
     if (useCache && messagesForDialogs[msgID] !== undefined) {
+      delete messagesForDialogs[msgID].typing;
       return messagesForDialogs[msgID];
     }
 

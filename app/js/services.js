@@ -120,7 +120,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       deleted: (apiUser.flags & (1 << 13)) > 0,
       bot: (apiUser.flags & (1 << 14)) > 0,
       botNoPrivacy: (apiUser.flags & (1 << 15)) > 0,
-      botNoGroups: (apiUser.flags & (1 << 16)) > 0
+      botNoGroups: (apiUser.flags & (1 << 16)) > 0,
+      verified: (apiUser.flags & (1 << 17)) > 0
     };
 
     apiUser.sortName = apiUser.pFlags.deleted ? '' : SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
