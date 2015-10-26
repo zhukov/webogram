@@ -1618,7 +1618,7 @@ angular.module('izhukov.utils', [])
           var command = entityText.substr(1);
           var bot, atPos;
           if ((atPos = command.indexOf('@')) != -1) {
-            bot = command.substr(atPos);
+            bot = command.substr(atPos + 1);
             command = command.substr(0, atPos);
           } else {
             bot = options.fromBot;
