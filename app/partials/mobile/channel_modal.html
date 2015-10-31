@@ -78,6 +78,10 @@
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.creator">
       <a class="mobile_modal_action" ng-click="inviteToChannel()" my-i18n="channel_modal_add_member"></a>
     </div>
+    
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.creator">
+      <a class="mobile_modal_action" ng-click="addChannelAdmin()" my-i18n="channel_modal_add_admin"></a>
+    </div>
 
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.left">
       <a class="mobile_modal_action" ng-click="joinChannel()" my-i18n="channel_modal_join"></a>
