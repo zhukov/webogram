@@ -821,6 +821,7 @@ angular.module('myApp.services')
     return MtpApiManager.invokeApi('messages.deleteMessages', {
       id: messageIDs
     }).then(function (affectedMessages) {
+    console.log(affectedMessages);
       ApiUpdatesManager.processUpdateMessage({
         _: 'updateShort',
         update: {

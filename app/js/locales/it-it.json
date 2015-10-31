@@ -31,6 +31,7 @@
     "channel_modal_share_loading": "Caricamento{dots}",
     "channel_modal_join": "Unisciti al canale",
     "channel_modal_add_member": "Invita membri",
+    "channel_modal_add_admin": "Aggiungi amministratori",
     "channel_modal_leave_channel": "Lascia il canale",
     "channel_modal_delete_channel": "Elimina canale",
     "country_select_modal_title": "Nazione",

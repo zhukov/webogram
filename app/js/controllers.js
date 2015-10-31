@@ -3371,6 +3371,24 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }).then(onChatUpdated);
       });
     };
+    
+    $scope.addChannelAdmin = function () {
+      var disabled = [];
+      angular.forEach(($scope.chatFull.participants || {}).participants || [], function(participant){
+        disabled.push(participant.user_id);
+      });
+
+      ContactsSelectService.selectContacts({disabled: disabled}).then(function (userIDs) {
+        var inputUsers = [];
+        angular.forEach(userIDs, function (userID) {
+          inputUsers.push(AppUsersManager.getUserInput(userID));
+        });
+        MtpApiManager.invokeApi('channels.inviteToChannel', {
+          channel: AppChatsManager.getChannelInput($scope.chatID),
+          users: inputUsers
+        }).then(onChatUpdated);
+      });
+    };
 
     $scope.kickFromChannel = function (userID) {
       MtpApiManager.invokeApi('channels.kickFromChannel', {
