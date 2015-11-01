@@ -712,7 +712,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       angular.forEach(chatFull.participants.participants, function(participant) {
         participant.canLeave = !chat.pFlags.creator && participant._ == 'channelParticipantSelf';
         participant.canKick = isAdmin && participant._ == 'channelParticipant';
-
+	   participant.canRemAdmin = isAdmin && (participant._ == 'channelParticipantModerator' || participant._ == 'channelParticipantEditor');
         // just for order by last seen
         participant.user = AppUsersManager.getUser(participant.user_id);
       });

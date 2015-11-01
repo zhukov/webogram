@@ -3371,6 +3371,32 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }).then(onChatUpdated);
       });
     };
+    
+    $scope.addChannelAdmin = function () {
+      var disabled = [];
+      angular.forEach(($scope.chatFull.participants || {}).participants || [], function(participant){
+        disabled.push(participant.user_id);
+      });
+      ContactsSelectService.selectContact().then(function (userID) {
+        if(AppUsersManager.isBot(userID))
+        	var userRole = "channelRoleEditor";
+        else
+        	var userRole = "channelRoleModerator";
+        MtpApiManager.invokeApi('channels.editAdmin', {
+          channel: AppChatsManager.getChannelInput($scope.chatID),
+          user_id: AppUsersManager.getUserInput(userID),
+          role: {_: userRole}
+        }).then(onChatUpdated);
+      });
+    };
+    
+    $scope.removeChannelAdmin = function (userID) {
+      MtpApiManager.invokeApi('channels.editAdmin', {
+          channel: AppChatsManager.getChannelInput($scope.chatID),
+          user_id: AppUsersManager.getUserInput(userID),
+          role: {_: "channelRoleEmpty"}
+        }).then(onChatUpdated);
+    };
 
     $scope.kickFromChannel = function (userID) {
       MtpApiManager.invokeApi('channels.kickFromChannel', {

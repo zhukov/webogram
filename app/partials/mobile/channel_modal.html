@@ -78,6 +78,10 @@
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.creator">
       <a class="mobile_modal_action" ng-click="inviteToChannel()" my-i18n="channel_modal_add_member"></a>
     </div>
+    
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.creator">
+      <a class="mobile_modal_action" ng-click="addChannelAdmin()" my-i18n="channel_modal_add_admin"></a>
+    </div>
 
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.left">
       <a class="mobile_modal_action" ng-click="joinChannel()" my-i18n="channel_modal_join"></a>
@@ -114,7 +118,7 @@
           <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
             <a ng-if="participant.canKick" ng-click="kickFromChannel(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
             <a ng-if="participant.canLeave" ng-click="leaveChannel()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_leave"></a>
-
+		  <a ng-if="participant.canRemAdmin" ng-click="removeChannelAdmin(participant.user_id)" class="md_modal_list_peer_action pull-right" my-i18n="channel_modal_members_remAdmin"></a>
             <a class="chat_modal_participant_photo pull-left" my-peer-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 
             <div class="chat_modal_participant_name">
