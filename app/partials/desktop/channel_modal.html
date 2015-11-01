@@ -128,6 +128,8 @@
 
             <a ng-if="participant.canLeave" ng-click="leaveChannel()" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_menu_leave"></a>
             <a ng-if="participant.canKick" ng-click="kickFromChannel(participant.user_id)" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_members_kick"></a>
+            
+            <a ng-if="participant.canRemAdmin" ng-click="removeChannelAdmin(participant.user_id)" class="md_modal_list_peer_action pull-right" my-i18n="channel_modal_members_remAdmin"></a>
 
             <a class="md_modal_list_peer_photo pull-left" my-peer-photolink="::participant.user_id" img-class="md_modal_list_peer_photo"></a>
 
