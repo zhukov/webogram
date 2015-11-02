@@ -37,7 +37,8 @@
     "it-it",
     "ru-ru",
     "nl-nl",
-    "pt-br"
+    "pt-br",
+    "fa-ir"
   ],
   "homepage": "http://zhukov.github.io/webogram",
   "devDependencies": {
