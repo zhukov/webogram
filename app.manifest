@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Fri Oct 23 2015 18:38:58 GMT+0200 (CEST)
+# Time: Mon Nov 02 2015 15:40:42 GMT+0300 (MSK)
 
 
 CACHE:
@@ -71,11 +71,11 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-vendor/cryptoJS/crypto.js
-vendor/leemon_bigint/bigint.js
-vendor/jsbn/jsbn_combined.js
-vendor/rusha/rusha.js
 vendor/closure/long.js
+vendor/cryptoJS/crypto.js
+vendor/jsbn/jsbn_combined.js
+vendor/leemon_bigint/bigint.js
+vendor/rusha/rusha.js
 vendor/angular/i18n/angular-locale_de-de.js
 vendor/angular/i18n/angular-locale_en-us.js
 vendor/angular/i18n/angular-locale_es-es.js
