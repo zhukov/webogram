@@ -831,20 +831,61 @@ angular.module('myApp.services')
   }
 
   function deleteMessages (messageIDs) {
-    return MtpApiManager.invokeApi('messages.deleteMessages', {
-      id: messageIDs
-    }).then(function (affectedMessages) {
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updateDeleteMessages',
-          messages: messageIDs,
-          pts: affectedMessages.pts,
-          pts_count: affectedMessages.pts_count
+    var splitted = splitMessageIDsByChannels(messageIDs);
+    var promises = [];
+    angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
+      var promise;
+      if (channelID > 0) {
+        var channel = AppChatsManager.getChat(channelID);
+        if (!channel.pFlags.creator) {
+          var goodMsgIDs = [];
+          if (channel.pFlags.editor) {
+            angular.forEach(msgIDs, function (msgID, i) {
+              var message = getMessage(splitted.mids[channelID][i]);
+              if (message.out) {
+                goodMsgIDs.push(msgID);
+              }
+            });
+          }
+          if (!goodMsgIDs.length) {
+            return;
+          }
+          msgIDs = goodMsgIDs;
         }
-      });
-      return messageIDs;
+        promise = MtpApiManager.invokeApi('channels.deleteMessages', {
+          channel: AppChatsManager.getChannelInput(channelID),
+          id: msgIDs
+        }).then(function (affectedMessages) {
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updateShort',
+            update: {
+              _: 'updateDeleteChannelMessages',
+              channel_id: channelID,
+              messages: msgIDs,
+              pts: affectedMessages.pts,
+              pts_count: affectedMessages.pts_count
+            }
+          });
+        });
+      } else {
+        promise = MtpApiManager.invokeApi('messages.deleteMessages', {
+          id: msgIDs
+        }).then(function (affectedMessages) {
+          ApiUpdatesManager.processUpdateMessage({
+            _: 'updateShort',
+            update: {
+              _: 'updateDeleteMessages',
+              messages: msgIDs,
+              pts: affectedMessages.pts,
+              pts_count: affectedMessages.pts_count
+            }
+          });
+        });
+      }
+      promises.push(promise);
     });
+
+    return $q.all(promises);
   }
 
   function processAffectedHistory (inputPeer, affectedHistory, method) {
