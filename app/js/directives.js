@@ -573,6 +573,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_photo'),
       link: function ($scope, element, attrs) {
         $scope.openPhoto = AppPhotosManager.openPhoto;
+        $scope.preloadPhoto = AppPhotosManager.preloadPhoto;
       }
     };
   })
