@@ -830,21 +830,39 @@ angular.module('myApp.services')
     return messagesStorage[messageID] || {deleted: true};
   }
 
-  function deleteMessages (messageIDs) {
-    return MtpApiManager.invokeApi('messages.deleteMessages', {
-      id: messageIDs
-    }).then(function (affectedMessages) {
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updateDeleteMessages',
-          messages: messageIDs,
-          pts: affectedMessages.pts,
-          pts_count: affectedMessages.pts_count
-        }
-      });
-      return messageIDs;
-    });
+  function deleteMessages (messageIDs, peerID) {
+    if(peerID === undefined)
+	    return MtpApiManager.invokeApi('messages.deleteMessages', {
+		 id: messageIDs
+	    }).then(function (affectedMessages) {
+		 ApiUpdatesManager.processUpdateMessage({
+		   _: 'updateShort',
+		   update: {
+		     _: 'updateDeleteMessages',
+		     messages: messageIDs,
+		     pts: affectedMessages.pts,
+		     pts_count: affectedMessages.pts_count
+		   }
+		 });
+		 return messageIDs;
+	    });
+    else
+    	    var channel = AppChatsManager.getChat(-peerID);
+	    return MtpApiManager.invokeApi('channels.deleteMessages', {
+		 channel: {_:"inputChannel", channel_id: -peerID, access_hash: channel.access_hash},
+		 id: messageIDs
+	    }).then(function (affectedMessages) {
+		 ApiUpdatesManager.processUpdateMessage({
+		   _: 'updateShort',
+		   update: {
+		     _: 'updateDeleteMessages',
+		     messages: messageIDs,
+		     pts: affectedMessages.pts,
+		     pts_count: affectedMessages.pts_count
+		   }
+		 });
+		 return messageIDs;
+	    });
   }
 
   function processAffectedHistory (inputPeer, affectedHistory, method) {
