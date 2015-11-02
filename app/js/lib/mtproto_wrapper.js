@@ -7,7 +7,7 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $q, TelegramMeWebService) {
+.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $rootScope, $q, TelegramMeWebService) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
@@ -31,11 +31,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function mtpSetUserAuth (dcID, userAuth) {
+    var fullUserAuth = angular.extend({dcID: dcID}, userAuth);
     Storage.set({
       dc: dcID,
-      user_auth: angular.extend({dcID: dcID}, userAuth)
+      user_auth: fullUserAuth
     });
     telegramMeNotify(true);
+    $rootScope.$broadcast('user_auth', fullUserAuth);
 
     baseDcID = dcID;
   }
@@ -216,6 +218,29 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 }, rejectPromise);
               });
             }
+          }
+          else if (!options.rawError && error.code == 420) {
+            var waitTime = error.type.match(/^FLOOD_WAIT_(\d+)/)[1] || 10;
+            if (waitTime > (options.timeout || 60)) {
+              return rejectPromise(error);
+            }
+            setTimeout(function () {
+              performRequest(cachedNetworker);
+            }, waitTime * 1000);
+          }
+          else if (!options.rawError && error.code == 500) {
+            var now = tsNow();
+            if (options.stopTime) {
+              if (now >= options.stopTime) {
+                return rejectPromise(error);
+              }
+            } else {
+              options.stopTime = now + (options.timeout !== undefined ? options.timeout : 10) * 1000;
+            }
+            options.waitTime = options.waitTime ? Math.min(60, options.waitTime * 1.5) : 1;
+            setTimeout(function () {
+              performRequest(cachedNetworker);
+            }, options.waitTime * 1000);
           }
           else {
             rejectPromise(error);
@@ -412,7 +437,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         }, {
           dcID: location.dc_id,
           fileDownload: true,
-          createNetworker: true
+          createNetworker: true,
+          noErrorBox: true
         });
       });
 

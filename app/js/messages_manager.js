@@ -187,6 +187,8 @@ angular.module('myApp.services')
     return channelsLoadPromise = MtpApiManager.invokeApi('channels.getDialogs', {
       offset: 0,
       limit: 100
+    }, {
+      timeout: 300
     }).then(function (dialogsResult) {
       AppUsersManager.saveApiUsers(dialogsResult.users);
       AppChatsManager.saveApiChats(dialogsResult.chats);
@@ -206,6 +208,8 @@ angular.module('myApp.services')
     return MtpApiManager.invokeApi('messages.getDialogs', {
       offset: offset,
       limit: limit
+    }, {
+      timeout: 300
     }).then(function (dialogsResult) {
       if (!offset) {
         TelegramMeWebService.setAuthorized(true);
@@ -317,6 +321,9 @@ angular.module('myApp.services')
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
+      }, {
+        timeout: 300,
+        noErrorBox: true
       });
     } else {
       promise = MtpApiManager.invokeApi('messages.getHistory', {
@@ -324,7 +331,10 @@ angular.module('myApp.services')
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
-      }, {noErrorBox: true});
+      }, {
+        timeout: 300,
+        noErrorBox: true
+      });
     }
 
     return promise.then(function (historyResult) {
@@ -785,6 +795,9 @@ angular.module('myApp.services')
       max_date: 0,
       limit: limit || 20,
       max_id: maxID || 0
+    }, {
+      timeout: 300,
+      noErrorBox: true
     }).then(function (searchResult) {
       AppUsersManager.saveApiUsers(searchResult.users);
       AppChatsManager.saveApiChats(searchResult.chats);

@@ -321,6 +321,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             delete $scope.credentials.phone_code_valid;
             error.handled = true;
             break;
+          case 'PHONE_CODE_EXPIRED':
+            $scope.editPhone();
+            error.handled = true;
+            break;
         }
       });
 

@@ -442,6 +442,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   });
 
+  $rootScope.$on('user_auth', function (e, userAuth) {
+    myID = userAuth && userAuth.id || 0;
+  });
+
+
   setInterval(updateUsersStatuses, 60000);
 
 
