@@ -1678,7 +1678,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (selectedMessageIDs.length) {
         ErrorService.confirm({type: 'MESSAGES_DELETE', count: selectedMessageIDs.length}).then(function () {
-          AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
+        if(AppPeersManager.isChannel($scope.curDialog.peerID))
+          AppMessagesManager.deleteMessages(selectedMessageIDs, $scope.curDialog.peerID).then(function () {
+            selectedCancel();
+          });
+        else
+        	AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
             selectedCancel();
           });
         });
@@ -2516,9 +2521,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope['delete'] = function () {
       var messageID = $scope.messageID;
+      var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID));
+      var inputPeer = AppPeersManager.getInputPeerByID(peerID);
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
-        AppMessagesManager.deleteMessages([messageID]);
-      });
+        if(AppPeersManager.isChannel(peerID))
+          AppMessagesManager.deleteMessages([messageID], peerID);
+        else
+        	AppMessagesManager.deleteMessages([messageID]);
+        $modalInstance.dismiss();
+        });
     };
 
     var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID)),
@@ -2958,9 +2969,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope['delete'] = function () {
       var messageID = $scope.messageID;
+      var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID));
+      var inputPeer = AppPeersManager.getInputPeerByID(peerID);
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
-        AppMessagesManager.deleteMessages([messageID]);
-      });
+        if(AppPeersManager.isChannel(peerID))
+          AppMessagesManager.deleteMessages([messageID], peerID);
+        else
+        	AppMessagesManager.deleteMessages([messageID]);
+        $modalInstance.dismiss();
+        });
     };
 
     $scope.download = function () {
@@ -2993,9 +3010,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope['delete'] = function () {
       var messageID = $scope.messageID;
+      var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID));
+      var inputPeer = AppPeersManager.getInputPeerByID(peerID);
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
-        AppMessagesManager.deleteMessages([messageID]);
-      });
+        if(AppPeersManager.isChannel(peerID))
+          AppMessagesManager.deleteMessages([messageID], peerID);
+        else
+        	AppMessagesManager.deleteMessages([messageID]);
+        $modalInstance.dismiss();
+        });
     };
 
     $scope.download = function () {
@@ -3030,9 +3053,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope['delete'] = function () {
       var messageID = $scope.messageID;
+      var peerID = AppMessagesManager.getMessagePeer(AppMessagesManager.getMessage($scope.messageID));
+      var inputPeer = AppPeersManager.getInputPeerByID(peerID);
       ErrorService.confirm({type: 'MESSAGE_DELETE'}).then(function () {
-        AppMessagesManager.deleteMessages([messageID]);
-      });
+        if(AppPeersManager.isChannel(peerID))
+          AppMessagesManager.deleteMessages([messageID], peerID);
+        else
+        	AppMessagesManager.deleteMessages([messageID]);
+        $modalInstance.dismiss();
+        });
     };
 
   })
