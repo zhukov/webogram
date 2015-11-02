@@ -205,7 +205,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var authKeyStarted = tsNow();
         MtpApiManager.invokeApi('auth.sendCode', {
           phone_number: $scope.credentials.phone_full,
-          // sms_type: 5,
+          sms_type: 5,
           api_id: Config.App.id,
           api_hash: Config.App.hash,
           lang_code: navigator.language || 'en'
