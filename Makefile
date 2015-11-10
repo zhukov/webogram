@@ -6,6 +6,12 @@ package:
 	find dist_package | grep "\.git\|DS_Store\|.swp" | xargs rm -rf
 	cd dist_package && zip -r ../releases/webogram_v$(version).zip .
 
+ghdist:
+	rm -rf dist
+	mkdir dist
+	cp -r .git dist/
+	cd dist && git checkout gh-pages
+
 publish:
 	./node_modules/gulp/bin/gulp.js clean
 	cd dist && git pull origin gh-pages
@@ -15,7 +21,6 @@ publish:
 
 bump:
 	./node_modules/gulp/bin/gulp.js bump
-
 
 txinstall:
 	curl -O https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py
