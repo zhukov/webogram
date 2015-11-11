@@ -1856,7 +1856,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     var doc = angular.copy(docs[docID]),
         isGif = doc.mime_type == 'image/gif',
-        isSticker = doc.mime_type.substr(0, 6) == 'image/' && doc.sticker,
+        isSticker = doc.mime_type == 'image/webp' && doc.sticker,
         thumbPhotoSize = doc.thumb,
         width, height;
 
@@ -1901,7 +1901,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     doc.thumb = thumb;
 
-    doc.withPreview = !Config.Mobile && doc.mime_type.match(/^(image\/)/) ? 1 : 0;
+    doc.withPreview = !Config.Mobile && doc.mime_type.match(/^image\/(gif|png|jpeg|jpg|bmp|tiff)/) ? 1 : 0;
 
     if (isGif && doc.thumb) {
       doc.isSpecial = 'gif';
