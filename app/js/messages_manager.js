@@ -1060,6 +1060,9 @@ angular.module('myApp.services')
       }
 
       apiMessage.date -= serverTimeOffset;
+      if (apiMessage.fwd_date) {
+        apiMessage.fwd_date -= serverTimeOffset;
+      }
       apiMessage.toID = toPeerID;
       apiMessage.fromID = apiMessage.from_id || toPeerID;
       if (apiMessage.fwd_from_id) {
