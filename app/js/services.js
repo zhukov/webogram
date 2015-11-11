@@ -3639,7 +3639,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             popup = window.open('https://web.telegram.org', '_blank');
           } catch (e) {}
           if (!popup) {
-            location = 'https://web.telegram.org';
+            location.href = 'https://web.telegram.org';
           }
         }, function () {
           Storage.set({https_dismiss: tsNow()});
