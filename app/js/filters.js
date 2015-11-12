@@ -54,7 +54,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
         case 'userStatusBot':
           if (botChatPrivacy) {
-            if (user.pFlags.botNoPrivacy) {
+            if (user.pFlags.bot_chat_history) {
               return _('user_status_bot_noprivacy');
             } else {
               return _('user_status_bot_privacy');

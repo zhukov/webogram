@@ -1452,7 +1452,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         angular.forEach(historyResult.history, function (id) {
           var message = AppMessagesManager.wrapForHistory(id);
           if ($scope.historyState.skipped) {
-            delete message.unread;
+            delete message.pFlags.unread;
           }
           if (historyResult.unreadOffset) {
             message.unreadAfter = true;
@@ -1839,7 +1839,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
         $scope.$broadcast('ui_history_append_new', {
           my: addedMessage.my,
-          idleScroll: unreadAfterIdle && !historyMessage.out && $rootScope.idle.isIDLE
+          idleScroll: unreadAfterIdle && !historyMessage.pFlags.out && $rootScope.idle.isIDLE
         });
         if (addedMessage.my && $scope.historyUnreadAfter) {
           delete $scope.historyUnreadAfter;
@@ -1848,9 +1848,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         // console.log('append check', $rootScope.idle.isIDLE, addedMessage.peerID, $scope.curDialog.peerID, historyMessage, history.messages[history.messages.length - 2]);
         if ($rootScope.idle.isIDLE) {
-          if (historyMessage.unread &&
-              !historyMessage.out &&
-              !(history.messages[history.messages.length - 2] || {}).unread) {
+          if (historyMessage.pFlags.unread &&
+              !historyMessage.pFlags.out &&
+              !(history.messages[history.messages.length - 2] || {}).pFlags.unread) {
 
             $scope.historyUnreadAfter = historyMessage.mid;
             unreadAfterIdle = true;
@@ -1910,7 +1910,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var hasOut = false;
         var unreadAfterNew = false;
         var historyMessage = history.messages[history.messages.length - 1];
-        var lastIsRead = !historyMessage || !historyMessage.unread;
+        var lastIsRead = !historyMessage || !historyMessage.pFlags.unread;
         for (i = 0; i < len; i++) {
           messageID = msgs[i];
           if (messageID < maxID ||
@@ -1921,15 +1921,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           history.messages.push(historyMessage);
           history.ids.push(messageID);
           if (!unreadAfterNew && isIDLE) {
-            if (historyMessage.unread &&
-                !historyMessage.out &&
+            if (historyMessage.pFlags.unread &&
+                !historyMessage.pFlags.out &&
                 lastIsRead) {
               unreadAfterNew = messageID;
             } else {
-              lastIsRead = !historyMessage.unread;
+              lastIsRead = !historyMessage.pFlags.unread;
             }
           }
-          if (!hasOut && historyMessage.out) {
+          if (!hasOut && historyMessage.pFlags.out) {
             hasOut = true;
           }
         }

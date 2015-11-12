@@ -116,8 +116,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       var deregisterUnreadAfter;
-      if (!$scope.historyMessage.out &&
-          ($scope.historyMessage.unread || $scope.historyMessage.unreadAfter)) {
+      if (!$scope.historyMessage.pFlags.out &&
+          ($scope.historyMessage.pFlags.unread || $scope.historyMessage.unreadAfter)) {
         var applyUnreadAfter = function () {
           if ($scope.peerHistory.peerID != $scope.historyPeer.id) {
             return;
@@ -141,10 +141,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         applyUnreadAfter();
         deregisterUnreadAfter = $scope.$on('messages_unread_after', applyUnreadAfter);
       }
-      if ($scope.historyMessage.unread && $scope.historyMessage.out) {
+      if ($scope.historyMessage.pFlags.unread && $scope.historyMessage.pFlags.out) {
         element.addClass(unreadClass);
         var deregisterUnread = $scope.$on('messages_read', function () {
-          if (!$scope.historyMessage.unread) {
+          if (!$scope.historyMessage.pFlags.unread) {
             element.removeClass(unreadClass);
             deregisterUnread();
             if (deregisterUnreadAfter && !unreadAfter) {
@@ -2947,8 +2947,8 @@ angular.module('myApp.directives', ['myApp.filters'])
                 $scope.mediaPlayer.player.play();
 
                 if ($scope.message &&
-                    !$scope.message.out &&
-                    $scope.message.media_unread) {
+                    !$scope.message.pFlags.out &&
+                    $scope.message.pFlags.media_unread) {
                   AppMessagesManager.readMessages([$scope.message.mid]);
                 }
               }, 300);

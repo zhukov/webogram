@@ -113,16 +113,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       usernames[searchUsername] = userID;
     }
 
-    apiUser.pFlags = {
-      self: (apiUser.flags & (1 << 10)) > 0,
-      contact: (apiUser.flags & (1 << 11)) > 0,
-      mutual: (apiUser.flags & (1 << 12)) > 0,
-      deleted: (apiUser.flags & (1 << 13)) > 0,
-      bot: (apiUser.flags & (1 << 14)) > 0,
-      botNoPrivacy: (apiUser.flags & (1 << 15)) > 0,
-      botNoGroups: (apiUser.flags & (1 << 16)) > 0,
-      verified: (apiUser.flags & (1 << 17)) > 0
-    };
+    if (apiUser.pFlags === undefined) {
+      apiUser.pFlags = {};
+    }
 
     apiUser.sortName = apiUser.pFlags.deleted ? '' : SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
 
@@ -575,29 +568,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
 
-    var flags = apiChat.flags;
-    apiChat.pFlags = {
-      creator: (flags & (1 << 0)) > 0,
-      kicked: (flags & (1 << 1)) > 0,
-      left: (flags & (1 << 2)) > 0
-    };
-
-    if (apiChat._ == 'channel') {
-      angular.extend(apiChat.pFlags, {
-        editor: (apiChat.flags & (1 << 3)) > 0,
-        moderator: (apiChat.flags & (1 << 4)) > 0,
-        broadcast: (apiChat.flags & (1 << 5)) > 0,
-        username: (apiChat.flags & (1 << 6)) > 0,
-        verified: (apiChat.flags & (1 << 7)) > 0
-      });
-    };
-
     var titleWords = SearchIndexManager.cleanSearchText(apiChat.title || '').split(' ');
     var firstWord = titleWords.shift();
     var lastWord = titleWords.pop();
     apiChat.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
 
     apiChat.num = (Math.abs(apiChat.id >> 1) % 8) + 1;
+
+    if (apiChat.pFlags === undefined) {
+      apiChat.pFlags = {};
+    }
 
     if (apiChat.username) {
       var searchUsername = SearchIndexManager.cleanUsername(apiChat.username);
@@ -656,6 +636,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return false;
   }
 
+  function isMegagroup (id) {
+    var chat = chats[id];
+    if (chat && chat._ == 'channel' && chat.pFlags.megagroup) {
+      return true;
+    }
+    return false;
+  }
+
   function getChatInput (id) {
     return id || 0;
   }
@@ -702,10 +690,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
       MtpApiManager.getUserID().then(function (myID) {
-        chatFull.isAdmin = (myID == chatFull.participants.admin_id);
+        var isAdmin = chat.pFlags.creator || chat.pFlags.admins_enabled && chat.pFlags.admin;
         angular.forEach(chatFull.participants.participants, function(participant){
           participant.canLeave = myID == participant.user_id;
-          participant.canKick = !participant.canLeave && (chatFull.isAdmin || myID == participant.inviter_id);
+          participant.canKick = !participant.canLeave && (
+                                  chat.pFlags.creator ||
+                                  participant._ == 'chatParticipant' && (isAdmin || myID == participant.inviter_id)
+                                );
 
           // just for order by last seen
           participant.user = AppUsersManager.getUser(participant.user_id);
@@ -769,6 +760,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     saveApiChat: saveApiChat,
     getChat: getChat,
     isChannel: isChannel,
+    isMegagroup: isMegagroup,
     hasRights: hasRights,
     saveChannelAccess: saveChannelAccess,
     getChatInput: getChatInput,
@@ -917,6 +909,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return (peerID < 0) && AppChatsManager.isChannel(-peerID);
   }
 
+  function isMegagroup (peerID) {
+    return (peerID < 0) && AppChatsManager.isMegagroup(-peerID);
+  }
+
   function isBot (peerID) {
     return (peerID > 0) && AppUsersManager.isBot(peerID);
   }
@@ -932,6 +928,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getPeerPhoto: getPeerPhoto,
     resolveUsername: resolveUsername,
     isChannel: isChannel,
+    isMegagroup: isMegagroup,
     isBot: isBot
   }
 })
@@ -2526,6 +2523,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           message: {
             _: 'message',
             flags: updateMessage.flags,
+            pFlags: updateMessage.pFlags,
             id: updateMessage.id,
             from_id: fromID,
             to_id: AppPeersManager.getOutputPeer(toID),
@@ -2672,7 +2670,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       console.log(dT(), 'apply channel diff', channelState.pts);
 
-      if (differenceResult._ == 'updates.channelDifference' && !(differenceResult.flags & 1)) {
+      if (differenceResult._ == 'updates.channelDifference' &&
+          !differenceResult.pFlags['final']) {
         getChannelDifference(channelID);
       } else {
         console.log(dT(), 'finished channel get diff');

@@ -23,13 +23,13 @@
 
     </div>
 
-    <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.out ? 'im_message_out' : 'im_message_in', historyMessage.fwdFromID ? 'im_message_fwd' : '']">
+    <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.pFlags.out ? 'im_message_out' : 'im_message_in', historyMessage.fwdFromID ? 'im_message_fwd' : '']">
       <i class="icon icon-select-tick"></i>
 
       <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
         <i class="icon-message-status" tooltip="Try again"></i>
       </a>
-      <i ng-if="::historyMessage.unread &amp;&amp; historyMessage.out || historyMessage.pending || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
+      <i ng-if="::historyMessage.pFlags.unread &amp;&amp; historyMessage.pFlags.out || historyMessage.pending || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
 
       <a class="im_message_from_photo pull-left" my-peer-photolink="::historyMessage.fromID" img-class="im_message_from_photo"></a>
 
