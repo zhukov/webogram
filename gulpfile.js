@@ -23,8 +23,17 @@ gulp.task('templates', function() {
     .pipe(gulp.dest('app/js'));
 });
 
+gulp.task('usemin-badbrowser', function() {
+  return gulp.src('app/badbrowser.html')
+    .pipe($.usemin({
+      html: [$.minifyHtml({empty: true})],
+      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})],
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
 gulp.task('usemin', ['templates', 'enable-production'], function() {
-  return gulp.src(['app/index.html', 'app/badbrowser.html'])
+  return gulp.src('app/index.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
       js: ['concat', $.ngAnnotate(), $.uglify({outSourceMap: false})],
@@ -252,6 +261,7 @@ gulp.task('build', function(callback) {
   runSequence(
     'less',
     'usemin',
+    'usemin-badbrowser',
     ['copy', 'copy-locales', 'copy-images', 'disable-production'],
     callback
   );
