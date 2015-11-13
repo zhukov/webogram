@@ -1562,10 +1562,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         voiceRecord.on('touchstart', function(e) {
           if ($scope.$parent.$parent.voiceRecorder.processing) { return; }
+
           navigator.getUserMedia({audio : true}, function(stream){
             var start = Date.now();
             var touch = null;
 
+            audioPromise = null;
             audioStream = stream;
             audioRecorder = new MediaRecorder(stream);
 
@@ -1594,7 +1596,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
 
         voiceRecord.on('click', function(){
-          if (audioRecorder) {
+          if (audioPromise) {
             $scope.$parent.$parent.voiceRecorder.processing = true;
 
             audioPromise.then(function(e) {
@@ -1604,20 +1606,24 @@ angular.module('myApp.directives', ['myApp.filters'])
               $scope.draftMessage.files = [blob];
               $scope.draftMessage.isMedia = true;
 
-              audioRecorder = null;
               $scope.$parent.$parent.voiceRecorder.processing = false;
+
+              audioPromise = null;
             });
           }
         });
 
         $($window).on('touchend', function(){
-          if (audioRecorder) {
+          if (audioStream && audioRecorder) {
             audioPromise = new Promise(function(resolve) {
               audioRecorder.ondataavailable = resolve;
             });
 
             audioRecorder.stop();
             audioStream.stop();
+
+            audioRecorder = null;
+            audioStream   = null;
 
             clearInterval($scope.$parent.$parent.voiceRecorder.recording);
 
