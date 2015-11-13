@@ -1429,7 +1429,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, shouldFocusOnInteraction) {
+  .directive('mySendForm', function (_, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, shouldFocusOnInteraction) {
+
     return {
       link: link,
       scope: {
