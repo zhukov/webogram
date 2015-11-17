@@ -65,8 +65,6 @@ angular.module('myApp.services')
 
   NotificationsManager.start();
 
-  var allChannelsLoaded = false;
-  var channelsLoadPromise = false;
   var allDialogsLoaded = false
   var loadedDialogsCount = 0;
   var dialogsNum = 0;
@@ -108,7 +106,7 @@ angular.module('myApp.services')
 
     if (
       isSearch ||
-      (allChannelsLoaded && allDialogsLoaded) ||
+      allDialogsLoaded ||
       (
         curDialogStorage.dialogs.length >= offset + limit &&
         curDialogStorage.dialogs[offset + limit - 1].index >= minDialogsIndex
@@ -119,7 +117,7 @@ angular.module('myApp.services')
       });
     }
 
-    return $q.all([getAllChannels(), getTopMessages(loadedDialogsCount, limit)]).then(function () {
+    return getTopMessages(limit).then(function () {
       offset = 0;
       if (offsetIndex > 0) {
         for (offset = 0; offset < curDialogStorage.dialogs.length; offset++) {
@@ -149,8 +147,13 @@ angular.module('myApp.services')
     var peerText = AppPeersManager.getPeerSearchText(peerID);
     SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
-    var mid = getFullMessageID(dialog.top_important_message, channelID);
-    dialog.top_message = mid;
+    var isMegagroup = AppChatsManager.isMegagroup(channelID);
+    if (isMegagroup) {
+      var mid = getFullMessageID(dialog.top_message, channelID);
+    } else {
+      var mid = getFullMessageID(dialog.top_important_message, channelID);
+      dialog.top_message = mid;
+    }
     dialog.unread_count = dialog.unread_important_count;
     dialog.read_inbox_max_id = getFullMessageID(dialog.read_inbox_max_id, channelID);
 
@@ -180,44 +183,33 @@ angular.module('myApp.services')
     ApiUpdatesManager.addChannelState(channelID, dialog.pts);
   }
 
-  function getAllChannels () {
-    if (channelsLoadPromise) {
-      return channelsLoadPromise;
+  function getTopMessages (limit) {
+    var first = true;
+    var dialogs = dialogsStorage.dialogs;
+    var len = dialogs && dialogs.length;
+    var offsetDate = 0;
+    var offsetID = 0;
+    var offsetPeerID = 0;
+    if (len) {
+      var dialog = dialogs[len - 1];
+      var index = dialog.index;
+      if (index) {
+        offsetDate = Math.ceil(index / 0x10000);
+        offsetID = dialog.top_message;
+        offsetPeerID = dialog.peerID;
+      }
     }
-    return channelsLoadPromise = MtpApiManager.invokeApi('channels.getDialogs', {
-      offset: 0,
-      limit: 100
-    }, {
-      timeout: 300
-    }).then(function (dialogsResult) {
-      AppUsersManager.saveApiUsers(dialogsResult.users);
-      AppChatsManager.saveApiChats(dialogsResult.chats);
-      saveMessages(dialogsResult.messages);
-
-      angular.forEach(dialogsResult.dialogs, function (dialog) {
-        var peerID = AppPeersManager.getPeerID(dialog.peer);
-        var channelID = -peerID;
-        saveChannelDialog(channelID, dialog);
-        ApiUpdatesManager.addChannelState(channelID, dialog.pts);
-      });
-      allChannelsLoaded = true;
-    });
-  }
-
-  function getTopMessages (offset, limit) {
     return MtpApiManager.invokeApi('messages.getDialogs', {
-      offset: offset,
+      offset_date: offsetDate,
+      offset_id: getMessageLocalID(offsetID),
+      offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
       limit: limit
     }, {
       timeout: 300
     }).then(function (dialogsResult) {
-      if (!offset) {
+      console.log('dialogs result', dialogsResult);
+      if (!offsetDate) {
         TelegramMeWebService.setAuthorized(true);
-      }
-
-      // Server-side bug
-      if (dialogsResult.count && offset >= dialogsResult.count) {
-        dialogsResult.dialogs = [];
       }
 
       AppUsersManager.saveApiUsers(dialogsResult.users);
@@ -227,44 +219,53 @@ angular.module('myApp.services')
       if (!dialogsResult.dialogs.length) {
         allDialogsLoaded = true;
       }
-      else if (!offset) {
-        incrementMaxSeenID(dialogsResult.dialogs[0].top_message);
-      }
 
+      var maxSeenIdIncremented = offsetDate ? true : false;
       angular.forEach(dialogsResult.dialogs, function (dialog) {
         var peerID = AppPeersManager.getPeerID(dialog.peer);
-        var peerText = AppPeersManager.getPeerSearchText(peerID);
-        SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
+        if (dialog._ == 'dialogChannel') {
+          var channelID = -peerID;
+          saveChannelDialog(channelID, dialog);
+          ApiUpdatesManager.addChannelState(channelID, dialog.pts);
+        } else {
+          var peerText = AppPeersManager.getPeerSearchText(peerID);
+          SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
-        var message = getMessage(dialog.top_message);
+          var message = getMessage(dialog.top_message);
 
-        dialog.index = generateDialogIndex(message.date);
-        dialog.peerID = peerID;
+          dialog.index = generateDialogIndex(message.date);
+          dialog.peerID = peerID;
 
-        pushDialogToStorage(dialog);
+          pushDialogToStorage(dialog);
 
-        if (historiesStorage[peerID] === undefined) {
-          var historyStorage = {count: null, history: [dialog.top_message], pending: []};
-          historiesStorage[peerID] = historyStorage;
-          if (mergeReplyKeyboard(historyStorage, message)) {
-            $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
+          if (!maxSeenIdIncremented) {
+            incrementMaxSeenID(dialog.top_message);
+            maxSeenIdIncremented = true;
           }
-        }
 
-        NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
+          if (historiesStorage[peerID] === undefined) {
+            var historyStorage = {count: null, history: [dialog.top_message], pending: []};
+            historiesStorage[peerID] = historyStorage;
+            if (mergeReplyKeyboard(historyStorage, message)) {
+              $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
+            }
+          }
 
-        if (
-          dialog.unread_count > 0 &&
-          maxSeenID &&
-          dialog.top_message > maxSeenID
-        ) {
-          var notifyPeer = message.flags & 16 ? message.from_id : peerID;
-          if (message.pFlags.unread && !message.pFlags.out) {
-            NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
-              if (!muted) {
-                notifyAboutMessage(message);
-              }
-            });
+          NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
+
+          if (
+            dialog.unread_count > 0 &&
+            maxSeenID &&
+            dialog.top_message > maxSeenID
+          ) {
+            var notifyPeer = message.flags & 16 ? message.from_id : peerID;
+            if (message.pFlags.unread && !message.pFlags.out) {
+              NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
+                if (!muted) {
+                  notifyAboutMessage(message);
+                }
+              });
+            }
           }
         }
       });
