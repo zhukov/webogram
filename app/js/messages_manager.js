@@ -70,6 +70,9 @@ angular.module('myApp.services')
   var dialogsNum = 0;
   var minDialogsIndex = Math.pow(2, 50);
 
+  var migratedFrom = {};
+  var migratedTo = {};
+
   function getConversations (query, offsetIndex, limit) {
     var curDialogStorage = dialogsStorage;
     var isSearch = angular.isString(query) && query.length;
@@ -227,6 +230,15 @@ angular.module('myApp.services')
           saveChannelDialog(channelID, dialog);
           ApiUpdatesManager.addChannelState(channelID, dialog.pts);
         } else {
+          if (peerID < 0) {
+            var chat = AppChatsManager.getChat(-peerID);
+            if (chat && chat.migrated_to && chat.pFlags.deactivated) {
+              var migratedToPeer = AppPeersManager.getPeerID(chat.migrated_to);
+              migratedFrom[peerID] = migratedToPeer;
+              migratedTo[migratedToPeer] = peerID;
+              return;
+            }
+          }
           var peerText = AppPeersManager.getPeerSearchText(peerID);
           SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
@@ -464,6 +476,11 @@ angular.module('myApp.services')
     // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
     return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
       historyStorage.count = historyResult.count || historyResult.messages.length;
+      var peerID = AppPeersManager.getPeerID(inputPeer);
+      var migratedFromPeer = migratedTo[peerID];
+      // if () {
+      //   historyStorage.count++;
+      // }
 
       var offset = 0;
       if (!maxID && historyResult.messages.length) {
@@ -487,7 +504,8 @@ angular.module('myApp.services')
 
       fullLimit -= historyResult.messages.length;
 
-      if (fullLimit > 0 && historyStorage.history.length < historyStorage.count) {
+      if (fullLimit > 0 &&
+          (historyStorage.history.length < historyStorage.count || migratedFromPeer)) {
         maxID = historyStorage.history[historyStorage.history.length - 1];
         return fillHistoryStorage(inputPeer, maxID, fullLimit, historyStorage);
       }

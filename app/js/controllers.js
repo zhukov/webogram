@@ -749,7 +749,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         case 'updateUserTyping':
         case 'updateChatUserTyping':
           if (!AppUsersManager.hasUser(update.user_id)) {
-            if (update.chat_id) {
+            if (update.chat_id &&
+                AppChatsManager.hasChat(update.chat_id) &&
+                !AppChatsManager.isChannel(update.chat_id)) {
               AppProfileManager.getChatFull(update.chat_id);
             }
             return;
