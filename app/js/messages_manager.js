@@ -721,7 +721,7 @@ angular.module('myApp.services')
       lastSearchResults = [];
     }
 
-    if (!maxID && !query) {
+    if (peerID && !maxID && !query) {
       var historyStorage = historiesStorage[peerID];
 
       if (historyStorage !== undefined && historyStorage.history.length) {
@@ -788,24 +788,50 @@ angular.module('myApp.services')
       });
     }
 
-    var flags = 0;
-    if (AppPeersManager.isChannel(peerID)) {
-      flags |= 1;
+    var apiPromise;
+
+    if (peerID || !query) {
+      var flags = 0;
+      if (AppPeersManager.isChannel(peerID) &&
+          !AppPeersManager.isMegagroup(peerID)) {
+        flags |= 1;
+      }
+      apiPromise = MtpApiManager.invokeApi('messages.search', {
+        flags: flags,
+        peer: inputPeer,
+        q: query || '',
+        filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
+        min_date: 0,
+        max_date: 0,
+        limit: limit || 20,
+        max_id: maxID || 0
+      }, {
+        timeout: 300,
+        noErrorBox: true
+      });
+    } else {
+      var offsetDate = 0;
+      var offsetPeerID = 0;
+      var offsetID = 0;
+      var offsetMessage = maxID && getMessage(maxID);
+      if (offsetMessage && offsetMessage.date) {
+        offsetDate = offsetMessage.date;
+        offsetID = offsetMessage.id;
+        offsetPeerID = getMessagePeer(offsetMessage);
+      }
+      apiPromise = MtpApiManager.invokeApi('messages.searchGlobal', {
+        q: query,
+        offset_date: offsetDate,
+        offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
+        offset_id: getMessageLocalID(offsetID),
+        limit: limit || 20
+      }, {
+        timeout: 300,
+        noErrorBox: true
+      });
     }
 
-    return MtpApiManager.invokeApi('messages.search', {
-      flags: flags,
-      peer: inputPeer,
-      q: query || '',
-      filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
-      min_date: 0,
-      max_date: 0,
-      limit: limit || 20,
-      max_id: maxID || 0
-    }, {
-      timeout: 300,
-      noErrorBox: true
-    }).then(function (searchResult) {
+    return apiPromise.then(function (searchResult) {
       AppUsersManager.saveApiUsers(searchResult.users);
       AppChatsManager.saveApiChats(searchResult.chats);
       saveMessages(searchResult.messages);
