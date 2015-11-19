@@ -442,6 +442,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   setInterval(updateUsersStatuses, 60000);
 
+  $rootScope.$on('stateSynchronized', updateUsersStatuses);
 
   return {
     getContacts: getContacts,
@@ -556,6 +557,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var chats = {},
       usernames = {},
       channelAccess = {},
+      megagroups = {},
       cachedPhotoLocations = {};
 
   function saveApiChats (apiChats) {
@@ -612,7 +614,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return false;
     }
     if (isChannel(id) && action == 'send') {
-      if (!chat.pFlags.creator && !chat.pFlags.editor) {
+      if (!chat.pFlags.megagroup &&
+          !chat.pFlags.creator &&
+          !chat.pFlags.editor) {
         return false;
       }
     }
@@ -627,6 +631,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     channelAccess[id] = accessHash;
   }
 
+  function saveIsMegagroup (id) {
+    megagroups[id] = true;
+  }
+
   function isChannel (id) {
     var chat = chats[id];
     if (chat && (chat._ == 'channel' || chat._ == 'channelForbidden') ||
@@ -637,6 +645,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function isMegagroup (id) {
+    if (megagroups[id]) {
+      return true;
+    }
     var chat = chats[id];
     if (chat && chat._ == 'channel' && chat.pFlags.megagroup) {
       return true;
@@ -679,7 +690,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function getChatString (id) {
     var chat = getChat(id);
     if (isChannel(id)) {
-      return 'c' + id + '_' + chat.access_hash;
+      return (isMegagroup(id) ? 's' : 'c') + id + '_' + chat.access_hash;
     }
     return 'g' + id;
   }
@@ -763,6 +774,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     isMegagroup: isMegagroup,
     hasRights: hasRights,
     saveChannelAccess: saveChannelAccess,
+    saveIsMegagroup: saveIsMegagroup,
     getChatInput: getChatInput,
     getChannelInput: getChannelInput,
     getChatPhoto: getChatPhoto,
@@ -787,8 +799,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         access_hash: peerParams[1]
       };
     }
-    else if (firstChar == 'c') {
+    else if (firstChar == 'c' || firstChar == 's') {
       AppChatsManager.saveChannelAccess(peerParams[0], peerParams[1]);
+      if (firstChar == 's') {
+        AppChatsManager.saveIsMegagroup(peerParams[0]);
+      }
       return {
         _: 'inputPeerChannel',
         channel_id: peerParams[0],

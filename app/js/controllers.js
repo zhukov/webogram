@@ -1241,7 +1241,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           AppPeersManager.isChannel(peerID) &&
           (channel = AppChatsManager.getChat(-peerID))) {
 
-        var canSend = channel.pFlags.creator || channel.pFlags.editor;
+        var canSend = AppChatsManager.hasRights(-peerID, 'send');
         if (!canSend) {
           if (channel.pFlags.left) {
             $scope.historyState.channelActions = 'join';
@@ -2217,7 +2217,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       // console.log(dT(), 'reset draft', $scope.curDialog.peer, forceDraft);
       if (forceDraft) {
         if (forceDraft == $scope.curDialog.peer) {
-          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID);
+          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID) && !AppPeersManager.isMegagroup($scope.curDialog.peerID);
           $scope.$broadcast('ui_peer_draft');
           return;
         } else {
@@ -2231,7 +2231,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         Storage.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
           // console.log('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
           $scope.draftMessage.text = draftText || '';
-          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID);
+          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID) && !AppPeersManager.isMegagroup($scope.curDialog.peerID);
           // console.log('send broadcast', $scope.draftMessage);
           $scope.$broadcast('ui_peer_draft');
         });

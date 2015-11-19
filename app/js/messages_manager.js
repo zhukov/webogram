@@ -152,9 +152,9 @@ angular.module('myApp.services')
       var mid = getFullMessageID(dialog.top_message, channelID);
     } else {
       var mid = getFullMessageID(dialog.top_important_message, channelID);
-      dialog.top_message = mid;
+      dialog.unread_count = dialog.unread_important_count;
     }
-    dialog.unread_count = dialog.unread_important_count;
+    dialog.top_message = mid;
     dialog.read_inbox_max_id = getFullMessageID(dialog.read_inbox_max_id, channelID);
 
     var message = getMessage(dialog.top_message);
@@ -207,7 +207,6 @@ angular.module('myApp.services')
     }, {
       timeout: 300
     }).then(function (dialogsResult) {
-      console.log('dialogs result', dialogsResult);
       if (!offsetDate) {
         TelegramMeWebService.setAuthorized(true);
       }
@@ -315,8 +314,10 @@ angular.module('myApp.services')
   function requestHistory (inputPeer, maxID, limit, offset) {
     var peerID = AppPeersManager.getPeerID(inputPeer);
     var isChannel = AppPeersManager.isChannel(peerID);
+    var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
+
     var promise;
-    if (isChannel) {
+    if (isChannel && !isMegagroup) {
       promise = MtpApiManager.invokeApi('channels.getImportantHistory', {
         channel: AppChatsManager.getChannelInput(-peerID),
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
@@ -1070,6 +1071,7 @@ angular.module('myApp.services')
       var toPeerID = AppPeersManager.getPeerID(apiMessage.to_id);
       var isChannel = apiMessage.to_id._ == 'peerChannel';
       var channelID = isChannel ? -toPeerID : 0;
+      var isBroadcast = isChannel && !AppChatsManager.isMegagroup(channelID);
 
       var mid = getFullMessageID(apiMessage.id, channelID);
       apiMessage.mid = mid;
@@ -1124,19 +1126,43 @@ angular.module('myApp.services')
         }
       }
       if (apiMessage.action) {
-        if (apiMessage.action._ == 'messageActionChatEditPhoto') {
-          AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
-          if (isChannel) {
-            apiMessage.action._ = 'messageActionChannelEditPhoto';
-          }
-        }
-        else if (isChannel) {
-          if (apiMessage.action._ == 'messageActionChatEditTitle') {
-            apiMessage.action._ = 'messageActionChannelEditTitle';
-          }
-          if (apiMessage.action._ == 'messageActionChatDeletePhoto') {
-            apiMessage.action._ = 'messageActionChannelDeletePhoto';
-          }
+        switch (apiMessage.action._) {
+          case 'messageActionChatEditPhoto':
+            AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
+            if (isBroadcast) {
+              apiMessage.action._ = 'messageActionChannelEditPhoto';
+            }
+            break;
+
+          case 'messageActionChatEditTitle':
+            if (isBroadcast) {
+              apiMessage.action._ = 'messageActionChannelEditTitle';
+            }
+            break;
+
+          case 'messageActionChatDeletePhoto':
+            if (isBroadcast) {
+              apiMessage.action._ = 'messageActionChannelDeletePhoto';
+            }
+            break;
+
+          case 'messageActionChatAddUser':
+            if (apiMessage.action.users.length == 1) {
+              apiMessage.action.user_id = apiMessage.action.users[0];
+              if (apiMessage.fromID == apiMessage.action.user_id) {
+                apiMessage.action._ = 'messageActionChatReturn';
+              }
+            }
+            else if (apiMessage.action.users.length > 1) {
+              apiMessage.action._ = 'messageActionChatAddUsers';
+            }
+            break;
+
+          case 'messageActionChatDeleteUser':
+            if (apiMessage.fromID == apiMessage.action.user_id) {
+              apiMessage.action._ = 'messageActionChatLeave';
+            }
+            break;
         }
       }
 
@@ -1162,7 +1188,8 @@ angular.module('myApp.services')
         pFlags = {},
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
-        asChannel = isChannel ? true : false,
+        isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
+        asChannel = isChannel && !isMegagroup ? true : false,
         entities = [],
         message;
 
@@ -1303,7 +1330,8 @@ angular.module('myApp.services')
         pFlags = {},
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
-        asChannel = isChannel ? true : false,
+        isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
+        asChannel = isChannel && !isMegagroup ? true : false,
         attachType, apiFileName, realFileName;
 
     if (!options.isMedia) {
@@ -1489,7 +1517,8 @@ angular.module('myApp.services')
         inputPeer = AppPeersManager.getInputPeerByID(peerID),
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
-        asChannel = isChannel ? true : false;
+        isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
+        asChannel = isChannel && !isMegagroup ? true : false;
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1622,7 +1651,8 @@ angular.module('myApp.services')
     var i, mid, msgID;
     var fromChannel = getMessageIDInfo(mids[0])[1];
     var isChannel = AppPeersManager.isChannel(peerID);
-    var asChannel = isChannel ? true : false;
+    var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
+    var asChannel = isChannel && !isMegagroup ? true : false;
 
     if (asChannel) {
       flags |= 16;

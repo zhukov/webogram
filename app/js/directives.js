@@ -2519,13 +2519,20 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myUserStatus', function ($filter, AppUsersManager) {
+  .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
 
     var statusFilter = $filter('userStatus'),
         ind = 0,
         statuses = {};
 
     setInterval(updateAll, 90000);
+
+    $rootScope.$on('stateSynchronized', function () {
+      setTimeout(function () {
+        updateAll();
+      }, 100);
+    });
+
 
     return {
       link: link
@@ -2545,6 +2552,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             element
               .html(statusFilter(user, attrs.botChatPrivacy))
               .toggleClass('status_online', user.status && user.status._ == 'userStatusOnline' || false);
+            // console.log(dT(), 'update status', element[0], user.status && user.status, tsNow(true), element.html());
           };
 
       $scope.$watch(attrs.myUserStatus, function (newUserID) {
