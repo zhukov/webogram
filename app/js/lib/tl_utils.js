@@ -518,8 +518,18 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
 
   if (type.substr(0, 6) == 'Vector' || type.substr(0, 6) == 'vector') {
     if (type.charAt(0) == 'V') {
-      var constructor = this.readInt(field + '[id]');
-      if (constructor != 0x1cb5c415) {
+      var constructor = this.readInt(field + '[id]'),
+          constructorCmp = uintToInt(constructor);
+
+      if (constructorCmp == 0x3072cfa1) { // Gzip packed
+        var compressed = this.fetchBytes(field + '[packed_string]'),
+            uncompressed = gzipUncompress(compressed),
+            buffer = bytesToArrayBuffer(uncompressed),
+            newDeserializer = (new TLDeserialization(buffer));
+
+        return newDeserializer.fetchObject(type, field);
+      }
+      if (constructorCmp != 0x1cb5c415) {
         throw new Error('Invalid vector constructor ' + constructor);
       }
     }

@@ -599,7 +599,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   };
 
   function getChat (id) {
-    return chats[id] || {id: id, deleted: true};
+    return chats[id] || {id: id, deleted: true, access_hash: channelAccess[id]};
   }
 
   function hasRights (id, action) {

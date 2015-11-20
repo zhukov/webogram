@@ -70,8 +70,8 @@ angular.module('myApp.services')
   var dialogsNum = 0;
   var minDialogsIndex = Math.pow(2, 50);
 
-  var migratedFrom = {};
-  var migratedTo = {};
+  var migratedFromTo = {};
+  var migratedToFrom = {};
 
   function getConversations (query, offsetIndex, limit) {
     var curDialogStorage = dialogsStorage;
@@ -234,8 +234,8 @@ angular.module('myApp.services')
             var chat = AppChatsManager.getChat(-peerID);
             if (chat && chat.migrated_to && chat.pFlags.deactivated) {
               var migratedToPeer = AppPeersManager.getPeerID(chat.migrated_to);
-              migratedFrom[peerID] = migratedToPeer;
-              migratedTo[migratedToPeer] = peerID;
+              migratedFromTo[peerID] = migratedToPeer;
+              migratedToFrom[migratedToPeer] = peerID;
               return;
             }
           }
@@ -323,8 +323,7 @@ angular.module('myApp.services')
     }
   }
 
-  function requestHistory (inputPeer, maxID, limit, offset) {
-    var peerID = AppPeersManager.getPeerID(inputPeer);
+  function requestHistory (peerID, maxID, limit, offset) {
     var isChannel = AppPeersManager.isChannel(peerID);
     var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
 
@@ -341,7 +340,7 @@ angular.module('myApp.services')
       });
     } else {
       promise = MtpApiManager.invokeApi('messages.getHistory', {
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
@@ -472,15 +471,14 @@ angular.module('myApp.services')
     };
   }
 
-  function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
-    // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
-    return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
+  function fillHistoryStorage (peerID, maxID, fullLimit, historyStorage) {
+    // console.log('fill history storage', peerID, maxID, fullLimit, angular.copy(historyStorage));
+    var migratedNextPeer = migratedFromTo[peerID];
+    var migratedPrevPeer = migratedToFrom[peerID];
+    var isMigrated = migratedNextPeer !== undefined || migratedPrevPeer !== undefined;
+
+    return requestHistory (peerID, maxID, fullLimit).then(function (historyResult) {
       historyStorage.count = historyResult.count || historyResult.messages.length;
-      var peerID = AppPeersManager.getPeerID(inputPeer);
-      var migratedFromPeer = migratedTo[peerID];
-      // if () {
-      //   historyStorage.count++;
-      // }
 
       var offset = 0;
       if (!maxID && historyResult.messages.length) {
@@ -494,22 +492,41 @@ angular.module('myApp.services')
         }
       }
 
+      var wasTotalCount = historyStorage.history.length;
+
       historyStorage.history.splice(offset, historyStorage.history.length - offset);
       angular.forEach(historyResult.messages, function (message) {
         if (mergeReplyKeyboard(historyStorage, message)) {
-          $rootScope.$broadcast('history_reply_markup', {peerID: AppPeersManager.getPeerID(inputPeer)});
+          $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
         }
         historyStorage.history.push(message.mid);
       });
 
-      fullLimit -= historyResult.messages.length;
+      var totalCount = historyStorage.history.length;
+      fullLimit -= (totalCount - wasTotalCount);
 
-      if (fullLimit > 0 &&
-          (historyStorage.history.length < historyStorage.count || migratedFromPeer)) {
-        maxID = historyStorage.history[historyStorage.history.length - 1];
-        return fillHistoryStorage(inputPeer, maxID, fullLimit, historyStorage);
+      if (isMigrated) {
+        historyStorage.count = Math.max(historyStorage.count, totalCount) + 1;
       }
 
+      if (fullLimit > 0) {
+        maxID = historyStorage.history[totalCount - 1];
+        if (isMigrated) {
+          if (!historyResult.messages.length) {
+            if (migratedPrevPeer) {
+              maxID = 0;
+              peerID = migratedPrevPeer;
+            } else {
+              historyStorage.count = totalCount;
+              return true;
+            }
+          }
+          return fillHistoryStorage(peerID, maxID, fullLimit, historyStorage);
+        }
+        else if (totalCount < historyStorage.count) {
+          return fillHistoryStorage(peerID, maxID, fullLimit, historyStorage);
+        }
+      }
       return true;
     });
   };
@@ -529,9 +546,11 @@ angular.module('myApp.services')
     return $q.when(result);
   }
 
-  function getHistory (inputPeer, maxID, limit, backLimit, prerendered) {
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        historyStorage = historiesStorage[peerID],
+  function getHistory (peerID, maxID, limit, backLimit, prerendered) {
+    if (migratedFromTo[peerID]) {
+      peerID = migratedFromTo[peerID];
+    }
+    var historyStorage = historiesStorage[peerID],
         offset = 0,
         offsetNotFound = false,
         unreadOffset = false,
@@ -541,6 +560,15 @@ angular.module('myApp.services')
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+    }
+
+    var isMigrated = false;
+    var reqPeerID = peerID;
+    if (migratedToFrom[peerID]) {
+      isMigrated = true;
+      if (maxID && maxID < fullMsgIDModulus) {
+        reqPeerID = migratedToFrom[peerID];
+      }
     }
 
     if (!limit && !maxID) {
@@ -611,8 +639,11 @@ angular.module('myApp.services')
         offset = -backLimit;
         limit += backLimit;
       }
-      return requestHistory(inputPeer, maxID, limit, offset).then(function (historyResult) {
+      return requestHistory(reqPeerID, maxID, limit, offset).then(function (historyResult) {
         historyStorage.count = historyResult.count || historyResult.messages.length;
+        if (isMigrated) {
+          historyStorage.count++;
+        }
 
         var history = [];
         angular.forEach(historyResult.messages, function (message) {
@@ -631,7 +662,7 @@ angular.module('myApp.services')
       })
     }
 
-    return fillHistoryStorage(inputPeer, maxID, limit, historyStorage).then(function () {
+    return fillHistoryStorage(peerID, maxID, limit, historyStorage).then(function () {
       offset = 0;
       if (maxID > 0) {
         for (offset = 0; offset < historyStorage.history.length; offset++) {
@@ -728,10 +759,9 @@ angular.module('myApp.services')
     return false;
   }
 
-  function getSearch (inputPeer, query, inputFilter, maxID, limit) {
+  function getSearch (peerID, query, inputFilter, maxID, limit) {
     var foundMsgs = [],
         useSearchCache = !query,
-        peerID = AppPeersManager.getPeerID(inputPeer),
         newSearchFilter = {peer: peerID, filter: inputFilter},
         sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, newSearchFilter);
 
@@ -817,7 +847,7 @@ angular.module('myApp.services')
       }
       apiPromise = MtpApiManager.invokeApi('messages.search', {
         flags: flags,
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         q: query || '',
         filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
         min_date: 0,
@@ -884,6 +914,7 @@ angular.module('myApp.services')
 
   function deleteMessages (messageIDs) {
     var splitted = splitMessageIDsByChannels(messageIDs);
+    debugger;
     var promises = [];
     angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
       var promise;
@@ -940,10 +971,9 @@ angular.module('myApp.services')
     return $q.all(promises);
   }
 
-  function readHistory (inputPeer) {
+  function readHistory (peerID) {
     // console.trace('start read');
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        isChannel = AppPeersManager.isChannel(peerID),
+    var isChannel = AppPeersManager.isChannel(peerID),
         historyStorage = historiesStorage[peerID],
         foundDialog = getDialogByPeerID(peerID)[0];
 
@@ -981,7 +1011,7 @@ angular.module('myApp.services')
       });
     } else {
       apiPromise = MtpApiManager.invokeApi('messages.readHistory', {
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         max_id: 0
       });
     }
@@ -1059,9 +1089,8 @@ angular.module('myApp.services')
     });
   }
 
-  function flushHistory (inputPeer) {
-    var peerID = AppPeersManager.getPeerID(inputPeer);
-    return doFlushHistory(inputPeer).then(function () {
+  function flushHistory (peerID) {
+    return doFlushHistory(AppPeersManager.getInputPeerByID(peerID)).then(function () {
       var foundDialog = getDialogByPeerID(peerID);
       if (foundDialog[0]) {
         dialogsStorage.dialogs.splice(foundDialog[1], 1);
@@ -1201,7 +1230,6 @@ angular.module('myApp.services')
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
         pFlags = {},
         replyToMsgID = options.replyToMsgID,
@@ -1285,7 +1313,7 @@ angular.module('myApp.services')
       // console.log(flags, entities);
       MtpApiManager.invokeApi('messages.sendMessage', {
         flags: flags,
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         message: text,
         random_id: randomID,
         reply_to_msg_id: getMessageLocalID(replyToMsgID),
@@ -1343,7 +1371,6 @@ angular.module('myApp.services')
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
         pFlags = {},
         replyToMsgID = options.replyToMsgID,
@@ -1474,7 +1501,7 @@ angular.module('myApp.services')
           }
           MtpApiManager.invokeApi('messages.sendMedia', {
             flags: flags,
-            peer: inputPeer,
+            peer: AppPeersManager.getInputPeerByID(peerID),
             media: inputMedia,
             random_id: randomID,
             reply_to_msg_id: getMessageLocalID(replyToMsgID)
@@ -1532,7 +1559,6 @@ angular.module('myApp.services')
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
         isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
@@ -1635,7 +1661,7 @@ angular.module('myApp.services')
 
       MtpApiManager.invokeApi('messages.sendMedia', {
         flags: flags,
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         media: inputMedia,
         random_id: randomID,
         reply_to_msg_id: getMessageLocalID(replyToMsgID)
@@ -2827,10 +2853,9 @@ angular.module('myApp.services')
 
   function reloadChannelDialog (channelID) {
     var peerID = -channelID;
-    var inputPeer = AppPeersManager.getInputPeerByID(peerID);
     return $q.all([
       AppProfileManager.getChannelFull(channelID, true),
-      getHistory(inputPeer, 0)
+      getHistory(peerID, 0)
     ]).then(function (results) {
       var channelResult = results[0];
       var historyResult = results[1];
