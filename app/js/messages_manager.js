@@ -65,12 +65,13 @@ angular.module('myApp.services')
 
   NotificationsManager.start();
 
-  var allChannelsLoaded = false;
-  var channelsLoadPromise = false;
   var allDialogsLoaded = false
   var loadedDialogsCount = 0;
   var dialogsNum = 0;
   var minDialogsIndex = Math.pow(2, 50);
+
+  var migratedFromTo = {};
+  var migratedToFrom = {};
 
   function getConversations (query, offsetIndex, limit) {
     var curDialogStorage = dialogsStorage;
@@ -108,7 +109,7 @@ angular.module('myApp.services')
 
     if (
       isSearch ||
-      (allChannelsLoaded && allDialogsLoaded) ||
+      allDialogsLoaded ||
       (
         curDialogStorage.dialogs.length >= offset + limit &&
         curDialogStorage.dialogs[offset + limit - 1].index >= minDialogsIndex
@@ -119,7 +120,7 @@ angular.module('myApp.services')
       });
     }
 
-    return $q.all([getAllChannels(), getTopMessages(loadedDialogsCount, limit)]).then(function () {
+    return getTopMessages(limit).then(function () {
       offset = 0;
       if (offsetIndex > 0) {
         for (offset = 0; offset < curDialogStorage.dialogs.length; offset++) {
@@ -149,9 +150,14 @@ angular.module('myApp.services')
     var peerText = AppPeersManager.getPeerSearchText(peerID);
     SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
-    var mid = getFullMessageID(dialog.top_important_message, channelID);
+    var isMegagroup = AppChatsManager.isMegagroup(channelID);
+    if (isMegagroup) {
+      var mid = getFullMessageID(dialog.top_message, channelID);
+    } else {
+      var mid = getFullMessageID(dialog.top_important_message, channelID);
+      dialog.unread_count = dialog.unread_important_count;
+    }
     dialog.top_message = mid;
-    dialog.unread_count = dialog.unread_important_count;
     dialog.read_inbox_max_id = getFullMessageID(dialog.read_inbox_max_id, channelID);
 
     var message = getMessage(dialog.top_message);
@@ -168,7 +174,7 @@ angular.module('myApp.services')
 
     // Because we saved message without dialog present
     if (message.mid && message.mid > dialog.read_inbox_max_id) {
-      message.unread = true;
+      message.pFlags.unread = true;
     }
 
     if (historiesStorage[peerID] === undefined) {
@@ -180,44 +186,32 @@ angular.module('myApp.services')
     ApiUpdatesManager.addChannelState(channelID, dialog.pts);
   }
 
-  function getAllChannels () {
-    if (channelsLoadPromise) {
-      return channelsLoadPromise;
+  function getTopMessages (limit) {
+    var first = true;
+    var dialogs = dialogsStorage.dialogs;
+    var len = dialogs && dialogs.length;
+    var offsetDate = 0;
+    var offsetID = 0;
+    var offsetPeerID = 0;
+    if (len) {
+      var dialog = dialogs[len - 1];
+      var index = dialog.index;
+      if (index) {
+        offsetDate = Math.ceil(index / 0x10000);
+        offsetID = dialog.top_message;
+        offsetPeerID = dialog.peerID;
+      }
     }
-    return channelsLoadPromise = MtpApiManager.invokeApi('channels.getDialogs', {
-      offset: 0,
-      limit: 100
-    }, {
-      timeout: 300
-    }).then(function (dialogsResult) {
-      AppUsersManager.saveApiUsers(dialogsResult.users);
-      AppChatsManager.saveApiChats(dialogsResult.chats);
-      saveMessages(dialogsResult.messages);
-
-      angular.forEach(dialogsResult.dialogs, function (dialog) {
-        var peerID = AppPeersManager.getPeerID(dialog.peer);
-        var channelID = -peerID;
-        saveChannelDialog(channelID, dialog);
-        ApiUpdatesManager.addChannelState(channelID, dialog.pts);
-      });
-      allChannelsLoaded = true;
-    });
-  }
-
-  function getTopMessages (offset, limit) {
     return MtpApiManager.invokeApi('messages.getDialogs', {
-      offset: offset,
+      offset_date: offsetDate,
+      offset_id: getMessageLocalID(offsetID),
+      offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
       limit: limit
     }, {
       timeout: 300
     }).then(function (dialogsResult) {
-      if (!offset) {
+      if (!offsetDate) {
         TelegramMeWebService.setAuthorized(true);
-      }
-
-      // Server-side bug
-      if (dialogsResult.count && offset >= dialogsResult.count) {
-        dialogsResult.dialogs = [];
       }
 
       AppUsersManager.saveApiUsers(dialogsResult.users);
@@ -227,44 +221,62 @@ angular.module('myApp.services')
       if (!dialogsResult.dialogs.length) {
         allDialogsLoaded = true;
       }
-      else if (!offset) {
-        incrementMaxSeenID(dialogsResult.dialogs[0].top_message);
-      }
 
+      var maxSeenIdIncremented = offsetDate ? true : false;
       angular.forEach(dialogsResult.dialogs, function (dialog) {
         var peerID = AppPeersManager.getPeerID(dialog.peer);
-        var peerText = AppPeersManager.getPeerSearchText(peerID);
-        SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
-
-        var message = getMessage(dialog.top_message);
-
-        dialog.index = generateDialogIndex(message.date);
-        dialog.peerID = peerID;
-
-        pushDialogToStorage(dialog);
-
-        if (historiesStorage[peerID] === undefined) {
-          var historyStorage = {count: null, history: [dialog.top_message], pending: []};
-          historiesStorage[peerID] = historyStorage;
-          if (mergeReplyKeyboard(historyStorage, message)) {
-            $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
+        if (dialog._ == 'dialogChannel') {
+          var channelID = -peerID;
+          saveChannelDialog(channelID, dialog);
+          ApiUpdatesManager.addChannelState(channelID, dialog.pts);
+        } else {
+          if (peerID < 0) {
+            var chat = AppChatsManager.getChat(-peerID);
+            if (chat && chat.migrated_to && chat.pFlags.deactivated) {
+              var migratedToPeer = AppPeersManager.getPeerID(chat.migrated_to);
+              migratedFromTo[peerID] = migratedToPeer;
+              migratedToFrom[migratedToPeer] = peerID;
+              return;
+            }
           }
-        }
+          var peerText = AppPeersManager.getPeerSearchText(peerID);
+          SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
-        NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
+          var message = getMessage(dialog.top_message);
 
-        if (
-          dialog.unread_count > 0 &&
-          maxSeenID &&
-          dialog.top_message > maxSeenID
-        ) {
-          var notifyPeer = message.flags & 16 ? message.from_id : peerID;
-          if (message.unread && !message.out) {
-            NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
-              if (!muted) {
-                notifyAboutMessage(message);
-              }
-            });
+          dialog.index = generateDialogIndex(message.date);
+          dialog.peerID = peerID;
+
+          pushDialogToStorage(dialog);
+
+          if (!maxSeenIdIncremented) {
+            incrementMaxSeenID(dialog.top_message);
+            maxSeenIdIncremented = true;
+          }
+
+          if (historiesStorage[peerID] === undefined) {
+            var historyStorage = {count: null, history: [dialog.top_message], pending: []};
+            historiesStorage[peerID] = historyStorage;
+            if (mergeReplyKeyboard(historyStorage, message)) {
+              $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
+            }
+          }
+
+          NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
+
+          if (
+            dialog.unread_count > 0 &&
+            maxSeenID &&
+            dialog.top_message > maxSeenID
+          ) {
+            var notifyPeer = message.flags & 16 ? message.from_id : peerID;
+            if (message.pFlags.unread && !message.pFlags.out) {
+              NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
+                if (!muted) {
+                  notifyAboutMessage(message);
+                }
+              });
+            }
           }
         }
       });
@@ -311,11 +323,12 @@ angular.module('myApp.services')
     }
   }
 
-  function requestHistory (inputPeer, maxID, limit, offset) {
-    var peerID = AppPeersManager.getPeerID(inputPeer);
+  function requestHistory (peerID, maxID, limit, offset) {
     var isChannel = AppPeersManager.isChannel(peerID);
+    var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
+
     var promise;
-    if (isChannel) {
+    if (isChannel && !isMegagroup) {
       promise = MtpApiManager.invokeApi('channels.getImportantHistory', {
         channel: AppChatsManager.getChannelInput(-peerID),
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
@@ -327,7 +340,7 @@ angular.module('myApp.services')
       });
     } else {
       promise = MtpApiManager.invokeApi('messages.getHistory', {
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         offset_id: maxID ? getMessageLocalID(maxID) : 0,
         add_offset: offset || 0,
         limit: limit || 0
@@ -364,6 +377,7 @@ angular.module('myApp.services')
             from_id: peerID,
             to_id: AppPeersManager.getOutputPeer(peerID),
             flags: 0,
+            pFlags: {},
             date: tsNow(true) + serverTimeOffset,
             action: {
               _: 'messageActionBotIntro',
@@ -457,9 +471,13 @@ angular.module('myApp.services')
     };
   }
 
-  function fillHistoryStorage (inputPeer, maxID, fullLimit, historyStorage) {
-    // console.log('fill history storage', inputPeer, maxID, fullLimit, angular.copy(historyStorage));
-    return requestHistory (inputPeer, maxID, fullLimit).then(function (historyResult) {
+  function fillHistoryStorage (peerID, maxID, fullLimit, historyStorage) {
+    // console.log('fill history storage', peerID, maxID, fullLimit, angular.copy(historyStorage));
+    var migratedNextPeer = migratedFromTo[peerID];
+    var migratedPrevPeer = migratedToFrom[peerID];
+    var isMigrated = migratedNextPeer !== undefined || migratedPrevPeer !== undefined;
+
+    return requestHistory (peerID, maxID, fullLimit).then(function (historyResult) {
       historyStorage.count = historyResult.count || historyResult.messages.length;
 
       var offset = 0;
@@ -474,21 +492,41 @@ angular.module('myApp.services')
         }
       }
 
+      var wasTotalCount = historyStorage.history.length;
+
       historyStorage.history.splice(offset, historyStorage.history.length - offset);
       angular.forEach(historyResult.messages, function (message) {
         if (mergeReplyKeyboard(historyStorage, message)) {
-          $rootScope.$broadcast('history_reply_markup', {peerID: AppPeersManager.getPeerID(inputPeer)});
+          $rootScope.$broadcast('history_reply_markup', {peerID: peerID});
         }
         historyStorage.history.push(message.mid);
       });
 
-      fullLimit -= historyResult.messages.length;
+      var totalCount = historyStorage.history.length;
+      fullLimit -= (totalCount - wasTotalCount);
 
-      if (fullLimit > 0 && historyStorage.history.length < historyStorage.count) {
-        maxID = historyStorage.history[historyStorage.history.length - 1];
-        return fillHistoryStorage(inputPeer, maxID, fullLimit, historyStorage);
+      if (isMigrated) {
+        historyStorage.count = Math.max(historyStorage.count, totalCount) + 1;
       }
 
+      if (fullLimit > 0) {
+        maxID = historyStorage.history[totalCount - 1];
+        if (isMigrated) {
+          if (!historyResult.messages.length) {
+            if (migratedPrevPeer) {
+              maxID = 0;
+              peerID = migratedPrevPeer;
+            } else {
+              historyStorage.count = totalCount;
+              return true;
+            }
+          }
+          return fillHistoryStorage(peerID, maxID, fullLimit, historyStorage);
+        }
+        else if (totalCount < historyStorage.count) {
+          return fillHistoryStorage(peerID, maxID, fullLimit, historyStorage);
+        }
+      }
       return true;
     });
   };
@@ -499,7 +537,7 @@ angular.module('myApp.services')
       var i, message;
       for (i = result.history.length - 1; i >= 0; i--) {
         message = messagesStorage[result.history[i]];
-        if (message && !message.out && message.unread) {
+        if (message && !message.pFlags.out && message.pFlags.unread) {
           result.unreadOffset = i + 1;
           break;
         }
@@ -508,9 +546,11 @@ angular.module('myApp.services')
     return $q.when(result);
   }
 
-  function getHistory (inputPeer, maxID, limit, backLimit, prerendered) {
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        historyStorage = historiesStorage[peerID],
+  function getHistory (peerID, maxID, limit, backLimit, prerendered) {
+    if (migratedFromTo[peerID]) {
+      peerID = migratedFromTo[peerID];
+    }
+    var historyStorage = historiesStorage[peerID],
         offset = 0,
         offsetNotFound = false,
         unreadOffset = false,
@@ -520,6 +560,15 @@ angular.module('myApp.services')
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
+    }
+
+    var isMigrated = false;
+    var reqPeerID = peerID;
+    if (migratedToFrom[peerID]) {
+      isMigrated = true;
+      if (maxID && maxID < fullMsgIDModulus) {
+        reqPeerID = migratedToFrom[peerID];
+      }
     }
 
     if (!limit && !maxID) {
@@ -590,8 +639,11 @@ angular.module('myApp.services')
         offset = -backLimit;
         limit += backLimit;
       }
-      return requestHistory(inputPeer, maxID, limit, offset).then(function (historyResult) {
+      return requestHistory(reqPeerID, maxID, limit, offset).then(function (historyResult) {
         historyStorage.count = historyResult.count || historyResult.messages.length;
+        if (isMigrated) {
+          historyStorage.count++;
+        }
 
         var history = [];
         angular.forEach(historyResult.messages, function (message) {
@@ -610,7 +662,7 @@ angular.module('myApp.services')
       })
     }
 
-    return fillHistoryStorage(inputPeer, maxID, limit, historyStorage).then(function () {
+    return fillHistoryStorage(peerID, maxID, limit, historyStorage).then(function () {
       offset = 0;
       if (maxID > 0) {
         for (offset = 0; offset < historyStorage.history.length; offset++) {
@@ -641,7 +693,7 @@ angular.module('myApp.services')
   function mergeReplyKeyboard (historyStorage, message) {
     // console.log('merge', message.mid, message.reply_markup, historyStorage.reply_markup);
     if (!message.reply_markup &&
-        !message.out &&
+        !message.pFlags.out &&
         !message.action) {
       return false;
     }
@@ -657,7 +709,7 @@ angular.module('myApp.services')
       }
       if (historyStorage.maxOutID &&
           message.mid < historyStorage.maxOutID &&
-          messageReplyMarkup.pFlags.one_time) {
+          messageReplyMarkup.pFlags.single_use) {
         messageReplyMarkup.pFlags.hidden = true;
       }
       messageReplyMarkup = angular.extend({
@@ -671,9 +723,9 @@ angular.module('myApp.services')
       return true;
     }
 
-    if (message.out) {
+    if (message.pFlags.out) {
       if (lastReplyMarkup) {
-        if (lastReplyMarkup.pFlags.one_time &&
+        if (lastReplyMarkup.pFlags.single_use &&
             !lastReplyMarkup.pFlags.hidden &&
             (message.mid > lastReplyMarkup.mid || message.mid < 0) &&
             message.message) {
@@ -707,10 +759,9 @@ angular.module('myApp.services')
     return false;
   }
 
-  function getSearch (inputPeer, query, inputFilter, maxID, limit) {
+  function getSearch (peerID, query, inputFilter, maxID, limit) {
     var foundMsgs = [],
         useSearchCache = !query,
-        peerID = AppPeersManager.getPeerID(inputPeer),
         newSearchFilter = {peer: peerID, filter: inputFilter},
         sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, newSearchFilter);
 
@@ -719,7 +770,7 @@ angular.module('myApp.services')
       lastSearchResults = [];
     }
 
-    if (!maxID && !query) {
+    if (peerID && !maxID && !query) {
       var historyStorage = historiesStorage[peerID];
 
       if (historyStorage !== undefined && historyStorage.history.length) {
@@ -786,19 +837,50 @@ angular.module('myApp.services')
       });
     }
 
-    return MtpApiManager.invokeApi('messages.search', {
-      flags: 0,
-      peer: inputPeer,
-      q: query || '',
-      filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
-      min_date: 0,
-      max_date: 0,
-      limit: limit || 20,
-      max_id: maxID || 0
-    }, {
-      timeout: 300,
-      noErrorBox: true
-    }).then(function (searchResult) {
+    var apiPromise;
+
+    if (peerID || !query) {
+      var flags = 0;
+      if (AppPeersManager.isChannel(peerID) &&
+          !AppPeersManager.isMegagroup(peerID)) {
+        flags |= 1;
+      }
+      apiPromise = MtpApiManager.invokeApi('messages.search', {
+        flags: flags,
+        peer: AppPeersManager.getInputPeerByID(peerID),
+        q: query || '',
+        filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
+        min_date: 0,
+        max_date: 0,
+        limit: limit || 20,
+        max_id: maxID || 0
+      }, {
+        timeout: 300,
+        noErrorBox: true
+      });
+    } else {
+      var offsetDate = 0;
+      var offsetPeerID = 0;
+      var offsetID = 0;
+      var offsetMessage = maxID && getMessage(maxID);
+      if (offsetMessage && offsetMessage.date) {
+        offsetDate = offsetMessage.date;
+        offsetID = offsetMessage.id;
+        offsetPeerID = getMessagePeer(offsetMessage);
+      }
+      apiPromise = MtpApiManager.invokeApi('messages.searchGlobal', {
+        q: query,
+        offset_date: offsetDate,
+        offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
+        offset_id: getMessageLocalID(offsetID),
+        limit: limit || 20
+      }, {
+        timeout: 300,
+        noErrorBox: true
+      });
+    }
+
+    return apiPromise.then(function (searchResult) {
       AppUsersManager.saveApiUsers(searchResult.users);
       AppChatsManager.saveApiChats(searchResult.chats);
       saveMessages(searchResult.messages);
@@ -832,6 +914,7 @@ angular.module('myApp.services')
 
   function deleteMessages (messageIDs) {
     var splitted = splitMessageIDsByChannels(messageIDs);
+    debugger;
     var promises = [];
     angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
       var promise;
@@ -842,7 +925,7 @@ angular.module('myApp.services')
           if (channel.pFlags.editor) {
             angular.forEach(msgIDs, function (msgID, i) {
               var message = getMessage(splitted.mids[channelID][i]);
-              if (message.out) {
+              if (message.pFlags.out) {
                 goodMsgIDs.push(msgID);
               }
             });
@@ -888,32 +971,9 @@ angular.module('myApp.services')
     return $q.all(promises);
   }
 
-  function processAffectedHistory (inputPeer, affectedHistory, method) {
-    ApiUpdatesManager.processUpdateMessage({
-      _: 'updateShort',
-      update: {
-        _: 'updatePts',
-        pts: affectedHistory.pts,
-        pts_count: affectedHistory.pts_count
-      }
-    });
-    if (!affectedHistory.offset) {
-      return $q.when();
-    }
-
-    return MtpApiManager.invokeApi(method, {
-      peer: inputPeer,
-      offset: affectedHistory.offset,
-      max_id: 0
-    }).then(function (affectedHistory) {
-      return processAffectedHistory(inputPeer, affectedHistory, method);
-    });
-  }
-
-  function readHistory (inputPeer) {
+  function readHistory (peerID) {
     // console.trace('start read');
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        isChannel = AppPeersManager.isChannel(peerID),
+    var isChannel = AppPeersManager.isChannel(peerID),
         historyStorage = historiesStorage[peerID],
         foundDialog = getDialogByPeerID(peerID)[0];
 
@@ -929,7 +989,7 @@ angular.module('myApp.services')
       for (i = historyStorage.history.length; i >= 0; i--) {
         messageID = historyStorage.history[i];
         message = messagesStorage[messageID];
-        if (message && !message.out && message.unread) {
+        if (message && !message.pFlags.out && message.pFlags.unread) {
           foundUnread = true;
           break;
         }
@@ -951,11 +1011,8 @@ angular.module('myApp.services')
       });
     } else {
       apiPromise = MtpApiManager.invokeApi('messages.readHistory', {
-        peer: inputPeer,
-        offset: 0,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         max_id: 0
-      }).then(function (affectedHistory) {
-        return processAffectedHistory(inputPeer, affectedHistory, 'messages.readHistory');
       });
     }
 
@@ -978,13 +1035,13 @@ angular.module('myApp.services')
       for (i = 0; i < historyStorage.history.length; i++) {
         messageID = historyStorage.history[i];
         message = messagesStorage[messageID];
-        if (message && !message.out) {
-          message.unread = false;
+        if (message && !message.pFlags.out) {
+          message.pFlags.unread = false;
           if (messagesForHistory[messageID]) {
-            messagesForHistory[messageID].unread = false;
+            messagesForHistory[messageID].pFlags.unread = false;
           }
           if (messagesForDialogs[messageID]) {
-            messagesForDialogs[messageID].unread = false;
+            messagesForDialogs[messageID].pFlags.unread = false;
           }
           NotificationsManager.cancel('msg' + messageID);
         }
@@ -1012,17 +1069,28 @@ angular.module('myApp.services')
     });
   }
 
-  function flushHistory (inputPeer) {
-    // console.log('start flush');
-    var peerID = AppPeersManager.getPeerID(inputPeer),
-        historyStorage = historiesStorage[peerID];
-
+  function doFlushHistory (inputPeer) {
     return MtpApiManager.invokeApi('messages.deleteHistory', {
       peer: inputPeer,
-      offset: 0
+      max_id: 0
     }).then(function (affectedHistory) {
-      return processAffectedHistory(inputPeer, affectedHistory, 'messages.deleteHistory');
-    }).then(function () {
+      ApiUpdatesManager.processUpdateMessage({
+        _: 'updateShort',
+        update: {
+          _: 'updatePts',
+          pts: affectedHistory.pts,
+          pts_count: affectedHistory.pts_count
+        }
+      });
+      if (!affectedHistory.offset) {
+        return true;
+      }
+      return doFlushHistory(inputPeer);
+    });
+  }
+
+  function flushHistory (peerID) {
+    return doFlushHistory(AppPeersManager.getInputPeerByID(peerID)).then(function () {
       var foundDialog = getDialogByPeerID(peerID);
       if (foundDialog[0]) {
         dialogsStorage.dialogs.splice(foundDialog[1], 1);
@@ -1034,25 +1102,33 @@ angular.module('myApp.services')
 
   function saveMessages (apiMessages) {
     angular.forEach(apiMessages, function (apiMessage) {
+      if (apiMessage.pFlags === undefined) {
+        apiMessage.pFlags = {};
+      }
+      if (!apiMessage.pFlags.out) {
+        apiMessage.pFlags.out = false;
+      }
+      if (!apiMessage.pFlags.unread) {
+        apiMessage.pFlags.unread = false;
+      }
       if (apiMessage._ == 'messageEmpty') {
         return;
       }
-      apiMessage.out = apiMessage.flags & 2 ? true : false;
-      apiMessage.media_unread = apiMessage.flags & 32 ? true : false;
 
       var toPeerID = AppPeersManager.getPeerID(apiMessage.to_id);
       var isChannel = apiMessage.to_id._ == 'peerChannel';
       var channelID = isChannel ? -toPeerID : 0;
+      var isBroadcast = isChannel && !AppChatsManager.isMegagroup(channelID);
 
       var mid = getFullMessageID(apiMessage.id, channelID);
       apiMessage.mid = mid;
       messagesStorage[mid] = apiMessage;
 
-      if (channelID && !apiMessage.out) {
+      if (channelID && !apiMessage.pFlags.out) {
         var dialog = getDialogByPeerID(toPeerID)[0];
-        apiMessage.unread = dialog ? mid > dialog.read_inbox_max_id : true;
+        apiMessage.pFlags.unread = dialog ? mid > dialog.read_inbox_max_id : true;
       } else {
-        apiMessage.unread = apiMessage.flags & 1 ? true : false;
+        apiMessage.pFlags.unread = apiMessage.flags & 1 ? true : false;
       }
 
       if (apiMessage.reply_to_msg_id) {
@@ -1097,27 +1173,44 @@ angular.module('myApp.services')
         }
       }
       if (apiMessage.action) {
-        if (apiMessage.action._ == 'messageActionChatEditPhoto') {
-          AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
-          if (isChannel) {
-            apiMessage.action._ = 'messageActionChannelEditPhoto';
-          }
+        switch (apiMessage.action._) {
+          case 'messageActionChatEditPhoto':
+            AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
+            if (isBroadcast) {
+              apiMessage.action._ = 'messageActionChannelEditPhoto';
+            }
+            break;
+
+          case 'messageActionChatEditTitle':
+            if (isBroadcast) {
+              apiMessage.action._ = 'messageActionChannelEditTitle';
+            }
+            break;
+
+          case 'messageActionChatDeletePhoto':
+            if (isBroadcast) {
+              apiMessage.action._ = 'messageActionChannelDeletePhoto';
+            }
+            break;
+
+          case 'messageActionChatAddUser':
+            if (apiMessage.action.users.length == 1) {
+              apiMessage.action.user_id = apiMessage.action.users[0];
+              if (apiMessage.fromID == apiMessage.action.user_id) {
+                apiMessage.action._ = 'messageActionChatReturn';
+              }
+            }
+            else if (apiMessage.action.users.length > 1) {
+              apiMessage.action._ = 'messageActionChatAddUsers';
+            }
+            break;
+
+          case 'messageActionChatDeleteUser':
+            if (apiMessage.fromID == apiMessage.action.user_id) {
+              apiMessage.action._ = 'messageActionChatLeave';
+            }
+            break;
         }
-        else if (isChannel) {
-          if (apiMessage.action._ == 'messageActionChatEditTitle') {
-            apiMessage.action._ = 'messageActionChannelEditTitle';
-          }
-          if (apiMessage.action._ == 'messageActionChatDeletePhoto') {
-            apiMessage.action._ = 'messageActionChannelDeletePhoto';
-          }
-        }
-      }
-      if (apiMessage.reply_markup) {
-        apiMessage.reply_markup.pFlags = {
-          resize: (apiMessage.reply_markup.flags & 1) > 0,
-          one_time: (apiMessage.reply_markup.flags & 2) > 0,
-          selective: (apiMessage.reply_markup.flags & 4) > 0
-        };
       }
 
       if (apiMessage.message && apiMessage.message.length) {
@@ -1137,11 +1230,12 @@ angular.module('myApp.services')
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
+        pFlags = {},
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
-        asChannel = isChannel ? true : false,
+        isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
+        asChannel = isChannel && !isMegagroup ? true : false,
         entities = [],
         message;
 
@@ -1154,8 +1248,10 @@ angular.module('myApp.services')
     var fromID = AppUsersManager.getSelf().id;
     if (peerID != fromID) {
       flags |= 2;
+      pFlags.out = true;
       if (!isChannel && !AppUsersManager.isBot(peerID)) {
         flags |= 1;
+        pFlags.unread = true;
       }
     }
     if (replyToMsgID) {
@@ -1172,6 +1268,7 @@ angular.module('myApp.services')
       from_id: fromID,
       to_id: AppPeersManager.getOutputPeer(peerID),
       flags: flags,
+      pFlags: pFlags,
       date: tsNow(true) + serverTimeOffset,
       message: text,
       random_id: randomIDS,
@@ -1216,7 +1313,7 @@ angular.module('myApp.services')
       // console.log(flags, entities);
       MtpApiManager.invokeApi('messages.sendMessage', {
         flags: flags,
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         message: text,
         random_id: randomID,
         reply_to_msg_id: getMessageLocalID(replyToMsgID),
@@ -1274,11 +1371,12 @@ angular.module('myApp.services')
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
         flags = 0,
+        pFlags = {},
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
-        asChannel = isChannel ? true : false,
+        isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
+        asChannel = isChannel && !isMegagroup ? true : false,
         attachType, apiFileName, realFileName;
 
     if (!options.isMedia) {
@@ -1305,8 +1403,10 @@ angular.module('myApp.services')
     var fromID = AppUsersManager.getSelf().id;
     if (peerID != fromID) {
       flags |= 2;
+      pFlags.out = true;
       if (!isChannel && !AppUsersManager.isBot(peerID)) {
         flags |= 1;
+        pFlags.unread = true;
       }
     }
     if (replyToMsgID) {
@@ -1331,6 +1431,7 @@ angular.module('myApp.services')
       from_id: fromID,
       to_id: AppPeersManager.getOutputPeer(peerID),
       flags: flags,
+      pFlags: pFlags,
       date: tsNow(true) + serverTimeOffset,
       message: '',
       media: media,
@@ -1400,7 +1501,7 @@ angular.module('myApp.services')
           }
           MtpApiManager.invokeApi('messages.sendMedia', {
             flags: flags,
-            peer: inputPeer,
+            peer: AppPeersManager.getInputPeerByID(peerID),
             media: inputMedia,
             random_id: randomID,
             reply_to_msg_id: getMessageLocalID(replyToMsgID)
@@ -1458,10 +1559,10 @@ angular.module('myApp.services')
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
         historyStorage = historiesStorage[peerID],
-        inputPeer = AppPeersManager.getInputPeerByID(peerID),
         replyToMsgID = options.replyToMsgID,
         isChannel = AppPeersManager.isChannel(peerID),
-        asChannel = isChannel ? true : false;
+        isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
+        asChannel = isChannel && !isMegagroup ? true : false;
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1494,10 +1595,13 @@ angular.module('myApp.services')
     }
 
     var flags = 0;
+    var pFlags = {};
     if (peerID != fromID) {
       flags |= 2;
+      pFlags.out = true;
       if (!AppUsersManager.isBot(peerID)) {
         flags |= 1;
+        pFlags.unread = true;
       }
     }
     if (replyToMsgID) {
@@ -1515,6 +1619,7 @@ angular.module('myApp.services')
       from_id: fromID,
       to_id: AppPeersManager.getOutputPeer(peerID),
       flags: flags,
+      pFlags: pFlags,
       date: tsNow(true) + serverTimeOffset,
       message: '',
       media: media,
@@ -1556,7 +1661,7 @@ angular.module('myApp.services')
 
       MtpApiManager.invokeApi('messages.sendMedia', {
         flags: flags,
-        peer: inputPeer,
+        peer: AppPeersManager.getInputPeerByID(peerID),
         media: inputMedia,
         random_id: randomID,
         reply_to_msg_id: getMessageLocalID(replyToMsgID)
@@ -1590,7 +1695,8 @@ angular.module('myApp.services')
     var i, mid, msgID;
     var fromChannel = getMessageIDInfo(mids[0])[1];
     var isChannel = AppPeersManager.isChannel(peerID);
-    var asChannel = isChannel ? true : false;
+    var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
+    var asChannel = isChannel && !isMegagroup ? true : false;
 
     if (asChannel) {
       flags |= 16;
@@ -1621,19 +1727,19 @@ angular.module('myApp.services')
   };
 
   function startBot (botID, chatID, startParam) {
+    var peerID = chatID ? -chatID : botID;
     if (startParam) {
       var randomID = bigint(nextRandomInt(0xFFFFFFFF)).shiftLeft(32).add(bigint(nextRandomInt(0xFFFFFFFF))).toString();
 
       return MtpApiManager.invokeApi('messages.startBot', {
         bot: AppUsersManager.getUserInput(botID),
-        chat_id: AppChatsManager.getChatInput(chatID),
+        peer: AppPeersManager.getInputPeerByID(peerID),
         random_id: randomID,
         start_param: startParam
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
       });
     }
-
-    var peerID = chatID ? -chatID : botID;
-    var inputPeer = AppPeersManager.getInputPeerByID(peerID);
 
     if (chatID) {
       return MtpApiManager.invokeApi('messages.addChatUser', {
@@ -1641,16 +1747,17 @@ angular.module('myApp.services')
         user_id: AppUsersManager.getUserInput(botID)
       }).then(function (updates) {
         ApiUpdatesManager.processUpdateMessage(updates);
+        sendText(peerID, '/start@' + bot.username);
       }, function (error) {
         if (error && error.type == 'USER_ALREADY_PARTICIPANT') {
           var bot = AppUsersManager.getUser(botID);
-          sendText(-chatID, '/start@' + bot.username);
+          sendText(peerID, '/start@' + bot.username);
           error.handled = true;
         }
       });
     }
 
-    return sendText(botID, '/start');
+    return sendText(peerID, '/start');
   }
 
   function cancelPendingMessage (randomID) {
@@ -1777,7 +1884,7 @@ angular.module('myApp.services')
 
     if (toID < 0) {
       return toID;
-    } else if (message.out || message.flags & 2) {
+    } else if (message.pFlags && message.pFlags.out || message.flags & 2) {
       return toID;
     }
     return message.from_id;
@@ -1796,7 +1903,7 @@ angular.module('myApp.services')
 
     if (!message || !message.to_id) {
       if (dialog && dialog.peerID) {
-        message = {_: 'message', to_id: AppPeersManager.getOutputPeer(dialog.peerID), deleted: true, date: tsNow(true)};
+        message = {_: 'message', to_id: AppPeersManager.getOutputPeer(dialog.peerID), deleted: true, date: tsNow(true), pFlags: {}};
         message.deleted = true;
       } else {
         return message;
@@ -2316,7 +2423,7 @@ angular.module('myApp.services')
       MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (blob) {
         notification.image = FileManager.getUrl(blob, 'image/jpeg');
 
-        if (message.unread) {
+        if (message.pFlags.unread) {
           NotificationsManager.notify(notification);
         }
       });
@@ -2379,11 +2486,11 @@ angular.module('myApp.services')
       notifyPeerToHandle.isMutedPromise.then(function (muted) {
         var topMessage = notifyPeerToHandle.top_message;
         if (muted ||
-            !topMessage.unread) {
+            !topMessage.pFlags.unread) {
           return;
         }
         setTimeout(function () {
-          if (topMessage.unread) {
+          if (topMessage.pFlags.unread) {
             notifyAboutMessage(topMessage, {
               fwd_count: notifyPeerToHandle.fwd_count
             });
@@ -2451,7 +2558,7 @@ angular.module('myApp.services')
           $rootScope.$broadcast('history_reply_markup', {peerID: peerID})
         }
 
-        if (!message.out && message.from_id) {
+        if (!message.pFlags.out && message.from_id) {
           AppUsersManager.forceUserOnline(message.from_id);
         }
 
@@ -2477,7 +2584,7 @@ angular.module('myApp.services')
 
         var foundDialog = getDialogByPeerID(peerID);
         var dialog;
-        var inboxUnread = !message.out && message.unread;
+        var inboxUnread = !message.pFlags.out && message.pFlags.unread;
 
         if (foundDialog.length) {
           dialog = foundDialog[0];
@@ -2555,25 +2662,25 @@ angular.module('myApp.services')
           }
           message = messagesStorage[messageID];
 
-          if (message.out != isOut) {
+          if (message.pFlags.out != isOut) {
             continue;
           }
-          if (!message.unread) {
+          if (!message.pFlags.unread) {
             break;
           }
-          // console.log('read', messageID, message.unread, message);
-          if (message && message.unread) {
-            message.unread = false;
+          // console.log('read', messageID, message.pFlags.unread, message);
+          if (message && message.pFlags.unread) {
+            message.pFlags.unread = false;
             if (messagesForHistory[messageID]) {
-              messagesForHistory[messageID].unread = false;
+              messagesForHistory[messageID].pFlags.unread = false;
               if (!foundAffected) {
                 foundAffected = true;
               }
             }
             if (messagesForDialogs[messageID]) {
-              messagesForDialogs[messageID].unread = false;
+              messagesForDialogs[messageID].pFlags.unread = false;
             }
-            if (!message.out) {
+            if (!message.pFlags.out) {
               if (foundDialog) {
                 newUnreadCount = --foundDialog[0].unread_count;
               }
@@ -2597,10 +2704,10 @@ angular.module('myApp.services')
         for (i = 0; i < len; i++) {
           messageID = messages[i];
           if (message = messagesStorage[messageID]) {
-            delete message.media_unread;
+            delete message.pFlags.media_unread;
           }
           if (historyMessage = messagesForHistory[messageID]) {
-            delete historyMessage.media_unread;
+            delete historyMessage.pFlags.media_unread;
           }
         }
         break;
@@ -2619,8 +2726,8 @@ angular.module('myApp.services')
             peerID = getMessagePeer(message);
             history = historiesUpdated[peerID] || (historiesUpdated[peerID] = {count: 0, unread: 0, msgs: {}});
 
-            if (!message.out && message.unread) {
-              history.unread++;
+            if (!message.pFlags.out && message.pFlags.unread) {
+              history.pFlags.unread++;
               NotificationsManager.cancel('msg' + messageID);
             }
             history.count++;
@@ -2641,8 +2748,7 @@ angular.module('myApp.services')
               from_id: message.from_id,
               to_id: message.to_id,
               flags: message.flags,
-              out: message.out,
-              unread: message.unread,
+              pFlags: message.pFlags,
               date: message.date
             };
           }
@@ -2651,8 +2757,8 @@ angular.module('myApp.services')
         angular.forEach(historiesUpdated, function (updatedData, peerID) {
           var foundDialog = getDialogByPeerID(peerID);
           if (foundDialog) {
-            if (updatedData.unread) {
-              foundDialog[0].unread_count -= updatedData.unread;
+            if (updatedData.pFlags.unread) {
+              foundDialog[0].unread_count -= updatedData.pFlags.unread;
 
               $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: foundDialog[0].unread_count});
             }
@@ -2747,10 +2853,9 @@ angular.module('myApp.services')
 
   function reloadChannelDialog (channelID) {
     var peerID = -channelID;
-    var inputPeer = AppPeersManager.getInputPeerByID(peerID);
     return $q.all([
       AppProfileManager.getChannelFull(channelID, true),
-      getHistory(inputPeer, 0)
+      getHistory(peerID, 0)
     ]).then(function (results) {
       var channelResult = results[0];
       var historyResult = results[1];

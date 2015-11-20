@@ -69,7 +69,7 @@
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-init="f.showMoreActions = !user.phone.length">
         <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
-        <div class="md_modal_section_link_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.botNoGroups">
+        <div class="md_modal_section_link_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.bot_nochats">
           <a class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
         </div>
 

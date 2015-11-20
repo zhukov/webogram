@@ -6,20 +6,22 @@
   </my-i18n>
   <span ng-switch-when="messageActionChatEditPhoto" my-i18n="message_service_changed_group_photo"></span>
   <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="message_service_removed_group_photo"></span>
-  <span ng-switch-when="messageActionChatAddUser" ng-switch="::historyMessage.fromID != historyMessage.action.user_id">
-    <span ng-switch-when="true" my-i18n="message_service_invited_user">
-      <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
-    </span>
-    <span ng-switch-default my-i18n="message_service_returned_to_group"></span>
-  </span>
-  <span ng-switch-when="messageActionChatDeleteUser" ng-switch="::historyMessage.fromID != historyMessage.action.user_id">
-    <span ng-switch-when="true" my-i18n="message_service_kicked_user">
-      <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
-    </span>
-    <span ng-switch-default my-i18n="message_service_left_group"></span>
-  </span>
   <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="message_service_joined_by_link"></span>
+  <span ng-switch-when="messageActionChatReturn" my-i18n="message_service_returned_to_group"></span>
+  <span ng-switch-when="messageActionChatAddUser" my-i18n="message_service_invited_user">
+    <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
+  </span>
+  <span ng-switch-when="messageActionChatAddUsers" my-i18n="message_service_invited_users">
+    <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
+    <my-i18n-param name="num-more"><span ng-bind="historyMessage.action.users.length - 1"></span></my-i18n-param>
+  </span>
+  <span ng-switch-when="messageActionChatLeave" my-i18n="message_service_left_group"></span>
+  <span ng-switch-when="messageActionChatDeleteUser" my-i18n="message_service_kicked_user">
+    <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
+  </span>
 
+  <span ng-switch-when="messageActionChatMigrateTo" my-i18n="message_service_converted_to_supergroup"></span>
+  <span ng-switch-when="messageActionChannelMigrateFrom" my-i18n="message_service_converted_to_supergroup"></span>
   <span ng-switch-when="messageActionChannelCreate" my-i18n="message_service_created_channel"></span>
   <span ng-switch-when="messageActionChannelEditTitle" my-i18n="message_service_changed_channel_name">
     <my-i18n-param name="channel-name">&laquo;<strong ng-bind-html="::historyMessage.action.rTitle"></strong>&raquo;</my-i18n-param>

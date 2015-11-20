@@ -261,6 +261,7 @@ TLSerialization.prototype.storeObject = function (obj, type, field) {
     case 'bytes':  return this.storeBytes(obj,  field);
     case 'double': return this.storeDouble(obj,   field);
     case 'Bool':   return this.storeBool(obj,   field);
+    case 'true':   return;
   }
 
   if (angular.isArray(obj)) {
@@ -510,14 +511,25 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
     case 'bytes':  return this.fetchBytes(field);
     case 'double': return this.fetchDouble(field);
     case 'Bool':   return this.fetchBool(field);
+    case 'true':   return true;
   }
 
   field = field || type || 'Object';
 
   if (type.substr(0, 6) == 'Vector' || type.substr(0, 6) == 'vector') {
     if (type.charAt(0) == 'V') {
-      var constructor = this.readInt(field + '[id]');
-      if (constructor != 0x1cb5c415) {
+      var constructor = this.readInt(field + '[id]'),
+          constructorCmp = uintToInt(constructor);
+
+      if (constructorCmp == 0x3072cfa1) { // Gzip packed
+        var compressed = this.fetchBytes(field + '[packed_string]'),
+            uncompressed = gzipUncompress(compressed),
+            buffer = bytesToArrayBuffer(uncompressed),
+            newDeserializer = (new TLDeserialization(buffer));
+
+        return newDeserializer.fetchObject(type, field);
+      }
+      if (constructorCmp != 0x1cb5c415) {
         throw new Error('Invalid vector constructor ' + constructor);
       }
     }
@@ -613,12 +625,15 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
   if (this.override[overrideKey]) {
     this.override[overrideKey].apply(this, [result, field + '[' + predicate + ']']);
   } else {
-    var i, param, type, condType, fieldBit;
+    var i, param, type, isCond, condType, fieldBit, value;
     var len = constructorData.params.length;
     for (i = 0; i < len; i++) {
       param = constructorData.params[i];
       type = param.type;
-      if (type.indexOf('?') !== -1) {
+      if (type == '#' && result.pFlags === undefined) {
+        result.pFlags = {};
+      }
+      if (isCond = (type.indexOf('?') !== -1)) {
         condType = type.split('?');
         fieldBit = condType[0].split('.');
         if (!(result[fieldBit[0]] & (1 << fieldBit[1]))) {
@@ -627,7 +642,13 @@ TLDeserialization.prototype.fetchObject = function (type, field) {
         type = condType[1];
       }
 
-      result[param.name] = self.fetchObject(type, field + '[' + predicate + '][' + param.name + ']');
+      value = self.fetchObject(type, field + '[' + predicate + '][' + param.name + ']');
+
+      if (isCond && type === 'true') {
+        result.pFlags[param.name] = value;
+      } else {
+        result[param.name] = value;
+      }
     }
   }
 
