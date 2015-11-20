@@ -826,7 +826,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (searchMessages) {
         searchTimeoutPromise = (force || maxID) ? $q.when() : $timeout(angular.noop, 500);
         return searchTimeoutPromise.then(function () {
-          return AppMessagesManager.getSearch({_: 'inputPeerEmpty'}, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
+          return AppMessagesManager.getSearch(false, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
             if (curJump != jump) {
               return $q.reject();
             }
@@ -2614,7 +2614,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return;
     }
 
-    AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, 0, 1000).then(function (searchCachedResult) {
+    AppMessagesManager.getSearch(peerID, inputQuery, inputFilter, 0, 1000).then(function (searchCachedResult) {
       if (searchCachedResult.history.indexOf($scope.messageID) >= 0) {
         list = searchCachedResult.history;
         maxID = list[list.length - 1];
@@ -2666,7 +2666,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function loadMore () {
       if (loadingPromise) return loadingPromise;
 
-      return loadingPromise = AppMessagesManager.getSearch(inputPeer, inputQuery, inputFilter, maxID).then(function (searchResult) {
+      return loadingPromise = AppMessagesManager.getSearch(peerID, inputQuery, inputFilter, maxID).then(function (searchResult) {
         if (searchResult.history.length) {
           maxID = searchResult.history[searchResult.history.length - 1];
           list = list.concat(searchResult.history);

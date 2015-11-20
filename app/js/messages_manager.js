@@ -197,7 +197,7 @@ angular.module('myApp.services')
       var dialog = dialogs[len - 1];
       var index = dialog.index;
       if (index) {
-        offsetDate = Math.ceil(index / 0x10000);
+        offsetDate = Math.ceil(index / 0x10000) + serverTimeOffset;
         offsetID = dialog.top_message;
         offsetPeerID = dialog.peerID;
       }
@@ -863,8 +863,9 @@ angular.module('myApp.services')
       var offsetPeerID = 0;
       var offsetID = 0;
       var offsetMessage = maxID && getMessage(maxID);
+
       if (offsetMessage && offsetMessage.date) {
-        offsetDate = offsetMessage.date;
+        offsetDate = offsetMessage.date + serverTimeOffset;
         offsetID = offsetMessage.id;
         offsetPeerID = getMessagePeer(offsetMessage);
       }
@@ -2524,8 +2525,9 @@ angular.module('myApp.services')
             historyStorage = historiesStorage[peerID];
 
         if (update._ == 'updateNewChannelMessage' &&
+            !AppChatsManager.isMegagroup(-peerID) &&
             !(message.flags & 16 || message.flags & 2 || (message.flags & 256) == 0)) {
-          // we don't support not important messages yet
+          // we don't support not important messages in channels yet
           break;
         }
 
