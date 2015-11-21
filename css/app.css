@@ -153,7 +153,7 @@ code,kbd,pre,samp{font-family:Menlo,Monaco,Consolas,"Courier New",monospace}
 code{padding:2px 4px;font-size:90%;color:#c7254e;background-color:#f9f2f4;border-radius:4px}
 kbd{padding:2px 4px;font-size:90%;color:#fff;background-color:#333;border-radius:3px;box-shadow:inset 0 -1px 0 rgba(0,0,0,.25)}
 kbd kbd{padding:0;font-size:100%;box-shadow:none}
-pre{display:block;margin:0 0 10px;font-size:13px;line-height:1.42857143;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border-radius:4px}
+pre{display:block;margin:0 0 10px;line-height:1.42857143;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border-radius:4px}
 pre code{padding:0;font-size:inherit;color:inherit;white-space:pre-wrap;background-color:transparent;border-radius:0}
 .pre-scrollable{max-height:340px;overflow-y:scroll}
 .container,.container-fluid{margin-right:auto;margin-left:auto;padding-left:0;padding-right:0}
@@ -1131,7 +1131,7 @@ h1,h2,h3,h4,h5{color:#222}
 .non_osx h4{font-size:17px}
 .noselect{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 .hasselect{-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
-pre{margin-bottom:0;max-height:300px;overflow:auto;padding:3px;border:1px solid #dedede}
+pre{margin-bottom:0;max-height:300px;overflow:auto;padding:3px;border:1px solid #dedede;font-size:inherit}
 a{cursor:pointer}
 a.disabled{cursor:default;pointer-events:none}
 .form-control{border:1px solid #d9dbde;border-radius:2px;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;-webkit-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s}
@@ -1636,6 +1636,7 @@ a.composer_command_option.composer_autocomplete_option_active .composer_command_
 .error_modal_details_link,.error_modal_details_link:hover{font-size:11px;color:#999}
 .confirm_modal_description{text-align:center;padding:20px 0;font-size:14px;line-height:160%}
 .confirm_phone_number{font-weight:700;padding:15px 10px 0;text-align:center}
+.confirm_modal_extlink_jump{word-break:break-all}
 .document_modal_window,.photo_modal_window,.video_modal_window{display:block}
 .photo_modal_error{color:#999;position:absolute;width:100%;top:50%;margin-top:-20px;padding:0 20px;text-align:center;font-size:1.4em;line-height:160%}
 .video_full_error{border-radius:10px;overflow:hidden;background:rgba(0,0,0,.6);color:#fff;position:absolute;top:50%;margin:-40px 10px 0;padding:10px;text-align:center;font-size:1.4em;line-height:160%}
@@ -1667,6 +1668,8 @@ a.contacts_modal_search_clear{right:9px;margin-top:-24px}
 .contacts_modal_contact_photo .peer_initials{line-height:40px;font-size:15px}
 .contacts_modal_contact_status{color:#999}
 .contacts_modal_members_list .active a.contacts_modal_contact .contacts_modal_contact_status,.contacts_modal_members_list .active a.contacts_modal_contact .md_modal_list_peer_description,a.contacts_modal_contact:hover .contacts_modal_contact_status,a.contacts_modal_contact:hover .md_modal_list_peer_description{color:#91a6ba}
+h4.chat_modal_migrate_header{font-size:inherit;font-weight:700;color:inherit}
+ul.chat_modal_migrate_list{margin-top:10px;padding-left:15px}
 .chat_modal_participant_wrap{padding:8px 0;border-top:1px solid #F0F0F0}
 .chat_modal_participant_wrap:first-child{border-top:0}
 .chat_modal_participant_kick{padding:11px 0;display:block}
@@ -1832,7 +1835,8 @@ a.peer_modal_photo,div.peer_modal_photo{display:block;margin-right:19px}
 .md_modal_section_link.pull-right{color:#3a6d99}
 .md_modal_section_text{display:block;padding:4px 0;color:#777}
 .md_modal_section_version{color:#777;display:inline-block;margin-left:-70px;position:absolute}
-.md_modal_section_splitter{border-top:1px solid #dfdfdf;height:12px;background:#f5f5f5;-webkit-box-shadow:inset 0 1px 1px #ededed;-moz-box-shadow:inset 0 1px 1px #ededed;box-shadow:inset 0 1px 1px #ededed}
+.md_modal_section_splitter{border-top:1px solid #dfdfdf;min-height:12px;background:#f5f5f5;-webkit-box-shadow:inset 0 1px 1px #ededed;-moz-box-shadow:inset 0 1px 1px #ededed;box-shadow:inset 0 1px 1px #ededed}
+.md_modal_section_splitter_content{height:auto;color:#777;font-size:12px;padding:5px 20px 3px 55px}
 .md_modal_versioned_section_wrap{position:relative;border-bottom:1px solid #ebebeb;margin:19px 0 0 120px;padding-right:28px}
 .md_modal_versioned_section_wrap:last-child{border-bottom:0}
 .md_modal_list_peer_wrap{padding-bottom:16px}
