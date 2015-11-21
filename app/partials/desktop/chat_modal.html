@@ -4,7 +4,7 @@
     <div class="md_modal_title_wrap">
       <div class="md_modal_actions_wrap clearfix">
         <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
-        <a class="md_modal_action" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left" ng-click="editTitle()" my-i18n="modal_edit"></a>
+        <a class="md_modal_action" ng-if="hasRights('edit_title')" ng-click="editTitle()" my-i18n="modal_edit"></a>
       </div>
       <div class="md_modal_title" my-i18n="group_modal_info"></div>
     </div>
@@ -40,7 +40,7 @@
 
     <div class="md_modal_sections clearfix">
 
-      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="chatFull.chat._ != 'chatForbidden'">
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="hasRights('invite') || chatFull.chat.pFlags.left">
         <i class="md_modal_section_icon md_modal_section_icon_person"></i>
 
         <div class="md_modal_section_link_wrap" ng-switch="chatFull.chat.pFlags.left">
@@ -52,7 +52,6 @@
       </div>
 
       <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.pFlags.left && chatFull.chat.pFlags.creator">
-        <!-- <i class="md_modal_section_icon md_modal_section_icon_more"></i> -->
 
         <div class="md_modal_section_link_wrap">
           <a class="md_modal_section_link" ng-click="inviteViaLink()" my-i18n="group_modal_menu_share_link"></a>

@@ -2179,7 +2179,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           return;
         }
 
-        var needMentions = peerBots.length > 1;
+        var needMentions = peerID < 0;
         var commandsList = [];
         var commandsIndex = SearchIndexManager.createIndex();
 
@@ -3304,6 +3304,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     }
 
+    $scope.hasRights = function (action) {
+      return AppChatsManager.hasRights($scope.chatID, action);
+    }
+
   })
 
   .controller('ChannelModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
@@ -3451,6 +3455,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.goToHistory = function () {
       $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
     };
+
+    $scope.hasRights = function (action) {
+      return AppChatsManager.hasRights($scope.chatID, action);
+    }
 
   })
 

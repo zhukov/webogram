@@ -2621,18 +2621,20 @@ angular.module('myApp.directives', ['myApp.filters'])
       var update = function () {
         var html = allPluralize(participantsCount);
         var onlineCount = 0;
-        var wasMe = false;
-        angular.forEach(participants, function (t, userID) {
-          var user = AppUsersManager.getUser(userID);
-          if (user.status && user.status._ == 'userStatusOnline') {
-            if (user.id == myID) {
-              wasMe = true;
+        if (!AppChatsManager.isChannel(chatID)) {
+          var wasMe = false;
+          angular.forEach(participants, function (t, userID) {
+            var user = AppUsersManager.getUser(userID);
+            if (user.status && user.status._ == 'userStatusOnline') {
+              if (user.id == myID) {
+                wasMe = true;
+              }
+              onlineCount++;
             }
-            onlineCount++;
+          });
+          if (onlineCount > 1 || onlineCount == 1 && !wasMe) {
+            html = _('group_modal_participants', {total: html, online: onlinePluralize(onlineCount)});
           }
-        });
-        if (onlineCount > 1 || onlineCount == 1 && !wasMe) {
-          html = _('group_modal_participants', {total: html, online: onlinePluralize(onlineCount)});
         }
         if (!onlineCount && !participantsCount) {
           html = '';

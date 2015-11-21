@@ -613,12 +613,37 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         chat.pFlags.left) {
       return false;
     }
-    if (isChannel(id) && action == 'send') {
-      if (!chat.pFlags.megagroup &&
-          !chat.pFlags.creator &&
-          !chat.pFlags.editor) {
-        return false;
-      }
+    if (chat.pFlags.creator) {
+      return true;
+    }
+
+    switch (action) {
+      case 'send':
+        if (chat._ == 'channel' &&
+            !chat.pFlags.megagroup &&
+            !chat.pFlags.editor) {
+          return false;
+        }
+        break;
+
+      case 'edit_title':
+      case 'edit_photo':
+      case 'invite':
+        if (chat._ == 'channel') {
+          if (chat.pFlags.megagroup) {
+            if (!chat.pFlags.editor) {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        } else {
+          if (chat.pFlags.admins_enabled &&
+              !chat.pFlags.editor) {
+            return false;
+          }
+        }
+        break;
     }
     return true;
   }
@@ -1003,7 +1028,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function getPeerBots (peerID) {
     var peerBots = [];
     if (peerID >= 0 && !AppUsersManager.isBot(peerID) ||
-        AppPeersManager.isChannel(peerID)) {
+        (AppPeersManager.isChannel(peerID) && !AppPeersManager.isMegagroup(peerID))) {
       return $q.when(peerBots);
     }
     if (peerID >= 0) {
@@ -1080,7 +1105,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       channel: AppChatsManager.getChannelInput(id),
       filter: {_: 'channelParticipantsRecent'},
       offset: 0,
-      limit: 200
+      limit: AppChatsManager.isMegagroup(id) ? 50 : 200
     }).then(function (result) {
       AppUsersManager.saveApiUsers(result.users);
       return result.participants;
@@ -1107,10 +1132,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       NotificationsManager.savePeerSettings(-id, fullChannel.notify_settings);
       var participantsPromise;
-      if ((fullChannel.flags & 8) ||
-          chat.pFlags.creator ||
-          chat.pFlags.editor ||
-          chat.pFlags.moderator) {
+      if (fullChannel.flags & 8) {
         participantsPromise = getChannelParticipants(id).then(function (participants) {
           delete chatFullPromises[id];
           fullChannel.participants = {
@@ -2728,6 +2750,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       case 'updateDeleteChannelMessages':
         channelID = update.channel_id;
         break;
+    }
+    if (channelID && !AppChatsManager.hasChat(channelID)) {
+      return false;
     }
     var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
 
