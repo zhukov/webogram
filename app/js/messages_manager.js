@@ -473,11 +473,8 @@ angular.module('myApp.services')
 
   function fillHistoryStorage (peerID, maxID, fullLimit, historyStorage) {
     // console.log('fill history storage', peerID, maxID, fullLimit, angular.copy(historyStorage));
-    var migratedNextPeer = migratedFromTo[peerID];
-    var migratedPrevPeer = migratedToFrom[peerID];
-    var isMigrated = migratedNextPeer !== undefined || migratedPrevPeer !== undefined;
-
-    return requestHistory (peerID, maxID, fullLimit).then(function (historyResult) {
+    var offset = (migratedFromTo[peerID] && !maxID) ? 1 : 0;
+    return requestHistory (peerID, maxID, fullLimit, offset).then(function (historyResult) {
       historyStorage.count = historyResult.count || historyResult.messages.length;
 
       var offset = 0;
@@ -504,6 +501,10 @@ angular.module('myApp.services')
 
       var totalCount = historyStorage.history.length;
       fullLimit -= (totalCount - wasTotalCount);
+
+      var migratedNextPeer = migratedFromTo[peerID];
+      var migratedPrevPeer = migratedToFrom[peerID];
+      var isMigrated = migratedNextPeer !== undefined || migratedPrevPeer !== undefined;
 
       if (isMigrated) {
         historyStorage.count = Math.max(historyStorage.count, totalCount) + 1;
@@ -544,6 +545,30 @@ angular.module('myApp.services')
       }
     }
     return $q.when(result);
+  }
+
+  function migrateChecks (migrateFrom, migrateTo) {
+    if (!migratedFromTo[migrateFrom] &&
+        !migratedToFrom[migrateTo] &&
+        AppChatsManager.hasChat(-migrateTo)) {
+
+      var fromChat = AppChatsManager.getChat(-migrateFrom);
+      if (fromChat &&
+          fromChat.migrated_to &&
+          fromChat.migrated_to.channel_id == -migrateTo) {
+        migratedFromTo[migrateFrom] = migrateTo;
+        migratedToFrom[migrateTo] = migrateFrom;
+
+        $timeout(function () {
+          var foundDialog = getDialogByPeerID(migrateFrom);
+          if (foundDialog.length) {
+            dialogsStorage.dialogs.splice(foundDialog[1], 1);
+            $rootScope.$broadcast('dialog_drop', {peerID: migrateFrom});
+          }
+          $rootScope.$broadcast('dialog_migrate', {migrateFrom: migrateFrom, migrateTo: migrateTo});
+        }, 100);
+      }
+    }
   }
 
   function getHistory (peerID, maxID, limit, backLimit, prerendered) {
@@ -1174,6 +1199,7 @@ angular.module('myApp.services')
         }
       }
       if (apiMessage.action) {
+        var migrateFrom, migrateTo;
         switch (apiMessage.action._) {
           case 'messageActionChatEditPhoto':
             AppPhotosManager.savePhoto(apiMessage.action.photo, mediaContext);
@@ -1211,6 +1237,22 @@ angular.module('myApp.services')
               apiMessage.action._ = 'messageActionChatLeave';
             }
             break;
+
+          case 'messageActionChannelMigrateFrom':
+            migrateFrom = -apiMessage.action.chat_id;
+            migrateTo = -channelID;
+            break;
+
+          case 'messageActionChatMigrateTo':
+            migrateFrom = -channelID;
+            migrateTo = -apiMessage.action.channel_id;
+            break;
+        }
+        if (migrateFrom &&
+            migrateTo &&
+            !migratedFromTo[migrateFrom] &&
+            !migratedToFrom[migrateTo]) {
+          migrateChecks(migrateFrom, migrateTo);
         }
       }
 

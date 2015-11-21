@@ -1794,6 +1794,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       historiesQueuePop(updPeerID);
     });
 
+    $scope.$on('dialog_migrate', function (e, data) {
+      if (data.migrateFrom == $scope.curDialog.peerID) {
+        var peerString = AppPeersManager.getPeerString(data.migrateTo);
+        $rootScope.$broadcast('history_focus', {peerString: peerString});
+      }
+      historiesQueuePop(data.migrateFrom);
+    });
+
     $scope.$on('notify_settings', function (e, data) {
       if (data.peerID == $scope.curDialog.peerID) {
         updateChannelActions();
@@ -3161,9 +3169,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
     $scope.settings = {notifications: true};
 
+    $scope.maxParticipants = 200;
+
     AppProfileManager.getChatFull($scope.chatID).then(function (chatFull) {
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull);
       $scope.$broadcast('ui_height');
+
+      $scope.canMigrate = $scope.chatFull &&
+                          $scope.chatFull.participants &&
+                          $scope.chatFull.participants.participants &&
+                          $scope.chatFull.participants.participants.length >= 200;
+
+      if (Config.Modes.test || Config.Modes.debug) {
+        $scope.canMigrate = true;
+      }
 
       NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings);
 
@@ -3228,6 +3247,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
       });
     };
+
+    $scope.migrateToSuperGroup = function () {
+      ErrorService.confirm({type: 'SUPERGROUP_MIGRATE'}).then(function () {
+        MtpApiManager.invokeApi('messages.migrateChat', {
+          chat_id: AppChatsManager.getChatInput($scope.chatID)
+        }).then(onChatUpdated);
+      });
+    }
 
     $scope.kickFromGroup = function (userID) {
       MtpApiManager.invokeApi('messages.deleteChatUser', {
@@ -3338,6 +3365,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           });
         });
       });
+
+      if ($scope.chatFull.chat &&
+          $scope.chatFull.chat.pFlags.creator &&
+          $scope.chatFull.exported_invite &&
+          $scope.chatFull.exported_invite._ == 'chatInviteEmpty') {
+        AppProfileManager.getChatInviteLink($scope.chatID, true).then(function (link) {
+          $scope.chatFull.exported_invite = {_: 'chatInviteExported', link: link};
+        });
+      }
     });
 
 

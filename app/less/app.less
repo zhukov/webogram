@@ -3012,12 +3012,14 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
   padding: 20px 0;
   font-size: 14px;
   line-height: 160%;
-  word-break: break-all;
 }
 .confirm_phone_number {
   font-weight: bold;
   padding: 15px 10px 0;
   text-align: center;
+}
+.confirm_modal_extlink_jump {
+  word-break: break-all;
 }
 
 .photo_modal_window,
@@ -3206,6 +3208,16 @@ a.contacts_modal_contact:hover .contacts_modal_contact_status,
 a.contacts_modal_contact:hover .md_modal_list_peer_description,
 .contacts_modal_members_list .active a.contacts_modal_contact .md_modal_list_peer_description {
   color: #91a6ba;
+}
+
+h4.chat_modal_migrate_header {
+  font-size: inherit;
+  font-weight: bold;
+  color: inherit;
+}
+ul.chat_modal_migrate_list {
+  margin-top: 10px;
+  padding-left: 15px;
 }
 
 .chat_modal_participant_wrap {
@@ -4045,10 +4057,17 @@ a.countries_modal_search_clear {
 
   &_splitter {
     border-top: 1px solid #dfdfdf;
-    height: 12px;
+    min-height: 12px;
     background: #f5f5f5;
 
     .box-shadow(inset 0px 1px 1px #ededed);
+  }
+  &_splitter_content {
+    height: auto;
+    padding-left: 120px;
+    color: #777;
+    font-size: 12px;
+    padding: 5px 20px 3px 55px;
   }
 }
 

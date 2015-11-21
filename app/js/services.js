@@ -1089,9 +1089,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           chatFull.exported_invite._ == 'chatInviteExported') {
         return chatFull.exported_invite.link;
       }
-      return MtpApiManager.invokeApi('messages.exportChatInvite', {
-        chat_id: AppChatsManager.getChatInput(id)
-      }).then(function (exportedInvite) {
+      var promise;
+      if (AppChatsManager.isChannel(id)) {
+        promise = MtpApiManager.invokeApi('channels.exportInvite', {
+          channel: AppChatsManager.getChannelInput(id)
+        });
+      } else {
+        promise = MtpApiManager.invokeApi('messages.exportChatInvite', {
+          chat_id: AppChatsManager.getChatInput(id)
+        });
+      }
+      return promise.then(function (exportedInvite) {
         if (chatsFull[id] !== undefined) {
           chatsFull[id].exported_invite = exportedInvite;
         }
