@@ -1645,13 +1645,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         composer.onMentionsUpdated();
       });
 
-      var sendAwaiting = false;
       $scope.$on('ui_message_before_send', function () {
-        sendAwaiting = true;
         updateValue();
       });
       $scope.$on('ui_message_send', function () {
-        sendAwaiting = false;
         if (!Config.Navigator.touch) {
           focusField();
         }

@@ -1359,8 +1359,9 @@ angular.module('myApp.services')
     historyStorage.pending.unshift(messageID);
     $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
+    setZeroTimeout(message.send);
     // setTimeout(function () {
-      message.send();
+    //   message.send();
     // }, 5000);
 
     pendingByRandomID[randomIDS] = [peerID, messageID];
@@ -1548,7 +1549,7 @@ angular.module('myApp.services')
     historyStorage.pending.unshift(messageID);
     $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
-    message.send();
+    setZeroTimeout(message.send);
 
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
@@ -1682,7 +1683,8 @@ angular.module('myApp.services')
     historyStorage.pending.unshift(messageID);
     $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true});
 
-    message.send();
+    setZeroTimeout(message.send);
+
     pendingByRandomID[randomIDS] = [peerID, messageID];
   }
 
