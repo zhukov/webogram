@@ -27,7 +27,7 @@
     "group_modal_members": "Mitglieder",
     "group_modal_members_kick": "Entfernen",
     "group_modal_migrate_header": "Gruppenlimit erreicht",
-    "group_modal_migrate_desc": "To go over the limit and get additional features, upgrade to a supergroup:",
+    "group_modal_migrate_desc": "Für weitere Funktionen und um das Limit aufzuheben in Supergruppe ändern:",
     "group_modal_migrate_item1": "Bis zu 1000 Mitglieder sind nun möglich",
     "group_modal_migrate_item2": "Neue Mitglieder sehen gesamten Verlauf",
     "group_modal_migrate_item3": "Admins können alle Nachrichten löschen",
