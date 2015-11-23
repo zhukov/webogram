@@ -352,7 +352,8 @@ function templateUrl (tplName) {
     chat_invite_link_modal: 'desktop',
     reply_markup: 'desktop',
     dialog_service: 'desktop',
-    channel_edit_modal: 'desktop'
+    channel_edit_modal: 'desktop',
+    megagroup_edit_modal: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';

@@ -1116,7 +1116,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       limit: AppChatsManager.isMegagroup(id) ? 50 : 200
     }).then(function (result) {
       AppUsersManager.saveApiUsers(result.users);
-      return result.participants;
+      var participants = result.participants;
+
+      var chat = AppChatsManager.getChat(id);
+      if (!chat.pFlags.kicked && !chat.pFlags.left) {
+        var myID = AppUsersManager.getSelf().id;
+        var myIndex = false;
+        var myParticipant;
+        for (var i = 0, len = participants.length; i < len; i++) {
+          if (participants[i].user_id == myID) {
+            myIndex = i;
+            break;
+          }
+        }
+        if (myIndex !== false) {
+          myParticipant = participants[i];
+          participants.splice(i, 1);
+        } else {
+          myParticipant = {_: 'channelParticipantSelf', user_id: myID};
+        }
+        participants.unshift(myParticipant);
+      }
+
+      return participants;
     });
   }
 

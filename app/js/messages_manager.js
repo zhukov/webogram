@@ -1897,7 +1897,7 @@ angular.module('myApp.services')
         chatTitle = chatInvite.title;
       }
       ErrorService.confirm({
-        type:  chatInvite.flags & 1 ? 'JOIN_CHANNEL_BY_LINK' : 'JOIN_GROUP_BY_LINK',
+        type: (chatInvite.pFlags.channel && !chatInvite.pFlags.megagroup) ? 'JOIN_CHANNEL_BY_LINK' : 'JOIN_GROUP_BY_LINK',
         title: chatTitle
       }).then(function () {
         return MtpApiManager.invokeApi('messages.importChatInvite', {

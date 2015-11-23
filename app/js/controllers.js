@@ -1204,6 +1204,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_peer_change');
         $scope.$broadcast('ui_history_change');
         safeReplaceObject($scope.state, {loaded: true, empty: !peerHistory.messages.length});
+
+        updateBotActions();
+        updateChannelActions();
       }
     }
 
@@ -3341,6 +3344,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
     $scope.settings = {notifications: true};
+    $scope.isMegagroup = AppChatsManager.isMegagroup($scope.chatID);
 
     AppProfileManager.getChannelFull($scope.chatID, true).then(function (chatFull) {
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull);
@@ -3389,7 +3393,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.deleteChannel = function () {
-      return ErrorService.confirm({type: 'CHANNEL_DELETE'}).then(function () {
+      return ErrorService.confirm({type: $scope.isMegagroup ? 'MEGAGROUP_DELETE' : 'CHANNEL_DELETE'}).then(function () {
         MtpApiManager.invokeApi('channels.deleteChannel', {
           channel: AppChatsManager.getChannelInput($scope.chatID)
         }).then(onChatUpdated);
@@ -3481,7 +3485,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       scope.chatID = $scope.chatID;
 
       $modal.open({
-        templateUrl: templateUrl('channel_edit_modal'),
+        templateUrl: templateUrl($scope.isMegagroup ? 'megagroup_edit_modal' : 'channel_edit_modal'),
         controller: 'ChannelEditModalController',
         scope: scope,
         windowClass: 'md_simple_modal_window mobile_modal'
@@ -4384,6 +4388,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         promises.push(editAbout());
       }
 
+      $scope.channel.updating = true;
       return $q.all(promises).then(function () {
         var peerString = AppChatsManager.getChatString($scope.chatID);
         $rootScope.$broadcast('history_focus', {peerString: peerString});
@@ -4414,6 +4419,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.exportedInvite = {link: _('group_invite_link_loading_raw')};
 
     var isChannel = AppChatsManager.isChannel($scope.chatID);
+    var isMegagroup = AppChatsManager.isMegagroup($scope.chatID);
 
     function selectLink () {
       $timeout(function () {
@@ -4442,7 +4448,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.revokeLink = function () {
       ErrorService.confirm({
-        type: isChannel ? 'REVOKE_CHANNEL_INVITE_LINK' : 'REVOKE_GROUP_INVITE_LINK'
+        type: isChannel && !isMegagroup ? 'REVOKE_CHANNEL_INVITE_LINK' : 'REVOKE_GROUP_INVITE_LINK'
       }).then(function () {
         updateLink(true);
       })

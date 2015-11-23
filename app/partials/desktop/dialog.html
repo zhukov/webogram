@@ -34,7 +34,7 @@
       <div ng-switch-default class="im_dialog_message">
         <span ng-switch="dialogMessage.peerID > 0 || dialogMessage.fromID < 0">
           <span ng-switch-when="true">
-            <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.pFlags.out">
+            <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.pFlags.out && dialogMessage.fromID > 0">
               <span
                 class="im_dialog_chat_from"
                 my-i18n="conversation_you"

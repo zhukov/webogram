@@ -6,7 +6,10 @@
         <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
         <a class="md_modal_action" ng-if="hasRights('edit_title')" ng-click="editChannel()" my-i18n="modal_edit"></a>
       </div>
-      <div class="md_modal_title" my-i18n="channel_modal_info"></div>
+      <div class="md_modal_title" ng-switch="isMegagroup">
+        <span ng-switch-when="true" my-i18n="group_modal_info"></span>
+        <span ng-switch-default my-i18n="channel_modal_info"></span>
+      </div>
     </div>
 
     <div class="peer_modal_profile_wrap clearfix">
@@ -91,15 +94,18 @@
 
       </div>
 
-      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="chatFull.chat.pFlags.creator || !chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked">
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="chatFull.chat.pFlags.creator || !chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked && !isMegagroup">
         <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
-        <div class="md_modal_section_link_wrap" ng-if="!chatFull.chat.pFlags.creator && !chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked">
+        <div class="md_modal_section_link_wrap" ng-if="!chatFull.chat.pFlags.creator && !chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked && !isMegagroup">
           <a class="md_modal_section_link" ng-click="leaveChannel()" my-i18n="channel_modal_leave_channel"></a>
         </div>
 
         <div class="md_modal_section_link_wrap" ng-if="chatFull.chat.pFlags.creator">
-          <a class="md_modal_section_link md_modal_section_link_danger" ng-click="deleteChannel()" my-i18n="channel_modal_delete_channel"></a>
+          <a class="md_modal_section_link md_modal_section_link_danger" ng-click="deleteChannel()" ng-switch="isMegagroup">
+            <span ng-switch-when="true" my-i18n="group_modal_delete_group"></span>
+            <span ng-switch-default my-i18n="channel_modal_delete_channel"></span>
+          </a>
         </div>
 
       </div>
