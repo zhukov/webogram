@@ -49,11 +49,23 @@
   "activities": {
     "share": {
       "href": "/index.html",
-      "disposition": "window",
       "filters": {
-        "type": ["image/*","audio/*","video/*"]
-      },
-      "returnValue": false
+        "type": ["image/*","audio/*","video/*", "url"],
+        "url": {
+          "required": true,
+          "regexp": "/^https?:/"
+        }
+      }
+    },
+    "view": {
+      "href": "/index.html",
+      "filters": {
+        "type": "url",
+        "url": {
+          "required": true,
+          "regexp": "/^tg:/"
+        }
+      }
     }
   },
   "orientation": "portrait-primary",

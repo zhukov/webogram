@@ -2979,7 +2979,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 })
 
-.service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager) {
+.service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager, FileManager) {
 
   navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate;
 
@@ -3204,12 +3204,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport);
 
     // FFOS Notification blob src bug workaround
-    if (Config.Navigator.ffos) {
-      data.image = 'https://raw.githubusercontent.com/zhukov/webogram/master/app/img/icons/icon60.png';
+    if (Config.Navigator.ffos && !Config.Navigator.ffos2p) {
+      data.image = 'https://telegram.org/img/t_logo.png';
+    }
+    else if (data.image && !angular.isString(data.image)) {
+      if (Config.Navigator.ffos2p) {
+        FileManager.getDataUrl(data.image, 'image/jpeg').then(function (url) {
+          data.image = url;
+          notify(data);
+        });
+        return false;
+      } else {
+        data.image = FileManager.getUrl(data.image, 'image/jpeg');
+      }
     }
     else if (!data.image) {
       data.image = 'img/icons/icon60.png';
     }
+    console.log('notify image', data.image);
 
     notificationsCount++;
 

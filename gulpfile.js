@@ -203,6 +203,8 @@ gulp.task('package-dev', function() {
      .pipe(gulp.dest('dist_package/img')),
     gulp.src('app/vendor/**/*')
      .pipe(gulp.dest('dist_package/vendor')),
+    gulp.src('app/**/*.json')
+     .pipe(gulp.dest('dist_package')),
 
     gulp.src('app/**/*.html')
       .pipe($.replace(/PRODUCTION_ONLY_BEGIN/g, 'PRODUCTION_ONLY_BEGIN-->'))
@@ -210,7 +212,7 @@ gulp.task('package-dev', function() {
       .pipe(gulp.dest('dist_package')),
 
     gulp.src('app/**/*.js')
-      .pipe($.ngmin())
+      .pipe($.ngAnnotate())
       .pipe($.replace(/PRODUCTION_ONLY_BEGIN(\*\/)?/g, 'PRODUCTION_ONLY_BEGIN*/'))
       .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, '/*PRODUCTION_ONLY_END'))
       .pipe(gulp.dest('dist_package'))

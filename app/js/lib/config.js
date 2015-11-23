@@ -44,6 +44,7 @@ Config.Navigator = {
         (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1,
   retina: window.devicePixelRatio > 1,
   ffos: navigator.userAgent.search(/mobi.+Gecko/i) != -1,
+  ffos2p: navigator.userAgent.search(/mobi.+Gecko\/[34567]/i) != -1,
   touch: screen.width <= 768 || ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch,
   mobile: screen.width && screen.width < 480 || navigator.userAgent.search(/iOS|iPhone OS|Android|BlackBerry|BB10|Series ?[64]0|J2ME|MIDP|opera mini|opera mobi|mobi.+Gecko|Windows Phone/i) != -1
 };

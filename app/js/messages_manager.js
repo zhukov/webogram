@@ -9,7 +9,7 @@
 
 angular.module('myApp.services')
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppStickersManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, FileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppStickersManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -940,15 +940,14 @@ angular.module('myApp.services')
 
   function deleteMessages (messageIDs) {
     var splitted = splitMessageIDsByChannels(messageIDs);
-    debugger;
     var promises = [];
     angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
       var promise;
       if (channelID > 0) {
         var channel = AppChatsManager.getChat(channelID);
-        if (!channel.pFlags.creator) {
+        if (!channel.pFlags.creator && !(channel.pFlags.editor && channel.pFlags.megagroup)) {
           var goodMsgIDs = [];
-          if (channel.pFlags.editor) {
+          if (channel.pFlags.editor || channel.pFlags.megagroup) {
             angular.forEach(msgIDs, function (msgID, i) {
               var message = getMessage(splitted.mids[channelID][i]);
               if (message.pFlags.out) {
@@ -2460,15 +2459,13 @@ angular.module('myApp.services')
     };
 
     notification.message = notificationMessage;
-    notification.image = notificationPhoto.placeholder;
     notification.key = 'msg' + message.mid;
     notification.tag = peerString;
 
     if (notificationPhoto.location && !notificationPhoto.location.empty) {
       MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (blob) {
-        notification.image = FileManager.getUrl(blob, 'image/jpeg');
-
         if (message.pFlags.unread) {
+          notification.image = blob;
           NotificationsManager.notify(notification);
         }
       });
@@ -2478,6 +2475,7 @@ angular.module('myApp.services')
   }
 
   if (window.navigator.mozSetMessageHandler) {
+    console.warn('set message handler');
     window.navigator.mozSetMessageHandler('activity', function(activityRequest) {
       var source = activityRequest.source;
       console.log(dT(), 'Received activity', source.name, source.data);
@@ -2803,8 +2801,8 @@ angular.module('myApp.services')
         angular.forEach(historiesUpdated, function (updatedData, peerID) {
           var foundDialog = getDialogByPeerID(peerID);
           if (foundDialog) {
-            if (updatedData.pFlags.unread) {
-              foundDialog[0].unread_count -= updatedData.pFlags.unread;
+            if (updatedData.unread) {
+              foundDialog[0].unread_count -= updatedData.unread;
 
               $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: foundDialog[0].unread_count});
             }

@@ -2282,6 +2282,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         forceDraft = $scope.curDialog.peer;
         $scope.draftMessage.fwdMessages = attachment.id;
         $scope.$broadcast('ui_peer_reply');
+        var peerID = AppPeersManager.getPeerID($scope.curDialog.peer);
+        Storage.get('draft' + peerID).then(function (draftText) {
+          $scope.draftMessage.text = draftText || '';
+          $scope.$broadcast('ui_peer_draft');
+        });
       }
     }
 
