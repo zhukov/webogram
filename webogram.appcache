@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sun Nov 22 2015 13:47:18 GMT+0300 (MSK)
+# Time: Mon Nov 23 2015 15:24:43 GMT+0300 (MSK)
 
 
 CACHE:
@@ -28,6 +28,22 @@ js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
 img/changelog/card_wecandoit.png
+img/icons/AboutLogos.png
+img/icons/AboutLogos_2x.png
+img/icons/General.png
+img/icons/General_2x.png
+img/icons/IconsetSmiles.png
+img/icons/IconsetSmiles_2x.png
+img/icons/IconsetW.png
+img/icons/IconsetW_2x.png
+img/icons/Major.png
+img/icons/Major_2x.png
+img/icons/MobileIcons.png
+img/icons/MobileIcons_2x.png
+img/icons/PhotoIcons.png
+img/icons/PhotoIcons_2x.png
+img/icons/ProfileIcons.png
+img/icons/ProfileIcons_2x.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
@@ -60,22 +76,6 @@ vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/rusha/rusha.js
-img/icons/AboutLogos.png
-img/icons/AboutLogos_2x.png
-img/icons/General.png
-img/icons/General_2x.png
-img/icons/IconsetSmiles.png
-img/icons/IconsetSmiles_2x.png
-img/icons/IconsetW.png
-img/icons/IconsetW_2x.png
-img/icons/Major.png
-img/icons/Major_2x.png
-img/icons/MobileIcons.png
-img/icons/MobileIcons_2x.png
-img/icons/PhotoIcons.png
-img/icons/PhotoIcons_2x.png
-img/icons/ProfileIcons.png
-img/icons/ProfileIcons_2x.png
 vendor/angular/i18n/angular-locale_de-de.js
 vendor/angular/i18n/angular-locale_en-us.js
 vendor/angular/i18n/angular-locale_es-es.js

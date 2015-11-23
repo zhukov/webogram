@@ -33,6 +33,7 @@
 	"group_modal_migrate_item2": "New members see the entire chat history",
 	"group_modal_migrate_item3": "Admins delete messages for everyone",
 	"group_modal_migrate_item4": "Notifications are muted by default",
+	"group_modal_delete_group": "Delete group",
 
 	"channel_modal_info": "Channel info",
 	"channel_modal_description": "Description",
@@ -186,6 +187,7 @@
 
 	"group_edit_modal_title": "Edit group",
 	"group_edit_name": "Group name",
+	"group_edit_about": "Group description",
 	"group_edit_submit": "Save",
 	"group_edit_submit_active": "Saving...",
 
@@ -229,6 +231,7 @@
 	"confirm_modal_revoke_group_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the group using it.",
 	"confirm_modal_revoke_channel_link": "Are you sure you want to revoke this link? Once you do, no one will be able to join the channel using it.",
 	"confirm_modal_delete_channel_md": "Are you sure you want to delete this channel?\n\nAll members will be removed and all messages will be lost.",
+	"confirm_modal_delete_group_md": "Are you sure you want to delete this group?\n\nAll members will be removed and all messages will be lost.",
 	"confirm_modal_jump_ext_url_md": "Open this link?\n\n{url}",
 	"confirm_modal_migrate_supergroup_md": "Please note that group members will need to update their Telegram apps to the latest version to see your supergroup.\n\nAre you sure you want to upgrade this group?",
 
