@@ -1251,6 +1251,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   });
 
+  $rootScope.$on('chat_update', function (e, chatID) {
+    var fullChat = chatsFull[chatID];
+    var chat = AppChatsManager.getChat(chatID);
+    if (!chat.photo || !fullChat) {
+      return;
+    }
+    var emptyPhoto = chat.photo == 'chatPhotoEmpty';
+    if (emptyPhoto != (fullChat.chat_photo._ == 'photoEmpty')) {
+      delete chatsFull[chatID];
+      $rootScope.$broadcast('chat_full_update', chatID);
+      return;
+    }
+    if (emptyPhoto) {
+      return;
+    }
+    var smallUserpic = chat.photo.photo_small;
+    var smallPhotoSize = AppPhotosManager.choosePhotoSize(fullChat.chat_photo, 0, 0);
+    if (!angular.equals(smallUserpic, smallPhotoSize.location)) {
+      delete chatsFull[chatID];
+      $rootScope.$broadcast('chat_full_update', chatID);
+    }
+  });
+
   return {
     getPeerBots: getPeerBots,
     getProfile: getProfile,
