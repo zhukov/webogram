@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
@@ -51,9 +51,33 @@
       "href": "/index.html",
       "disposition": "window",
       "filters": {
-        "type": ["image/*","audio/*","video/*"]
+        "type": ["image/*","audio/*","video/*", "url"],
+        "url": {
+          "pattern": "https?:.{1,16384}",
+          "regexp": "^https?:"
+        }
       },
       "returnValue": false
+    },
+    "view": {
+      "href": "/index.html",
+      "disposition": "window",
+      "filters": {
+        "type": "url",
+        "url": {
+          "required": true,
+          "pattern": "tg:.{1,16384}",
+          "regexp": "^tg:"
+        }
+      },
+      "returnValue": false
+    },
+    "webrtc-call": {
+      "href": "index.html",
+      "filters": {
+        "type": "webcontacts/contact"
+       },
+      "disposition": "window"
     }
   },
   "orientation": "portrait-primary",

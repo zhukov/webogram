@@ -450,6 +450,18 @@ html {
 .im_message_out .im_message_body_media .im_message_audio {
   background: #e4ecf2;
 }
+.im_message_webpage,
+.im_message_webpage_site,
+.im_message_webpage_title,
+.im_message_webpage_description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  line-height: 140%;
+}
+.im_message_webpage_wrap {
+  padding-left: 6px;
+}
 .im_message_document {
   position: relative;
   width: auto;
@@ -525,6 +537,10 @@ html {
 .im_message_document_thumbed .im_message_upload_progress_wrap,
 .im_message_document_thumbed .im_message_download_progress_wrap {
   width: 130px;
+}
+.im_message_text {
+  line-height: 140%;
+  font-size: 13px;
 }
 .img_gif_label,
 .img_gif_size,
