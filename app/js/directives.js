@@ -553,7 +553,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         onContentLoaded(function () {
           scroller.updateHeight();
           scroller.scrollTo(0);
-          $scope.$emit('ui_panel_update', {blur: data.enabled});
+          $scope.$emit('ui_panel_update', {blur: data && data.enabled});
         })
       });
       onContentLoaded(function () {
@@ -759,7 +759,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return cancelEvent(e);
         }
 
-        if (searchFocused && e.keyCode == 13) { // Enter
+        if (searchFocused && e.keyCode == 13 && !Config.Navigator.mobile) { // Enter
           var currentSelected = $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.im_dialog_wrap a')[0];
           if (currentSelected) {
             $(currentSelected).trigger('mousedown');

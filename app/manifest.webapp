@@ -49,23 +49,35 @@
   "activities": {
     "share": {
       "href": "/index.html",
+      "disposition": "window",
       "filters": {
         "type": ["image/*","audio/*","video/*", "url"],
         "url": {
-          "required": true,
-          "regexp": "/^https?:/"
+          "pattern": "https?:.{1,16384}",
+          "regexp": "^https?:"
         }
-      }
+      },
+      "returnValue": false
     },
     "view": {
       "href": "/index.html",
+      "disposition": "window",
       "filters": {
         "type": "url",
         "url": {
           "required": true,
-          "regexp": "/^tg:/"
+          "pattern": "tg:.{1,16384}",
+          "regexp": "^tg:"
         }
-      }
+      },
+      "returnValue": false
+    },
+    "webrtc-call": {
+      "href": "index.html",
+      "filters": {
+        "type": "webcontacts/contact"
+       },
+      "disposition": "window"
     }
   },
   "orientation": "portrait-primary",

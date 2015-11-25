@@ -2264,7 +2264,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       if (attachment._ == 'share_url') {
         var url = attachment.url;
-        var text = attachment.text || '';
+        var text = attachment.text || ' ';
         forceDraft = $scope.curDialog.peer;
 
         $timeout(function () {

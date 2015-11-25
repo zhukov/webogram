@@ -9,7 +9,7 @@
 
 angular.module('myApp.services')
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppStickersManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, PeersSelectService, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppStickersManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -1439,6 +1439,8 @@ angular.module('myApp.services')
       apiFileName = 'document.' + file.type.split('/')[1];
     }
 
+    console.log(attachType, apiFileName, file.type);
+
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
     }
@@ -1786,19 +1788,35 @@ angular.module('myApp.services')
     }
 
     if (chatID) {
-      return MtpApiManager.invokeApi('messages.addChatUser', {
-        chat_id: AppChatsManager.getChatInput(chatID),
-        user_id: AppUsersManager.getUserInput(botID)
-      }).then(function (updates) {
-        ApiUpdatesManager.processUpdateMessage(updates);
-        sendText(peerID, '/start@' + bot.username);
-      }, function (error) {
-        if (error && error.type == 'USER_ALREADY_PARTICIPANT') {
-          var bot = AppUsersManager.getUser(botID);
+      if (AppChatsManager.isChannel(chatID)) {
+        return MtpApiManager.invokeApi('channels.inviteToChannel', {
+          channel: AppChatsManager.getChannelInput(chatID),
+          users: [AppUsersManager.getUserInput(botID)]
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
           sendText(peerID, '/start@' + bot.username);
-          error.handled = true;
-        }
-      });
+        }, function (error) {
+          if (error && error.type == 'USER_ALREADY_PARTICIPANT') {
+            var bot = AppUsersManager.getUser(botID);
+            sendText(peerID, '/start@' + bot.username);
+            error.handled = true;
+          }
+        });
+      } else {
+        return MtpApiManager.invokeApi('messages.addChatUser', {
+          chat_id: AppChatsManager.getChatInput(chatID),
+          user_id: AppUsersManager.getUserInput(botID)
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
+          sendText(peerID, '/start@' + bot.username);
+        }, function (error) {
+          if (error && error.type == 'USER_ALREADY_PARTICIPANT') {
+            var bot = AppUsersManager.getUser(botID);
+            sendText(peerID, '/start@' + bot.username);
+            error.handled = true;
+          }
+        });
+      }
     }
 
     return sendText(peerID, '/start');
@@ -2474,28 +2492,6 @@ angular.module('myApp.services')
     }
   }
 
-  if (window.navigator.mozSetMessageHandler) {
-    console.warn('set message handler');
-    window.navigator.mozSetMessageHandler('activity', function(activityRequest) {
-      var source = activityRequest.source;
-      console.log(dT(), 'Received activity', source.name, source.data);
-
-      if (source.name === 'share' && source.data.blobs.length > 0) {
-        PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
-          angular.forEach(peerStrings, function (peerString) {
-            var peerID = AppPeersManager.getPeerID(peerString);
-            angular.forEach(source.data.blobs, function (blob) {
-              sendFile(peerID, blob, {isMedia: true});
-            });
-          })
-          if (peerStrings.length == 1) {
-            $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
-          }
-        });
-      }
-    });
-  }
-
   var newMessagesHandlePromise = false;
   var newMessagesToHandle = {};
   var newDialogsHandlePromise = false;
@@ -2564,13 +2560,19 @@ angular.module('myApp.services')
       case 'updateNewChannelMessage':
         var message = update.message,
             peerID = getMessagePeer(message),
-            historyStorage = historiesStorage[peerID];
+            historyStorage = historiesStorage[peerID],
+            messageForMe = true;
 
-        if (update._ == 'updateNewChannelMessage' &&
-            !AppChatsManager.isMegagroup(-peerID) &&
-            !(message.flags & 16 || message.flags & 2 || (message.flags & 256) == 0)) {
-          // we don't support not important messages in channels yet
-          break;
+        if (update._ == 'updateNewChannelMessage') {
+          if (!AppChatsManager.isMegagroup(-peerID) &&
+              !(message.flags & 16 || message.flags & 2 || (message.flags & 256) == 0)) {
+            // we don't support not important messages in channels yet
+            break;
+          }
+          var chat = AppChatsManager.getChat(-peerID);
+          if (chat.pFlags && (chat.pFlags.left || chat.pFlags.kicked)) {
+            break;
+          }
         }
 
         saveMessages([message]);
@@ -2771,7 +2773,7 @@ angular.module('myApp.services')
             history = historiesUpdated[peerID] || (historiesUpdated[peerID] = {count: 0, unread: 0, msgs: {}});
 
             if (!message.pFlags.out && message.pFlags.unread) {
-              history.pFlags.unread++;
+              history.unread++;
               NotificationsManager.cancel('msg' + messageID);
             }
             history.count++;

@@ -3221,7 +3221,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     else if (!data.image) {
       data.image = 'img/icons/icon60.png';
     }
-    console.log('notify image', data.image);
+    // console.log('notify image', data.image);
 
     notificationsCount++;
 
@@ -3899,9 +3899,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (matches = url.match(/^msg_url\?url=([^&]+)(?:&text=(.*))?$/)) {
-      PeersSelectService.selectPeer({
-        confirm_type: 'SHARE_URL'
-      }).then(function (toPeerString) {
+      PeersSelectService.selectPeer().then(function (toPeerString) {
         var url = decodeURIComponent(matches[1]);
         var text = matches[2] ? decodeURIComponent(matches[2]) : '';
         $rootScope.$broadcast('history_focus', {
@@ -3961,6 +3959,62 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       try {
         navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web');
       } catch (e) {}
+    }
+
+    if (window.navigator.mozSetMessageHandler) {
+      console.log(dT(), 'Set activity message handler');
+      window.navigator.mozSetMessageHandler('activity', function(activityRequest) {
+        var source = activityRequest.source;
+        console.log(dT(), 'Received activity', source.name, source.data);
+
+        if (source.name == 'share' && source.data.url) {
+          var tgUrl = 'msg_url?url=' + encodeURIComponent(source.data.url);
+          handleTgProtoAddr(tgUrl);
+        }
+        else if (source.name == 'view' && source.data.url) {
+          var matches = source.data.url.match(tgAddrRegExp);
+          if (matches) {
+            handleTgProtoAddr(matches[3]);
+          }
+        }
+        else if (source.name == 'webrtc-call' && source.data.contact) {
+          var contact = source.data.contact;
+          var phones = [];
+          if (contact.tel != undefined) {
+            for (var i = 0; i < contact.tel.length; i++) {
+              phones.push(contact.tel[i].value);
+            }
+          }
+          var firstName = (contact.givenName || []).join(' ');
+          var lastName = (contact.familyName || []).join(' ');
+
+          if (phones.length) {
+            AppUsersManager.importContact(phones[0], firstName, lastName).then(function (foundUserID) {
+              if (foundUserID) {
+                var peerString = AppPeersManager.getPeerString(foundUserID);
+                $rootScope.$broadcast('history_focus', {peerString: peerString});
+              } else {
+                ErrorService.show({
+                  error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
+                });
+              }
+            });
+          }
+        }
+        else if (source.name === 'share' && source.data.blobs && source.data.blobs.length > 0) {
+          PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
+            angular.forEach(peerStrings, function (peerString) {
+              var peerID = AppPeersManager.getPeerID(peerString);
+              angular.forEach(source.data.blobs, function (blob) {
+                AppMessagesManager.sendFile(peerID, blob, {isMedia: true});
+              });
+            })
+            if (peerStrings.length == 1) {
+              $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
+            }
+          });
+        }
+      });
     }
 
     $(document).on('click', function (event) {
