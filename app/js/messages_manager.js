@@ -1748,11 +1748,6 @@ angular.module('myApp.services')
     mids = mids.sort();
 
     var flags = 0;
-    var msgIDs = [];
-    var randomIDs = [];
-    var len = mids.length;
-    var i, mid, msgID;
-    var fromChannel = getMessageIDInfo(mids[0])[1];
     var isChannel = AppPeersManager.isChannel(peerID);
     var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
     var asChannel = isChannel && !isMegagroup ? true : false;
@@ -1761,28 +1756,36 @@ angular.module('myApp.services')
       flags |= 16;
     }
 
-    for (i = 0; i < len; i++) {
-      msgIDs.push(getMessageLocalID(mids[i]));
-      randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
-    }
-    var sentRequestOptions = {};
-    if (pendingAfterMsgs[peerID]) {
-      sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
-    }
-    return MtpApiManager.invokeApi('messages.forwardMessages', {
-      flags: flags,
-      from_peer: AppPeersManager.getInputPeerByID(-fromChannel),
-      id: msgIDs,
-      random_id: randomIDs,
-      to_peer: AppPeersManager.getInputPeerByID(peerID),
-    }, sentRequestOptions).then(function (updates) {
-      ApiUpdatesManager.processUpdateMessage(updates);
-    })['finally'](function () {
-      if (pendingAfterMsgs[peerID] === sentRequestOptions) {
-        delete pendingAfterMsgs[peerID];
+    var splitted = splitMessageIDsByChannels(mids);
+    var promises = [];
+    angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
+      var len = msgIDs.length;
+      var randomIDs = [];
+      for (var i = 0; i < len; i++) {
+        randomIDs.push([nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]);
       }
+      var sentRequestOptions = {};
+      if (pendingAfterMsgs[peerID]) {
+        sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
+      }
+      var promise = MtpApiManager.invokeApi('messages.forwardMessages', {
+        flags: flags,
+        from_peer: AppPeersManager.getInputPeerByID(-channelID),
+        id: msgIDs,
+        random_id: randomIDs,
+        to_peer: AppPeersManager.getInputPeerByID(peerID),
+      }, sentRequestOptions).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates);
+      })['finally'](function () {
+        if (pendingAfterMsgs[peerID] === sentRequestOptions) {
+          delete pendingAfterMsgs[peerID];
+        }
+      });
+      pendingAfterMsgs[peerID] = sentRequestOptions;
+      promises.push(promise);
     });
-    pendingAfterMsgs[peerID] = sentRequestOptions;
+
+    return $q.all(promises);
   };
 
   function startBot (botID, chatID, startParam) {
