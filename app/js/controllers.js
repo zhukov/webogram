@@ -412,7 +412,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start();
   })
 
-  .controller('AppIMController', function ($q, qSync, $scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
+  .controller('AppIMController', function ($q, qSync, $scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
 
     $scope.$on('$routeUpdate', updateCurDialog);
 
@@ -545,6 +545,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       else if ($scope.search.query) {
         $scope.searchClear();
+      }
+      var peerID = AppPeersManager.getPeerID(peerString);
+      var converted = AppMessagesManager.convertMigratedPeer(peerID);
+      if (converted) {
+        params.peerString = AppPeersManager.getPeerString(converted);
       }
       $rootScope.$broadcast('history_focus', params);
     };

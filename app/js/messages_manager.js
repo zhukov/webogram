@@ -571,6 +571,12 @@ angular.module('myApp.services')
     }
   }
 
+  function convertMigratedPeer (peerID) {
+    if (migratedFromTo[peerID]) {
+      return migratedFromTo[peerID];
+    }
+  }
+
   function getHistory (peerID, maxID, limit, backLimit, prerendered) {
     if (migratedFromTo[peerID]) {
       peerID = migratedFromTo[peerID];
@@ -915,6 +921,13 @@ angular.module('myApp.services')
 
       foundMsgs = [];
       angular.forEach(searchResult.messages, function (message) {
+        var peerID = getMessagePeer(message);
+        if (peerID < 0) {
+          var chat = AppChatsManager.getChat(-peerID);
+          if (chat.migrated_to) {
+            migrateChecks(peerID, -chat.migrated_to.channel_id);
+          }
+        }
         foundMsgs.push(message.mid);
       });
 
@@ -2952,6 +2965,7 @@ angular.module('myApp.services')
     forwardMessages: forwardMessages,
     startBot: startBot,
     openChatInviteLink: openChatInviteLink,
+    convertMigratedPeer: convertMigratedPeer,
     getMessagePeer: getMessagePeer,
     getMessageThumb: getMessageThumb,
     wrapForDialog: wrapForDialog,
