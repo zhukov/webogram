@@ -1371,6 +1371,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           height: height
         };
 
+    if (options.website && Config.Mobile) {
+      width = 50;
+      height = 50;
+    }
+
     // console.log('chosen photo size', photoID, thumbPhotoSize);
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
       var dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);

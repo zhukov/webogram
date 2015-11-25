@@ -1563,14 +1563,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       $(submitBtn).on('mousedown touchstart', onMessageSubmit);
 
       function onMessageSubmit (e) {
-        $scope.$apply(function () {
+        $timeout(function () {
           updateValue();
           $scope.draftMessage.send();
           composer.resetTyping();
           if (composerEmojiPanel) {
             composerEmojiPanel.update();
           }
-        });
+        }, Config.Navigator.touch ? 100 : 0);
         return cancelEvent(e);
       }
 

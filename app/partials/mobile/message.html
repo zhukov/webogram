@@ -40,7 +40,7 @@
         <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
       </div>
 
-      <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media && !historyMessage.media.rCaption ? true : false}">
+      <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media && historyMessage.media._ != 'messageMediaWebPage' && !historyMessage.media.rCaption ? true : false}">
 
         <a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.toID > 0" color="historyMessage.toID < 0" no-watch="true"></a>
 
@@ -50,6 +50,8 @@
           <a my-i18n-param="from" class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID" no-watch="true"></a>
           <span my-i18n-param="date" class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
         </div>
+
+        <div class="im_message_text" ng-if="::historyMessage.message.length || false" my-message-text="::historyMessage" dir="auto"></div>
 
         <div ng-if="::historyMessage.media || historyMessage.mid < 0 ? true : false" class="im_message_media" ng-switch="historyMessage.media._">
 
@@ -69,8 +71,6 @@
           </div>
 
         </div>
-
-        <div class="im_message_text" ng-if="::historyMessage.message.length || false" my-message-text="::historyMessage" dir="auto"></div>
       </div>
 
     </div>

@@ -597,6 +597,19 @@ html {
   }
 }
 
+.im_message_webpage,
+.im_message_webpage_site,
+.im_message_webpage_title,
+.im_message_webpage_description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  line-height: 140%;
+}
+.im_message_webpage_wrap {
+  padding-left: 6px;
+}
+
 .im_message {
   &_document {
     position: relative;
@@ -694,6 +707,11 @@ html {
   &_document_thumbed &_upload_progress_wrap,
   &_document_thumbed &_download_progress_wrap {
     width: 130px;
+  }
+
+  &_text {
+    line-height: 140%;
+    font-size: 13px;
   }
 }
 

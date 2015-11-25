@@ -1,5 +1,7 @@
 <div class="im_message_document im_message_upload_file" ng-class="::'im_message_upload_' + historyMessage.media.type">
-  <i class="icon" ng-class="::'icon-' + historyMessage.media.type"></i>
+  <div class="im_message_file_button im_message_file_button_upload">
+    <i class="im_message_file_button_icon"></i>
+  </div>
   <div class="im_message_document_info">
     <div class="im_message_document_name_wrap">
       <span class="im_message_document_name" ng-bind="::historyMessage.media.file_name"></span>

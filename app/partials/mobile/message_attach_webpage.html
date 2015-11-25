@@ -31,6 +31,7 @@
   </div>
 
   <div ng-switch-default class="im_message_webpage_article">
+    <div class="im_message_webpage_site" ng-bind="webpage.site_name"></div>
     <a ng-if="webpage.photo" href="{{webpage.url}}" target="_blank" class="im_message_webpage_article_photo pull-right">
       <img
         class="im_message_article_thumb"
@@ -38,7 +39,6 @@
         thumb="webpage.photo.thumb"
       />
     </a>
-    <div class="im_message_webpage_site" ng-bind="webpage.site_name"></div>
     <div class="im_message_webpage_title">
       <a ng-click="openEmbed($event)" href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
     </div>

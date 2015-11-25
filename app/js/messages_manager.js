@@ -2065,8 +2065,7 @@ angular.module('myApp.services')
 
         case 'messageMediaWebPage':
           if (!message.media.webpage ||
-              message.media.webpage._ == 'webPageEmpty' ||
-              Config.Mobile) {
+              message.media.webpage._ == 'webPageEmpty') {
             delete message.media;
             break;
           }
@@ -2085,7 +2084,7 @@ angular.module('myApp.services')
         case 'messageActionChatEditTitle':
         case 'messageActionChannelCreate':
         case 'messageActionChannelEditTitle':
-          message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
+          message.action.rTitle = RichTextProcessor.wrapRichText(message.action.title, {noLinebreaks: true}) || _('chat_title_deleted');
           break;
 
         case 'messageActionBotIntro':
