@@ -61,6 +61,7 @@
     "gulp-usemin": "^0.3.11",
     "gulp-zip": "^0.1.2",
     "http": "0.0.0",
+    "oghliner": "^1.0.1",
     "run-sequence": "^1.0.2",
     "st": "^0.5.2"
   }

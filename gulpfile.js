@@ -10,6 +10,7 @@ var st = require('st');
 var less = require('gulp-less');
 var del = require('del');
 var runSequence = require('run-sequence');
+var oghliner = require('oghliner');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -152,7 +153,7 @@ gulp.task('disable-production', function() {
   );
 });
 
-gulp.task('add-appcache-manifest', function() {
+gulp.task('add-appcache-manifest', ['build'], function() {
   var sources = [
     './dist/**/*',
     '!dist/manifest.*',
@@ -250,7 +251,7 @@ gulp.task('bump', ['update-version-manifests', 'update-version-config'], functio
   gulp.start('update-version-comments');
 });
 
-gulp.task('build', function(callback) {
+gulp.task('build', ['clean'], function(callback) {
   runSequence(
     'less',
     'usemin',
@@ -261,10 +262,10 @@ gulp.task('build', function(callback) {
 
 gulp.task('package', ['cleanup-dist']);
 
-gulp.task('publish', ['build'], function() {
-  gulp.start('add-appcache-manifest');
+gulp.task('deploy', ['add-appcache-manifest'], function() {
+  return oghliner.deploy({
+    rootDir: 'dist/',
+  });
 });
 
-gulp.task('default', ['clean'], function() {
-  gulp.start('build');
-});
+gulp.task('default', ['build']);
