@@ -2650,7 +2650,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getDifference () {
-    console.trace(dT(), 'Get full diff');
+    // console.trace(dT(), 'Get full diff');
     if (!updatesState.syncLoading) {
       updatesState.syncLoading = true;
       updatesState.pendingSeqUpdates = {};
@@ -2704,7 +2704,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       updatesState.pts = nextState.pts;
       updatesState.date = nextState.date;
 
-      console.log(dT(), 'apply diff', updatesState.seq, updatesState.pts);
+      // console.log(dT(), 'apply diff', updatesState.seq, updatesState.pts);
 
       if (differenceResult._ == 'updates.differenceSlice') {
         getDifference();
@@ -2726,14 +2726,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       clearTimeout(channelState.syncPending.timeout);
       channelState.syncPending = false;
     }
-    console.log(dT(), 'Get channel diff', AppChatsManager.getChat(channelID), channelState.pts);
+    // console.log(dT(), 'Get channel diff', AppChatsManager.getChat(channelID), channelState.pts);
     MtpApiManager.invokeApi('updates.getChannelDifference', {
       channel: AppChatsManager.getChannelInput(channelID),
       filter: {_: 'channelMessagesFilterEmpty'},
       pts: channelState.pts,
       limit: 30
     }).then(function (differenceResult) {
-      console.log(dT(), 'channel diff result', differenceResult);
+      // console.log(dT(), 'channel diff result', differenceResult);
       channelState.pts = differenceResult.pts;
 
       if (differenceResult._ == 'updates.channelDifferenceEmpty') {
@@ -2816,16 +2816,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         channelID = update.channel_id;
         break;
     }
-    // if (channelID) {
-    //   console.log(dT(), channelID, update.pts, update);
-    // }
     if (channelID && !AppChatsManager.hasChat(channelID)) {
-      console.log(dT(), 'skip update, missing channel', channelID, update);
+      // console.log(dT(), 'skip update, missing channel', channelID, update);
       return false;
     }
     var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
 
-    console.log(dT(), 'process', channelID, curState, update);
+    // console.log(dT(), 'process', channelID, curState, update);
 
     if (curState.syncLoading) {
       return false;
@@ -3944,14 +3941,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       PeersSelectService.selectPeer().then(function (toPeerString) {
         var url = decodeURIComponent(matches[1]);
         var text = matches[2] ? decodeURIComponent(matches[2]) : '';
-        $rootScope.$broadcast('history_focus', {
-          peerString: toPeerString,
-          attachment: {
-            _: 'share_url',
-            url: url,
-            text: text
-          }
-        });
+        shareUrl(url, text);
       });
       return true;
     }
@@ -3987,6 +3977,57 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return false;
   }
 
+  function handleActivityMessage (name, data) {
+    console.log(dT(), 'Received activity', name, data);
+
+    if (name == 'share' && data.url) {
+      shareUrl(data.url, '');
+    }
+    else if (name == 'view' && data.url) {
+      var matches = data.url.match(tgAddrRegExp);
+      if (matches) {
+        handleTgProtoAddr(matches[3]);
+      }
+    }
+    else if (name == 'webrtc-call' && data.contact) {
+      var contact = data.contact;
+      var phones = [];
+      if (contact.tel != undefined) {
+        for (var i = 0; i < contact.tel.length; i++) {
+          phones.push(contact.tel[i].value);
+        }
+      }
+      var firstName = (contact.givenName || []).join(' ');
+      var lastName = (contact.familyName || []).join(' ');
+
+      if (phones.length) {
+        AppUsersManager.importContact(phones[0], firstName, lastName).then(function (foundUserID) {
+          if (foundUserID) {
+            var peerString = AppPeersManager.getPeerString(foundUserID);
+            $rootScope.$broadcast('history_focus', {peerString: peerString});
+          } else {
+            ErrorService.show({
+              error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
+            });
+          }
+        });
+      }
+    }
+    else if (name === 'share' && data.blobs && data.blobs.length > 0) {
+      PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
+        angular.forEach(peerStrings, function (peerString) {
+          var peerID = AppPeersManager.getPeerID(peerString);
+          angular.forEach(data.blobs, function (blob) {
+            AppMessagesManager.sendFile(peerID, blob, {isMedia: true});
+          });
+        })
+        if (peerStrings.length == 1) {
+          $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
+        }
+      });
+    }
+  }
+
   var started = false;
   function start () {
     if (started) {
@@ -4006,56 +4047,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (window.navigator.mozSetMessageHandler) {
       console.log(dT(), 'Set activity message handler');
       window.navigator.mozSetMessageHandler('activity', function(activityRequest) {
-        var source = activityRequest.source;
-        console.log(dT(), 'Received activity', source.name, source.data);
-
-        if (source.name == 'share' && source.data.url) {
-          var tgUrl = 'msg_url?url=' + encodeURIComponent(source.data.url);
-          handleTgProtoAddr(tgUrl);
-        }
-        else if (source.name == 'view' && source.data.url) {
-          var matches = source.data.url.match(tgAddrRegExp);
-          if (matches) {
-            handleTgProtoAddr(matches[3]);
-          }
-        }
-        else if (source.name == 'webrtc-call' && source.data.contact) {
-          var contact = source.data.contact;
-          var phones = [];
-          if (contact.tel != undefined) {
-            for (var i = 0; i < contact.tel.length; i++) {
-              phones.push(contact.tel[i].value);
-            }
-          }
-          var firstName = (contact.givenName || []).join(' ');
-          var lastName = (contact.familyName || []).join(' ');
-
-          if (phones.length) {
-            AppUsersManager.importContact(phones[0], firstName, lastName).then(function (foundUserID) {
-              if (foundUserID) {
-                var peerString = AppPeersManager.getPeerString(foundUserID);
-                $rootScope.$broadcast('history_focus', {peerString: peerString});
-              } else {
-                ErrorService.show({
-                  error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'}
-                });
-              }
-            });
-          }
-        }
-        else if (source.name === 'share' && source.data.blobs && source.data.blobs.length > 0) {
-          PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
-            angular.forEach(peerStrings, function (peerString) {
-              var peerID = AppPeersManager.getPeerID(peerString);
-              angular.forEach(source.data.blobs, function (blob) {
-                AppMessagesManager.sendFile(peerID, blob, {isMedia: true});
-              });
-            })
-            if (peerStrings.length == 1) {
-              $rootScope.$broadcast('history_focus', {peerString: peerStrings[0]});
-            }
-          });
-        }
+        handleActivityMessage(activityRequest.source.name, activityRequest.source.data);
       });
     }
 
@@ -4079,7 +4071,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     checkLocationTgAddr();
   };
 
+  function shareUrl (url, text) {
+    PeersSelectService.selectPeer().then(function (toPeerString) {
+      $rootScope.$broadcast('history_focus', {
+        peerString: toPeerString,
+        attachment: {
+          _: 'share_url',
+          url: url,
+          text: text
+        }
+      });
+    });
+  }
+
   return {
-    start: start
+    start: start,
+    shareUrl: shareUrl
   };
 })

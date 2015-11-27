@@ -1911,7 +1911,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         if (len > 10) {
           if (curPeer) {
-            if (exlen > 10) {
+            if (exlen > 10 && isIDLE) {
               minID = history.messages[exlen - 1].mid;
               $scope.historyState.skipped = hasLess = minID > 0;
               if (hasLess) {
@@ -2130,16 +2130,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
           };
           do {
-
-            (function (peerID, curText, curTimeout) {
-              setTimeout(function () {
-                AppMessagesManager.sendText(peerID, curText, options);
-              }, curTimeout)
-            })($scope.curDialog.peerID, text.substr(0, 4096), timeout);
-
+            AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096), options);
             text = text.substr(4096);
-            timeout += 100;
-
           } while (text.length);
         }
         fwdsSend();
@@ -2331,9 +2323,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.draftMessage.fwdMessages.length) {
         var ids = $scope.draftMessage.fwdMessages.slice();
         fwdsClear();
-        setTimeout(function () {
+        setZeroTimeout(function () {
           AppMessagesManager.forwardMessages($scope.curDialog.peerID, ids);
-        }, 0);
+        });
       }
     }
 
@@ -4660,7 +4652,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('StickersetModalController', function ($scope, MtpApiManager, RichTextProcessor, AppStickersManager) {
+  .controller('StickersetModalController', function ($scope, $rootScope, $modalInstance, MtpApiManager, RichTextProcessor, AppStickersManager, AppDocsManager, AppMessagesManager, LocationParamsService) {
     $scope.slice = {limit: 20, limitDelta: 20};
 
     AppStickersManager.getStickerset($scope.inputStickerset).then(function (result) {
@@ -4679,26 +4671,32 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         });
       });
 
-      // if (doc.id && doc.access_hash) {
-      //   var inputMedia = {
-      //     _: 'inputMediaDocument',
-      //     id: {
-      //       _: 'inputDocument',
-      //       id: doc.id,
-      //       access_hash: doc.access_hash
-      //     }
-      //   }
-      //   var options = {
-      //     replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
-      //   };
-      //   AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options);
-      //   $scope.$broadcast('ui_message_send');
-      // }
     });
 
     $scope.toggleInstalled = function (installed) {
       AppStickersManager.installStickerset($scope.stickerset, !installed).then(function () {
         $scope.stickersetInstalled = installed;
       })
-    }
+    };
+
+    $scope.chooseSticker = function (docID) {
+      var doc = AppDocsManager.getDoc(docID);
+      if (!doc.id || !doc.access_hash || !$rootScope.selectedPeerID) {
+        return;
+      }
+      var inputMedia = {
+        _: 'inputMediaDocument',
+        id: {
+          _: 'inputDocument',
+          id: doc.id,
+          access_hash: doc.access_hash
+        }
+      }
+      AppMessagesManager.sendOther($rootScope.selectedPeerID, inputMedia);
+      $modalInstance.close(doc.id);
+    };
+
+    $scope.share = function () {
+      LocationParamsService.shareUrl('https://telegram.me/addstickers/' + $scope.stickerset.short_name, $scope.stickerset.title);
+    };
   })
