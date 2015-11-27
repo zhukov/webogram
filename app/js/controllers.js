@@ -4660,7 +4660,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('StickersetModalController', function ($scope, MtpApiManager, AppStickersManager) {
+  .controller('StickersetModalController', function ($scope, MtpApiManager, RichTextProcessor, AppStickersManager) {
     $scope.slice = {limit: 20, limitDelta: 20};
 
     AppStickersManager.getStickerset($scope.inputStickerset).then(function (result) {
@@ -4669,6 +4669,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.stickerset = result.set;
       $scope.stickersetInstalled = result.installed;
       $scope.documents = result.documents;
+
+      $scope.stickerEmojis = {};
+      angular.forEach($scope.documents, function (doc) {
+        $scope.stickerEmojis[doc.id] = RichTextProcessor.wrapRichText(doc.stickerEmojiRaw, {
+          noLinks: true,
+          noLinebreaks: true,
+          emojiIconSize: 26
+        });
+      });
+
+      // if (doc.id && doc.access_hash) {
+      //   var inputMedia = {
+      //     _: 'inputMediaDocument',
+      //     id: {
+      //       _: 'inputDocument',
+      //       id: doc.id,
+      //       access_hash: doc.access_hash
+      //     }
+      //   }
+      //   var options = {
+      //     replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
+      //   };
+      //   AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options);
+      //   $scope.$broadcast('ui_message_send');
+      // }
     });
 
     $scope.toggleInstalled = function (installed) {

@@ -1051,7 +1051,16 @@ angular.module('myApp.services')
       apiPromise = MtpApiManager.invokeApi('messages.readHistory', {
         peer: AppPeersManager.getInputPeerByID(peerID),
         max_id: 0
-      });
+      }).then(function (affectedMessages) {
+        ApiUpdatesManager.processUpdateMessage({
+          _: 'updateShort',
+          update: {
+            _: 'updatePts',
+            pts: affectedMessages.pts,
+            pts_count: affectedMessages.pts_count
+          }
+        });
+      })
     }
 
     historyStorage.readPromise = apiPromise.then(function () {

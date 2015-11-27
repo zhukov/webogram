@@ -1484,6 +1484,7 @@ angular.module('izhukov.utils', [])
     var url;
     var html = [];
     var lastOffset = 0;
+    var curEmojiSize = options.emojiIconSize || emojiIconSize;
     for (i = 0; i < len; i++) {
       entity = entities[i];
       if (entity.offset > lastOffset) {
@@ -1600,9 +1601,9 @@ angular.module('izhukov.utils', [])
             '<span class="emoji emoji-',
             entity.coords.category,
             '-',
-            (emojiIconSize * entity.coords.column),
+            (curEmojiSize * entity.coords.column),
             '-',
-            (emojiIconSize * entity.coords.row),
+            (curEmojiSize * entity.coords.row),
             '" ',
             'title="', entity.title, '">',
             ':', entity.title, ':</span>'
@@ -1675,8 +1676,9 @@ angular.module('izhukov.utils', [])
 
     if (!options.nested && (emojiFound || options.hasNested)) {
       text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text);
+      var emojiSizeClass = curEmojiSize == 18 ? '' : (' emoji-w' + curEmojiSize);
       text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
-                          '<span class="emoji emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
+                          '<span class="emoji ' + emojiSizeClass + ' emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>');
     }
 
     return $sce.trustAs('html', text);

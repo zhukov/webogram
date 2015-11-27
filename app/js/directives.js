@@ -1074,7 +1074,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: Math.min(500, $($window).height()
+          height: Math.min(600, $($window).height()
                     - (Config.Mobile ? 46 + 18 : 200))
         });
         $(stickersWrap).nanoScroller();

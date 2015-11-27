@@ -2650,6 +2650,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function getDifference () {
+    console.trace(dT(), 'Get full diff');
     if (!updatesState.syncLoading) {
       updatesState.syncLoading = true;
       updatesState.pendingSeqUpdates = {};
@@ -2721,12 +2722,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       channelState.syncLoading = true;
       channelState.pendingPtsUpdates = [];
     }
+    if (channelState.syncPending) {
+      clearTimeout(channelState.syncPending.timeout);
+      channelState.syncPending = false;
+    }
+    console.log(dT(), 'Get channel diff', AppChatsManager.getChat(channelID), channelState.pts);
     MtpApiManager.invokeApi('updates.getChannelDifference', {
       channel: AppChatsManager.getChannelInput(channelID),
       filter: {_: 'channelMessagesFilterEmpty'},
       pts: channelState.pts,
-      limit: 10
+      limit: 30
     }).then(function (differenceResult) {
+      console.log(dT(), 'channel diff result', differenceResult);
       channelState.pts = differenceResult.pts;
 
       if (differenceResult._ == 'updates.channelDifferenceEmpty') {
@@ -2809,12 +2816,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         channelID = update.channel_id;
         break;
     }
+    // if (channelID) {
+    //   console.log(dT(), channelID, update.pts, update);
+    // }
     if (channelID && !AppChatsManager.hasChat(channelID)) {
+      console.log(dT(), 'skip update, missing channel', channelID, update);
       return false;
     }
     var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
 
-    // console.log('process', channelID, curState, update);
+    console.log(dT(), 'process', channelID, curState, update);
 
     if (curState.syncLoading) {
       return false;
@@ -2840,7 +2851,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (update.pts) {
       var newPts = curState.pts + (update.pts_count || 0);
       if (newPts < update.pts) {
-        console.log(dT(), 'Pts hole', curState, update);
+        console.warn(dT(), 'Pts hole', curState, update, channelID && AppChatsManager.getChat(channelID));
         curState.pendingPtsUpdates.push(update);
         if (!curState.syncPending) {
           curState.syncPending = {
@@ -2859,6 +2870,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (update.pts > curState.pts) {
         curState.pts = update.pts;
         popPts = true;
+      }
+      if (channelID && options.date && updatesState.date < options.date) {
+        updatesState.date = options.date;
       }
     }
     else if (!channelID && options.seq > 0) {
