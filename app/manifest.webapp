@@ -71,13 +71,6 @@
         }
       },
       "returnValue": false
-    },
-    "webrtc-call": {
-      "href": "index.html",
-      "filters": {
-        "type": "webcontacts/contact"
-       },
-      "disposition": "window"
     }
   },
   "orientation": "portrait-primary",
