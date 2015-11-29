@@ -98,6 +98,7 @@
     "stickerset_modal_title_loading": "Pacote de Sticker",
     "stickerset_modal_install": "Adicionar Stickers",
     "stickerset_modal_uninstall": "Remover stickers",
+    "stickerset_modal_share": "Compartilhar",
     "stickerset_modal_loading": "Carregando{dots}",
     "page_title_pluralize_notifications": "{'0': 'Sem notificações', 'one': '1 notificação', 'other': '{} notificações'}",
     "profile_edit_modal_title": "Editar perfil",

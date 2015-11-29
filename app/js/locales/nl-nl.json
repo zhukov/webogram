@@ -98,6 +98,7 @@
     "stickerset_modal_title_loading": "Stickerbundel",
     "stickerset_modal_install": "Stickers toevoegen",
     "stickerset_modal_uninstall": "Stickers verwijderen",
+    "stickerset_modal_share": "Delen",
     "stickerset_modal_loading": "Laden{dots}",
     "page_title_pluralize_notifications": "{'0': 'Geen meldingen', 'one': '1 melding', 'other': '{} meldingen'}",
     "profile_edit_modal_title": "Profiel bewerken",

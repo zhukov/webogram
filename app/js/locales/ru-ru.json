@@ -98,6 +98,7 @@
     "stickerset_modal_title_loading": "Набор стикеров",
     "stickerset_modal_install": "Добавить стикеры",
     "stickerset_modal_uninstall": "Удалить стикеры",
+    "stickerset_modal_share": "Share",
     "stickerset_modal_loading": "Загрузка{dots}",
     "page_title_pluralize_notifications": "{'0': 'Нет уведомлений', 'one': 'Одно уведомление', 'other': 'Уведомлений: {}'}",
     "profile_edit_modal_title": "Редактировать профиль",
