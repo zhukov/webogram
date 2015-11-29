@@ -1918,7 +1918,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
 
         if ((!curPeer || isIDLE) &&
-            exlen > (len > 10 ? 10 : 10)) {
+            exlen > (len > 10 ? 10 : 100)) {
           console.warn(dT(), 'Drop too many messages', len, exlen, isIDLE, curPeer, peerID);
           if (curPeer) {
             minID = history.messages[exlen - 1].mid;
