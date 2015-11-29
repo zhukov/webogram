@@ -1983,6 +1983,7 @@ angular.module('myApp.services')
 
     if (useCache && messagesForDialogs[msgID] !== undefined) {
       delete messagesForDialogs[msgID].typing;
+      messagesForDialogs[msgID].unreadCount = unreadCount;
       return messagesForDialogs[msgID];
     }
 

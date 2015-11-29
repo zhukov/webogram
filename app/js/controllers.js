@@ -699,9 +699,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         dialog = $scope.dialogs[i];
         if (dialogsUpdated[dialog.peerID]) {
           $scope.dialogs.splice(i, 1);
-          AppMessagesManager.clearDialogCache($scope.dialogs.mid);
           i--;
           len--;
+          AppMessagesManager.clearDialogCache(dialog.mid);
         }
       }
       len = indexes.length;
@@ -893,8 +893,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                 !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
               return;
             }
-            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
-            if (!searchMessages) {
+            var wrapDialog = searchMessages ? undefined : dialog;
+            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, wrapDialog);
+            if (searchMessages) {
+              wrappedDialog.unreadCount = -1;
+            } else {
               peersInDialogs[dialog.peerID] = true;
             }
             dialogsList.push(wrappedDialog);
@@ -949,8 +952,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                 !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
               return;
             }
-            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
-            if (!searchMessages) {
+            var wrapDialog = searchMessages ? undefined : dialog;
+            var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, wrapDialog);
+            if (searchMessages) {
+              wrappedDialog.unreadCount = -1;
+            } else {
               peersInDialogs[dialog.peerID] = true;
             }
             dialogsList.push(wrappedDialog);
@@ -1910,22 +1916,23 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           delete $scope.state.empty;
         }
-        if (len > 10) {
+
+        if ((!curPeer || isIDLE) &&
+            exlen > (len > 10 ? 10 : 10)) {
+          console.warn(dT(), 'Drop too many messages', len, exlen, isIDLE, curPeer, peerID);
           if (curPeer) {
-            if (exlen > 10 && isIDLE) {
-              minID = history.messages[exlen - 1].mid;
-              $scope.historyState.skipped = hasLess = minID > 0;
-              if (hasLess) {
-                loadAfterSync = peerID;
-                $scope.$broadcast('ui_history_append');
-                return;
-              }
+            minID = history.messages[exlen - 1].mid;
+            $scope.historyState.skipped = hasLess = minID > 0;
+            if (hasLess) {
+              loadAfterSync = peerID;
+              $scope.$broadcast('ui_history_append');
             }
           } else {
             historiesQueuePop(peerID);
-            return;
           }
+          return;
         }
+
         var messageID, historyMessage, i;
         var hasOut = false;
         var unreadAfterNew = false;
@@ -2067,6 +2074,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (!newVal) {
         unreadAfterIdle = false;
+        if (loadAfterSync == $scope.curDialog.peerID) {
+          loadHistory();
+          loadAfterSync = false;
+        }
       }
     });
 
