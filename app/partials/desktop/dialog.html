@@ -6,6 +6,7 @@
       class="im_dialog_badge badge"
       ng-show="dialogMessage.unreadCount > 0 && !dialogMessage.pFlags.out"
       ng-bind="dialogMessage.unreadCount"
+      my-peer-muted="dialogMessage.peerID" muted-class="im_dialog_badge_muted"
     ></span>
     <i
       class="im_dialog_unread"

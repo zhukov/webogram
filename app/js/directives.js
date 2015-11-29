@@ -2666,6 +2666,33 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myPeerMuted', function ($rootScope, NotificationsManager) {
+
+    return {
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var peerID = $scope.$eval(attrs.myPeerMuted);
+      var className = attrs.mutedClass || 'muted';
+      var unsubscribe = $rootScope.$on('notify_settings', function (e, data) {
+        if (data.peerID == peerID) {
+          updateClass(peerID, element, className);
+        }
+      });
+      updateClass(peerID, element, className);
+
+      $scope.$on('$destroy', unsubscribe);
+    }
+
+    function updateClass (peerID, element, className) {
+      NotificationsManager.getPeerMuted(peerID).then(function (muted) {
+        element.toggleClass(className, muted);
+      });
+    }
+  })
+
+
   .directive('myPeerLink', function (AppChatsManager, AppUsersManager) {
 
     return {
