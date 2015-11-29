@@ -639,7 +639,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
         } else {
           if (chat.pFlags.admins_enabled &&
-              !chat.pFlags.editor) {
+              !chat.pFlags.admin) {
             return false;
           }
         }
