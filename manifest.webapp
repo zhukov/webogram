@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
@@ -71,13 +71,6 @@
         }
       },
       "returnValue": false
-    },
-    "webrtc-call": {
-      "href": "index.html",
-      "filters": {
-        "type": "webcontacts/contact"
-       },
-      "disposition": "window"
     }
   },
   "orientation": "portrait-primary",

@@ -1326,6 +1326,7 @@ a.im_dialog:hover .im_dialog_message_text,a.im_dialog_selected .im_dialog_messag
 .im_dialog_badge{background:#64c270;font-size:11px;padding:5px;border-radius:11px;min-width:21px;text-align:center;margin-top:4px}
 .active .im_dialog_badge{color:#428bca;background-color:#fff}
 .im_dialogs_modal_col .im_dialog_badge{display:none}
+.im_dialog_badge_muted{background:#ccc}
 .im_dialog_unread{background:#c1d6e5;display:inline-block;float:right;width:8px;height:8px;border-radius:5px;overflow:hidden;margin:12px 0 0}
 a.im_dialog:hover .im_dialog_unread,a.im_dialog_selected .im_dialog_unread{background:#a3c0d4}
 .active .im_dialog_unread{background-color:#a4c4dd}
@@ -1699,11 +1700,12 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .sessions_modal_session_device{margin:3px 0}
 .sessions_modal_session_location{color:#777}
 .sessions_modal_other_splitter{margin:15px 0 20px 24px}
-.stickerset_modal_window .modal-dialog{max-width:474px}
+.stickerset_modal_window .modal-dialog{max-width:642px;width:auto}
 .stickerset_modal_stickers_list{padding:25px}
-.stickerset_modal_sticker_wrap{list-style:none;margin:0 10px 10px 0;padding:0;position:relative;display:block;width:96px;height:96px;float:left}
-.stickerset_modal_sticker{width:96px;height:96px}
-.stickerset_modal_sticker img{max-width:96px;max-height:96px}
+.stickerset_modal_sticker_wrap{margin:0 5px 5px 0;padding:0;position:relative;display:block;width:192px;height:192px;float:left;border-radius:3px;overflow:hidden}
+.stickerset_modal_sticker_wrap:hover{background:#f2f6fa}
+.stickerset_modal_sticker{width:192px;height:192px}
+.stickerset_modal_sticker img{max-width:192px;max-height:192px}
 .stickerset_modal_sticker_alt{position:absolute;bottom:0;right:0}
 .stickerset_actions{padding:10px 20px;height:50px;text-align:center}
 .stickerset_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}

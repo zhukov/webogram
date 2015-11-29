@@ -106,6 +106,7 @@
 	"stickerset_modal_title_loading": "Stickerset",
 	"stickerset_modal_install": "Add stickers",
 	"stickerset_modal_uninstall": "Remove stickers",
+	"stickerset_modal_share": "Share",
 	"stickerset_modal_loading": "Loading{dots}",
 
 	"page_title_pluralize_notifications": "{'0': 'No notifications', 'one': '1 notification', 'other': '{} notifications'}",

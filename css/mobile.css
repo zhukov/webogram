@@ -1400,9 +1400,10 @@ a.media_modal_date:hover {
   padding: 10px;
 }
 .stickerset_modal_sticker_wrap,
-.stickerset_modal_sticker_wrap img {
-  width: 64px;
-  height: 64px;
+.stickerset_modal_sticker_wrap img,
+.stickerset_modal_sticker {
+  width: 90px;
+  height: 90px;
 }
 .message_actions_modal_window {
   max-width: 220px;
