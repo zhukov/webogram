@@ -1269,23 +1269,6 @@ angular.module('izhukov.utils', [])
 
               url = (match[5] ? '' : protocol) + match[4];
             }
-
-            var tgMeMatch;
-            if (tld == 'me' &&
-                (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
-              var path = tgMeMatch[1].split('/');
-              switch (path[0]) {
-                case 'joinchat':
-                  url = 'tg://join?invite=' + path[1];
-                  break;
-                case 'addstickers':
-                  url = 'tg://addstickers?set=' + path[1];
-                  break;
-                default:
-                  var domainQuery = path[0].split('?');
-                  url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
-              }
-            }
           } else { // IP address
             url = (match[5] ? '' : 'http://') + match[4];
           }
@@ -1579,8 +1562,10 @@ angular.module('izhukov.utils', [])
                 url = 'tg://addstickers?set=' + path[1];
                 break;
               default:
-                var domainQuery = path[0].split('?');
-                url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
+                if (!path[1]) {
+                  var domainQuery = path[0].split('?');
+                  url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
+                }
             }
           }
           html.push(
