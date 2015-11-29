@@ -31,6 +31,17 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.2')">
+        <div class="md_modal_section_version">0.5.2</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Muted conversations now have grey badge in list.</li>
+            <li>Improved Stickerset box: click on sticker to send, bigger images, Share button.</li>
+            <li>Improved performance.</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.1')">
         <div class="md_modal_section_version">0.5.1</div>
         <div class="md_modal_section_description changelog_version_changes">
