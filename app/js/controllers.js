@@ -699,6 +699,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         dialog = $scope.dialogs[i];
         if (dialogsUpdated[dialog.peerID]) {
           $scope.dialogs.splice(i, 1);
+          AppMessagesManager.clearDialogCache($scope.dialogs.mid);
           i--;
           len--;
         }

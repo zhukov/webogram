@@ -2019,6 +2019,10 @@ angular.module('myApp.services')
     return message;
   }
 
+  function clearDialogCache (msgID) {
+    delete messagesForDialogs[msgID];
+  }
+
   function wrapForHistory (msgID) {
     if (messagesForHistory[msgID] !== undefined) {
       return messagesForHistory[msgID];
@@ -2980,6 +2984,7 @@ angular.module('myApp.services')
     convertMigratedPeer: convertMigratedPeer,
     getMessagePeer: getMessagePeer,
     getMessageThumb: getMessageThumb,
+    clearDialogCache: clearDialogCache,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
     wrapReplyMarkup: wrapReplyMarkup,
