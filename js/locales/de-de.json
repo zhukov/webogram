@@ -98,6 +98,7 @@
     "stickerset_modal_title_loading": "Sticker-Paket",
     "stickerset_modal_install": "Sticker hinzufügen",
     "stickerset_modal_uninstall": "Sticker entfernen",
+    "stickerset_modal_share": "Teilen",
     "stickerset_modal_loading": "Lade{dots}",
     "page_title_pluralize_notifications": "{'0': 'Keine Nachrichten', 'one': '1 Nachricht', 'other': '{} Nachrichten'}",
     "profile_edit_modal_title": "Profil bearbeiten",
