@@ -300,7 +300,7 @@
     "message_action_forward": "Weiterleiten",
     "message_action_select": "Auswählen",
     "message_action_cancel": "Abbrechen",
-    "message_action_retry": "Try again",
+    "message_action_retry": "Erneut versuchen",
     "error_modal_warning_title": "Warnung",
     "error_modal_bad_request_title": "Fehler",
     "error_modal_unauthorized_title": "Nicht autorisiert",

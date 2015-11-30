@@ -1704,7 +1704,7 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .stickerset_modal_stickers_list{padding:25px}
 .stickerset_modal_sticker_wrap{margin:0 5px 5px 0;padding:0;position:relative;display:block;width:192px;height:192px;float:left;border-radius:3px;overflow:hidden}
 .stickerset_modal_sticker_wrap:hover{background:#f2f6fa}
-.stickerset_modal_sticker{width:192px;height:192px}
+.stickerset_modal_sticker{width:192px;height:192px;text-align:center}
 .stickerset_modal_sticker img{max-width:192px;max-height:192px}
 .stickerset_modal_sticker_alt{position:absolute;bottom:0;right:0}
 .stickerset_actions{padding:10px 20px;height:50px;text-align:center}

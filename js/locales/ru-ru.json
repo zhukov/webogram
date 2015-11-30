@@ -300,7 +300,6 @@
     "message_action_forward": "Переслать",
     "message_action_select": "Выбрать",
     "message_action_cancel": "Отмена",
-    "message_action_retry": "Try again",
     "error_modal_warning_title": "Внимание",
     "error_modal_bad_request_title": "Ошибка",
     "error_modal_unauthorized_title": "Необходима авторизация",
