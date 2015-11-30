@@ -300,6 +300,7 @@
     "message_action_forward": "Inoltra",
     "message_action_select": "Seleziona",
     "message_action_cancel": "Annulla",
+    "message_action_retry": "Riprova",
     "error_modal_warning_title": "Attenzione",
     "error_modal_bad_request_title": "Errore",
     "error_modal_unauthorized_title": "Non autorizzato",

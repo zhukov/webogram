@@ -300,6 +300,7 @@
     "message_action_forward": "Doorsturen",
     "message_action_select": "Selecteren",
     "message_action_cancel": "Annuleren",
+    "message_action_retry": "Try again",
     "error_modal_warning_title": "Waarschuwing",
     "error_modal_bad_request_title": "Fout",
     "error_modal_unauthorized_title": "Geen bevoegdheid",

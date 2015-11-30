@@ -1326,7 +1326,7 @@ a.im_dialog:hover .im_dialog_message_text,a.im_dialog_selected .im_dialog_messag
 .im_dialog_badge{background:#64c270;font-size:11px;padding:5px;border-radius:11px;min-width:21px;text-align:center;margin-top:4px}
 .active .im_dialog_badge{color:#428bca;background-color:#fff}
 .im_dialogs_modal_col .im_dialog_badge{display:none}
-.im_dialog_badge_muted{background:#ccc}
+.im_dialog_badge_muted{background:#bfbfbf}
 .im_dialog_unread{background:#c1d6e5;display:inline-block;float:right;width:8px;height:8px;border-radius:5px;overflow:hidden;margin:12px 0 0}
 a.im_dialog:hover .im_dialog_unread,a.im_dialog_selected .im_dialog_unread{background:#a3c0d4}
 .active .im_dialog_unread{background-color:#a4c4dd}
