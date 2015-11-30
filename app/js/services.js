@@ -152,11 +152,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var timeNow = tsNow(true) + serverTimeOffset;
       switch (status._) {
         case 'userStatusRecently':
-          return tsNow(true) + serverTimeOffset - 86400 * 3;
+          return timeNow - 86400 * 3;
         case 'userStatusLastWeek':
-          return tsNow(true) + serverTimeOffset - 86400 * 7;
+          return timeNow - 86400 * 7;
         case 'userStatusLastMonth':
-          return tsNow(true) + serverTimeOffset - 86400 * 30;
+          return timeNow - 86400 * 30;
       }
     }
 
@@ -1064,6 +1064,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (chatFullPromises[id] !== undefined) {
       return chatFullPromises[id];
     }
+    // console.trace('get chat full');
     return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
       chat_id: AppChatsManager.getChatInput(id)
     }).then(function (result) {
@@ -1257,7 +1258,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (!chat.photo || !fullChat) {
       return;
     }
-    var emptyPhoto = chat.photo == 'chatPhotoEmpty';
+    var emptyPhoto = chat.photo._ == 'chatPhotoEmpty';
     if (emptyPhoto != (fullChat.chat_photo._ == 'photoEmpty')) {
       delete chatsFull[chatID];
       $rootScope.$broadcast('chat_full_update', chatID);

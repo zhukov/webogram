@@ -1507,7 +1507,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }, 2800);
         }
 
-        AppMessagesManager.readHistory($scope.curDialog.peerID);
+        if (!$rootScope.idle.isIDLE) {
+          AppMessagesManager.readHistory($scope.curDialog.peerID);
+        }
 
         updateBotActions();
         updateChannelActions();
@@ -2074,7 +2076,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       if (!newVal) {
         unreadAfterIdle = false;
-        if (loadAfterSync == $scope.curDialog.peerID) {
+        if (loadAfterSync &&
+            loadAfterSync == $scope.curDialog.peerID) {
           loadHistory();
           loadAfterSync = false;
         }

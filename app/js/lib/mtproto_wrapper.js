@@ -228,7 +228,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
               performRequest(cachedNetworker);
             }, waitTime * 1000);
           }
-          else if (!options.rawError && error.code == 500) {
+          else if (!options.rawError && (error.code == 500 || error.type == 'MSG_WAIT_FAILED')) {
             var now = tsNow();
             if (options.stopTime) {
               if (now >= options.stopTime) {

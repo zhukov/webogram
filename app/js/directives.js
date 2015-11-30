@@ -2064,8 +2064,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         height: $scope.document.thumb.height
       });
 
-      var smallLocation = angular.copy($scope.document.thumb.location);
-      smallLocation.sticker = true;
+      var smallLocation = false;
+      if ($scope.document.thumb.location) {
+        smallLocation = angular.copy($scope.document.thumb.location);
+        smallLocation.sticker = true;
+      }
 
       var fullLocation = {
         _: 'inputDocumentFileLocation',
@@ -2094,7 +2097,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         imgElement.attr('src', emptySrc).appendTo(element);
       }
 
-      if (attrs.thumb) {
+      if (attrs.thumb && smallLocation) {
         MtpApiFileManager.downloadSmallFile(smallLocation).then(function (blob) {
           setSrc(blob);
         }, function (e) {
