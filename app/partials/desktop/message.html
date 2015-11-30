@@ -27,7 +27,7 @@
       <i class="icon icon-select-tick"></i>
 
       <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
-        <i class="icon-message-status" tooltip="Try again"></i>
+        <i class="icon-message-status" tooltip="{{'message_action_retry' | i18n}}"></i>
       </a>
       <i ng-if="::historyMessage.pFlags.unread &amp;&amp; historyMessage.pFlags.out || historyMessage.pending || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
 

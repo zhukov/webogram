@@ -336,6 +336,7 @@
 	"message_action_forward": "Forward",
 	"message_action_select": "Select",
 	"message_action_cancel": "Cancel",
+	"message_action_retry": "Try again",
 
 	"error_modal_warning_title": "Warning",
 	"error_modal_bad_request_title": "Error",
