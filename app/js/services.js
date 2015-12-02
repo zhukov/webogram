@@ -246,7 +246,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var wasStatus;
       if (user.status._ != 'userStatusOffline') {
         delete user.status.wasStatus;
-        wasStatus != angular.copy(user.status);
+        wasStatus = angular.copy(user.status);
       }
       user.status = {
         _: 'userStatusOnline',
