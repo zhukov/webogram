@@ -11,6 +11,7 @@ var less = require('gulp-less');
 var del = require('del');
 var runSequence = require('run-sequence');
 var oghliner = require('oghliner');
+var gulpServiceWorker = require('gulp-serviceworker');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -153,18 +154,25 @@ gulp.task('disable-production', function() {
   );
 });
 
-gulp.task('add-appcache-manifest', ['build'], function() {
-  var sources = [
-    './dist/**/*',
-    '!dist/manifest.*',
-    '!dist/*.html',
-    '!dist/fonts/*',
-    '!dist/img/icons/icon*.png',
-    '!dist/js/background.js'
-  ];
+var fileGlobs = [
+  './dist/**/*',
+  '!dist/manifest.*',
+  '!dist/*.html',
+  '!dist/fonts/*',
+  '!dist/img/icons/icon*.png',
+  '!dist/js/background.js',
+];
 
+gulp.task('generate-service-worker', ['build'], function() {
+  return gulp.src(fileGlobs)
+  .pipe(gulpServiceWorker({
+    rootDir: 'dist/',
+  }));
+});
+
+gulp.task('add-appcache-manifest', ['build'], function() {
   return es.concat(
-    gulp.src(sources)
+    gulp.src(fileGlobs)
       .pipe($.manifest({
           timestamp: true,
           network: ['http://*', 'https://*', '*'],
@@ -174,7 +182,7 @@ gulp.task('add-appcache-manifest', ['build'], function() {
       )
       .pipe(gulp.dest('./dist')),
 
-    gulp.src(sources)
+    gulp.src(fileGlobs)
       .pipe($.manifest({
           timestamp: true,
           network: ['http://*', 'https://*', '*'],
@@ -262,7 +270,9 @@ gulp.task('build', ['clean'], function(callback) {
 
 gulp.task('package', ['cleanup-dist']);
 
-gulp.task('deploy', ['add-appcache-manifest'], function() {
+gulp.task('offline', ['add-appcache-manifest', 'generate-service-worker']);
+
+gulp.task('deploy', ['offline'], function() {
   return oghliner.deploy({
     rootDir: 'dist/',
   });
