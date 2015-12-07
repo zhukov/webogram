@@ -66,9 +66,8 @@ angular.module('myApp.services')
   NotificationsManager.start();
 
   var allDialogsLoaded = false
-  var loadedDialogsCount = 0;
+  var dialogsOffsetDate = 0;
   var dialogsNum = 0;
-  var minDialogsIndex = Math.pow(2, 50);
 
   var migratedFromTo = {};
   var migratedToFrom = {};
@@ -110,10 +109,7 @@ angular.module('myApp.services')
     if (
       isSearch ||
       allDialogsLoaded ||
-      (
-        curDialogStorage.dialogs.length >= offset + limit &&
-        curDialogStorage.dialogs[offset + limit - 1].index >= minDialogsIndex
-      )
+      curDialogStorage.dialogs.length >= offset + limit
     ) {
       return $q.when({
         dialogs: curDialogStorage.dialogs.slice(offset, offset + limit)
@@ -151,16 +147,18 @@ angular.module('myApp.services')
     SearchIndexManager.indexObject(peerID, peerText, dialogsIndex);
 
     var isMegagroup = AppChatsManager.isMegagroup(channelID);
-    if (isMegagroup) {
-      var mid = getFullMessageID(dialog.top_message, channelID);
-    } else {
-      var mid = getFullMessageID(dialog.top_important_message, channelID);
+    var mid = getFullMessageID(dialog.top_message, channelID);
+    var message = getMessage(mid);
+    var offsetDate = message.date;
+
+    if (!isMegagroup) {
+      mid = getFullMessageID(dialog.top_important_message, channelID);
+      message = getMessage(mid);
       dialog.unread_count = dialog.unread_important_count;
     }
     dialog.top_message = mid;
     dialog.read_inbox_max_id = getFullMessageID(dialog.read_inbox_max_id, channelID);
 
-    var message = getMessage(dialog.top_message);
     var topDate = message.date;
     var channel = AppChatsManager.getChat(channelID);
     if (!topDate || channel.date && channel.date > topDate) {
@@ -170,7 +168,7 @@ angular.module('myApp.services')
     dialog.index = generateDialogIndex(topDate);
     dialog.peerID = peerID;
 
-    pushDialogToStorage(dialog);
+    pushDialogToStorage(dialog, offsetDate);
 
     // Because we saved message without dialog present
     if (message.mid && message.mid > dialog.read_inbox_max_id) {
@@ -189,18 +187,11 @@ angular.module('myApp.services')
   function getTopMessages (limit) {
     var first = true;
     var dialogs = dialogsStorage.dialogs;
-    var len = dialogs && dialogs.length;
     var offsetDate = 0;
     var offsetID = 0;
     var offsetPeerID = 0;
-    if (len) {
-      var dialog = dialogs[len - 1];
-      var index = dialog.index;
-      if (index) {
-        offsetDate = Math.ceil(index / 0x10000) + serverTimeOffset;
-        offsetID = dialog.top_message;
-        offsetPeerID = dialog.peerID;
-      }
+    if (dialogsOffsetDate) {
+      offsetDate = dialogsOffsetDate + serverTimeOffset;
     }
     return MtpApiManager.invokeApi('messages.getDialogs', {
       offset_date: offsetDate,
@@ -217,10 +208,6 @@ angular.module('myApp.services')
       AppUsersManager.saveApiUsers(dialogsResult.users);
       AppChatsManager.saveApiChats(dialogsResult.chats);
       saveMessages(dialogsResult.messages);
-
-      if (!dialogsResult.dialogs.length) {
-        allDialogsLoaded = true;
-      }
 
       var maxSeenIdIncremented = offsetDate ? true : false;
       angular.forEach(dialogsResult.dialogs, function (dialog) {
@@ -247,7 +234,7 @@ angular.module('myApp.services')
           dialog.index = generateDialogIndex(message.date);
           dialog.peerID = peerID;
 
-          pushDialogToStorage(dialog);
+          pushDialogToStorage(dialog, message.date);
 
           if (!maxSeenIdIncremented) {
             incrementMaxSeenID(dialog.top_message);
@@ -280,6 +267,12 @@ angular.module('myApp.services')
           }
         }
       });
+
+      if (!dialogsResult.dialogs.length ||
+          !dialogsResult.count ||
+          dialogs.length >= dialogsResult.count) {
+        allDialogsLoaded = true;
+      }
     });
   }
 
@@ -290,22 +283,17 @@ angular.module('myApp.services')
     return (date * 0x10000) + ((++dialogsNum) & 0xFFFF);
   }
 
-  function pushDialogToStorage (dialog) {
+  function pushDialogToStorage (dialog, offsetDate) {
+    if (offsetDate && (!dialogsOffsetDate || offsetDate < dialogsOffsetDate)) {
+      dialogsOffsetDate = offsetDate;
+    }
     var dialogs = dialogsStorage.dialogs;
-
     var pos = getDialogByPeerID(dialog.peerID)[1];
-    var index = dialog.index;
-    var isDialog = dialog._ == 'dialog';
     if (pos !== undefined) {
       dialogs.splice(pos, 1);
     }
-    else if (isDialog) {
-      loadedDialogsCount++;
-      if (index < minDialogsIndex) {
-        minDialogsIndex = index;
-      }
-    }
 
+    var index = dialog.index;
     var i, len = dialogs.length;
     if (!len || index < dialogs[len - 1].index) {
       dialogs.push(dialog);

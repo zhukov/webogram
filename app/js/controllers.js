@@ -784,18 +784,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       searchMessages = false;
       contactsJump++;
       loadDialogs();
-
-      if ($routeParams.q && $scope.search.query != $routeParams.q) {
-        $timeout(function () {
-          $location.url(
-            '/im' +
-            ($scope.curDialog.peer
-              ? '?p=' + $scope.curDialog.peer
-              : ''
-            )
-          );
-        });
-      }
     });
 
     if (Config.Mobile) {
@@ -1105,12 +1093,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         lessPending = false;
 
     function applyDialogSelect (newDialog, oldDialog) {
-      if (oldDialog.peer == newDialog.peer &&
-          oldDialog.messageID == newDialog.messageID &&
-          oldDialog.startParam == newDialog.startParam) {
-        return false;
-      }
-
       peerID = $rootScope.selectedPeerID = newDialog.peerID;
       $scope.historyFilter.mediaType = false;
 
