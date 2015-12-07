@@ -2751,6 +2751,13 @@ angular.module('myApp.services')
             }
           }
         }
+        if (!isOut && foundDialog) {
+          if (newUnreadCount &&
+              foundDialog[0].top_message <= maxID) {
+            newUnreadCount = foundDialog[0].unread_count = 0;
+          }
+          foundDialog[0].read_inbox_max_id = maxID;
+        }
 
         if (newUnreadCount !== false) {
           $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: newUnreadCount});
