@@ -2194,6 +2194,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function updateCommands () {
       var peerID = $scope.curDialog.peerID;
+      if (peerID === undefined) {
+        console.warn('undefined peerID', $scope.curDialog);
+        console.trace();
+        safeReplaceObject($scope.commands, {});
+        $scope.$broadcast('mentions_update');
+        return;
+      }
 
       AppProfileManager.getPeerBots(peerID).then(function (peerBots) {
         if (!peerBots.length) {

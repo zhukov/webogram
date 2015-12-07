@@ -1064,7 +1064,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (chatFullPromises[id] !== undefined) {
       return chatFullPromises[id];
     }
-    // console.trace('get chat full');
+    console.trace(dT(), 'Get chat full', id, AppChatsManager.getChat(id));
     return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
       chat_id: AppChatsManager.getChatInput(id)
     }).then(function (result) {
