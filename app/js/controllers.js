@@ -593,18 +593,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     updateCurDialog();
 
-    var lastSearch = false;
     function updateCurDialog() {
-      if ($routeParams.q) {
-        if ($routeParams.q !== lastSearch) {
-          $scope.search.query = lastSearch = $routeParams.q;
-          if ($scope.curDialog !== undefined) {
-            return false;
-          }
-        }
-      } else {
-        lastSearch = false;
-      }
       var addParams = pendingParams || {};
       pendingParams = false;
       addParams.messageID = parseInt(addParams.messageID) || false;
@@ -613,7 +602,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var peerStringPromise;
       if ($routeParams.p && $routeParams.p.charAt(0) == '@') {
         if ($scope.curDialog === undefined) {
-          $scope.curDialog = {};
+          $scope.curDialog = {
+            peer: '',
+            peerID: 0
+          };
         }
         peerStringPromise = AppPeersManager.resolveUsername($routeParams.p.substr(1)).then(function (peerID) {
           return qSync.when(AppPeersManager.getPeerString(peerID));
@@ -623,7 +615,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       peerStringPromise.then(function (peerString) {
         $scope.curDialog = angular.extend({
-          peer: peerString
+          peer: peerString,
+          peerID: AppPeersManager.getPeerID(peerString || '')
         }, addParams);
         if (pendingAttachment) {
           $scope.$broadcast('peer_draft_attachment', pendingAttachment);
@@ -1112,20 +1105,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         lessPending = false;
 
     function applyDialogSelect (newDialog, oldDialog) {
-      var newPeer = newDialog.peer || $scope.curDialog.peer || '';
-      peerID = AppPeersManager.getPeerID(newPeer);
-
-      if (peerID == $scope.curDialog.peerID &&
+      if (oldDialog.peer == newDialog.peer &&
           oldDialog.messageID == newDialog.messageID &&
           oldDialog.startParam == newDialog.startParam) {
         return false;
       }
 
-      $rootScope.selectedPeerID = peerID;
-      $scope.curDialog.peerID = peerID;
+      peerID = $rootScope.selectedPeerID = newDialog.peerID;
       $scope.historyFilter.mediaType = false;
 
-      AppPeersManager.getInputPeer(newPeer);
+      AppPeersManager.getInputPeer(newDialog.peer || $scope.curDialog.peer || '');
 
       updateBotActions();
       selectedCancel(true);
@@ -1135,7 +1124,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           newDialog.messageID) {
         messageFocusHistory();
       }
-      else if (peerID) {
+      else if (newDialog.peerID) {
         updateHistoryPeer(true);
         loadHistory();
       }
@@ -1834,7 +1823,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var typingTimeouts = {};
     $scope.$on('history_append', function (e, addedMessage) {
       var history = historiesQueueFind(addedMessage.peerID);
-      // var history = historiesQueuePush(addedMessage.peerID);
       if (!history) {
         return;
       }
@@ -2194,9 +2182,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function updateCommands () {
       var peerID = $scope.curDialog.peerID;
-      if (peerID === undefined) {
-        console.warn('undefined peerID', $scope.curDialog);
-        console.trace();
+      if (!peerID) {
         safeReplaceObject($scope.commands, {});
         $scope.$broadcast('mentions_update');
         return;
