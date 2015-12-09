@@ -124,6 +124,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var lastWord = nameWords.pop();
     apiUser.initials = firstWord.charAt(0) + (lastWord ? lastWord.charAt(0) : firstWord.charAt(1));
 
+    if (apiUser.status) {
+      if (apiUser.status.expires) {
+        apiUser.status.expires -= serverTimeOffset;
+      }
+      if (apiUser.status.was_online) {
+        apiUser.status.was_online -= serverTimeOffset;
+      }
+    }
     if (apiUser.pFlags.bot) {
       apiUser.sortStatus = -1;
     } else {
@@ -149,7 +157,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (expires) {
         return expires;
       }
-      var timeNow = tsNow(true) + serverTimeOffset;
+      var timeNow = tsNow(true);
       switch (status._) {
         case 'userStatusRecently':
           return timeNow - 86400 * 3;
@@ -220,7 +228,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function updateUsersStatuses () {
-    var timestampNow = tsNow(true) + serverTimeOffset;
+    var timestampNow = tsNow(true);
     angular.forEach(users, function (user) {
       if (user.status &&
           user.status._ == 'userStatusOnline' &&
@@ -250,7 +258,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       user.status = {
         _: 'userStatusOnline',
-        expires: tsNow(true) + serverTimeOffset + 60,
+        expires: tsNow(true) + 60,
         wasStatus: wasStatus
       };
       user.sortStatus = getUserStatusForSort(user.status);
@@ -384,10 +392,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (user) {
       var status = offline ? {
           _: 'userStatusOffline',
-          was_online: tsNow(true) + serverTimeOffset
+          was_online: tsNow(true)
         } : {
           _: 'userStatusOnline',
-          expires: tsNow(true) + serverTimeOffset + 500
+          expires: tsNow(true) + 500
         };
 
       user.status = status;
@@ -405,6 +413,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             user = users[userID];
         if (user) {
           user.status = update.status;
+          if (user.status) {
+            if (user.status.expires) {
+              user.status.expires -= serverTimeOffset;
+            }
+            if (user.status.was_online) {
+              user.status.was_online -= serverTimeOffset;
+            }
+          }
           user.sortStatus = getUserStatusForSort(user.status);
           $rootScope.$broadcast('user_update', userID);
         }

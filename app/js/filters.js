@@ -235,18 +235,17 @@ angular.module('myApp.filters', ['myApp.i18n'])
         dateOrTimeFilter = $filter('dateOrTime');
 
     return function (timestamp) {
-      var ticks = timestamp * 1000,
-          diff = Math.abs(tsNow() - ticks);
+      var diff = Math.abs(tsNow(true) - timestamp);
 
-      if (diff < 60000) {
+      if (diff < 60) {
         return _('relative_time_just_now');
       }
-      if (diff < 3600000) {
-        var minutes = Math.floor(diff / 60000);
+      if (diff < 3600) {
+        var minutes = Math.floor(diff / 60);
         return langMinutesPluralize(minutes);
       }
-      if (diff < 86400000) {
-        var hours = Math.floor(diff / 3600000);
+      if (diff < 86400) {
+        var hours = Math.floor(diff / 3600);
         return langHoursPluralize(hours);
       }
       return dateOrTimeFilter(timestamp, true);
