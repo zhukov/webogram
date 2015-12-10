@@ -1556,7 +1556,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppWebPagesManager', function ($modal, $sce, $window, $rootScope, MtpApiManager, AppPhotosManager, RichTextProcessor) {
+.service('AppWebPagesManager', function ($modal, $sce, $window, $rootScope, MtpApiManager, AppPhotosManager, AppDocsManager, RichTextProcessor) {
 
   var webpages = {};
   var pendingWebPages = {};
@@ -1566,6 +1566,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       AppPhotosManager.savePhoto(apiWebPage.photo, mediaContext);
     } else {
       delete apiWebPage.photo;
+    }
+    if (apiWebPage.document && apiWebPage.document._ === 'document') {
+      AppDocsManager.saveDoc(apiWebPage.document, mediaContext);
+    } else {
+      delete apiWebPage.document;
     }
 
     apiWebPage.rTitle = RichTextProcessor.wrapRichText(
@@ -1634,6 +1639,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (webPage.photo && webPage.photo.id) {
       webPage.photo = AppPhotosManager.wrapForHistory(webPage.photo.id, {website: webPage.type != 'photo' && webPage.type != 'video'});
+    }
+    if (webPage.document && webPage.document.id) {
+      webPage.document = AppDocsManager.wrapForHistory(webPage.document.id);
     }
 
     return webPage;
@@ -1967,11 +1975,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         isGif = doc.mime_type == 'image/gif',
         isSticker = doc.mime_type == 'image/webp' && doc.sticker,
         thumbPhotoSize = doc.thumb,
-        width, height;
+        width, height, thumb, dim;
 
     if (isGif) {
-      width = Math.min(windowW - 80, 260);
-      height = Math.min(windowH - 100, 260);
+      width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
+      height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
     }
     else if (isSticker) {
       width = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
@@ -1980,18 +1988,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       width = height = 100;
     }
 
-    var thumb = {
-          width: width,
-          height: height
-        };
-    var dim;
+    thumb = {
+      width: width,
+      height: height
+    };
 
     if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
       if (isGif && doc.w && doc.h) {
-        dim = {
-          w: doc.w,
-          h: doc.h
-        };
+        dim = calcImageInBox(doc.w, doc.h, width, height);
       } else {
         dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
       }
