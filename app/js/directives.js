@@ -1990,6 +1990,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
+      var imgWrap = $('.img_gif_image_wrap', element);
+      imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height});
+
       var downloadPromise = false;
 
       $scope.isActive = false;
