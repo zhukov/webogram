@@ -1932,6 +1932,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
         case 'documentAttributeVideo':
           apiDoc.duration = attribute.duration;
+          apiDoc.w = attribute.w;
+          apiDoc.h = attribute.h;
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = 1;
@@ -1953,6 +1955,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           apiDoc.w = attribute.w;
           apiDoc.h = attribute.h;
           break;
+        case 'documentAttributeAnimated':
+          apiDoc.animated = true;
+          break;
       }
     });
     apiDoc.file_name = apiDoc.file_name || '';
@@ -1972,7 +1977,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     var doc = angular.copy(docs[docID]),
-        isGif = doc.mime_type == 'image/gif',
+        isGif = doc.mime_type == 'image/gif' || doc.animated && doc.mime_type == 'video/mp4',
         isSticker = doc.mime_type == 'image/webp' && doc.sticker,
         thumbPhotoSize = doc.thumb,
         width, height, thumb, dim;
