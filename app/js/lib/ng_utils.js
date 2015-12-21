@@ -1178,7 +1178,7 @@ angular.module('izhukov.utils', [])
   var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i;
   var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i;
 
-  var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)/;
+  var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)/;
 
   var siteHashtags = {
     Telegram: '#/im?q=%23{1}',
@@ -1340,11 +1340,19 @@ angular.module('izhukov.utils', [])
       matchIndex = rawOffset + match.index;
       newText.push(raw.substr(0, match.index));
 
-      var text = (match[3] || match[7]).replace(/^\s+|\s+$/g, '');
+      var text = (match[3] || match[7]);
+      rawOffset -= text.length;
+      text = text.replace(/^\s+|\s+$/g, '');
+      rawOffset += text.length;
+
       if (text.match(/^`*$/)) {
         newText.push(match[0]);
       }
       else if (match[3]) { // pre
+        if (match[5] == "\n") {
+          match[5] = '';
+          rawOffset -= 1;
+        }
         newText.push(match[1] + text + match[5]);
         entities.push({
           _: 'messageEntityPre',
