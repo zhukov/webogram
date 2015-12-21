@@ -1960,7 +1960,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
       }
     });
-    apiDoc.file_name = apiDoc.file_name || '';
+
+    apiDoc.mime_type = apiDoc.mime_type || '';
+    apiDoc.file_name = apiDoc.file_name || 'file';
+    if (apiDoc._ == 'documentEmpty') {
+      apiDoc.file_name = 'DELETED';
+      apiDoc.size = 0;
+    }
   };
 
   function getDoc (docID) {
@@ -2062,6 +2068,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           access_hash: doc.access_hash,
           file_name: doc.file_name
         };
+
+    if (doc._ == 'documentEmpty') {
+      return $q.reject();
+    }
 
     if (historyDoc.downloaded && !toFileEntry) {
       var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
