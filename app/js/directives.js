@@ -12,6 +12,8 @@
 
 angular.module('myApp.directives', ['myApp.filters'])
 
+  .constant('shouldFocusOnInteraction', !Config.Navigator.mobile)
+
   .directive('myHead', function() {
     return {
       restrict: 'AE',
@@ -1427,8 +1429,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService) {
-
+  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, shouldFocusOnInteraction) {
     return {
       link: link,
       scope: {
@@ -1570,7 +1571,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (composerEmojiPanel) {
             composerEmojiPanel.update();
           }
-        }, Config.Navigator.touch ? 100 : 0);
+        }, shouldFocusOnInteraction ? 0 : 100);
         return cancelEvent(e);
       }
 
@@ -1601,7 +1602,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $('body').on('dragenter dragleave dragover drop', onDragDropEvent);
       $(document).on('paste', onPasteEvent);
 
-      if (!Config.Navigator.touch) {
+      if (shouldFocusOnInteraction) {
         $scope.$on('ui_peer_change', focusField);
         $scope.$on('ui_history_focus', focusField);
         $scope.$on('ui_history_change', focusField);
@@ -1621,7 +1622,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             composer.setValue($scope.draftMessage.text || '');
             updateHeight();
           }
-          if (!Config.Navigator.touch || options && options.focus) {
+          if (shouldFocusOnInteraction || options && options.focus) {
             composer.focus();
           }
         }
@@ -1635,7 +1636,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_peer_reply', function () {
         onContentLoaded(function () {
           $scope.$emit('ui_editor_resize');
-          if (!Config.Navigator.touch) {
+          if (shouldFocusOnInteraction) {
             composer.focus();
           }
         })
@@ -1649,7 +1650,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateValue();
       });
       $scope.$on('ui_message_send', function () {
-        if (!Config.Navigator.touch) {
+        if (shouldFocusOnInteraction) {
           focusField();
         }
       });
@@ -1740,7 +1741,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         fileSelects.off('change');
       });
 
-      if (!Config.Navigator.touch) {
+      if (shouldFocusOnInteraction) {
         focusField();
       }
 
@@ -2275,10 +2276,10 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myFocused', function(){
+  .directive('myFocused', function(shouldFocusOnInteraction) {
     return {
       link: function($scope, element, attrs) {
-        if (Config.Navigator.touch) {
+        if (!shouldFocusOnInteraction) {
           return false;
         }
         setTimeout(function () {
@@ -2288,11 +2289,11 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myFocusOn', function(){
+  .directive('myFocusOn', function(shouldFocusOnInteraction) {
     return {
       link: function($scope, element, attrs) {
         $scope.$on(attrs.myFocusOn, function () {
-          if (Config.Navigator.touch) {
+          if (!shouldFocusOnInteraction) {
             return false;
           }
           onContentLoaded(function () {
