@@ -1565,7 +1565,8 @@ angular.module('myApp.services')
           }, function (error) {
             if (attachType == 'photo' &&
                 error.code == 400 &&
-                error.type == 'PHOTO_INVALID_DIMENSIONS') {
+                (error.type == 'PHOTO_INVALID_DIMENSIONS' ||
+                 error.type == 'PHOTO_SAVE_FILE_INVALID')) {
               error.handled = true;
               attachType = 'document';
               message.send();
