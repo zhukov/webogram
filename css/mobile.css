@@ -683,24 +683,31 @@ a.im_message_from_photo {
   position: absolute;
   margin-left: -45px;
 }
-.im_message_author {
+.im_message_author,
+.im_message_author_via {
   display: none;
 }
-.im_history_messages_group a.im_message_author {
+.im_history_messages_group a.im_message_author,
+.im_history_messages_group .im_message_author_via {
   display: inline;
   font-size: 13px;
   font-weight: normal;
 }
 .im_grouped_short a.im_message_from_photo,
 .im_grouped_short a.im_message_author,
+.im_grouped_short a.im_message_author_via,
 .im_grouped a.im_message_from_photo,
 .im_grouped a.im_message_author,
-.im_grouped_fwd a.im_message_author,
+.im_grouped a.im_message_author_via,
 .im_grouped_fwd a.im_message_from_photo,
-.im_grouped_fwd_short a.im_message_author,
+.im_grouped_fwd a.im_message_author,
+.im_grouped_fwd a.im_message_author_via,
 .im_grouped_fwd_short a.im_message_from_photo,
-.im_message_out a.im_message_author,
+.im_grouped_fwd_short a.im_message_author,
+.im_grouped_fwd_short a.im_message_author_via,
 .im_message_out a.im_message_from_photo,
+.im_message_out a.im_message_author,
+.im_message_out a.im_message_author_via,
 .im_message_body_media a.im_message_author {
   display: none;
 }
