@@ -2,7 +2,12 @@
 
   <div class="img_gif_image_wrap">
 
-    <img ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" class="img_gif_image" ng-src="{{document.url}}" />
+    <div ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" ng-switch="document.mime_type == 'video/mp4'">
+      <video ng-switch-when="true" width="{{document.thumb.width}}" height="{{document.thumb.height}}" loop autoplay class="img_gif_video">
+        <source ng-src="{{document.url}}" type="video/mp4">
+      </video>
+      <img ng-switch-default class="img_gif_image" ng-src="{{document.url}}" width="{{document.thumb.width}}" height="{{document.thumb.height}}" />
+    </div>
     <img ng-hide="document.downloaded &amp;&amp; isActive" class="img_gif_thumb" my-load-thumb thumb="document.thumb" />
 
   </div>
