@@ -598,20 +598,20 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myMessageDocument', function(AppDocsManager) {
     return {
       scope: {
-        'document': '=myMessageDocument',
+        'media': '=myMessageDocument',
         'messageId': '=messageId'
       },
       templateUrl: templateUrl('message_attach_document'),
       link: function ($scope, element, attrs) {
-        AppDocsManager.updateDocDownloaded($scope.document.id);
+        AppDocsManager.updateDocDownloaded($scope.media.document.id);
         $scope.docSave = function () {
-          AppDocsManager.saveDocFile($scope.document.id);
+          AppDocsManager.saveDocFile($scope.media.document.id);
         };
         $scope.docOpen = function () {
-          if (!$scope.document.withPreview) {
+          if (!$scope.media.document.withPreview) {
             return $scope.docSave();
           }
-          AppDocsManager.openDoc($scope.document.id, $scope.messageId);
+          AppDocsManager.openDoc($scope.media.document.id, $scope.messageId);
         };
       }
     };
@@ -1998,7 +1998,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.isActive = false;
 
       $scope.toggle = function (e) {
-        if (checkClick(e, true)) {
+        if (e && checkClick(e, true)) {
           AppDocsManager.saveDocFile($scope.document.id);
           return false;
         }
@@ -2024,6 +2024,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$emit('ui_height');
         })
       }
+
+      // Autoplay small GIFs
+      // if (!Config.Mobile &&
+      //     $scope.document.size &&
+      //     $scope.document.size < 1024 * 1024) {
+      //   $scope.toggle();
+      // }
     }
   })
 
@@ -2709,6 +2716,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {};
       var short = attrs.short && $scope.$eval(attrs.short);
+      var username = attrs.username && $scope.$eval(attrs.username);
 
       var peerID;
       var update = function () {
@@ -2717,9 +2725,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         if (peerID > 0) {
           var user = AppUsersManager.getUser(peerID);
-          var key = short ? 'rFirstName' : 'rFullName';
+          var prefix = username ? '@' : '';
+          var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName');
 
           element.html(
+            prefix +
             (override[key] || user[key] || '').valueOf() +
             (attrs.verified && user.pFlags && user.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
           );

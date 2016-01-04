@@ -44,14 +44,14 @@
 
       <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media ? true : false}">
 
-        <a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.toID > 0" color="historyMessage.toID < 0" no-watch="true"></a>
+        <a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.toID > 0" color="historyMessage.toID < 0" no-watch="true"></a><span ng-if="::historyMessage.viaBotID && !historyMessage.fwdFromID" class="im_message_author_via" my-i18n="message_via_bot"><my-i18n-param name="bot"><a class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></a></my-i18n-param></span>
 
         <a class="im_message_reply_wrap" my-reply-message="historyMessage.reply_to_msg" ng-if="::historyMessage.reply_to_mid"></a>
 
         <div ng-if="::historyMessage.fwdFromID || false" class="im_message_fwd_from">
           <a class="im_message_fwd_photo pull-left" my-peer-photolink="::historyMessage.fwdFromID" img-class="im_message_fwd_photo"></a>
           <div class="im_message_fwd_author_wrap">
-            <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID"></a><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
+            <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID"></a><span ng-if="::historyMessage.viaBotID" class="im_message_fwd_via" my-i18n="message_via_bot"><my-i18n-param name="bot"><a class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></a></my-i18n-param></span><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span>
             <span class="im_message_views_inline" ng-if="::historyMessage.views > 0">
               <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
             </span>
@@ -64,7 +64,7 @@
 
           <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.mid"></div>
           <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media.document" message-id="historyMessage.mid"></div>
+          <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media" message-id="historyMessage.mid"></div>
           <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio" message="historyMessage"></div>
           <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
           <div ng-switch-when="messageMediaVenue"     my-message-venue="historyMessage.media"></div>

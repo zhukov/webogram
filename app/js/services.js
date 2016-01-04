@@ -1936,9 +1936,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           apiDoc.h = attribute.h;
           break;
         case 'documentAttributeSticker':
-          apiDoc.sticker = 1;
+          apiDoc.sticker = true;
           if (attribute.alt !== undefined) {
-            apiDoc.sticker = 2;
             apiDoc.stickerEmojiRaw = attribute.alt;
             apiDoc.stickerEmoji = RichTextProcessor.wrapRichText(apiDoc.stickerEmojiRaw, {noLinks: true, noLinebreaks: true});
           }
@@ -1967,6 +1966,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       apiDoc.file_name = 'DELETED';
       apiDoc.size = 0;
     }
+
+    if ((apiDoc.mime_type == 'image/gif' || apiDoc.animated && apiDoc.mime_type == 'video/mp4') && apiDoc.thumb && apiDoc.thumb._ == 'photoSize') {
+      apiDoc.isSpecial = 'gif';
+    }
+    else if (apiDoc.mime_type == 'image/webp' && apiDoc.sticker) {
+      apiDoc.isSpecial = 'sticker';
+    }
+    else if (apiDoc.mime_type.substr(0, 6) == 'audio/') {
+      apiDoc.isSpecial = 'audio';
+    }
+
+
   };
 
   function getDoc (docID) {
@@ -1983,8 +1994,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     var doc = angular.copy(docs[docID]),
-        isGif = doc.mime_type == 'image/gif' || doc.animated && doc.mime_type == 'video/mp4',
-        isSticker = doc.mime_type == 'image/webp' && doc.sticker,
+        isGif = doc.isSpecial == 'gif',
+        isSticker = doc.isSpecial == 'sticker',
         thumbPhotoSize = doc.thumb,
         width, height, thumb, dim;
 
@@ -2026,16 +2037,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     doc.thumb = thumb;
 
     doc.withPreview = !Config.Mobile && doc.mime_type.match(/^image\/(gif|png|jpeg|jpg|bmp|tiff)/) ? 1 : 0;
-
-    if (isGif && doc.thumb) {
-      doc.isSpecial = 'gif';
-    }
-    else if (isSticker) {
-      doc.isSpecial = 'sticker';
-    }
-    else if (doc.mime_type.substr(0, 6) == 'audio/') {
-      doc.isSpecial = 'audio';
-    }
 
     return docsForHistory[docID] = doc;
   }
@@ -3991,6 +3992,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }).then(function () {
         window.open(url, '_blank');
       });
+      return true;
+    }
+
+    if (matches = url.match(/^search_hashtag\?hashtag=(.+?)$/)) {
+      $rootScope.$broadcast('dialogs_search', {query: '#' + decodeURIComponent(matches[1])});
+      if (Config.Mobile) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: ''
+        });
+      }
       return true;
     }
 
