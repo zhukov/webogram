@@ -30,7 +30,7 @@
     "group_modal_migrate_desc": "Para ir além do limite e ter funcionalidades adicionais, atualize para um supergrupo:",
     "group_modal_migrate_item1": "Supergrupos podem ter até 1000 membros",
     "group_modal_migrate_item2": "• Novos membros veêm todo o histórico do chat",
-    "group_modal_migrate_item3": "Administradores deletam mensagens para todos",
+    "group_modal_migrate_item3": "Administradores apagam mensagens de todos",
     "group_modal_migrate_item4": "Notificações são silenciadas por padrão",
     "group_modal_delete_group": "Apagar grupo",
     "channel_modal_info": "Info do canal",
