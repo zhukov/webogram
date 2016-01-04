@@ -804,6 +804,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$on('ui_dialogs_search_clear', $scope.searchClear);
 
+    if (!$scope.noMessages) {
+      $scope.$on('dialogs_search', function (e, data) {
+        $scope.search.query = data.query || '';
+        $scope.toggleSearch();
+      });
+    }
+
     var searchTimeoutPromise;
     function getDialogs(force) {
       var curJump = ++jump;

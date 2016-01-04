@@ -284,6 +284,7 @@
 	"conversation_media_video": "Video",
 	"conversation_media_document": "File",
 	"conversation_media_sticker": "Sticker",
+	"conversation_media_gif": "GIF",
 	"conversation_media_audio": "Audio",
 	"conversation_media_location": "Location",
 	"conversation_media_contact": "Contact",
@@ -521,7 +522,9 @@
 	"login_controller_unknown_country": "Unknown",
 
 	"message_forwarded_message": "Forwarded message",
+	"message_via_bot": "via {bot}",
 	"message_forwarded_message_mobile": "Forwarded from {from}, {date}",
+	"message_forwarded_via_message_mobile": "Forwarded from {from} via {bot}, {date}",
 
 	"message_attach_audio_message": "Voice message",
 	"message_attach_audio_play": "Play",

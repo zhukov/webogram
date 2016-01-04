@@ -1179,6 +1179,9 @@ angular.module('myApp.services')
       if (apiMessage.fwd_from_id) {
         apiMessage.fwdFromID = AppPeersManager.getPeerID(apiMessage.fwd_from_id);
       }
+      if (apiMessage.via_bot_id > 0) {
+        apiMessage.viaBotID = apiMessage.via_bot_id;
+      }
 
       var mediaContext = {
         user_id: apiMessage.fromID,
@@ -1543,7 +1546,7 @@ angular.module('myApp.services')
 
             case 'document':
             default:
-              inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, mime_type: file.type, attributes: [
+              inputMedia = {_: 'inputMediaUploadedDocument', file: inputFile, mime_type: file.type, caption: '', attributes: [
                 {_: 'documentAttributeFilename', file_name: file.name}
               ]};
           }
@@ -2290,14 +2293,18 @@ angular.module('myApp.services')
 
       if (prevMessage &&
           // !curMessage.views &&
-          curMessage.fromID == prevMessage.fromID &&
+          prevMessage.fromID == curMessage.fromID &&
           !prevMessage.fwdFromID == !curMessage.fwdFromID &&
+          prevMessage.viaBotID == curMessage.viaBotID &&
           !prevMessage.action &&
           !curMessage.action &&
           curMessage.date < prevMessage.date + 900) {
 
         var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf("\n") == -1 && !curMessage.reply_to_mid;
-        if (groupFwd && curMessage.fwdFromID && curMessage.fwdFromID == prevMessage.fwdFromID) {
+        if (groupFwd &&
+            curMessage.fwdFromID &&
+            curMessage.fwdFromID == prevMessage.fwdFromID &&
+            curMessage.viaBotID == prevMessage.viaBotID) {
           curMessage.grouped = singleLine ? 'im_grouped_fwd_short' : 'im_grouped_fwd';
         } else {
           curMessage.grouped = !curMessage.fwdFromID && singleLine ? 'im_grouped_short' : 'im_grouped';
@@ -2400,9 +2407,32 @@ angular.module('myApp.services')
       }
     } else if (message.media) {
       switch (message.media._) {
-        case 'messageMediaPhoto': notificationMessage = _('conversation_media_photo_raw'); break;
-        case 'messageMediaVideo': notificationMessage = _('conversation_media_video_raw'); break;
+        case 'messageMediaPhoto':
+          notificationMessage = _('conversation_media_photo_raw');
+          break;
+        case 'messageMediaVideo':
+          notificationMessage = _('conversation_media_video_raw');
+          break;
         case 'messageMediaDocument':
+          switch (message.media.document.isSpecial) {
+            case 'gif':
+              notificationMessage = _('conversation_media_gif_raw');
+              break;
+            case 'sticker':
+              notificationMessage = _('conversation_media_sticker');
+              var stickerEmoji = message.media.document.stickerEmojiRaw;
+              if (stickerEmoji !== undefined) {
+                notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' ' + notificationMessage;
+              }
+              break;
+            case 'audio':
+              notificationMessage = _('conversation_media_audio_raw');
+              break;
+            default:
+              notificationMessage = message.media.document.file_name || _('conversation_media_attachment_raw');
+              break;
+
+          }
           if (message.media.document.sticker) {
             notificationMessage = _('conversation_media_sticker');
             var stickerEmoji = message.media.document.stickerEmojiRaw;
@@ -2413,43 +2443,61 @@ angular.module('myApp.services')
             notificationMessage = message.media.document.file_name || _('conversation_media_document_raw');
           }
           break;
-        case 'messageMediaAudio': notificationMessage = _('conversation_media_audio_raw'); break;
+        case 'messageMediaAudio':
+          notificationMessage = _('conversation_media_audio_raw');
+          break;
         case 'messageMediaGeo':
-        case 'messageMediaVenue': notificationMessage = _('conversation_media_location_raw'); break;
-        case 'messageMediaContact': notificationMessage = _('conversation_media_contact_raw'); break;
-        default: notificationMessage = _('conversation_media_attachment_raw'); break;
+        case 'messageMediaVenue':
+          notificationMessage = _('conversation_media_location_raw');
+          break;
+        case 'messageMediaContact':
+          notificationMessage = _('conversation_media_contact_raw');
+          break;
+        default:
+          notificationMessage = _('conversation_media_attachment_raw');
+          break;
       }
     } else if (message._ == 'messageService') {
       switch (message.action._) {
         case 'messageActionChatCreate':
           notificationMessage = _('conversation_group_created_raw');
           break;
-        case 'messageActionChatEditTitle': notificationMessage = _('conversation_group_renamed_raw');
+        case 'messageActionChatEditTitle':
+          notificationMessage = _('conversation_group_renamed_raw');
           break;
-        case 'messageActionChatEditPhoto': notificationMessage = _('conversation_group_photo_updated_raw');
+        case 'messageActionChatEditPhoto':
+          notificationMessage = _('conversation_group_photo_updated_raw');
           break;
-        case 'messageActionChatDeletePhoto': notificationMessage = _('conversation_group_photo_removed_raw');
+        case 'messageActionChatDeletePhoto':
+          notificationMessage = _('conversation_group_photo_removed_raw');
           break;
         case 'messageActionChatAddUser':
-          notificationMessage = message.action.user_id == message.from_id ? _('conversation_returned_to_group') : _('conversation_invited_user_message_raw');
+        case 'messageActionChatAddUsers':
+          notificationMessage = _('conversation_invited_user_message_raw_raw');
+          break;
+        case 'messageActionChatReturn':
+          notificationMessage = _('conversation_returned_to_group_raw');
           break;
         case 'messageActionChatDeleteUser':
-          notificationMessage = message.action.user_id == message.from_id ? _('conversation_left_group') : _('conversation_kicked_user_message_raw');
+          notificationMessage = _('conversation_kicked_user_message_raw');
+          break;
+        case 'messageActionChatLeave':
+          notificationMessage = _('conversation_left_group_raw');
           break;
         case 'messageActionChatJoinedByLink':
-          notificationMessage = _('conversation_joined_by_link');
+          notificationMessage = _('conversation_joined_by_link_raw');
           break;
         case 'messageActionChannelCreate':
-          notificationMessage = _('conversation_created_channel');
+          notificationMessage = _('conversation_created_channel_raw');
           break;
         case 'messageActionChannelEditTitle':
-          notificationMessage = _('conversation_changed_channel_name');
+          notificationMessage = _('conversation_changed_channel_name_raw');
           break;
         case 'messageActionChannelEditPhoto':
-          notificationMessage = _('conversation_changed_channel_photo');
+          notificationMessage = _('conversation_changed_channel_photo_raw');
           break;
         case 'messageActionChannelDeletePhoto':
-          notificationMessage = _('conversation_removed_channel_photo');
+          notificationMessage = _('conversation_removed_channel_photo_raw');
           break;
       }
     }

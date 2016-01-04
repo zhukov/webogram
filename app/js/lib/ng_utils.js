@@ -1181,7 +1181,7 @@ angular.module('izhukov.utils', [])
   var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)/;
 
   var siteHashtags = {
-    Telegram: '#/im?q=%23{1}',
+    Telegram: 'tg://search_hashtag?hashtag={1}',
     Twitter: 'https://twitter.com/hashtag/{1}',
     Instagram: 'https://instagram.com/explore/tags/{1}/',
     'Google Plus': 'https://plus.google.com/explore/{1}'

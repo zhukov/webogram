@@ -60,12 +60,13 @@
         <span class="im_dialog_message_media" ng-if="dialogMessage.media" ng-switch="dialogMessage.media._">
           <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
           <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
-          <span ng-switch-when="messageMediaDocument" ng-switch="dialogMessage.media.document.sticker || false">
-            <span ng-switch-when="1" my-i18n="conversation_media_sticker"></span>
-            <span ng-switch-when="2">
+          <span ng-switch-when="messageMediaDocument" ng-switch="dialogMessage.media.document.isSpecial || false">
+            <span ng-switch-when="sticker">
               <span ng-bind-html="dialogMessage.media.document.stickerEmoji"></span>
-              (<my-i18n msgid="conversation_media_sticker"></my-i18n>)
+              <my-i18n msgid="conversation_media_sticker"></my-i18n>
             </span>
+            <span ng-switch-when="gif" my-i18n="conversation_media_gif"></span>
+            <span ng-switch-when="audio" my-i18n="conversation_media_audio"></span>
             <span ng-switch-default ng-bind="dialogMessage.media.document.file_name"></span>
           </span>
           <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
