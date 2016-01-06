@@ -1811,3 +1811,35 @@ a.media_modal_date:hover {
 .im_send_keyboard_wrap {
   padding: 0 5px;
 }
+
+.composer_sticker_suggest{
+    height:80px;
+    position:absolute;
+    overflow:hidden;
+    background-color: white;
+    border: 1px #DFDFDF solid;
+    padding: 2px 2px 0 2px;
+    margin:0;
+    .sticker_suggest_list{
+        padding:0;
+        white-space: nowrap;
+        margin:0;
+        display:inline-block;
+        .sticker_suggest_item{
+            &:hover{
+                background-color:#e4ecf2;
+            }
+            list-style-type:none;
+            display:inline-block;
+            margin: 0 3px;
+            img{
+                height:65px;
+            }
+        }
+    }
+    @scrollbar-height:10px;
+    @scrollbar-width:100px;
+    .my-scrollbar-bar-container{background:#EDF1F1;border-radius:2px;}
+    .my-scrollbar-bar{background:#BCCAD3;width:@scrollbar-width;height:@scrollbar-height;cursor:default;border-radius:2px;}
+    .my-scrollbar-bar:hover{background:#ACBECC;height:@scrollbar-height;}
+}

@@ -1492,6 +1492,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
+      var stickerSuggestEl = $('<div my-suggest-sticker-panel />').appendTo(document.body);
+      var suggestStickerScope = $scope.$new();
+      suggestStickerScope.locationElement = element.parent()[0];
+      $compile(stickerSuggestEl)(suggestStickerScope);
+
       var composerEmojiPanel;
       if (emojiPanel) {
         composerEmojiPanel = new EmojiPanel(emojiPanel, {
@@ -3253,3 +3258,144 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
   })
+  .directive('mySuggestStickerPanel', function (AppStickersManager) {
+    return {
+      template: '<div class="composer_sticker_suggest noselect" ng-show="draftMessage.text && draftMessage.suggestStickers.length"><div class="myHorizontalScrollbar"><div class="sticker_suggest_list noselect" ondragstart="return false;" ondrop="return false;"><div class="sticker_suggest_item" ng-repeat="stickerId in draftMessage.suggestStickers"><a my-load-sticker ng-click="steickerClicked(stickerId)" document="stickerId|document"></a></div></div></div></div>',
+      replace: true,
+      link: function ($scope, element, attrs) {
+        var locationEl = $($scope.locationElement);
+
+        var updatePosition=function() {
+          var offset = locationEl.offset();
+          var width = locationEl.outerWidth();
+          var height = element.height();
+          if (Config.Mobile) {
+            element.css({
+              top: offset.top - height - 10,
+              left: 0,
+              right: getScrollWidth()
+              
+            });
+          } else {
+            element.css({
+              top: offset.top - height - 6,
+              left: offset.left,
+              width: width - 2
+          });
+          }
+
+        }
+       
+        $scope.steickerClicked=function(stickerId) {
+          if (stickerId) {
+            $scope.draftMessage.sticker = stickerId;
+          }
+        }
+
+        $scope.$watch('draftMessage.suggestStickers', function (stickers) {
+          if (stickers && stickers.length) {
+            updatePosition();
+          }
+        });
+
+        $scope.$watch('draftMessage.text', function (newVal) {
+          var setSuggestStickers = function(stickers) {
+            $scope.draftMessage.suggestStickers = stickers;
+            if(!stickers){
+              $scope.$broadcast('myHorizontalScrollbar::reset');
+            }
+          }
+          if (newVal && newVal.length) {
+            var emoji = newVal.match(/^:([a-z0-9\-\+\*_]+?):$/gi) && newVal.replace(/:([a-z0-9\-\+\*_]+?):/gi, function(all, shortcut) {
+              var emojiCode = EmojiHelper.shortcuts[shortcut];
+              if (emojiCode !== undefined) {
+                return EmojiHelper.emojis[emojiCode][0];
+              }
+              return null;
+            });
+            if (emoji) {
+              AppStickersManager.getStickerSuggestSet().then(function(stickers) {
+                setSuggestStickers(stickers[emoji]);
+              });
+            } else {
+              setSuggestStickers(null);
+            }
+          } else {
+            setSuggestStickers(null);
+          }
+        });
+      }
+    };
+  })
+.directive('myHorizontalScrollbar', function () {
+    return {
+        restrict: 'EC',
+        transclude:true,
+        template:"<div class='my-scrollbar'><div class='my-scrollbar-container' ng-transclude></div><div class='my-scrollbar-bar-container'><div class='my-scrollbar-bar'/></div></div>",
+        link: function (scope, element, attrs) {
+
+            var scrollbar=element.find('.my-scrollbar-bar');
+            var scrollbarContainer=scrollbar.parent();
+            var container=element.find('.my-scrollbar-container');
+            var content=container.children();
+
+            var clickFlag=false;
+            var overFlag=false;
+
+            function getContenOffset(offset){
+              return offset*(container.width()-content.width())/(scrollbarContainer.width()-scrollbar.width());
+            }
+            function getScrollbarOffset(offset){
+              return offset*(scrollbarContainer.width()-scrollbar.width())/(container.width()-content.width());
+            }
+
+            element.on('mouseover',function(){
+              overFlag=true;
+              if(content.width()>container.width()) scrollbar.show();
+            });
+            element.on('mouseout',function(){
+              overFlag=false;
+              if(!clickFlag) scrollbar.hide();
+            });
+
+            scrollbar.on('mousedown',function(e){
+              clickFlag=true;
+              var range=scrollbarContainer.width()-scrollbar.width();
+              var oldX= e.pageX - scrollbar.offset().left;
+              $(document).on('mousemove.my-scrollbar-bar',function(e){               
+                var t = e.pageX - oldX-scrollbarContainer.offset().left;
+                t=t<0?0:t;
+                t=t>range?range:t;
+                scrollbar.css('margin-left', t);
+                content.css('margin-left', getContenOffset(t));
+                return false;
+              });
+            });
+
+            $(document).on('mouseup.my-scrollbar-bar',function(){
+              clickFlag=false;
+              if(!overFlag) scrollbar.hide();
+              $(this).off('mousemove.my-scrollbar-bar');
+            });
+
+            addWheelListener(container[0], function (e) {
+              var range=(container.width()-content.width());
+              var normalized = e.deltaY > 0 ? -1 : 1;
+              var marginLeft=parseInt(content.css('margin-left'),10);
+
+              marginLeft+=normalized*70;
+              marginLeft=marginLeft>0?0:marginLeft;
+              marginLeft=marginLeft<range?range:marginLeft;
+              
+              content.css('margin-left', marginLeft); 
+              scrollbar.css('margin-left', getScrollbarOffset(marginLeft));             
+              event.preventDefault();
+            });
+
+            scope.$on("myHorizontalScrollbar::reset", function(){
+              scrollbar.css('margin-left', 0);
+              content.css('margin-left', 0);
+            });
+        }
+    }
+})

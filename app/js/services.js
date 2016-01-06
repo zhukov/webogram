@@ -2284,7 +2284,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     pushPopularSticker: pushPopularSticker,
     getStickers: getStickers,
     getStickerset: getStickerset,
-    getStickersImages: getStickersImages
+    getStickersImages: getStickersImages,
+    getStickerSuggestSet:getStickerSuggestSet
   };
 
   function start () {
@@ -2392,14 +2393,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function getStickers (force) {
+  function getStickers (force,processStickers) {
+  	if(!processStickers) processStickers=processRawStickers;
     return Storage.get('all_stickers').then(function (stickers) {
       var layer = Config.Schema.API.layer;
       if (stickers.layer != layer) {
         stickers = false;
       }
       if (stickers && stickers.date > tsNow(true) && !force) {
-        return processRawStickers(stickers);
+        return processStickers(stickers);
       }
       return MtpApiManager.invokeApi('messages.getAllStickers', {
         hash: stickers && stickers.hash || ''
@@ -2414,12 +2416,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         if (notModified) {
           Storage.set({all_stickers: newStickers});
-          return processRawStickers(newStickers);
+          return processStickers(newStickers);
         }
 
         return getStickerSets(newStickers).then(function () {
           Storage.set({all_stickers: newStickers});
-          return processRawStickers(newStickers);
+          return processStickers(newStickers);
         });
 
       });
@@ -2522,6 +2524,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       scope: scope,
       windowClass: 'stickerset_modal_window mobile_modal'
     });
+  }
+  
+  function getStickerSuggestSet()
+  { 
+  	  var processSuggest=function(stickerSets){
+  	  	 var rtn={};
+	  	  var fullSets=stickerSets.fullSets;
+	  	  for(var i in fullSets){ 
+	  	  	  var packs=fullSets[i].packs;
+	  	  	   for(var j in packs){
+	  	  	   	   var pack=packs[j];
+	  	  	   	   rtn[pack.emoticon]=rtn[pack.emoticon]||[];
+	  	  	   	   rtn[pack.emoticon]=rtn[pack.emoticon].concat(pack.documents);
+	  	  	   }
+	  	  }
+	  	  return rtn;
+  	  };
+  	  return getStickers(false,processSuggest);
   }
 })
 
