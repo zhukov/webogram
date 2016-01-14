@@ -63,6 +63,7 @@
 
     <div ng-if="error" class="error_modal_details" ng-switch="error.detailsShown">
       <textarea ng-switch-when="true" rows="3" onclick="this.select()">Method: {{error.input || 'N/A'}}
+Url: {{error.url || 'N/A'}}
 Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}
 Stack: {{error.originalError.stack || error.stack}}</textarea>
       <div ng-switch-default>

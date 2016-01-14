@@ -208,18 +208,20 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     var requestData = xhrSendBuffer ? resultBuffer : resultArray,
         requestPromise;
+    var url = MtpDcConfigurator.chooseServer(dcID);
+    var baseError = {code: 406, type: 'NETWORK_BAD_RESPONSE', url: url};
     try {
-      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID), requestData, {
+      requestPromise =  $http.post(url, requestData, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
     } catch (e) {
-      requestPromise = $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
+      requestPromise = $q.reject(angular.extend(baseError, {originalError: e}));
     }
     return requestPromise.then(
       function (result) {
         if (!result.data || !result.data.byteLength) {
-          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
+          return $q.reject(baseError);
         }
 
         try {
@@ -230,14 +232,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var msg_len     = deserializer.fetchInt('msg_len');
 
         } catch (e) {
-          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
+          return $q.reject(angular.extend(baseError, {originalError: e}));
         }
 
         return deserializer;
       },
       function (error) {
         if (!error.message && !error.type) {
-          error = {code: 406, type: 'NETWORK_BAD_REQUEST', originalError: error};
+          error = angular.extend(baseError, {originalError: error});
         }
         return $q.reject(error);
       }
@@ -286,7 +288,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         deferred.reject(error);
       });
     }, function (error) {
-      console.log(dT(), 'req_pq error', error.message);
+      console.error(dT(), 'req_pq error', error.message);
       deferred.reject(error);
     });
 
@@ -1201,19 +1203,22 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var requestData = xhrSendBuffer ? request.getBuffer() : request.getArray();
 
       var requestPromise;
+      var url = MtpDcConfigurator.chooseServer(self.dcID, self.upload);
+      var baseError = {code: 406, type: 'NETWORK_BAD_RESPONSE', url: url};
+
       try {
         options = angular.extend(options || {}, {
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID, self.upload), requestData, options);
+        requestPromise =  $http.post(url, requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
       return requestPromise.then(
         function (result) {
           if (!result.data || !result.data.byteLength) {
-            return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
+            return $q.reject(baseError);
           }
           return result;
         },
@@ -1228,7 +1233,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
             });
           }
           if (!error.message && !error.type) {
-            error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+            error = angular.extend(baseError, {type: 'NETWORK_BAD_REQUEST', originalError: error});
           }
           return $q.reject(error);
         }
