@@ -216,7 +216,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
                 }, rejectPromise);
-              });
+              }, rejectPromise);
             }
           }
           else if (!options.rawError && error.code == 420) {

@@ -14,6 +14,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 .service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiFileManager, MtpApiManager, RichTextProcessor, ErrorService, Storage, _) {
   var users = {},
       usernames = {},
+      userAccess = {},
       cachedPhotoLocations = {},
       contactsFillPromise,
       contactsList,
@@ -151,6 +152,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   };
 
+  function saveUserAccess (id, accessHash) {
+    userAccess[id] = accessHash;
+  }
+
   function getUserStatusForSort(status) {
     if (status) {
       var expires = status.expires || status.was_online;
@@ -175,7 +180,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (angular.isObject(id)) {
       return id;
     }
-    return users[id] || {id: id, deleted: true, num: 1};
+    return users[id] || {id: id, deleted: true, num: 1, access_hash: userAccess[id]};
   }
 
   function getSelf() {
@@ -464,6 +469,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getContacts: getContacts,
     saveApiUsers: saveApiUsers,
     saveApiUser: saveApiUser,
+    saveUserAccess: saveUserAccess,
     getUser: getUser,
     getSelf: getSelf,
     getUserInput: getUserInput,
@@ -834,6 +840,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         peerParams = peerString.substr(1).split('_');
 
     if (firstChar == 'u') {
+      AppUsersManager.saveUserAccess(peerParams[0], peerParams[1]);
       return {
         _: 'inputPeerUser',
         user_id: peerParams[0],

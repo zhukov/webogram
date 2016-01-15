@@ -1495,7 +1495,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         updateChannelActions();
 
       }, function () {
-        safeReplaceObject($scope.state, {error: true});
+        safeReplaceObject($scope.state, {error: true, loaded: true});
       });
     }
 

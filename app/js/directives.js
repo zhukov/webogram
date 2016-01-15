@@ -3316,6 +3316,49 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
+  .directive('myArcProgress', function () {
+    var html = '<svg class="progress-arc" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle class="progress-arc-circle" fill="transparent" stroke-dashoffset="0"></circle><circle class="progress-arc-bar" fill="transparent" stroke-dashoffset="0"></circle></svg>';
+    return {
+      scope: {
+        progress: '=myArcProgress'
+      },
+      link: function  ($scope, element, attrs) {
+        element
+          .html(html)
+          .addClass('progress-arc-wrap');
+
+        var svgEl = element[0].firstChild;
+        var circle = $('.progress-arc-circle', element);
+        var bar = $('.progress-arc-bar', element);
+
+        var width = attrs.width || 40;
+        var radius = width * 0.86;
+        var stroke = width * 0.14;
+        var center = width / 2;
+
+        $(svgEl).attr('width', width);
+        $(svgEl).attr('height', width);
+        circle.attr('cx', center);
+        circle.attr('cy', center);
+        circle.attr('r', radius);
+        circle.css({strokeWidth: stroke});
+
+        bar.attr('cx', center);
+        bar.attr('cy', center);
+        bar.attr('r', radius);
+        bar.css({strokeWidth: stroke});
+
+        var fullLen = 2 * Math.PI * radius;
+        $scope.$watch('progress', function (newProgress) {
+          var progress = newProgress / 100.0;
+          progress = Math.max(0.0, Math.min(progress, 1.0));
+          bar.css({strokeDasharray: (progress * fullLen) + ', ' + ((1 - progress) * fullLen)});
+        });
+
+      }
+    }
+  })
+
   .directive('myScrollToOn', function () {
 
     return {
