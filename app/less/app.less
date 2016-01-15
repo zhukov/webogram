@@ -416,6 +416,62 @@ a {
   }
 }
 
+.progress-arc-wrap {
+  display: block;
+  border-radius: 100%;
+}
+.progress-arc circle {
+  stroke-dashoffset: 0;
+  stroke: rgba(0,0,0,0.3);
+  stroke-width: 3px;
+}
+.progress-arc .progress-arc-bar {
+  stroke: #FFF;
+  transform-origin: center center;
+  transition: stroke-dasharray 500ms linear;
+
+  -webkit-animation:  infinite_rotation 2s linear infinite;
+  -moz-animation:     infinite_rotation 2s linear infinite;
+  -ms-animation:      infinite_rotation 2s linear infinite;
+  animation:          infinite_rotation 2s linear infinite;
+}
+
+/* Infinite rotation */
+@-webkit-keyframes infinite_rotation {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@-moz-keyframes infinite_rotation {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@-ms-keyframes infinite_rotation {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes infinite_rotation {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+
 .dropdown-menu {
   border-radius: 2px;
   padding: 0;
