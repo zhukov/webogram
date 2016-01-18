@@ -1979,7 +1979,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadGif', function(AppDocsManager) {
+  .directive('myLoadGif', function(AppDocsManager, $timeout) {
 
     return {
       link: link,
@@ -1995,6 +1995,15 @@ angular.module('myApp.directives', ['myApp.filters'])
       imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height});
 
       var downloadPromise = false;
+
+      // Demo
+      // $scope.document.progress = {enabled: true, percent: 30};
+      // $timeout(function () {
+      //   $scope.document.progress.percent = 60;
+      // }, 3000);
+      // $timeout(function () {
+      //   $scope.document.progress.percent = 100;
+      // }, 10000);
 
       $scope.isActive = false;
 
@@ -3248,8 +3257,8 @@ angular.module('myApp.directives', ['myApp.filters'])
         var bar = $('.progress-arc-bar', element);
 
         var width = attrs.width || 40;
-        var radius = width * 0.86;
-        var stroke = width * 0.14;
+        var radius = width / 2 * 0.86;
+        var stroke = width / 2 * 0.14;
         var center = width / 2;
 
         $(svgEl).attr('width', width);

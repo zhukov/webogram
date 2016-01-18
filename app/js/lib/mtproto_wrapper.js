@@ -384,11 +384,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function getFileStorage () {
-    if (TmpfsFileStorage.isAvailable()) {
-      return TmpfsFileStorage;
-    }
-    if (IdbFileStorage.isAvailable()) {
-      return IdbFileStorage;
+    if (!Config.Modes.memory_only) {
+      if (TmpfsFileStorage.isAvailable()) {
+        return TmpfsFileStorage;
+      }
+      if (IdbFileStorage.isAvailable()) {
+        return IdbFileStorage;
+      }
     }
     return MemoryFileStorage;
   }

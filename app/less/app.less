@@ -427,6 +427,7 @@ a {
 }
 .progress-arc .progress-arc-bar {
   stroke: #FFF;
+  stroke: rgba(255,255,255,0.95);
   transform-origin: center center;
   transition: stroke-dasharray 500ms linear;
 
@@ -3553,12 +3554,31 @@ h5 {
 }
 
 /* Gif documents */
-.img_gif_with_progress_wrap {
+.img_gif_image_wrap {
   position: relative;
+}
+.img_gif_meta {
+  width: 40px;
+  height: 40px;
+  line-height: 0;
+  position: absolute;
+  z-index: 2;
+  border-radius: 50%;
   overflow: hidden;
-  float: left;
-  margin-top: 3px;
-  max-width: 100%;
+  margin: 0 auto;
+  top: 50%;
+  left: 50%;
+  margin-left: -20px;
+  margin-top: -20px;
+}
+.img_gif_label {
+  font-weight: bold;
+  color: #FFF;
+  display: block;
+  line-height: 40px;
+  font-size: 15px;
+  background: rgba(0,0,0,0.3);
+  text-align: center;
 }
 
 .img_gif_thumb {
@@ -3585,13 +3605,13 @@ h5 {
   right: 0;
   padding: 4px;
 }
-.img_gif_label,
-.img_gif_size {
-  padding: 1px 8px;
-  background: rgba(0,0,0,0.5);
-  border-radius: 3px;
-  overflow: hidden;
-}
+// .img_gif_label,
+// .img_gif_size {
+//   padding: 1px 8px;
+//   background: rgba(0,0,0,0.5);
+//   border-radius: 3px;
+//   overflow: hidden;
+// }
 
 .img_gif_progress_wrap {
   position: absolute;

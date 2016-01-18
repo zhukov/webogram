@@ -4,10 +4,7 @@
 
     <div class="img_gif_meta" ng-show="!isActive" ng-switch="document.progress.enabled">
       <div ng-switch-when="true" my-arc-progress="document.progress.percent"></div>
-      <div ng-switch-default class="img_gif_info_wrap">
-        <div class="img_gif_label pull-left">GIF</div>
-        <div ng-if="!document.downloaded" class="img_gif_size pull-right" ng-bind="::document.size | formatSize"></div>
-      </div>
+      <div ng-switch-default class="img_gif_label">GIF</div>
     </div>
 
     <div ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" ng-switch="document.mime_type == 'video/mp4'">
