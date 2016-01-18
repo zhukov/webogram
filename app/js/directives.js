@@ -1999,7 +1999,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.isActive = false;
 
       // Demo
-      $scope.document.progress = {enabled: true, percent: 30};
+      // $scope.document.progress = {enabled: true, percent: 30};
       // $timeout(function () {
       //   $scope.document.progress.percent = 60;
       // }, 3000);
