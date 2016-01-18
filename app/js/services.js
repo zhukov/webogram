@@ -2828,6 +2828,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function addChannelState (channelID, pts) {
+    if (!pts) {
+      throw new Error('Add channel state without pts ' + channelID);
+    }
     if (channelStates[channelID] === undefined) {
       channelStates[channelID] = {
         pts: pts,
@@ -2842,9 +2845,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function getChannelState (channelID, pts) {
     if (channelStates[channelID] === undefined) {
-      if (!pts) {
-        throw new Error('Get channel empty state without pts ' + channelID);
-      }
       addChannelState(channelID, pts);
     }
     return channelStates[channelID];
