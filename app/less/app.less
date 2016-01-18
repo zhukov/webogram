@@ -420,14 +420,8 @@ a {
   display: block;
   border-radius: 100%;
 }
-.progress-arc circle {
-  stroke-dashoffset: 0;
-  stroke: rgba(0,0,0,0.3);
-  stroke-width: 3px;
-}
 .progress-arc .progress-arc-bar {
-  stroke: #FFF;
-  stroke: rgba(255,255,255,0.95);
+  stroke-dashoffset: 0;
   transform-origin: center center;
   transition: stroke-dasharray 500ms linear;
 
@@ -435,6 +429,31 @@ a {
   -moz-animation:     infinite_rotation 2s linear infinite;
   -ms-animation:      infinite_rotation 2s linear infinite;
   animation:          infinite_rotation 2s linear infinite;
+
+  stroke: #FFF;
+  stroke: rgba(255,255,255,0.95);
+
+  .progress-arc-intermediate & {
+    stroke: url(#grad-intermediate);
+  }
+}
+.stop0 {
+  stop-opacity: 1.0;
+  // .progress-arc-intermediate-blue & {
+    stop-color: #68a4d1;
+  // }
+}
+.stop60 {
+  stop-opacity: 1.0;
+  // .progress-arc-intermediate-blue & {
+    stop-color: #68a4d1;
+  // }
+}
+.stop100 {
+  stop-opacity: 0.0;
+  // .progress-arc-intermediate-blue & {
+    stop-color: #68a4d1;
+  // }
 }
 
 /* Infinite rotation */
@@ -3556,8 +3575,10 @@ h5 {
 /* Gif documents */
 .img_gif_image_wrap {
   position: relative;
+  overflow: hidden;
 }
 .img_gif_meta {
+  background: rgba(0,0,0,0.3);
   width: 40px;
   height: 40px;
   line-height: 0;
@@ -3576,61 +3597,58 @@ h5 {
   color: #FFF;
   display: block;
   line-height: 40px;
-  font-size: 15px;
-  background: rgba(0,0,0,0.3);
+  font-size: 13px;
   text-align: center;
+}
+.icon-cancel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -9px;
+  margin-top: -1px;
+
+  .icon-bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: #FFF;
+    transform-origin: 50% 50%;
+
+    &:first-child {
+      .transform(rotate(-45deg));
+    }
+    &:last-child {
+      .transform(translate3d(0,-2px,0) rotate(45deg));
+    }
+  }
 }
 
 .img_gif_thumb {
-  -webkit-filter: blur(3px);
-  -moz-filter: blur(3px);
-  -o-filter: blur(3px);
-  -ms-filter: blur(3px);
-  filter: blur(3px);
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  -o-filter: blur(2px);
+  -ms-filter: blur(2px);
+  filter: blur(2px);
   filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='3');
-  margin: -1px;
-  padding: 1px;
+  transform-origin: center center;
+  -webkit-transform-origin: center center;
+  -webkit-transform: scale(1.02, 1.02);
+  transform: scale(1.02, 1.02);
+
   max-width: 100%;
   height: auto;
 }
-.img_gif_image {
-  max-width: 100%;
+
+.img_gif_meta_contents {
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
 }
-.img_gif_info_wrap {
-  color: #fff;
-  font-size: 10px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 4px;
+.img_gif_meta_contents.ng-leave.ng-leave-active,
+.img_gif_meta_contents.ng-enter {
+  opacity: 0;
 }
-// .img_gif_label,
-// .img_gif_size {
-//   padding: 1px 8px;
-//   background: rgba(0,0,0,0.5);
-//   border-radius: 3px;
-//   overflow: hidden;
-// }
-
-.img_gif_progress_wrap {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  .tg_progress {
-    background: rgba(0,0,0, 0.6);
-    border-color: rgba(0,0,0, 0.6);
-    border-width: 8px;
-    height: 18px;
-    border-radius: 0;
-  }
-
-  .progress-bar {
-    background: #fff;
-    height: 2px;
-  }
+.img_gif_meta_contents.ng-leave,
+.img_gif_meta_contents.ng-enter.ng-enter-active {
+  opacity: 1;
 }
 
 .countries_modal_window {

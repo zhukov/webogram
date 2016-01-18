@@ -1548,13 +1548,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         var target = $event.target;
         while (target) {
-          if (target.className.indexOf('im_message_outer_wrap') != -1) {
+          if (target instanceof SVGElement) {
+            target = target.parentNode;
+            continue;
+          }
+          if (target.className && target.className.indexOf('im_message_outer_wrap') != -1) {
             if (Config.Mobile) {
               return false;
             }
             break;
           }
           if (Config.Mobile &&
+              target.className &&
               target.className.indexOf('im_message_body') != -1) {
             break;
           }

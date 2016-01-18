@@ -1996,6 +1996,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var downloadPromise = false;
 
+      $scope.isActive = false;
+
       // Demo
       // $scope.document.progress = {enabled: true, percent: 30};
       // $timeout(function () {
@@ -2004,8 +2006,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       // $timeout(function () {
       //   $scope.document.progress.percent = 100;
       // }, 10000);
-
-      $scope.isActive = false;
 
       $scope.toggle = function (e) {
         if (e && checkClick(e, true)) {
@@ -2017,6 +2017,16 @@ angular.module('myApp.directives', ['myApp.filters'])
           onContentLoaded(function () {
             $scope.isActive = !$scope.isActive;
             $scope.$emit('ui_height');
+
+            var video = $('video', element)[0];
+            if (video) {
+              if (!$scope.isActive) {
+                video.pause();
+                video.currentTime = 0;
+              } else {
+                video.play();
+              }
+            }
           })
           return;
         }
@@ -2030,8 +2040,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         downloadPromise = AppDocsManager.downloadDoc($scope.document.id);
 
         downloadPromise.then(function () {
-          $scope.isActive = true;
-          $scope.$emit('ui_height');
+          $timeout(function () {
+            $scope.isActive = true;
+          }, 200);
         })
       }
 
@@ -3242,7 +3253,25 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
   .directive('myArcProgress', function () {
-    var html = '<svg class="progress-arc" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle class="progress-arc-circle" fill="transparent" stroke-dashoffset="0"></circle><circle class="progress-arc-bar" fill="transparent" stroke-dashoffset="0"></circle></svg>';
+    var html =
+'<svg class="progress-arc" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">\
+  <defs>\
+    <linearGradient id="grad-intermediate">\
+      <stop offset="60%" class="stop0" />\
+      <stop offset="60%" class="stop60" />\
+      <stop offset="100%" class="stop100"/>\
+    </linearGradient>\
+  </defs>\
+  <circle class="progress-arc-bar" fill="transparent" stroke-dashoffset="0"></circle>\
+</svg>';
+
+    function updateProgress (bar, progress, fullLen) {
+      progress = Math.max(0.0, Math.min(progress, 1.0));
+      var minProgress = 0.2;
+      progress = minProgress + (1 - minProgress) * progress;
+      bar.css({strokeDasharray: (progress * fullLen) + ', ' + ((1 - progress) * fullLen)});
+    }
+
     return {
       scope: {
         progress: '=myArcProgress'
@@ -3252,8 +3281,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           .html(html)
           .addClass('progress-arc-wrap');
 
+        var intermediate = attrs.intermediate && $scope.$eval(attrs.intermediate);
+
+        if (intermediate) {
+          element.addClass('progress-arc-intermediate');
+        }
+
         var svgEl = element[0].firstChild;
-        var circle = $('.progress-arc-circle', element);
         var bar = $('.progress-arc-bar', element);
 
         var width = attrs.width || 40;
@@ -3263,10 +3297,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         $(svgEl).attr('width', width);
         $(svgEl).attr('height', width);
-        circle.attr('cx', center);
-        circle.attr('cy', center);
-        circle.attr('r', radius);
-        circle.css({strokeWidth: stroke});
 
         bar.attr('cx', center);
         bar.attr('cy', center);
@@ -3274,12 +3304,13 @@ angular.module('myApp.directives', ['myApp.filters'])
         bar.css({strokeWidth: stroke});
 
         var fullLen = 2 * Math.PI * radius;
-        $scope.$watch('progress', function (newProgress) {
-          var progress = newProgress / 100.0;
-          progress = Math.max(0.0, Math.min(progress, 1.0));
-          bar.css({strokeDasharray: (progress * fullLen) + ', ' + ((1 - progress) * fullLen)});
-        });
-
+        if (intermediate) {
+          updateProgress(bar, 0.3, fullLen);
+        } else {
+          $scope.$watch('progress', function (newProgress) {
+            updateProgress(bar, newProgress / 100.0, fullLen);
+          });
+        }
       }
     }
   })

@@ -3,8 +3,14 @@
   <div class="img_gif_image_wrap">
 
     <div class="img_gif_meta" ng-show="!isActive" ng-switch="document.progress.enabled">
-      <div ng-switch-when="true" my-arc-progress="document.progress.percent"></div>
-      <div ng-switch-default class="img_gif_label">GIF</div>
+      <div ng-switch-when="true" class="img_gif_meta_contents">
+        <i class="icon icon-cancel">
+          <i class="icon icon-bar"></i>
+          <i class="icon icon-bar"></i>
+        </i>
+        <div my-arc-progress="document.progress.percent"></div>
+      </div>
+      <div ng-switch-default class="img_gif_label noselect" class="img_gif_meta_contents">GIF</div>
     </div>
 
     <div ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" ng-switch="document.mime_type == 'video/mp4'">
