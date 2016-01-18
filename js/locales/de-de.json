@@ -475,7 +475,7 @@
     "message_forwarded_message": "Weitergeleitete Nachricht",
     "message_via_bot": "via {bot}",
     "message_forwarded_message_mobile": "Weitergeleitet von {from}, {date}",
-    "message_forwarded_via_message_mobile": "Forwarded from {from} via {bot}, {date}",
+    "message_forwarded_via_message_mobile": "Weitergeleitet von {from} via {bot}, {date}",
     "message_attach_audio_message": "Sprachnachricht",
     "message_attach_audio_play": "Abspielen",
     "message_attach_document_open": "Öffnen",
