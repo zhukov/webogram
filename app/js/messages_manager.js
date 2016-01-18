@@ -181,7 +181,10 @@ angular.module('myApp.services')
     }
 
     NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
-    ApiUpdatesManager.addChannelState(channelID, dialog.pts);
+
+    if (dialog.pts) {
+      ApiUpdatesManager.addChannelState(channelID, dialog.pts);
+    }
   }
 
   function getTopMessages (limit) {

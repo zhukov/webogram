@@ -12,7 +12,7 @@ angular.module('myApp', [
   'ngRoute',
   'ngSanitize',
   'ngTouch',
-  'ngAnimate',
+  // 'ngAnimate',
   'ui.bootstrap',
   'mediaPlayer',
   'izhukov.utils',

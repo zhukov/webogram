@@ -423,37 +423,40 @@ a {
 .progress-arc .progress-arc-bar {
   stroke-dashoffset: 0;
   transform-origin: center center;
-  transition: stroke-dasharray 500ms linear;
-
-  -webkit-animation:  infinite_rotation 2s linear infinite;
-  -moz-animation:     infinite_rotation 2s linear infinite;
-  -ms-animation:      infinite_rotation 2s linear infinite;
-  animation:          infinite_rotation 2s linear infinite;
-
-  stroke: #FFF;
-  stroke: rgba(255,255,255,0.95);
+  fill: transparent;
 
   .progress-arc-intermediate & {
-    stroke: url(#grad-intermediate);
+    stroke: #68a4d1;
+
+    -webkit-animation:  infinite_rotation 0.8s linear infinite;
+    -moz-animation:     infinite_rotation 0.8s linear infinite;
+    -ms-animation:      infinite_rotation 0.8s linear infinite;
+    animation:          infinite_rotation 0.8s linear infinite;
+  }
+
+  .progress-arc-percent & {
+    stroke: #FFF;
+    stroke: rgba(255,255,255,0.95);
+
+    transition: stroke-dasharray 500ms linear;
+
+    -webkit-animation:  infinite_rotation 2s linear infinite;
+    -moz-animation:     infinite_rotation 2s linear infinite;
+    -ms-animation:      infinite_rotation 2s linear infinite;
+    animation:          infinite_rotation 2s linear infinite;
   }
 }
 .stop0 {
   stop-opacity: 1.0;
-  // .progress-arc-intermediate-blue & {
-    stop-color: #68a4d1;
-  // }
+  stop-color: #68a4d1;
 }
 .stop60 {
   stop-opacity: 1.0;
-  // .progress-arc-intermediate-blue & {
-    stop-color: #68a4d1;
-  // }
+  stop-color: #68a4d1;
 }
 .stop100 {
   stop-opacity: 0.0;
-  // .progress-arc-intermediate-blue & {
-    stop-color: #68a4d1;
-  // }
+  stop-color: #68a4d1;
 }
 
 /* Infinite rotation */
@@ -1412,7 +1415,8 @@ a.im_dialog_selected {
 }
 
 .im_history {
-  padding: 20px 0 0 0;
+  // padding: 20px 0 0 0;
+  padding: 0;
   position: relative;
 }
 .im_message_unread_split {
@@ -2263,6 +2267,37 @@ a.im_message_fwd_photo {
 
   .im_history_to_bottom & {
     display: none;
+  }
+}
+.im_history_loading {
+  width: 60px;
+  margin: 0 auto;
+  visibility: hidden;
+
+  &.vertical-aligned {
+    visibility: visible;
+  }
+}
+
+.im_history_loading_more {
+  display: block;
+  width: 26px;
+  margin: 0 auto;
+  padding: 20px 0 0;
+  visibility: hidden;
+
+  &.im_history_loading_more_active {
+    visibility: visible;
+  }
+}
+.im_history_loading_less {
+  display: block;
+  width: 26px;
+  margin: 0 auto;
+  visibility: hidden;
+
+  &.im_history_loading_less_active {
+    visibility: visible;
   }
 }
 

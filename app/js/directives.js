@@ -1999,7 +1999,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.isActive = false;
 
       // Demo
-      // $scope.document.progress = {enabled: true, percent: 30};
+      $scope.document.progress = {enabled: true, percent: 30};
       // $timeout(function () {
       //   $scope.document.progress.percent = 60;
       // }, 3000);
@@ -3256,13 +3256,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     var html =
 '<svg class="progress-arc" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">\
   <defs>\
-    <linearGradient id="grad-intermediate">\
-      <stop offset="60%" class="stop0" />\
+    <linearGradient id="grad_intermediate%id%" x1="0%" y1="0%" x2="100%" y2="0%">\
+      <stop offset="0%" class="stop0" />\
       <stop offset="60%" class="stop60" />\
-      <stop offset="100%" class="stop100"/>\
+      <stop offset="100%"  class="stop100"/>\
     </linearGradient>\
   </defs>\
-  <circle class="progress-arc-bar" fill="transparent" stroke-dashoffset="0"></circle>\
+  <circle class="progress-arc-bar"></circle>\
 </svg>';
 
     function updateProgress (bar, progress, fullLen) {
@@ -3272,40 +3272,43 @@ angular.module('myApp.directives', ['myApp.filters'])
       bar.css({strokeDasharray: (progress * fullLen) + ', ' + ((1 - progress) * fullLen)});
     }
 
+    var num = 0;
+
     return {
       scope: {
         progress: '=myArcProgress'
       },
       link: function  ($scope, element, attrs) {
-        element
-          .html(html)
-          .addClass('progress-arc-wrap');
-
-        var intermediate = attrs.intermediate && $scope.$eval(attrs.intermediate);
-
-        if (intermediate) {
-          element.addClass('progress-arc-intermediate');
-        }
-
-        var svgEl = element[0].firstChild;
-        var bar = $('.progress-arc-bar', element);
-
-        var width = attrs.width || 40;
-        var radius = width / 2 * 0.86;
-        var stroke = width / 2 * 0.14;
+        var intermediate = !attrs.myArcProgress;
+        var width = attrs.width || element.width() || 40;
+        var stroke = attrs.stroke || (width / 2 * 0.14);
         var center = width / 2;
+        var radius = center - stroke;
 
-        $(svgEl).attr('width', width);
-        $(svgEl).attr('height', width);
+        // Doesn't work without unique id for every gradient
+        var curNum = ++num;
 
-        bar.attr('cx', center);
-        bar.attr('cy', center);
-        bar.attr('r', radius);
-        bar.css({strokeWidth: stroke});
+        element
+          .html(html.replace('%id%', curNum))
+          .addClass('progress-arc-wrap')
+          .addClass(intermediate ? 'progress-arc-intermediate' : 'progress-arc-percent')
+          .css({width: width, height: width});
+
+        $(element[0].firstChild)
+          .attr('width', width)
+          .attr('height', width);
+
+        var bar = $('.progress-arc-bar', element);
+        bar
+          .attr('cx', center)
+          .attr('cy', center)
+          .attr('r', radius)
+          .css({strokeWidth: stroke});
 
         var fullLen = 2 * Math.PI * radius;
         if (intermediate) {
           updateProgress(bar, 0.3, fullLen);
+          bar.css({stroke: 'url(#grad_intermediate' + curNum + ')'});
         } else {
           $scope.$watch('progress', function (newProgress) {
             updateProgress(bar, newProgress / 100.0, fullLen);

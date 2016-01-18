@@ -1297,14 +1297,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       lessPending = false;
-      lessActive = true;
+      $scope.state.lessActive = lessActive = true;
 
       var curJump = jump,
           curLessJump = ++lessJump,
           limit = 0,
           backLimit = 20;
       AppMessagesManager.getHistory($scope.curDialog.peerID, minID, limit, backLimit).then(function (historyResult) {
-        lessActive = false;
+        $scope.state.lessActive = lessActive = false;
         if (curJump != jump || curLessJump != lessJump) return;
 
         var i, id;
@@ -1345,7 +1345,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       morePending = false;
-      moreActive = true;
+      $scope.state.moreActive = moreActive = true;
 
       var curJump = jump,
           curMoreJump = ++moreJump,
@@ -1356,7 +1356,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         : AppMessagesManager.getHistory($scope.curDialog.peerID, maxID, limit);
 
       getMessagesPromise.then(function (historyResult) {
-        moreActive = false;
+        $scope.state.moreActive = moreActive = false;
         if (curJump != jump || curMoreJump != moreJump) return;
 
         angular.forEach(historyResult.history, function (id) {
@@ -1403,9 +1403,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         limit = 10;
       }
 
-      moreActive = false;
+      $scope.state.moreActive = moreActive = false;
       morePending = false;
-      lessActive = false;
+      $scope.state.lessActive = lessActive = false;
       lessPending = false;
 
       var prerenderedLen = peerHistory.messages.length;

@@ -90,8 +90,8 @@
         <div ng-switch-default class="im_history_not_selected" my-vertical-position="0.35" padding="true" my-i18n="im_select_a_chat"></div>
       </div>
 
-      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35" padding="true">
-        <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
+      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_loading" my-vertical-position="0.35" padding="true">
+        <div my-arc-progress stroke="5" width="60"></div>
       </div>
 
       <div ng-show="state.loaded">
@@ -103,14 +103,18 @@
 
               <div class="im_history_scrollable">
                   <div class="im_history" ng-class="{im_history_selectable: !historyState.botActions, im_history_select_active: historyState.selectActions}">
-                    <div ng-if="state.empty"  class="im_history_empty" ng-switch="state.mayBeHasMore" my-vertical-position="0.25" padding="true">
-                      <span ng-switch-when="true">
-                        <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
-                      </span>
-                      <span ng-switch-default my-i18n="im_no_messages"></span>
+
+                    <div ng-if="state.empty" ng-switch="state.mayBeHasMore">
+                      <div ng-switch-when="true" class="im_history_loading" my-vertical-position="0.25" padding="true">
+                        <div my-arc-progress stroke="5" width="60"></div>
+                      </div>
+                      <div ng-switch-default class="im_history_empty" my-vertical-position="0.25" padding="true" my-i18n="im_no_messages"></div>
                     </div>
 
                     <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
+                      <div class="im_history_loading_more" ng-if="!state.empty" ng-class="{im_history_loading_more_active: state.moreActive}">
+                        <div my-arc-progress stroke="3" width="26"></div>
+                      </div>
                       <div class="im_history_messages_peer" ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
                         <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in peerHistory.messages"></div>
                       </div>
@@ -118,9 +122,12 @@
 
                   </div>
 
-                  <div class="im_history_typing_wrap">
+                  <div class="im_history_typing_wrap" ng-switch="historyState.skipped">
 
-                    <div class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType &amp;&amp; !state.empty" ng-switch="historyState.typing.length" my-i18n>
+                    <div ng-switch-when="true" class="im_history_loading_less" ng-class="{im_history_loading_less_active: state.lessActive}">
+                      <div my-arc-progress stroke="3" width="26"></div>
+                    </div>
+                    <div ng-switch-default class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType &amp;&amp; !state.empty" ng-switch="historyState.typing.length" my-i18n>
                       <span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
                       <span ng-switch-when="2" my-i18n-format="im_two_typing"></span>
                       <span ng-switch-default my-i18n-format="im_many_typing"></span>
