@@ -1193,7 +1193,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
         $scope.$broadcast('ui_peer_change');
         $scope.$broadcast('ui_history_change');
-        safeReplaceObject($scope.state, {loaded: true, empty: !peerHistory.messages.length});
+        safeReplaceObject($scope.state, {loaded: true, empty: !peerHistory.messages.length, mayBeHasMore: true});
 
         updateBotActions();
         updateChannelActions();

@@ -112,7 +112,7 @@
                     </div>
 
                     <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
-                      <div class="im_history_loading_more" ng-if="!state.empty" ng-class="{im_history_loading_more_active: state.moreActive}">
+                      <div class="im_history_loading_more" ng-show="state.loaded && (!state.empty || state.mayBeHasMore)" ng-class="{im_history_loading_more_active: state.moreActive}">
                         <div my-arc-progress stroke="3" width="26"></div>
                       </div>
                       <div class="im_history_messages_peer" ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
