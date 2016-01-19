@@ -1907,7 +1907,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
+.service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, $timeout, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
   var docs = {},
       docsForHistory = {},
       windowW = $(window).width(),
@@ -2096,13 +2096,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
 
     downloadPromise.then(function (blob) {
-      delete historyDoc.progress;
       if (blob) {
         FileManager.getFileCorrectUrl(blob, doc.mime_type).then(function (url) {
           historyDoc.url = $sce.trustAsResourceUrl(url);
         })
         historyDoc.downloaded = true;
       }
+      historyDoc.progress.percent = 100;
+      $timeout(function () {
+        delete historyDoc.progress;
+      });
       console.log('file save done');
     }, function (e) {
       console.log('document download failed', e);
@@ -2282,6 +2285,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var stickersetItems = {};
   var applied = false;
   var started = false;
+
+  // $rootScope.$on('apiUpdate', function (e, update) {
+  //   if (update._ == 'updateStickerSets') {
+  //   }
+  // });
 
   return {
     start: start,

@@ -289,7 +289,21 @@ function scrollToNode (scrollable, node, scroller) {
   }
 }
 
+if (Config.Modes.animations &&
+    typeof window.requestAnimationFrame == 'function') {
+  window.onAnimationFrameCallback = function (cb) {
+    return (function () {
+      window.requestAnimationFrame(cb);
+    });
+  };
+} else {
+  window.onAnimationFrameCallback = function (cb) {
+    return cb;
+  };
+}
+
 function onContentLoaded (cb) {
+  cb = onAnimationFrameCallback(cb);
   setZeroTimeout(cb);
 }
 

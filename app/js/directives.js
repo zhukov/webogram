@@ -1099,6 +1099,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           historyEl = $('.im_history', element)[0],
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
+          emptyWrapEl = $('.im_history_empty_wrap', element)[0],
           bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
@@ -1412,6 +1413,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(historyMessagesEl).css({marginTop: 0});
         var marginTop = scrollableWrap.offsetHeight
                         - historyMessagesEl.offsetHeight
+                        - emptyWrapEl.offsetHeight
                         - (Config.Mobile ? 0 : 39);
 
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
