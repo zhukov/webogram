@@ -4661,7 +4661,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.$broadcast('ui_height');
       $scope.stickersetLoaded = true;
       $scope.stickerset = result.set;
-      $scope.stickersetInstalled = result.installed;
+      $scope.stickersetInstalled = result.set.pFlags.installed;
       $scope.documents = result.documents;
 
       $scope.stickerEmojis = {};

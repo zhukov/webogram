@@ -2281,15 +2281,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   var currentStickers = [];
   var currentStickersets = [];
-  var installedStickersets = {};
   var stickersetItems = {};
   var applied = false;
   var started = false;
 
-  // $rootScope.$on('apiUpdate', function (e, update) {
-  //   if (update._ == 'updateStickerSets') {
-  //   }
-  // });
+  $rootScope.$on('apiUpdate', function (e, update) {
+    if (update._ == 'updateStickerSets') {
+      // Storage.remove('all_stickers').then(function () {
+      //   getStickers(true);
+      // });
+    }
+  });
 
   return {
     start: start,
@@ -2298,8 +2300,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     installStickerset: installStickerset,
     pushPopularSticker: pushPopularSticker,
     getStickers: getStickers,
-    getStickerset: getStickerset,
-    getStickersImages: getStickersImages
+    getStickerset: getStickerset
   };
 
   function start () {
@@ -2354,32 +2355,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function processRawStickers(stickers) {
     if (applied !== stickers.hash) {
       applied = stickers.hash;
-      var i, j, len1, len2, doc, set, setItems, fullSet;
+      var i, j, len1, len2, doc, set, docIDs, documents;
 
       currentStickersets = [];
-      currentStickers = [];
       len1 = stickers.sets.length;
       for (i = 0; i < len1; i++) {
         set = stickers.sets[i];
-        fullSet = stickers.fullSets[set.id];
-        len2 = fullSet.documents.length;
-        setItems = [];
-        for (j = 0; j < len2; j++) {
-          doc = fullSet.documents[j];
-          AppDocsManager.saveDoc(doc);
-          currentStickers.push(doc.id);
-          setItems.push(doc.id);
+        if (set.pFlags.disabled) {
+          continue;
         }
-        currentStickersets.push({
-          id: set.id,
-          title: set.title,
-          short_name: set.short_name,
-          installed: (set.flags & (1 << 0)) > 0,
-          disabled: (set.flags & (1 << 1)) > 0,
-          official: (set.flags & (1 << 2)) > 0,
-          docIDs: setItems
-        });
-        installedStickersets[set.id] = true;
+        documents = stickers.fullSets[set.id].documents;
+        len2 = documents.length;
+        docIDs = [];
+        for (j = 0; j < len2; j++) {
+          doc = documents[j];
+          AppDocsManager.saveDoc(doc);
+          docIDs.push(doc.id);
+        }
+        set.docIDs = docIDs;
       }
     }
 
@@ -2387,20 +2380,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var resultStickersets = currentStickersets;
       if (popularStickers.length) {
         resultStickersets = currentStickersets.slice();
-        var setItems = [];
+        var docIDs = [];
         var i, len;
         for (i = 0, len = popularStickers.length; i < len; i++) {
-          setItems.push(popularStickers[i].id);
+          docIDs.push(popularStickers[i].id);
         }
         resultStickersets.unshift({
           id: 0,
           title: _('im_stickers_tab_recent_raw'),
           short_name: '',
-          installed: true,
-          disabled: false,
-          official: false,
-          docIDs: setItems
-        })
+          docIDs: docIDs
+        });
       }
 
       return resultStickersets;
@@ -2465,26 +2455,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return $q.all(promises);
   }
 
-  function downloadStickerThumb (docID) {
-    var doc = AppDocsManager.getDoc(docID);
-    var thumbLocation = angular.copy(doc.thumb.location);
-    thumbLocation.sticker = true;
-    return MtpApiFileManager.downloadSmallFile(thumbLocation).then(function (blob) {
-      return {
-        id: doc.id,
-        src: FileManager.getUrl(blob, 'image/webp')
-      };
-    });
-  }
-
-  function getStickersImages () {
-    var promises = [];
-    angular.forEach(currentStickers, function (docID) {
-      promises.push(downloadStickerThumb (docID));
-    });
-    return $q.all(promises);
-  }
-
   function getStickerset (inputStickerset) {
     return MtpApiManager.invokeApi('messages.getStickerSet', {
       stickerset: inputStickerset
@@ -2492,7 +2462,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       for (var i = 0; i < result.documents.length; i++) {
         AppDocsManager.saveDoc(result.documents[i]);
       }
-      result.installed = installedStickersets[result.set.id] !== undefined;
       return result;
     });
   }
@@ -2511,13 +2480,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       disabled: false
     }).then(function (result) {
       if (uninstall) {
-        delete installedStickersets[set.id];
+
       } else {
-        installedStickersets[set.id] = true;
+        ApiUpdatesManager.processUpdateMessage({
+          _: 'updateShort',
+          update: {
+            _: 'updateNewStickerSet',
+            channel_id: channelID,
+            messages: msgIDs,
+            pts: affectedMessages.pts,
+            pts_count: affectedMessages.pts_count
+          }
+        });
       }
-      Storage.remove('all_stickers').then(function () {
-        getStickers(true);
-      });
     });
   }
 
