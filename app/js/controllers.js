@@ -4657,11 +4657,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   .controller('StickersetModalController', function ($scope, $rootScope, $modalInstance, MtpApiManager, RichTextProcessor, AppStickersManager, AppDocsManager, AppMessagesManager, LocationParamsService) {
     $scope.slice = {limit: 20, limitDelta: 20};
 
+    var fullSet;
+
     AppStickersManager.getStickerset($scope.inputStickerset).then(function (result) {
       $scope.$broadcast('ui_height');
       $scope.stickersetLoaded = true;
+      fullSet = result;
       $scope.stickerset = result.set;
-      $scope.stickersetInstalled = result.set.pFlags.installed;
+      $scope.stickersetInstalled = result.set.pFlags.installed == true;
       $scope.documents = result.documents;
 
       $scope.stickerEmojis = {};
@@ -4676,7 +4679,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
     $scope.toggleInstalled = function (installed) {
-      AppStickersManager.installStickerset($scope.stickerset, !installed).then(function () {
+      AppStickersManager.installStickerset(fullSet, !installed).then(function () {
         $scope.stickersetInstalled = installed;
       })
     };

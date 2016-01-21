@@ -1222,6 +1222,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           });
           break;
       }
+      return $q.reject(error);
     });
   }
 
@@ -2277,20 +2278,69 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppStickersManager', function ($q, $rootScope, $modal, _, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage) {
+.service('AppStickersManager', function ($q, $rootScope, $modal, _, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage, ApiUpdatesManager) {
 
-  var currentStickers = [];
-  var currentStickersets = [];
-  var stickersetItems = {};
-  var applied = false;
   var started = false;
+  var applied = false;
+  var currentStickerSets = [];
 
   $rootScope.$on('apiUpdate', function (e, update) {
+    var rewriteCached = false;
     if (update._ == 'updateStickerSets') {
-      // Storage.remove('all_stickers').then(function () {
-      //   getStickers(true);
-      // });
+      getStickers(true);
+      return true;
     }
+    if (update._ != 'updateNewStickerSet' &&
+        update._ != 'updateDelStickerSet' &&
+        update._ != 'updateStickerSetsOrder') {
+      return false;
+    }
+
+    return Storage.get('all_stickers').then(function (stickers) {
+      if (stickers &&
+          stickers.layer == Config.Schema.API.layer) {
+        switch (update._) {
+          case 'updateNewStickerSet':
+            var fullSet = update.stickerset;
+            var set = fullSet.set;
+            set.pFlags.installed = true;
+            stickers.fullSets[set.id] = fullSet;
+            var pos = false;
+            for (var i = 0, len = stickers.sets.length; i < len; i++) {
+              if (stickers.sets[i].id == set.id) {
+                pos = i;
+                break;
+              }
+            }
+            if (pos !== false) {
+              stickers.sets.splice(pos, 1);
+            }
+            stickers.sets.unshift(set);
+            break;
+
+          case 'updateDelStickerSet':
+            for (var i = 0, len = stickers.sets.length; i < len; i++) {
+              if (stickers.sets[i].id == update.id) {
+                stickers.sets.splice(i, 1);
+                break;
+              }
+            }
+            delete stickers.fullSets[update.id];
+            break;
+
+          case 'updateStickerSetsOrder':
+            var order = update.order;
+            stickers.sets.sort(function (a, b) {
+              return order.indexOf(a.id) - order.indexOf(b.id);
+            });
+            break;
+        }
+        Storage.set({all_stickers: stickers}).then(function () {
+          getStickers(true)
+        });
+      }
+    });
+
   });
 
   return {
@@ -2357,7 +2407,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       applied = stickers.hash;
       var i, j, len1, len2, doc, set, docIDs, documents;
 
-      currentStickersets = [];
+      currentStickerSets = [];
       len1 = stickers.sets.length;
       for (i = 0; i < len1; i++) {
         set = stickers.sets[i];
@@ -2373,13 +2423,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           docIDs.push(doc.id);
         }
         set.docIDs = docIDs;
+        currentStickerSets.push(set);
       }
     }
 
     return getPopularStickers().then(function (popularStickers) {
-      var resultStickersets = currentStickersets;
+      var resultStickersets = currentStickerSets;
       if (popularStickers.length) {
-        resultStickersets = currentStickersets.slice();
+        resultStickersets = currentStickerSets.slice();
         var docIDs = [];
         var i, len;
         for (i = 0, len = popularStickers.length; i < len; i++) {
@@ -2393,6 +2444,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         });
       }
 
+      console.log('stickers', resultStickersets);
       return resultStickersets;
     });
   }
@@ -2466,33 +2518,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function installStickerset (set, uninstall) {
+  function installStickerset (fullSet, uninstall) {
     var method = uninstall
       ? 'messages.uninstallStickerSet'
       : 'messages.installStickerSet';
     var inputStickerset = {
       _: 'inputStickerSetID',
-      id: set.id,
-      access_hash: set.access_hash
+      id: fullSet.set.id,
+      access_hash: fullSet.set.access_hash
     };
     return MtpApiManager.invokeApi(method, {
       stickerset: inputStickerset,
       disabled: false
     }).then(function (result) {
+      var update;
       if (uninstall) {
-
+        update = {_: 'updateDelStickerSet', id: fullSet.set.id};
       } else {
-        ApiUpdatesManager.processUpdateMessage({
-          _: 'updateShort',
-          update: {
-            _: 'updateNewStickerSet',
-            channel_id: channelID,
-            messages: msgIDs,
-            pts: affectedMessages.pts,
-            pts_count: affectedMessages.pts_count
-          }
-        });
+        update = {_: 'updateNewStickerSet', stickerset: fullSet};
       }
+      ApiUpdatesManager.processUpdateMessage({
+        _: 'updateShort',
+        update: update
+      });
     });
   }
 
