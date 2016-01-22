@@ -944,6 +944,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  function resolveInlineMention (username) {
+    return resolveUsername(username).then(function (peerID) {
+      if (peerID > 0) {
+        var bot = AppUsersManager.getUser(peerID);
+        if (bot.pFlags.bot && bot.bot_inline_placeholder !== undefined) {
+          return bot.bot_inline_placeholder;
+        }
+      }
+      return $q.reject();
+    }, function (error) {
+      error.handled = true;
+      return $q.reject(error);
+    });
+  }
+
   function getPeerID (peerString) {
     if (angular.isObject(peerString)) {
       return peerString.user_id
@@ -990,6 +1005,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getPeer: getPeer,
     getPeerPhoto: getPeerPhoto,
     resolveUsername: resolveUsername,
+    resolveInlineMention: resolveInlineMention,
     isChannel: isChannel,
     isMegagroup: isMegagroup,
     isBot: isBot

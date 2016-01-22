@@ -2380,6 +2380,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return cancelEvent($event);
     }
 
+    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32}) /;
+    var lastInlineBot = false;
     function onMessageChange(newVal) {
       // console.log('ctrl text changed', newVal);
       // console.trace('ctrl text changed', newVal);
@@ -2393,6 +2395,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         Storage.set(backupDraftObj);
         // console.log(dT(), 'draft save', backupDraftObj);
+
+        var matches;
+        if (matches = newVal.match(inlineUsernameRegex)) {
+          AppPeersManager.resolveInlineMention(matches[1]).then(function (placeholder) {
+            $scope.draftMessage.inlinePlaceholder = placeholder;
+          }, function () {
+
+          })
+        }
       } else {
         Storage.remove('draft' + $scope.curDialog.peerID);
         // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
