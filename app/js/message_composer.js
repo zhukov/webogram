@@ -364,7 +364,7 @@ EmojiTooltip.prototype.createTooltip = function () {
 
 
 EmojiTooltip.prototype.selectCategory = function (cat, force) {
-  if (this.cat === cat && !force) {
+  if (!this.tab && this.cat === cat && !force) {
     return false;
   }
   $('.active', this.categoriesEl).removeClass('active');
@@ -564,6 +564,12 @@ EmojiTooltip.prototype.onStickersScroll = function (scrollable, scrollTop) {
   $('.active', this.categoriesEl).removeClass('active');
   this.cat = currentCat;
   this.activateStickerCategory();
+};
+
+EmojiTooltip.prototype.onStickersChanged = function () {
+  if (this.tab) {
+    this.updateStickersContents(true);
+  }
 };
 
 EmojiTooltip.prototype.activateStickerCategory = function () {

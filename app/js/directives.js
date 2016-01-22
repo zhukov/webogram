@@ -1493,6 +1493,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
+      $scope.$on('stickers_changed', function () {
+        emojiTooltip.onStickersChanged();
+      });
+
+
       var composerEmojiPanel;
       if (emojiPanel) {
         composerEmojiPanel = new EmojiPanel(emojiPanel, {

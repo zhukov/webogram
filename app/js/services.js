@@ -2285,71 +2285,73 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   var currentStickerSets = [];
 
   $rootScope.$on('apiUpdate', function (e, update) {
-    var rewriteCached = false;
-    if (update._ == 'updateStickerSets') {
-      getStickers(true);
-      return true;
-    }
-    if (update._ != 'updateNewStickerSet' &&
+    if (update._ != 'updateStickerSets' &&
+        update._ != 'updateNewStickerSet' &&
         update._ != 'updateDelStickerSet' &&
         update._ != 'updateStickerSetsOrder') {
       return false;
     }
 
     return Storage.get('all_stickers').then(function (stickers) {
-      if (stickers &&
-          stickers.layer == Config.Schema.API.layer) {
-        switch (update._) {
-          case 'updateNewStickerSet':
-            var fullSet = update.stickerset;
-            var set = fullSet.set;
-            set.pFlags.installed = true;
-            stickers.fullSets[set.id] = fullSet;
-            var pos = false;
-            for (var i = 0, len = stickers.sets.length; i < len; i++) {
-              if (stickers.sets[i].id == set.id) {
-                pos = i;
-                break;
-              }
-            }
-            if (pos !== false) {
-              stickers.sets.splice(pos, 1);
-            }
-            stickers.sets.unshift(set);
-            break;
-
-          case 'updateDelStickerSet':
-            for (var i = 0, len = stickers.sets.length; i < len; i++) {
-              if (stickers.sets[i].id == update.id) {
-                stickers.sets.splice(i, 1);
-                break;
-              }
-            }
-            delete stickers.fullSets[update.id];
-            break;
-
-          case 'updateStickerSetsOrder':
-            var order = update.order;
-            stickers.sets.sort(function (a, b) {
-              return order.indexOf(a.id) - order.indexOf(b.id);
-            });
-            break;
-        }
-        Storage.set({all_stickers: stickers}).then(function () {
-          getStickers(true)
-        });
+      if (!stickers ||
+          stickers.layer != Config.Schema.API.layer) {
+        $rootScope.$broadcast('stickers_changed');
       }
+      switch (update._) {
+        case 'updateNewStickerSet':
+          var fullSet = update.stickerset;
+          var set = fullSet.set;
+          var pos = false;
+          for (var i = 0, len = stickers.sets.length; i < len; i++) {
+            if (stickers.sets[i].id == set.id) {
+              pos = i;
+              break;
+            }
+          }
+          if (pos !== false) {
+            stickers.sets.splice(pos, 1);
+          }
+          set.pFlags.installed = true;
+          stickers.sets.unshift(set);
+          stickers.fullSets[set.id] = fullSet;
+          break;
+
+        case 'updateDelStickerSet':
+          var set;
+          for (var i = 0, len = stickers.sets.length; i < len; i++) {
+            set = stickers.sets[i];
+            if (set.id == update.id) {
+              set.pFlags.installed = false;
+              stickers.sets.splice(i, 1);
+              break;
+            }
+          }
+          delete stickers.fullSets[update.id];
+          break;
+
+        case 'updateStickerSetsOrder':
+          var order = update.order;
+          stickers.sets.sort(function (a, b) {
+            return order.indexOf(a.id) - order.indexOf(b.id);
+          });
+          break;
+      }
+      stickers.hash = getStickerSetsHash(stickers.sets);
+      stickers.date = 0;
+      Storage.set({all_stickers: stickers}).then(function () {
+        $rootScope.$broadcast('stickers_changed');
+      });
     });
 
   });
 
   return {
     start: start,
+    getStickers: getStickers,
     openStickersetLink: openStickersetLink,
     openStickerset: openStickerset,
     installStickerset: installStickerset,
     pushPopularSticker: pushPopularSticker,
-    getStickers: getStickers,
     getStickerset: getStickerset
   };
 
@@ -2360,46 +2362,38 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
-  function getPopularStickers () {
-    return Storage.get('stickers_popular').then(function (popStickers) {
-      var result = [];
-      var i, len, docID;
-      if (popStickers && popStickers.length) {
-        for (i = 0, len = popStickers.length; i < len; i++) {
-          docID = popStickers[i][0];
-          if (AppDocsManager.hasDoc(docID)) {
-            result.push({id: docID, rate: popStickers[i][1]});
-          }
+  function getStickers (force) {
+    return Storage.get('all_stickers').then(function (stickers) {
+      var layer = Config.Schema.API.layer;
+      if (stickers.layer != layer) {
+        stickers = false;
+      }
+      if (stickers && stickers.date > tsNow(true) && !force) {
+        return processRawStickers(stickers);
+      }
+      return MtpApiManager.invokeApi('messages.getAllStickers', {
+        hash: stickers && stickers.hash || ''
+      }).then(function (newStickers) {
+        var notModified = newStickers._ == 'messages.allStickersNotModified';
+        if (notModified) {
+          newStickers = stickers;
         }
-      };
-      return result;
-    });
-  }
+        newStickers.date = tsNow(true) + 3600;
+        newStickers.layer = layer;
+        delete newStickers._;
 
-  function pushPopularSticker (id) {
-    getPopularStickers().then(function (popularStickers) {
-      var exists = false;
-      var count = popularStickers.length;
-      var result = [];
-      for (var i = 0; i < count; i++) {
-        if (popularStickers[i].id == id) {
-          exists = true;
-          popularStickers[i].rate++;
+        if (notModified) {
+          Storage.set({all_stickers: newStickers});
+          return processRawStickers(newStickers);
         }
-        result.push([popularStickers[i].id, popularStickers[i].rate]);
-      }
-      if (exists) {
-        result.sort(function (a, b) {
-          return b[1] - a[1];
+
+        return getStickerSets(newStickers, stickers && stickers.fullSets).then(function () {
+          Storage.set({all_stickers: newStickers});
+          return processRawStickers(newStickers);
         });
-      } else {
-        if (result.length > 15) {
-          result = result.slice(0, 15);
-        }
-        result.push([id, 1]);
-      }
-      ConfigStorage.set({stickers_popular: result});
-    });
+
+      });
+    })
   }
 
   function processRawStickers(stickers) {
@@ -2443,49 +2437,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           docIDs: docIDs
         });
       }
-
-      console.log('stickers', resultStickersets);
       return resultStickersets;
     });
   }
 
-  function getStickers (force) {
-    return Storage.get('all_stickers').then(function (stickers) {
-      var layer = Config.Schema.API.layer;
-      if (stickers.layer != layer) {
-        stickers = false;
-      }
-      if (stickers && stickers.date > tsNow(true) && !force) {
-        return processRawStickers(stickers);
-      }
-      return MtpApiManager.invokeApi('messages.getAllStickers', {
-        hash: stickers && stickers.hash || ''
-      }).then(function (newStickers) {
-        var notModified = newStickers._ == 'messages.allStickersNotModified';
-        if (notModified) {
-          newStickers = stickers;
-        }
-        newStickers.date = tsNow(true) + 3600;
-        newStickers.layer = layer;
-        delete newStickers._;
-
-        if (notModified) {
-          Storage.set({all_stickers: newStickers});
-          return processRawStickers(newStickers);
-        }
-
-        return getStickerSets(newStickers).then(function () {
-          Storage.set({all_stickers: newStickers});
-          return processRawStickers(newStickers);
-        });
-
-      });
-    })
-  }
-
-  function getStickerSets (allStickers) {
+  function getStickerSets (allStickers, prevCachedSets) {
     var promises = [];
-    var cachedSets = allStickers.fullSets || {};
+    var cachedSets = prevCachedSets || allStickers.fullSets || {};
     allStickers.fullSets = {};
     angular.forEach(allStickers.sets, function (shortSet) {
       var fullSet = cachedSets[shortSet.id];
@@ -2505,6 +2463,48 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     });
     return $q.all(promises);
+  }
+
+  function getPopularStickers () {
+    return Storage.get('stickers_popular').then(function (popStickers) {
+      var result = [];
+      var i, len, docID;
+      if (popStickers && popStickers.length) {
+        for (i = 0, len = popStickers.length; i < len; i++) {
+          docID = popStickers[i][0];
+          if (AppDocsManager.hasDoc(docID)) {
+            result.push({id: docID, rate: popStickers[i][1]});
+          }
+        }
+      };
+      return result;
+    });
+  }
+
+  function pushPopularSticker (id) {
+    getPopularStickers().then(function (popularStickers) {
+      var exists = false;
+      var count = popularStickers.length;
+      var result = [];
+      for (var i = 0; i < count; i++) {
+        if (popularStickers[i].id == id) {
+          exists = true;
+          popularStickers[i].rate++;
+        }
+        result.push([popularStickers[i].id, popularStickers[i].rate]);
+      }
+      if (exists) {
+        result.sort(function (a, b) {
+          return b[1] - a[1];
+        });
+      } else {
+        if (result.length > 15) {
+          result = result.slice(0, 15);
+        }
+        result.push([id, 1]);
+      }
+      ConfigStorage.set({stickers_popular: result});
+    });
   }
 
   function getStickerset (inputStickerset) {
@@ -2560,6 +2560,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       scope: scope,
       windowClass: 'stickerset_modal_window mobile_modal'
     });
+  }
+
+  function getStickerSetsHash (stickerSets) {
+    var acc = 0, set;
+    for (var i = 0; i < stickerSets.length; i++) {
+      set = stickerSets[i];
+      if (set.pFlags.disabled || !set.pFlags.installed) {
+        continue;
+      }
+      acc = ((acc * 20261) + 0x80000000 + set.hash) % 0x80000000;
+    }
+    return acc;
   }
 })
 
