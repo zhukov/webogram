@@ -1558,6 +1558,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             }
             break;
           }
+          if (target.className &&
+              target.className.indexOf('im_message_date') != -1) {
+            if ($scope.historyState.canReply) {
+              selectedReply(messageID);
+            } else {
+              selectedForward(messageID);
+            }
+            return false;
+          }
           if (Config.Mobile &&
               target.className &&
               target.className.indexOf('im_message_body') != -1) {

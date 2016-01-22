@@ -39,7 +39,7 @@
             <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
           </div>
         </div>
-        <span class="im_message_date" ng-bind="::historyMessage.date | time"></span>
+        <span class="im_message_date clickable" ng-bind="::historyMessage.date | time"></span>
       </div>
 
       <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media ? true : false}">
