@@ -1145,6 +1145,7 @@ a.im_panel_peer_photo .peer_initials {
   min-height: 50px;
   line-height: 20px;
   height: auto;
+  margin-right: -15px;
 
   &:focus {
     border: 0;
@@ -1156,6 +1157,13 @@ a.im_panel_peer_photo .peer_initials {
   .im_send_field_wrap_2ndbtn & {
     padding-right: 65px;
   }
+}
+
+.rtl-dir .composer_rich_textarea,
+.rtl-dir .composer_textarea {
+  direction: rtl;
+  margin-left: -15px;
+  margin-right: 0;
 }
 
 .icon-paperclip {
