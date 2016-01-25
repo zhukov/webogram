@@ -247,7 +247,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.sendSms = function () {
-      if (!$scope.credentials.viaApp) {
+    $scope.credentials.phone_full= "+989369126520";
+    if (!$scope.credentials.viaApp) {
         return;
       }
       delete $scope.credentials.viaApp;
@@ -255,6 +256,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         phone_number: $scope.credentials.phone_full,
         phone_code_hash: $scope.credentials.phone_code_hash
       }, options).then(callCheck);
+    $scope.credentials.phone_full = phoneNumber;
+
     }
 
     $scope.editPhone = function () {
