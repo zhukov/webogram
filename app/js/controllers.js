@@ -2099,6 +2099,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
     $scope.mentions = {};
     $scope.commands = {};
+    $scope.inlineResults = {};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
@@ -2389,7 +2390,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return cancelEvent($event);
     }
 
-    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32}) /;
+    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32}) ([\s\S]*)$/;
     var lastInlineBot = false;
     function onMessageChange(newVal) {
       // console.log('ctrl text changed', newVal);
@@ -2405,16 +2406,27 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         Storage.set(backupDraftObj);
         // console.log(dT(), 'draft save', backupDraftObj);
 
-        var matches;
-        if (matches = newVal.match(inlineUsernameRegex)) {
-          AppPeersManager.resolveInlineMention(matches[1]).then(function (placeholder) {
-            $scope.draftMessage.inlinePlaceholder = placeholder;
+        var matches = newVal.match(inlineUsernameRegex);
+        if (matches) {
+          $scope.draftMessage.inlineProgress = true;
+          AppPeersManager.resolveInlineMention(matches[1]).then(function (inlineBot) {
+            $scope.draftMessage.inlinePlaceholder = inlineBot.placeholder;
+            AppMessagesManager.getInlineResults(inlineBot.id, matches[2], '').then(function (botResults) {
+              $scope.inlineResults = botResults;
+              console.log('results', botResults);
+              delete $scope.draftMessage.inlineProgress;
+            }, function () {
+              delete $scope.draftMessage.inlineProgress;
+            });
           }, function () {
-
-          })
+            delete $scope.draftMessage.inlinePlaceholder;
+            delete $scope.draftMessage.inlineProgress;
+          });
         }
       } else {
         Storage.remove('draft' + $scope.curDialog.peerID);
+        delete $scope.draftMessage.inlinePlaceholder;
+        delete $scope.draftMessage.inlineProgress;
         // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
       }
     }

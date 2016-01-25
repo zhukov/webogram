@@ -1517,16 +1517,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         getSendOnEnter: function () {
           return sendOnEnter;
         },
-        getPeerImage: function (element, peerID, noReplace) {
-          if (cachedPeerPhotos[peerID] && !noReplace) {
-            element.replaceWith(cachedPeerPhotos[peerID]);
-            return;
-          }
+        dropdownDirective: function (element, callback) {
           var scope = $scope.$new(true);
-          scope.peerID = peerID;
-          peerPhotoCompiled(scope, function (clonedElement) {
-            cachedPeerPhotos[peerID] = clonedElement;
+          $compile('<div my-composer-dropdown></div>')(scope, function (clonedElement) {
             element.replaceWith(clonedElement);
+            callback(scope, clonedElement);
           });
         },
         mentions: $scope.mentions,
@@ -3289,7 +3284,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         var width = attrs.width || element.width() || 40;
         var stroke = attrs.stroke || (width / 2 * 0.14);
         var center = width / 2;
-        var radius = center - stroke;
+        var radius = center - (stroke / 2);
 
         // Doesn't work without unique id for every gradient
         var curNum = ++num;
@@ -3345,3 +3340,63 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
   })
+
+  .directive('myComposerDropdown', function () {
+
+    return {
+      templateUrl: templateUrl('composer_dropdown')
+    }
+  })
+
+  .directive('myEmojiSuggestions', function () {
+
+    return {
+      link: function($scope, element, attrs) {
+        $scope.$watchCollection('emojiCodes', function (codes) {
+          // var codes = $scope.$eval(attrs.myEmojiSuggestions);
+          var html = [];
+          var iconSize = Config.Mobile ? 26 : 20;
+
+          var emoticonCode, emoticonData, spritesheet, pos, categoryIndex;
+          var count = Math.min(5, codes.length);
+          var i, x, y;
+
+          for (i = 0; i < count; i++) {
+            emoticonCode = codes[i];
+            if (emoticonCode.code) {
+              emoticonCode = emoticonCode.code;
+            }
+            if (emoticonData = Config.Emoji[emoticonCode]) {
+              spritesheet = EmojiHelper.spritesheetPositions[emoticonCode];
+              categoryIndex = spritesheet[0];
+              pos = spritesheet[1];
+              x = iconSize * spritesheet[3];
+              y = iconSize * spritesheet[2];
+              html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w', iconSize, ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
+            }
+          }
+          onContentLoaded(function () {
+            element.html(html);
+          });
+        });
+      }
+    };
+
+  })
+
+  .directive('myInlineResults', function () {
+
+    return {
+      templateUrl: templateUrl('inline_results'),
+      scope: {
+        botResults: '=myInlineResults'
+      },
+
+      link: function  ($scope, element, attrs) {
+        $scope.$watch('botResults.results.length', function (show) {
+          console.log($scope.botResults, show);
+        });
+      }
+    }
+  })
+

@@ -1,0 +1,15 @@
+<div class="inline_results_wrap">
+  <div class="inline_result_wrap" ng-repeat="result in botResults.results track by result.qID" ng-switch="result.type">
+    <div ng-switch-default class="inline_result_">
+      <div class="inline_article_thumb_wrap pull-left" ng-switch="result.thumbUrl.length > 0">
+        <img ng-switch-when="true" ng-src="{{result.thumbUrl}}"/>
+        <div ng-switch-default class="inline_article_thumb_initials" ng-bind="result.initials"></div>
+      </div>
+      <div class="inline_article_content_wrap">
+        <div class="inline_article_title" ng-if="::result.title.length > 0" ng-bind-html="::result.rTitle"></div>
+        <div class="inline_article_description" ng-if="::result.description.length > 0" ng-bind-html="::result.rDescription"></div>
+        <div class="inline_article_url" ng-if="::result.url.length > 0" ng-bind="::result.url"></div>
+      </div>
+    </div>
+  </div>
+</div>

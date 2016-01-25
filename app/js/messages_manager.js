@@ -3010,7 +3010,31 @@ angular.module('myApp.services')
         };
       }
     })
-  })
+  });
+
+  var inlineResults = {};
+  function getInlineResults (botID, query, offset) {
+    return MtpApiManager.invokeApi('messages.getInlineBotResults', {
+      bot: AppUsersManager.getUserInput(botID),
+      query: query,
+      offset: offset
+    }).then(function(botResults) {
+      var queryID = botResults.query_id;
+      delete botResults._;
+      delete botResults.flags;
+      delete botResults.query_id;
+      angular.forEach(botResults.results, function (result) {
+        var qID = queryID + '_' + result.id;
+        result.qID = qID;
+
+        result.rTitle = RichTextProcessor.wrapRichText(result.title, {noLinebreaks: true, noLinks: true});
+        result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
+
+        inlineResults[qID] = result;
+      });
+      return botResults;
+    });
+  }
 
   return {
     getConversations: getConversations,
@@ -3033,6 +3057,7 @@ angular.module('myApp.services')
     getMessagePeer: getMessagePeer,
     getMessageThumb: getMessageThumb,
     clearDialogCache: clearDialogCache,
+    getInlineResults: getInlineResults,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
     wrapReplyMarkup: wrapReplyMarkup,

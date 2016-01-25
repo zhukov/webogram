@@ -949,7 +949,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (peerID > 0) {
         var bot = AppUsersManager.getUser(peerID);
         if (bot.pFlags.bot && bot.bot_inline_placeholder !== undefined) {
-          return bot.bot_inline_placeholder;
+          return qSync.when({
+            id: peerID,
+            placeholder: bot.bot_inline_placeholder
+          });
         }
       }
       return $q.reject();

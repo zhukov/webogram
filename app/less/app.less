@@ -434,6 +434,10 @@ a {
     animation:          infinite_rotation 0.8s linear infinite;
   }
 
+  .composer_progress_icon & {
+    stroke: rgba(0,0,0,0.3);
+  }
+
   .progress-arc-percent & {
     stroke: #FFF;
     stroke: rgba(255,255,255,0.95);
@@ -449,14 +453,23 @@ a {
 .stop0 {
   stop-opacity: 1.0;
   stop-color: #68a4d1;
+  .composer_progress_icon & {
+    stop-color: rgba(0,0,0,0.3);
+  }
 }
 .stop60 {
   stop-opacity: 1.0;
   stop-color: #68a4d1;
+  .composer_progress_icon & {
+    stop-color: rgba(0,0,0,0.3);
+  }
 }
 .stop100 {
   stop-opacity: 0.0;
   stop-color: #68a4d1;
+  .composer_progress_icon & {
+    stop-color: rgba(0,0,0,0.3);
+  }
 }
 
 /* Infinite rotation */
@@ -2485,7 +2498,27 @@ img.img_fullsize {
 }
 
 /* Message composer */
+.composer_progress_icon {
+  display: block;
+  opacity: 0;
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  cursor: pointer;
+  padding: 0;
+
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+  pointer-events: none;
+
+  .composer_progress_enabled & {
+    opacity: 1;
+  }
+}
 .composer_emoji_insert_btn {
+  opacity: 1;
   display: block;
   position: absolute;
   right: 3px;
@@ -2496,7 +2529,13 @@ img.img_fullsize {
   width: 22px;
   height: 22px;
   margin-top: 1px;
+  transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+
+  .composer_progress_enabled & {
+    opacity: 0;
+  }
 }
+
 .icon-emoji {
   display: inline-block;
   width: 22px;
@@ -3090,6 +3129,46 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
 
   .composer_keyboard_btn:hover & {
     opacity: 1.0;
+  }
+}
+
+.im_send_form_inline_results {
+  position: relative;
+  display: none;
+}
+.inline_results_wrap {
+  position: absolute;
+  bottom: 0;
+  background: #FFF;
+  border: 0;
+
+  .box-shadow(0px 1px 1px 0px rgba(60,75,87,0.27));
+
+  // margin-top: -5px;
+  // margin-left: -1px;
+  // position: static;
+  display: block;
+  float: none;
+  top: auto;
+  left: auto;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  z-index: auto;
+}
+
+.inline_result_wrap {
+  display: block;
+  font-size: 13px;
+  line-height: 15px;
+  padding: 4px 10px;
+  color: #52719a;
+
+  &:hover,
+  &.composer_autocomplete_option_active {
+    color: #52719a;
+    background: #f2f6fa;
   }
 }
 

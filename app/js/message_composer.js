@@ -674,13 +674,51 @@ EmojiPanel.prototype.update = function () {
 
 
 function MessageComposer (textarea, options) {
+  var self = this;
+
   this.textareaEl = $(textarea);
 
   this.setUpInput();
 
   this.autoCompleteWrapEl = $('<div class="composer_dropdown_wrap"></div>').appendTo(document.body);
-  this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu"></ul>').appendTo(this.autoCompleteWrapEl);
+  var autoCompleteEl = $('<div></div>').appendTo(this.autoCompleteWrapEl);
 
+  options.dropdownDirective(div, function (scope, autoCompleteEl) {
+    self.autoCompleteEl = autoCompleteEl;
+    self.autoCompleteScope = scope;
+    self.setUpAutoComplete();
+  });
+
+  this.isActive = false;
+
+  this.onTyping = options.onTyping;
+  this.onMessageSubmit = options.onMessageSubmit;
+  this.getSendOnEnter = options.getSendOnEnter;
+  this.onFilePaste = options.onFilePaste;
+  this.onCommandSend = options.onCommandSend;
+  this.mentions = options.mentions;
+  this.commands = options.commands;
+}
+
+MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
+
+
+MessageComposer.prototype.setUpInput = function () {
+  if ('contentEditable' in document.body) {
+    this.setUpRich();
+  } else {
+    this.setUpPlaintext();
+  }
+
+  if (!Config.Mobile) {
+    var sbWidth = getScrollWidth();
+    if (sbWidth) {
+      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
+    }
+  }
+}
+
+MessageComposer.prototype.setUpAutoComplete = function () {
   this.scroller = new Scroller(this.autoCompleteEl, {maxHeight: 180});
 
   var self = this;
@@ -707,35 +745,6 @@ function MessageComposer (textarea, options) {
     }
     return cancelEvent(e);
   });
-
-  this.isActive = false;
-
-  this.onTyping = options.onTyping;
-  this.onMessageSubmit = options.onMessageSubmit;
-  this.getSendOnEnter = options.getSendOnEnter;
-  this.onFilePaste = options.onFilePaste;
-  this.mentions = options.mentions;
-  this.commands = options.commands;
-  this.getPeerImage = options.getPeerImage;
-  this.onCommandSend = options.onCommandSend;
-}
-
-MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
-
-
-MessageComposer.prototype.setUpInput = function () {
-  if ('contentEditable' in document.body) {
-    this.setUpRich();
-  } else {
-    this.setUpPlaintext();
-  }
-
-  if (!Config.Mobile) {
-    var sbWidth = getScrollWidth();
-    if (sbWidth) {
-      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
-    }
-  }
 }
 
 MessageComposer.prototype.setUpRich = function () {
@@ -1353,8 +1362,7 @@ MessageComposer.prototype.blur = function () {
   }
 }
 
-MessageComposer.prototype.renderSuggestions = function (html) {
-  this.autoCompleteEl.html(html.join(''));
+MessageComposer.prototype.renderSuggestions = function () {
   this.autoCompleteWrapEl.show();
   this.scroller.reinit();
   this.updatePosition();
@@ -1362,72 +1370,35 @@ MessageComposer.prototype.renderSuggestions = function (html) {
 }
 
 MessageComposer.prototype.showEmojiSuggestions = function (codes) {
-  var html = [];
-  var iconSize = Config.Mobile ? 26 : 20;
-
-  var emoticonCode, emoticonData, spritesheet, pos, categoryIndex;
-  var count = Math.min(5, codes.length);
-  var i, x, y;
-
-  for (i = 0; i < count; i++) {
-    emoticonCode = codes[i];
-    if (emoticonCode.code) {
-      emoticonCode = emoticonCode.code;
-    }
-    if (emoticonData = Config.Emoji[emoticonCode]) {
-      spritesheet = EmojiHelper.spritesheetPositions[emoticonCode];
-      categoryIndex = spritesheet[0];
-      pos = spritesheet[1];
-      x = iconSize * spritesheet[3];
-      y = iconSize * spritesheet[2];
-      html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w', iconSize, ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
-    }
-  }
-
-  this.renderSuggestions(html);
+  var self = this;
+  this.autoCompleteScope.$apply(function () {
+    self.autoCompleteScope.type = 'emoji';
+    self.autoCompleteScope.emojiCodes = codes;
+  });
+  onContentLoaded(function () {
+    self.renderSuggestions();
+  });
 }
 
 MessageComposer.prototype.showMentionSuggestions = function (users) {
-  var html = [];
-  var user;
-  var count = users.length;
-  var i;
-
-  for (i = 0; i < count; i++) {
-    user = users[i];
-    html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_photo" data-user-id="' + user.id + '"></span><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
-  }
-
-  this.renderSuggestions(html);
   var self = this;
-  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
-    self.getPeerImage($(element), element.getAttribute('data-user-id'));
+  this.autoCompleteScope.$apply(function () {
+    self.autoCompleteScope.type = 'mentions';
+    self.autoCompleteScope.mentionUsers = users;
+  });
+  onContentLoaded(function () {
+    self.renderSuggestions();
   });
 }
 
 MessageComposer.prototype.showCommandsSuggestions = function (commands) {
-  var html = [];
-  var command;
-  var count = Math.min(200, commands.length);
-  var i;
-
-  for (i = 0; i < count; i++) {
-    command = commands[i];
-    html.push('<li><a class="composer_command_option" data-command="' + encodeEntities(command.value) + '"><span class="composer_user_photo" data-user-id="' + command.botID + '"></span><span class="composer_command_value">' + encodeEntities(command.value) + '</span><span class="composer_command_desc">' + command.rDescription + '</span></a></li>');
-  }
-
-  this.renderSuggestions(html);
-
   var self = this;
-  var usedImages = {};
-  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
-    var noReplace = true;
-    var botID = element.getAttribute('data-user-id');
-    if (!usedImages[botID]) {
-      usedImages[botID] = true;
-      noReplace = false;
-    }
-    self.getPeerImage($(element), botID, noReplace);
+  this.autoCompleteScope.$apply(function () {
+    self.autoCompleteScope.type = 'commands';
+    self.autoCompleteScope.commands = commands;
+  });
+  onContentLoaded(function () {
+    self.renderSuggestions();
   });
 }
 
