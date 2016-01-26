@@ -1507,9 +1507,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      var peerPhotoCompiled = $compile('<span class="composer_user_photo" my-peer-photolink="peerID" img-class="composer_user_photo"></span>');
-      var cachedPeerPhotos = {};
-
       var composer = new MessageComposer(messageField, {
         onTyping: function () {
           $scope.$emit('ui_typing');
@@ -3375,9 +3372,10 @@ angular.module('myApp.directives', ['myApp.filters'])
               html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w', iconSize, ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
             }
           }
-          onContentLoaded(function () {
-            element.html(html);
-          });
+          // onContentLoaded(function () {
+            element.html(html.join(''));
+            console.log(dT(), 'emoji done');
+          // });
         });
       }
     };
@@ -3394,7 +3392,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       link: function  ($scope, element, attrs) {
         $scope.$watch('botResults.results.length', function (show) {
-          console.log($scope.botResults, show);
+          // console.log($scope.botResults, show);
         });
       }
     }

@@ -683,7 +683,7 @@ function MessageComposer (textarea, options) {
   this.autoCompleteWrapEl = $('<div class="composer_dropdown_wrap"></div>').appendTo(document.body);
   var autoCompleteEl = $('<div></div>').appendTo(this.autoCompleteWrapEl);
 
-  options.dropdownDirective(div, function (scope, autoCompleteEl) {
+  options.dropdownDirective(autoCompleteEl, function (scope, autoCompleteEl) {
     self.autoCompleteEl = autoCompleteEl;
     self.autoCompleteScope = scope;
     self.setUpAutoComplete();
@@ -1405,6 +1405,7 @@ MessageComposer.prototype.showCommandsSuggestions = function (commands) {
 MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
   var height = this.scroller.updateHeight();
+  console.log(dT(), 'pos', height);
   var width = $((this.richTextareaEl || this.textareaEl)[0].parentNode).outerWidth();
   this.autoCompleteWrapEl.css({
     top: offset.top - height,
