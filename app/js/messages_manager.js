@@ -1294,10 +1294,12 @@ angular.module('myApp.services')
         isChannel = AppPeersManager.isChannel(peerID),
         isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
         asChannel = isChannel && !isMegagroup ? true : false,
-        entities = [],
+        entities = options.entities || [],
         message;
 
-    text = RichTextProcessor.parseMarkdown(text, entities);
+    if (!options.viaBotID) {
+      text = RichTextProcessor.parseMarkdown(text, entities);
+    }
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1331,6 +1333,7 @@ angular.module('myApp.services')
       message: text,
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
+      via_bot_id: options.viaBotID,
       entities: entities,
       views: asChannel && 1,
       pending: true
@@ -1362,21 +1365,35 @@ angular.module('myApp.services')
       if (replyToMsgID) {
         flags |= 1;
       }
-      if (entities.length) {
-        flags |= 8;
-      }
       if (asChannel) {
         flags |= 16;
       }
+      var apiPromise;
+      if (options.viaBotID) {
+        console.warn(options);
+        apiPromise = MtpApiManager.invokeApi('messages.sendInlineBotResult', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
+          query_id: options.queryID,
+          id: options.resultID
+        }, sentRequestOptions);
+      } else {
+        if (entities.length) {
+          flags |= 8;
+        }
+        apiPromise = MtpApiManager.invokeApi('messages.sendMessage', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          message: text,
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
+          entities: entities
+        }, sentRequestOptions)
+      }
       // console.log(flags, entities);
-      MtpApiManager.invokeApi('messages.sendMessage', {
-        flags: flags,
-        peer: AppPeersManager.getInputPeerByID(peerID),
-        message: text,
-        random_id: randomID,
-        reply_to_msg_id: getMessageLocalID(replyToMsgID),
-        entities: entities
-      }, sentRequestOptions).then(function (updates) {
+      apiPromise.then(function (updates) {
         if (updates._ == 'updateShortSentMessage') {
           message.flags = updates.flags;
           message.date = updates.date;
@@ -1423,6 +1440,31 @@ angular.module('myApp.services')
 
     pendingByRandomID[randomIDS] = [peerID, messageID];
   };
+
+  function sendInlineResult (peerID, qID, options) {
+    var inlineResult = inlineResults[qID];
+    if (inlineResult === undefined) {
+      return false;
+    }
+    var splitted = qID.split('_');
+    var queryID = splitted.shift();
+    var resultID = splitted.join('_');
+    options = options || {};
+    options.viaBotID = inlineResult.botID;
+    options.queryID = queryID;
+    options.resultID = resultID;
+
+    if (inlineResult.send_message._ == 'botInlineMessageText') {
+      options.entities = inlineResult.send_message.entities;
+      sendText(peerID, inlineResult.send_message.message, options);
+    } else {
+      sendOther(peerID, {
+        _: 'messageMediaPending',
+        size: 0,
+        progress: {percent: 33, total: 0}
+      }, options);
+    }
+  }
 
   function sendFile(peerID, file, options) {
     options = options || {};
@@ -1654,6 +1696,10 @@ angular.module('myApp.services')
           'document': doc
         };
         break;
+
+      case 'messageMediaPending':
+        media = inputMedia;
+        break;
     }
 
     var flags = 0;
@@ -1687,6 +1733,7 @@ angular.module('myApp.services')
       media: media,
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
+      via_bot_id: options.viaBotID,
       views: asChannel && 1,
       pending: true
     };
@@ -1721,13 +1768,27 @@ angular.module('myApp.services')
         sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
       }
 
-      MtpApiManager.invokeApi('messages.sendMedia', {
-        flags: flags,
-        peer: AppPeersManager.getInputPeerByID(peerID),
-        media: inputMedia,
-        random_id: randomID,
-        reply_to_msg_id: getMessageLocalID(replyToMsgID)
-      }, sentRequestOptions).then(function (updates) {
+      var apiPromise;
+      if (options.viaBotID) {
+        console.warn(options);
+        apiPromise = MtpApiManager.invokeApi('messages.sendInlineBotResult', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
+          query_id: options.queryID,
+          id: options.resultID
+        }, sentRequestOptions);
+      } else {
+        apiPromise = MtpApiManager.invokeApi('messages.sendMedia', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          media: inputMedia,
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID)
+        }, sentRequestOptions);
+      }
+      apiPromise.then(function (updates) {
         ApiUpdatesManager.processUpdateMessage(updates);
       }, function (error) {
         toggleError(true);
@@ -3026,9 +3087,11 @@ angular.module('myApp.services')
       angular.forEach(botResults.results, function (result) {
         var qID = queryID + '_' + result.id;
         result.qID = qID;
+        result.botID = botID;
 
         result.rTitle = RichTextProcessor.wrapRichText(result.title, {noLinebreaks: true, noLinks: true});
         result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
+        result.initials = (result.url || result.title || result.type || '').substr(0, 1)
 
         inlineResults[qID] = result;
       });
@@ -3058,6 +3121,7 @@ angular.module('myApp.services')
     getMessageThumb: getMessageThumb,
     clearDialogCache: clearDialogCache,
     getInlineResults: getInlineResults,
+    sendInlineResult: sendInlineResult,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
     wrapReplyMarkup: wrapReplyMarkup,

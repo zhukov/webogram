@@ -683,8 +683,8 @@ function MessageComposer (textarea, options) {
   this.autoCompleteWrapEl = $('<div class="composer_dropdown_wrap"></div>').appendTo(document.body);
   var autoCompleteEl = $('<div></div>').appendTo(this.autoCompleteWrapEl);
 
-  options.dropdownDirective(autoCompleteEl, function (scope, autoCompleteEl) {
-    self.autoCompleteEl = autoCompleteEl;
+  options.dropdownDirective(autoCompleteEl, function (scope, newAutoCompleteEl) {
+    self.autoCompleteEl = newAutoCompleteEl;
     self.autoCompleteScope = scope;
     self.setUpAutoComplete();
   });
@@ -696,6 +696,7 @@ function MessageComposer (textarea, options) {
   this.getSendOnEnter = options.getSendOnEnter;
   this.onFilePaste = options.onFilePaste;
   this.onCommandSend = options.onCommandSend;
+  this.onInlineResultSend = options.onInlineResultSend;
   this.mentions = options.mentions;
   this.commands = options.commands;
 }
@@ -704,6 +705,10 @@ MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
 
 
 MessageComposer.prototype.setUpInput = function () {
+  this.inlinePlaceholderWrap = $('<div class="im_inline_placeholder_wrap"></div>').prependTo(this.textareaEl[0].parentNode);
+  this.inlinePlaceholderPrefixEl = $('<span class="im_inline_placeholder_prefix"></span>').appendTo(this.inlinePlaceholderWrap);
+  this.inlinePlaceholderEl = $('<span class="im_inline_placeholder"></span>').appendTo(this.inlinePlaceholderWrap);
+
   if ('contentEditable' in document.body) {
     this.setUpRich();
   } else {
@@ -718,13 +723,27 @@ MessageComposer.prototype.setUpInput = function () {
   }
 }
 
+MessageComposer.prototype.setInlinePlaceholder = function (prefix, placeholder) {
+  this.inlinePlaceholderPrefix = prefix
+  this.inlinePlaceholderPrefixEl.html(encodeEntities(prefix));
+  this.inlinePlaceholderEl.html(encodeEntities(placeholder));
+}
+
+MessageComposer.prototype.updateInlinePlaceholder = function () {
+  var prefix = this.inlinePlaceholderPrefix;
+  if (prefix) {
+    var value = this.textareaEl.val();
+    this.inlinePlaceholderWrap.toggle(value == prefix);
+  }
+}
+
 MessageComposer.prototype.setUpAutoComplete = function () {
   this.scroller = new Scroller(this.autoCompleteEl, {maxHeight: 180});
 
   var self = this;
   this.autoCompleteEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), mention, code, command;
+    var target = $(e.target), mention, code, command, inlineID;
     if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
@@ -740,6 +759,12 @@ MessageComposer.prototype.setUpAutoComplete = function () {
     if (command = target.attr('data-command')) {
       if (self.onCommandSelected) {
         self.onCommandSelected(command);
+      }
+      self.hideSuggestions();
+    }
+    if (inlineID = target.attr('data-inlineid')) {
+      if (self.onInlineResultSend) {
+        self.onInlineResultSend(inlineID);
       }
       self.hideSuggestions();
     }
@@ -778,13 +803,15 @@ MessageComposer.prototype.onKeyEvent = function (e) {
       if (this.keyupStarted === undefined) {
         this.keyupStarted = now;
       }
-      if (now - this.keyupStarted > 10000) {
+      if (now - this.keyupStarted > 3000 || true) {
         this.onChange();
       }
       else {
         length = this.richTextareaEl[0].textContent.length;
         if (this.wasEmpty != !length) {
           this.wasEmpty = !this.wasEmpty;
+          this.onChange();
+        } else if (this.inlinePlaceholderPrefix) {
           this.onChange();
         } else {
           this.updateValueTO = setTimeout(this.onChange.bind(this), 1000);
@@ -812,45 +839,54 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     if (this.autocompleteShown) {
       if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
         var next = e.keyCode == 40;
-        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
+        var currentSel = $(this.autoCompleteEl).find('li.composer_autocomplete_option_active');
+        var allLIs = Array.prototype.slice.call($(this.autoCompleteEl).find('li'));
+        var nextSel;
 
-        if (currentSelected.length) {
-          var currentSelectedWrap = currentSelected[0].parentNode;
-          var nextWrap = currentSelectedWrap[next ? 'nextSibling' : 'previousSibling'];
-          currentSelected.removeClass('composer_autocomplete_option_active');
-          if (nextWrap) {
-            $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
-            this.scroller.scrollToNode(nextWrap);
+        if (currentSel.length) {
+          var pos = allLIs.indexOf(currentSel[0]);
+          var nextPos = pos + (next ? 1 : -1);
+          nextSel = allLIs[nextPos];
+          currentSel.removeClass('composer_autocomplete_option_active');
+          if (nextSel) {
+            $(nextSel).addClass('composer_autocomplete_option_active');
+            this.scroller.scrollToNode(nextSel);
             return cancelEvent(e);
           }
         }
 
-        var childNodes = this.autoCompleteEl[0].childNodes;
-        var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
-        this.scroller.scrollToNode(nextWrap);
-        $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
+        nextSel = allLIs[next ? 0 : allLIs.length - 1];
+        this.scroller.scrollToNode(nextSel);
+        $(nextSel).addClass('composer_autocomplete_option_active');
 
         return cancelEvent(e);
       }
 
       if (e.keyCode == 13 || e.keyCode == 9) { // Enter or Tab
-        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
-        if (!currentSelected.length && e.keyCode == 9) {
-          currentSelected = $(this.autoCompleteEl[0].childNodes[0]).find('a');
+        var currentSel = $(this.autoCompleteEl).find('li.composer_autocomplete_option_active');
+        if (!currentSel.length && e.keyCode == 9) {
+          currentSel = $(this.autoCompleteEl).find('li:first');
         }
+        currentSel = currentSel.find('a:first');
         var code, mention, command;
-        if (code = currentSelected.attr('data-code')) {
+        if (code = currentSel.attr('data-code')) {
           this.onEmojiSelected(code, true);
           EmojiHelper.pushPopularEmoji(code);
           return cancelEvent(e);
         }
-        if (mention = currentSelected.attr('data-mention')) {
+        if (mention = currentSel.attr('data-mention')) {
           this.onMentionSelected(mention);
           return cancelEvent(e);
         }
-        if (command = currentSelected.attr('data-command')) {
+        if (command = currentSel.attr('data-command')) {
           if (this.onCommandSelected) {
             this.onCommandSelected(command, e.keyCode == 9);
+          }
+          return cancelEvent(e);
+        }
+        if (inlineID = target.attr('data-inlineid')) {
+          if (self.onInlineResultSend) {
+            self.onInlineResultSend(inlineID);
           }
           return cancelEvent(e);
         }
@@ -1283,6 +1319,7 @@ MessageComposer.prototype.onChange = function (e) {
     delete this.keyupStarted;
     this.textareaEl.val(getRichValue(this.richTextareaEl[0])).trigger('change');
   }
+  this.updateInlinePlaceholder();
 }
 
 MessageComposer.prototype.getEmojiHtml = function (code, emoji) {
@@ -1402,10 +1439,26 @@ MessageComposer.prototype.showCommandsSuggestions = function (commands) {
   });
 }
 
+MessageComposer.prototype.showInlineSuggestions = function (botResults) {
+  if (!botResults || !botResults.results.length) {
+    if (this.autocompleteShown && this.autoCompleteScope.type == 'inline') {
+      this.hideSuggestions();
+    }
+    return;
+  }
+  var self = this;
+  this.autoCompleteScope.$apply(function () {
+    self.autoCompleteScope.type = 'inline';
+    self.autoCompleteScope.botResults = botResults;
+  });
+  onContentLoaded(function () {
+    self.renderSuggestions();
+  });
+}
+
 MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
   var height = this.scroller.updateHeight();
-  console.log(dT(), 'pos', height);
   var width = $((this.richTextareaEl || this.textareaEl)[0].parentNode).outerWidth();
   this.autoCompleteWrapEl.css({
     top: offset.top - height,
@@ -1416,6 +1469,7 @@ MessageComposer.prototype.updatePosition = function () {
 }
 
 MessageComposer.prototype.hideSuggestions = function () {
+  // return;
   this.autoCompleteWrapEl.hide();
   delete this.autocompleteShown;
 }

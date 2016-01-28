@@ -1056,6 +1056,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedReply = selectedReply;
     $scope.selectedCancel = selectedCancel;
     $scope.selectedFlush = selectedFlush;
+    $scope.selectInlineBot = selectInlineBot;
 
     $scope.startBot = startBot;
     $scope.cancelBot = cancelBot;
@@ -1572,13 +1573,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               target.className.indexOf('im_message_body') != -1) {
             break;
           }
-          if (target.tagName == 'A' ||
-              target.onclick ||
-              target.getAttribute('ng-click')) {
-            return false;
-          }
-          var events = $._data(target, 'events');
-          if (events && (events.click || events.mousedown)) {
+          if (target.tagName == 'A' || hasOnlick(target)) {
             return false;
           }
           target = target.parentNode;
@@ -1661,6 +1656,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       }
       $scope.$broadcast('messages_select');
+    }
+
+    function selectInlineBot (botID, $event) {
+      $scope.$broadcast('inline_bot_select', botID);
+      return cancelEvent($event);
     }
 
     function selectedCancel (noBroadcast) {
@@ -2099,16 +2099,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
     $scope.mentions = {};
     $scope.commands = {};
-    $scope.inlineResults = {};
     $scope.$watch('draftMessage.text', onMessageChange);
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
     $scope.$watch('draftMessage.command', onCommandSelected);
+    $scope.$watch('draftMessage.inlineResultID', onInlineResultSelected);
 
     $scope.$on('history_reply_markup', function (e, peerData) {
       if (peerData.peerID == $scope.curDialog.peerID) {
         updateReplyKeyboard();
       }
+    });
+
+    $scope.$on('inline_bot_select', function (e, botID) {
+      var bot = AppUsersManager.getUser(botID);
+      $scope.draftMessage.text = '@' + bot.username + ' ';;
+      $scope.$broadcast('ui_peer_draft', {focus: true});
     });
 
     $scope.replyKeyboardToggle = replyKeyboardToggle;
@@ -2390,7 +2396,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return cancelEvent($event);
     }
 
-    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32}) ([\s\S]*)$/;
+    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
     var lastInlineBot = false;
     function onMessageChange(newVal) {
       // console.log('ctrl text changed', newVal);
@@ -2409,11 +2415,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var matches = newVal.match(inlineUsernameRegex);
         if (matches) {
           $scope.draftMessage.inlineProgress = true;
-          AppPeersManager.resolveInlineMention(matches[1]).then(function (inlineBot) {
-            $scope.draftMessage.inlinePlaceholder = inlineBot.placeholder;
-            AppMessagesManager.getInlineResults(inlineBot.id, matches[2], '').then(function (botResults) {
-              $scope.inlineResults = botResults;
-              console.log('results', botResults);
+          var username = matches[1];
+          AppPeersManager.resolveInlineMention(username).then(function (inlineBot) {
+            $scope.$broadcast('inline_placeholder', {
+              prefix: '@' + username + matches[2],
+              placeholder: inlineBot.placeholder
+            });
+            AppMessagesManager.getInlineResults(inlineBot.id, matches[3], '').then(function (botResults) {
+              $scope.$broadcast('inline_results', botResults);
               delete $scope.draftMessage.inlineProgress;
             }, function () {
               delete $scope.draftMessage.inlineProgress;
@@ -2502,6 +2511,24 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       delete $scope.draftMessage.sticker;
       delete $scope.draftMessage.text;
       delete $scope.draftMessage.command;
+      delete $scope.draftMessage.inlineResultID;
+      $scope.$broadcast('ui_message_send');
+      $scope.$broadcast('ui_peer_draft');
+    }
+
+    function onInlineResultSelected (qID) {
+      if (!qID) {
+        return;
+      }
+      var options = {
+        replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
+      };
+      AppMessagesManager.sendInlineResult($scope.curDialog.peerID, qID, options);
+      resetDraft();
+      delete $scope.draftMessage.sticker;
+      delete $scope.draftMessage.text;
+      delete $scope.draftMessage.command;
+      delete $scope.draftMessage.inlineResultID;
       $scope.$broadcast('ui_message_send');
       $scope.$broadcast('ui_peer_draft');
     }

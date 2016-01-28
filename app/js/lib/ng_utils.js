@@ -963,7 +963,7 @@ angular.module('izhukov.utils', [])
   };
 })
 
-.service('ExternalResourcesManager', function ($q, $http) {
+.service('ExternalResourcesManager', function ($q, $http, $sce) {
   var urlPromises = {};
 
   function downloadImage (url) {
@@ -974,7 +974,8 @@ angular.module('izhukov.utils', [])
     return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
       .then(function (response) {
         window.URL = window.URL || window.webkitURL;
-        return window.URL.createObjectURL(response.data);
+        var url = window.URL.createObjectURL(response.data);
+        return $sce.trustAsResourceUrl(url);
       });
   }
 

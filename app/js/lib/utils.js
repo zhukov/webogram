@@ -60,6 +60,18 @@ function cancelEvent (event) {
   return false;
 }
 
+function hasOnlick (element) {
+  if (element.onclick ||
+      element.getAttribute('ng-click')) {
+    return true;
+  }
+  var events = $._data(element, 'events');
+  if (events && (events.click || events.mousedown)) {
+    return true;
+  }
+  return false;
+}
+
 function getScrollWidth() {
   var outer = $('<div>').css({
     position: 'absolute',

@@ -203,7 +203,7 @@
                       <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
                       <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
-                      <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto"></textarea>
+                      <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto" ng-trim="false"></textarea>
                     </div>
 
                     <div class="im_send_buttons_wrap clearfix">

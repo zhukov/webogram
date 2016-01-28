@@ -833,7 +833,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppPeersManager', function (qSync, AppUsersManager, AppChatsManager, MtpApiManager) {
+.service('AppPeersManager', function ($q, qSync, AppUsersManager, AppChatsManager, MtpApiManager) {
 
   function getInputPeer (peerString) {
     var firstChar = peerString.charAt(0),

@@ -1516,7 +1516,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         },
         dropdownDirective: function (element, callback) {
           var scope = $scope.$new(true);
-          $compile('<div my-composer-dropdown></div>')(scope, function (clonedElement) {
+          var clonedElement = $compile('<div><div my-composer-dropdown></div></div>')(scope, function (clonedElement, scope) {
             element.replaceWith(clonedElement);
             callback(scope, clonedElement);
           });
@@ -1524,6 +1524,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         mentions: $scope.mentions,
         commands: $scope.commands,
         onMessageSubmit: onMessageSubmit,
+        onInlineResultSend: onInlineResultSend,
         onFilePaste: onFilePaste,
         onCommandSend: function (command) {
           $scope.$apply(function () {
@@ -1532,10 +1533,20 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
+      $scope.$on('inline_results', function (e, inlineResults) {
+        setZeroTimeout(function () {
+          composer.showInlineSuggestions(inlineResults);
+        });
+      });
+
       var richTextarea = composer.richTextareaEl[0];
       if (richTextarea) {
         $(richTextarea).on('keydown keyup', updateHeight);
       }
+
+      $scope.$on('inline_placeholder', function(e, data) {
+        composer.setInlinePlaceholder(data.prefix, data.placeholder);
+      });
 
       fileSelects.on('change', function () {
         var self = this;
@@ -1571,6 +1582,12 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
         }, shouldFocusOnInteraction ? 0 : 100);
         return cancelEvent(e);
+      }
+
+      function onInlineResultSend (qID) {
+        $scope.$apply(function () {
+          $scope.draftMessage.inlineResultID = qID;
+        });
       }
 
       function updateValue () {
@@ -2265,7 +2282,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=15&size='+width+'x'+height+'&scale=2&key=' + apiKey;
 
       ExternalResourcesManager.downloadImage(src).then(function (url) {
-        element.attr('src', url);
+        element.attr('src', url.valueOf());
       });
     }
 
@@ -2765,7 +2782,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       };
 
-      if (element[0].tagName == 'A') {
+      if (element[0].tagName == 'A' && !hasOnlick(element[0])) {
         element.on('click', function () {
           if (peerID > 0) {
             AppUsersManager.openUser(peerID, override);
@@ -3382,7 +3399,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myInlineResults', function () {
+  .directive('myInlineResults', function (ExternalResourcesManager) {
 
     return {
       templateUrl: templateUrl('inline_results'),
@@ -3391,8 +3408,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       },
 
       link: function  ($scope, element, attrs) {
-        $scope.$watch('botResults.results.length', function (show) {
-          // console.log($scope.botResults, show);
+        $scope.$watch('botResults.results', function (results) {
+          angular.forEach(results, function (result) {
+            if (result.thumb_url && !result.thumbUrl) {
+              ExternalResourcesManager.downloadImage(result.thumb_url).then(function (url) {
+                result.thumbUrl = url;
+              });
+            }
+          })
         });
       }
     }
