@@ -1370,7 +1370,6 @@ angular.module('myApp.services')
       }
       var apiPromise;
       if (options.viaBotID) {
-        console.warn(options);
         apiPromise = MtpApiManager.invokeApi('messages.sendInlineBotResult', {
           flags: flags,
           peer: AppPeersManager.getInputPeerByID(peerID),
@@ -1440,31 +1439,6 @@ angular.module('myApp.services')
 
     pendingByRandomID[randomIDS] = [peerID, messageID];
   };
-
-  function sendInlineResult (peerID, qID, options) {
-    var inlineResult = inlineResults[qID];
-    if (inlineResult === undefined) {
-      return false;
-    }
-    var splitted = qID.split('_');
-    var queryID = splitted.shift();
-    var resultID = splitted.join('_');
-    options = options || {};
-    options.viaBotID = inlineResult.botID;
-    options.queryID = queryID;
-    options.resultID = resultID;
-
-    if (inlineResult.send_message._ == 'botInlineMessageText') {
-      options.entities = inlineResult.send_message.entities;
-      sendText(peerID, inlineResult.send_message.message, options);
-    } else {
-      sendOther(peerID, {
-        _: 'messageMediaPending',
-        size: 0,
-        progress: {percent: 33, total: 0}
-      }, options);
-    }
-  }
 
   function sendFile(peerID, file, options) {
     options = options || {};
@@ -1682,7 +1656,8 @@ angular.module('myApp.services')
       case 'inputMediaPhoto':
         media = {
           _: 'messageMediaPhoto',
-          photo: AppPhotosManager.getPhoto(inputMedia.id.id)
+          photo: AppPhotosManager.getPhoto(inputMedia.id.id),
+          caption: inputMedia.caption || ''
         };
         break;
 
@@ -1693,7 +1668,8 @@ angular.module('myApp.services')
         };
         media = {
           _: 'messageMediaDocument',
-          'document': doc
+          'document': doc,
+          caption: inputMedia.caption || ''
         };
         break;
 
@@ -1770,7 +1746,6 @@ angular.module('myApp.services')
 
       var apiPromise;
       if (options.viaBotID) {
-        console.warn(options);
         apiPromise = MtpApiManager.invokeApi('messages.sendInlineBotResult', {
           flags: flags,
           peer: AppPeersManager.getInputPeerByID(peerID),
@@ -3073,32 +3048,6 @@ angular.module('myApp.services')
     })
   });
 
-  var inlineResults = {};
-  function getInlineResults (botID, query, offset) {
-    return MtpApiManager.invokeApi('messages.getInlineBotResults', {
-      bot: AppUsersManager.getUserInput(botID),
-      query: query,
-      offset: offset
-    }).then(function(botResults) {
-      var queryID = botResults.query_id;
-      delete botResults._;
-      delete botResults.flags;
-      delete botResults.query_id;
-      angular.forEach(botResults.results, function (result) {
-        var qID = queryID + '_' + result.id;
-        result.qID = qID;
-        result.botID = botID;
-
-        result.rTitle = RichTextProcessor.wrapRichText(result.title, {noLinebreaks: true, noLinks: true});
-        result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
-        result.initials = (result.url || result.title || result.type || '').substr(0, 1)
-
-        inlineResults[qID] = result;
-      });
-      return botResults;
-    });
-  }
-
   return {
     getConversations: getConversations,
     getHistory: getHistory,
@@ -3120,8 +3069,6 @@ angular.module('myApp.services')
     getMessagePeer: getMessagePeer,
     getMessageThumb: getMessageThumb,
     clearDialogCache: clearDialogCache,
-    getInlineResults: getInlineResults,
-    sendInlineResult: sendInlineResult,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,
     wrapReplyMarkup: wrapReplyMarkup,

@@ -2372,15 +2372,19 @@ textarea.im_message_field {
 }
 .im_inline_placeholder_wrap {
   position: absolute;
-  left: 0;
   margin-top: 2px;
-  white-space: nowrap
+  white-space: nowrap;
+  pointer-events: none;
+  display: none;
+}
+.im_inline_placeholder_wrap.active {
+  display: block;
 }
 .im_inline_placeholder_prefix {
   visibility: hidden;
 }
 .im_inline_placeholder {
-  color: #999;
+  color: #9aa2ab;
 }
 
 .icon-online {

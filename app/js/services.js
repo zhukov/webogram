@@ -11,7 +11,7 @@
 
 angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiFileManager, MtpApiManager, RichTextProcessor, ErrorService, Storage, _) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, ErrorService, Storage, _) {
   var users = {},
       usernames = {},
       userAccess = {},
@@ -575,7 +575,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
 })
 
-.service('AppChatsManager', function ($q, $rootScope, $modal, _, MtpApiFileManager, MtpApiManager, AppUsersManager, AppPhotosManager, RichTextProcessor) {
+.service('AppChatsManager', function ($q, $rootScope, $modal, _, MtpApiManager, AppUsersManager, AppPhotosManager, RichTextProcessor) {
   var chats = {},
       usernames = {},
       channelAccess = {},
@@ -2297,7 +2297,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppStickersManager', function ($q, $rootScope, $modal, _, FileManager, MtpApiManager, MtpApiFileManager, AppDocsManager, Storage, ApiUpdatesManager) {
+.service('AppStickersManager', function ($q, $rootScope, $modal, _, FileManager, MtpApiManager, AppDocsManager, Storage, ApiUpdatesManager) {
 
   var started = false;
   var applied = false;
@@ -2592,6 +2592,100 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     return acc;
   }
+})
+
+.service('AppInlineBotsManager', function (MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager) {
+
+  var inlineResults = {};
+
+  return {
+    sendInlineResult: sendInlineResult,
+    getInlineResults: getInlineResults
+  };
+
+  function getInlineResults (botID, query, offset) {
+    return MtpApiManager.invokeApi('messages.getInlineBotResults', {
+      bot: AppUsersManager.getUserInput(botID),
+      query: query,
+      offset: offset
+    }).then(function(botResults) {
+      var queryID = botResults.query_id;
+      delete botResults._;
+      delete botResults.flags;
+      delete botResults.query_id;
+      angular.forEach(botResults.results, function (result) {
+        var qID = queryID + '_' + result.id;
+        result.qID = qID;
+        result.botID = botID;
+
+        result.rTitle = RichTextProcessor.wrapRichText(result.title, {noLinebreaks: true, noLinks: true});
+        result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
+        result.initials = (result.url || result.title || result.type || '').substr(0, 1)
+
+        if (result._ == 'botInlineMediaResultDocument') {
+          AppDocsManager.saveDoc(result.document);
+        }
+        else if (result._ == 'botInlineMediaResultPhoto') {
+          AppPhotosManager.savePhoto(result.photo);
+        }
+
+        inlineResults[qID] = result;
+      });
+      return botResults;
+    });
+  }
+
+  function sendInlineResult (peerID, qID, options) {
+    var inlineResult = inlineResults[qID];
+    if (inlineResult === undefined) {
+      return false;
+    }
+    var splitted = qID.split('_');
+    var queryID = splitted.shift();
+    var resultID = splitted.join('_');
+    options = options || {};
+    options.viaBotID = inlineResult.botID;
+    options.queryID = queryID;
+    options.resultID = resultID;
+
+    if (inlineResult.send_message._ == 'botInlineMessageText') {
+      options.entities = inlineResult.send_message.entities;
+      AppMessagesManager.sendText(peerID, inlineResult.send_message.message, options);
+    } else {
+      var caption = '';
+      if (inlineResult.send_message._ == 'botInlineMessageMediaAuto') {
+        caption = inlineResult.send_message.caption;
+      }
+      var inputMedia = false;
+      if (inlineResult._ == 'botInlineMediaResultDocument') {
+        var doc = inlineResult.document;
+        inputMedia = {
+          _: 'inputMediaDocument',
+          id: {_: 'inputDocument', id: doc.id, access_hash: doc.access_hash},
+          caption: caption
+        };
+      }
+      else if (inlineResult._ == 'botInlineMediaResultPhoto') {
+        var photo = inlineResult.photo;
+        inputMedia = {
+          _: 'inputMediaPhoto',
+          id: {_: 'inputPhoto', id: photo.id, access_hash: photo.access_hash},
+          caption: caption
+        };
+      }
+      if (!inputMedia) {
+        inputMedia = {
+          _: 'messageMediaPending',
+          type: inlineResult.type,
+          file_name: inlineResult.title || inlineResult.content_url || inlineResult.url,
+          size: 0,
+          progress: {percent: 30, total: 0}
+        };
+      }
+      AppMessagesManager.sendOther(peerID, inputMedia, options);
+    }
+  }
+
 })
 
 .service('ApiUpdatesManager', function ($rootScope, MtpNetworkerFactory, AppUsersManager, AppChatsManager, AppPeersManager, MtpApiManager) {

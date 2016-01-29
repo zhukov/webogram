@@ -187,6 +187,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
   .filter('formatSizeProgress', function ($filter, _) {
     var formatSizeFilter = $filter('formatSize');
     return function (progress) {
+      if (!progress.total) {
+        return '';
+      }
       var done = formatSizeFilter(progress.done, true),
           doneParts = done.split(' '),
           total = formatSizeFilter(progress.total),

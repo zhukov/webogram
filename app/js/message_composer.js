@@ -727,13 +727,14 @@ MessageComposer.prototype.setInlinePlaceholder = function (prefix, placeholder) 
   this.inlinePlaceholderPrefix = prefix
   this.inlinePlaceholderPrefixEl.html(encodeEntities(prefix));
   this.inlinePlaceholderEl.html(encodeEntities(placeholder));
+  this.onChange();
 }
 
 MessageComposer.prototype.updateInlinePlaceholder = function () {
   var prefix = this.inlinePlaceholderPrefix;
   if (prefix) {
     var value = this.textareaEl.val();
-    this.inlinePlaceholderWrap.toggle(value == prefix);
+    this.inlinePlaceholderWrap.toggleClass('active', value == prefix);
   }
 }
 
@@ -868,7 +869,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           currentSel = $(this.autoCompleteEl).find('li:first');
         }
         currentSel = currentSel.find('a:first');
-        var code, mention, command;
+        var code, mention, command, inlineID;
         if (code = currentSel.attr('data-code')) {
           this.onEmojiSelected(code, true);
           EmojiHelper.pushPopularEmoji(code);
@@ -884,7 +885,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           }
           return cancelEvent(e);
         }
-        if (inlineID = target.attr('data-inlineid')) {
+        if (inlineID = currentSel.attr('data-inlineid')) {
           if (self.onInlineResultSend) {
             self.onInlineResultSend(inlineID);
           }
@@ -953,6 +954,9 @@ MessageComposer.prototype.restoreSelection = function () {
 
 
 MessageComposer.prototype.checkAutocomplete = function (forceFull) {
+  if (this.autocompleteShown && this.autoCompleteScope.type == 'inline') {
+    return;
+  }
   var pos, value;
   if (this.richTextareaEl) {
     var textarea = this.richTextareaEl[0];
@@ -1469,6 +1473,7 @@ MessageComposer.prototype.updatePosition = function () {
 }
 
 MessageComposer.prototype.hideSuggestions = function () {
+  // console.trace();
   // return;
   this.autoCompleteWrapEl.hide();
   delete this.autocompleteShown;
