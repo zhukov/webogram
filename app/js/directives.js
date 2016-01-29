@@ -1430,7 +1430,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, shouldFocusOnInteraction) {
+  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, shouldFocusOnInteraction) {
     return {
       link: link,
       scope: {
@@ -1534,6 +1534,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       $scope.$on('inline_results', function (e, inlineResults) {
+        var w = 180;
+        var h = 50;
+        AppInlineBotsManager.regroupWrappedResults(inlineResults.results, w, h);
         setZeroTimeout(function () {
           composer.showInlineSuggestions(inlineResults);
         });
