@@ -2600,6 +2600,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   return {
     sendInlineResult: sendInlineResult,
+    regroupWrappedResults: regroupWrappedResults,
     getInlineResults: getInlineResults
   };
 
@@ -2613,6 +2614,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete botResults._;
       delete botResults.flags;
       delete botResults.query_id;
+
       angular.forEach(botResults.results, function (result) {
         var qID = queryID + '_' + result.id;
         result.qID = qID;
@@ -2622,16 +2624,89 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
         result.initials = (result.url || result.title || result.type || '').substr(0, 1)
 
-        if (result._ == 'botInlineMediaResultDocument') {
+        if (result.document) {
           AppDocsManager.saveDoc(result.document);
         }
-        else if (result._ == 'botInlineMediaResultPhoto') {
+        if (result.photo) {
           AppPhotosManager.savePhoto(result.photo);
         }
 
         inlineResults[qID] = result;
       });
       return botResults;
+    });
+  }
+
+  function regroupWrappedResults (results, rowW, rowH) {
+    if (!results ||
+        !results[0] ||
+        results[0].type != 'photo' && results[0].type != 'gif') {
+      return;
+    }
+    var ratios = [];
+    angular.forEach(results, function (result) {
+      var w, h;
+      if (result._ == 'botInlineMediaResultDocument') {
+        w = result.document.w;
+        h = result.document.h;
+      }
+      else if (result._ == 'botInlineMediaResultPhoto') {
+        var photoSize = (result.photo.sizes || [])[0];
+        w = photoSize && photoSize.w;
+        h = photoSize && photoSize.h;
+      }
+      else  {
+        w = result.w;
+        h = result.h;
+      }
+      if (!w || !h) {
+        w = h = 1;
+      }
+      ratios.push(w / h);
+    });
+
+    var rows = [];
+    var curCnt = 0;
+    var curW = 0;
+    angular.forEach(ratios, function (ratio) {
+      var w = ratio * rowH;
+      curW += w;
+      console.log(curCnt, w, curW, rowW);
+      if (!curCnt || curCnt < 4 && curW < (rowW * 1.1)) {
+        curCnt++;
+      } else {
+        rows.push(curCnt);
+        curCnt = 1;
+        curW = w;
+      }
+    });
+    if (curCnt) {
+      rows.push(curCnt);
+    }
+
+    var i = 0;
+    var thumbs = [];
+    var lastRowI = rows.length - 1;
+    angular.forEach(rows, function (rowCnt, rowI) {
+      var lastRow = rowI == lastRowI;
+      var curRatios = ratios.slice(i, i + rowCnt);
+      var sumRatios = 0;
+      angular.forEach(curRatios, function (ratio) {
+        sumRatios += ratio;
+      });
+      angular.forEach(curRatios, function (ratio, j) {
+        var thumbH = rowH;
+        var thumbW = rowW * ratio / sumRatios;
+        var realW = thumbH * ratio;
+        if (lastRow && thumbW > realW) {
+          thumbW = realW;
+        }
+        var result = results[i + j];
+        result.thumbW = Math.floor(thumbW);
+        result.thumbH = Math.floor(thumbH);
+      });
+
+      i += rowCnt;
     });
   }
 

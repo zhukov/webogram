@@ -1,5 +1,11 @@
 <ul class="inline_results_wrap composer_dropdown">
-  <li class="inline_result_wrap" ng-repeat="result in botResults.results track by result.qID" ng-switch="result.type">
+  <li class="inline_result_wrap" ng-class="" ng-repeat="result in botResults.results track by result.qID" ng-switch="result.type">
+    <a ng-switch-when="gif" class="inline_result_gif img_gif_with_progress_wrap" data-inlineid="{{result.qID}}">
+      <div class="img_gif_image_wrap" ng-switch="result._">
+        <img ng-switch-when="botInlineMediaResultDocument" class="img_gif_thumb" my-load-thumb thumb="result.document.thumb" width="{{result.thumbW}}" height="{{result.thumbH}}" />
+        <img ng-switch-default ng-if="result.thumbUrl !== undefined" class="img_gif_thumb" ng- width="{{result.thumbW}}" height="{{result.thumbH}}" ng-src="{{result.thumbUrl}}" />
+      </div>
+    </a>
     <a ng-switch-default class="inline_result_article clearfix" data-inlineid="{{result.qID}}">
       <div class="inline_article_thumb_wrap pull-left" ng-switch="result.thumbUrl !== undefined">
         <img ng-switch-when="true" class="inline_article_thumb" ng-src="{{result.thumbUrl}}"/>
