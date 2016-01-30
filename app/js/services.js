@@ -4228,7 +4228,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         type: 'JUMP_EXT_URL',
         url: url
       }).then(function () {
-        window.open(url, '_blank');
+        var target = '_blank';
+        if (url.search('https://telegram.me/') === 0) {
+          target = '_self';
+        }
+        window.open(url, target);
       });
       return true;
     }
