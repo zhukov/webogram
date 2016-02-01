@@ -1533,19 +1533,21 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      $scope.$on('inline_results', function (e, inlineResults) {
-        var w = 180;
-        var h = 50;
-        AppInlineBotsManager.regroupWrappedResults(inlineResults.results, w, h);
-        setZeroTimeout(function () {
-          composer.showInlineSuggestions(inlineResults);
-        });
-      });
-
       var richTextarea = composer.richTextareaEl[0];
       if (richTextarea) {
         $(richTextarea).on('keydown keyup', updateHeight);
       }
+
+      $scope.$on('inline_results', function (e, inlineResults) {
+        if (inlineResults) {
+          var w = ((richTextarea || messageField).offsetWidth || 382) - 2;
+          var h = 80;
+          AppInlineBotsManager.regroupWrappedResults(inlineResults.results, w, h);
+          setZeroTimeout(function () {
+            composer.setInlineSuggestions(inlineResults);
+          });
+        }
+      });
 
       $scope.$on('inline_placeholder', function(e, data) {
         composer.setInlinePlaceholder(data.prefix, data.placeholder);
@@ -2284,7 +2286,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=15&size='+width+'x'+height+'&scale=2&key=' + apiKey;
 
-      ExternalResourcesManager.downloadImage(src).then(function (url) {
+      ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf());
       });
     }
@@ -3402,7 +3404,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myInlineResults', function (ExternalResourcesManager) {
+  .directive('myInlineResults', function (AppPhotosManager, ExternalResourcesManager, AppDocsManager) {
 
     return {
       templateUrl: templateUrl('inline_results'),
@@ -3414,9 +3416,27 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$watch('botResults.results', function (results) {
           angular.forEach(results, function (result) {
             if (result.thumb_url && !result.thumbUrl) {
-              ExternalResourcesManager.downloadImage(result.thumb_url).then(function (url) {
+              ExternalResourcesManager.downloadByURL(result.thumb_url).then(function (url) {
                 result.thumbUrl = url;
               });
+            }
+            if (result.type == 'gif' && result.content_url && !result.contentUrl) {
+              ExternalResourcesManager.downloadByURL(result.content_url).then(function (url) {
+                result.contentUrl = url;
+              });
+            }
+            if (result.type == 'gif' && result.document) {
+              AppDocsManager.downloadDoc(result.document.id);
+            }
+            if (result.type == 'photo' && result.photo) {
+              var photoSize = AppPhotosManager.choosePhotoSize(result.photo, result.thumbW, result.thumbH),
+                  dim = calcImageInBox(photoSize.w, photoSize.h, result.thumbW, result.thumbH);
+              result.thumb = {
+                width: dim.w,
+                height: dim.h,
+                location: photoSize.location,
+                size: photoSize.size
+              };
             }
           })
         });

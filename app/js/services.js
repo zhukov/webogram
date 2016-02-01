@@ -2118,7 +2118,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     downloadPromise.then(function (blob) {
       if (blob) {
         FileManager.getFileCorrectUrl(blob, doc.mime_type).then(function (url) {
-          historyDoc.url = $sce.trustAsResourceUrl(url);
+          var trustedUrl = $sce.trustAsResourceUrl(url);
+          historyDoc.url = trustedUrl;
+          doc.url = trustedUrl;
         })
         historyDoc.downloaded = true;
       }
@@ -2609,7 +2611,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       bot: AppUsersManager.getUserInput(botID),
       query: query,
       offset: offset
-    }).then(function(botResults) {
+    }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function(botResults) {
       var queryID = botResults.query_id;
       delete botResults._;
       delete botResults.flags;
@@ -2671,7 +2673,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     angular.forEach(ratios, function (ratio) {
       var w = ratio * rowH;
       curW += w;
-      console.log(curCnt, w, curW, rowW);
       if (!curCnt || curCnt < 4 && curW < (rowW * 1.1)) {
         curCnt++;
       } else {

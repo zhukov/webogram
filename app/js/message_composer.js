@@ -954,9 +954,6 @@ MessageComposer.prototype.restoreSelection = function () {
 
 
 MessageComposer.prototype.checkAutocomplete = function (forceFull) {
-  if (this.autocompleteShown && this.autoCompleteScope.type == 'inline') {
-    return;
-  }
   var pos, value;
   if (this.richTextareaEl) {
     var textarea = this.richTextareaEl[0];
@@ -972,6 +969,13 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
     var pos = getFieldSelection(textarea);
     var value = textarea.value;
   }
+
+  if (value &&
+      this.curInlineResults &&
+      this.curInlineResults.text == value) {
+    this.showInlineSuggestions(this.curInlineResults);
+    return;
+  };
 
   if (!forceFull) {
     value = value.substr(0, pos);
@@ -1412,52 +1416,63 @@ MessageComposer.prototype.renderSuggestions = function () {
 
 MessageComposer.prototype.showEmojiSuggestions = function (codes) {
   var self = this;
-  this.autoCompleteScope.$apply(function () {
-    self.autoCompleteScope.type = 'emoji';
-    self.autoCompleteScope.emojiCodes = codes;
-  });
-  onContentLoaded(function () {
-    self.renderSuggestions();
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'emoji';
+      self.autoCompleteScope.emojiCodes = codes;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
 }
 
 MessageComposer.prototype.showMentionSuggestions = function (users) {
   var self = this;
-  this.autoCompleteScope.$apply(function () {
-    self.autoCompleteScope.type = 'mentions';
-    self.autoCompleteScope.mentionUsers = users;
-  });
-  onContentLoaded(function () {
-    self.renderSuggestions();
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'mentions';
+      self.autoCompleteScope.mentionUsers = users;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
 }
 
 MessageComposer.prototype.showCommandsSuggestions = function (commands) {
   var self = this;
-  this.autoCompleteScope.$apply(function () {
-    self.autoCompleteScope.type = 'commands';
-    self.autoCompleteScope.commands = commands;
-  });
-  onContentLoaded(function () {
-    self.renderSuggestions();
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'commands';
+      self.autoCompleteScope.commands = commands;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
 }
 
 MessageComposer.prototype.showInlineSuggestions = function (botResults) {
   if (!botResults || !botResults.results.length) {
-    if (this.autocompleteShown && this.autoCompleteScope.type == 'inline') {
-      this.hideSuggestions();
-    }
+    this.hideSuggestions();
     return;
   }
   var self = this;
-  this.autoCompleteScope.$apply(function () {
-    self.autoCompleteScope.type = 'inline';
-    self.autoCompleteScope.botResults = botResults;
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'inline';
+      self.autoCompleteScope.botResults = botResults;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
-  onContentLoaded(function () {
-    self.renderSuggestions();
-  });
+}
+
+MessageComposer.prototype.setInlineSuggestions = function (botResults) {
+  this.curInlineResults = botResults;
+  this.checkAutocomplete();
 }
 
 MessageComposer.prototype.updatePosition = function () {

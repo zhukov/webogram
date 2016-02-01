@@ -2269,6 +2269,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.draftMessage.text = '';
         $scope.$broadcast('ui_peer_draft');
       }
+
+      delete $scope.draftMessage.inlineProgress;
+      $scope.$broadcast('inline_results', false);
     }
 
     function applyDraftAttachment (e, attachment) {
@@ -2396,8 +2399,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return cancelEvent($event);
     }
 
-    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
-    var lastInlineBot = false;
     function onMessageChange(newVal) {
       // console.log('ctrl text changed', newVal);
       // console.trace('ctrl text changed', newVal);
@@ -2411,33 +2412,64 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
         Storage.set(backupDraftObj);
         // console.log(dT(), 'draft save', backupDraftObj);
-
-        var matches = newVal.match(inlineUsernameRegex);
-        if (matches) {
-          $scope.draftMessage.inlineProgress = true;
-          var username = matches[1];
-          AppPeersManager.resolveInlineMention(username).then(function (inlineBot) {
-            $scope.$broadcast('inline_placeholder', {
-              prefix: '@' + username + matches[2],
-              placeholder: inlineBot.placeholder
-            });
-            AppInlineBotsManager.getInlineResults(inlineBot.id, matches[3], '').then(function (botResults) {
-              $scope.$broadcast('inline_results', botResults);
-              delete $scope.draftMessage.inlineProgress;
-            }, function () {
-              delete $scope.draftMessage.inlineProgress;
-            });
-          }, function () {
-            delete $scope.draftMessage.inlinePlaceholder;
-            delete $scope.draftMessage.inlineProgress;
-          });
-        }
       } else {
         Storage.remove('draft' + $scope.curDialog.peerID);
-        delete $scope.draftMessage.inlinePlaceholder;
-        delete $scope.draftMessage.inlineProgress;
         // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
       }
+      checkInlinePattern(newVal);
+    }
+
+    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
+    var getInlineResultsTO = false;
+    var jump = 0;
+
+    function checkInlinePattern (message) {
+      if (getInlineResultsTO) {
+        $timeout.cancel(getInlineResultsTO);
+      }
+      var curJump = ++jump;
+      if (!message || !message.length) {
+        delete $scope.draftMessage.inlineProgress;
+        $scope.$broadcast('inline_results', false);
+        return;
+      }
+      var matches = message.match(inlineUsernameRegex);
+      if (!matches) {
+        delete $scope.draftMessage.inlineProgress;
+        $scope.$broadcast('inline_results', false);
+        return;
+      }
+      var username = matches[1];
+      $scope.draftMessage.inlineProgress = true;
+      AppPeersManager.resolveInlineMention(username).then(function (inlineBot) {
+        if (curJump != jump) {
+          return;
+        }
+        $scope.$broadcast('inline_placeholder', {
+          prefix: '@' + username + matches[2],
+          placeholder: inlineBot.placeholder
+        });
+        if (getInlineResultsTO) {
+          $timeout.cancel(getInlineResultsTO);
+        }
+        getInlineResultsTO = $timeout(function () {
+          AppInlineBotsManager.getInlineResults(inlineBot.id, matches[3], '').then(function (botResults) {
+            getInlineResultsTO = false;
+            if (curJump != jump) {
+              return;
+            }
+            botResults.text = message;
+            $scope.$broadcast('inline_results', botResults);
+            delete $scope.draftMessage.inlineProgress;
+          }, function () {
+            $scope.$broadcast('inline_results', false);
+            delete $scope.draftMessage.inlineProgress;
+          });
+        }, 500);
+      }, function () {
+        $scope.$broadcast('inline_results', false);
+        delete $scope.draftMessage.inlineProgress;
+      });
     }
 
     function onTyping () {
@@ -2499,7 +2531,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         fwdsSend();
       }
       delete $scope.draftMessage.sticker;
-      resetDraft();
     }
 
     function onCommandSelected (command) {
