@@ -1099,6 +1099,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           historyEl = $('.im_history', element)[0],
           scrollableWrap = $('.im_history_scrollable_wrap', element)[0],
           scrollable = $('.im_history_scrollable', element)[0],
+          emptyWrapEl = $('.im_history_empty_wrap', element)[0],
           bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0],
           sendFormWrap = $('.im_send_form_wrap', element)[0],
           headWrap = $('.tg_page_head')[0],
@@ -1412,7 +1413,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $(historyMessagesEl).css({marginTop: 0});
         var marginTop = scrollableWrap.offsetHeight
                         - historyMessagesEl.offsetHeight
-                        - 20
+                        - emptyWrapEl.offsetHeight
                         - (Config.Mobile ? 0 : 39);
 
         if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
@@ -1429,8 +1430,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function (_, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, shouldFocusOnInteraction) {
-
+  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, shouldFocusOnInteraction) {
     return {
       link: link,
       scope: {
@@ -1497,6 +1497,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
+      $scope.$on('stickers_changed', function () {
+        emojiTooltip.onStickersChanged();
+      });
+
+
       var composerEmojiPanel;
       if (emojiPanel) {
         composerEmojiPanel = new EmojiPanel(emojiPanel, {
@@ -1506,9 +1511,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
 
-      var peerPhotoCompiled = $compile('<span class="composer_user_photo" my-peer-photolink="peerID" img-class="composer_user_photo"></span>');
-      var cachedPeerPhotos = {};
-
       var composer = new MessageComposer(messageField, {
         onTyping: function () {
           $scope.$emit('ui_typing');
@@ -1516,21 +1518,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         getSendOnEnter: function () {
           return sendOnEnter;
         },
-        getPeerImage: function (element, peerID, noReplace) {
-          if (cachedPeerPhotos[peerID] && !noReplace) {
-            element.replaceWith(cachedPeerPhotos[peerID]);
-            return;
-          }
+        dropdownDirective: function (element, callback) {
           var scope = $scope.$new(true);
-          scope.peerID = peerID;
-          peerPhotoCompiled(scope, function (clonedElement) {
-            cachedPeerPhotos[peerID] = clonedElement;
+          var clonedElement = $compile('<div><div my-composer-dropdown></div></div>')(scope, function (clonedElement, scope) {
             element.replaceWith(clonedElement);
+            callback(scope, clonedElement);
           });
         },
         mentions: $scope.mentions,
         commands: $scope.commands,
         onMessageSubmit: onMessageSubmit,
+        onInlineResultSend: onInlineResultSend,
         onFilePaste: onFilePaste,
         onCommandSend: function (command) {
           $scope.$apply(function () {
@@ -1543,6 +1541,21 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (richTextarea) {
         $(richTextarea).on('keydown keyup', updateHeight);
       }
+
+      $scope.$on('inline_results', function (e, inlineResults) {
+        if (inlineResults) {
+          var w = ((richTextarea || messageField).offsetWidth || 382) - 2;
+          var h = 80;
+          AppInlineBotsManager.regroupWrappedResults(inlineResults.results, w, h);
+          setZeroTimeout(function () {
+            composer.setInlineSuggestions(inlineResults);
+          });
+        }
+      });
+
+      $scope.$on('inline_placeholder', function(e, data) {
+        composer.setInlinePlaceholder(data.prefix, data.placeholder);
+      });
 
       fileSelects.on('change', function () {
         var self = this;
@@ -1657,6 +1670,12 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
         }, shouldFocusOnInteraction ? 0 : 100);
         return cancelEvent(e);
+      }
+
+      function onInlineResultSend (qID) {
+        $scope.$apply(function () {
+          $scope.draftMessage.inlineResultID = qID;
+        });
       }
 
       function updateValue () {
@@ -2063,7 +2082,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myLoadGif', function(AppDocsManager) {
+  .directive('myLoadGif', function(AppDocsManager, $timeout) {
 
     return {
       link: link,
@@ -2082,6 +2101,15 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.isActive = false;
 
+      // Demo
+      // $scope.document.progress = {enabled: true, percent: 30};
+      // $timeout(function () {
+      //   $scope.document.progress.percent = 60;
+      // }, 3000);
+      // $timeout(function () {
+      //   $scope.document.progress.percent = 100;
+      // }, 10000);
+
       $scope.toggle = function (e) {
         if (e && checkClick(e, true)) {
           AppDocsManager.saveDocFile($scope.document.id);
@@ -2092,6 +2120,16 @@ angular.module('myApp.directives', ['myApp.filters'])
           onContentLoaded(function () {
             $scope.isActive = !$scope.isActive;
             $scope.$emit('ui_height');
+
+            var video = $('video', element)[0];
+            if (video) {
+              if (!$scope.isActive) {
+                video.pause();
+                video.currentTime = 0;
+              } else {
+                video.play();
+              }
+            }
           })
           return;
         }
@@ -2105,8 +2143,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         downloadPromise = AppDocsManager.downloadDoc($scope.document.id);
 
         downloadPromise.then(function () {
-          $scope.isActive = true;
-          $scope.$emit('ui_height');
+          $timeout(function () {
+            $scope.isActive = true;
+          }, 200);
         })
       }
 
@@ -2330,8 +2369,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=15&size='+width+'x'+height+'&scale=2&key=' + apiKey;
 
-      ExternalResourcesManager.downloadImage(src).then(function (url) {
-        element.attr('src', url);
+      ExternalResourcesManager.downloadByURL(src).then(function (url) {
+        element.attr('src', url.valueOf());
       });
     }
 
@@ -2831,7 +2870,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       };
 
-      if (element[0].tagName == 'A') {
+      if (element[0].tagName == 'A' && !hasOnlick(element[0])) {
         element.on('click', function () {
           if (peerID > 0) {
             AppUsersManager.openUser(peerID, override);
@@ -3317,44 +3356,67 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
   .directive('myArcProgress', function () {
-    var html = '<svg class="progress-arc" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg"><circle class="progress-arc-circle" fill="transparent" stroke-dashoffset="0"></circle><circle class="progress-arc-bar" fill="transparent" stroke-dashoffset="0"></circle></svg>';
+    var html =
+'<svg class="progress-arc" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">\
+  <defs>\
+    <linearGradient id="grad_intermediate%id%" x1="0%" y1="0%" x2="100%" y2="0%">\
+      <stop offset="0%" class="stop0" />\
+      <stop offset="60%" class="stop60" />\
+      <stop offset="100%"  class="stop100"/>\
+    </linearGradient>\
+  </defs>\
+  <circle class="progress-arc-bar"></circle>\
+</svg>';
+
+    function updateProgress (bar, progress, fullLen) {
+      progress = Math.max(0.0, Math.min(progress, 1.0));
+      var minProgress = 0.2;
+      progress = minProgress + (1 - minProgress) * progress;
+      bar.css({strokeDasharray: (progress * fullLen) + ', ' + ((1 - progress) * fullLen)});
+    }
+
+    var num = 0;
+
     return {
       scope: {
         progress: '=myArcProgress'
       },
       link: function  ($scope, element, attrs) {
-        element
-          .html(html)
-          .addClass('progress-arc-wrap');
-
-        var svgEl = element[0].firstChild;
-        var circle = $('.progress-arc-circle', element);
-        var bar = $('.progress-arc-bar', element);
-
-        var width = attrs.width || 40;
-        var radius = width * 0.86;
-        var stroke = width * 0.14;
+        var intermediate = !attrs.myArcProgress;
+        var width = attrs.width || element.width() || 40;
+        var stroke = attrs.stroke || (width / 2 * 0.14);
         var center = width / 2;
+        var radius = center - (stroke / 2);
 
-        $(svgEl).attr('width', width);
-        $(svgEl).attr('height', width);
-        circle.attr('cx', center);
-        circle.attr('cy', center);
-        circle.attr('r', radius);
-        circle.css({strokeWidth: stroke});
+        // Doesn't work without unique id for every gradient
+        var curNum = ++num;
 
-        bar.attr('cx', center);
-        bar.attr('cy', center);
-        bar.attr('r', radius);
-        bar.css({strokeWidth: stroke});
+        element
+          .html(html.replace('%id%', curNum))
+          .addClass('progress-arc-wrap')
+          .addClass(intermediate ? 'progress-arc-intermediate' : 'progress-arc-percent')
+          .css({width: width, height: width});
+
+        $(element[0].firstChild)
+          .attr('width', width)
+          .attr('height', width);
+
+        var bar = $('.progress-arc-bar', element);
+        bar
+          .attr('cx', center)
+          .attr('cy', center)
+          .attr('r', radius)
+          .css({strokeWidth: stroke});
 
         var fullLen = 2 * Math.PI * radius;
-        $scope.$watch('progress', function (newProgress) {
-          var progress = newProgress / 100.0;
-          progress = Math.max(0.0, Math.min(progress, 1.0));
-          bar.css({strokeDasharray: (progress * fullLen) + ', ' + ((1 - progress) * fullLen)});
-        });
-
+        if (intermediate) {
+          updateProgress(bar, 0.3, fullLen);
+          bar.css({stroke: 'url(#grad_intermediate' + curNum + ')'});
+        } else {
+          $scope.$watch('progress', function (newProgress) {
+            updateProgress(bar, newProgress / 100.0, fullLen);
+          });
+        }
       }
     }
   })
@@ -3379,4 +3441,88 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
+  })
+
+  .directive('myComposerDropdown', function () {
+
+    return {
+      templateUrl: templateUrl('composer_dropdown')
+    }
+  })
+
+  .directive('myEmojiSuggestions', function () {
+
+    return {
+      link: function($scope, element, attrs) {
+        $scope.$watchCollection('emojiCodes', function (codes) {
+          // var codes = $scope.$eval(attrs.myEmojiSuggestions);
+          var html = [];
+          var iconSize = Config.Mobile ? 26 : 20;
+
+          var emoticonCode, emoticonData, spritesheet, pos, categoryIndex;
+          var count = Math.min(5, codes.length);
+          var i, x, y;
+
+          for (i = 0; i < count; i++) {
+            emoticonCode = codes[i];
+            if (emoticonCode.code) {
+              emoticonCode = emoticonCode.code;
+            }
+            if (emoticonData = Config.Emoji[emoticonCode]) {
+              spritesheet = EmojiHelper.spritesheetPositions[emoticonCode];
+              categoryIndex = spritesheet[0];
+              pos = spritesheet[1];
+              x = iconSize * spritesheet[3];
+              y = iconSize * spritesheet[2];
+              html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w', iconSize, ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
+            }
+          }
+          // onContentLoaded(function () {
+            element.html(html.join(''));
+            console.log(dT(), 'emoji done');
+          // });
+        });
+      }
+    };
+
+  })
+
+  .directive('myInlineResults', function (AppPhotosManager, ExternalResourcesManager, AppDocsManager) {
+
+    return {
+      templateUrl: templateUrl('inline_results'),
+      scope: {
+        botResults: '=myInlineResults'
+      },
+
+      link: function  ($scope, element, attrs) {
+        $scope.$watch('botResults.results', function (results) {
+          angular.forEach(results, function (result) {
+            if (result.thumb_url && !result.thumbUrl) {
+              ExternalResourcesManager.downloadByURL(result.thumb_url).then(function (url) {
+                result.thumbUrl = url;
+              });
+            }
+            if (result.type == 'gif' && result.content_url && !result.contentUrl) {
+              ExternalResourcesManager.downloadByURL(result.content_url).then(function (url) {
+                result.contentUrl = url;
+              });
+            }
+            if (result.type == 'gif' && result.document) {
+              AppDocsManager.downloadDoc(result.document.id);
+            }
+            if (result.type == 'photo' && result.photo) {
+              var photoSize = AppPhotosManager.choosePhotoSize(result.photo, result.thumbW, result.thumbH),
+                  dim = calcImageInBox(photoSize.w, photoSize.h, result.thumbW, result.thumbH);
+              result.thumb = {
+                width: dim.w,
+                height: dim.h,
+                location: photoSize.location,
+                size: photoSize.size
+              };
+            }
+          })
+        });
+      }
+    }
   })

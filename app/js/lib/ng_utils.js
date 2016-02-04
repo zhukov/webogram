@@ -963,10 +963,10 @@ angular.module('izhukov.utils', [])
   };
 })
 
-.service('ExternalResourcesManager', function ($q, $http) {
+.service('ExternalResourcesManager', function ($q, $http, $sce) {
   var urlPromises = {};
 
-  function downloadImage (url) {
+  function downloadByURL (url) {
     if (urlPromises[url] !== undefined) {
       return urlPromises[url];
     }
@@ -974,12 +974,18 @@ angular.module('izhukov.utils', [])
     return urlPromises[url] = $http.get(url, {responseType: 'blob', transformRequest: null})
       .then(function (response) {
         window.URL = window.URL || window.webkitURL;
-        return window.URL.createObjectURL(response.data);
+        var url = window.URL.createObjectURL(response.data);
+        return $sce.trustAsResourceUrl(url);
+      }, function (error) {
+        if (!Config.modes.chrome_packed) {
+          return $q.when($sce.trustAsResourceUrl(url));
+        }
+        return $q.reject(error);
       });
   }
 
   return {
-    downloadImage: downloadImage
+    downloadByURL: downloadByURL
   }
 })
 

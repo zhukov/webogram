@@ -36,7 +36,9 @@ Config.Modes = {
   webcrypto: location.search.indexOf('webcrypto=0')== -1,
   packed: location.protocol == 'app:' || location.protocol == 'chrome-extension:',
   ios_standalone: window.navigator.standalone && navigator.userAgent.match(/iOS|iPhone|iPad/),
-  chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false
+  chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false,
+  animations: true,
+  memory_only: false
 };
 
 Config.Navigator = {

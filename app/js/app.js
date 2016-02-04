@@ -7,6 +7,12 @@
 
 'use strict';
 
+var extraModules = [];
+if (Config.Modes.animations) {
+  extraModules.push('ngAnimate');
+}
+
+
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
   'ngRoute',
@@ -24,7 +30,7 @@ angular.module('myApp', [
   PRODUCTION_ONLY_END*/
   'myApp.directives',
   'myApp.controllers'
-]).
+].concat(extraModules)).
 config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvider', function($locationProvider, $routeProvider, $compileProvider, StorageProvider) {
 
   $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//);

@@ -181,7 +181,10 @@ angular.module('myApp.services')
     }
 
     NotificationsManager.savePeerSettings(peerID, dialog.notify_settings);
-    ApiUpdatesManager.addChannelState(channelID, dialog.pts);
+
+    if (dialog.pts) {
+      ApiUpdatesManager.addChannelState(channelID, dialog.pts);
+    }
   }
 
   function getTopMessages (limit) {
@@ -1291,10 +1294,12 @@ angular.module('myApp.services')
         isChannel = AppPeersManager.isChannel(peerID),
         isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
         asChannel = isChannel && !isMegagroup ? true : false,
-        entities = [],
+        entities = options.entities || [],
         message;
 
-    text = RichTextProcessor.parseMarkdown(text, entities);
+    if (!options.viaBotID) {
+      text = RichTextProcessor.parseMarkdown(text, entities);
+    }
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
@@ -1328,6 +1333,7 @@ angular.module('myApp.services')
       message: text,
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
+      via_bot_id: options.viaBotID,
       entities: entities,
       views: asChannel && 1,
       pending: true
@@ -1359,21 +1365,34 @@ angular.module('myApp.services')
       if (replyToMsgID) {
         flags |= 1;
       }
-      if (entities.length) {
-        flags |= 8;
-      }
       if (asChannel) {
         flags |= 16;
       }
+      var apiPromise;
+      if (options.viaBotID) {
+        apiPromise = MtpApiManager.invokeApi('messages.sendInlineBotResult', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
+          query_id: options.queryID,
+          id: options.resultID
+        }, sentRequestOptions);
+      } else {
+        if (entities.length) {
+          flags |= 8;
+        }
+        apiPromise = MtpApiManager.invokeApi('messages.sendMessage', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          message: text,
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
+          entities: entities
+        }, sentRequestOptions)
+      }
       // console.log(flags, entities);
-      MtpApiManager.invokeApi('messages.sendMessage', {
-        flags: flags,
-        peer: AppPeersManager.getInputPeerByID(peerID),
-        message: text,
-        random_id: randomID,
-        reply_to_msg_id: getMessageLocalID(replyToMsgID),
-        entities: entities
-      }, sentRequestOptions).then(function (updates) {
+      apiPromise.then(function (updates) {
         if (updates._ == 'updateShortSentMessage') {
           message.flags = updates.flags;
           message.date = updates.date;
@@ -1637,7 +1656,8 @@ angular.module('myApp.services')
       case 'inputMediaPhoto':
         media = {
           _: 'messageMediaPhoto',
-          photo: AppPhotosManager.getPhoto(inputMedia.id.id)
+          photo: AppPhotosManager.getPhoto(inputMedia.id.id),
+          caption: inputMedia.caption || ''
         };
         break;
 
@@ -1648,8 +1668,13 @@ angular.module('myApp.services')
         };
         media = {
           _: 'messageMediaDocument',
-          'document': doc
+          'document': doc,
+          caption: inputMedia.caption || ''
         };
+        break;
+
+      case 'messageMediaPending':
+        media = inputMedia;
         break;
     }
 
@@ -1684,6 +1709,7 @@ angular.module('myApp.services')
       media: media,
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
+      via_bot_id: options.viaBotID,
       views: asChannel && 1,
       pending: true
     };
@@ -1718,13 +1744,26 @@ angular.module('myApp.services')
         sentRequestOptions.afterMessageID = pendingAfterMsgs[peerID].messageID;
       }
 
-      MtpApiManager.invokeApi('messages.sendMedia', {
-        flags: flags,
-        peer: AppPeersManager.getInputPeerByID(peerID),
-        media: inputMedia,
-        random_id: randomID,
-        reply_to_msg_id: getMessageLocalID(replyToMsgID)
-      }, sentRequestOptions).then(function (updates) {
+      var apiPromise;
+      if (options.viaBotID) {
+        apiPromise = MtpApiManager.invokeApi('messages.sendInlineBotResult', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID),
+          query_id: options.queryID,
+          id: options.resultID
+        }, sentRequestOptions);
+      } else {
+        apiPromise = MtpApiManager.invokeApi('messages.sendMedia', {
+          flags: flags,
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          media: inputMedia,
+          random_id: randomID,
+          reply_to_msg_id: getMessageLocalID(replyToMsgID)
+        }, sentRequestOptions);
+      }
+      apiPromise.then(function (updates) {
         ApiUpdatesManager.processUpdateMessage(updates);
       }, function (error) {
         toggleError(true);
@@ -3007,7 +3046,7 @@ angular.module('myApp.services')
         };
       }
     })
-  })
+  });
 
   return {
     getConversations: getConversations,

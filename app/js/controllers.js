@@ -1058,6 +1058,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedReply = selectedReply;
     $scope.selectedCancel = selectedCancel;
     $scope.selectedFlush = selectedFlush;
+    $scope.selectInlineBot = selectInlineBot;
 
     $scope.startBot = startBot;
     $scope.cancelBot = cancelBot;
@@ -1195,7 +1196,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.historyState.typing.splice(0, $scope.historyState.typing.length);
         $scope.$broadcast('ui_peer_change');
         $scope.$broadcast('ui_history_change');
-        safeReplaceObject($scope.state, {loaded: true, empty: !peerHistory.messages.length});
+        safeReplaceObject($scope.state, {loaded: true, empty: !peerHistory.messages.length, mayBeHasMore: true});
 
         updateBotActions();
         updateChannelActions();
@@ -1299,14 +1300,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       lessPending = false;
-      lessActive = true;
+      $scope.state.lessActive = lessActive = true;
 
       var curJump = jump,
           curLessJump = ++lessJump,
           limit = 0,
           backLimit = 20;
       AppMessagesManager.getHistory($scope.curDialog.peerID, minID, limit, backLimit).then(function (historyResult) {
-        lessActive = false;
+        $scope.state.lessActive = lessActive = false;
         if (curJump != jump || curLessJump != lessJump) return;
 
         var i, id;
@@ -1347,7 +1348,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       morePending = false;
-      moreActive = true;
+      $scope.state.moreActive = moreActive = true;
 
       var curJump = jump,
           curMoreJump = ++moreJump,
@@ -1358,7 +1359,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         : AppMessagesManager.getHistory($scope.curDialog.peerID, maxID, limit);
 
       getMessagesPromise.then(function (historyResult) {
-        moreActive = false;
+        $scope.state.moreActive = moreActive = false;
         if (curJump != jump || curMoreJump != moreJump) return;
 
         angular.forEach(historyResult.history, function (id) {
@@ -1405,9 +1406,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         limit = 10;
       }
 
-      moreActive = false;
+      $scope.state.moreActive = moreActive = false;
       morePending = false;
-      lessActive = false;
+      $scope.state.lessActive = lessActive = false;
       lessPending = false;
 
       var prerenderedLen = peerHistory.messages.length;
@@ -1550,23 +1551,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         var target = $event.target;
         while (target) {
-          if (target.className.indexOf('im_message_outer_wrap') != -1) {
+          if (target instanceof SVGElement) {
+            target = target.parentNode;
+            continue;
+          }
+          if (target.className && target.className.indexOf('im_message_outer_wrap') != -1) {
             if (Config.Mobile) {
               return false;
             }
             break;
           }
+          if (target.className &&
+              target.className.indexOf('im_message_date') != -1) {
+            if ($scope.historyState.canReply) {
+              selectedReply(messageID);
+            } else {
+              selectedForward(messageID);
+            }
+            return false;
+          }
           if (Config.Mobile &&
+              target.className &&
               target.className.indexOf('im_message_body') != -1) {
             break;
           }
-          if (target.tagName == 'A' ||
-              target.onclick ||
-              target.getAttribute('ng-click')) {
-            return false;
-          }
-          var events = $._data(target, 'events');
-          if (events && (events.click || events.mousedown)) {
+          if (target.tagName == 'A' || hasOnlick(target)) {
             return false;
           }
           target = target.parentNode;
@@ -1649,6 +1658,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       }
       $scope.$broadcast('messages_select');
+    }
+
+    function selectInlineBot (botID, $event) {
+      $scope.$broadcast('inline_bot_select', botID);
+      return cancelEvent($event);
     }
 
     function selectedCancel (noBroadcast) {
@@ -2069,7 +2083,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, MtpApiFileManager, RichTextProcessor) {
+  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, RichTextProcessor) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -2091,11 +2105,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$watch('draftMessage.files', onFilesSelected);
     $scope.$watch('draftMessage.sticker', onStickerSelected);
     $scope.$watch('draftMessage.command', onCommandSelected);
+    $scope.$watch('draftMessage.inlineResultID', onInlineResultSelected);
 
     $scope.$on('history_reply_markup', function (e, peerData) {
       if (peerData.peerID == $scope.curDialog.peerID) {
         updateReplyKeyboard();
       }
+    });
+
+    $scope.$on('inline_bot_select', function (e, botID) {
+      var bot = AppUsersManager.getUser(botID);
+      $scope.draftMessage.text = '@' + bot.username + ' ';;
+      $scope.$broadcast('ui_peer_draft', {focus: true});
     });
 
     $scope.replyKeyboardToggle = replyKeyboardToggle;
@@ -2250,6 +2271,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.draftMessage.text = '';
         $scope.$broadcast('ui_peer_draft');
       }
+
+      delete $scope.draftMessage.inlineProgress;
+      $scope.$broadcast('inline_results', false);
     }
 
     function applyDraftAttachment (e, attachment) {
@@ -2394,6 +2418,60 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         Storage.remove('draft' + $scope.curDialog.peerID);
         // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
       }
+      checkInlinePattern(newVal);
+    }
+
+    var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
+    var getInlineResultsTO = false;
+    var jump = 0;
+
+    function checkInlinePattern (message) {
+      if (getInlineResultsTO) {
+        $timeout.cancel(getInlineResultsTO);
+      }
+      var curJump = ++jump;
+      if (!message || !message.length) {
+        delete $scope.draftMessage.inlineProgress;
+        $scope.$broadcast('inline_results', false);
+        return;
+      }
+      var matches = message.match(inlineUsernameRegex);
+      if (!matches) {
+        delete $scope.draftMessage.inlineProgress;
+        $scope.$broadcast('inline_results', false);
+        return;
+      }
+      var username = matches[1];
+      $scope.draftMessage.inlineProgress = true;
+      AppPeersManager.resolveInlineMention(username).then(function (inlineBot) {
+        if (curJump != jump) {
+          return;
+        }
+        $scope.$broadcast('inline_placeholder', {
+          prefix: '@' + username + matches[2],
+          placeholder: inlineBot.placeholder
+        });
+        if (getInlineResultsTO) {
+          $timeout.cancel(getInlineResultsTO);
+        }
+        getInlineResultsTO = $timeout(function () {
+          AppInlineBotsManager.getInlineResults(inlineBot.id, matches[3], '').then(function (botResults) {
+            getInlineResultsTO = false;
+            if (curJump != jump) {
+              return;
+            }
+            botResults.text = message;
+            $scope.$broadcast('inline_results', botResults);
+            delete $scope.draftMessage.inlineProgress;
+          }, function () {
+            $scope.$broadcast('inline_results', false);
+            delete $scope.draftMessage.inlineProgress;
+          });
+        }, 500);
+      }, function () {
+        $scope.$broadcast('inline_results', false);
+        delete $scope.draftMessage.inlineProgress;
+      });
     }
 
     function onTyping () {
@@ -2455,7 +2533,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         fwdsSend();
       }
       delete $scope.draftMessage.sticker;
-      resetDraft();
     }
 
     function onCommandSelected (command) {
@@ -2467,6 +2544,25 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       delete $scope.draftMessage.sticker;
       delete $scope.draftMessage.text;
       delete $scope.draftMessage.command;
+      delete $scope.draftMessage.inlineResultID;
+      $scope.$broadcast('ui_message_send');
+      $scope.$broadcast('ui_peer_draft');
+    }
+
+    function onInlineResultSelected (qID) {
+      if (!qID) {
+        return;
+      }
+      var options = {
+        replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
+      };
+      AppInlineBotsManager.sendInlineResult($scope.curDialog.peerID, qID, options);
+      fwdsSend();
+      resetDraft();
+      delete $scope.draftMessage.sticker;
+      delete $scope.draftMessage.text;
+      delete $scope.draftMessage.command;
+      delete $scope.draftMessage.inlineResultID;
       $scope.$broadcast('ui_message_send');
       $scope.$broadcast('ui_peer_draft');
     }
@@ -4654,11 +4750,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   .controller('StickersetModalController', function ($scope, $rootScope, $modalInstance, MtpApiManager, RichTextProcessor, AppStickersManager, AppDocsManager, AppMessagesManager, LocationParamsService) {
     $scope.slice = {limit: 20, limitDelta: 20};
 
+    var fullSet;
+
     AppStickersManager.getStickerset($scope.inputStickerset).then(function (result) {
       $scope.$broadcast('ui_height');
       $scope.stickersetLoaded = true;
+      fullSet = result;
       $scope.stickerset = result.set;
-      $scope.stickersetInstalled = result.installed;
+      $scope.stickersetInstalled = result.set.pFlags.installed == true;
       $scope.documents = result.documents;
 
       $scope.stickerEmojis = {};
@@ -4673,7 +4772,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     });
 
     $scope.toggleInstalled = function (installed) {
-      AppStickersManager.installStickerset($scope.stickerset, !installed).then(function () {
+      AppStickersManager.installStickerset(fullSet, !installed).then(function () {
         $scope.stickersetInstalled = installed;
       })
     };

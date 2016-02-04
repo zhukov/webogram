@@ -364,7 +364,7 @@ EmojiTooltip.prototype.createTooltip = function () {
 
 
 EmojiTooltip.prototype.selectCategory = function (cat, force) {
-  if (this.cat === cat && !force) {
+  if (!this.tab && this.cat === cat && !force) {
     return false;
   }
   $('.active', this.categoriesEl).removeClass('active');
@@ -566,6 +566,12 @@ EmojiTooltip.prototype.onStickersScroll = function (scrollable, scrollTop) {
   this.activateStickerCategory();
 };
 
+EmojiTooltip.prototype.onStickersChanged = function () {
+  if (this.tab) {
+    this.updateStickersContents(true);
+  }
+};
+
 EmojiTooltip.prototype.activateStickerCategory = function () {
   var categoriesEl = this.categoriesEl[1];
   var categoryEl = categoriesEl.childNodes[this.cat];
@@ -668,19 +674,77 @@ EmojiPanel.prototype.update = function () {
 
 
 function MessageComposer (textarea, options) {
+  var self = this;
+
   this.textareaEl = $(textarea);
 
   this.setUpInput();
 
   this.autoCompleteWrapEl = $('<div class="composer_dropdown_wrap"></div>').appendTo(document.body);
-  this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu"></ul>').appendTo(this.autoCompleteWrapEl);
+  var autoCompleteEl = $('<div></div>').appendTo(this.autoCompleteWrapEl);
 
+  options.dropdownDirective(autoCompleteEl, function (scope, newAutoCompleteEl) {
+    self.autoCompleteEl = newAutoCompleteEl;
+    self.autoCompleteScope = scope;
+    self.setUpAutoComplete();
+  });
+
+  this.isActive = false;
+
+  this.onTyping = options.onTyping;
+  this.onMessageSubmit = options.onMessageSubmit;
+  this.getSendOnEnter = options.getSendOnEnter;
+  this.onFilePaste = options.onFilePaste;
+  this.onCommandSend = options.onCommandSend;
+  this.onInlineResultSend = options.onInlineResultSend;
+  this.mentions = options.mentions;
+  this.commands = options.commands;
+}
+
+MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
+
+
+MessageComposer.prototype.setUpInput = function () {
+  this.inlinePlaceholderWrap = $('<div class="im_inline_placeholder_wrap"></div>').prependTo(this.textareaEl[0].parentNode);
+  this.inlinePlaceholderPrefixEl = $('<span class="im_inline_placeholder_prefix"></span>').appendTo(this.inlinePlaceholderWrap);
+  this.inlinePlaceholderEl = $('<span class="im_inline_placeholder"></span>').appendTo(this.inlinePlaceholderWrap);
+
+  if ('contentEditable' in document.body) {
+    this.setUpRich();
+  } else {
+    this.setUpPlaintext();
+  }
+
+  if (!Config.Mobile) {
+    var sbWidth = getScrollWidth();
+    if (sbWidth) {
+      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
+    }
+  }
+}
+
+MessageComposer.prototype.setInlinePlaceholder = function (prefix, placeholder) {
+  this.inlinePlaceholderPrefix = prefix
+  this.inlinePlaceholderPrefixEl.html(encodeEntities(prefix));
+  this.inlinePlaceholderEl.html(encodeEntities(placeholder));
+  this.onChange();
+}
+
+MessageComposer.prototype.updateInlinePlaceholder = function () {
+  var prefix = this.inlinePlaceholderPrefix;
+  if (prefix) {
+    var value = this.textareaEl.val();
+    this.inlinePlaceholderWrap.toggleClass('active', value == prefix);
+  }
+}
+
+MessageComposer.prototype.setUpAutoComplete = function () {
   this.scroller = new Scroller(this.autoCompleteEl, {maxHeight: 180});
 
   var self = this;
   this.autoCompleteEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), mention, code, command;
+    var target = $(e.target), mention, code, command, inlineID;
     if (target[0].tagName != 'A') {
       target = $(target[0].parentNode);
     }
@@ -699,37 +763,14 @@ function MessageComposer (textarea, options) {
       }
       self.hideSuggestions();
     }
+    if (inlineID = target.attr('data-inlineid')) {
+      if (self.onInlineResultSend) {
+        self.onInlineResultSend(inlineID);
+      }
+      self.hideSuggestions();
+    }
     return cancelEvent(e);
   });
-
-  this.isActive = false;
-
-  this.onTyping = options.onTyping;
-  this.onMessageSubmit = options.onMessageSubmit;
-  this.getSendOnEnter = options.getSendOnEnter;
-  this.onFilePaste = options.onFilePaste;
-  this.mentions = options.mentions;
-  this.commands = options.commands;
-  this.getPeerImage = options.getPeerImage;
-  this.onCommandSend = options.onCommandSend;
-}
-
-MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
-
-
-MessageComposer.prototype.setUpInput = function () {
-  if ('contentEditable' in document.body) {
-    this.setUpRich();
-  } else {
-    this.setUpPlaintext();
-  }
-
-  if (!Config.Mobile) {
-    var sbWidth = getScrollWidth();
-    if (sbWidth) {
-      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
-    }
-  }
 }
 
 MessageComposer.prototype.setUpRich = function () {
@@ -763,13 +804,15 @@ MessageComposer.prototype.onKeyEvent = function (e) {
       if (this.keyupStarted === undefined) {
         this.keyupStarted = now;
       }
-      if (now - this.keyupStarted > 10000) {
+      if (now - this.keyupStarted > 3000 || true) {
         this.onChange();
       }
       else {
         length = this.richTextareaEl[0].textContent.length;
         if (this.wasEmpty != !length) {
           this.wasEmpty = !this.wasEmpty;
+          this.onChange();
+        } else if (this.inlinePlaceholderPrefix) {
           this.onChange();
         } else {
           this.updateValueTO = setTimeout(this.onChange.bind(this), 1000);
@@ -797,45 +840,54 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     if (this.autocompleteShown) {
       if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
         var next = e.keyCode == 40;
-        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
+        var currentSel = $(this.autoCompleteEl).find('li.composer_autocomplete_option_active');
+        var allLIs = Array.prototype.slice.call($(this.autoCompleteEl).find('li'));
+        var nextSel;
 
-        if (currentSelected.length) {
-          var currentSelectedWrap = currentSelected[0].parentNode;
-          var nextWrap = currentSelectedWrap[next ? 'nextSibling' : 'previousSibling'];
-          currentSelected.removeClass('composer_autocomplete_option_active');
-          if (nextWrap) {
-            $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
-            this.scroller.scrollToNode(nextWrap);
+        if (currentSel.length) {
+          var pos = allLIs.indexOf(currentSel[0]);
+          var nextPos = pos + (next ? 1 : -1);
+          nextSel = allLIs[nextPos];
+          currentSel.removeClass('composer_autocomplete_option_active');
+          if (nextSel) {
+            $(nextSel).addClass('composer_autocomplete_option_active');
+            this.scroller.scrollToNode(nextSel);
             return cancelEvent(e);
           }
         }
 
-        var childNodes = this.autoCompleteEl[0].childNodes;
-        var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
-        this.scroller.scrollToNode(nextWrap);
-        $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
+        nextSel = allLIs[next ? 0 : allLIs.length - 1];
+        this.scroller.scrollToNode(nextSel);
+        $(nextSel).addClass('composer_autocomplete_option_active');
 
         return cancelEvent(e);
       }
 
       if (e.keyCode == 13 || e.keyCode == 9) { // Enter or Tab
-        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
-        if (!currentSelected.length && e.keyCode == 9) {
-          currentSelected = $(this.autoCompleteEl[0].childNodes[0]).find('a');
+        var currentSel = $(this.autoCompleteEl).find('li.composer_autocomplete_option_active');
+        if (!currentSel.length && e.keyCode == 9) {
+          currentSel = $(this.autoCompleteEl).find('li:first');
         }
-        var code, mention, command;
-        if (code = currentSelected.attr('data-code')) {
+        currentSel = currentSel.find('a:first');
+        var code, mention, command, inlineID;
+        if (code = currentSel.attr('data-code')) {
           this.onEmojiSelected(code, true);
           EmojiHelper.pushPopularEmoji(code);
           return cancelEvent(e);
         }
-        if (mention = currentSelected.attr('data-mention')) {
+        if (mention = currentSel.attr('data-mention')) {
           this.onMentionSelected(mention);
           return cancelEvent(e);
         }
-        if (command = currentSelected.attr('data-command')) {
+        if (command = currentSel.attr('data-command')) {
           if (this.onCommandSelected) {
             this.onCommandSelected(command, e.keyCode == 9);
+          }
+          return cancelEvent(e);
+        }
+        if (inlineID = currentSel.attr('data-inlineid')) {
+          if (self.onInlineResultSend) {
+            self.onInlineResultSend(inlineID);
           }
           return cancelEvent(e);
         }
@@ -917,6 +969,13 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
     var pos = getFieldSelection(textarea);
     var value = textarea.value;
   }
+
+  if (value &&
+      this.curInlineResults &&
+      this.curInlineResults.text == value) {
+    this.showInlineSuggestions(this.curInlineResults);
+    return;
+  };
 
   if (!forceFull) {
     value = value.substr(0, pos);
@@ -1268,6 +1327,7 @@ MessageComposer.prototype.onChange = function (e) {
     delete this.keyupStarted;
     this.textareaEl.val(getRichValue(this.richTextareaEl[0])).trigger('change');
   }
+  this.updateInlinePlaceholder();
 }
 
 MessageComposer.prototype.getEmojiHtml = function (code, emoji) {
@@ -1347,8 +1407,7 @@ MessageComposer.prototype.blur = function () {
   }
 }
 
-MessageComposer.prototype.renderSuggestions = function (html) {
-  this.autoCompleteEl.html(html.join(''));
+MessageComposer.prototype.renderSuggestions = function () {
   this.autoCompleteWrapEl.show();
   this.scroller.reinit();
   this.updatePosition();
@@ -1356,73 +1415,64 @@ MessageComposer.prototype.renderSuggestions = function (html) {
 }
 
 MessageComposer.prototype.showEmojiSuggestions = function (codes) {
-  var html = [];
-  var iconSize = Config.Mobile ? 26 : 20;
-
-  var emoticonCode, emoticonData, spritesheet, pos, categoryIndex;
-  var count = Math.min(5, codes.length);
-  var i, x, y;
-
-  for (i = 0; i < count; i++) {
-    emoticonCode = codes[i];
-    if (emoticonCode.code) {
-      emoticonCode = emoticonCode.code;
-    }
-    if (emoticonData = Config.Emoji[emoticonCode]) {
-      spritesheet = EmojiHelper.spritesheetPositions[emoticonCode];
-      categoryIndex = spritesheet[0];
-      pos = spritesheet[1];
-      x = iconSize * spritesheet[3];
-      y = iconSize * spritesheet[2];
-      html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w', iconSize, ' emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
-    }
-  }
-
-  this.renderSuggestions(html);
+  var self = this;
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'emoji';
+      self.autoCompleteScope.emojiCodes = codes;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
+  });
 }
 
 MessageComposer.prototype.showMentionSuggestions = function (users) {
-  var html = [];
-  var user;
-  var count = users.length;
-  var i;
-
-  for (i = 0; i < count; i++) {
-    user = users[i];
-    html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_photo" data-user-id="' + user.id + '"></span><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
-  }
-
-  this.renderSuggestions(html);
   var self = this;
-  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
-    self.getPeerImage($(element), element.getAttribute('data-user-id'));
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'mentions';
+      self.autoCompleteScope.mentionUsers = users;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
 }
 
 MessageComposer.prototype.showCommandsSuggestions = function (commands) {
-  var html = [];
-  var command;
-  var count = Math.min(200, commands.length);
-  var i;
-
-  for (i = 0; i < count; i++) {
-    command = commands[i];
-    html.push('<li><a class="composer_command_option" data-command="' + encodeEntities(command.value) + '"><span class="composer_user_photo" data-user-id="' + command.botID + '"></span><span class="composer_command_value">' + encodeEntities(command.value) + '</span><span class="composer_command_desc">' + command.rDescription + '</span></a></li>');
-  }
-
-  this.renderSuggestions(html);
-
   var self = this;
-  var usedImages = {};
-  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
-    var noReplace = true;
-    var botID = element.getAttribute('data-user-id');
-    if (!usedImages[botID]) {
-      usedImages[botID] = true;
-      noReplace = false;
-    }
-    self.getPeerImage($(element), botID, noReplace);
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'commands';
+      self.autoCompleteScope.commands = commands;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
+}
+
+MessageComposer.prototype.showInlineSuggestions = function (botResults) {
+  if (!botResults || !botResults.results.length) {
+    this.hideSuggestions();
+    return;
+  }
+  var self = this;
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'inline';
+      self.autoCompleteScope.botResults = botResults;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
+  });
+}
+
+MessageComposer.prototype.setInlineSuggestions = function (botResults) {
+  this.curInlineResults = botResults;
+  this.checkAutocomplete();
 }
 
 MessageComposer.prototype.updatePosition = function () {
@@ -1438,6 +1488,8 @@ MessageComposer.prototype.updatePosition = function () {
 }
 
 MessageComposer.prototype.hideSuggestions = function () {
+  // console.trace();
+  // return;
   this.autoCompleteWrapEl.hide();
   delete this.autocompleteShown;
 }
