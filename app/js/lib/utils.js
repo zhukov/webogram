@@ -381,7 +381,9 @@ function templateUrl (tplName) {
     reply_markup: 'desktop',
     dialog_service: 'desktop',
     channel_edit_modal: 'desktop',
-    megagroup_edit_modal: 'desktop'
+    megagroup_edit_modal: 'desktop',
+    inline_results: 'desktop',
+    composer_dropdown: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';

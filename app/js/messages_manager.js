@@ -2844,6 +2844,9 @@ angular.module('myApp.services')
               foundDialog[0].top_message <= maxID) {
             newUnreadCount = foundDialog[0].unread_count = 0;
           }
+          if (!foundDialog[0]) {
+            console.error('empty found dialog', foundDialog, update);
+          }
           foundDialog[0].read_inbox_max_id = maxID;
         }
 

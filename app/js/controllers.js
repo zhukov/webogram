@@ -1659,7 +1659,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function selectInlineBot (botID, $event) {
-      $scope.$broadcast('inline_bot_select', botID);
+      if ($scope.historyState.canReply) {
+        $scope.$broadcast('inline_bot_select', botID);
+      }
       return cancelEvent($event);
     }
 

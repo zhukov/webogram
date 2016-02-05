@@ -2650,16 +2650,22 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link($scope, element, attrs) {
       var chatID;
       var curInd = ind++;
+      var jump = 0;
       var participantsCount = 0;
       var participants = {};
 
       var updateParticipants = function () {
+        var curJump = ++jump;
         participantsCount = 0;
         participants = {};
         if (!chatID) {
+          update();
           return;
         }
         AppProfileManager.getChatFull(chatID).then(function (chatFull) {
+          if (curJump != jump) {
+            return;
+          }
           var participantsVector = (chatFull.participants || {}).participants || [];
           participantsCount = participantsVector.length;
           angular.forEach(participantsVector, function (participant) {
