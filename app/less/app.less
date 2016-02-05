@@ -1452,6 +1452,7 @@ a.im_dialog_selected {
   font-size: 12px;
 }
 .im_message_author_via {
+  color: #3a6d99;
   margin-left: 5px;
 }
 .im_message_fwd_via {
@@ -3171,6 +3172,7 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
   height: 50px;
   margin-right: 10px;
   pointer-events: none;
+  text-align: center;
 }
 .inline_article_thumb {
   max-width: 50px;
@@ -3178,18 +3180,40 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
   line-height: 0;
 }
 .inline_article_thumb_initials {
-  background: rgba(0,0,0, 0.05);
+  color: #999;
+  background: #EEE;
   line-height: 50px;
   text-align: center;
   font-size: 25px;
   text-transform: uppercase;
+
+  li a:hover &,
+  li.composer_autocomplete_option_active a & {
+    color: #698192;
+    background: darken(#f2f6fa, 5%);
+  }
 }
 .inline_article_content_wrap {
   overflow: hidden;
   pointer-events: none;
 }
+.inline_article_thumb_wrap,
+.inline_article_title,
+.inline_article_description,
+.inline_article_url {
+  pointer-events: none;
+}
 .inline_article_title {
+  color: #222;
   font-weight: bold;
+}
+.inline_article_description {
+  color: #808080;
+  padding-top: 4px;
+  li a:hover &,
+  li.composer_autocomplete_option_active a & {
+    color: #698192;
+  }
 }
 
 
@@ -3738,7 +3762,7 @@ h5 {
   overflow: hidden;
 }
 .img_gif_meta {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.4);
   width: 40px;
   height: 40px;
   line-height: 0;

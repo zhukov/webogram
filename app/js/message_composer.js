@@ -795,6 +795,7 @@ MessageComposer.prototype.setUpPlaintext = function () {
 MessageComposer.prototype.onKeyEvent = function (e) {
   var self = this;
   if (e.type == 'keyup') {
+    console.log(dT(), 'keyup', e.keyCode);
     this.checkAutocomplete();
 
     var length = false;
@@ -852,6 +853,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           if (nextSel) {
             $(nextSel).addClass('composer_autocomplete_option_active');
             this.scroller.scrollToNode(nextSel);
+            console.log(dT(), 'keydown cancel', e.keyCode);
             return cancelEvent(e);
           }
         }
@@ -860,6 +862,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
         this.scroller.scrollToNode(nextSel);
         $(nextSel).addClass('composer_autocomplete_option_active');
 
+        console.log(dT(), 'keydown cancel', e.keyCode);
         return cancelEvent(e);
       }
 
@@ -889,6 +892,8 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           if (self.onInlineResultSend) {
             self.onInlineResultSend(inlineID);
           }
+          self.hideSuggestions();
+          console.log(dT(), 'keydown cancel', e.keyCode);
           return cancelEvent(e);
         }
         checkSubmit = true;
@@ -973,6 +978,7 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
   if (value &&
       this.curInlineResults &&
       this.curInlineResults.text == value) {
+    console.trace(dT(), value, this.curInlineResults);
     this.showInlineSuggestions(this.curInlineResults);
     return;
   };

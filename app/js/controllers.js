@@ -2243,6 +2243,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       replyClear();
       updateReplyKeyboard();
 
+      delete $scope.draftMessage.inlineProgress;
+      $scope.$broadcast('inline_results', false);
+
       // console.log(dT(), 'reset draft', $scope.curDialog.peer, forceDraft);
       if (forceDraft) {
         if (forceDraft == $scope.curDialog.peer) {
@@ -2269,9 +2272,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.draftMessage.text = '';
         $scope.$broadcast('ui_peer_draft');
       }
-
-      delete $scope.draftMessage.inlineProgress;
-      $scope.$broadcast('inline_results', false);
     }
 
     function applyDraftAttachment (e, attachment) {

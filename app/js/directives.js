@@ -1539,14 +1539,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('inline_results', function (e, inlineResults) {
+        var w = ((richTextarea || messageField).offsetWidth || 382) - 2;
+        var h = 80;
         if (inlineResults) {
-          var w = ((richTextarea || messageField).offsetWidth || 382) - 2;
-          var h = 80;
           AppInlineBotsManager.regroupWrappedResults(inlineResults.results, w, h);
-          setZeroTimeout(function () {
-            composer.setInlineSuggestions(inlineResults);
-          });
         }
+        setZeroTimeout(function () {
+          composer.setInlineSuggestions(inlineResults);
+        });
       });
 
       $scope.$on('inline_placeholder', function(e, data) {

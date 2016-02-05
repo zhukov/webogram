@@ -91,7 +91,7 @@
       </div>
 
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_loading" my-vertical-position="0.35" padding="true">
-        <div my-arc-progress stroke="5" width="60"></div>
+        <div my-arc-progress stroke="5" width="50"></div>
       </div>
 
       <div ng-show="state.loaded">
@@ -105,8 +105,8 @@
                   <div class="im_history" ng-class="{im_history_selectable: !historyState.botActions, im_history_select_active: historyState.selectActions}">
 
                     <div class="im_history_empty_wrap" ng-show="state.empty" ng-switch="state.mayBeHasMore">
-                      <div ng-switch-when="true" class="im_history_loading" my-vertical-position="0.25" padding="true">
-                        <div my-arc-progress stroke="5" width="60"></div>
+                      <div ng-switch-when="true" class="im_history_loading" my-vertical-position="0.3" padding="true">
+                        <div my-arc-progress stroke="5" width="50"></div>
                       </div>
                       <div ng-switch-default class="im_history_empty" my-vertical-position="0.25" padding="true" my-i18n="im_no_messages"></div>
                     </div>

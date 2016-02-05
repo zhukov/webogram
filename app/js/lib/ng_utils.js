@@ -977,7 +977,7 @@ angular.module('izhukov.utils', [])
         var url = window.URL.createObjectURL(response.data);
         return $sce.trustAsResourceUrl(url);
       }, function (error) {
-        if (!Config.modes.chrome_packed) {
+        if (!Config.Modes.chrome_packed) {
           return $q.when($sce.trustAsResourceUrl(url));
         }
         return $q.reject(error);
