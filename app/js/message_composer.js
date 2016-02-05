@@ -1465,6 +1465,10 @@ MessageComposer.prototype.showInlineSuggestions = function (botResults) {
     return;
   }
   var self = this;
+  if (self.autoCompleteScope.type == 'inline' &&
+      self.autoCompleteScope.botResults == botResults) {
+    return;
+  }
   setZeroTimeout(function () {
     self.autoCompleteScope.$apply(function () {
       self.autoCompleteScope.type = 'inline';

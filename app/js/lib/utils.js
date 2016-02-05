@@ -55,6 +55,8 @@ function cancelEvent (event) {
 
     if (event.stopPropagation) event.stopPropagation();
     if (event.preventDefault) event.preventDefault();
+    event.returnValue = false;
+    event.cancelBubble = true;
   }
 
   return false;

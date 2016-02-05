@@ -2081,7 +2081,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, RichTextProcessor) {
+  .controller('AppImSendController', function ($q, $scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, RichTextProcessor) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
@@ -2116,6 +2116,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.draftMessage.text = '@' + bot.username + ' ';;
       $scope.$broadcast('ui_peer_draft', {focus: true});
     });
+
+    $scope.$on('inline_bots_popular', updateMentions);
 
     $scope.replyKeyboardToggle = replyKeyboardToggle;
     $scope.toggleSlash = toggleSlash;
@@ -2163,19 +2165,45 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function updateMentions () {
       var peerID = $scope.curDialog.peerID;
 
-      if (!peerID || peerID > 0) {
+      if (!peerID) {
         safeReplaceObject($scope.mentions, {});
         $scope.$broadcast('mentions_update');
         return;
       }
-      AppProfileManager.getChatFull(-peerID).then(function (chatFull) {
-        var participantsVector = (chatFull.participants || {}).participants || [];
 
-        var mentionUsers = [];
-        var mentionIndex = SearchIndexManager.createIndex();
+      var mentionUsers = [];
+      var mentionIndex = SearchIndexManager.createIndex();
 
-        angular.forEach(participantsVector, function (participant) {
-          var user = AppUsersManager.getUser(participant.user_id);
+      var inlineBotsPromise = AppInlineBotsManager.getPopularBots().then(function (inlineBots) {
+        var ids = [];
+        angular.forEach(inlineBots, function (bot) {
+          ids.push(bot.id);
+        });
+        return ids;
+      });
+      var chatParticipantsPromise;
+      if (peerID < 0) {
+        chatParticipantsPromise = AppProfileManager.getChatFull(-peerID).then(function (chatFull) {
+          var participantsVector = (chatFull.participants || {}).participants || [];
+          var ids = [];
+          angular.forEach(participantsVector, function (participant) {
+            ids.push(participant.user_id);
+          });
+          return ids;
+        });
+      } else {
+        chatParticipantsPromise = $q.when([]);
+      }
+
+      $q.all({pop: inlineBotsPromise, chat: chatParticipantsPromise}).then(function (result) {
+        var done = {};
+        var ids = result.pop.concat(result.chat);
+        angular.forEach(ids, function (userID) {
+          if (done[userID]) {
+            return;
+          }
+          done[userID] = true;
+          var user = AppUsersManager.getUser(userID);
           if (user.username) {
             mentionUsers.push(user);
             SearchIndexManager.indexObject(user.id, AppUsersManager.getUserSearchText(user.id), mentionIndex);
@@ -2187,6 +2215,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           index: mentionIndex
         });
         $scope.$broadcast('mentions_update');
+
       });
     }
 

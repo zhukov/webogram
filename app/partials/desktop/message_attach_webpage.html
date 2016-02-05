@@ -1,6 +1,5 @@
 <div ng-show="webpage._ == 'webPage'" class="im_message_webpage_wrap clearfix" ng-switch="webpage.type">
   <div ng-switch-when="photo" class="im_message_webpage_photo">
-    <div class="im_message_webpage_site" ng-bind="webpage.site_name || webpage.display_url"></div>
     <div class="im_message_webpage_title">
       <a href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
     </div>
@@ -35,6 +34,9 @@
   </div>
 
   <div ng-switch-when="gif" class="im_message_webpage_gif">
+    <div class="im_message_webpage_title">
+      <a href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
+    </div>
     <div my-message-document="webpage" message-id="messageId"></div>
   </div>
 

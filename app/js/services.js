@@ -2596,15 +2596,67 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppInlineBotsManager', function (MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager) {
+.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager) {
 
   var inlineResults = {};
 
   return {
     sendInlineResult: sendInlineResult,
     regroupWrappedResults: regroupWrappedResults,
-    getInlineResults: getInlineResults
+    getInlineResults: getInlineResults,
+    getPopularBots: getPopularBots
   };
+
+  function getPopularBots () {
+    return Storage.get('inline_bots_popular').then(function (bots) {
+      var result = [];
+      var i, len, userID;
+      if (bots && bots.length) {
+        var now = tsNow(true);
+        for (i = 0, len = bots.length; i < len; i++) {
+          if ((now - bots[i][3]) > 14 * 86400) {
+            continue;
+          }
+          userID = bots[i][0];
+          if (!AppUsersManager.hasUser(userID)) {
+            AppUsersManager.saveApiUser(bots[i][1]);
+          }
+          result.push({id: userID, rate: bots[i][2], date: bots[i][3]});
+        }
+      };
+      return result;
+    });
+  }
+
+  function pushPopularBot (id) {
+    getPopularBots().then(function (bots) {
+      var exists = false;
+      var count = bots.length;
+      var result = [];
+      for (var i = 0; i < count; i++) {
+        if (bots[i].id == id) {
+          exists = true;
+          bots[i].rate++;
+          bots[i].date = tsNow(true);
+        }
+        var user = AppUsersManager.getUser(bots[i].id);
+        result.push([bots[i].id, user, bots[i].rate, bots[i].date]);
+      }
+      if (exists) {
+        result.sort(function (a, b) {
+          return b[2] - a[2];
+        });
+      } else {
+        if (result.length > 15) {
+          result = result.slice(0, 15);
+        }
+        result.push([id, AppUsersManager.getUser(id), 1, tsNow(true)]);
+      }
+      ConfigStorage.set({inline_bots_popular: result});
+
+      $rootScope.$broadcast('inline_bots_popular');
+    });
+  }
 
   function getInlineResults (botID, query, offset) {
     return MtpApiManager.invokeApi('messages.getInlineBotResults', {
@@ -2716,6 +2768,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (inlineResult === undefined) {
       return false;
     }
+    pushPopularBot(inlineResult.botID);
     var splitted = qID.split('_');
     var queryID = splitted.shift();
     var resultID = splitted.join('_');
