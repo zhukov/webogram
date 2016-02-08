@@ -2755,8 +2755,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           thumbW = realW;
         }
         var result = results[i + j];
-        result.thumbW = Math.floor(thumbW);
-        result.thumbH = Math.floor(thumbH);
+        result.thumbW = Math.floor(thumbW) - 2;
+        result.thumbH = Math.floor(thumbH) - 2;
       });
 
       i += rowCnt;

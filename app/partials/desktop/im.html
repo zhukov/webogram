@@ -94,7 +94,7 @@
         <div my-arc-progress stroke="5" width="50"></div>
       </div>
 
-      <div ng-show="state.loaded">
+      <div ng-show="!state.notSelected &amp;&amp; state.loaded">
         <div my-history class="im_history_col">
 
           <div class="im_history_wrap nano">

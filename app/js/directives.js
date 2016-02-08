@@ -1539,7 +1539,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('inline_results', function (e, inlineResults) {
-        var w = (messageFieldWrap.offsetWidth || 382) - 2;
+        var w = Config.Mobile ? $(window).width() : (messageFieldWrap.offsetWidth || 382) - 2;
         var h = 80;
         if (inlineResults) {
           AppInlineBotsManager.regroupWrappedResults(inlineResults.results, w, h);
