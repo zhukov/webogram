@@ -1728,7 +1728,9 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
-              $(emojiButton).hide();
+              if (!Config.Mobile) {
+                $(emojiButton).hide();
+              }
               $(dropbox)
                 .css({height: messageFieldWrap.offsetHeight + 2, width: messageFieldWrap.offsetWidth})
                 .show();
@@ -1742,7 +1744,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             }
             dragTimeout = setTimeout(function () {
               $(dropbox).hide();
-              $(emojiButton).show();
+              if (!Config.Mobile) {
+                $(emojiButton).show();
+              }
               dragStarted = false;
               dragTimeout = false;
             }, 300);
