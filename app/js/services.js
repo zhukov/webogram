@@ -3680,7 +3680,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     nextSoundAt = now + 1000;
     prevSoundVolume = volume;
     var filename = 'img/sound_a.mp3';
-    var obj = $('#notify_sound').html('<audio autoplay="autoplay">' +
+    var obj = $('#notify_sound').html('<audio autoplay="autoplay" mozaudiochannel="notification">' +
         '<source src="' + filename + '" type="audio/mpeg" />' +
         '<embed hidden="true" autostart="true" loop="false" volume="' + (volume * 100) +'" src="' + filename +'" />' +
         '</audio>');
