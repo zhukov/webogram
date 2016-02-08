@@ -1430,7 +1430,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('mySendForm', function (_, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, shouldFocusOnInteraction) {
+  .directive('mySendForm', function (_, $q, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
     return {
       link: link,
       scope: {
@@ -1685,10 +1685,18 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       function onFilePaste (blob) {
-        ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE'}).then(function () {
-          $scope.draftMessage.files = [blob];
-          $scope.draftMessage.isMedia = true;
-        });
+        var mimeType = blob.type || '';
+        var fileUrlPromise = $q.when(false);
+        if (['image/jpeg', 'image/gif', 'image/png', 'image/bmp'].indexOf(mimeType) >= 0) {
+          fileUrlPromise = FileManager.getFileCorrectUrl(blob, mimeType);
+        }
+        fileUrlPromise.then(function (fileUrl) {
+          fileUrl = fileUrl || false;
+          ErrorService.confirm({type: 'FILE_CLIPBOARD_PASTE', fileUrl: fileUrl}).then(function () {
+            $scope.draftMessage.files = [blob];
+            $scope.draftMessage.isMedia = true;
+          });
+        })
       };
 
       function onPasteEvent (e) {
@@ -1705,6 +1713,9 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if (files.length > 0) {
+          if (files.length == 1) {
+            return onFilePaste(files[0]);
+          }
           ErrorService.confirm({type: 'FILES_CLIPBOARD_PASTE', files: files}).then(function () {
             $scope.draftMessage.files = files;
             $scope.draftMessage.isMedia = true;

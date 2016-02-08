@@ -14,7 +14,10 @@
                      when="confirm_modal_clipboard_X_files_send">
         </ng-pluralize>
       </span>
-      <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send"></span>
+      <div ng-switch-when="FILE_CLIPBOARD_PASTE">
+        <span my-i18n="confirm_modal_clipboard_file_send"></span>
+        <div class="confirm_modal_paste_image" ng-if="fileUrl !== false" ng-style="{backgroundImage: 'url(' + fileUrl + ')'}"></div>
+      </div>
       <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete"></span>
       <span ng-switch-when="MESSAGES_DELETE">
         <ng-pluralize count="count"
