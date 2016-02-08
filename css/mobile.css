@@ -683,12 +683,16 @@ a.im_message_from_photo {
   position: absolute;
   margin-left: -45px;
 }
-.im_message_author,
 .im_message_author_via {
+  display: block;
+  font-size: 13px;
+  font-weight: normal;
+  margin-bottom: 3px;
+}
+.im_message_author {
   display: none;
 }
-.im_history_messages_group a.im_message_author,
-.im_history_messages_group .im_message_author_via {
+.im_history_messages_group a.im_message_author {
   display: inline;
   font-size: 13px;
   font-weight: normal;
@@ -1427,6 +1431,17 @@ a.media_modal_date:hover {
 .im_send_field_wrap_2ndbtn .composer_textarea {
   padding-right: 35px;
 }
+.im_inline_placeholder_wrap {
+  font-size: 15px;
+  line-height: 17px;
+  padding: 6px 7px;
+  top: 0;
+}
+.im_send_dropbox_wrap {
+  padding: 5px 10px;
+  font-size: 15px;
+  line-height: 22px;
+}
 .im_send_field_panel {
   position: relative;
 }
@@ -1440,4 +1455,8 @@ a.media_modal_date:hover {
 }
 .im_send_keyboard_wrap {
   padding: 0 5px;
+}
+.composer_progress_icon {
+  right: 6px;
+  top: 4px;
 }
