@@ -25,17 +25,17 @@
 
     <div class="im_message_document_info">
       <div class="im_message_document_name_wrap">
-        <a href="" ng-click="docOpen()" class="im_message_document_name" ng-bind="::media.document.file_name"></a>
+        <span class="copyonly">[</span><a href="" ng-click="docOpen()" class="im_message_document_name" ng-bind="::media.document.file_name"></a><span class="copyonly">]</span>
         <span class="im_message_document_size" ng-if="!media.document.progress.enabled" ng-bind="::media.document.size | formatSize"></span>
         <span class="im_message_document_size" ng-if="media.document.progress.enabled" ng-bind="media.document.progress | formatSizeProgress"></span>
       </div>
       <div class="im_message_document_actions" ng-if="!media.document.progress.enabled" ng-switch="media.document.downloaded">
-        <a ng-switch-when="true" href="" ng-click="docSave()" my-i18n="message_attach_document_save"></a>
-        <a ng-switch-default href="" ng-click="docSave()" my-i18n="message_attach_document_download"></a>
-        <a ng-if="::media.document.withPreview" href="" ng-click="docOpen()" my-i18n="message_attach_document_open"></a>
+        <a class="nocopy" ng-switch-when="true" href="" ng-click="docSave()" my-i18n="message_attach_document_save"></a>
+        <a class="nocopy" ng-switch-default href="" ng-click="docSave()" my-i18n="message_attach_document_download"></a>
+        <a class="nocopy" ng-if="::media.document.withPreview" href="" ng-click="docOpen()" my-i18n="message_attach_document_open"></a>
       </div>
       <div class="clearfix im_message_cancelable_progress_wrap" ng-if="media.document.progress.enabled">
-        <a class="im_message_media_progress_cancel pull-right" ng-click="media.document.progress.cancel()" my-i18n="modal_cancel"></a>
+        <a class="im_message_media_progress_cancel pull-right nocopy" ng-click="media.document.progress.cancel()" my-i18n="modal_cancel"></a>
         <div class="im_message_download_progress_wrap">
           <div class="progress tg_down_progress">
             <div class="progress-bar progress-bar-success" ng-style="{width: media.document.progress.percent + '%'}"></div>

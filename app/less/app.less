@@ -37,12 +37,28 @@ h1, h2, h3, h4, h5 {
   .user-select(text);
 }
 
+.copyonly {
+  color: transparent;
+  display: inline-block;
+  vertical-align: baseline;
+  width: 1px;
+  height: 0px;
+  background: none 0 no-repeat;
+  font-size: 0px;
+  float: left;
+  text-rendering: auto;
+  .user-select(none);
+}
+.nocopy::before {
+  content: attr(data-content);
+}
+
 pre {
   margin-bottom: 0;
-  max-height: 300px;
   overflow: auto;
   padding: 3px;
-  border: 1px solid #dedede;
+  border: 1px solid #eee;
+  max-height: none;
   font-size: inherit;
 }
 
@@ -2060,7 +2076,7 @@ div.im_message_body {
   overflow: hidden;
 }
 
-.im_message_meta,
+// .im_message_meta,
 .im_message_body {
   .user-select(text);
 }

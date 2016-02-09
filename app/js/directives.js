@@ -45,7 +45,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myMessage', function($filter, _) {
 
     var dateFilter = $filter('myDate'),
-        dateSplitHtml = '<div class="im_message_date_split im_service_message_wrap"><div class="im_service_message"></div></div>',
+        dateSplitHtml = '<div class="im_message_date_split im_service_message_wrap"><div class="im_service_message"><span class="copyonly"><br/>---&nbsp;</span><span class="im_message_date_split_text"></span><span class="copyonly">&nbsp;---</span></div></div>',
         unreadSplitHtml = '<div class="im_message_unread_split">' + _('unread_messages_split') + '</div>',
         selectedClass = 'im_message_selected',
         focusClass = 'im_message_focus',
@@ -90,7 +90,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                   needDateSplit.show();
                 } else {
                   needDateSplit = $(dateSplitHtml);
-                  $(needDateSplit[0].firstChild).text(dateFilter($scope.historyMessage.date));
+                  $('.im_message_date_split_text', needDateSplit).text(dateFilter($scope.historyMessage.date));
                   if (unreadAfterSplit) {
                     needDateSplit.insertBefore(unreadAfterSplit)
                   } else {
@@ -2090,7 +2090,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myLoadSticker', function(MtpApiFileManager, FileManager, AppStickersManager) {
+  .directive('myLoadSticker', function(_, MtpApiFileManager, FileManager, AppStickersManager) {
 
     var emptySrc = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
@@ -2104,6 +2104,8 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var imgElement = $('<img />').addClass(attrs.imgClass);
       var wasAdded = false;
+
+      imgElement.attr('alt', '['+ ($scope.document.stickerEmojiRaw || '') + ' ' + _('conversation_media_sticker') +']');
 
       if (attrs.open && $scope.document.stickerSetInput) {
         element

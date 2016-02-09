@@ -9,6 +9,7 @@
         class="im_message_photo_thumb"
         my-load-thumb
         thumb="webpage.photo.thumb"
+        alt="[{{::'conversation_media_photo' | i18n}}]"
       />
     </a>
   </div>
@@ -19,12 +20,13 @@
     </div>
     <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
     <a class="im_message_video_thumb" ng-click="openEmbed($event)" ng-href="{{webpage.url}}" target="_blank" ng-style="::{width: video.thumb.width + 'px'}">
-      <span ng-if="webpage.duration > 0" class="im_message_video_duration" ng-bind="::webpage.duration | duration"></span>
+      <span ng-if="webpage.duration > 0" class="im_message_video_duration nocopy" data-content="::webpage.duration | duration"></span>
       <i class="icon icon-videoplay"></i>
       <img
         class="im_message_video_thumb"
         my-load-thumb
         thumb="webpage.photo.thumb"
+        alt="[{{::'conversation_media_video' | i18n}}]"
       />
     </a>
   </div>

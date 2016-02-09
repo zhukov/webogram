@@ -12,9 +12,12 @@
     />
   </div>
   <div class="im_message_reply_author" ng-switch-default>
+    <span class="copyonly">&gt;&nbsp;</span>
     <span my-peer-link="replyMessage.fromID" peer-watch="true"></span>
   </div>
   <div class="im_message_reply_body" ng-switch-default>
+    <span class="copyonly">&gt;&nbsp;</span>
+
     <span class="im_reply_message_media" ng-if="replyMessage.media" ng-switch="replyMessage.media._">
       <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
       <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
