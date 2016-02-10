@@ -1190,17 +1190,17 @@ a.md_modal_action:active,a.md_modal_action:focus,a.md_modal_action:hover{text-de
 .navbar-offline-text{color:#b9cfe3;padding:13px 15px;font-size:13px;display:block;line-height:20px}
 .tg_progress{height:12px;margin:0;padding:0;background:rgba(255,255,255,.4);border:5px solid rgba(0,0,0,.5);border-radius:3px}
 .tg_progress .progress-bar{height:5px;line-height:2px;background:rgba(255,255,255,.9);border-radius:0;overflow:hidden}
-.progress-arc-wrap{display:block;border-radius:100%}
+.progress-arc-wrap{display:block;border-radius:100%;transform-origin:center center;-webkit-animation:infinite_rotation .8s linear infinite;-moz-animation:infinite_rotation .8s linear infinite;-ms-animation:infinite_rotation .8s linear infinite;animation:infinite_rotation .8s linear infinite}
 .progress-arc .progress-arc-bar{stroke-dashoffset:0;transform-origin:center center;fill:transparent}
-.progress-arc-intermediate .progress-arc .progress-arc-bar{stroke:#68a4d1;-webkit-animation:infinite_rotation .8s linear infinite;-moz-animation:infinite_rotation .8s linear infinite;-ms-animation:infinite_rotation .8s linear infinite;animation:infinite_rotation .8s linear infinite}
-.composer_progress_icon .progress-arc .progress-arc-bar{stroke:rgba(0,0,0,.3)}
-.progress-arc-percent .progress-arc .progress-arc-bar{stroke:#FFF;stroke:rgba(255,255,255,.95);transition:stroke-dasharray 500ms linear;-webkit-animation:infinite_rotation 2s linear infinite;-moz-animation:infinite_rotation 2s linear infinite;-ms-animation:infinite_rotation 2s linear infinite;animation:infinite_rotation 2s linear infinite}
+.progress-arc-intermediate .progress-arc .progress-arc-bar{stroke:#68a4d1}
+.composer_progress_icon .progress-arc .progress-arc-bar{stroke:#b3b3b3}
+.progress-arc-percent .progress-arc .progress-arc-bar{stroke:#FFF;stroke:rgba(255,255,255,.95);transition:stroke-dasharray 500ms linear}
 .stop0{stop-opacity:1;stop-color:#68a4d1}
-.composer_progress_icon .stop0{stop-color:rgba(0,0,0,.3)}
+.composer_progress_icon .stop0{stop-color:#b3b3b3}
 .stop60{stop-opacity:1;stop-color:#68a4d1}
-.composer_progress_icon .stop60{stop-color:rgba(0,0,0,.3)}
+.composer_progress_icon .stop60{stop-color:#b3b3b3}
 .stop100{stop-opacity:0;stop-color:#68a4d1}
-.composer_progress_icon .stop100{stop-color:rgba(0,0,0,.3)}
+.composer_progress_icon .stop100{stop-color:#b3b3b3}
 @-webkit-keyframes infinite_rotation{0%{transform:rotate(0)}
 100%{transform:rotate(360deg)}}
 @-moz-keyframes infinite_rotation{0%{transform:rotate(0)}
