@@ -31,6 +31,20 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.3')">
+        <div class="md_modal_section_version">0.5.3</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Inline bots: A new way to add bot content to any chat. Type a bot's username and your query in the text field to get instant results and send them to your chat partner. Try typing <code>@gif dog</code> in your next chat. Sample bots: @gif, @wiki, @bing, @vid, @bold.</li>
+            <li>Check out the <a href="https://telegram.org/blog/inline-bots" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Improved GIFs: 20x faster sending and downloading, nice animated progress</li>
+            <li>Click on message date to reply (or to forward from channels).</li>
+            <li>Preview images before sending when pasting from clipboard.</li>
+            <li>Improved formatting for copy-pasted history fragments (date, time and sender names inserted automatically).</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.2')">
         <div class="md_modal_section_version">0.5.2</div>
         <div class="md_modal_section_description changelog_version_changes">

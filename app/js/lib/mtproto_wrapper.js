@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.2 - messaging web application for MTProto
+ * Webogram v0.5.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -487,14 +487,14 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       }
     }
 
-    // console.log(dT(), 'Dload file', dcID, location, size);
+    console.log(dT(), 'Dload file', dcID, location, size);
     var fileName = getFileName(location),
         toFileEntry = options.toFileEntry || null,
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
 
     var fileStorage = getFileStorage();
 
-    // console.log(dT(), 'fs', fileStorage, fileName, cachedPromise);
+    console.log(dT(), 'fs', fileStorage.name, fileName, cachedPromise);
 
     if (cachedPromise) {
       if (toFileEntry) {
@@ -520,7 +520,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         };
 
 
+    console.log(dT(), 'fs get file', fileName, size);
     fileStorage.getFile(fileName, size).then(function (blob) {
+      console.log(dT(), 'fs got file', fileName, size);
       if (toFileEntry) {
         FileManager.copy(blob, toFileEntry).then(function () {
           deferred.resolve();
@@ -529,6 +531,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         deferred.resolve(cachedDownloads[fileName] = blob);
       }
     }, function () {
+      console.log(dT(), 'fs fail file', fileName, size);
       var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
 
       var processDownloaded = function (bytes) {

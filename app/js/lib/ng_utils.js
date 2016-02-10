@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.2 - messaging web application for MTProto
+ * Webogram v0.5.3 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -375,11 +375,20 @@ angular.module('izhukov.utils', [])
         throw new Exception();
       }
     } catch (error) {
+      console.error('error opening db', error.message);
       storageIsAvailable = false;
       return $q.reject(error);
     }
 
+    var finished = false;
+    setTimeout(function () {
+      if (!finished) {
+        request.onerror({type: 'IDB_CREATE_TIMEOUT'});
+      }
+    }, 3000);
+
     request.onsuccess = function (event) {
+      finished = true;
       db = request.result;
 
       db.onerror = function (error) {
@@ -392,12 +401,14 @@ angular.module('izhukov.utils', [])
     };
 
     request.onerror = function (event) {
+      finished = true;
       storageIsAvailable = false;
       console.error('Error creating/accessing IndexedDB database', event);
       deferred.reject(event);
     }
 
     request.onupgradeneeded = function (event) {
+      finished = true;
       console.warn('performing idb upgrade from', event.oldVersion, 'to', event.newVersion);
       var db = event.target.result;
       if (event.oldVersion == 1) {
@@ -550,6 +561,7 @@ angular.module('izhukov.utils', [])
   openDatabase();
 
   return {
+    name: 'IndexedDB',
     isAvailable: isAvailable,
     saveFile: saveFile,
     getFile: getFile,
@@ -650,6 +662,7 @@ angular.module('izhukov.utils', [])
   requestFS();
 
   return {
+    name: 'TmpFS',
     isAvailable: isAvailable,
     saveFile: saveFile,
     getFile: getFile,
@@ -684,6 +697,7 @@ angular.module('izhukov.utils', [])
   }
 
   return {
+    name: 'Memory',
     isAvailable: isAvailable,
     saveFile: saveFile,
     getFile: getFile,
