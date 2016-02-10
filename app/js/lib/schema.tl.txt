@@ -198,8 +198,6 @@ importedContact#d0028438 user_id:int client_id:long = ImportedContact;
 
 contactBlocked#561bc879 user_id:int date:int = ContactBlocked;
 
-contactSuggested#3de191a1 user_id:int mutual_contacts:int = ContactSuggested;
-
 contactStatus#d3680c61 user_id:int status:UserStatus = ContactStatus;
 
 contacts.link#3ace484c my_link:ContactLink foreign_link:ContactLink user:User = contacts.Link;
@@ -211,8 +209,6 @@ contacts.importedContacts#ad524315 imported:Vector<ImportedContact> retry_contac
 
 contacts.blocked#1c138d15 blocked:Vector<ContactBlocked> users:Vector<User> = contacts.Blocked;
 contacts.blockedSlice#900802a1 count:int blocked:Vector<ContactBlocked> users:Vector<User> = contacts.Blocked;
-
-contacts.suggested#5649dcc5 results:Vector<ContactSuggested> users:Vector<User> = contacts.Suggested;
 
 messages.dialogs#15ba6c40 dialogs:Vector<Dialog> messages:Vector<Message> chats:Vector<Chat> users:Vector<User> = messages.Dialogs;
 messages.dialogsSlice#71e094f3 count:int dialogs:Vector<Dialog> messages:Vector<Message> chats:Vector<Chat> users:Vector<User> = messages.Dialogs;
@@ -597,7 +593,6 @@ users.getFullUser#ca30a5b1 id:InputUser = UserFull;
 contacts.getStatuses#c4a353ee = Vector<ContactStatus>;
 contacts.getContacts#22c6aa08 hash:string = contacts.Contacts;
 contacts.importContacts#da30b32d contacts:Vector<InputContact> replace:Bool = contacts.ImportedContacts;
-contacts.getSuggested#cd773428 limit:int = contacts.Suggested;
 contacts.deleteContact#8e953744 id:InputUser = contacts.Link;
 contacts.deleteContacts#59ab389e id:Vector<InputUser> = Bool;
 contacts.block#332b49fc id:InputUser = Bool;
