@@ -3117,7 +3117,7 @@ a.composer_command_option:hover .composer_command_desc,
 
   .user-select(text);
 
-  &:empty:before {
+  &:empty::before {
     content: attr(placeholder);
     color: #9aa2ab;
     display: block;
@@ -3125,8 +3125,8 @@ a.composer_command_option:hover .composer_command_desc,
     margin-left: 1px;
     pointer-events: none;
   }
-  &:empty:active:before,
-  &:empty:focus:before {
+  &:empty:active::before,
+  &:empty:focus::before {
     opacity: 0.75;
   }
 
@@ -3279,13 +3279,24 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
   }
 }
 
-
 .composer_dropdown > li.inline_result_gif > a,
 .composer_dropdown > li.inline_result_photo > a {
   padding: 0;
   line-height: 0;
   display: block;
   overflow: hidden;
+}
+li.inline_result_gif.composer_autocomplete_option_active a,
+li.inline_result_photo.composer_autocomplete_option_active a {
+  position: relative;
+
+  .inline_result_ind {
+    display: block;
+    background: rgba(255,255,255,0.3);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
 }
 .inline_result_gif .img_gif_video,
 .inline_result_photo .inline_result_photo_image {
