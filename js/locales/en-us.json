@@ -523,8 +523,8 @@
 
 	"message_forwarded_message": "Forwarded message",
 	"message_via_bot": "via {bot}",
-	"message_forwarded_message_mobile": "Forwarded from {from}, {date}",
-	"message_forwarded_via_message_mobile": "Forwarded from {from} via {bot}, {date}",
+	"message_forwarded_message_mobile": "Forwarded from {from}",
+	"message_forwarded_via_message_mobile": "Forwarded from {from} via {bot}",
 
 	"message_attach_audio_message": "Voice message",
 	"message_attach_audio_play": "Play",
