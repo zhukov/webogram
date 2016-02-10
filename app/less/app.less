@@ -435,6 +435,12 @@ a {
 .progress-arc-wrap {
   display: block;
   border-radius: 100%;
+
+  transform-origin: center center;
+  -webkit-animation:  infinite_rotation 0.8s linear infinite;
+  -moz-animation:     infinite_rotation 0.8s linear infinite;
+  -ms-animation:      infinite_rotation 0.8s linear infinite;
+  animation:          infinite_rotation 0.8s linear infinite;
 }
 .progress-arc .progress-arc-bar {
   stroke-dashoffset: 0;
@@ -443,15 +449,10 @@ a {
 
   .progress-arc-intermediate & {
     stroke: #68a4d1;
-
-    -webkit-animation:  infinite_rotation 0.8s linear infinite;
-    -moz-animation:     infinite_rotation 0.8s linear infinite;
-    -ms-animation:      infinite_rotation 0.8s linear infinite;
-    animation:          infinite_rotation 0.8s linear infinite;
   }
 
   .composer_progress_icon & {
-    stroke: rgba(0,0,0,0.3);
+    stroke: #b3b3b3;
   }
 
   .progress-arc-percent & {
@@ -459,32 +460,27 @@ a {
     stroke: rgba(255,255,255,0.95);
 
     transition: stroke-dasharray 500ms linear;
-
-    -webkit-animation:  infinite_rotation 2s linear infinite;
-    -moz-animation:     infinite_rotation 2s linear infinite;
-    -ms-animation:      infinite_rotation 2s linear infinite;
-    animation:          infinite_rotation 2s linear infinite;
   }
 }
 .stop0 {
   stop-opacity: 1.0;
   stop-color: #68a4d1;
   .composer_progress_icon & {
-    stop-color: rgba(0,0,0,0.3);
+    stop-color: #b3b3b3;
   }
 }
 .stop60 {
   stop-opacity: 1.0;
   stop-color: #68a4d1;
   .composer_progress_icon & {
-    stop-color: rgba(0,0,0,0.3);
+    stop-color: #b3b3b3;
   }
 }
 .stop100 {
   stop-opacity: 0.0;
   stop-color: #68a4d1;
   .composer_progress_icon & {
-    stop-color: rgba(0,0,0,0.3);
+    stop-color: #b3b3b3;
   }
 }
 
