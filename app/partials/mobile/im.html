@@ -75,7 +75,8 @@
       </div>
     </div>
 
-    <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
+    <div class="im_history_col_wrap" ng-controller="AppImHistoryController" ng-class="{im_history_loaded: state.loaded}">
+
       <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35" padding="true">
         <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
       </div>

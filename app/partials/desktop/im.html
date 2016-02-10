@@ -79,9 +79,9 @@
       </div>
     </div>
 
-    <div class="im_history_col_wrap noselect" ng-controller="AppImHistoryController">
+    <div class="im_history_col_wrap noselect" ng-controller="AppImHistoryController" ng-class="{im_history_loaded: state.loaded}">
 
-      <div ng-show="state.notSelected" ng-switch="isEmpty.contacts &amp;&amp; isEmpty.dialogs">
+      <div class="im_history_not_selected_wrap" ng-switch="isEmpty.contacts &amp;&amp; isEmpty.dialogs">
         <div ng-switch-when="true" class="im_history_no_dialogs_wrap">
           <h3 class="im_dialogs_empty_header" my-i18n="im_get_started"></h3>
           <p class="im_dialogs_empty_lead" my-i18n="im_welcome_text"></p>
@@ -90,11 +90,11 @@
         <div ng-switch-default class="im_history_not_selected" my-vertical-position="0.35" padding="true" my-i18n="im_select_a_chat"></div>
       </div>
 
-      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_loading" my-vertical-position="0.35" padding="true">
+      <div class="im_history_selected_loading_wrap im_history_loading" my-vertical-position="0.35" padding="true">
         <div my-arc-progress stroke="5" width="50"></div>
       </div>
 
-      <div ng-show="!state.notSelected &amp;&amp; state.loaded">
+      <div class="im_history_selected_wrap">
         <div my-history class="im_history_col">
 
           <div class="im_history_wrap nano">

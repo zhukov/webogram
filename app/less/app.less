@@ -2297,6 +2297,30 @@ a.im_message_fwd_photo {
 .reply_markup_button_w12 {width: 8.33333333%;}
 
 
+.im_history_not_selected_wrap {
+  display: none;
+  .im_page_peer_not_selected & {
+    display: block;
+  }
+}
+.im_history_selected_wrap {
+  display: none;
+  .im_history_loaded & {
+    display: block;
+  }
+  .im_page_peer_not_selected & {
+    display: none;
+  }
+}
+.im_history_selected_loading_wrap {
+  display: block;
+  .im_history_loaded & {
+    display: none;
+  }
+  .im_page_peer_not_selected & {
+    display: none;
+  }
+}
 
 .im_history_not_selected,
 .im_history_empty {
