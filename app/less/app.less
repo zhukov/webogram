@@ -1456,15 +1456,24 @@ a.im_dialog_selected {
   padding: 4px 10px;
   margin: 10px 0;
 }
+
 .im_message_author,
-.im_message_fwd_author,
-.im_message_via_author {
+.im_message_fwd_author {
   color: #3a6d99;
   font-weight: bold;
 }
-.non_osx .im_message_author,
-.non_osx .im_message_fwd_author,
-.non_osx .im_message_via_author {
+.im_message_author_via,
+.im_message_fwd_via {
+  color: #3a6d99;
+  &:hover {
+    text-decoration: none;
+    & .im_message_fwd_author {
+      text-decoration: underline;
+    }
+  }
+}
+.non_osx .im_message_author_wrap,
+.non_osx .im_message_fwd_author_wrap {
   font-size: 12px;
 }
 .im_message_author_via {
