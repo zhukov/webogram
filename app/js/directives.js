@@ -2855,7 +2855,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       var peerID, peer, peerPhoto;
       var imgEl = $('<img class="' + (attrs.imgClass || '') + '">');
-      var initEl = $('<span class="peer_initials ' + (attrs.imgClass || '') + '"></span>');
+      var initEl = $('<span class="peer_initials nocopy ' + (attrs.imgClass || '') + '"></span>');
       var jump = 0;
       var prevClass = false;
 
@@ -2896,7 +2896,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
         }
 
-        initEl.text(peer.initials).prependTo(element);
+        initEl.attr('data-content', encodeEntities(peer.initials)).prependTo(element);
         imgEl.remove();
 
 
