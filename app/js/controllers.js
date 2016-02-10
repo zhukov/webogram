@@ -4790,12 +4790,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.documents = result.documents;
 
       $scope.stickerEmojis = {};
+      $scope.stickerDimensions = {};
       angular.forEach($scope.documents, function (doc) {
         $scope.stickerEmojis[doc.id] = RichTextProcessor.wrapRichText(doc.stickerEmojiRaw, {
           noLinks: true,
           noLinebreaks: true,
           emojiIconSize: 26
         });
+        var dim = calcImageInBox(doc.w, doc.h, 192, 192);
+        $scope.stickerDimensions[doc.id] = {width: dim.w, height: dim.h};
       });
 
     });

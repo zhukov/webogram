@@ -2107,6 +2107,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       imgElement.attr('alt', '['+ ($scope.document.stickerEmojiRaw || '') + ' ' + _('conversation_media_sticker') +']');
 
+      var dim = attrs.dim && $scope.$parent.$eval(attrs.dim) || $scope.document.thumb;
+
       if (attrs.open && $scope.document.stickerSetInput) {
         element
           .addClass('clickable')
@@ -2124,12 +2126,12 @@ angular.module('myApp.directives', ['myApp.filters'])
       };
 
       imgElement.css({
-        width: $scope.document.thumb.width,
-        height: $scope.document.thumb.height
+        width: dim.width,
+        height: dim.height
       });
       element.css({
-        width: $scope.document.thumb.width,
-        height: $scope.document.thumb.height
+        width: dim.width,
+        height: dim.height
       });
 
       var smallLocation = false;
