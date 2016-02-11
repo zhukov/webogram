@@ -451,7 +451,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
-  .directive('myMessageText', function(AppPeersManager, AppMessagesManager, AppUsersManager, RichTextProcessor) {
+  .directive('myMessageText', function(AppPeersManager, AppMessagesManager, AppChatsManager, AppUsersManager, RichTextProcessor) {
     return {
       link: link,
       scope: {
@@ -465,7 +465,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
       var toPeerID = AppPeersManager.getPeerID(message.to_id);
       var withBot = (fromBot ||
-                    toPeerID < 0 ||
+                    toPeerID < 0 && !(AppChatsManager.isChannel(-toPeerID) && !AppChatsManager.isMegagroup(-toPeerID)) ||
                     toPeerID > 0 && AppUsersManager.isBot(toPeerID));
 
       var options = {
