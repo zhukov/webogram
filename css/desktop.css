@@ -1079,6 +1079,11 @@ a.im_panel_peer_photo .peer_initials {
     min-height: 25px;
     padding-right: 25px;
   }
+  .composer_progress_icon_wrap {
+    top: 0;
+    right: 0;
+    margin-top: 0;
+  }
   .composer_emoji_insert_btn {
     top: 0;
     right: 0px;
