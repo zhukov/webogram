@@ -2572,21 +2572,18 @@ img.img_fullsize {
 }
 
 /* Message composer */
-.composer_progress_icon {
-  display: block;
+.composer_progress_icon_wrap {
   opacity: 0;
   position: absolute;
   right: 3px;
   top: 2px;
-  cursor: pointer;
-  padding: 0;
-
   width: 22px;
   height: 22px;
+  overflow: hidden;
   margin-top: 1px;
-  transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
   pointer-events: none;
-
+  padding: 0;
+  transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
   .composer_progress_enabled & {
     opacity: 1;
   }

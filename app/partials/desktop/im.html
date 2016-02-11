@@ -198,7 +198,9 @@
 
                     <div class="im_send_field_wrap hasselect" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">
                       <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
-                      <div class="composer_progress_icon" my-arc-progress width="22" stroke="2.5"></div>
+                      <div class="composer_progress_icon_wrap">
+                        <div class="composer_progress_icon" my-arc-progress width="22" stroke="2.5"></div>
+                      </div>
                       <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && (!draftMessage.text.length || draftMessage.text[0] == '/')" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
                       <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 

@@ -1533,7 +1533,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       });
 
-      var richTextarea = composer.richTextareaEl[0];
+      var richTextarea = composer.richTextareaEl && composer.richTextareaEl[0];
       if (richTextarea) {
         $(richTextarea).on('keydown keyup', updateHeight);
       }

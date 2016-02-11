@@ -1116,6 +1116,9 @@ MessageComposer.prototype.onRichPaste = function (e) {
 }
 
 MessageComposer.prototype.cleanRichTextarea = function (value, focused) {
+  if (!this.richTextareaEl[0]) {
+    return;
+  }
   if (value === undefined) {
     value = getRichValue(this.richTextareaEl[0]);
   }
