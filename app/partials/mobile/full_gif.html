@@ -14,7 +14,7 @@
     </div>
 
     <div ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" ng-switch="document.mime_type == 'video/mp4'">
-      <video ng-switch-when="true" width="{{document.thumb.width}}" height="{{document.thumb.height}}" controls class="img_gif_video">
+      <video ng-switch-when="true" width="{{document.thumb.width}}" height="{{document.thumb.height}}" controls loop class="img_gif_video">
         <source ng-src="{{document.url}}" type="video/mp4">
       </video>
       <img ng-switch-default class="img_gif_image" ng-src="{{document.url}}" width="{{document.thumb.width}}" height="{{document.thumb.height}}" />
