@@ -1089,7 +1089,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
           documents: 'inputMessagesFilterDocument',
-          audio: 'inputMessagesFilterAudio'
+          audio: 'inputMessagesFilterAudio',
+          url: 'inputMessagesFilterUrl'
         },
         unfocusMessagePromise,
         jump = 0,

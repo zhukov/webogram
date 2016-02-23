@@ -49,6 +49,7 @@
             <li><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
             <li><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
             <li><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
+            <li><a ng-click="toggleMedia('url')" my-i18n="head_media_url"></a></li>
           </ul>
         </div>
 
@@ -70,6 +71,9 @@
           </div>
           <div class="tg_head_peer_media" ng-switch-when="audio">
             <i class="icon icon-filter-audio"></i><span my-i18n="im_media_audio"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="url">
+            <i class="icon icon-filter-url"></i><span my-i18n="im_media_url"></span>
           </div>
 
           <a class="tg_head_btn" ng-switch-default ng-click="showPeerInfo()">
