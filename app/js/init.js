@@ -118,7 +118,6 @@
     );
 
     // Nightmode CSS injection if found in stored configs
-    console.log('DARK THEME?', nightmode);
     if (nightmode) {
       $('head').append(
         '<link rel="stylesheet" href="css/dark.css" />'

@@ -3876,7 +3876,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       $scope.toggleNightmode = function () {
         $scope.appearance.nightmode = !$scope.appearance.nightmode;
-        console.log('jee', $scope.appearance.nightmode);
         if (!$scope.appearance.nightmode) {
           Storage.remove('appearance_nightmode');
         } else {
