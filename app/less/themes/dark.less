@@ -1,0 +1,103 @@
+/* Dark theme common css */
+
+@background_color: #232323;
+@theme_color: #35971B;
+@header_color: #1f1f1f;
+
+html {
+  background: @background_color;
+}
+
+body {
+  color: #898989;
+}
+
+.im_page_wrap {
+  background-color: #292929;
+  border: 1px solid @background_color;
+  box-shadow: none;
+}
+
+.im_dialog_peer {
+  color: #666;
+
+  .active & {
+    color: #fff;
+  }
+  
+}
+
+
+.im_dialogs_col_wrap {
+  border-right: 2px solid #333;
+}
+
+.im_message_unread_split {
+  background: #555;
+}
+
+.im_dialogs_scrollable_wrap {
+
+  a.im_dialog {
+    &:hover,
+    &_selected {
+      border-radius: 0;
+      background: #343434;
+    }
+  }
+
+  .active {
+    a.im_dialog {
+      background-color: @theme_color;
+
+      &:hover,
+      &_selected {
+        background-color: lighten(@theme_color, 2%);
+      }
+    }
+  }
+}
+
+.im_message_selected .im_message_outer_wrap {
+  background: lighten(@background_color, 6%);
+}
+
+.im_history_select_active .im_message_outer_wrap:hover {
+  background: lighten(@background_color, 6%);
+}
+
+.im_message_selected .im_message_date,
+.im_message_selected .im_message_document_size,
+.im_message_selected .im_message_audio_duration,
+.im_message_selected .im_message_audio_size,
+.im_message_selected .im_message_fwd_date,
+.im_message_selected .im_message_views_cnt,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_date,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_document_size,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_audio_duration,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_audio_size,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_fwd_date,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_views_cnt {
+  color: #ccc;
+}
+
+
+.tg_head {
+  &_split {
+    background: @header_color;
+  }
+
+  &_btn {
+    color: #ccc;
+
+    .dropdown.open &,
+    &:hover {
+      color: #ccc;
+      background: lighten(@header_color, 3%);
+    }
+  }
+}
+
+.footer_wrap {
+  background: @background_color;
+}
