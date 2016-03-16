@@ -3649,6 +3649,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.notify = {volume: 0.5};
     $scope.send = {};
+    $scope.appearance = {};
 
     $scope.$watch('photo.file', onPhotoSelected);
 
@@ -3783,7 +3784,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     };
 
-    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (settings) {
+    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview', 'appearance_nightmode').then(function (settings) {
       $scope.notify.desktop = !settings[0];
       $scope.send.enter = settings[1] ? '' : '1';
 
@@ -3797,6 +3798,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.notify.vibrate = !settings[3];
 
       $scope.notify.preview = !settings[4];
+
+      // Set default to false
+      $scope.appearance.nightmode = settings[5];
 
       $scope.notify.volumeOf4 = function () {
         return 1 + Math.ceil(($scope.notify.volume - 0.1) / 0.33);
@@ -3868,6 +3872,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           Storage.set({send_ctrlenter: true});
         }
         $rootScope.$broadcast('settings_changed');
+      }
+
+      $scope.toggleNightmode = function () {
+        $scope.appearance.nightmode = !$scope.appearance.nightmode;
+        console.log('jee', $scope.appearance.nightmode);
+        if (!$scope.appearance.nightmode) {
+          Storage.remove('appearance_nightmode');
+        } else {
+          Storage.set({appearance_nightmode: true});
+        }
+        $rootScope.$broadcast('settings_changed');
+        LayoutSwitchService.switchLayout(false);
       }
     });
 

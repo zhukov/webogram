@@ -41,7 +41,7 @@ gulp.task('imagemin', function() {
 });
 
 gulp.task('less', function () {
-  gulp.src('app/less/*.less')
+  gulp.src(['app/less/*.less', 'app/less/themes/*.less'])
     .pipe(less({
       paths: [path.join(__dirname, 'less', 'includes')]
     }))

@@ -60,6 +60,7 @@
     "settings_modal_notifications": "Notifiche desktop",
     "settings_modal_message_preview": "Anteprima messaggio",
     "settings_modal_sound": "Suono",
+    "settings_modal_night_mode": "Modalità notturna",
     "settings_modal_enter_send_description_md": "**Invio** - invia messaggio, **Shift + Invio** - a capo",
     "settings_modal_ctrl_enter_send_description_md": "**Ctrl + Invio** - invia messaggio, **Invio** - a capo",
     "settings_modal_send_on_enter": "Spedisci con Invio",

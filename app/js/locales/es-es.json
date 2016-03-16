@@ -60,6 +60,7 @@
     "settings_modal_notifications": "Notificaciones de escritorio",
     "settings_modal_message_preview": "Vista previa del mensaje",
     "settings_modal_sound": "Sonido",
+    "settings_modal_night_mode": "Modo nocturno",
     "settings_modal_enter_send_description_md": "**Intro** - enviar mensaje, **Shift + Intro** - nueva línea",
     "settings_modal_ctrl_enter_send_description_md": "**Ctrl + Intro** - enviar mensaje, **Intro** - nueva línea",
     "settings_modal_send_on_enter": "Enviar con Intro",

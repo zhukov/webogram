@@ -73,9 +73,10 @@
   }
   $(document.body).addClass(classes.join(' '));
 
-  ConfigStorage.get('layout_selected', 'i18n_locale', function (params) {
+  ConfigStorage.get('layout_selected', 'i18n_locale', 'appearance_nightmode', function (params) {
     var layout = params[0],
         locale = params[1],
+        nightmode = params[2],
         defaultLocale = 'en-us',
         bootReady = {
           dom: false,
@@ -115,6 +116,14 @@
     $('head').append(
       '<link rel="stylesheet" href="css/' + (Config.Mobile ? 'mobile.css' : 'desktop.css') + '" />'
     );
+
+    // Nightmode CSS injection if found in stored configs
+    console.log('DARK THEME?', nightmode);
+    if (nightmode) {
+      $('head').append(
+        '<link rel="stylesheet" href="css/dark.css" />'
+      );
+    }
 
     if (!locale) {
       locale = (navigator.language || '').toLowerCase();

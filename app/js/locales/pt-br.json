@@ -60,6 +60,7 @@
     "settings_modal_notifications": "Notificações na área de trabalho",
     "settings_modal_message_preview": "Pré-Visualização",
     "settings_modal_sound": "Som",
+    "settings_modal_night_mode": "Modo noturno",
     "settings_modal_enter_send_description_md": "**Enter** - enviar mensagem, **Shift + Enter** - nova linha",
     "settings_modal_ctrl_enter_send_description_md": "**Ctrl + Enter** - enviar mensagem, **Enter** - nova linha",
     "settings_modal_send_on_enter": "Enviar com Enter",

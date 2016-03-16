@@ -60,6 +60,7 @@
     "settings_modal_notifications": "Desktopbenachrichtigungen",
     "settings_modal_message_preview": "Nachrichtenvorschau",
     "settings_modal_sound": "Ton",
+    "settings_modal_night_mode": "Nacht-Modus",
     "settings_modal_enter_send_description_md": "**Enter** - Nachricht senden, **Shift + Enter** - Zeilenumbruch",
     "settings_modal_ctrl_enter_send_description_md": "**Strg + Enter** - Nachricht senden, **Enter** - Zeilenumbruch",
     "settings_modal_send_on_enter": "Senden mit Enter",
