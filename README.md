@@ -106,5 +106,6 @@ Many thanks to all these libraries' authors and contributors. A detailed list wi
 
 The source code is licensed under GPL v3. License is available [here](/LICENSE).
 
+//This is a new comment line
 
 ### [Contribute](CONTRIBUTING.md)
