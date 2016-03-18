@@ -8,7 +8,7 @@ MTProto data can be carried over HTTP (SSL is also supported), so this project i
 That said, I'm using this app myself and I'd like to share its sources, so anyone can contribute to the development. Any help is welcome!
 
 
-### Interface
+### Interface Henry
 
 
 Here are some screenshots of the interface:
