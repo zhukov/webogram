@@ -1,5 +1,7 @@
 var TelegramBot = require('node-telegram-bot-api');
+var telegram = require('telegram-bot-api');
 var token = '189573317:AAEQXcSxr8YI1F5Zex65_TCvRc_jEtTi4UY';
+var api = new telegram({token:token});
 // Setup polling way
 var bot = new TelegramBot(token, {polling: true});
 var data = [];
@@ -8,8 +10,16 @@ bot.onText(/\/start/, function (msg, match) {
   var fromId = msg.from.id;
   var name = bot.getMe().id;
   console.log(bot.getMe());
-  var resp = 'Welcome '+ name;
+  var resp = 'Welcome';
   bot.sendMessage(fromId, resp);
+});
+
+bot.onText(/\/me/, function (msg, match){
+	var fromId = msg.from.id;
+	var ask = 'Do you want to start filling in Personal Information?'
+
+
+
 });
 
 bot.onText(/\/echo (.+)/, function (msg, match) {
@@ -79,10 +89,10 @@ function insertID(newName,newID){
 
 	connection.connect();
 
-	connection.query('insert into '+ 'user_id' +' (indexID, chatID) values ("' + newName + '", "' + newID + '")',
+	connection.query('insert into '+ 'user_id' +' (userID,name) values ("' + newID + '", "' + newName + '")',
 	function(err, results, fields) {
 	    if (err) throw err;
-	    else bot.sendMessage(msg.from.id,'success');
+	    else bot.sendMessage(newID,'success');
 	});
 
 	connection.end();
@@ -94,3 +104,4 @@ function setValue(value){
 	data=[];
 	data.push(value[0]);
 }
+
