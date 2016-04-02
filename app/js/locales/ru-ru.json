@@ -57,6 +57,7 @@
     "settings_modal_vibrate": "Вибросигнал",
     "settings_modal_sounds": "Звук",
     "settings_modal_language": "Язык",
+    "settings_modal_font_size": "Pазмер шрифта",
     "settings_modal_notifications": "Всплывающие уведомления",
     "settings_modal_message_preview": "Предпросмотр сообщения",
     "settings_modal_sound": "Звуковые оповещения",
@@ -750,5 +751,7 @@
     "country_select_modal_country_ye": "Йемен",
     "country_select_modal_country_zm": "Замбия",
     "country_select_modal_country_tz_uk": "Занзибар",
-    "country_select_modal_country_zw": "Зимбабве"
+    "country_select_modal_country_zw": "Зимбабве",
+    
+    "list_fonts": {"n": "Нормальный", "m": "Cредний", "l": "большой", "xl": "O-большой"}
 }

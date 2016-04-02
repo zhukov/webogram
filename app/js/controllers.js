@@ -2619,20 +2619,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   
   .controller('AppFontSelectController', function ($scope, _, Storage, ErrorService, AppRuntimeManager) {
     $scope.supportedFonts = ["n", "m", "l", "xl"]
-    $scope.fontNames = {"n": "Normal", "m": "Medium", "l": "Large", "xl": "X-Large"}; //Config.I18n.list_fonts
-    $scope.curFont = 'n';
-    $scope.form = {font: 'n'};
+    $scope.fontNames = Config.I18n.messages.list_fonts;
+    
+    // TODO: This should be more angular-ly
+    var cf = localStorage.getItem('font');
+    if ((typeof cf !== "undefined") && (cf !== null)) {
+        cf = JSON.parse(cf);
+    } else {
+        cf = 'n';
+    }
+
+    $scope.curFont = cf;
+    $scope.form = {font: cf};
 
     $scope.fontSelect = function fontSelect (newFont) {
       newFont = newFont || $scope.form.font;
       if ($scope.curFont !== newFont) {
-        ErrorService.confirm({type: 'APPLY_FONT_WITH_RELOAD'}).then(function () {
+          $scope.curFont = newFont
+        //ErrorService.confirm({type: 'APPLY_FONT_WITH_RELOAD'}).then(function () {
           Storage.set({font: newFont}).then(function () {
-            AppRuntimeManager.reload();
+            //AppRuntimeManager.reload();
+            updateFont();
           });
-        }, function () {
+        /*}, function () {
           $scope.form.font = $scope.curFont;
-        });
+        });*/
       }
     };
   })

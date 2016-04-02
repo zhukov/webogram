@@ -57,6 +57,7 @@
     "settings_modal_vibrate": "Vibración",
     "settings_modal_sounds": "Sonidos",
     "settings_modal_language": "Idioma",
+    "settings_modal_font_size": "Tamaño de Fuente",
     "settings_modal_notifications": "Notificaciones de escritorio",
     "settings_modal_message_preview": "Vista previa del mensaje",
     "settings_modal_sound": "Sonido",
@@ -750,5 +751,7 @@
     "country_select_modal_country_ye": "Yemen",
     "country_select_modal_country_zm": "Zambia",
     "country_select_modal_country_tz_uk": "Zanzíbar",
-    "country_select_modal_country_zw": "Zimbabue"
+    "country_select_modal_country_zw": "Zimbabue",
+    
+    "list_fonts": {"n": "Normal", "m": "Mediano", "l": "Grande", "xl": "X-Grande"}
 }
