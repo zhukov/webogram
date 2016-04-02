@@ -2636,14 +2636,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       newFont = newFont || $scope.form.font;
       if ($scope.curFont !== newFont) {
           $scope.curFont = newFont
-        //ErrorService.confirm({type: 'APPLY_FONT_WITH_RELOAD'}).then(function () {
           Storage.set({font: newFont}).then(function () {
-            //AppRuntimeManager.reload();
             updateFont();
           });
-        /*}, function () {
-          $scope.form.font = $scope.curFont;
-        });*/
       }
     };
   })
