@@ -11,11 +11,27 @@ html {
 body {
   color: #000;
   background: none;
-  font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+  font: 100% 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
   overflow: hidden;
 
   &.non_osx {
-    font: 13px/18px Tahoma, sans-serif, Arial, Helvetica;
+    font: 105% Tahoma, sans-serif, Arial, Helvetica;
+  }
+  
+  &.font-n {
+    font-size: 100%;
+  }
+  
+  &.font-m {
+    font-size: 133%;
+  }
+  
+  &.font-l {
+    font-size: 166%;
+  }
+  
+  &.font-xl {
+    font-size: 200%;
   }
 }
 
@@ -25,7 +41,7 @@ h1, h2, h3, h4, h5 {
 
 .non_osx {
   h4 {
-    font-size: 17px;
+    font-size: 142%;
   }
 }
 
@@ -225,7 +241,7 @@ input[type="number"] {
   border-radius: 2px;
   overflow: hidden;
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: 108%;
   padding: 6px 10px;
   font-weight: bold;
 
@@ -278,7 +294,7 @@ input[type="number"] {
   color: #999;
   cursor: pointer;
   display: block;
-  font-size: 13px;
+  font-size: 108%;
   margin: 0;
   padding: 0;
   z-index: 1;
@@ -306,7 +322,7 @@ input[type="number"] {
   display: inline-block;
   border: 0;
   outline: 0;
-  font-size: 13px;
+  font-size: 108%;
   padding: 3px 0;
   margin: 3px 0 0;
   width: 100%;
@@ -391,7 +407,7 @@ a {
 .md_modal_title {
   font-weight: bold;
   padding: 18px 0 5px;
-  font-size: 13px;
+  font-size: 108%;
 }
 
 .navbar_offline {
@@ -409,7 +425,7 @@ a {
   &-text {
     color: #b9cfe3;
     padding: 13px 15px;
-    font-size: 13px;
+    font-size: 108%;
     display: block;
     line-height: 20px;
   }
@@ -537,7 +553,7 @@ a {
   & > li {
     & > a {
       padding: 5px 14px;
-      font-size: 13px;
+      font-size: 108%;
     }
   }
 }
@@ -583,13 +599,13 @@ a {
   &-title {
     color: #222;
     font-weight: bold;
-    font-size: 17px;
+    font-size: 117%;
     line-height: 1.4;
   }
 
   &-close-link,
   &-head-link {
-    font-size: 12px;
+    font-size: 100%;
     line-height: 1.4;
     float: right;
     padding: 0 2px 0;
@@ -642,7 +658,7 @@ a {
 
 .modal_simple {
   &_header {
-    font-size: 14px;
+    font-size: 117%;
     margin: 0 0 10px;
     text-align: center;
     font-weight: bold;
@@ -654,7 +670,7 @@ a {
     /*padding: 70px 0 50px;*/
 
     h4 {
-      font-size: 14px;
+      font-size: 117%;
       margin-bottom: 38px;
       text-align: left;
     }
@@ -674,7 +690,7 @@ a {
 
 .md_simple {
   &_header {
-    font-size: 14px;
+    font-size: 117%;
     margin: 0 0 10px;
     font-weight: bold;
   }
@@ -689,7 +705,7 @@ a {
     }
 
     .modal_simple_form h4 {
-      font-size: 14px;
+      font-size: 117%;
       margin-top: 0;
       margin-bottom: 38px;
       text-align: left;
@@ -716,7 +732,7 @@ a {
 
 .modal_section {
   &_header {
-    font-size: 12px;
+    font-size: 100%;
     line-height: 14px;
     color: #999;
     background: #f5f5f5;
@@ -992,7 +1008,7 @@ a.tg_radio_on:hover i.icon-radio {
 }
 .login_head_submit_btn,
 .login_head_submit_progress {
-  font-size: 13px;
+  font-size: 108%;
   line-height: 20px;
   padding: 27px 15px 28px;
   display: inline-block;
@@ -1018,7 +1034,7 @@ a.tg_radio_on:hover i.icon-radio {
 
 .login_footer_wrap {
   color: #84a2bc;
-  font-size: 13px;
+  font-size: 108%;
   line-height: 16px;
   margin-top: 25px;
   text-align: center;
@@ -1070,14 +1086,14 @@ a.tg_radio_on:hover i.icon-radio {
 
   h3 {
     margin: 0 0 20px;
-    font-size: 15px;
+    font-size: 125%;
     font-weight: bold;
     text-align: left;
   }
 
   p {
     margin: 0 0 20px;
-    font-size: 13px;
+    font-size: 108%;
     line-height: 160%;
 
     &:last-child {
@@ -1089,30 +1105,30 @@ a.tg_radio_on:hover i.icon-radio {
 .login_form_head {
   color: #222222;
   margin: 0 0 20px;
-  font-size: 15px;
+  font-size: 125%;
   font-weight: bold;
 }
 .login_form_lead {
   color: #999;
   margin: 15px 0 30px;
-  font-size: 13px;
+  font-size: 108%;
   line-height: 160%;
 }
 .login_form_hint {
   color: #999;
   margin: 0 0 20px;
-  font-size: 13px;
+  font-size: 108%;
   line-height: 160%;
 }
 .login_form_messaging {
   color: #999;
-  font-size: 13px;
+  font-size: 108%;
   margin-top: 20px;
   line-height: 160%;
 }
 .login_phone_head {
   color: #222222;
-  font-size: 15px;
+  font-size: 125%;
   font-weight: bold;
   text-align: center;
   margin: 0;
@@ -1149,7 +1165,7 @@ a.tg_radio_on:hover i.icon-radio {
   text-align: center;
 }
 .im_dialogs_empty_header {
-  font-size: 15px;
+  font-size: 125%;
   color: #808080;
   margin: 0 0 15px;
 }
@@ -1417,7 +1433,7 @@ a.im_dialog_selected {
 }
 
 .im_dialogs_empty_header {
-  font-size: 15px;
+  font-size: 125%;
   color: #808080;
   margin: 0 0 15px;
 }
@@ -2037,7 +2053,7 @@ img.im_message_document_thumb {
   color: #000;
   line-height: 1.4;
   text-align: left;
-  font-size: 13px;
+  font-size: 108%;
 }
 .im_bot_intro_message_header {
   font-weight: bold;
@@ -2269,7 +2285,7 @@ a.im_message_fwd_photo {
   width: 100%;
   background: #f0f4f7;
   height: 30px;
-  font-size: 13px;
+  font-size: 108%;
   margin: 0;
   padding: 6px 6px;
 
@@ -2956,7 +2972,7 @@ a.composer_emoji_btn {
 
   & > li > a {
     display: block;
-    font-size: 13px;
+    font-size: 108%;
     line-height: 15px;
     padding: 4px 10px;
     color: #52719a;
@@ -3011,7 +3027,7 @@ a.composer_emoji_btn {
   span& {
     .peer_initials {
       line-height: 32px;
-      font-size: 14px;
+      font-size: 116%;
     }
   }
 }
@@ -3060,7 +3076,7 @@ a.composer_command_option:hover .composer_command_desc,
   white-space: nowrap;
   text-overflow: ellipsis;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 108%;
   color: #444;
   margin: 10px 0 3px;
   padding: 0 6px;
@@ -3318,7 +3334,7 @@ li.inline_result_photo.composer_autocomplete_option_active a {
 .error_modal_description {
   color: #999;
   padding: 5px 0;
-  font-size: 13px;
+  font-size: 108%;
   line-height: 160%;
 }
 
@@ -3354,7 +3370,7 @@ li.inline_result_photo.composer_autocomplete_option_active a {
 .confirm_modal_description {
   text-align: center;
   padding: 20px 0;
-  font-size: 14px;
+  font-size: 116%;
   line-height: 160%;
 }
 .confirm_phone_number {
@@ -3549,7 +3565,7 @@ a.contacts_modal_search_clear {
 
   .peer_initials {
     line-height: 40px;
-    font-size: 15px;
+    font-size: 125%;
   }
 }
 .contacts_modal_contact_status {
@@ -3615,7 +3631,7 @@ ul.chat_modal_migrate_list {
   }
   .peer_initials {
     line-height: 40px;
-    font-size: 15px;
+    font-size: 125%;
   }
 }
 
@@ -3666,7 +3682,7 @@ ul.chat_modal_migrate_list {
   }
   &_sessions_header {
     color: #999;
-    font-size: 13px;
+    font-size: 108%;
     margin-left: 16px;
     margin-top: 20px;
     font-weight: bold;
@@ -3831,7 +3847,7 @@ h5 {
   .im_dialogs_contacts_wrap &,
   .im_dialogs_messages_wrap & {
     color: #999;
-    font-size: 13px;
+    font-size: 108%;
     margin-left: 20px;
     font-weight: bold;
   }
@@ -3863,7 +3879,7 @@ h5 {
   color: #FFF;
   display: block;
   line-height: 40px;
-  font-size: 13px;
+  font-size: 108%;
   text-align: center;
 }
 .icon-cancel {
@@ -4126,13 +4142,13 @@ a.countries_modal_search_clear {
   }
 
   &_github_link {
-    font-size: 13px;
+    font-size: 108%;
     float: right;
     color: #999;
   }
 
   &_more_link {
-    font-size: 13px;
+    font-size: 108%;
   }
 }
 
@@ -4150,7 +4166,7 @@ a.countries_modal_search_clear {
 }
 
 .bad_browser_text {
-  font-size: 14px;
+  font-size: 116%;
   line-height: 160%;
   margin: 25px 0 30px;
 }
@@ -4183,7 +4199,7 @@ a.countries_modal_search_clear {
 }
 
 .peer_modal_profile_name {
-  font-size: 14px;
+  font-size: 116%;
   padding: 15px 0 9px;
   font-weight: bold;
 }
@@ -4466,7 +4482,7 @@ a.countries_modal_search_clear {
   }
 
   &_action {
-    font-size: 13px;
+    font-size: 108%;
     padding: 3px;
     margin: -3px;
   }
@@ -4485,7 +4501,7 @@ a.countries_modal_search_clear {
   }
 
   &_name {
-    font-size: 13px;
+    font-size: 108%;
     font-weight: bold;
 
     a& {
@@ -4556,7 +4572,7 @@ a.countries_modal_search_clear {
 }
 .inactive_description {
   color: #666666;
-  font-size: 15px;
+  font-size: 125%;
   line-height: 150%;
 }
 .inactive_actions {

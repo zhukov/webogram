@@ -89,6 +89,23 @@
   <script type="text/javascript" src="js/directives.js"></script>
   <script type="text/javascript" src="js/directives_mobile.js"></script>
   <!-- endbuild -->
-
+  <script>
+    function updateFont(){
+        var fSet = localStorage.getItem("font");
+        
+        if (fSet !== null) {
+            fSet = JSON.parse(fSet);
+            var bod = $(document.body);
+            
+            bod.removeClass('font-n')
+            bod.removeClass('font-m')
+            bod.removeClass('font-l')
+            bod.removeClass('font-xl')
+            bod.addClass('font-' + fSet)
+        }
+    }
+    
+    updateFont()
+  </script>
 </body>
 </html>
