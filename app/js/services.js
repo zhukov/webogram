@@ -1597,6 +1597,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (apiWebPage.document && apiWebPage.document._ === 'document') {
       AppDocsManager.saveDoc(apiWebPage.document, mediaContext);
     } else {
+      if (apiWebPage.type == 'document') {
+        delete apiWebPage.type;
+      }
       delete apiWebPage.document;
     }
 
