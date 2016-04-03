@@ -3077,6 +3077,7 @@ angular.module('myApp.services')
     openChatInviteLink: openChatInviteLink,
     convertMigratedPeer: convertMigratedPeer,
     getMessagePeer: getMessagePeer,
+    getFullMessageID: getFullMessageID,
     getMessageThumb: getMessageThumb,
     clearDialogCache: clearDialogCache,
     wrapForDialog: wrapForDialog,

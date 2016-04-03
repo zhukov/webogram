@@ -4231,7 +4231,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function handleTgProtoAddr (url, inner) {
     var matches;
 
-    if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup)=(.+))?$/)) {
+    if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup|post)=(.+))?$/)) {
       AppPeersManager.resolveUsername(matches[1]).then(function (peerID) {
 
         if (peerID > 0 && AppUsersManager.isBot(peerID) && matches[2] == 'startgroup') {
@@ -4248,10 +4248,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           return true;
         }
 
-        $rootScope.$broadcast('history_focus', {
-          peerString: AppPeersManager.getPeerString(peerID),
-          startParam: matches[3]
-        });
+        var params = {
+          peerString: AppPeersManager.getPeerString(peerID)
+        };
+
+        if (matches[2] == 'start') {
+          params.startParam = matches[3];
+        } else {
+          params.messageID = AppMessagesManager.getFullMessageID(parseInt(matches[3]), -peerID);
+        }
+
+        $rootScope.$broadcast('history_focus', params);
       });
       return true;
     }

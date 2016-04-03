@@ -1590,7 +1590,10 @@ angular.module('izhukov.utils', [])
                 url = 'tg://addstickers?set=' + path[1];
                 break;
               default:
-                if (!path[1]) {
+                if (path[1] && path[1].match(/^\d+$/)) {
+                  url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1];
+                }
+                else if (!path[1]) {
                   var domainQuery = path[0].split('?');
                   url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
                 }
