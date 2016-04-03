@@ -1239,7 +1239,11 @@ angular.module('myApp.services')
             if (apiMessage.action.users.length == 1) {
               apiMessage.action.user_id = apiMessage.action.users[0];
               if (apiMessage.fromID == apiMessage.action.user_id) {
-                apiMessage.action._ = 'messageActionChatReturn';
+                if (isChannel) {
+                  apiMessage.action._ = 'messageActionChatJoined';
+                } else {
+                  apiMessage.action._ = 'messageActionChatReturn';
+                }
               }
             }
             else if (apiMessage.action.users.length > 1) {
@@ -2516,6 +2520,9 @@ angular.module('myApp.services')
           break;
         case 'messageActionChatReturn':
           notificationMessage = _('conversation_returned_to_group_raw');
+          break;
+        case 'messageActionChatJoined':
+          notificationMessage = _('conversation_joined_group_raw');
           break;
         case 'messageActionChatDeleteUser':
           notificationMessage = _('conversation_kicked_user_message_raw');
