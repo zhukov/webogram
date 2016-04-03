@@ -2898,7 +2898,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           }
         }
 
-        initEl.attr('data-content', encodeEntities(peer.initials || '')).prependTo(element);
+        initEl.attr('data-content', peer.initials || '').prependTo(element);
         imgEl.remove();
 
 
