@@ -4277,11 +4277,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (matches = url.match(/^msg_url\?url=([^&]+)(?:&text=(.*))?$/)) {
-      PeersSelectService.selectPeer().then(function (toPeerString) {
-        var url = decodeURIComponent(matches[1]);
-        var text = matches[2] ? decodeURIComponent(matches[2]) : '';
-        shareUrl(url, text);
-      });
+      var url = decodeURIComponent(matches[1]);
+      var text = matches[2] ? decodeURIComponent(matches[2]) : '';
+      shareUrl(url, text);
       return true;
     }
 
