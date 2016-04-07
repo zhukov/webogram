@@ -579,7 +579,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
   })
-  .directive('myMessageVideo', function(AppVideoManager) {
+  .directive('myMessageVideo', function(AppDocsManager) {
     return {
       scope: {
         'media': '=myMessageVideo',
@@ -587,12 +587,12 @@ angular.module('myApp.directives', ['myApp.filters'])
       },
       templateUrl: templateUrl('message_attach_video'),
       link: function ($scope, element, attrs) {
-        AppVideoManager.updateVideoDownloaded($scope.media.video.id);
+        AppDocsManager.updateDocDownloaded($scope.media.video.id);
         $scope.videoSave = function () {
-          AppVideoManager.saveVideoFile($scope.media.video.id);
+          AppDocsManager.saveDocFile($scope.media.video.id);
         };
         $scope.videoOpen = function () {
-          AppVideoManager.openVideo($scope.media.video.id, $scope.messageId);
+          AppDocsManager.openVideo($scope.media.video.id, $scope.messageId);
         };
       }
     };
@@ -1944,7 +1944,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myLoadVideo', function($sce, AppVideoManager, ErrorService, _) {
+  .directive('myLoadVideo', function($sce, AppDocsManager, ErrorService, _) {
 
     return {
       link: link,
@@ -1957,7 +1957,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
-      var downloadPromise = AppVideoManager.downloadVideo($scope.video.id);
+      var downloadPromise = AppDocsManager.downloadDoc($scope.video.id);
 
       downloadPromise.then(function () {
         $scope.$emit('ui_height');
@@ -2950,7 +2950,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager, AppMessagesManager, ErrorService) {
+  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppDocsManager, AppMessagesManager, ErrorService) {
 
     var currentPlayer = false;
     var audioVolume = 0.5;
@@ -2995,21 +2995,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function link($scope, element, attrs) {
-      if ($scope.audio._ == 'audio') {
-        AppAudioManager.updateAudioDownloaded($scope.audio.id);
-      } else {
-        AppDocsManager.updateDocDownloaded($scope.audio.id);
-      }
+      AppDocsManager.updateDocDownloaded($scope.audio.id);
 
       $scope.volume = audioVolume;
       $scope.mediaPlayer = {};
 
       $scope.download = function () {
-        if ($scope.audio._ == 'audio') {
-          AppAudioManager.saveAudioFile($scope.audio.id);
-        } else {
-          AppDocsManager.saveDocFile($scope.audio.id);
-        }
+        AppDocsManager.saveDocFile($scope.audio.id);
       };
 
       $scope.togglePlay = function () {
@@ -3021,14 +3013,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         else {
-          var downloadPromise;
-          if ($scope.audio._ == 'audio') {
-            downloadPromise = AppAudioManager.downloadAudio($scope.audio.id);
-          } else {
-            downloadPromise = AppDocsManager.downloadDoc($scope.audio.id);
-          }
-
-          downloadPromise.then(function () {
+          AppDocsManager.downloadDoc($scope.audio.id).then(function () {
             onContentLoaded(function () {
               var errorListenerEl = $('audio', element)[0] || element[0];
               if (errorListenerEl) {

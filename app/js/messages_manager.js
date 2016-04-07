@@ -9,7 +9,7 @@
 
 angular.module('myApp.services')
 
-.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppVideoManager, AppDocsManager, AppStickersManager, AppAudioManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
+.service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppDocsManager, AppStickersManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, RichTextProcessor, NotificationsManager, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
 
   var messagesStorage = {};
   var messagesForHistory = {};
@@ -719,6 +719,10 @@ angular.module('myApp.services')
         !message.action) {
       return false;
     }
+    if (message.reply_markup &&
+        message.reply_markup._ == 'replyInlineMarkup') {
+      return false;
+    }
     var messageReplyMarkup = message.reply_markup;
     var lastReplyMarkup = historyStorage.reply_markup;
     if (messageReplyMarkup) {
@@ -797,6 +801,7 @@ angular.module('myApp.services')
 
       if (historyStorage !== undefined && historyStorage.history.length) {
         var neededContents = {},
+            neededDocType,
             neededLimit = limit || 20,
             i, message;
 
@@ -805,26 +810,35 @@ angular.module('myApp.services')
             neededContents['messageMediaPhoto'] = true;
             break;
 
-          case 'inputMessagesFilterVideo':
-            neededContents['messageMediaVideo'] = true;
-            break;
-
           case 'inputMessagesFilterPhotoVideo':
             neededContents['messageMediaPhoto'] = true;
-            neededContents['messageMediaVideo'] = true;
+            neededContents['messageMediaDocument'] = true;
+            neededDocType = 'video';
+            break;
+
+          case 'inputMessagesFilterVideo':
+            neededContents['messageMediaDocument'] = true;
+            neededDocType = 'video';
             break;
 
           case 'inputMessagesFilterDocument':
             neededContents['messageMediaDocument'] = true;
+            neededDocType = false;
             break;
 
-          case 'inputMessagesFilterAudio':
-            neededContents['messageMediaAudio'] = true;
+          case 'inputMessagesFilterVoice':
+            neededContents['messageMediaDocument'] = true;
+            neededDocType = 'voice';
             break;
         }
         for (i = 0; i < historyStorage.history.length; i++) {
           message = messagesStorage[historyStorage.history[i]];
           if (message.media && neededContents[message.media._]) {
+            if (neededDocType !== undefined &&
+                message.media._ == 'messageMediaDocument' &&
+                message.media.document.type != neededDocType) {
+              continue;
+            }
             foundMsgs.push(message.mid);
             if (foundMsgs.length >= neededLimit) {
               break;
@@ -1199,14 +1213,8 @@ angular.module('myApp.services')
           case 'messageMediaPhoto':
             AppPhotosManager.savePhoto(apiMessage.media.photo, mediaContext);
             break;
-          case 'messageMediaVideo':
-            AppVideoManager.saveVideo(apiMessage.media.video, mediaContext);
-            break;
           case 'messageMediaDocument':
             AppDocsManager.saveDoc(apiMessage.media.document, mediaContext);
-            break;
-          case 'messageMediaAudio':
-            AppAudioManager.saveAudio(apiMessage.media.audio);
             break;
           case 'messageMediaWebPage':
             AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.mid, mediaContext);
@@ -1557,14 +1565,6 @@ angular.module('myApp.services')
           switch (attachType) {
             case 'photo':
               inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile};
-              break;
-
-            case 'video':
-              inputMedia = {_: 'inputMediaUploadedVideo', file: inputFile, duration: 0, w: 0, h: 0, mime_type: file.type};
-              break;
-
-            case 'audio':
-              inputMedia = {_: 'inputMediaUploadedAudio', file: inputFile, duration: 0, mime_type: file.type};
               break;
 
             case 'document':
@@ -2093,16 +2093,8 @@ angular.module('myApp.services')
           message.media.photo = AppPhotosManager.wrapForHistory(message.media.photo.id);
           break;
 
-        case 'messageMediaVideo':
-          message.media.video = AppVideoManager.wrapForHistory(message.media.video.id);
-          break;
-
         case 'messageMediaDocument':
           message.media.document = AppDocsManager.wrapForHistory(message.media.document.id);
-          break;
-
-        case 'messageMediaAudio':
-          message.media.audio = AppAudioManager.wrapForHistory(message.media.audio.id);
           break;
 
         case 'messageMediaGeo':
@@ -2453,11 +2445,8 @@ angular.module('myApp.services')
         case 'messageMediaPhoto':
           notificationMessage = _('conversation_media_photo_raw');
           break;
-        case 'messageMediaVideo':
-          notificationMessage = _('conversation_media_video_raw');
-          break;
         case 'messageMediaDocument':
-          switch (message.media.document.isSpecial) {
+          switch (message.media.document.type) {
             case 'gif':
               notificationMessage = _('conversation_media_gif_raw');
               break;
@@ -2468,27 +2457,19 @@ angular.module('myApp.services')
                 notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' ' + notificationMessage;
               }
               break;
+            case 'video':
+              notificationMessage = _('conversation_media_video_raw');
+              break;
+            case 'voice':
             case 'audio':
               notificationMessage = _('conversation_media_audio_raw');
               break;
             default:
-              notificationMessage = message.media.document.file_name || _('conversation_media_attachment_raw');
+              notificationMessage = message.media.document.file_name || _('conversation_media_document_raw');
               break;
+          }
+          break;
 
-          }
-          if (message.media.document.sticker) {
-            notificationMessage = _('conversation_media_sticker');
-            var stickerEmoji = message.media.document.stickerEmojiRaw;
-            if (stickerEmoji !== undefined) {
-              notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' (' + notificationMessage + ')';
-            }
-          } else {
-            notificationMessage = message.media.document.file_name || _('conversation_media_document_raw');
-          }
-          break;
-        case 'messageMediaAudio':
-          notificationMessage = _('conversation_media_audio_raw');
-          break;
         case 'messageMediaGeo':
         case 'messageMediaVenue':
           notificationMessage = _('conversation_media_location_raw');

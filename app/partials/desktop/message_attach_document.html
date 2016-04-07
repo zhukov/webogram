@@ -1,8 +1,12 @@
-<div ng-switch="::media.document.isSpecial">
+<div ng-switch="::media.document.type">
 
   <div ng-switch-when="gif" my-load-gif document="media.document"></div>
 
   <div ng-switch-when="sticker" my-load-sticker document="media.document" open="true"></div>
+
+  <div ng-switch-when="voice" class="im_message_audio">
+    <div my-audio-player audio="media.document"></div>
+  </div>
 
   <div ng-switch-when="audio" class="im_message_audio">
     <div my-audio-player audio="media.document"></div>

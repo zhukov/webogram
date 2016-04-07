@@ -1089,7 +1089,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
           documents: 'inputMessagesFilterDocument',
-          audio: 'inputMessagesFilterAudio'
+          audio: 'inputMessagesFilterVoice'
         },
         unfocusMessagePromise,
         jump = 0,
@@ -3192,8 +3192,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.settings = {notifications: true};
 
     AppProfileManager.getProfile($scope.userID, $scope.override).then(function (userFull) {
-      $scope.blocked = userFull.blocked;
+      $scope.blocked = userFull.pFlags.blocked;
       $scope.bot_info = userFull.bot_info;
+      $scope.rAbout = userFull.rAbout;
 
       NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
         $scope.settings.notifications = !muted;

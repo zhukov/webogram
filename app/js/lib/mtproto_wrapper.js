@@ -339,22 +339,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   function getFileName(location) {
     switch (location._) {
-      case 'inputVideoFileLocation':
-        return 'video' + location.id + '.mp4';
-
       case 'inputDocumentFileLocation':
         var fileName = (location.file_name || '').split('.', 2);
         var ext = fileName[1] || '';
         if (location.sticker && !WebpManager.isWebpSupported()) {
           ext += '.png';
         }
-        if (fileName.length) {
-          return fileName[0] + '_' + location.id + '.' + ext;
-        }
-        return 'doc' + location.id;
-
-      case 'inputAudioFileLocation':
-        return 'audio' + location.id;
+        return fileName[0] + '_' + location.id + '.' + ext;
 
       default:
         if (!location.volume_id) {

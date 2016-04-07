@@ -1035,7 +1035,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       version: botInfo.version,
       shareText: botInfo.share_text,
       description: botInfo.description,
-      rAbout: RichTextProcessor.wrapRichText(botInfo.share_text, {noLinebreaks: true}),
       commands: commands
     };
   }
@@ -1055,13 +1054,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         AppUsersManager.saveApiUser(userFull.user, true);
       }
 
-      AppPhotosManager.savePhoto(userFull.profile_photo, {
-        user_id: id
-      });
+      if (userFull.profile_photo) {
+        AppPhotosManager.savePhoto(userFull.profile_photo, {
+          user_id: id
+        });
+      }
+
+      if (userFull.about !== undefined) {
+        userFull.rAbout = RichTextProcessor.wrapRichText(userFull.about, {noLinebreaks: true});
+      }
 
       NotificationsManager.savePeerSettings(id, userFull.notify_settings);
 
-      userFull.bot_info = saveBotInfo(userFull.bot_info);
+      if (userFull.bot_info) {
+        userFull.bot_info = saveBotInfo(userFull.bot_info);
+      }
 
       return userFull;
     });
@@ -1733,203 +1740,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-
-.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, AppUsersManager, FileManager, qSync) {
-  var videos = {},
-      videosForHistory = {},
-      windowW = $(window).width(),
-      windowH = $(window).height();
-
-  function saveVideo (apiVideo, context) {
-    if (context) {
-      angular.extend(apiVideo, context);
-    }
-    videos[apiVideo.id] = apiVideo;
-
-    if (apiVideo.thumb && apiVideo.thumb._ == 'photoCachedSize') {
-      MtpApiFileManager.saveSmallFile(apiVideo.thumb.location, apiVideo.thumb.bytes);
-
-      // Memory
-      apiVideo.thumb.size = apiVideo.thumb.bytes.length;
-      delete apiVideo.thumb.bytes;
-      apiVideo.thumb._ = 'photoSize';
-    }
-  };
-
-  function wrapForHistory (videoID) {
-    if (videosForHistory[videoID] !== undefined) {
-      return videosForHistory[videoID];
-    }
-
-    var video = angular.copy(videos[videoID]),
-        width = Math.min(windowW - 80, Config.Mobile ? 210 : 150),
-        height = Math.min(windowH - 100, Config.Mobile ? 210 : 150),
-        thumbPhotoSize = video.thumb,
-        thumb = {
-          placeholder: 'img/placeholders/VideoThumbConversation.gif',
-          width: width,
-          height: height
-        };
-
-    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
-        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      }
-      else {
-        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
-        if (thumb.width > width) {
-          thumb.height = parseInt(thumb.height * width / thumb.width);
-          thumb.width = width;
-        }
-      }
-
-      thumb.location = thumbPhotoSize.location;
-      thumb.size = thumbPhotoSize.size;
-    }
-
-    video.thumb = thumb;
-
-    return videosForHistory[videoID] = video;
-  }
-
-  function wrapForFull (videoID) {
-    var video = wrapForHistory(videoID),
-        fullWidth = Math.min($(window).width() - (Config.Mobile ? 0 : 60), 542),
-        fullHeight = $($window).height() - (Config.Mobile ? 92 : 150),
-        fullPhotoSize = video,
-        full = {
-          placeholder: 'img/placeholders/VideoThumbModal.gif',
-          width: fullWidth,
-          height: fullHeight,
-        };
-
-    if (!video.w || !video.h) {
-      full.height = full.width = Math.min(fullWidth, fullHeight);
-    } else {
-      var wh = calcImageInBox(video.w, video.h, fullWidth, fullHeight);
-      full.width = wh.w;
-      full.height = wh.h;
-    }
-
-    video.full = full;
-    video.fullThumb = angular.copy(video.thumb);
-    video.fullThumb.width = full.width;
-    video.fullThumb.height = full.height;
-
-    return video;
-  }
-
-  function openVideo (videoID, messageID) {
-    var scope = $rootScope.$new(true);
-    scope.videoID = videoID;
-    scope.messageID = messageID;
-
-    return $modal.open({
-      templateUrl: templateUrl('video_modal'),
-      windowTemplateUrl: templateUrl('media_modal_layout'),
-      controller: 'VideoModalController',
-      scope: scope,
-      windowClass: 'video_modal_window'
-    });
-  }
-
-  function updateVideoDownloaded (videoID) {
-    var video = videos[videoID],
-        historyVideo = videosForHistory[videoID] || video || {},
-        inputFileLocation = {
-          _: 'inputVideoFileLocation',
-          id: videoID,
-          access_hash: video.access_hash
-        };
-
-    // historyVideo.progress = {enabled: true, percent: 10, total: video.size};
-
-    if (historyVideo.downloaded === undefined) {
-      MtpApiFileManager.getDownloadedFile(inputFileLocation, video.size).then(function () {
-        historyVideo.downloaded = true;
-      }, function () {
-        historyVideo.downloaded = false;
-      });
-    }
-  }
-
-  function downloadVideo (videoID, toFileEntry) {
-    var video = videos[videoID],
-        historyVideo = videosForHistory[videoID] || video || {},
-        mimeType = video.mime_type || 'video/ogg',
-        inputFileLocation = {
-          _: 'inputVideoFileLocation',
-          id: videoID,
-          access_hash: video.access_hash
-        };
-
-    if (historyVideo.downloaded && !toFileEntry) {
-      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
-      if (cachedBlob) {
-        return qSync.when(cachedBlob);
-      }
-    }
-
-    historyVideo.progress = {enabled: !historyVideo.downloaded, percent: 1, total: video.size};
-
-    var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
-      mime: mimeType,
-      toFileEntry: toFileEntry
-    });
-
-    downloadPromise.then(function (blob) {
-      FileManager.getFileCorrectUrl(blob, mimeType).then(function (url) {
-        historyVideo.url = $sce.trustAsResourceUrl(url);
-      });
-
-      delete historyVideo.progress;
-      historyVideo.downloaded = true;
-      console.log('video save done');
-    }, function (e) {
-      console.log('video download failed', e);
-      historyVideo.progress.enabled = false;
-    }, function (progress) {
-      console.log('dl progress', progress);
-      historyVideo.progress.enabled = true;
-      historyVideo.progress.done = progress.done;
-      historyVideo.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      $rootScope.$broadcast('history_update');
-    });
-
-    historyVideo.progress.cancel = downloadPromise.cancel;
-
-    return downloadPromise;
-  }
-
-  function saveVideoFile (videoID) {
-    var video = videos[videoID],
-        mimeType = video.mime_type || 'video/mp4',
-        fileExt = mimeType.split('.')[1] || 'mp4',
-        fileName = 't_video' + videoID + '.' + fileExt,
-        historyVideo = videosForHistory[videoID] || video || {};
-
-    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
-      if (writableFileEntry) {
-        downloadVideo(videoID, writableFileEntry);
-      }
-    }, function () {
-      downloadVideo(videoID).then(function (blob) {
-        FileManager.download(blob, mimeType, fileName);
-      });
-    });
-  }
-
-  return {
-    saveVideo: saveVideo,
-    wrapForHistory: wrapForHistory,
-    wrapForFull: wrapForFull,
-    openVideo: openVideo,
-    updateVideoDownloaded: updateVideoDownloaded,
-    downloadVideo: downloadVideo,
-    saveVideoFile: saveVideoFile
-  }
-})
-
 .service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, $timeout, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
   var docs = {},
       docsForHistory = {},
@@ -1950,6 +1760,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete apiDoc.thumb.bytes;
       apiDoc.thumb._ = 'photoSize';
     }
+    if (apiDoc.thumb && apiDoc.thumb._ == 'photoSizeEmpty') {
+      delete apiDoc.thumb;
+    }
     angular.forEach(apiDoc.attributes, function (attribute) {
       switch (attribute._) {
         case 'documentAttributeFilename':
@@ -1959,11 +1772,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           apiDoc.duration = attribute.duration;
           apiDoc.audioTitle = attribute.title;
           apiDoc.audioPerformer = attribute.performer;
+          apiDoc.type = attribute.pFlags.voice ? 'voice' : 'audio';
           break;
         case 'documentAttributeVideo':
           apiDoc.duration = attribute.duration;
           apiDoc.w = attribute.w;
           apiDoc.h = attribute.h;
+          apiDoc.type = 'video';
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = true;
@@ -1979,34 +1794,43 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               apiDoc.stickerSetInput = attribute.stickerset;
             }
           }
+          if (apiDoc.mime_type == 'image/webp') {
+            apiDoc.type = 'sticker';
+          }
           break;
         case 'documentAttributeImageSize':
           apiDoc.w = attribute.w;
           apiDoc.h = attribute.h;
           break;
         case 'documentAttributeAnimated':
+          if ((apiDoc.mime_type == 'image/gif' || apiDoc.mime_type == 'video/mp4') &&
+              apiDoc.thumb &&
+              apiDoc.thumb._ == 'photoSize') {
+            apiDoc.type = 'gif';
+          }
           apiDoc.animated = true;
           break;
       }
     });
 
-    apiDoc.mime_type = apiDoc.mime_type || '';
-    apiDoc.file_name = apiDoc.file_name || 'file';
+    if (!apiDoc.mime_type) {
+      switch (apiDoc.type) {
+        case 'gif':     apiDoc.mime_type = 'video/mp4'; break;
+        case 'video':   apiDoc.mime_type = 'video/mp4'; break;
+        case 'sticker': apiDoc.mime_type = 'image/webp'; break;
+        case 'audio':   apiDoc.mime_type = 'audio/mpeg'; break;
+        case 'voice':   apiDoc.mime_type = 'audio/ogg'; break;
+        default:        apiDoc.mime_type = 'application/octet-stream'; break;
+      }
+    }
+
+    if (!apiDoc.file_name) {
+      apiDoc.file_name = '';
+    }
+
     if (apiDoc._ == 'documentEmpty') {
-      apiDoc.file_name = 'DELETED';
       apiDoc.size = 0;
     }
-
-    if ((apiDoc.mime_type == 'image/gif' || apiDoc.animated && apiDoc.mime_type == 'video/mp4') && apiDoc.thumb && apiDoc.thumb._ == 'photoSize') {
-      apiDoc.isSpecial = 'gif';
-    }
-    else if (apiDoc.mime_type == 'image/webp' && apiDoc.sticker) {
-      apiDoc.isSpecial = 'sticker';
-    }
-    else if (apiDoc.mime_type.substr(0, 6) == 'audio/') {
-      apiDoc.isSpecial = 'audio';
-    }
-
 
   };
 
@@ -2018,50 +1842,66 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return docs[docID] !== undefined;
   }
 
+  function getFileName(doc) {
+    if (doc.file_name) {
+      return doc.file_name;
+    }
+    var fileExt = '.' + doc.mime_type.split('.')[1];
+    if (fileExt == '.octet-stream') {
+      fileExt = '';
+    }
+    return 't_' + (doc.type || 'file') + doc.id + fileExt;
+  }
+
   function wrapForHistory (docID) {
     if (docsForHistory[docID] !== undefined) {
       return docsForHistory[docID];
     }
 
     var doc = angular.copy(docs[docID]),
-        isGif = doc.isSpecial == 'gif',
-        isSticker = doc.isSpecial == 'sticker',
         thumbPhotoSize = doc.thumb,
-        width, height, thumb, dim;
+        inlineImage = false,
+        boxWidth, boxHeight, thumb, dim;
 
-    if (isGif) {
-      width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
-      height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+    switch (doc.type) {
+      case 'video':
+        boxWidth = Math.min(windowW - 80, Config.Mobile ? 210 : 150),
+        boxHeight = Math.min(windowH - 100, Config.Mobile ? 210 : 150);
+        break;
+
+      case 'sticker':
+        inlineImage = true;
+        boxWidth = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
+        boxHeight = Math.min(windowH - 100, Config.Mobile ? 128 : 192);
+        break;
+
+      case 'gif':
+        inlineImage = true;
+        boxWidth = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
+        boxHeight = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+        break;
+
+      default:
+        boxWidth = boxHeight = 100;
     }
-    else if (isSticker) {
-      width = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
-      height = Math.min(windowH - 100, Config.Mobile ? 128 : 192);
-    } else {
-      width = height = 100;
+
+    if (inlineImage && doc.w && doc.h) {
+      dim = calcImageInBox(doc.w, doc.h, boxWidth, boxHeight);
+    }
+    else if (thumbPhotoSize) {
+      dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, boxWidth, boxHeight);
     }
 
-    thumb = {
-      width: width,
-      height: height
-    };
-
-    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (isGif && doc.w && doc.h) {
-        dim = calcImageInBox(doc.w, doc.h, width, height);
-      } else {
-        dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+    if (dim) {
+      thumb = {
+        width: dim.w,
+        height: dim.h
+      };
+      if (thumbPhotoSize) {
+        thumb.location = thumbPhotoSize.location;
+        thumb.size = thumbPhotoSize.size;
       }
-      thumb.width = dim.w;
-      thumb.height = dim.h;
-      thumb.location = thumbPhotoSize.location;
-      thumb.size = thumbPhotoSize.size;
-    }
-    else if (isSticker) {
-      dim = calcImageInBox(doc.w, doc.h, width, height);
-      thumb.width = dim.w;
-      thumb.height = dim.h;
-    }
-    else {
+    } else {
       thumb = false;
     }
     doc.thumb = thumb;
@@ -2078,7 +1918,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           _: 'inputDocumentFileLocation',
           id: docID,
           access_hash: doc.access_hash,
-          file_name: doc.file_name
+          file_name: getFileName(doc)
         };
 
     if (historyDoc.downloaded === undefined) {
@@ -2097,7 +1937,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           _: 'inputDocumentFileLocation',
           id: docID,
           access_hash: doc.access_hash,
-          file_name: doc.file_name
+          file_name: getFileName(doc)
         };
 
     if (doc._ == 'documentEmpty') {
@@ -2164,17 +2004,59 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function saveDocFile (docID) {
     var doc = docs[docID],
-        historyDoc = docsForHistory[docID] || doc || {};
+        historyDoc = docsForHistory[docID] || doc || {},
+        mimeType = video.mime_type || 'video/mp4',
+        fileName = getFileName(doc),
+        ext = (fileName.split('.', 2) || [])[1] || '';
 
-    var ext = (doc.file_name.split('.', 2) || [])[1] || '';
-    FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
+    FileManager.chooseSave(getFileName(doc), ext, doc.mime_type).then(function (writableFileEntry) {
       if (writableFileEntry) {
         downloadDoc(docID, writableFileEntry);
       }
     }, function () {
       downloadDoc(docID).then(function (blob) {
-        FileManager.download(blob, doc.mime_type, doc.file_name);
+        FileManager.download(blob, doc.mime_type, fileName);
       });
+    });
+  }
+
+  function wrapVideoForFull (docID) {
+    var doc = wrapForHistory(docID),
+        fullWidth = Math.min($(window).width() - (Config.Mobile ? 0 : 60), 542),
+        fullHeight = $(window).height() - (Config.Mobile ? 92 : 150),
+        full = {
+          placeholder: 'img/placeholders/docThumbModal.gif',
+          width: fullWidth,
+          height: fullHeight,
+        };
+
+    if (!doc.w || !doc.h) {
+      full.height = full.width = Math.min(fullWidth, fullHeight);
+    } else {
+      var dim = calcImageInBox(doc.w, doc.h, fullWidth, fullHeight);
+      full.width = dim.w;
+      full.height = dim.h;
+    }
+
+    doc.full = full;
+    doc.fullThumb = angular.copy(doc.thumb);
+    doc.fullThumb.width = full.width;
+    doc.fullThumb.height = full.height;
+
+    return doc;
+  }
+
+  function openVideo (docID, messageID) {
+    var scope = $rootScope.$new(true);
+    scope.docID = docID;
+    scope.messageID = messageID;
+
+    return $modal.open({
+      templateUrl: templateUrl('video_modal'),
+      windowTemplateUrl: templateUrl('media_modal_layout'),
+      controller: 'VideoModalController',
+      scope: scope,
+      windowClass: 'video_modal_window'
     });
   }
 
@@ -2183,122 +2065,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getDoc: getDoc,
     hasDoc: hasDoc,
     wrapForHistory: wrapForHistory,
+    wrapVideoForFull: wrapVideoForFull,
     updateDocDownloaded: updateDocDownloaded,
     downloadDoc: downloadDoc,
     openDoc: openDoc,
+    openVideo: openVideo,
     saveDocFile: saveDocFile
-  }
-})
-
-.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, FileManager, qSync) {
-  var audios = {};
-  var audiosForHistory = {};
-
-  function saveAudio (apiAudio) {
-    audios[apiAudio.id] = apiAudio;
-  };
-
-  function wrapForHistory (audioID) {
-    if (audiosForHistory[audioID] !== undefined) {
-      return audiosForHistory[audioID];
-    }
-
-    var audio = angular.copy(audios[audioID]);
-
-    return audiosForHistory[audioID] = audio;
-  }
-
-  function updateAudioDownloaded (audioID) {
-    var audio = audios[audioID],
-        historyAudio = audiosForHistory[audioID] || audio || {},
-        inputFileLocation = {
-          _: 'inputAudioFileLocation',
-          id: audioID,
-          access_hash: audio.access_hash
-        };
-
-    // historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 10, total: audio.size};
-
-    if (historyAudio.downloaded === undefined) {
-      MtpApiFileManager.getDownloadedFile(inputFileLocation, audio.size).then(function () {
-        historyAudio.downloaded = true;
-      }, function () {
-        historyAudio.downloaded = false;
-      });
-    }
-  }
-
-  function downloadAudio (audioID, toFileEntry) {
-    var audio = audios[audioID],
-        historyAudio = audiosForHistory[audioID] || audio || {},
-        mimeType = audio.mime_type || 'audio/ogg',
-        inputFileLocation = {
-          _: 'inputAudioFileLocation',
-          id: audioID,
-          access_hash: audio.access_hash
-        };
-
-    if (historyAudio.downloaded && !toFileEntry) {
-      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
-      if (cachedBlob) {
-        return qSync.when(cachedBlob);
-      }
-    }
-
-    historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 1, total: audio.size};
-
-    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {
-      mime: mimeType,
-      toFileEntry: toFileEntry
-    });
-
-    downloadPromise.then(function (blob) {
-      FileManager.getFileCorrectUrl(blob, mimeType).then(function (url) {
-        historyAudio.url = $sce.trustAsResourceUrl(url);
-      });
-      delete historyAudio.progress;
-      historyAudio.downloaded = true;
-      console.log('audio save done');
-    }, function (e) {
-      console.log('audio download failed', e);
-      historyAudio.progress.enabled = false;
-    }, function (progress) {
-      console.log('dl progress', progress);
-      historyAudio.progress.enabled = true;
-      historyAudio.progress.done = progress.done;
-      historyAudio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      $rootScope.$broadcast('history_update');
-    });
-
-    historyAudio.progress.cancel = downloadPromise.cancel;
-
-    return downloadPromise;
-  }
-
-  function saveAudioFile (audioID) {
-    var audio = audios[audioID],
-        mimeType = audio.mime_type || 'audio/ogg',
-        fileExt = mimeType.split('.')[1] || 'ogg',
-        fileName = 't_audio' + audioID + '.' + fileExt,
-        historyAudio = audiosForHistory[audioID] || audio || {};
-
-    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
-      if (writableFileEntry) {
-        downloadAudio(audioID, writableFileEntry);
-      }
-    }, function () {
-      downloadAudio(audioID).then(function (blob) {
-        FileManager.download(blob, mimeType, fileName);
-      });
-    });
-  }
-
-  return {
-    saveAudio: saveAudio,
-    wrapForHistory: wrapForHistory,
-    updateAudioDownloaded: updateAudioDownloaded,
-    downloadAudio: downloadAudio,
-    saveAudioFile: saveAudioFile
   }
 })
 
