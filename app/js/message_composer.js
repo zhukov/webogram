@@ -1334,7 +1334,9 @@ MessageComposer.prototype.onCommandSelected = function (command, isTab) {
 MessageComposer.prototype.onChange = function (e) {
   if (this.richTextareaEl) {
     delete this.keyupStarted;
-    this.textareaEl.val(getRichValue(this.richTextareaEl[0])).trigger('change');
+    var richValue = getRichValue(this.richTextareaEl[0]);
+    richValue = richValue.replace(/\u00A0/g, ' ');
+    this.textareaEl.val(richValue).trigger('change');
   }
   this.updateInlinePlaceholder();
 }
