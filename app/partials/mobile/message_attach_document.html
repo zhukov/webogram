@@ -12,6 +12,18 @@
     <div my-audio-player audio="media.document"></div>
   </div>
 
+  <div ng-switch-when="video" class="im_message_video im_message_document_thumbed">
+    <a class="im_message_video_thumb" href="" ng-click="videoOpen()" ng-style="::{width: media.document.thumb.width + 'px'}">
+      <span class="im_message_video_duration" ng-bind="::media.document.duration | duration"></span>
+      <i class="icon icon-videoplay"></i>
+      <img
+        class="im_message_video_thumb im_message_video_thumb_blurred"
+        my-load-thumb
+        thumb="media.document.thumb"
+      />
+    </a>
+  </div>
+
   <div ng-switch-default class="im_message_document clearfix" ng-class="{im_message_document_thumbed: !!media.document.thumb, im_message_document_progress: media.document.progress.enabled}">
 
     <a ng-if="::!media.document.thumb" class="im_message_file_button" ng-click="docOpen()" ng-class="{im_message_file_button_dl_doc: media.document.downloaded}">

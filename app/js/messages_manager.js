@@ -260,7 +260,9 @@ angular.module('myApp.services')
             dialog.top_message > maxSeenID
           ) {
             var notifyPeer = message.flags & 16 ? message.from_id : peerID;
-            if (message.pFlags.unread && !message.pFlags.out) {
+            if (message.pFlags.unread &&
+                !message.pFlags.out &&
+                !message.pFlags.silent) {
               NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
                 if (!muted) {
                   notifyAboutMessage(message);
@@ -1188,14 +1190,16 @@ angular.module('myApp.services')
       }
 
       apiMessage.date -= serverTimeOffset;
-      if (apiMessage.fwd_date) {
-        apiMessage.fwd_date -= serverTimeOffset;
+
+      var fwdHeader = apiMessage.fwd_from;
+      if (fwdHeader) {
+        apiMessage.fwdFromID = fwdHeader.from_id ? fwdHeader.from_id : -fwdHeader.channel_id;
+        fwdHeader.date -= serverTimeOffset;
       }
+
       apiMessage.toID = toPeerID;
       apiMessage.fromID = apiMessage.from_id || toPeerID;
-      if (apiMessage.fwd_from_id) {
-        apiMessage.fwdFromID = AppPeersManager.getPeerID(apiMessage.fwd_from_id);
-      }
+
       if (apiMessage.via_bot_id > 0) {
         apiMessage.viaBotID = apiMessage.via_bot_id;
       }
@@ -2387,10 +2391,6 @@ angular.module('myApp.services')
             sticker = true;
           }
           break;
-
-        case 'messageMediaVideo':
-          thumbPhotoSize = message.media.video.thumb;
-          break;
       }
     }
 
@@ -2746,7 +2746,9 @@ angular.module('myApp.services')
           newDialogsHandlePromise = $timeout(handleNewDialogs, 0);
         }
 
-        if (inboxUnread && ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE)) {
+        if (inboxUnread &&
+            ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
+            !message.pFlags.silent) {
 
           var notifyPeer = message.flags & 16 ? message.from_id : peerID;
           var notifyPeerToHandle = notificationsToHandle[notifyPeer];

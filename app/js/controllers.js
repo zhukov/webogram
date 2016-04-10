@@ -55,7 +55,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.credentials = {phone_country: '', phone_country_name: '', phone_number: '', phone_full: ''};
     $scope.progress = {};
-    $scope.callPending = {};
+    $scope.nextPending = {};
     $scope.about = {};
 
     $scope.chooseCountry = function () {
@@ -158,38 +158,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     initPhoneCountry();
 
 
-    var callTimeout;
+    var nextTimeout;
     var updatePasswordTimeout = false;
 
     function saveAuth (result) {
       MtpApiManager.setUserAuth(options.dcID, {
         id: result.user.id
       });
-      $timeout.cancel(callTimeout);
+      $timeout.cancel(nextTimeout);
 
       $location.url('/im');
     };
 
-    function callCheck () {
-      $timeout.cancel(callTimeout);
-      if ($scope.credentials.viaApp) {
-        return;
-      }
-      if (!(--$scope.callPending.remaining)) {
-        $scope.callPending.success = false;
-        MtpApiManager.invokeApi('auth.sendCall', {
-          phone_number: $scope.credentials.phone_full,
-          phone_code_hash: $scope.credentials.phone_code_hash
-        }, options).then(function () {
-          $scope.callPending.success = true;
-        });
-      } else {
-        callTimeout = $timeout(callCheck, 1000);
-      }
-    }
-
     $scope.sendCode = function () {
-      $timeout.cancel(callTimeout);
+      $timeout.cancel(nextTimeout);
 
       ErrorService.confirm({
         type: 'LOGIN_PHONE_CORRECT',
@@ -204,26 +186,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         var authKeyStarted = tsNow();
         MtpApiManager.invokeApi('auth.sendCode', {
+          flags: 0,
           phone_number: $scope.credentials.phone_full,
-          sms_type: 5,
           api_id: Config.App.id,
           api_hash: Config.App.hash,
           lang_code: navigator.language || 'en'
         }, options).then(function (sentCode) {
           $scope.progress.enabled = false;
 
-          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
-          $scope.credentials.phone_occupied = sentCode.phone_registered;
-          $scope.credentials.viaApp = sentCode._ == 'auth.sentAppCode';
-          $scope.callPending.remaining = sentCode.send_call_timeout || 60;
           $scope.error = {};
           $scope.about = {};
-
-          callCheck();
-
-          onContentLoaded(function () {
-            $scope.$broadcast('ui_height');
-          });
+          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
+          applySentCode(sentCode);
 
         }, function (error) {
           $scope.progress.enabled = false;
@@ -246,27 +220,70 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     }
 
-    $scope.sendSms = function () {
-      if (!$scope.credentials.viaApp) {
+    function applySentCode(sentCode) {
+      $scope.credentials.type = sentCode.type;
+      $scope.nextPending.type = sentCode.next_type || false;
+      $scope.nextPending.remaining = sentCode.timeout || false;
+
+      nextTimeoutCheck();
+
+      onContentLoaded(function () {
+        $scope.$broadcast('ui_height');
+      });
+    }
+
+    $scope.sendNext = function () {
+      if (!$scope.nextPending.type ||
+          $scope.nextPending.remaining > 0) {
         return;
       }
-      delete $scope.credentials.viaApp;
-      MtpApiManager.invokeApi('auth.sendSms', {
+      MtpApiManager.invokeApi('auth.resendCode', {
         phone_number: $scope.credentials.phone_full,
         phone_code_hash: $scope.credentials.phone_code_hash
-      }, options).then(callCheck);
+      }, options).then(applySentCode);
+    }
+
+    function nextTimeoutCheck () {
+      $timeout.cancel(nextTimeout);
+      if (!$scope.nextPending.type ||
+          $scope.nextPending.remaining === false) {
+        return;
+      }
+      if (!(--$scope.nextPending.remaining)) {
+        $scope.nextPending.success = false;
+        $scope.sendNext();
+      } else {
+        nextTimeout = $timeout(nextTimeoutCheck, 1000);
+      }
     }
 
     $scope.editPhone = function () {
-      $timeout.cancel(callTimeout);
+      $timeout.cancel(nextTimeout);
+
+      if ($scope.credentials.phone_full &&
+          $scope.credentials.phone_code_hash) {
+        MtpApiManager.invokeApi('auth.cancelCode', {
+          phone_number: $scope.credentials.phone_full,
+          phone_code_hash: $scope.credentials.phone_code_hash
+        }, options);
+      }
 
       delete $scope.credentials.phone_code_hash;
       delete $scope.credentials.phone_unoccupied;
       delete $scope.credentials.phone_code_valid;
-      delete $scope.credentials.viaApp;
-      delete $scope.callPending.remaining;
-      delete $scope.callPending.success;
+      delete $scope.nextPending.remaining;
+      delete $scope.nextPending.success;
     }
+
+    $scope.$watch('credentials.phone_code', function (newVal) {
+      if (newVal &&
+          newVal.match(/^\d+$/) &&
+          $scope.credentials.type &&
+          $scope.credentials.type.length &&
+          newVal.length == $scope.credentials.type.length) {
+        $scope.logIn();
+      }
+    });
 
     $scope.logIn = function (forceSignUp) {
       var method = 'auth.signIn', params = {
@@ -3080,9 +3097,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppVideoManager, AppPeersManager, ErrorService) {
+  .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppDocsManager, AppPeersManager, ErrorService) {
 
-    $scope.video = AppVideoManager.wrapForFull($scope.videoID);
+    $scope.video = AppDocsManager.wrapVideoForFull($scope.docID);
 
     $scope.progress = {enabled: false};
     $scope.player = {};
@@ -3109,7 +3126,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.download = function () {
-      AppVideoManager.saveVideoFile($scope.videoID);
+      AppDocsManager.saveDocFile($scope.docID);
     };
 
     $scope.$on('history_delete', function (e, historyUpdate) {

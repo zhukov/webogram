@@ -59,9 +59,7 @@
         <div ng-if="::historyMessage.media || historyMessage.mid < 0 ? true : false" class="im_message_media" ng-switch="historyMessage.media._">
 
           <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.mid"></div>
           <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio" message="historyMessage"></div>
           <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
           <div ng-switch-when="messageMediaVenue"     my-message-venue="historyMessage.media"></div>
           <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>

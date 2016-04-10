@@ -579,24 +579,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
   })
-  .directive('myMessageVideo', function(AppDocsManager) {
-    return {
-      scope: {
-        'media': '=myMessageVideo',
-        'messageId': '=messageId'
-      },
-      templateUrl: templateUrl('message_attach_video'),
-      link: function ($scope, element, attrs) {
-        AppDocsManager.updateDocDownloaded($scope.media.video.id);
-        $scope.videoSave = function () {
-          AppDocsManager.saveDocFile($scope.media.video.id);
-        };
-        $scope.videoOpen = function () {
-          AppDocsManager.openVideo($scope.media.video.id, $scope.messageId);
-        };
-      }
-    };
-  })
   .directive('myMessageDocument', function(AppDocsManager) {
     return {
       scope: {
@@ -614,6 +596,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             return $scope.docSave();
           }
           AppDocsManager.openDoc($scope.media.document.id, $scope.messageId);
+        };
+        $scope.videoOpen = function () {
+          AppDocsManager.openVideo($scope.media.document.id, $scope.messageId);
         };
       }
     };

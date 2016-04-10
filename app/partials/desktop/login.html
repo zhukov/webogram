@@ -56,25 +56,31 @@
       <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
         <h3 class="login_phone_head"><span ng-bind="credentials.phone_country"></span> <span ng-bind="credentials.phone_number"></span></h3>
         <div class="login_edit_phone"><a ng-click="editPhone()" my-i18n="login_edit_number"></a></div>
-        <div ng-switch="credentials.viaApp">
-          <div ng-switch-when="true">
-            <p class="login_smscode_lead" my-i18n="login_enter_code_label_md"></p>
-            <p class="login_smscode_lead">
-              <a ng-click="sendSms()" my-i18n="login_code_not_received"></a>
-            </p>
-          </div>
-          <div ng-switch-default>
-            <p class="login_smscode_lead" my-i18n="login_enter_sms_code_label_md"></p>
 
-            <p class="login_smscode_lead">
-              <span ng-show="callPending.remaining > 0" my-i18n="login_call_remaining">
-                <my-i18n-param name="remaining">{{callPending.remaining | duration}}</my-i18n-param>
-              </span>
-              <span ng-show="!callPending.remaining &amp;&amp; !callPending.success" my-i18n="login_calling"></span>
-              <span ng-show="!callPending.remaining &amp;&amp; callPending.success" my-i18n="login_number_dialed"></span>
-            </p>
-          </div>
+        <div ng-switch="credentials.type._">
+          <p ng-switch-when="auth.sentCodeTypeApp" class="login_smscode_lead" my-i18n="login_enter_code_label_md"></p>
+          <p ng-switch-default class="login_smscode_lead" my-i18n="login_enter_sms_code_label_md"></p>
         </div>
+
+        <div ng-if="nextPending.type" ng-switch="nextPending.remaining === false">
+          <p ng-switch-when="true" class="login_smscode_lead">
+            <a ng-click="sendNext()" my-i18n="login_code_not_received"></a>
+          </p>
+          <p ng-switch-default class="login_smscode_lead">
+            <span ng-show="nextPending.remaining > 0" my-i18n="login_call_remaining">
+              <my-i18n-param name="remaining" ng-bind="nextPending.remaining | duration"></my-i18n-param>
+            </span>
+            <span ng-show="!nextPending.remaining" my-i18n="login_calling"></span>
+          </p>
+        </div>
+
+        <div ng-if="credentials.type._ == 'auth.sentCodeTypeCall'">
+          <p class="login_smscode_lead">
+            <span my-i18n="login_number_dialed"></span>
+          </p>
+        </div>
+
+
 
         <div class="md-input-group md-input-group-centered" ng-class="{'md-input-error': error.field == 'phone_code'}" my-labeled-input ng-switch="error.field == 'phone_code'">
           <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_sms_code"></label>

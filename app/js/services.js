@@ -94,6 +94,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     var userID = apiUser.id;
+    var result = users[userID];
+
+    if (apiUser.pFlags === undefined) {
+      apiUser.pFlags = {};
+    }
+
+    if (apiUser.pFlags.min) {
+      if (result !== undefined) {
+        return;
+      }
+    }
 
     if (apiUser.phone) {
       apiUser.rPhone = $filter('phoneNumber')(apiUser.phone);
@@ -112,10 +123,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (apiUser.username) {
       var searchUsername = SearchIndexManager.cleanUsername(apiUser.username);
       usernames[searchUsername] = userID;
-    }
-
-    if (apiUser.pFlags === undefined) {
-      apiUser.pFlags = {};
     }
 
     apiUser.sortName = apiUser.pFlags.deleted ? '' : SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
@@ -191,8 +198,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return users[id] && users[id].pFlags.bot;
   }
 
-  function hasUser(id) {
-    return angular.isObject(users[id]);
+  function hasUser(id, allowMin) {
+    var user = users[id];
+    return angular.isObject(user) && (!allowMin || !user.pFlags.min);
   }
 
   function getUserPhoto(id) {
@@ -592,6 +600,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
 
+    var result = chats[apiChat.id];
     var titleWords = SearchIndexManager.cleanSearchText(apiChat.title || '').split(' ');
     var firstWord = titleWords.shift();
     var lastWord = titleWords.pop();
@@ -602,16 +611,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (apiChat.pFlags === undefined) {
       apiChat.pFlags = {};
     }
+    if (apiChat.pFlags.min) {
+      if (result !== undefined) {
+        return;
+      }
+    }
 
     if (apiChat.username) {
       var searchUsername = SearchIndexManager.cleanUsername(apiChat.username);
       usernames[searchUsername] = apiChat.id;
     }
 
-    if (chats[apiChat.id] === undefined) {
-      chats[apiChat.id] = apiChat;
+    if (result === undefined) {
+      result = chats[apiChat.id] = apiChat;
     } else {
-      safeReplaceObject(chats[apiChat.id], apiChat);
+      safeReplaceObject(result, apiChat);
       $rootScope.$broadcast('chat_update', apiChat.id);
     }
 
@@ -653,7 +667,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       case 'invite':
         if (chat._ == 'channel') {
           if (chat.pFlags.megagroup) {
-            if (!chat.pFlags.editor) {
+            if (!chat.pFlags.editor &&
+                !(action == 'invite' && chat.pFlags.democracy)) {
               return false;
             }
           } else {
@@ -717,8 +732,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
-  function hasChat (id) {
-    return angular.isObject(chats[id]);
+  function hasChat (id, allowMin) {
+    var chat = chats[id];
+    return angular.isObject(chat) && (!allowMin || !chat.pFlags.min);
   }
 
   function getChatPhoto(id) {
@@ -1778,7 +1794,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           apiDoc.duration = attribute.duration;
           apiDoc.w = attribute.w;
           apiDoc.h = attribute.h;
-          apiDoc.type = 'video';
+          if (apiDoc.thumb) {
+            apiDoc.type = 'video';
+          }
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = true;
@@ -1794,7 +1812,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               apiDoc.stickerSetInput = attribute.stickerset;
             }
           }
-          if (apiDoc.mime_type == 'image/webp') {
+          if (apiDoc.thumb && apiDoc.mime_type == 'image/webp') {
             apiDoc.type = 'sticker';
           }
           break;
@@ -1804,8 +1822,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           break;
         case 'documentAttributeAnimated':
           if ((apiDoc.mime_type == 'image/gif' || apiDoc.mime_type == 'video/mp4') &&
-              apiDoc.thumb &&
-              apiDoc.thumb._ == 'photoSize') {
+              apiDoc.thumb) {
             apiDoc.type = 'gif';
           }
           apiDoc.animated = true;
@@ -1846,7 +1863,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (doc.file_name) {
       return doc.file_name;
     }
-    var fileExt = '.' + doc.mime_type.split('.')[1];
+    var fileExt = '.' + doc.mime_type.split('/')[1];
     if (fileExt == '.octet-stream') {
       fileExt = '';
     }
@@ -2005,7 +2022,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function saveDocFile (docID) {
     var doc = docs[docID],
         historyDoc = docsForHistory[docID] || doc || {},
-        mimeType = video.mime_type || 'video/mp4',
+        mimeType = doc.mime_type,
         fileName = getFileName(doc),
         ext = (fileName.split('.', 2) || [])[1] || '';
 
@@ -2728,8 +2745,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             to_id: AppPeersManager.getOutputPeer(toID),
             date: updateMessage.date,
             message: updateMessage.message,
-            fwd_from_id: updateMessage.fwd_from_id,
-            fwd_date: updateMessage.fwd_date,
+            fwd_from: updateMessage.fwd_from,
             reply_to_msg_id: updateMessage.reply_to_msg_id,
             entities: updateMessage.entities
           },
@@ -2932,13 +2948,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return false;
     }
 
-    if (update._ == 'updateNewMessage') {
+    if (update._ == 'updateNewMessage' ||
+        update._ == 'updateNewChannelMessage') {
       var message = update.message;
-      var fwdPeerID = message.fwd_from_id ? AppPeersManager.getPeerID(message.fwd_from_id) : 0;
       var toPeerID = AppPeersManager.getPeerID(message.to_id);
-      if (message.from_id && !AppUsersManager.hasUser(message.from_id) ||
-          fwdPeerID > 0 && !AppUsersManager.hasUser(fwdPeerID) ||
-          fwdPeerID < 0 && !AppChatsManager.hasChat(-fwdPeerID) ||
+      var fwdHeader = message.fwdHeader || {};
+      if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post) ||
+          fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) ||
+          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id) ||
           toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
           toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
         console.warn(dT(), 'Short update not enough data', message);
