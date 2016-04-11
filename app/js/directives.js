@@ -330,16 +330,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myServiceShortMessage', function() {
+  .directive('myShortMessage', function() {
     return {
       scope: {
-        message: '=myServiceShortMessage'
+        message: '=myShortMessage'
       },
-      templateUrl: templateUrl('dialog_service')
+      templateUrl: templateUrl('short_message')
     };
   })
 
-  .directive('myReplyMessage', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
+  .directive('myReplyMessage', function(AppMessagesManager, AppPeersManager, $rootScope) {
 
     return {
       templateUrl: templateUrl('reply_message'),
@@ -390,6 +390,55 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.mid});
 
+        })
+      }
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      })
+    }
+
+  })
+
+  .directive('myPinnedMessage', function(AppMessagesManager, AppPeersManager, $rootScope) {
+
+    return {
+      templateUrl: templateUrl('pinned_message'),
+      scope: {
+        'pinnedMessage': '=myPinnedMessage'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var message = $scope.pinnedMessage;
+      if (!message.loading) {
+        updateMessage($scope, element);
+      } else {
+        var mid = message.mid;
+        var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
+          if (mids.indexOf(mid) != -1) {
+            $scope.pinnedMessage = AppMessagesManager.wrapForDialog(mid);
+            updateMessage($scope, element);
+            stopWaiting();
+          }
+        });
+      }
+    }
+
+    function updateMessage($scope, element) {
+      var message = $scope.pinnedMessage;
+      if (!message || message.deleted || !message.to_id) {
+        $(element).remove();
+        return;
+      }
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          var peerID = AppMessagesManager.getMessagePeer(message);
+          var peerString = AppPeersManager.getPeerString(peerID);
+
+          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.mid});
         })
       }
 

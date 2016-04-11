@@ -1293,17 +1293,17 @@ i.icon-verified {
   word-wrap: break-word;
 }
 .im_dialog_chat_from_wrap,
-.im_dialog_message_media,
-.im_dialog_message_service {
+.im_short_message_media,
+.im_short_message_service {
   color: #3a6d99;
 }
-.im_dialog_message_text {
+.im_short_message_text {
   color: #808080;
 }
 
 a.im_dialog:hover,
 a.im_dialog_selected {
-  .im_dialog_message_text {
+  .im_short_message_text {
     color: #698192;
   }
 }
@@ -1312,8 +1312,8 @@ a.im_dialog_selected {
   a.im_dialog {
     .im_dialog_chat_from_wrap,
     .im_dialog_message_media,
-    .im_dialog_message_service,
-    .im_dialog_message_text,
+    .im_short_message_service,
+    .im_short_message_text,
     .im_dialog_message {
       color: #fff;
     }
@@ -1388,10 +1388,6 @@ a.im_dialog_selected {
   }
 }
 
-.im_dialog_service {
-  font-style: italic;
-  color: #999;
-}
 .im_dialog_message,
 .im_dialog_peer {
   overflow: hidden;
@@ -2060,6 +2056,16 @@ img.im_message_document_thumb {
   display: inline-block;
   margin: 0 auto;
 }
+.im_service_message .im_service_message_pinned {
+  color: inherit;
+  font-weight: bold;
+  display: inline-block;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
 
 .im_message_date,
 .im_message_fwd_date {
@@ -2186,8 +2192,8 @@ div.im_message_body {
 .im_message_reply_loading {
   padding: 7px 0 8px;
 }
-.im_reply_message_service,
-.im_reply_message_media {
+.im_message_reply_body .im_short_message_service,
+.im_message_reply_body .im_short_message_media {
   color: #999;
 }
 .im_message_reply_body {
