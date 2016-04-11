@@ -585,7 +585,7 @@ EmojiTooltip.prototype.activateStickerCategory = function () {
   var viewportWidth = categoriesEl.clientWidth;
 
   // console.log('current cat el', categoryEl, left, width, viewportWidth);
-  $(categoriesEl).animate({scrollLeft: left - (viewportWidth - width) / 2}, 200);
+  $(categoriesEl).stop(true).animate({scrollLeft: left - (viewportWidth - width) / 2}, 200);
 }
 
 

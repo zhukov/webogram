@@ -2797,14 +2797,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       // Should be first because of updateMessageID
       // console.log(dT(), 'applying', differenceResult.other_updates.length, 'other updates');
+
+      var channelsUpdates = [];
       angular.forEach(differenceResult.other_updates, function(update) {
-        if (update._ == 'updateChannelTooLong') {
-          var channelID = update.channel_id;
-          var channelState = channelStates[channelID];
-          if (channelState !== undefined && !channelState.syncLoading) {
-            getChannelDifference(channelID);
-          }
-          return;
+        switch (update._) {
+          case 'updateChannelTooLong':
+          case 'updateNewChannelMessage':
+          case 'updateEditChannelMessage':
+            processUpdate(update);
+            return;
         }
         saveUpdate(update);
       });
@@ -2927,6 +2928,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function processUpdate (update, options) {
+    options = options || {};
     var channelID = false;
     switch (update._) {
       case 'updateNewChannelMessage':
@@ -2934,6 +2936,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         break;
       case 'updateDeleteChannelMessages':
         channelID = update.channel_id;
+        break;
+      case 'updateChannelTooLong':
+        channelID = update.channel_id;
+        if (channelStates[channelID] === undefined) {
+          return false;
+        }
         break;
     }
     if (channelID && !AppChatsManager.hasChat(channelID)) {
@@ -2962,6 +2970,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         forceGetDifference();
         return false;
       }
+    }
+    if (update._ == 'updateChannelTooLong' &&
+        !channelState.syncLoading) {
+      getChannelDifference(channelID);
     }
 
     var popPts, popSeq;
