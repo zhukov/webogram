@@ -36,6 +36,10 @@ config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvi
   $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//);
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|file|tg|mailto|blob|filesystem|chrome-extension|app):|data:/);
 
+  /*PRODUCTION_ONLY_BEGIN
+  $compileProvider.debugInfoEnabled(false);
+  PRODUCTION_ONLY_END*/
+
   if (Config.Modes.test) {
     StorageProvider.setPrefix('t_');
   }

@@ -542,6 +542,8 @@
 	"message_attach_video_save": "Save file",
 	"message_attach_video_play": "Play video",
 
+	"message_attach_unsupported": "The message is not supported on your version of Telegram Web. Update the app to view: {link}.",
+
 	"conversation_select_modal_title": "Select conversation",
 	"conversation_select_modal_contacts": "Contacts",
 	"conversation_one_selected": "{name1}",
