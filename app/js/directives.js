@@ -185,7 +185,11 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function updateMessageText (message, element) {
-      var entities = message.totalEntities;
+      if (typeof message.message !== 'string' ||
+          !message.message.length) {
+        element.hide();
+        return;
+      }
       var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
       var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
       var toPeerID = AppPeersManager.getPeerID(message.to_id);
@@ -196,7 +200,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var options = {
         noCommands: !withBot,
         fromBot: fromBot,
-        entities: entities
+        entities: message.totalEntities
       };
       if (message.pFlags.mentioned) {
         var user = AppUsersManager.getSelf();
@@ -205,9 +209,19 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
       var html = RichTextProcessor.wrapRichText(message.message, options);
-      // console.log('dd', entities, html);
 
       element.html(html.valueOf());
+    }
+
+    function updateMessageMedia(message, element) {
+      if (!message.media) {
+        element.hide();
+        return;
+      }
+      switch (message.media._) {
+        case 'messageMediaPhoto':
+
+      }
     }
 
     function link ($scope, element, attrs) {
@@ -338,34 +352,39 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myMessageVenue', function() {
     return {
       scope: {
-        'venue': '=myMessageVenue'
+        'media': '=myMessageVenue'
       },
       templateUrl: templateUrl('message_attach_venue')
     };
   })
   .directive('myMessageContact', function() {
     return {
+      scope: {
+        'media': '=myMessageContact'
+      },
       templateUrl: templateUrl('message_attach_contact')
     };
   })
   .directive('myMessageWebpage', function(AppWebPagesManager, AppPhotosManager) {
     return {
       scope: {
-        'webpage': '=myMessageWebpage',
+        'media': '=myMessageWebpage',
         'messageId': '=messageId'
       },
       templateUrl: templateUrl('message_attach_webpage'),
       link: function ($scope) {
         $scope.openPhoto = AppPhotosManager.openPhoto;
         $scope.openEmbed = function ($event) {
-          if ($scope.webpage && $scope.webpage.embed_url) {
-            AppWebPagesManager.openEmbed($scope.webpage.id, $scope.messageId);
+          if ($scope.media.webpage &&
+              $scope.media.webpage.embed_url) {
+            AppWebPagesManager.openEmbed($scope.media.webpage.id, $scope.messageId);
             return cancelEvent($event);
           }
         };
 
         $scope.$on('webpage_updated', function (e, eventData) {
-          if ($scope.webpage && $scope.webpage.id == eventData.id) {
+          if ($scope.media.webpage &&
+              $scope.media.webpage.id == eventData.id) {
             $scope.$emit('ui_height');
           }
         });
@@ -374,6 +393,9 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
   .directive('myMessagePending', function() {
     return {
+      scope: {
+        'media': '=myMessagePending'
+      },
       templateUrl: templateUrl('message_attach_pending')
     };
   })
