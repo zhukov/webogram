@@ -1154,7 +1154,7 @@ angular.module('myApp.services')
     });
   }
 
-  function saveMessages (apiMessages) {
+  function saveMessages (apiMessages, edited) {
     angular.forEach(apiMessages, function (apiMessage) {
       if (apiMessage.pFlags === undefined) {
         apiMessage.pFlags = {};
@@ -1176,13 +1176,10 @@ angular.module('myApp.services')
 
       var mid = getFullMessageID(apiMessage.id, channelID);
       apiMessage.mid = mid;
-      messagesStorage[mid] = apiMessage;
 
       if (channelID && !apiMessage.pFlags.out) {
         var dialog = getDialogByPeerID(toPeerID)[0];
         apiMessage.pFlags.unread = dialog ? mid > dialog.read_inbox_max_id : true;
-      } else {
-        apiMessage.pFlags.unread = apiMessage.flags & 1 ? true : false;
       }
 
       if (apiMessage.reply_to_msg_id) {
@@ -1291,6 +1288,10 @@ angular.module('myApp.services')
         var myEntities = RichTextProcessor.parseEntities(apiMessage.message);
         var apiEntities = apiMessage.entities || [];
         apiMessage.totalEntities = RichTextProcessor.mergeEntities(myEntities, apiEntities, !apiMessage.pending);
+      }
+
+      if (!edited) {
+        messagesStorage[mid] = apiMessage;
       }
     });
   }
@@ -2653,12 +2654,11 @@ angular.module('myApp.services')
       case 'updateNewChannelMessage':
         var message = update.message,
             peerID = getMessagePeer(message),
-            historyStorage = historiesStorage[peerID],
-            messageForMe = true;
+            historyStorage = historiesStorage[peerID];
 
         if (update._ == 'updateNewChannelMessage') {
           if (!AppChatsManager.isMegagroup(-peerID) &&
-              !(message.flags & 16 || message.flags & 2 || (message.flags & 256) == 0)) {
+              !(message.pFlags.out || message.pFlags.mention || message.pFlags.post)) {
             // we don't support not important messages in channels yet
             break;
           }
@@ -2776,6 +2776,34 @@ angular.module('myApp.services')
         }
 
         incrementMaxSeenID(message.id);
+        break;
+
+      case 'updateEditMessage':
+      case 'updateEditChannelMessage':
+        var message = update.message,
+            peerID = getMessagePeer(message),
+            historyStorage = historiesStorage[peerID];
+
+        saveMessages([message], true);
+        var mid = message.mid;
+        if (messagesStorage[mid] !== undefined) {
+          safeReplaceObject(messagesStorage[mid], message);
+          messagesStorage[mid] = message;
+        }
+        if (messagesForHistory[mid] !== undefined) {
+          var wasForHistory = messagesForHistory[mid];
+          delete messagesForHistory[mid];
+          var newForHistory = wrapForHistory(message);
+          safeReplaceObject(wasForHistory, newForHistory);
+          messagesForHistory[mid] = newForHistory;
+        }
+        // if (messagesForDialogs[mid] !== undefined) {
+        //   var wasForHistory = messagesForDialogs[mid];
+        //   delete messagesForDialogs[mid];
+        //   var newForHistory = wrapForHistory(message);
+        //   safeReplaceObject(wasForHistory, newForHistory);
+        //   messagesForDialogs[mid] = newForHistory;
+        // }
         break;
 
       case 'updateReadHistoryInbox':

@@ -2683,6 +2683,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return false;
     }
 
+    console.log(dT(), 'pop pending pts updates', goodPts, curState.pendingPtsUpdates.slice(0, goodIndex + 1));
+
     curState.pts = goodPts;
     for (i = 0; i <= goodIndex; i++) {
       update = curState.pendingPtsUpdates[i];
@@ -2932,6 +2934,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var channelID = false;
     switch (update._) {
       case 'updateNewChannelMessage':
+      case 'updateEditChannelMessage':
         channelID = -AppPeersManager.getPeerID(update.message.to_id);
         break;
       case 'updateDeleteChannelMessages':
@@ -2944,20 +2947,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         break;
     }
-    if (channelID && !AppChatsManager.hasChat(channelID)) {
-      // console.log(dT(), 'skip update, missing channel', channelID, update);
-      return false;
-    }
-    var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
-
-    // console.log(dT(), 'process', channelID, curState, update);
-
-    if (curState.syncLoading) {
-      return false;
-    }
 
     if (update._ == 'updateNewMessage' ||
-        update._ == 'updateNewChannelMessage') {
+        update._ == 'updateEditMessage' ||
+        update._ == 'updateNewChannelMessage' ||
+        update._ == 'updateEditChannelMessage') {
       var message = update.message;
       var toPeerID = AppPeersManager.getPeerID(message.to_id);
       var fwdHeader = message.fwdHeader || {};
@@ -2967,13 +2961,30 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
           toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
         console.warn(dT(), 'Short update not enough data', message);
-        forceGetDifference();
+        if (channelID && AppChatsManager.hasChat(channelID)) {
+          getChannelDifference(channelID);
+        } else {
+          forceGetDifference();
+        }
         return false;
       }
     }
-    if (update._ == 'updateChannelTooLong' &&
-        !channelState.syncLoading) {
+
+    if (channelID && !AppChatsManager.hasChat(channelID)) {
+      // console.log(dT(), 'skip update, missing channel', channelID, update);
+      return false;
+    }
+    var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
+
+    console.log(dT(), 'process', channelID, curState.pts, update);
+
+    if (curState.syncLoading) {
+      return false;
+    }
+
+    if (update._ == 'updateChannelTooLong') {
       getChannelDifference(channelID);
+      return false;
     }
 
     var popPts, popSeq;
