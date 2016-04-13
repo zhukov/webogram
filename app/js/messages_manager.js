@@ -2780,16 +2780,18 @@ angular.module('myApp.services')
 
       case 'updateEditMessage':
       case 'updateEditChannelMessage':
-        var message = update.message,
-            peerID = getMessagePeer(message),
-            historyStorage = historiesStorage[peerID];
+        var message = update.message;
+        var peerID = getMessagePeer(message);
+        var channelID = message.to_id._ == 'peerChannel' ? -peerID : 0;
+        var mid = getFullMessageID(message.id, channelID);
+        if (messagesStorage[mid] === undefined) {
+          break;
+        }
 
         saveMessages([message], true);
-        var mid = message.mid;
-        if (messagesStorage[mid] !== undefined) {
-          safeReplaceObject(messagesStorage[mid], message);
-          messagesStorage[mid] = message;
-        }
+        safeReplaceObject(messagesStorage[mid], message);
+        messagesStorage[mid] = message;
+
         if (messagesForHistory[mid] !== undefined) {
           var wasForHistory = messagesForHistory[mid];
           delete messagesForHistory[mid];
@@ -2797,13 +2799,7 @@ angular.module('myApp.services')
           safeReplaceObject(wasForHistory, newForHistory);
           messagesForHistory[mid] = newForHistory;
         }
-        // if (messagesForDialogs[mid] !== undefined) {
-        //   var wasForHistory = messagesForDialogs[mid];
-        //   delete messagesForDialogs[mid];
-        //   var newForHistory = wrapForHistory(message);
-        //   safeReplaceObject(wasForHistory, newForHistory);
-        //   messagesForDialogs[mid] = newForHistory;
-        // }
+        $rootScope.$broadcast('message_edit', {peerID: peerID, id: message.id, mid: mid});
         break;
 
       case 'updateReadHistoryInbox':
