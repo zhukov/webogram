@@ -133,7 +133,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
           if (!options.noErrorBox) {
             error.input = method;
-            error.stack = error.originalError && error.originalError.stack || error.stack || (new Error()).stack;
+            error.stack = stack || (error.originalError && error.originalError.stack) || error.stack || (new Error()).stack;
             setTimeout(function () {
               if (!error.handled) {
                 if (error.code == 401) {

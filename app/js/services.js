@@ -200,7 +200,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function hasUser(id, allowMin) {
     var user = users[id];
-    return angular.isObject(user) && (!allowMin || !user.pFlags.min);
+    return angular.isObject(user) && (allowMin || !user.pFlags.min);
   }
 
   function getUserPhoto(id) {
@@ -734,7 +734,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function hasChat (id, allowMin) {
     var chat = chats[id];
-    return angular.isObject(chat) && (!allowMin || !chat.pFlags.min);
+    return angular.isObject(chat) && (allowMin || !chat.pFlags.min);
   }
 
   function getChatPhoto(id) {
