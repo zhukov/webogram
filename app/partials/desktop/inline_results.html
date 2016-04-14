@@ -1,9 +1,11 @@
+<a ng-if="botResults.switch_pm !== undefined" class="inline_switch_pm" ng-bind-html="botResults.switch_pm.rText" data-inlineid="_switch_pm_{{botResults.switch_pm.start_param}}"></a>
+
 <ul class="inline_results_wrap composer_dropdown">
   <li class="inline_result_wrap" ng-class="'inline_result_' + result.type" ng-repeat="result in botResults.results track by result.qID" ng-switch="result.type">
 
     <a ng-switch-when="gif" class="img_gif_with_progress_wrap" data-inlineid="{{result.qID}}" ng-style="::{width: result.thumbW, height: result.thumbH}" ng-switch="result._">
       <div class="inline_result_ind"></div>
-      <div ng-switch-when="botInlineMediaResultDocument" ng-switch="result.document.url !== undefined" class="inline_result_gif_mtproto">
+      <div ng-switch-when="botInlineMediaResult" ng-switch="result.document.url !== undefined" class="inline_result_gif_mtproto">
         <div ng-switch-when="true" ng-switch="result.document.mime_type == 'video/mp4'">
           <video ng-switch-when="true" width="{{result.thumbW}}" height="{{result.thumbH}}" loop autoplay class="img_gif_video">
             <source ng-src="{{result.document.url}}" type="video/mp4">
@@ -25,9 +27,14 @@
       </div>
     </a>
 
+    <a ng-switch-when="sticker" data-inlineid="{{result.qID}}" ng-style="::{width: result.thumbW, height: result.thumbH}">
+      <div class="inline_result_ind"></div>
+      <div class="inline_result_sticker_image" my-load-sticker document="result.document" dim="{width: result.thumbW, height: result.thumbH}"></div>
+    </a>
+
     <a ng-switch-when="photo" data-inlineid="{{result.qID}}" ng-style="::{width: result.thumbW, height: result.thumbH}" ng-switch="result._">
       <div class="inline_result_ind"></div>
-      <div ng-switch-when="botInlineMediaResultPhoto" class="inline_result_photo_mtproto">
+      <div ng-switch-when="botInlineMediaResult" class="inline_result_photo_mtproto">
         <img
           class="inline_result_photo_image"
           my-load-thumb
@@ -35,14 +42,21 @@
           ng-style="::{width: result.thumbW, height: result.thumbH}"
         />
       </div>
-      <div ng-switch-default ng-switch="result.contentUrl !== undefined" class="inline_result_photo_http">
+      <div ng-switch-default class="inline_result_photo_http">
         <img ng-switch-default ng-if="result.thumbUrl !== undefined" class="inline_result_photo_image" width="{{result.thumbW}}" height="{{result.thumbH}}" ng-src="{{result.thumbUrl}}" />
       </div>
     </a>
 
     <a ng-switch-default class="inline_result_article clearfix" data-inlineid="{{result.qID}}">
-      <div class="inline_article_thumb_wrap pull-left" ng-switch="result.thumbUrl !== undefined">
-        <img ng-switch-when="true" class="inline_article_thumb" ng-src="{{result.thumbUrl}}"/>
+      <div class="inline_article_thumb_wrap pull-left" ng-switch="result.thumbUrl !== undefined ? 'thumb' : (result.send_message.geo ? 'geo' : false)">
+        <img ng-switch-when="thumb" class="inline_article_thumb" ng-src="{{result.thumbUrl}}"/>
+        <img
+          ng-switch-when="geo"
+          class="inline_article_thumb"
+          my-geo-point-map="result.send_message.geo"
+          width="50"
+          height="50"
+        />
         <div ng-switch-default class="inline_article_thumb_initials" ng-bind="result.initials"></div>
       </div>
       <div class="inline_article_content_wrap">

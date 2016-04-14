@@ -48,7 +48,7 @@
     "gulp-concat": "^2.1.7",
     "gulp-grep-stream": "0.0.2",
     "gulp-imagemin": "^2.3.0",
-    "gulp-less": "^3.0.2",
+    "gulp-less": "^3.0.5",
     "gulp-livereload": "^3.0.2",
     "gulp-load-plugins": "^0.4.0",
     "gulp-manifest": "0.0.3",

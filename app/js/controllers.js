@@ -2151,13 +2151,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var text = $scope.draftMessage.text;
 
         if (angular.isString(text) && text.length > 0) {
-          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, shortcut) {
-            var emojiCode = EmojiHelper.shortcuts[shortcut];
-            if (emojiCode !== undefined) {
-              return EmojiHelper.emojis[emojiCode][0];
-            }
-            return all;
-          });
+          text = RichTextProcessor.parseEmojis(text);
 
           var timeout = 0;
           var options = {
@@ -2469,6 +2463,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
     var getInlineResultsTO = false;
+    var lastInlineBotID = false;
     var jump = 0;
 
     function checkInlinePattern (message) {
@@ -2493,6 +2488,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (curJump != jump) {
           return;
         }
+        lastInlineBotID = inlineBot.id;
         $scope.$broadcast('inline_placeholder', {
           prefix: '@' + username + matches[2],
           placeholder: inlineBot.placeholder
@@ -2501,7 +2497,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $timeout.cancel(getInlineResultsTO);
         }
         getInlineResultsTO = $timeout(function () {
-          AppInlineBotsManager.getInlineResults(inlineBot.id, matches[3], '').then(function (botResults) {
+          var query = RichTextProcessor.parseEmojis(matches[3]);
+          AppInlineBotsManager.getInlineResults($scope.curDialog.peerID, inlineBot.id, query, '').then(function (botResults) {
             getInlineResultsTO = false;
             if (curJump != jump) {
               return;
@@ -2599,6 +2596,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!qID) {
         return;
       }
+
+      if (qID.substr(0, 11) == '_switch_pm_') {
+        var botID = lastInlineBotID;
+        var startParam = qID.substr(11);
+        return AppInlineBotsManager.switchToPM($scope.curDialog.peerID, botID, startParam);
+      }
+
       var options = {
         replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
       };

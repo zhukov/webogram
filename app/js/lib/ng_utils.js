@@ -1219,6 +1219,7 @@ angular.module('izhukov.utils', [])
     wrapPlainText: wrapPlainText,
     parseEntities: parseEntities,
     parseMarkdown: parseMarkdown,
+    parseEmojis: parseEmojis,
     mergeEntities: mergeEntities
   };
 
@@ -1345,6 +1346,16 @@ angular.module('izhukov.utils', [])
     // }
 
     return entities;
+  }
+
+  function parseEmojis(text) {
+    return text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, shortcut) {
+      var emojiCode = EmojiHelper.shortcuts[shortcut];
+      if (emojiCode !== undefined) {
+        return EmojiHelper.emojis[emojiCode][0];
+      }
+      return all;
+    });
   }
 
   function parseMarkdown (text, entities) {

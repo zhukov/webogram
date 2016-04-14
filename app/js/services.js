@@ -2388,13 +2388,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager) {
+.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager) {
 
   var inlineResults = {};
 
   return {
     sendInlineResult: sendInlineResult,
     regroupWrappedResults: regroupWrappedResults,
+    switchToPM: switchToPM,
     getInlineResults: getInlineResults,
     getPopularBots: getPopularBots
   };
@@ -2450,9 +2451,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function getInlineResults (botID, query, offset) {
+  function getInlineResults (peerID, botID, query, offset) {
     return MtpApiManager.invokeApi('messages.getInlineBotResults', {
+      flags: 0,
       bot: AppUsersManager.getUserInput(botID),
+      peer: AppPeersManager.getInputPeerByID(peerID),
       query: query,
       offset: offset
     }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function(botResults) {
@@ -2460,6 +2463,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete botResults._;
       delete botResults.flags;
       delete botResults.query_id;
+
+      if (botResults.switch_pm) {
+        botResults.switch_pm.rText = RichTextProcessor.wrapRichText(botResults.switch_pm.text, {noLinebreaks: true, noLinks: true});
+      }
 
       angular.forEach(botResults.results, function (result) {
         var qID = queryID + '_' + result.id;
@@ -2483,23 +2490,34 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  function switchToPM(fromPeerID, botID, startParam) {
+    var setHash = {};
+    var peerString = AppPeersManager.getPeerString(fromPeerID);
+    setHash['inline_switch_pm' + botID] = {peer: peerString, time: tsNow()};
+    Storage.set(setHash);
+    $rootScope.$broadcast('history_focus', {peerString: AppPeersManager.getPeerString(botID)});
+    AppMessagesManager.startBot(botID, 0, startParam);
+  }
+
   function regroupWrappedResults (results, rowW, rowH) {
     if (!results ||
         !results[0] ||
-        results[0].type != 'photo' && results[0].type != 'gif') {
+        results[0].type != 'photo' && results[0].type != 'gif' && results[0].type != 'sticker') {
       return;
     }
     var ratios = [];
     angular.forEach(results, function (result) {
-      var w, h;
-      if (result._ == 'botInlineMediaResultDocument') {
-        w = result.document.w;
-        h = result.document.h;
-      }
-      else if (result._ == 'botInlineMediaResultPhoto') {
-        var photoSize = (result.photo.sizes || [])[0];
-        w = photoSize && photoSize.w;
-        h = photoSize && photoSize.h;
+      var w, h, doc, photo;
+      if (result._ == 'botInlineMediaResult') {
+        if (doc = result.document) {
+          w = result.document.w;
+          h = result.document.h;
+        }
+        else if (photo = result.photo) {
+          var photoSize = (photo.sizes || [])[0];
+          w = photoSize && photoSize.w;
+          h = photoSize && photoSize.h;
+        }
       }
       else  {
         w = result.w;

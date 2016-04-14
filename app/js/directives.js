@@ -2205,12 +2205,12 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var width = element.attr('width') || 200;
       var height = element.attr('height') || 200;
+      var apiKey = Config.ExtCredentials.gmaps.api_key;
+      var zoom = width > 200 ? 15 : 13;
 
       element.attr('src', 'img/blank.gif');
 
-      var apiKey = Config.ExtCredentials.gmaps.api_key;
-
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=15&size='+width+'x'+height+'&scale=2&key=' + apiKey;
+      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size='+width+'x'+height+'&scale=2&key=' + apiKey;
 
       ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf());
@@ -3342,7 +3342,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                 result.contentUrl = url;
               });
             }
-            if (result.type == 'gif' && result.document) {
+            if ((result.type == 'gif' || result.type == 'sticker') && result.document) {
               AppDocsManager.downloadDoc(result.document.id);
             }
             if (result.type == 'photo' && result.photo) {
