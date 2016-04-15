@@ -264,7 +264,7 @@ angular.module('myApp.directives', ['myApp.filters'])
             updateMessageText($scope, element, message);
             unlink();
           }
-        })
+        });
       }
 
       $scope.$on('message_edit', function (e, data) {
@@ -272,7 +272,10 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         console.log('after edit', message);
+        updateMessageText($scope, element, message);
+        updateMessageMedia($scope, element, message);
         updateMessageKeyboard($scope, element, message);
+        $scope.$emit('ui_height');
       });
     }
   })

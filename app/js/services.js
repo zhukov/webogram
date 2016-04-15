@@ -2410,6 +2410,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     sendInlineResult: sendInlineResult,
     regroupWrappedResults: regroupWrappedResults,
     switchToPM: switchToPM,
+    checkSwitchReturn: checkSwitchReturn,
     getInlineResults: getInlineResults,
     getPopularBots: getPopularBots
   };
@@ -2489,7 +2490,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         result.rTitle = RichTextProcessor.wrapRichText(result.title, {noLinebreaks: true, noLinks: true});
         result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
-        result.initials = (result.url || result.title || result.type || '').substr(0, 1)
+        result.initials = (result.url || result.title || result.type || '').substr(0, 1);
 
         if (result.document) {
           AppDocsManager.saveDoc(result.document);
@@ -2500,6 +2501,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         inlineResults[qID] = result;
       });
+      console.log('res', botResults);
       return botResults;
     });
   }
@@ -2511,6 +2513,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     Storage.set(setHash);
     $rootScope.$broadcast('history_focus', {peerString: AppPeersManager.getPeerString(botID)});
     AppMessagesManager.startBot(botID, 0, startParam);
+  }
+
+  function checkSwitchReturn(botID) {
+    var bot = AppUsersManager.getUser(botID);
+    if (!bot || !bot.pFlags.bot || !bot.bot_inline_placeholder) {
+      return qSync.when(false);
+    }
+    var key = 'inline_switch_pm' + botID;
+    return Storage.get(key).then(function (peerData) {
+      if (peerData) {
+        Storage.remove(key);
+        if (tsNow() - peerData.time < 3600000) {
+          return peerData.peerString;
+        }
+      }
+      return false;
+    });
   }
 
   function regroupWrappedResults (results, rowW, rowH) {

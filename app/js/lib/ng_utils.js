@@ -1217,6 +1217,7 @@ angular.module('izhukov.utils', [])
   return {
     wrapRichText: wrapRichText,
     wrapPlainText: wrapPlainText,
+    wrapUrl: wrapUrl,
     parseEntities: parseEntities,
     parseMarkdown: parseMarkdown,
     parseEmojis: parseEmojis,
@@ -1584,32 +1585,7 @@ angular.module('izhukov.utils', [])
             break;
           }
           var url = entity.url || entityText;
-          if (!url.match(/^https?:\/\//i)) {
-            url = 'http://' + url;
-          }
-          var tgMeMatch;
-          if (entity._ == 'messageEntityTextUrl') {
-            url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
-          }
-          else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
-            var path = tgMeMatch[1].split('/');
-            switch (path[0]) {
-              case 'joinchat':
-                url = 'tg://join?invite=' + path[1];
-                break;
-              case 'addstickers':
-                url = 'tg://addstickers?set=' + path[1];
-                break;
-              default:
-                if (path[1] && path[1].match(/^\d+$/)) {
-                  url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1];
-                }
-                else if (!path[1]) {
-                  var domainQuery = path[0].split('?');
-                  url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
-                }
-            }
-          }
+          url = wrapUrl(url, entity._ == 'messageEntityTextUrl');
           html.push(
             '<a href="',
             encodeEntities(url),
@@ -1763,6 +1739,37 @@ angular.module('izhukov.utils', [])
     text.push(raw);
 
     return text.join('');
+  }
+
+  function wrapUrl(url, unsafe) {
+    var url = entity.url || entityText;
+    if (!url.match(/^https?:\/\//i)) {
+      url = 'http://' + url;
+    }
+    var tgMeMatch;
+    if (unsafe) {
+      url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
+    }
+    else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+      var path = tgMeMatch[1].split('/');
+      switch (path[0]) {
+        case 'joinchat':
+          url = 'tg://join?invite=' + path[1];
+          break;
+        case 'addstickers':
+          url = 'tg://addstickers?set=' + path[1];
+          break;
+        default:
+          if (path[1] && path[1].match(/^\d+$/)) {
+            url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1];
+          }
+          else if (!path[1]) {
+            var domainQuery = path[0].split('?');
+            url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
+          }
+      }
+    }
+    return url;
   }
 
 })
