@@ -176,7 +176,11 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myMessageBody', function(AppPeersManager, AppMessagesManager, AppChatsManager, AppUsersManager, RichTextProcessor) {
+  .directive('myMessageBody', function($compile, AppPeersManager, AppChatsManager, AppUsersManager, AppMessagesManager, RichTextProcessor) {
+
+    var messageMediaCompiled = $compile('<div class="im_message_media" my-message-media="media" message-id="messageId"></div>');
+    var messageKeyboardCompiled = $compile('<div class="im_message_keyboard" my-inline-reply-markup="markup"></div>');
+
     return {
       link: link,
       scope: {
@@ -184,10 +188,10 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     };
 
-    function updateMessageText (message, element) {
+    function updateMessageText ($scope, element, message) {
       if (typeof message.message !== 'string' ||
           !message.message.length) {
-        element.hide();
+        $('.im_message_text', element).hide();
         return;
       }
       var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
@@ -210,35 +214,66 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
       var html = RichTextProcessor.wrapRichText(message.message, options);
 
-      element.html(html.valueOf());
+      $('.im_message_text', element).html(html.valueOf());
     }
 
-    function updateMessageMedia(message, element) {
+    function updateMessageMedia($scope, element, message) {
       if (!message.media) {
-        element.hide();
+        $('.im_message_media', element).hide();
         return;
       }
-      switch (message.media._) {
-        case 'messageMediaPhoto':
 
+      var scope = $scope.$new(true);
+      scope.media = message.media;
+      scope.messageId = message.mid;
+      messageMediaCompiled(scope, function (clonedElement) {
+        $('.im_message_media', element).replaceWith(clonedElement);
+      });
+    }
+
+    function updateMessageKeyboard($scope, element, message) {
+      if (!message.reply_markup ||
+          message.reply_markup._ != 'replyInlineMarkup') {
+        $('.im_message_keyboard', element).hide();
+        return;
       }
+
+      var scope = $scope.$new(true);
+      scope.markup = AppMessagesManager.wrapReplyMarkup(message.reply_markup);
+      scope.messageId = message.mid;
+      messageKeyboardCompiled(scope, function (clonedElement) {
+        $('.im_message_keyboard', element).replaceWith(clonedElement);
+      });
+
+      scope.$on('reply_inline_button_press', function (e, button) {
+        AppMessagesManager.replyMarkupButtonPress(message.mid, button);
+      });
     }
 
     function link ($scope, element, attrs) {
       var message = $scope.message;
       var msgID = message.mid;
-      var textElement = $('.im_message_text', element);
 
-      updateMessageText(message, textElement);
+      updateMessageText($scope, element, message);
+      updateMessageMedia($scope, element, message);
+      updateMessageKeyboard($scope, element, message);
 
       if (message.pending) {
         var unlink = $scope.$on('messages_pending', function () {
           if (message.mid != msgID) {
-            updateMessageText(message, textElement);
+            updateMessageText($scope, element, message);
             unlink();
           }
         })
       }
+
+      $scope.$on('message_edit', function (e, data) {
+        if (data.mid != msgID) {
+          return;
+        }
+        console.log('after edit', message);
+        updateMessageKeyboard($scope, element, message);
+      });
     }
   })
 
@@ -304,6 +339,15 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('myMessageMedia', function() {
+    return {
+      scope: {
+        'media': '=myMessageMedia',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_media')
+    };
+  })
   .directive('myMessagePhoto', function(AppPhotosManager) {
     return {
       scope: {
@@ -398,6 +442,24 @@ angular.module('myApp.directives', ['myApp.filters'])
       },
       templateUrl: templateUrl('message_attach_pending')
     };
+  })
+
+  .directive('myInlineReplyMarkup', function() {
+
+    return {
+      templateUrl: templateUrl('reply_markup'),
+      scope: {
+        'replyMarkup': '=myInlineReplyMarkup'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      $scope.buttonSend = function (button) {
+        $scope.$emit('reply_inline_button_press', button);
+      }
+    }
+
   })
 
   .directive('myServiceMessage', function() {

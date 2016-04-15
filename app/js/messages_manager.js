@@ -2176,6 +2176,18 @@ angular.module('myApp.services')
     return messagesForHistory[msgID] = message;
   }
 
+  function replyMarkupButtonPress(id, button) {
+    var message = getMessage(id);
+    var peerID = getMessagePeer(message);
+    MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+      peer: AppPeersManager.getInputPeerByID(peerID),
+      msg_id: getMessageLocalID(id),
+      data: button.data
+    }).then(function (callbackAnswer) {
+      console.info(callbackAnswer.message || 'empty answer');
+    });
+  }
+
   function wrapReplyMarkup (replyMarkup) {
     if (!replyMarkup ||
         replyMarkup._ == 'replyKeyboardHide') {
@@ -2184,8 +2196,12 @@ angular.module('myApp.services')
     if (replyMarkup.wrapped) {
       return replyMarkup;
     }
+    var isInline = replyMarkup._ == 'replyInlineMarkup';
     var count = replyMarkup.rows && replyMarkup.rows.length || 0;
-    if (count > 0 && count <= 4 && !replyMarkup.pFlags.resize) {
+    if (!isInline &&
+        count > 0 &&
+        count <= 4 &&
+        !(replyMarkup.pFlags && replyMarkup.pFlags.resize)) {
       replyMarkup.splitCount = count;
     }
     replyMarkup.wrapped = true;
@@ -2193,11 +2209,7 @@ angular.module('myApp.services')
       angular.forEach(markupRow.buttons, function (markupButton) {
         markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
       })
-    })
-
-    if (nextRandomInt(1)) {
-      replyMarkup.rows = replyMarkup.rows.slice(0, 2);
-    }
+    });
     return replyMarkup;
   }
 
@@ -2788,6 +2800,8 @@ angular.module('myApp.services')
           break;
         }
 
+        console.trace(dT(), 'edit message', mid, message);
+
         saveMessages([message], true);
         safeReplaceObject(messagesStorage[mid], message);
         messagesStorage[mid] = message;
@@ -2795,7 +2809,8 @@ angular.module('myApp.services')
         if (messagesForHistory[mid] !== undefined) {
           var wasForHistory = messagesForHistory[mid];
           delete messagesForHistory[mid];
-          var newForHistory = wrapForHistory(message);
+          var newForHistory = wrapForHistory(mid);
+          // console.log('replacing', wasForHistory, 'with', newForHistory);
           safeReplaceObject(wasForHistory, newForHistory);
           messagesForHistory[mid] = newForHistory;
         }
@@ -3081,6 +3096,7 @@ angular.module('myApp.services')
     sendOther: sendOther,
     forwardMessages: forwardMessages,
     startBot: startBot,
+    replyMarkupButtonPress: replyMarkupButtonPress,
     openChatInviteLink: openChatInviteLink,
     convertMigratedPeer: convertMigratedPeer,
     getMessagePeer: getMessagePeer,

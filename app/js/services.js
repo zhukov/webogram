@@ -1452,8 +1452,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function wrapForHistory (photoID, options) {
     options = options || {};
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = options.website ? 100 : Math.min(windowW - 80, Config.Mobile ? 210 : 260),
-        height = options.website ? 100 : Math.min(windowH - 100, Config.Mobile ? 210 : 260),
+        width = options.website ? 64 : Math.min(windowW - 80, Config.Mobile ? 210 : 260),
+        height = options.website ? 64 : Math.min(windowH - 100, Config.Mobile ? 210 : 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -1626,23 +1626,37 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete apiWebPage.document;
     }
 
-    apiWebPage.rTitle = RichTextProcessor.wrapRichText(
-      apiWebPage.title || apiWebPage.author,
-      {noLinks: true, noLinebreaks: true}
-    );
+    var siteName = apiWebPage.site_name;
+    var title = apiWebPage.title || apiWebPage.author || siteName;
+    if (siteName &&
+        title == siteName) {
+      delete apiWebPage.site_name;
+    }
+    apiWebPage.rTitle = RichTextProcessor.wrapRichText(title, {noLinks: true, noLinebreaks: true});
     var contextHashtag = '';
-    if (apiWebPage.site_name == 'GitHub') {
+    if (siteName == 'GitHub') {
       var matches = apiWebPage.url.match(/(https?:\/\/github\.com\/[^\/]+\/[^\/]+)/);
       if (matches) {
         contextHashtag = matches[0] + '/issues/{1}';
       }
     }
+    // delete apiWebPage.description;
     apiWebPage.rDescription = RichTextProcessor.wrapRichText(
       apiWebPage.description, {
-        contextSite: apiWebPage.site_name || 'external',
+        contextSite: siteName || 'external',
         contextHashtag: contextHashtag
       }
     );
+
+    if (apiWebPage.type != 'photo' &&
+        apiWebPage.type != 'video' &&
+        apiWebPage.type != 'gif' &&
+        apiWebPage.type != 'document' &&
+        apiWebPage.type != 'gif' &&
+        !apiWebPage.description &&
+        apiWebPage.photo) {
+      apiWebPage.type = 'photo';
+    }
 
     if (messageID) {
       if (pendingWebPages[apiWebPage.id] === undefined) {
@@ -2966,6 +2980,19 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         break;
     }
 
+    var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
+
+    // console.log(dT(), 'process', channelID, curState.pts, update);
+
+    if (curState.syncLoading) {
+      return false;
+    }
+
+    if (update._ == 'updateChannelTooLong') {
+      getChannelDifference(channelID);
+      return false;
+    }
+
     if (update._ == 'updateNewMessage' ||
         update._ == 'updateEditMessage' ||
         update._ == 'updateNewChannelMessage' ||
@@ -2978,7 +3005,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id) ||
           toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
           toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
-        console.warn(dT(), 'Short update not enough data', message);
+        console.warn(dT(), 'Not enough data for message update', message);
         if (channelID && AppChatsManager.hasChat(channelID)) {
           getChannelDifference(channelID);
         } else {
@@ -2987,21 +3014,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return false;
       }
     }
-
-    if (channelID && !AppChatsManager.hasChat(channelID)) {
+    else if (channelID && !AppChatsManager.hasChat(channelID)) {
       // console.log(dT(), 'skip update, missing channel', channelID, update);
-      return false;
-    }
-    var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
-
-    console.log(dT(), 'process', channelID, curState.pts, update);
-
-    if (curState.syncLoading) {
-      return false;
-    }
-
-    if (update._ == 'updateChannelTooLong') {
-      getChannelDifference(channelID);
       return false;
     }
 
