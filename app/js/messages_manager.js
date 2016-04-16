@@ -821,6 +821,10 @@ angular.module('myApp.services')
           case 'inputMessagesFilterAudio':
             neededContents['messageMediaAudio'] = true;
             break;
+
+          case 'inputMessagesFilterUrl':
+            neededContents['messageMediaUrl'] = true;
+            break;
         }
         for (i = 0; i < historyStorage.history.length; i++) {
           message = messagesStorage[historyStorage.history[i]];
