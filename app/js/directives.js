@@ -276,18 +276,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('message_edit', function (e, data) {
-        // var message = $scope.message;
-        // message = $scope.$parent.$eval(attrs.myMessageBody);
-        message = AppMessagesManager.wrapForHistory(message.mid);
         if (data.mid != message.mid) {
           return;
         }
-        console.log('after edit', message.dir, message);
+        // console.log(dT(), 'Directive' edit', message);
         updateMessageText($scope, element, message);
         updateMessageMedia($scope, element, message);
         updateMessageKeyboard($scope, element, message);
         $scope.$emit('ui_height');
-        message.dir = true;
       });
     }
   })

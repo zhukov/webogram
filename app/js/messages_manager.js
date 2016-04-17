@@ -2798,7 +2798,9 @@ angular.module('myApp.services')
         var wasForHistory = messagesForHistory[mid];
         if (wasForHistory !== undefined) {
           delete messagesForHistory[mid];
-          safeReplaceObject(wasForHistory, wrapForHistory(mid));
+          var newForHistory = wrapForHistory(mid);
+          safeReplaceObject(wasForHistory, newForHistory);
+          messagesForHistory[mid] = wasForHistory;
         }
         $rootScope.$broadcast('message_edit', {
           peerID: peerID,
