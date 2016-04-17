@@ -164,7 +164,10 @@ function getRichValue(field) {
     lines.push(line.join(''));
   }
 
-  return lines.join('\n');
+  var value = lines.join('\n');
+  value = value.replace(/\u00A0/g, ' ');
+
+  return value;
 }
 
 function getRichValueWithCaret(field) {
@@ -197,6 +200,7 @@ function getRichValueWithCaret(field) {
   if (caretPos != -1) {
     value = value.substr(0, caretPos) + value.substr(caretPos + 1);
   }
+  value = value.replace(/\u00A0/g, ' ');
 
   return [value, caretPos];
 }

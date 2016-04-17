@@ -2176,18 +2176,6 @@ angular.module('myApp.services')
     return messagesForHistory[msgID] = message;
   }
 
-  function replyMarkupButtonPress(id, button) {
-    var message = getMessage(id);
-    var peerID = getMessagePeer(message);
-    MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
-      peer: AppPeersManager.getInputPeerByID(peerID),
-      msg_id: getMessageLocalID(id),
-      data: button.data
-    }).then(function (callbackAnswer) {
-      console.info(callbackAnswer.message || 'empty answer');
-    });
-  }
-
   function wrapReplyMarkup (replyMarkup) {
     if (!replyMarkup ||
         replyMarkup._ == 'replyKeyboardHide') {
@@ -2208,6 +2196,9 @@ angular.module('myApp.services')
     angular.forEach(replyMarkup.rows, function (markupRow) {
       angular.forEach(markupRow.buttons, function (markupButton) {
         markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
+        if (markupButton._ == 'keyboardButtonUrl') {
+          markupButton.pUrl = RichTextProcessor.wrapUrl(markupButton.url, true);
+        }
       })
     });
     return replyMarkup;
@@ -2800,21 +2791,20 @@ angular.module('myApp.services')
           break;
         }
 
-        console.trace(dT(), 'edit message', mid, message);
-
+        // console.trace(dT(), 'edit message', message);
         saveMessages([message], true);
         safeReplaceObject(messagesStorage[mid], message);
-        messagesStorage[mid] = message;
 
-        if (messagesForHistory[mid] !== undefined) {
-          var wasForHistory = messagesForHistory[mid];
+        var wasForHistory = messagesForHistory[mid];
+        if (wasForHistory !== undefined) {
           delete messagesForHistory[mid];
-          var newForHistory = wrapForHistory(mid);
-          // console.log('replacing', wasForHistory, 'with', newForHistory);
-          safeReplaceObject(wasForHistory, newForHistory);
-          messagesForHistory[mid] = newForHistory;
+          safeReplaceObject(wasForHistory, wrapForHistory(mid));
         }
-        $rootScope.$broadcast('message_edit', {peerID: peerID, id: message.id, mid: mid});
+        $rootScope.$broadcast('message_edit', {
+          peerID: peerID,
+          id: message.id,
+          mid: mid
+        });
         break;
 
       case 'updateReadHistoryInbox':
@@ -3085,6 +3075,7 @@ angular.module('myApp.services')
     getHistory: getHistory,
     getSearch: getSearch,
     getMessage: getMessage,
+    getMessageLocalID: getMessageLocalID,
     getReplyKeyboard: getReplyKeyboard,
     readHistory: readHistory,
     readMessages: readMessages,
@@ -3096,7 +3087,6 @@ angular.module('myApp.services')
     sendOther: sendOther,
     forwardMessages: forwardMessages,
     startBot: startBot,
-    replyMarkupButtonPress: replyMarkupButtonPress,
     openChatInviteLink: openChatInviteLink,
     convertMigratedPeer: convertMigratedPeer,
     getMessagePeer: getMessagePeer,

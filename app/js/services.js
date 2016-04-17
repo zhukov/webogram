@@ -2402,7 +2402,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager) {
+.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService) {
 
   var inlineResults = {};
 
@@ -2411,6 +2411,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     regroupWrappedResults: regroupWrappedResults,
     switchToPM: switchToPM,
     checkSwitchReturn: checkSwitchReturn,
+    switchInlineButtonClick: switchInlineButtonClick,
+    callbackButtonClick: callbackButtonClick,
     getInlineResults: getInlineResults,
     getPopularBots: getPopularBots
   };
@@ -2501,34 +2503,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         inlineResults[qID] = result;
       });
-      console.log('res', botResults);
       return botResults;
-    });
-  }
-
-  function switchToPM(fromPeerID, botID, startParam) {
-    var setHash = {};
-    var peerString = AppPeersManager.getPeerString(fromPeerID);
-    setHash['inline_switch_pm' + botID] = {peer: peerString, time: tsNow()};
-    Storage.set(setHash);
-    $rootScope.$broadcast('history_focus', {peerString: AppPeersManager.getPeerString(botID)});
-    AppMessagesManager.startBot(botID, 0, startParam);
-  }
-
-  function checkSwitchReturn(botID) {
-    var bot = AppUsersManager.getUser(botID);
-    if (!bot || !bot.pFlags.bot || !bot.bot_inline_placeholder) {
-      return qSync.when(false);
-    }
-    var key = 'inline_switch_pm' + botID;
-    return Storage.get(key).then(function (peerData) {
-      if (peerData) {
-        Storage.remove(key);
-        if (tsNow() - peerData.time < 3600000) {
-          return peerData.peerString;
-        }
-      }
-      return false;
     });
   }
 
@@ -2605,6 +2580,73 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       i += rowCnt;
     });
   }
+
+  function switchToPM(fromPeerID, botID, startParam) {
+    var peerString = AppPeersManager.getPeerString(fromPeerID);
+    var setHash = {};
+    setHash['inline_switch_pm' + botID] = {peer: peerString, time: tsNow()};
+    Storage.set(setHash);
+    $rootScope.$broadcast('history_focus', {peerString: AppPeersManager.getPeerString(botID)});
+    AppMessagesManager.startBot(botID, 0, startParam);
+  }
+
+  function checkSwitchReturn(botID) {
+    var bot = AppUsersManager.getUser(botID);
+    if (!bot || !bot.pFlags.bot || !bot.bot_inline_placeholder) {
+      return qSync.when(false);
+    }
+    var key = 'inline_switch_pm' + botID;
+    return Storage.get(key).then(function (peerData) {
+      if (peerData) {
+        Storage.remove(key);
+        if (tsNow() - peerData.time < 3600000) {
+          return peerData.peer;
+        }
+      }
+      return false;
+    });
+  }
+
+  function switchInlineQuery(botID, toPeerString, query) {
+    $rootScope.$broadcast('history_focus', {
+      peerString: toPeerString,
+      attachment: {
+        _: 'inline_query',
+        mention: '@' + AppUsersManager.getUser(botID).username,
+        query: query
+      }
+    });
+  }
+
+  function switchInlineButtonClick(id, button) {
+    var message = AppMessagesManager.getMessage(id);
+    var botID = message.fromID;
+    return checkSwitchReturn(botID).then(function (retPeerString) {
+      if (retPeerString) {
+        return switchInlineQuery(botID, retPeerString, button.query);
+      }
+      PeersSelectService.selectPeer({
+        canSend: true
+      }).then(function (toPeerString) {
+        return switchInlineQuery(botID, toPeerString, button.query);
+      });
+    });
+  }
+
+  function callbackButtonClick(id, button) {
+    var message = AppMessagesManager.getMessage(id);
+    var botID = message.fromID;
+    var peerID = AppMessagesManager.getMessagePeer(message);
+
+    return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+      peer: AppPeersManager.getInputPeerByID(peerID),
+      msg_id: AppMessagesManager.getMessageLocalID(id),
+      data: button.data
+    }).then(function (callbackAnswer) {
+      console.info(callbackAnswer.message || 'empty answer');
+    });
+  }
+
 
   function sendInlineResult (peerID, qID, options) {
     var inlineResult = inlineResults[qID];
@@ -3062,6 +3104,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (update.pts > curState.pts) {
         curState.pts = update.pts;
         popPts = true;
+      }
+      else if (update.pts_count) {
+        // console.warn(dT(), 'Duplicate update', update);
+        return false;
       }
       if (channelID && options.date && updatesState.date < options.date) {
         updatesState.date = options.date;
@@ -4228,7 +4274,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
     else if (name === 'share' && data.blobs && data.blobs.length > 0) {
-      PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
+      PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER', canSend: true}).then(function (peerStrings) {
         angular.forEach(peerStrings, function (peerString) {
           var peerID = AppPeersManager.getPeerID(peerString);
           angular.forEach(data.blobs, function (blob) {

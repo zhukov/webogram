@@ -1742,7 +1742,6 @@ angular.module('izhukov.utils', [])
   }
 
   function wrapUrl(url, unsafe) {
-    var url = entity.url || entityText;
     if (!url.match(/^https?:\/\//i)) {
       url = 'http://' + url;
     }

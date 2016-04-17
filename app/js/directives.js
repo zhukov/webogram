@@ -176,7 +176,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myMessageBody', function($compile, AppPeersManager, AppChatsManager, AppUsersManager, AppMessagesManager, RichTextProcessor) {
+  .directive('myMessageBody', function($compile, AppPeersManager, AppChatsManager, AppUsersManager, AppMessagesManager, AppInlineBotsManager, RichTextProcessor) {
 
     var messageMediaCompiled = $compile('<div class="im_message_media" my-message-media="media" message-id="messageId"></div>');
     var messageKeyboardCompiled = $compile('<div class="im_message_keyboard" my-inline-reply-markup="markup"></div>');
@@ -246,12 +246,20 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
 
       scope.$on('reply_inline_button_press', function (e, button) {
-        AppMessagesManager.replyMarkupButtonPress(message.mid, button);
+        switch (button._) {
+          case 'keyboardButtonSwitchInline':
+            AppInlineBotsManager.switchInlineButtonClick(message.mid, button);
+            break;
+          case 'keyboardButtonCallback':
+            AppInlineBotsManager.callbackButtonClick(message.mid, button);
+            break;
+        }
       });
     }
 
     function link ($scope, element, attrs) {
       var message = $scope.message;
+      message.dir = true;
       var msgID = message.mid;
 
       updateMessageText($scope, element, message);
@@ -268,14 +276,18 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       $scope.$on('message_edit', function (e, data) {
-        if (data.mid != msgID) {
+        // var message = $scope.message;
+        // message = $scope.$parent.$eval(attrs.myMessageBody);
+        message = AppMessagesManager.wrapForHistory(message.mid);
+        if (data.mid != message.mid) {
           return;
         }
-        console.log('after edit', message);
+        console.log('after edit', message.dir, message);
         updateMessageText($scope, element, message);
         updateMessageMedia($scope, element, message);
         updateMessageKeyboard($scope, element, message);
         $scope.$emit('ui_height');
+        message.dir = true;
       });
     }
   })
@@ -323,7 +335,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         classPrefix: 'reply_markup',
         maxHeight: 170
       });
-      $scope.buttonSend = function (button) {
+      $scope.buttonClick = function (button) {
         $scope.$emit('reply_button_press', button);
       }
 
@@ -458,7 +470,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
 
     function link ($scope, element, attrs) {
-      $scope.buttonSend = function (button) {
+      $scope.buttonClick = function (button) {
         $scope.$emit('reply_inline_button_press', button);
       }
     }

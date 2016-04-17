@@ -2348,6 +2348,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.$broadcast('ui_peer_draft');
         });
       }
+      else if (attachment._ == 'inline_query') {
+        var mention = attachment.mention;
+        var query = attachment.query;
+        forceDraft = $scope.curDialog.peer;
+
+        $timeout(function () {
+          $scope.draftMessage.text = mention + ' ' + query;
+          $scope.$broadcast('ui_peer_draft', {
+            customSelection: [
+              mention + " " + query,
+              '',
+              ''
+            ]
+          });
+        }, 1000);
+      }
     }
 
     function replySelect(messageID) {
