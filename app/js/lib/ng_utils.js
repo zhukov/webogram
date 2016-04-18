@@ -1084,6 +1084,42 @@ angular.module('izhukov.utils', [])
   }
 })
 
+.service('GeoLocationManager', function ($q) {
+
+  var lastCoords = false;
+
+  function isAvailable() {
+    return navigator.geolocation !== undefined;
+  }
+
+  function getPosition(force) {
+    if (!force && lastCoords) {
+      return $q.when(lastCoords);
+    }
+    if (!isAvailable()) {
+      return $q.reject();
+    }
+    var deferred = $q.defer();
+    navigator.geolocation.getCurrentPosition(function (position) {
+      lastCoords = {
+        lat: position.coords.latitude,
+        long: position.coords.longitude
+      };
+      deferred.resolve(lastCoords);
+    }, function (error) {
+      deferred.reject(error);
+    });
+
+    return deferred.promise;
+  }
+
+  return {
+    getPosition: getPosition,
+    isAvailable: isAvailable
+  }
+
+})
+
 .service('AppRuntimeManager', function ($window) {
 
   return {
@@ -1771,7 +1807,7 @@ angular.module('izhukov.utils', [])
     return url;
   }
 
-})
+});
 
 
 

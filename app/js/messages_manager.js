@@ -1351,6 +1351,7 @@ angular.module('myApp.services')
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
       via_bot_id: options.viaBotID,
+      reply_markup: options.reply_markup,
       entities: entities,
       views: asChannel && 1,
       pending: true
@@ -1658,10 +1659,6 @@ angular.module('myApp.services')
     var fromID = AppUsersManager.getSelf().id;
     var media;
     switch (inputMedia._) {
-      case 'inputMediaContact':
-        media = angular.extend({}, inputMedia, {_: 'messageMediaContact'});
-        break;
-
       case 'inputMediaPhoto':
         media = {
           _: 'messageMediaPhoto',
@@ -1679,6 +1676,42 @@ angular.module('myApp.services')
           _: 'messageMediaDocument',
           'document': doc,
           caption: inputMedia.caption || ''
+        };
+        break;
+
+      case 'inputMediaContact':
+        media = {
+          _: 'messageMediaContact',
+          phone_number: phone_number,
+          first_name: first_name,
+          last_name: last_name,
+          user_id: 0
+        };
+        break;
+
+      case 'inputMediaGeoPoint':
+        media = {
+          _: 'messageMediaGeo',
+          geo: {
+            _: 'geoPoint',
+            'lat': inputMedia.geo_point['lat'],
+            'long': inputMedia.geo_point['long']
+          }
+        };
+        break;
+
+      case 'inputMediaVenue':
+        media = {
+          _: 'messageMediaVenue',
+          geo: {
+            _: 'geoPoint',
+            'lat': inputMedia.geo_point['lat'],
+            'long': inputMedia.geo_point['long']
+          },
+          title: inputMedia.title,
+          address: inputMedia.address,
+          provider: inputMedia.provider,
+          venue_id: inputMedia.venue_id
         };
         break;
 
@@ -1719,6 +1752,7 @@ angular.module('myApp.services')
       random_id: randomIDS,
       reply_to_msg_id: replyToMsgID,
       via_bot_id: options.viaBotID,
+      reply_markup: options.reply_markup,
       views: asChannel && 1,
       pending: true
     };

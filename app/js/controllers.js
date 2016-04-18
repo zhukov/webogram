@@ -1804,9 +1804,48 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!replyKeyboard) {
         return;
       }
-      AppMessagesManager.sendText(peerID, button.text, {
-        replyToMsgID: peerID < 0 && replyKeyboard.mid
-      });
+      switch (button._) {
+        case 'keyboardButtonRequestPhone':
+          ErrorService.confirm({type: 'BOT_ACCESS_PHONE'}).then(function () {
+            var user = AppUsersManager.getSelf();
+            AppMessagesManager.sendOther(peerID, {
+              _: 'inputMediaContact',
+              phone_number: user.phone,
+              first_name: user.first_name,
+              last_name: user.last_name
+            }, {
+              replyToMsgID: peerID < 0 && replyKeyboard.mid
+            });
+          });
+          break;
+
+        case 'keyboardButtonRequestGeoLocation':
+          ErrorService.confirm({type: 'BOT_ACCESS_GEO'}).then(function () {
+            return GeoLocationManager.getPosition().then(function (coords) {
+              AppMessagesManager.sendOther(peerID, {
+                _: 'inputMediaGeoPoint',
+                geo_point: {
+                  _: 'inputGeoPoint',
+                  'lat': coords['lat'],
+                  'long': coords['long']
+                }
+              }, {
+                replyToMsgID: peerID < 0 && replyKeyboard.mid
+              });
+            }, function (error) {
+              ErrorService.alert(
+                _('error_modal_password_success_title_raw'),
+                _('error_modal_password_success_descripion_raw')
+              );
+            });
+          });
+          break;
+
+        default:
+          AppMessagesManager.sendText(peerID, button.text, {
+            replyToMsgID: peerID < 0 && replyKeyboard.mid
+          });
+      }
     });
 
     $scope.$on('history_reload', function (e, updPeerID) {
@@ -2479,7 +2518,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
     var getInlineResultsTO = false;
-    var lastInlineBotID = false;
+    var lastInlineBot = false;
     var jump = 0;
 
     function checkInlinePattern (message) {
@@ -2499,12 +2538,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       var username = matches[1];
+      var inlineBotPromise;
       $scope.draftMessage.inlineProgress = true;
-      AppPeersManager.resolveInlineMention(username).then(function (inlineBot) {
+      if (lastInlineBot && lastInlineBot.username == username) {
+        inlineBotPromise = $q.when(lastInlineBot);
+      } else {
+        inlineBotPromise = AppInlineBotsManager.resolveInlineMention(username);
+      }
+      inlineBotPromise.then(function (inlineBot) {
         if (curJump != jump) {
           return;
         }
-        lastInlineBotID = inlineBot.id;
+        lastInlineBot = inlineBot;
         $scope.$broadcast('inline_placeholder', {
           prefix: '@' + username + matches[2],
           placeholder: inlineBot.placeholder
@@ -2514,7 +2559,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         getInlineResultsTO = $timeout(function () {
           var query = RichTextProcessor.parseEmojis(matches[3]);
-          AppInlineBotsManager.getInlineResults($scope.curDialog.peerID, inlineBot.id, query, '').then(function (botResults) {
+          AppInlineBotsManager.getInlineResults($scope.curDialog.peerID, inlineBot.id, query, inlineBot.geo, '').then(function (botResults) {
             getInlineResultsTO = false;
             if (curJump != jump) {
               return;
@@ -2527,7 +2572,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             delete $scope.draftMessage.inlineProgress;
           });
         }, 500);
-      }, function () {
+      }, function (error) {
         $scope.$broadcast('inline_results', false);
         delete $scope.draftMessage.inlineProgress;
       });
@@ -2614,7 +2659,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       if (qID.substr(0, 11) == '_switch_pm_') {
-        var botID = lastInlineBotID;
+        var botID = lastInlineBot.id;
         var startParam = qID.substr(11);
         return AppInlineBotsManager.switchToPM($scope.curDialog.peerID, botID, startParam);
       }

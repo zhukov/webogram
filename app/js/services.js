@@ -11,7 +11,7 @@
 
 angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, ErrorService, Storage, _) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, Storage, _) {
   var users = {},
       usernames = {},
       userAccess = {},
@@ -960,24 +960,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function resolveInlineMention (username) {
-    return resolveUsername(username).then(function (peerID) {
-      if (peerID > 0) {
-        var bot = AppUsersManager.getUser(peerID);
-        if (bot.pFlags.bot && bot.bot_inline_placeholder !== undefined) {
-          return qSync.when({
-            id: peerID,
-            placeholder: bot.bot_inline_placeholder
-          });
-        }
-      }
-      return $q.reject();
-    }, function (error) {
-      error.handled = true;
-      return $q.reject(error);
-    });
-  }
-
   function getPeerID (peerString) {
     if (angular.isObject(peerString)) {
       return peerString.user_id
@@ -1024,7 +1006,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getPeer: getPeer,
     getPeerPhoto: getPeerPhoto,
     resolveUsername: resolveUsername,
-    resolveInlineMention: resolveInlineMention,
     isChannel: isChannel,
     isMegagroup: isMegagroup,
     isBot: isBot
@@ -2402,19 +2383,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService) {
+.service('AppInlineBotsManager', function (qSync, $q, $rootScope, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
 
   var inlineResults = {};
 
   return {
+    resolveInlineMention: resolveInlineMention,
+    getPopularBots: getPopularBots,
     sendInlineResult: sendInlineResult,
+    getInlineResults: getInlineResults,
     regroupWrappedResults: regroupWrappedResults,
     switchToPM: switchToPM,
     checkSwitchReturn: checkSwitchReturn,
     switchInlineButtonClick: switchInlineButtonClick,
-    callbackButtonClick: callbackButtonClick,
-    getInlineResults: getInlineResults,
-    getPopularBots: getPopularBots
+    callbackButtonClick: callbackButtonClick
   };
 
   function getPopularBots () {
@@ -2468,12 +2450,46 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function getInlineResults (peerID, botID, query, offset) {
+  function resolveInlineMention (username) {
+    return AppPeersManager.resolveUsername(username).then(function (peerID) {
+      if (peerID > 0) {
+        var bot = AppUsersManager.getUser(peerID);
+        if (bot.pFlags.bot && bot.bot_inline_placeholder !== undefined) {
+          var resolvedBot = {
+            username: username,
+            id: peerID,
+            placeholder: bot.bot_inline_placeholder
+          };
+          if (bot.pFlags.bot_inline_geo) {
+            return checkGeoLocationAccess(peerID).then(function () {
+              // console.log('bot has access');
+              return GeoLocationManager.getPosition().then(function (coords) {
+                resolvedBot.geo = coords;
+                console.log('got position', resolvedBot);
+                return qSync.when(resolvedBot);
+              });
+            })['catch'](function () {
+              console.log('resolve', resolvedBot);
+              return qSync.when(resolvedBot);
+            })
+          }
+          return qSync.when(resolvedBot);
+        }
+      }
+      return $q.reject();
+    }, function (error) {
+      error.handled = true;
+      return $q.reject(error);
+    });
+  }
+
+  function getInlineResults (peerID, botID, query, geo, offset) {
     return MtpApiManager.invokeApi('messages.getInlineBotResults', {
-      flags: 0,
+      flags: 0 | (geo ? 1 : 0),
       bot: AppUsersManager.getUserInput(botID),
       peer: AppPeersManager.getInputPeerByID(peerID),
       query: query,
+      geo_point: geo && {_: 'inputGeoPoint', lat: geo['lat'], long: geo['long']},
       offset: offset
     }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function(botResults) {
       var queryID = botResults.query_id;
@@ -2661,31 +2677,72 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     options.viaBotID = inlineResult.botID;
     options.queryID = queryID;
     options.resultID = resultID;
+    if (inlineResult.send_message.reply_markup) {
+      options.reply_markup = inlineResult.send_message.reply_markup;
+    }
 
     if (inlineResult.send_message._ == 'botInlineMessageText') {
       options.entities = inlineResult.send_message.entities;
       AppMessagesManager.sendText(peerID, inlineResult.send_message.message, options);
     } else {
       var caption = '';
-      if (inlineResult.send_message._ == 'botInlineMessageMediaAuto') {
-        caption = inlineResult.send_message.caption;
-      }
       var inputMedia = false;
-      if (inlineResult._ == 'botInlineMediaResultDocument') {
-        var doc = inlineResult.document;
-        inputMedia = {
-          _: 'inputMediaDocument',
-          id: {_: 'inputDocument', id: doc.id, access_hash: doc.access_hash},
-          caption: caption
-        };
-      }
-      else if (inlineResult._ == 'botInlineMediaResultPhoto') {
-        var photo = inlineResult.photo;
-        inputMedia = {
-          _: 'inputMediaPhoto',
-          id: {_: 'inputPhoto', id: photo.id, access_hash: photo.access_hash},
-          caption: caption
-        };
+      switch (inlineResult.send_message._) {
+        case 'botInlineMessageMediaAuto':
+          caption = inlineResult.send_message.caption;
+          if (inlineResult._ == 'botInlineMediaResult') {
+            var doc = inlineResult.document;
+            var photo = inlineResult.photo;
+            if (doc) {
+              inputMedia = {
+                _: 'inputMediaDocument',
+                id: {_: 'inputDocument', id: doc.id, access_hash: doc.access_hash},
+                caption: caption
+              };
+            } else {
+              inputMedia = {
+                _: 'inputMediaPhoto',
+                id: {_: 'inputPhoto', id: photo.id, access_hash: photo.access_hash},
+                caption: caption
+              };
+            }
+          }
+          break;
+
+        case 'botInlineMessageMediaGeo':
+          inputMedia = {
+            _: 'inputMediaGeoPoint',
+            geo_point: {
+              _: 'inputGeoPoint',
+              'lat': inlineResult.send_message.geo['lat'],
+              'long': inlineResult.send_message.geo['long']
+            }
+          };
+          break;
+
+        case 'botInlineMessageMediaVenue':
+          inputMedia = {
+            _: 'inputMediaVenue',
+            geo_point: {
+              _: 'inputGeoPoint',
+              'lat': inlineResult.send_message.geo['lat'],
+              'long': inlineResult.send_message.geo['long']
+            },
+            title: title,
+            address: address,
+            provider: provider,
+            venue_id: venue_id
+          };
+          break;
+
+        case 'botInlineMessageMediaContact':
+          inputMedia = {
+            _: 'inputMediaContact',
+            phone_number: inlineResult.send_message.phone_number,
+            first_name: inlineResult.send_message.first_name,
+            last_name: inlineResult.send_message.last_name
+          };
+          break;
       }
       if (!inputMedia) {
         inputMedia = {
@@ -2698,6 +2755,28 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       AppMessagesManager.sendOther(peerID, inputMedia, options);
     }
+  }
+
+  function checkGeoLocationAccess(botID) {
+    var key = 'bot_access_geo' + botID;
+    return Storage.get(key).then(function (geoAccess) {
+      if (geoAccess && geoAccess.granted) {
+        return true;
+      }
+      return ErrorService.confirm({
+        type: 'BOT_ACCESS_GEO'
+      }).then(function () {
+        var setHash = {};
+        setHash[key] = {granted: true, time: tsNow()};
+        Storage.set(setHash);
+        return true;
+      }, function () {
+        var setHash = {};
+        setHash[key] = {denied: true, time: tsNow()};
+        Storage.set(setHash);
+        return $q.reject();
+      });
+    });
   }
 
 })
