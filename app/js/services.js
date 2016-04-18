@@ -2462,14 +2462,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           };
           if (bot.pFlags.bot_inline_geo) {
             return checkGeoLocationAccess(peerID).then(function () {
-              // console.log('bot has access');
               return GeoLocationManager.getPosition().then(function (coords) {
                 resolvedBot.geo = coords;
-                console.log('got position', resolvedBot);
                 return qSync.when(resolvedBot);
               });
             })['catch'](function () {
-              console.log('resolve', resolvedBot);
               return qSync.when(resolvedBot);
             })
           }
@@ -2764,7 +2761,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return true;
       }
       return ErrorService.confirm({
-        type: 'BOT_ACCESS_GEO'
+        type: 'BOT_ACCESS_GEO_INLINE'
       }).then(function () {
         var setHash = {};
         setHash[key] = {granted: true, time: tsNow()};
