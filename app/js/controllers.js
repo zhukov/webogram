@@ -1804,6 +1804,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!replyKeyboard) {
         return;
       }
+      var sendOptions = {
+        replyToMsgID: peerID < 0 && replyKeyboard.mid
+      };
       switch (button._) {
         case 'keyboardButtonRequestPhone':
           ErrorService.confirm({type: 'BOT_ACCESS_PHONE'}).then(function () {
@@ -1813,9 +1816,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               phone_number: user.phone,
               first_name: user.first_name,
               last_name: user.last_name
-            }, {
-              replyToMsgID: peerID < 0 && replyKeyboard.mid
-            });
+            }, sendOptions);
           });
           break;
 
@@ -1829,22 +1830,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                   'lat': coords['lat'],
                   'long': coords['long']
                 }
-              }, {
-                replyToMsgID: peerID < 0 && replyKeyboard.mid
-              });
+              }, sendOptions);
             }, function (error) {
               ErrorService.alert(
-                _('error_modal_password_success_title_raw'),
-                _('error_modal_password_success_descripion_raw')
+                _('error_modal_bad_request_title_raw'),
+                _('error_modal_gelocation_na_raw')
               );
             });
           });
           break;
 
         default:
-          AppMessagesManager.sendText(peerID, button.text, {
-            replyToMsgID: peerID < 0 && replyKeyboard.mid
-          });
+          AppMessagesManager.sendText(peerID, button.text, sendOptions);
       }
     });
 

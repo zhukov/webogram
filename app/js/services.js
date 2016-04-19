@@ -2383,7 +2383,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppInlineBotsManager', function (qSync, $q, $rootScope, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
+.service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
 
   var inlineResults = {};
 
@@ -2460,7 +2460,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             id: peerID,
             placeholder: bot.bot_inline_placeholder
           };
-          if (bot.pFlags.bot_inline_geo) {
+          if (bot.pFlags.bot_inline_geo &&
+              GeoLocationManager.isAvailable()) {
             return checkGeoLocationAccess(peerID).then(function () {
               return GeoLocationManager.getPosition().then(function (coords) {
                 resolvedBot.geo = coords;
@@ -2656,7 +2657,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       msg_id: AppMessagesManager.getMessageLocalID(id),
       data: button.data
     }).then(function (callbackAnswer) {
-      console.info(callbackAnswer.message || 'empty answer');
+      if (typeof callbackAnswer.message != 'string' ||
+          !callbackAnswer.message.length) {
+        return;
+      }
+      if (callbackAnswer.pFlags.alert) {
+        ErrorService.alert(callbackAnswer.message);
+      } else {
+        var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true}).valueOf();;
+        toaster.pop({
+          type: 'material',
+          timeout: 100000,
+          body: html,
+          bodyOutputType: 'trustedHtml',
+          showCloseButton: false
+        });
+      }
     });
   }
 

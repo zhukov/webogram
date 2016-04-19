@@ -20,6 +20,7 @@ angular.module('myApp', [
   'ngTouch',
   'ui.bootstrap',
   'mediaPlayer',
+  'toaster',
   'izhukov.utils',
   'izhukov.mtproto',
   'izhukov.mtproto.wrapper',
