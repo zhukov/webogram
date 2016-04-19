@@ -380,6 +380,8 @@ function templateUrl (tplName) {
     media_modal_layout: 'desktop',
     slider: 'desktop',
     reply_message: 'desktop',
+    message_body: 'desktop',
+    message_media: 'desktop',
     forwarded_messages: 'desktop',
     chat_invite_link_modal: 'desktop',
     reply_markup: 'desktop',

@@ -2666,8 +2666,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       } else {
         var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true}).valueOf();;
         toaster.pop({
-          type: 'material',
-          timeout: 100000,
+          type: 'info',
+          // timeout: 100000,
           body: html,
           bodyOutputType: 'trustedHtml',
           showCloseButton: false
@@ -2741,10 +2741,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               'lat': inlineResult.send_message.geo['lat'],
               'long': inlineResult.send_message.geo['long']
             },
-            title: title,
-            address: address,
-            provider: provider,
-            venue_id: venue_id
+            title: inlineResult.send_message.title,
+            address: inlineResult.send_message.address,
+            provider: inlineResult.send_message.provider,
+            venue_id: inlineResult.send_message.venue_id
           };
           break;
 

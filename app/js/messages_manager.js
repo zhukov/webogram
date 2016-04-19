@@ -1682,9 +1682,9 @@ angular.module('myApp.services')
       case 'inputMediaContact':
         media = {
           _: 'messageMediaContact',
-          phone_number: phone_number,
-          first_name: first_name,
-          last_name: last_name,
+          phone_number: inputMedia.phone_number,
+          first_name: inputMedia.first_name,
+          last_name: inputMedia.last_name,
           user_id: 0
         };
         break;
