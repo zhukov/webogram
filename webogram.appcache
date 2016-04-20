@@ -1,13 +1,10 @@
 CACHE MANIFEST
-# Time: Wed Apr 20 2016 20:43:59 GMT+0300 (MSK)
+# Time: Wed Apr 20 2016 20:47:41 GMT+0300 (MSK)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
-css/app.css
-css/desktop.css
-css/mobile.css
 img/Manytabs.png
 img/Manytabs_2x.png
 img/Telegram.png
@@ -25,6 +22,9 @@ img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
 img/sound_a.mp3
+css/app.css
+css/desktop.css
+css/mobile.css
 js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
