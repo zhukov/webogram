@@ -30,6 +30,10 @@
   <span ng-switch-when="messageActionChannelEditPhoto" my-i18n="message_service_changed_channel_photo"></span>
   <span ng-switch-when="messageActionChannelDeletePhoto" my-i18n="message_service_removed_channel_photo"></span>
 
+  <span ng-switch-when="messageActionPinMessage" my-i18n="message_service_pinned_message">
+    <my-i18n-param name="message"><a my-pinned-message="historyMessage.reply_to_msg"></a></my-i18n-param>
+  </span>
+
   <span ng-switch-default my-i18n="message_service_unsupported_action">
     <my-i18n-param name="action"><span ng-bind="historyMessage.action._"></span></my-i18n-param>
   </span>

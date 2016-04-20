@@ -164,7 +164,10 @@ function getRichValue(field) {
     lines.push(line.join(''));
   }
 
-  return lines.join('\n');
+  var value = lines.join('\n');
+  value = value.replace(/\u00A0/g, ' ');
+
+  return value;
 }
 
 function getRichValueWithCaret(field) {
@@ -197,6 +200,7 @@ function getRichValueWithCaret(field) {
   if (caretPos != -1) {
     value = value.substr(0, caretPos) + value.substr(caretPos + 1);
   }
+  value = value.replace(/\u00A0/g, ' ');
 
   return [value, caretPos];
 }
@@ -376,10 +380,13 @@ function templateUrl (tplName) {
     media_modal_layout: 'desktop',
     slider: 'desktop',
     reply_message: 'desktop',
+    message_body: 'desktop',
+    message_media: 'desktop',
     forwarded_messages: 'desktop',
     chat_invite_link_modal: 'desktop',
     reply_markup: 'desktop',
-    dialog_service: 'desktop',
+    short_message: 'desktop',
+    pinned_message: 'desktop',
     channel_edit_modal: 'desktop',
     megagroup_edit_modal: 'desktop',
     inline_results: 'desktop',

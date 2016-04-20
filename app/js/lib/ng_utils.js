@@ -1084,6 +1084,42 @@ angular.module('izhukov.utils', [])
   }
 })
 
+.service('GeoLocationManager', function ($q) {
+
+  var lastCoords = false;
+
+  function isAvailable() {
+    return navigator.geolocation !== undefined;
+  }
+
+  function getPosition(force) {
+    if (!force && lastCoords) {
+      return $q.when(lastCoords);
+    }
+    if (!isAvailable()) {
+      return $q.reject();
+    }
+    var deferred = $q.defer();
+    navigator.geolocation.getCurrentPosition(function (position) {
+      lastCoords = {
+        lat: position.coords.latitude,
+        long: position.coords.longitude
+      };
+      deferred.resolve(lastCoords);
+    }, function (error) {
+      deferred.reject(error);
+    });
+
+    return deferred.promise;
+  }
+
+  return {
+    getPosition: getPosition,
+    isAvailable: isAvailable
+  }
+
+})
+
 .service('AppRuntimeManager', function ($window) {
 
   return {
@@ -1217,8 +1253,10 @@ angular.module('izhukov.utils', [])
   return {
     wrapRichText: wrapRichText,
     wrapPlainText: wrapPlainText,
+    wrapUrl: wrapUrl,
     parseEntities: parseEntities,
     parseMarkdown: parseMarkdown,
+    parseEmojis: parseEmojis,
     mergeEntities: mergeEntities
   };
 
@@ -1345,6 +1383,16 @@ angular.module('izhukov.utils', [])
     // }
 
     return entities;
+  }
+
+  function parseEmojis(text) {
+    return text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, shortcut) {
+      var emojiCode = EmojiHelper.shortcuts[shortcut];
+      if (emojiCode !== undefined) {
+        return EmojiHelper.emojis[emojiCode][0];
+      }
+      return all;
+    });
   }
 
   function parseMarkdown (text, entities) {
@@ -1573,32 +1621,7 @@ angular.module('izhukov.utils', [])
             break;
           }
           var url = entity.url || entityText;
-          if (!url.match(/^https?:\/\//i)) {
-            url = 'http://' + url;
-          }
-          var tgMeMatch;
-          if (entity._ == 'messageEntityTextUrl') {
-            url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
-          }
-          else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
-            var path = tgMeMatch[1].split('/');
-            switch (path[0]) {
-              case 'joinchat':
-                url = 'tg://join?invite=' + path[1];
-                break;
-              case 'addstickers':
-                url = 'tg://addstickers?set=' + path[1];
-                break;
-              default:
-                if (path[1] && path[1].match(/^\d+$/)) {
-                  url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1];
-                }
-                else if (!path[1]) {
-                  var domainQuery = path[0].split('?');
-                  url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
-                }
-            }
-          }
+          url = wrapUrl(url, entity._ == 'messageEntityTextUrl');
           html.push(
             '<a href="',
             encodeEntities(url),
@@ -1754,7 +1777,37 @@ angular.module('izhukov.utils', [])
     return text.join('');
   }
 
-})
+  function wrapUrl(url, unsafe) {
+    if (!url.match(/^https?:\/\//i)) {
+      url = 'http://' + url;
+    }
+    var tgMeMatch;
+    if (unsafe) {
+      url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
+    }
+    else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+      var path = tgMeMatch[1].split('/');
+      switch (path[0]) {
+        case 'joinchat':
+          url = 'tg://join?invite=' + path[1];
+          break;
+        case 'addstickers':
+          url = 'tg://addstickers?set=' + path[1];
+          break;
+        default:
+          if (path[1] && path[1].match(/^\d+$/)) {
+            url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1];
+          }
+          else if (!path[1]) {
+            var domainQuery = path[0].split('?');
+            url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
+          }
+      }
+    }
+    return url;
+  }
+
+});
 
 
 

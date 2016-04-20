@@ -33,15 +33,8 @@
 
     <div class="md_modal_sections clearfix">
 
-      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username">
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username || rAbout">
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
-
-        <div class="md_modal_section_param_wrap" ng-if="user.pFlags.bot &amp;&amp; bot_info.rAbout">
-          <div class="md_modal_section_param_value">
-            <span ng-bind-html="bot_info.rAbout"></span>
-          </div>
-          <div class="md_modal_section_param_name" my-i18n="user_modal_about"></div>
-        </div>
 
         <div class="md_modal_section_param_wrap" ng-if="user.phone">
           <div class="md_modal_section_param_value" ng-bind="user.phone | phoneNumber"></div>
@@ -53,6 +46,13 @@
             <span ng-bind="'@' + user.username"></span>
           </div>
           <div class="md_modal_section_param_name" my-i18n="user_modal_username"></div>
+        </div>
+
+        <div class="md_modal_section_param_wrap" ng-if="rAbout">
+          <div class="md_modal_section_param_value">
+            <span ng-bind-html="rAbout"></span>
+          </div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_about"></div>
         </div>
       </div>
 

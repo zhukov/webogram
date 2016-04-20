@@ -17,27 +17,6 @@
   </div>
   <div class="im_message_reply_body" ng-switch-default>
     <span class="copyonly">&gt;&nbsp;</span>
-
-    <span class="im_reply_message_media" ng-if="replyMessage.media" ng-switch="replyMessage.media._">
-      <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
-      <span ng-switch-when="messageMediaVideo" my-i18n="conversation_media_video"></span>
-      <span ng-switch-when="messageMediaDocument" ng-switch="dialogMessage.media.document.isSpecial || false">
-        <span ng-switch-when="sticker">
-          <span ng-bind-html="replyMessage.media.document.stickerEmoji"></span>
-          <my-i18n msgid="conversation_media_sticker"></my-i18n>
-        </span>
-        <span ng-switch-when="gif" my-i18n="conversation_media_gif"></span>
-        <span ng-switch-when="audio" my-i18n="conversation_media_audio"></span>
-        <span ng-switch-default ng-bind="replyMessage.media.document.file_name"></span>
-      </span>
-      <span ng-switch-when="messageMediaAudio" my-i18n="conversation_media_audio"></span>
-      <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
-      <span ng-switch-when="messageMediaVenue" my-i18n="conversation_media_location"></span>
-      <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
-    </span>
-
-    <span class="im_reply_message_service" ng-if="replyMessage._ == 'messageService'" my-service-short-message="replyMessage"></span>
-
-    <span class="im_reply_message_text" ng-if="replyMessage.message.length" ng-bind-html="replyMessage.richMessage"></span>
+    <span my-short-message="replyMessage"></span>
   </div>
 </div>

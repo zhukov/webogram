@@ -585,7 +585,7 @@ EmojiTooltip.prototype.activateStickerCategory = function () {
   var viewportWidth = categoriesEl.clientWidth;
 
   // console.log('current cat el', categoryEl, left, width, viewportWidth);
-  $(categoriesEl).animate({scrollLeft: left - (viewportWidth - width) / 2}, 200);
+  $(categoriesEl).stop(true).animate({scrollLeft: left - (viewportWidth - width) / 2}, 200);
 }
 
 
@@ -978,7 +978,6 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
   if (value &&
       this.curInlineResults &&
       this.curInlineResults.text == value) {
-    console.trace(dT(), value, this.curInlineResults);
     this.showInlineSuggestions(this.curInlineResults);
     return;
   };
@@ -1335,7 +1334,6 @@ MessageComposer.prototype.onChange = function (e) {
   if (this.richTextareaEl) {
     delete this.keyupStarted;
     var richValue = getRichValue(this.richTextareaEl[0]);
-    richValue = richValue.replace(/\u00A0/g, ' ');
     this.textareaEl.val(richValue).trigger('change');
   }
   this.updateInlinePlaceholder();
@@ -1390,13 +1388,18 @@ MessageComposer.prototype.setFocusedValue = function (parts) {
 
 
 MessageComposer.prototype.getRichHtml = function (text) {
-  return $('<div>').text(text).html().replace(/\n/g, '<br/>').replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
+  var html = $('<div>').text(text).html();
+  html = html.replace(/\n/g, '<br/>');
+  html = html.replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
     var code = EmojiHelper.shortcuts[shortcut];
     if (code !== undefined) {
       return this.getEmojiHtml(code);
     }
     return all;
   }).bind(this));
+  html = html.replace(/  /g, " \u00A0").replace(/^ | $/g, "\u00A0");
+
+  return html;
 }
 
 
@@ -1471,7 +1474,8 @@ MessageComposer.prototype.showInlineSuggestions = function (botResults) {
   }
   var self = this;
   if (self.autoCompleteScope.type == 'inline' &&
-      self.autoCompleteScope.botResults == botResults) {
+      self.autoCompleteScope.botResults == botResults &&
+      self.autocompleteShown) {
     return;
   }
   setZeroTimeout(function () {

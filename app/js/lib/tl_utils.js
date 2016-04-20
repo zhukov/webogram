@@ -111,7 +111,7 @@ TLSerialization.prototype.storeLong = function (sLong, field) {
   this.writeInt(intToUint(divRem[0].intValue()), (field || '') + ':long[high]');
 };
 
-TLSerialization.prototype.storeDouble = function (f) {
+TLSerialization.prototype.storeDouble = function (f, field) {
   var buffer     = new ArrayBuffer(8);
   var intView    = new Int32Array(buffer);
   var doubleView = new Float64Array(buffer);

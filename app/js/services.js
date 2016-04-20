@@ -11,7 +11,7 @@
 
 angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, ErrorService, Storage, _) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, Storage, _) {
   var users = {},
       usernames = {},
       userAccess = {},
@@ -94,6 +94,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     var userID = apiUser.id;
+    var result = users[userID];
+
+    if (apiUser.pFlags === undefined) {
+      apiUser.pFlags = {};
+    }
+
+    if (apiUser.pFlags.min) {
+      if (result !== undefined) {
+        return;
+      }
+    }
 
     if (apiUser.phone) {
       apiUser.rPhone = $filter('phoneNumber')(apiUser.phone);
@@ -112,10 +123,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (apiUser.username) {
       var searchUsername = SearchIndexManager.cleanUsername(apiUser.username);
       usernames[searchUsername] = userID;
-    }
-
-    if (apiUser.pFlags === undefined) {
-      apiUser.pFlags = {};
     }
 
     apiUser.sortName = apiUser.pFlags.deleted ? '' : SearchIndexManager.cleanSearchText(apiUser.first_name + ' ' + (apiUser.last_name || ''));
@@ -191,8 +198,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return users[id] && users[id].pFlags.bot;
   }
 
-  function hasUser(id) {
-    return angular.isObject(users[id]);
+  function hasUser(id, allowMin) {
+    var user = users[id];
+    return angular.isObject(user) && (allowMin || !user.pFlags.min);
   }
 
   function getUserPhoto(id) {
@@ -592,6 +600,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
     apiChat.rTitle = RichTextProcessor.wrapRichText(apiChat.title, {noLinks: true, noLinebreaks: true}) || _('chat_title_deleted');
 
+    var result = chats[apiChat.id];
     var titleWords = SearchIndexManager.cleanSearchText(apiChat.title || '').split(' ');
     var firstWord = titleWords.shift();
     var lastWord = titleWords.pop();
@@ -602,16 +611,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     if (apiChat.pFlags === undefined) {
       apiChat.pFlags = {};
     }
+    if (apiChat.pFlags.min) {
+      if (result !== undefined) {
+        return;
+      }
+    }
 
     if (apiChat.username) {
       var searchUsername = SearchIndexManager.cleanUsername(apiChat.username);
       usernames[searchUsername] = apiChat.id;
     }
 
-    if (chats[apiChat.id] === undefined) {
-      chats[apiChat.id] = apiChat;
+    if (result === undefined) {
+      result = chats[apiChat.id] = apiChat;
     } else {
-      safeReplaceObject(chats[apiChat.id], apiChat);
+      safeReplaceObject(result, apiChat);
       $rootScope.$broadcast('chat_update', apiChat.id);
     }
 
@@ -653,7 +667,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       case 'invite':
         if (chat._ == 'channel') {
           if (chat.pFlags.megagroup) {
-            if (!chat.pFlags.editor) {
+            if (!chat.pFlags.editor &&
+                !(action == 'invite' && chat.pFlags.democracy)) {
               return false;
             }
           } else {
@@ -717,8 +732,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   }
 
-  function hasChat (id) {
-    return angular.isObject(chats[id]);
+  function hasChat (id, allowMin) {
+    var chat = chats[id];
+    return angular.isObject(chat) && (allowMin || !chat.pFlags.min);
   }
 
   function getChatPhoto(id) {
@@ -944,24 +960,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function resolveInlineMention (username) {
-    return resolveUsername(username).then(function (peerID) {
-      if (peerID > 0) {
-        var bot = AppUsersManager.getUser(peerID);
-        if (bot.pFlags.bot && bot.bot_inline_placeholder !== undefined) {
-          return qSync.when({
-            id: peerID,
-            placeholder: bot.bot_inline_placeholder
-          });
-        }
-      }
-      return $q.reject();
-    }, function (error) {
-      error.handled = true;
-      return $q.reject(error);
-    });
-  }
-
   function getPeerID (peerString) {
     if (angular.isObject(peerString)) {
       return peerString.user_id
@@ -1008,7 +1006,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getPeer: getPeer,
     getPeerPhoto: getPeerPhoto,
     resolveUsername: resolveUsername,
-    resolveInlineMention: resolveInlineMention,
     isChannel: isChannel,
     isMegagroup: isMegagroup,
     isBot: isBot
@@ -1035,7 +1032,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       version: botInfo.version,
       shareText: botInfo.share_text,
       description: botInfo.description,
-      rAbout: RichTextProcessor.wrapRichText(botInfo.share_text, {noLinebreaks: true}),
       commands: commands
     };
   }
@@ -1055,13 +1051,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         AppUsersManager.saveApiUser(userFull.user, true);
       }
 
-      AppPhotosManager.savePhoto(userFull.profile_photo, {
-        user_id: id
-      });
+      if (userFull.profile_photo) {
+        AppPhotosManager.savePhoto(userFull.profile_photo, {
+          user_id: id
+        });
+      }
+
+      if (userFull.about !== undefined) {
+        userFull.rAbout = RichTextProcessor.wrapRichText(userFull.about, {noLinebreaks: true});
+      }
 
       NotificationsManager.savePeerSettings(id, userFull.notify_settings);
 
-      userFull.bot_info = saveBotInfo(userFull.bot_info);
+      if (userFull.bot_info) {
+        userFull.bot_info = saveBotInfo(userFull.bot_info);
+      }
 
       return userFull;
     });
@@ -1429,8 +1433,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function wrapForHistory (photoID, options) {
     options = options || {};
     var photo = angular.copy(photos[photoID]) || {_: 'photoEmpty'},
-        width = options.website ? 100 : Math.min(windowW - 80, Config.Mobile ? 210 : 260),
-        height = options.website ? 100 : Math.min(windowH - 100, Config.Mobile ? 210 : 260),
+        width = options.website ? 64 : Math.min(windowW - 80, Config.Mobile ? 210 : 260),
+        height = options.website ? 64 : Math.min(windowH - 100, Config.Mobile ? 210 : 260),
         thumbPhotoSize = choosePhotoSize(photo, width, height),
         thumb = {
           placeholder: 'img/placeholders/PhotoThumbConversation.gif',
@@ -1603,23 +1607,37 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete apiWebPage.document;
     }
 
-    apiWebPage.rTitle = RichTextProcessor.wrapRichText(
-      apiWebPage.title || apiWebPage.author,
-      {noLinks: true, noLinebreaks: true}
-    );
+    var siteName = apiWebPage.site_name;
+    var title = apiWebPage.title || apiWebPage.author || siteName;
+    if (siteName &&
+        title == siteName) {
+      delete apiWebPage.site_name;
+    }
+    apiWebPage.rTitle = RichTextProcessor.wrapRichText(title, {noLinks: true, noLinebreaks: true});
     var contextHashtag = '';
-    if (apiWebPage.site_name == 'GitHub') {
+    if (siteName == 'GitHub') {
       var matches = apiWebPage.url.match(/(https?:\/\/github\.com\/[^\/]+\/[^\/]+)/);
       if (matches) {
         contextHashtag = matches[0] + '/issues/{1}';
       }
     }
+    // delete apiWebPage.description;
     apiWebPage.rDescription = RichTextProcessor.wrapRichText(
       apiWebPage.description, {
-        contextSite: apiWebPage.site_name || 'external',
+        contextSite: siteName || 'external',
         contextHashtag: contextHashtag
       }
     );
+
+    if (apiWebPage.type != 'photo' &&
+        apiWebPage.type != 'video' &&
+        apiWebPage.type != 'gif' &&
+        apiWebPage.type != 'document' &&
+        apiWebPage.type != 'gif' &&
+        !apiWebPage.description &&
+        apiWebPage.photo) {
+      apiWebPage.type = 'photo';
+    }
 
     if (messageID) {
       if (pendingWebPages[apiWebPage.id] === undefined) {
@@ -1733,203 +1751,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-
-.service('AppVideoManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, AppUsersManager, FileManager, qSync) {
-  var videos = {},
-      videosForHistory = {},
-      windowW = $(window).width(),
-      windowH = $(window).height();
-
-  function saveVideo (apiVideo, context) {
-    if (context) {
-      angular.extend(apiVideo, context);
-    }
-    videos[apiVideo.id] = apiVideo;
-
-    if (apiVideo.thumb && apiVideo.thumb._ == 'photoCachedSize') {
-      MtpApiFileManager.saveSmallFile(apiVideo.thumb.location, apiVideo.thumb.bytes);
-
-      // Memory
-      apiVideo.thumb.size = apiVideo.thumb.bytes.length;
-      delete apiVideo.thumb.bytes;
-      apiVideo.thumb._ = 'photoSize';
-    }
-  };
-
-  function wrapForHistory (videoID) {
-    if (videosForHistory[videoID] !== undefined) {
-      return videosForHistory[videoID];
-    }
-
-    var video = angular.copy(videos[videoID]),
-        width = Math.min(windowW - 80, Config.Mobile ? 210 : 150),
-        height = Math.min(windowH - 100, Config.Mobile ? 210 : 150),
-        thumbPhotoSize = video.thumb,
-        thumb = {
-          placeholder: 'img/placeholders/VideoThumbConversation.gif',
-          width: width,
-          height: height
-        };
-
-    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if ((thumbPhotoSize.w / thumbPhotoSize.h) > (width / height)) {
-        thumb.height = parseInt(thumbPhotoSize.h * width / thumbPhotoSize.w);
-      }
-      else {
-        thumb.width = parseInt(thumbPhotoSize.w * height / thumbPhotoSize.h);
-        if (thumb.width > width) {
-          thumb.height = parseInt(thumb.height * width / thumb.width);
-          thumb.width = width;
-        }
-      }
-
-      thumb.location = thumbPhotoSize.location;
-      thumb.size = thumbPhotoSize.size;
-    }
-
-    video.thumb = thumb;
-
-    return videosForHistory[videoID] = video;
-  }
-
-  function wrapForFull (videoID) {
-    var video = wrapForHistory(videoID),
-        fullWidth = Math.min($(window).width() - (Config.Mobile ? 0 : 60), 542),
-        fullHeight = $($window).height() - (Config.Mobile ? 92 : 150),
-        fullPhotoSize = video,
-        full = {
-          placeholder: 'img/placeholders/VideoThumbModal.gif',
-          width: fullWidth,
-          height: fullHeight,
-        };
-
-    if (!video.w || !video.h) {
-      full.height = full.width = Math.min(fullWidth, fullHeight);
-    } else {
-      var wh = calcImageInBox(video.w, video.h, fullWidth, fullHeight);
-      full.width = wh.w;
-      full.height = wh.h;
-    }
-
-    video.full = full;
-    video.fullThumb = angular.copy(video.thumb);
-    video.fullThumb.width = full.width;
-    video.fullThumb.height = full.height;
-
-    return video;
-  }
-
-  function openVideo (videoID, messageID) {
-    var scope = $rootScope.$new(true);
-    scope.videoID = videoID;
-    scope.messageID = messageID;
-
-    return $modal.open({
-      templateUrl: templateUrl('video_modal'),
-      windowTemplateUrl: templateUrl('media_modal_layout'),
-      controller: 'VideoModalController',
-      scope: scope,
-      windowClass: 'video_modal_window'
-    });
-  }
-
-  function updateVideoDownloaded (videoID) {
-    var video = videos[videoID],
-        historyVideo = videosForHistory[videoID] || video || {},
-        inputFileLocation = {
-          _: 'inputVideoFileLocation',
-          id: videoID,
-          access_hash: video.access_hash
-        };
-
-    // historyVideo.progress = {enabled: true, percent: 10, total: video.size};
-
-    if (historyVideo.downloaded === undefined) {
-      MtpApiFileManager.getDownloadedFile(inputFileLocation, video.size).then(function () {
-        historyVideo.downloaded = true;
-      }, function () {
-        historyVideo.downloaded = false;
-      });
-    }
-  }
-
-  function downloadVideo (videoID, toFileEntry) {
-    var video = videos[videoID],
-        historyVideo = videosForHistory[videoID] || video || {},
-        mimeType = video.mime_type || 'video/ogg',
-        inputFileLocation = {
-          _: 'inputVideoFileLocation',
-          id: videoID,
-          access_hash: video.access_hash
-        };
-
-    if (historyVideo.downloaded && !toFileEntry) {
-      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
-      if (cachedBlob) {
-        return qSync.when(cachedBlob);
-      }
-    }
-
-    historyVideo.progress = {enabled: !historyVideo.downloaded, percent: 1, total: video.size};
-
-    var downloadPromise = MtpApiFileManager.downloadFile(video.dc_id, inputFileLocation, video.size, {
-      mime: mimeType,
-      toFileEntry: toFileEntry
-    });
-
-    downloadPromise.then(function (blob) {
-      FileManager.getFileCorrectUrl(blob, mimeType).then(function (url) {
-        historyVideo.url = $sce.trustAsResourceUrl(url);
-      });
-
-      delete historyVideo.progress;
-      historyVideo.downloaded = true;
-      console.log('video save done');
-    }, function (e) {
-      console.log('video download failed', e);
-      historyVideo.progress.enabled = false;
-    }, function (progress) {
-      console.log('dl progress', progress);
-      historyVideo.progress.enabled = true;
-      historyVideo.progress.done = progress.done;
-      historyVideo.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      $rootScope.$broadcast('history_update');
-    });
-
-    historyVideo.progress.cancel = downloadPromise.cancel;
-
-    return downloadPromise;
-  }
-
-  function saveVideoFile (videoID) {
-    var video = videos[videoID],
-        mimeType = video.mime_type || 'video/mp4',
-        fileExt = mimeType.split('.')[1] || 'mp4',
-        fileName = 't_video' + videoID + '.' + fileExt,
-        historyVideo = videosForHistory[videoID] || video || {};
-
-    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
-      if (writableFileEntry) {
-        downloadVideo(videoID, writableFileEntry);
-      }
-    }, function () {
-      downloadVideo(videoID).then(function (blob) {
-        FileManager.download(blob, mimeType, fileName);
-      });
-    });
-  }
-
-  return {
-    saveVideo: saveVideo,
-    wrapForHistory: wrapForHistory,
-    wrapForFull: wrapForFull,
-    openVideo: openVideo,
-    updateVideoDownloaded: updateVideoDownloaded,
-    downloadVideo: downloadVideo,
-    saveVideoFile: saveVideoFile
-  }
-})
-
 .service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, $timeout, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
   var docs = {},
       docsForHistory = {},
@@ -1950,6 +1771,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       delete apiDoc.thumb.bytes;
       apiDoc.thumb._ = 'photoSize';
     }
+    if (apiDoc.thumb && apiDoc.thumb._ == 'photoSizeEmpty') {
+      delete apiDoc.thumb;
+    }
     angular.forEach(apiDoc.attributes, function (attribute) {
       switch (attribute._) {
         case 'documentAttributeFilename':
@@ -1959,11 +1783,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           apiDoc.duration = attribute.duration;
           apiDoc.audioTitle = attribute.title;
           apiDoc.audioPerformer = attribute.performer;
+          apiDoc.type = attribute.pFlags.voice ? 'voice' : 'audio';
           break;
         case 'documentAttributeVideo':
           apiDoc.duration = attribute.duration;
           apiDoc.w = attribute.w;
           apiDoc.h = attribute.h;
+          if (apiDoc.thumb) {
+            apiDoc.type = 'video';
+          }
           break;
         case 'documentAttributeSticker':
           apiDoc.sticker = true;
@@ -1979,34 +1807,42 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               apiDoc.stickerSetInput = attribute.stickerset;
             }
           }
+          if (apiDoc.thumb && apiDoc.mime_type == 'image/webp') {
+            apiDoc.type = 'sticker';
+          }
           break;
         case 'documentAttributeImageSize':
           apiDoc.w = attribute.w;
           apiDoc.h = attribute.h;
           break;
         case 'documentAttributeAnimated':
+          if ((apiDoc.mime_type == 'image/gif' || apiDoc.mime_type == 'video/mp4') &&
+              apiDoc.thumb) {
+            apiDoc.type = 'gif';
+          }
           apiDoc.animated = true;
           break;
       }
     });
 
-    apiDoc.mime_type = apiDoc.mime_type || '';
-    apiDoc.file_name = apiDoc.file_name || 'file';
+    if (!apiDoc.mime_type) {
+      switch (apiDoc.type) {
+        case 'gif':     apiDoc.mime_type = 'video/mp4'; break;
+        case 'video':   apiDoc.mime_type = 'video/mp4'; break;
+        case 'sticker': apiDoc.mime_type = 'image/webp'; break;
+        case 'audio':   apiDoc.mime_type = 'audio/mpeg'; break;
+        case 'voice':   apiDoc.mime_type = 'audio/ogg'; break;
+        default:        apiDoc.mime_type = 'application/octet-stream'; break;
+      }
+    }
+
+    if (!apiDoc.file_name) {
+      apiDoc.file_name = '';
+    }
+
     if (apiDoc._ == 'documentEmpty') {
-      apiDoc.file_name = 'DELETED';
       apiDoc.size = 0;
     }
-
-    if ((apiDoc.mime_type == 'image/gif' || apiDoc.animated && apiDoc.mime_type == 'video/mp4') && apiDoc.thumb && apiDoc.thumb._ == 'photoSize') {
-      apiDoc.isSpecial = 'gif';
-    }
-    else if (apiDoc.mime_type == 'image/webp' && apiDoc.sticker) {
-      apiDoc.isSpecial = 'sticker';
-    }
-    else if (apiDoc.mime_type.substr(0, 6) == 'audio/') {
-      apiDoc.isSpecial = 'audio';
-    }
-
 
   };
 
@@ -2018,50 +1854,66 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return docs[docID] !== undefined;
   }
 
+  function getFileName(doc) {
+    if (doc.file_name) {
+      return doc.file_name;
+    }
+    var fileExt = '.' + doc.mime_type.split('/')[1];
+    if (fileExt == '.octet-stream') {
+      fileExt = '';
+    }
+    return 't_' + (doc.type || 'file') + doc.id + fileExt;
+  }
+
   function wrapForHistory (docID) {
     if (docsForHistory[docID] !== undefined) {
       return docsForHistory[docID];
     }
 
     var doc = angular.copy(docs[docID]),
-        isGif = doc.isSpecial == 'gif',
-        isSticker = doc.isSpecial == 'sticker',
         thumbPhotoSize = doc.thumb,
-        width, height, thumb, dim;
+        inlineImage = false,
+        boxWidth, boxHeight, thumb, dim;
 
-    if (isGif) {
-      width = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
-      height = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+    switch (doc.type) {
+      case 'video':
+        boxWidth = Math.min(windowW - 80, Config.Mobile ? 210 : 150),
+        boxHeight = Math.min(windowH - 100, Config.Mobile ? 210 : 150);
+        break;
+
+      case 'sticker':
+        inlineImage = true;
+        boxWidth = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
+        boxHeight = Math.min(windowH - 100, Config.Mobile ? 128 : 192);
+        break;
+
+      case 'gif':
+        inlineImage = true;
+        boxWidth = Math.min(windowW - 80, Config.Mobile ? 210 : 260);
+        boxHeight = Math.min(windowH - 100, Config.Mobile ? 210 : 260);
+        break;
+
+      default:
+        boxWidth = boxHeight = 100;
     }
-    else if (isSticker) {
-      width = Math.min(windowW - 80, Config.Mobile ? 128 : 192);
-      height = Math.min(windowH - 100, Config.Mobile ? 128 : 192);
-    } else {
-      width = height = 100;
+
+    if (inlineImage && doc.w && doc.h) {
+      dim = calcImageInBox(doc.w, doc.h, boxWidth, boxHeight);
+    }
+    else if (thumbPhotoSize) {
+      dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, boxWidth, boxHeight);
     }
 
-    thumb = {
-      width: width,
-      height: height
-    };
-
-    if (thumbPhotoSize && thumbPhotoSize._ != 'photoSizeEmpty') {
-      if (isGif && doc.w && doc.h) {
-        dim = calcImageInBox(doc.w, doc.h, width, height);
-      } else {
-        dim = calcImageInBox(thumbPhotoSize.w, thumbPhotoSize.h, width, height);
+    if (dim) {
+      thumb = {
+        width: dim.w,
+        height: dim.h
+      };
+      if (thumbPhotoSize) {
+        thumb.location = thumbPhotoSize.location;
+        thumb.size = thumbPhotoSize.size;
       }
-      thumb.width = dim.w;
-      thumb.height = dim.h;
-      thumb.location = thumbPhotoSize.location;
-      thumb.size = thumbPhotoSize.size;
-    }
-    else if (isSticker) {
-      dim = calcImageInBox(doc.w, doc.h, width, height);
-      thumb.width = dim.w;
-      thumb.height = dim.h;
-    }
-    else {
+    } else {
       thumb = false;
     }
     doc.thumb = thumb;
@@ -2078,7 +1930,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           _: 'inputDocumentFileLocation',
           id: docID,
           access_hash: doc.access_hash,
-          file_name: doc.file_name
+          file_name: getFileName(doc)
         };
 
     if (historyDoc.downloaded === undefined) {
@@ -2097,7 +1949,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           _: 'inputDocumentFileLocation',
           id: docID,
           access_hash: doc.access_hash,
-          file_name: doc.file_name
+          file_name: getFileName(doc)
         };
 
     if (doc._ == 'documentEmpty') {
@@ -2164,17 +2016,59 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function saveDocFile (docID) {
     var doc = docs[docID],
-        historyDoc = docsForHistory[docID] || doc || {};
+        historyDoc = docsForHistory[docID] || doc || {},
+        mimeType = doc.mime_type,
+        fileName = getFileName(doc),
+        ext = (fileName.split('.', 2) || [])[1] || '';
 
-    var ext = (doc.file_name.split('.', 2) || [])[1] || '';
-    FileManager.chooseSave(doc.file_name, ext, doc.mime_type).then(function (writableFileEntry) {
+    FileManager.chooseSave(getFileName(doc), ext, doc.mime_type).then(function (writableFileEntry) {
       if (writableFileEntry) {
         downloadDoc(docID, writableFileEntry);
       }
     }, function () {
       downloadDoc(docID).then(function (blob) {
-        FileManager.download(blob, doc.mime_type, doc.file_name);
+        FileManager.download(blob, doc.mime_type, fileName);
       });
+    });
+  }
+
+  function wrapVideoForFull (docID) {
+    var doc = wrapForHistory(docID),
+        fullWidth = Math.min($(window).width() - (Config.Mobile ? 0 : 60), 542),
+        fullHeight = $(window).height() - (Config.Mobile ? 92 : 150),
+        full = {
+          placeholder: 'img/placeholders/docThumbModal.gif',
+          width: fullWidth,
+          height: fullHeight,
+        };
+
+    if (!doc.w || !doc.h) {
+      full.height = full.width = Math.min(fullWidth, fullHeight);
+    } else {
+      var dim = calcImageInBox(doc.w, doc.h, fullWidth, fullHeight);
+      full.width = dim.w;
+      full.height = dim.h;
+    }
+
+    doc.full = full;
+    doc.fullThumb = angular.copy(doc.thumb);
+    doc.fullThumb.width = full.width;
+    doc.fullThumb.height = full.height;
+
+    return doc;
+  }
+
+  function openVideo (docID, messageID) {
+    var scope = $rootScope.$new(true);
+    scope.docID = docID;
+    scope.messageID = messageID;
+
+    return $modal.open({
+      templateUrl: templateUrl('video_modal'),
+      windowTemplateUrl: templateUrl('media_modal_layout'),
+      controller: 'VideoModalController',
+      scope: scope,
+      windowClass: 'video_modal_window'
     });
   }
 
@@ -2183,122 +2077,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     getDoc: getDoc,
     hasDoc: hasDoc,
     wrapForHistory: wrapForHistory,
+    wrapVideoForFull: wrapVideoForFull,
     updateDocDownloaded: updateDocDownloaded,
     downloadDoc: downloadDoc,
     openDoc: openDoc,
+    openVideo: openVideo,
     saveDocFile: saveDocFile
-  }
-})
-
-.service('AppAudioManager', function ($sce, $rootScope, $modal, $window, MtpApiFileManager, FileManager, qSync) {
-  var audios = {};
-  var audiosForHistory = {};
-
-  function saveAudio (apiAudio) {
-    audios[apiAudio.id] = apiAudio;
-  };
-
-  function wrapForHistory (audioID) {
-    if (audiosForHistory[audioID] !== undefined) {
-      return audiosForHistory[audioID];
-    }
-
-    var audio = angular.copy(audios[audioID]);
-
-    return audiosForHistory[audioID] = audio;
-  }
-
-  function updateAudioDownloaded (audioID) {
-    var audio = audios[audioID],
-        historyAudio = audiosForHistory[audioID] || audio || {},
-        inputFileLocation = {
-          _: 'inputAudioFileLocation',
-          id: audioID,
-          access_hash: audio.access_hash
-        };
-
-    // historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 10, total: audio.size};
-
-    if (historyAudio.downloaded === undefined) {
-      MtpApiFileManager.getDownloadedFile(inputFileLocation, audio.size).then(function () {
-        historyAudio.downloaded = true;
-      }, function () {
-        historyAudio.downloaded = false;
-      });
-    }
-  }
-
-  function downloadAudio (audioID, toFileEntry) {
-    var audio = audios[audioID],
-        historyAudio = audiosForHistory[audioID] || audio || {},
-        mimeType = audio.mime_type || 'audio/ogg',
-        inputFileLocation = {
-          _: 'inputAudioFileLocation',
-          id: audioID,
-          access_hash: audio.access_hash
-        };
-
-    if (historyAudio.downloaded && !toFileEntry) {
-      var cachedBlob = MtpApiFileManager.getCachedFile(inputFileLocation);
-      if (cachedBlob) {
-        return qSync.when(cachedBlob);
-      }
-    }
-
-    historyAudio.progress = {enabled: !historyAudio.downloaded, percent: 1, total: audio.size};
-
-    var downloadPromise = MtpApiFileManager.downloadFile(audio.dc_id, inputFileLocation, audio.size, {
-      mime: mimeType,
-      toFileEntry: toFileEntry
-    });
-
-    downloadPromise.then(function (blob) {
-      FileManager.getFileCorrectUrl(blob, mimeType).then(function (url) {
-        historyAudio.url = $sce.trustAsResourceUrl(url);
-      });
-      delete historyAudio.progress;
-      historyAudio.downloaded = true;
-      console.log('audio save done');
-    }, function (e) {
-      console.log('audio download failed', e);
-      historyAudio.progress.enabled = false;
-    }, function (progress) {
-      console.log('dl progress', progress);
-      historyAudio.progress.enabled = true;
-      historyAudio.progress.done = progress.done;
-      historyAudio.progress.percent = Math.max(1, Math.floor(100 * progress.done / progress.total));
-      $rootScope.$broadcast('history_update');
-    });
-
-    historyAudio.progress.cancel = downloadPromise.cancel;
-
-    return downloadPromise;
-  }
-
-  function saveAudioFile (audioID) {
-    var audio = audios[audioID],
-        mimeType = audio.mime_type || 'audio/ogg',
-        fileExt = mimeType.split('.')[1] || 'ogg',
-        fileName = 't_audio' + audioID + '.' + fileExt,
-        historyAudio = audiosForHistory[audioID] || audio || {};
-
-    FileManager.chooseSave(fileName, fileExt, mimeType).then(function (writableFileEntry) {
-      if (writableFileEntry) {
-        downloadAudio(audioID, writableFileEntry);
-      }
-    }, function () {
-      downloadAudio(audioID).then(function (blob) {
-        FileManager.download(blob, mimeType, fileName);
-      });
-    });
-  }
-
-  return {
-    saveAudio: saveAudio,
-    wrapForHistory: wrapForHistory,
-    updateAudioDownloaded: updateAudioDownloaded,
-    downloadAudio: downloadAudio,
-    saveAudioFile: saveAudioFile
   }
 })
 
@@ -2599,15 +2383,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 })
 
-.service('AppInlineBotsManager', function ($rootScope, Storage, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager) {
+.service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
 
   var inlineResults = {};
 
   return {
+    resolveInlineMention: resolveInlineMention,
+    getPopularBots: getPopularBots,
     sendInlineResult: sendInlineResult,
-    regroupWrappedResults: regroupWrappedResults,
     getInlineResults: getInlineResults,
-    getPopularBots: getPopularBots
+    regroupWrappedResults: regroupWrappedResults,
+    switchToPM: switchToPM,
+    checkSwitchReturn: checkSwitchReturn,
+    switchInlineButtonClick: switchInlineButtonClick,
+    callbackButtonClick: callbackButtonClick
   };
 
   function getPopularBots () {
@@ -2661,16 +2450,54 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
-  function getInlineResults (botID, query, offset) {
+  function resolveInlineMention (username) {
+    return AppPeersManager.resolveUsername(username).then(function (peerID) {
+      if (peerID > 0) {
+        var bot = AppUsersManager.getUser(peerID);
+        if (bot.pFlags.bot && bot.bot_inline_placeholder !== undefined) {
+          var resolvedBot = {
+            username: username,
+            id: peerID,
+            placeholder: bot.bot_inline_placeholder
+          };
+          if (bot.pFlags.bot_inline_geo &&
+              GeoLocationManager.isAvailable()) {
+            return checkGeoLocationAccess(peerID).then(function () {
+              return GeoLocationManager.getPosition().then(function (coords) {
+                resolvedBot.geo = coords;
+                return qSync.when(resolvedBot);
+              });
+            })['catch'](function () {
+              return qSync.when(resolvedBot);
+            })
+          }
+          return qSync.when(resolvedBot);
+        }
+      }
+      return $q.reject();
+    }, function (error) {
+      error.handled = true;
+      return $q.reject(error);
+    });
+  }
+
+  function getInlineResults (peerID, botID, query, geo, offset) {
     return MtpApiManager.invokeApi('messages.getInlineBotResults', {
+      flags: 0 | (geo ? 1 : 0),
       bot: AppUsersManager.getUserInput(botID),
+      peer: AppPeersManager.getInputPeerByID(peerID),
       query: query,
+      geo_point: geo && {_: 'inputGeoPoint', lat: geo['lat'], long: geo['long']},
       offset: offset
     }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function(botResults) {
       var queryID = botResults.query_id;
       delete botResults._;
       delete botResults.flags;
       delete botResults.query_id;
+
+      if (botResults.switch_pm) {
+        botResults.switch_pm.rText = RichTextProcessor.wrapRichText(botResults.switch_pm.text, {noLinebreaks: true, noLinks: true});
+      }
 
       angular.forEach(botResults.results, function (result) {
         var qID = queryID + '_' + result.id;
@@ -2679,7 +2506,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         result.rTitle = RichTextProcessor.wrapRichText(result.title, {noLinebreaks: true, noLinks: true});
         result.rDescription = RichTextProcessor.wrapRichText(result.description, {noLinebreaks: true, noLinks: true});
-        result.initials = (result.url || result.title || result.type || '').substr(0, 1)
+        result.initials = (result.url || result.title || result.type || '').substr(0, 1);
 
         if (result.document) {
           AppDocsManager.saveDoc(result.document);
@@ -2697,20 +2524,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function regroupWrappedResults (results, rowW, rowH) {
     if (!results ||
         !results[0] ||
-        results[0].type != 'photo' && results[0].type != 'gif') {
+        results[0].type != 'photo' && results[0].type != 'gif' && results[0].type != 'sticker') {
       return;
     }
     var ratios = [];
     angular.forEach(results, function (result) {
-      var w, h;
-      if (result._ == 'botInlineMediaResultDocument') {
-        w = result.document.w;
-        h = result.document.h;
-      }
-      else if (result._ == 'botInlineMediaResultPhoto') {
-        var photoSize = (result.photo.sizes || [])[0];
-        w = photoSize && photoSize.w;
-        h = photoSize && photoSize.h;
+      var w, h, doc, photo;
+      if (result._ == 'botInlineMediaResult') {
+        if (doc = result.document) {
+          w = result.document.w;
+          h = result.document.h;
+        }
+        else if (photo = result.photo) {
+          var photoSize = (photo.sizes || [])[0];
+          w = photoSize && photoSize.w;
+          h = photoSize && photoSize.h;
+        }
       }
       else  {
         w = result.w;
@@ -2766,6 +2595,88 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  function switchToPM(fromPeerID, botID, startParam) {
+    var peerString = AppPeersManager.getPeerString(fromPeerID);
+    var setHash = {};
+    setHash['inline_switch_pm' + botID] = {peer: peerString, time: tsNow()};
+    Storage.set(setHash);
+    $rootScope.$broadcast('history_focus', {peerString: AppPeersManager.getPeerString(botID)});
+    AppMessagesManager.startBot(botID, 0, startParam);
+  }
+
+  function checkSwitchReturn(botID) {
+    var bot = AppUsersManager.getUser(botID);
+    if (!bot || !bot.pFlags.bot || !bot.bot_inline_placeholder) {
+      return qSync.when(false);
+    }
+    var key = 'inline_switch_pm' + botID;
+    return Storage.get(key).then(function (peerData) {
+      if (peerData) {
+        Storage.remove(key);
+        if (tsNow() - peerData.time < 3600000) {
+          return peerData.peer;
+        }
+      }
+      return false;
+    });
+  }
+
+  function switchInlineQuery(botID, toPeerString, query) {
+    $rootScope.$broadcast('history_focus', {
+      peerString: toPeerString,
+      attachment: {
+        _: 'inline_query',
+        mention: '@' + AppUsersManager.getUser(botID).username,
+        query: query
+      }
+    });
+  }
+
+  function switchInlineButtonClick(id, button) {
+    var message = AppMessagesManager.getMessage(id);
+    var botID = message.fromID;
+    return checkSwitchReturn(botID).then(function (retPeerString) {
+      if (retPeerString) {
+        return switchInlineQuery(botID, retPeerString, button.query);
+      }
+      PeersSelectService.selectPeer({
+        canSend: true
+      }).then(function (toPeerString) {
+        return switchInlineQuery(botID, toPeerString, button.query);
+      });
+    });
+  }
+
+  function callbackButtonClick(id, button) {
+    var message = AppMessagesManager.getMessage(id);
+    var botID = message.fromID;
+    var peerID = AppMessagesManager.getMessagePeer(message);
+
+    return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+      peer: AppPeersManager.getInputPeerByID(peerID),
+      msg_id: AppMessagesManager.getMessageLocalID(id),
+      data: button.data
+    }).then(function (callbackAnswer) {
+      if (typeof callbackAnswer.message != 'string' ||
+          !callbackAnswer.message.length) {
+        return;
+      }
+      if (callbackAnswer.pFlags.alert) {
+        ErrorService.alert(callbackAnswer.message);
+      } else {
+        var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true}).valueOf();;
+        toaster.pop({
+          type: 'info',
+          // timeout: 100000,
+          body: html,
+          bodyOutputType: 'trustedHtml',
+          showCloseButton: false
+        });
+      }
+    });
+  }
+
+
   function sendInlineResult (peerID, qID, options) {
     var inlineResult = inlineResults[qID];
     if (inlineResult === undefined) {
@@ -2779,31 +2690,72 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     options.viaBotID = inlineResult.botID;
     options.queryID = queryID;
     options.resultID = resultID;
+    if (inlineResult.send_message.reply_markup) {
+      options.reply_markup = inlineResult.send_message.reply_markup;
+    }
 
     if (inlineResult.send_message._ == 'botInlineMessageText') {
       options.entities = inlineResult.send_message.entities;
       AppMessagesManager.sendText(peerID, inlineResult.send_message.message, options);
     } else {
       var caption = '';
-      if (inlineResult.send_message._ == 'botInlineMessageMediaAuto') {
-        caption = inlineResult.send_message.caption;
-      }
       var inputMedia = false;
-      if (inlineResult._ == 'botInlineMediaResultDocument') {
-        var doc = inlineResult.document;
-        inputMedia = {
-          _: 'inputMediaDocument',
-          id: {_: 'inputDocument', id: doc.id, access_hash: doc.access_hash},
-          caption: caption
-        };
-      }
-      else if (inlineResult._ == 'botInlineMediaResultPhoto') {
-        var photo = inlineResult.photo;
-        inputMedia = {
-          _: 'inputMediaPhoto',
-          id: {_: 'inputPhoto', id: photo.id, access_hash: photo.access_hash},
-          caption: caption
-        };
+      switch (inlineResult.send_message._) {
+        case 'botInlineMessageMediaAuto':
+          caption = inlineResult.send_message.caption;
+          if (inlineResult._ == 'botInlineMediaResult') {
+            var doc = inlineResult.document;
+            var photo = inlineResult.photo;
+            if (doc) {
+              inputMedia = {
+                _: 'inputMediaDocument',
+                id: {_: 'inputDocument', id: doc.id, access_hash: doc.access_hash},
+                caption: caption
+              };
+            } else {
+              inputMedia = {
+                _: 'inputMediaPhoto',
+                id: {_: 'inputPhoto', id: photo.id, access_hash: photo.access_hash},
+                caption: caption
+              };
+            }
+          }
+          break;
+
+        case 'botInlineMessageMediaGeo':
+          inputMedia = {
+            _: 'inputMediaGeoPoint',
+            geo_point: {
+              _: 'inputGeoPoint',
+              'lat': inlineResult.send_message.geo['lat'],
+              'long': inlineResult.send_message.geo['long']
+            }
+          };
+          break;
+
+        case 'botInlineMessageMediaVenue':
+          inputMedia = {
+            _: 'inputMediaVenue',
+            geo_point: {
+              _: 'inputGeoPoint',
+              'lat': inlineResult.send_message.geo['lat'],
+              'long': inlineResult.send_message.geo['long']
+            },
+            title: inlineResult.send_message.title,
+            address: inlineResult.send_message.address,
+            provider: inlineResult.send_message.provider,
+            venue_id: inlineResult.send_message.venue_id
+          };
+          break;
+
+        case 'botInlineMessageMediaContact':
+          inputMedia = {
+            _: 'inputMediaContact',
+            phone_number: inlineResult.send_message.phone_number,
+            first_name: inlineResult.send_message.first_name,
+            last_name: inlineResult.send_message.last_name
+          };
+          break;
       }
       if (!inputMedia) {
         inputMedia = {
@@ -2816,6 +2768,28 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       AppMessagesManager.sendOther(peerID, inputMedia, options);
     }
+  }
+
+  function checkGeoLocationAccess(botID) {
+    var key = 'bot_access_geo' + botID;
+    return Storage.get(key).then(function (geoAccess) {
+      if (geoAccess && geoAccess.granted) {
+        return true;
+      }
+      return ErrorService.confirm({
+        type: 'BOT_ACCESS_GEO_INLINE'
+      }).then(function () {
+        var setHash = {};
+        setHash[key] = {granted: true, time: tsNow()};
+        Storage.set(setHash);
+        return true;
+      }, function () {
+        var setHash = {};
+        setHash[key] = {denied: true, time: tsNow()};
+        Storage.set(setHash);
+        return $q.reject();
+      });
+    });
   }
 
 })
@@ -2894,6 +2868,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return false;
     }
 
+    console.log(dT(), 'pop pending pts updates', goodPts, curState.pendingPtsUpdates.slice(0, goodIndex + 1));
+
     curState.pts = goodPts;
     for (i = 0; i <= goodIndex; i++) {
       update = curState.pendingPtsUpdates[i];
@@ -2956,8 +2932,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             to_id: AppPeersManager.getOutputPeer(toID),
             date: updateMessage.date,
             message: updateMessage.message,
-            fwd_from_id: updateMessage.fwd_from_id,
-            fwd_date: updateMessage.fwd_date,
+            fwd_from: updateMessage.fwd_from,
             reply_to_msg_id: updateMessage.reply_to_msg_id,
             entities: updateMessage.entities
           },
@@ -3009,14 +2984,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       // Should be first because of updateMessageID
       // console.log(dT(), 'applying', differenceResult.other_updates.length, 'other updates');
+
+      var channelsUpdates = [];
       angular.forEach(differenceResult.other_updates, function(update) {
-        if (update._ == 'updateChannelTooLong') {
-          var channelID = update.channel_id;
-          var channelState = channelStates[channelID];
-          if (channelState !== undefined && !channelState.syncLoading) {
-            getChannelDifference(channelID);
-          }
-          return;
+        switch (update._) {
+          case 'updateChannelTooLong':
+          case 'updateNewChannelMessage':
+          case 'updateEditChannelMessage':
+            processUpdate(update);
+            return;
         }
         saveUpdate(update);
       });
@@ -3139,40 +3115,61 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   }
 
   function processUpdate (update, options) {
+    options = options || {};
     var channelID = false;
     switch (update._) {
       case 'updateNewChannelMessage':
+      case 'updateEditChannelMessage':
         channelID = -AppPeersManager.getPeerID(update.message.to_id);
         break;
       case 'updateDeleteChannelMessages':
         channelID = update.channel_id;
         break;
+      case 'updateChannelTooLong':
+        channelID = update.channel_id;
+        if (channelStates[channelID] === undefined) {
+          return false;
+        }
+        break;
     }
-    if (channelID && !AppChatsManager.hasChat(channelID)) {
-      // console.log(dT(), 'skip update, missing channel', channelID, update);
-      return false;
-    }
+
     var curState = channelID ? getChannelState(channelID, update.pts) : updatesState;
 
-    // console.log(dT(), 'process', channelID, curState, update);
+    // console.log(dT(), 'process', channelID, curState.pts, update);
 
     if (curState.syncLoading) {
       return false;
     }
 
-    if (update._ == 'updateNewMessage') {
+    if (update._ == 'updateChannelTooLong') {
+      getChannelDifference(channelID);
+      return false;
+    }
+
+    if (update._ == 'updateNewMessage' ||
+        update._ == 'updateEditMessage' ||
+        update._ == 'updateNewChannelMessage' ||
+        update._ == 'updateEditChannelMessage') {
       var message = update.message;
-      var fwdPeerID = message.fwd_from_id ? AppPeersManager.getPeerID(message.fwd_from_id) : 0;
       var toPeerID = AppPeersManager.getPeerID(message.to_id);
-      if (message.from_id && !AppUsersManager.hasUser(message.from_id) ||
-          fwdPeerID > 0 && !AppUsersManager.hasUser(fwdPeerID) ||
-          fwdPeerID < 0 && !AppChatsManager.hasChat(-fwdPeerID) ||
+      var fwdHeader = message.fwdHeader || {};
+      if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post) ||
+          fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) ||
+          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id) ||
           toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
           toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
-        console.warn(dT(), 'Short update not enough data', message);
-        forceGetDifference();
+        console.warn(dT(), 'Not enough data for message update', message);
+        if (channelID && AppChatsManager.hasChat(channelID)) {
+          getChannelDifference(channelID);
+        } else {
+          forceGetDifference();
+        }
         return false;
       }
+    }
+    else if (channelID && !AppChatsManager.hasChat(channelID)) {
+      // console.log(dT(), 'skip update, missing channel', channelID, update);
+      return false;
     }
 
     var popPts, popSeq;
@@ -3199,6 +3196,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (update.pts > curState.pts) {
         curState.pts = update.pts;
         popPts = true;
+      }
+      else if (update.pts_count) {
+        // console.warn(dT(), 'Duplicate update', update);
+        return false;
       }
       if (channelID && options.date && updatesState.date < options.date) {
         updatesState.date = options.date;
@@ -4365,7 +4366,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
     else if (name === 'share' && data.blobs && data.blobs.length > 0) {
-      PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER'}).then(function (peerStrings) {
+      PeersSelectService.selectPeers({confirm_type: 'EXT_SHARE_PEER', canSend: true}).then(function (peerStrings) {
         angular.forEach(peerStrings, function (peerString) {
           var peerID = AppPeersManager.getPeerID(peerString);
           angular.forEach(data.blobs, function (blob) {

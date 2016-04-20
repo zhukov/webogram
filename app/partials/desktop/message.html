@@ -55,32 +55,17 @@
           <span class="copyonly"><span my-i18n="message_forwarded_message"></span>:&nbsp;</span>
           <a class="im_message_fwd_photo pull-left" my-peer-photolink="::historyMessage.fwdFromID" img-class="im_message_fwd_photo"></a>
           <div class="im_message_fwd_author_wrap">
-            <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID"></a><a ng-if="::historyMessage.viaBotID" class="im_message_fwd_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">&nbsp;[</span><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_date | dateOrTime"></span><span class="copyonly">]&nbsp;</span>
+            <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID"></a><a ng-if="::historyMessage.viaBotID" class="im_message_fwd_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">&nbsp;[</span><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_from.date | dateOrTime"></span><span class="copyonly">]&nbsp;</span>
             <span class="im_message_views_inline" ng-if="::historyMessage.views > 0">
               <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
             </span>
           </div>
         </div>
 
-        <div class="im_message_text" ng-if="::historyMessage.message.length || false" my-message-text="::historyMessage" dir="auto"></div>
-
-        <div ng-if="::historyMessage.media || historyMessage.mid < 0 ? true : false" class="im_message_media" ng-switch="historyMessage.media._">
-
-          <div ng-switch-when="messageMediaPhoto"     my-message-photo="historyMessage.media" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaVideo"     my-message-video="historyMessage.media" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaDocument"  my-message-document="historyMessage.media" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaAudio"     class="im_message_audio" my-audio-player audio="historyMessage.media.audio" message="historyMessage"></div>
-          <div ng-switch-when="messageMediaGeo"       my-message-geo="historyMessage.media"></div>
-          <div ng-switch-when="messageMediaVenue"     my-message-venue="historyMessage.media"></div>
-          <div ng-switch-when="messageMediaContact"   class="im_message_contact" my-message-contact></div>
-          <div ng-switch-when="messageMediaWebPage"   class="im_message_webpage" my-message-webpage="historyMessage.media.webpage" message-id="historyMessage.mid"></div>
-          <div ng-switch-when="messageMediaPending"   my-message-pending></div>
-          <div ng-switch-when="messageMediaUnsupported">
-            <div class="im_message_text">
-              The message is not supported on your version of Telegram Web. Update the app to view: <a href="https://web.telegram.org">web.telegram.org</a>.
-            </div>
-          </div>
-
+        <div my-message-body="historyMessage">
+          <div class="im_message_text" dir="auto"></div>
+          <div class="im_message_media"></div>
+          <div class="im_message_keyboard"></div>
         </div>
 
 

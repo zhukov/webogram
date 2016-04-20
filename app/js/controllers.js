@@ -55,7 +55,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.credentials = {phone_country: '', phone_country_name: '', phone_number: '', phone_full: ''};
     $scope.progress = {};
-    $scope.callPending = {};
+    $scope.nextPending = {};
     $scope.about = {};
 
     $scope.chooseCountry = function () {
@@ -158,38 +158,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     initPhoneCountry();
 
 
-    var callTimeout;
+    var nextTimeout;
     var updatePasswordTimeout = false;
 
     function saveAuth (result) {
       MtpApiManager.setUserAuth(options.dcID, {
         id: result.user.id
       });
-      $timeout.cancel(callTimeout);
+      $timeout.cancel(nextTimeout);
 
       $location.url('/im');
     };
 
-    function callCheck () {
-      $timeout.cancel(callTimeout);
-      if ($scope.credentials.viaApp) {
-        return;
-      }
-      if (!(--$scope.callPending.remaining)) {
-        $scope.callPending.success = false;
-        MtpApiManager.invokeApi('auth.sendCall', {
-          phone_number: $scope.credentials.phone_full,
-          phone_code_hash: $scope.credentials.phone_code_hash
-        }, options).then(function () {
-          $scope.callPending.success = true;
-        });
-      } else {
-        callTimeout = $timeout(callCheck, 1000);
-      }
-    }
-
     $scope.sendCode = function () {
-      $timeout.cancel(callTimeout);
+      $timeout.cancel(nextTimeout);
 
       ErrorService.confirm({
         type: 'LOGIN_PHONE_CORRECT',
@@ -204,26 +186,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         var authKeyStarted = tsNow();
         MtpApiManager.invokeApi('auth.sendCode', {
+          flags: 0,
           phone_number: $scope.credentials.phone_full,
-          sms_type: 5,
           api_id: Config.App.id,
           api_hash: Config.App.hash,
           lang_code: navigator.language || 'en'
         }, options).then(function (sentCode) {
           $scope.progress.enabled = false;
 
-          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
-          $scope.credentials.phone_occupied = sentCode.phone_registered;
-          $scope.credentials.viaApp = sentCode._ == 'auth.sentAppCode';
-          $scope.callPending.remaining = sentCode.send_call_timeout || 60;
           $scope.error = {};
           $scope.about = {};
-
-          callCheck();
-
-          onContentLoaded(function () {
-            $scope.$broadcast('ui_height');
-          });
+          $scope.credentials.phone_code_hash = sentCode.phone_code_hash;
+          applySentCode(sentCode);
 
         }, function (error) {
           $scope.progress.enabled = false;
@@ -246,27 +220,70 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     }
 
-    $scope.sendSms = function () {
-      if (!$scope.credentials.viaApp) {
+    function applySentCode(sentCode) {
+      $scope.credentials.type = sentCode.type;
+      $scope.nextPending.type = sentCode.next_type || false;
+      $scope.nextPending.remaining = sentCode.timeout || false;
+
+      nextTimeoutCheck();
+
+      onContentLoaded(function () {
+        $scope.$broadcast('ui_height');
+      });
+    }
+
+    $scope.sendNext = function () {
+      if (!$scope.nextPending.type ||
+          $scope.nextPending.remaining > 0) {
         return;
       }
-      delete $scope.credentials.viaApp;
-      MtpApiManager.invokeApi('auth.sendSms', {
+      MtpApiManager.invokeApi('auth.resendCode', {
         phone_number: $scope.credentials.phone_full,
         phone_code_hash: $scope.credentials.phone_code_hash
-      }, options).then(callCheck);
+      }, options).then(applySentCode);
+    }
+
+    function nextTimeoutCheck () {
+      $timeout.cancel(nextTimeout);
+      if (!$scope.nextPending.type ||
+          $scope.nextPending.remaining === false) {
+        return;
+      }
+      if (!(--$scope.nextPending.remaining)) {
+        $scope.nextPending.success = false;
+        $scope.sendNext();
+      } else {
+        nextTimeout = $timeout(nextTimeoutCheck, 1000);
+      }
     }
 
     $scope.editPhone = function () {
-      $timeout.cancel(callTimeout);
+      $timeout.cancel(nextTimeout);
+
+      if ($scope.credentials.phone_full &&
+          $scope.credentials.phone_code_hash) {
+        MtpApiManager.invokeApi('auth.cancelCode', {
+          phone_number: $scope.credentials.phone_full,
+          phone_code_hash: $scope.credentials.phone_code_hash
+        }, options);
+      }
 
       delete $scope.credentials.phone_code_hash;
       delete $scope.credentials.phone_unoccupied;
       delete $scope.credentials.phone_code_valid;
-      delete $scope.credentials.viaApp;
-      delete $scope.callPending.remaining;
-      delete $scope.callPending.success;
+      delete $scope.nextPending.remaining;
+      delete $scope.nextPending.success;
     }
+
+    $scope.$watch('credentials.phone_code', function (newVal) {
+      if (newVal &&
+          newVal.match(/^\d+$/) &&
+          $scope.credentials.type &&
+          $scope.credentials.type.length &&
+          newVal.length == $scope.credentials.type.length) {
+        $scope.logIn();
+      }
+    });
 
     $scope.logIn = function (forceSignUp) {
       var method = 'auth.signIn', params = {
@@ -1030,7 +1047,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, NotificationsManager, ErrorService) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, NotificationsManager, ErrorService, GeoLocationManager) {
 
     $scope.$watchCollection('curDialog', applyDialogSelect);
 
@@ -1089,7 +1106,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           photos: 'inputMessagesFilterPhotos',
           video: 'inputMessagesFilterVideo',
           documents: 'inputMessagesFilterDocument',
-          audio: 'inputMessagesFilterAudio'
+          audio: 'inputMessagesFilterVoice'
         },
         unfocusMessagePromise,
         jump = 0,
@@ -1787,9 +1804,45 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!replyKeyboard) {
         return;
       }
-      AppMessagesManager.sendText(peerID, button.text, {
+      var sendOptions = {
         replyToMsgID: peerID < 0 && replyKeyboard.mid
-      });
+      };
+      switch (button._) {
+        case 'keyboardButtonRequestPhone':
+          ErrorService.confirm({type: 'BOT_ACCESS_PHONE'}).then(function () {
+            var user = AppUsersManager.getSelf();
+            AppMessagesManager.sendOther(peerID, {
+              _: 'inputMediaContact',
+              phone_number: user.phone,
+              first_name: user.first_name,
+              last_name: user.last_name
+            }, sendOptions);
+          });
+          break;
+
+        case 'keyboardButtonRequestGeoLocation':
+          ErrorService.confirm({type: 'BOT_ACCESS_GEO'}).then(function () {
+            return GeoLocationManager.getPosition().then(function (coords) {
+              AppMessagesManager.sendOther(peerID, {
+                _: 'inputMediaGeoPoint',
+                geo_point: {
+                  _: 'inputGeoPoint',
+                  'lat': coords['lat'],
+                  'long': coords['long']
+                }
+              }, sendOptions);
+            }, function (error) {
+              ErrorService.alert(
+                _('error_modal_bad_request_title_raw'),
+                _('error_modal_gelocation_na_raw')
+              );
+            });
+          });
+          break;
+
+        default:
+          AppMessagesManager.sendText(peerID, button.text, sendOptions);
+      }
     });
 
     $scope.$on('history_reload', function (e, updPeerID) {
@@ -2134,13 +2187,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var text = $scope.draftMessage.text;
 
         if (angular.isString(text) && text.length > 0) {
-          text = text.replace(/:([a-z0-9\-\+\*_]+?):/gi, function (all, shortcut) {
-            var emojiCode = EmojiHelper.shortcuts[shortcut];
-            if (emojiCode !== undefined) {
-              return EmojiHelper.emojis[emojiCode][0];
-            }
-            return all;
-          });
+          text = RichTextProcessor.parseEmojis(text);
 
           var timeout = 0;
           var options = {
@@ -2337,6 +2384,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.$broadcast('ui_peer_draft');
         });
       }
+      else if (attachment._ == 'inline_query') {
+        var mention = attachment.mention;
+        var query = attachment.query;
+        forceDraft = $scope.curDialog.peer;
+
+        $timeout(function () {
+          $scope.draftMessage.text = mention + ' ' + query;
+          $scope.$broadcast('ui_peer_draft', {
+            customSelection: [
+              mention + " " + query,
+              '',
+              ''
+            ]
+          });
+        }, 1000);
+      }
     }
 
     function replySelect(messageID) {
@@ -2452,6 +2515,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;
     var getInlineResultsTO = false;
+    var lastInlineBot = false;
     var jump = 0;
 
     function checkInlinePattern (message) {
@@ -2471,11 +2535,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return;
       }
       var username = matches[1];
+      var inlineBotPromise;
       $scope.draftMessage.inlineProgress = true;
-      AppPeersManager.resolveInlineMention(username).then(function (inlineBot) {
+      if (lastInlineBot && lastInlineBot.username == username) {
+        inlineBotPromise = $q.when(lastInlineBot);
+      } else {
+        inlineBotPromise = AppInlineBotsManager.resolveInlineMention(username);
+      }
+      inlineBotPromise.then(function (inlineBot) {
         if (curJump != jump) {
           return;
         }
+        lastInlineBot = inlineBot;
         $scope.$broadcast('inline_placeholder', {
           prefix: '@' + username + matches[2],
           placeholder: inlineBot.placeholder
@@ -2484,7 +2555,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $timeout.cancel(getInlineResultsTO);
         }
         getInlineResultsTO = $timeout(function () {
-          AppInlineBotsManager.getInlineResults(inlineBot.id, matches[3], '').then(function (botResults) {
+          var query = RichTextProcessor.parseEmojis(matches[3]);
+          AppInlineBotsManager.getInlineResults($scope.curDialog.peerID, inlineBot.id, query, inlineBot.geo, '').then(function (botResults) {
             getInlineResultsTO = false;
             if (curJump != jump) {
               return;
@@ -2497,7 +2569,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             delete $scope.draftMessage.inlineProgress;
           });
         }, 500);
-      }, function () {
+      }, function (error) {
         $scope.$broadcast('inline_results', false);
         delete $scope.draftMessage.inlineProgress;
       });
@@ -2582,6 +2654,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!qID) {
         return;
       }
+
+      if (qID.substr(0, 11) == '_switch_pm_') {
+        var botID = lastInlineBot.id;
+        var startParam = qID.substr(11);
+        return AppInlineBotsManager.switchToPM($scope.curDialog.peerID, botID, startParam);
+      }
+
       var options = {
         replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
       };
@@ -3080,9 +3159,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppVideoManager, AppPeersManager, ErrorService) {
+  .controller('VideoModalController', function ($scope, $rootScope, $modalInstance, PeersSelectService, AppMessagesManager, AppDocsManager, AppPeersManager, ErrorService) {
 
-    $scope.video = AppVideoManager.wrapForFull($scope.videoID);
+    $scope.video = AppDocsManager.wrapVideoForFull($scope.docID);
 
     $scope.progress = {enabled: false};
     $scope.player = {};
@@ -3109,7 +3188,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     };
 
     $scope.download = function () {
-      AppVideoManager.saveVideoFile($scope.videoID);
+      AppDocsManager.saveDocFile($scope.docID);
     };
 
     $scope.$on('history_delete', function (e, historyUpdate) {
@@ -3192,8 +3271,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.settings = {notifications: true};
 
     AppProfileManager.getProfile($scope.userID, $scope.override).then(function (userFull) {
-      $scope.blocked = userFull.blocked;
+      $scope.blocked = userFull.pFlags.blocked;
       $scope.bot_info = userFull.bot_info;
+      $scope.rAbout = userFull.rAbout;
 
       NotificationsManager.getPeerMuted($scope.userID).then(function (muted) {
         $scope.settings.notifications = !muted;

@@ -175,152 +175,301 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     }
   })
-  .directive('myExternalEmbed', function () {
 
-    var twitterAttached = false;
-    var facebookAttached = false;
-    var gplusAttached = false;
-    var twitterPendingWidgets = [];
-    var facebookPendingWidgets = [];
-    var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+  .directive('myMessageBody', function($compile, AppPeersManager, AppChatsManager, AppUsersManager, AppMessagesManager, AppInlineBotsManager, RichTextProcessor) {
 
-    function link ($scope, element, attrs) {
-      var embedData = $scope.$eval(attrs.myExternalEmbed);
-      if (!embedData) {
+    var messageMediaCompiled = $compile('<div class="im_message_media" my-message-media="media" message-id="messageId"></div>');
+    var messageKeyboardCompiled = $compile('<div class="im_message_keyboard" my-inline-reply-markup="markup"></div>');
+
+    return {
+      link: link,
+      scope: {
+        message: '=myMessageBody'
+      }
+    };
+
+    function updateMessageText ($scope, element, message) {
+      if (typeof message.message !== 'string' ||
+          !message.message.length) {
+        $('.im_message_text', element).hide();
         return;
       }
-      var html = '';
-      var callback = false;
-      var needTwitter = false;
-      switch (embedData[0]) {
-        case 'youtube':
-          var videoID = embedData[1];
-          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="https://www.youtube.com/embed/' + videoID +
-                '?autoplay=0&amp;controls=2" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
-          break;
+      var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
+      var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
+      var toPeerID = AppPeersManager.getPeerID(message.to_id);
+      var withBot = (fromBot ||
+                    toPeerID < 0 && !(AppChatsManager.isChannel(-toPeerID) && !AppChatsManager.isMegagroup(-toPeerID)) ||
+                    toPeerID > 0 && AppUsersManager.isBot(toPeerID));
 
-        case 'vimeo':
-          var videoID = embedData[1];
-          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="https://player.vimeo.com/video/' + videoID +
-                '?title=0&amp;byline=0&amp;portrait=0" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
-          break;
-
-        case 'instagram':
-          var instaID = embedData[1];
-          html = '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="https://instagram.com/p/' + instaID +
-                '/embed/"></' + embedTag + '></div>';
-          break;
-
-        case 'vine':
-          var vineID = embedData[1];
-          html = '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="https://vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
-          break;
-
-        case 'soundcloud':
-          var soundcloudUrl = embedData[1];
-          html = '<div class="im_message_media_embed im_message_soundcloud_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
-                'src="https://w.soundcloud.com/player/?url=' + encodeEntities(encodeURIComponent(soundcloudUrl)) +
-                '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
-          break;
-
-        case 'spotify':
-          var spotifyUrl = embedData[1];
-          html = '<div class="im_message_media_embed im_message_spotify_embed"><' + embedTag + ' type="text/html" frameborder="0" allowtransparency="true" ' +
-           'src="https://embed.spotify.com/?uri=spotify:' + encodeEntities(encodeURIComponent(spotifyUrl)) +
-           '"></' + embedTag + '></div>';
-          break;
-
-        case 'twitter':
-          html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
-
-          callback = function () {
-            if (!twitterAttached) {
-              twitterAttached = true;
-              $('<script>')
-                .appendTo('body')
-                .on('load', function () {
-                  twttr.events.bind('loaded', function (event) {
-                    for (var i = 0; i < twitterPendingWidgets.length; i++) {
-                      twitterPendingWidgets[i].$emit('ui_height');
-                    }
-                    twitterPendingWidgets = [];
-                  });
-                })
-                .attr('src', 'https://platform.twitter.com/widgets.js');
-            }
-            else if (window.twttr) {
-              twttr.widgets.load(element[0]);
-            }
-            twitterPendingWidgets.push($scope);
-          };
-          break;
-
-        case 'facebook':
-          html = '<div class="im_message_facebook_embed"><div class="fb-post" data-href="' + embedData[1] + '" data-width="300"></div></div>';
-
-          callback = function () {
-            if (!facebookAttached) {
-              facebookAttached = true;
-              $('<script>')
-                .appendTo('body')
-                .on('load', function () {
-                  FB.Event.subscribe('xfbml.render', function (event) {
-                    for (var i = 0; i < facebookPendingWidgets.length; i++) {
-                      facebookPendingWidgets[i].$emit('ui_height');
-                    }
-                    facebookPendingWidgets = [];
-                  });
-                })
-                .attr('src', 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&appId=254098051407226&version=v2.0');
-            }
-
-            else if (window.FB) {
-              FB.XFBML.parse(element[0]);
-            }
-            facebookPendingWidgets.push($scope);
-          };
-          break;
-
-        case 'gplus':
-          html = '<div class="im_message_gplus_embed"><div class="g-post" data-href="' + embedData[1] + '"></div></div>';
-
-          callback = function () {
-            if (!gplusAttached) {
-              gplusAttached = true;
-
-              window.___gcfg = {"parsetags": "explicit"};
-              $('<script>')
-                .appendTo('body')
-                .on('load', function () {
-                  gapi.post.go();
-                })
-                .attr('src', 'https://apis.google.com/js/plusone.js');
-            }
-            else if (window.gapi) {
-              gapi.post.go(element[0]);
-            }
-            element.one('load', function () {
-              $scope.$emit('ui_height');
-            });
-          };
-          break;
-      }
-
-      if (html) {
-        element[0].innerHTML = html;
-        if (callback) {
-          callback();
+      var options = {
+        noCommands: !withBot,
+        fromBot: fromBot,
+        entities: message.totalEntities
+      };
+      if (message.pFlags.mentioned) {
+        var user = AppUsersManager.getSelf();
+        if (user) {
+          options.highlightUsername = user.username;
         }
       }
+      var html = RichTextProcessor.wrapRichText(message.message, options);
+
+      $('.im_message_text', element).html(html.valueOf());
     }
+
+    function updateMessageMedia($scope, element, message) {
+      if (!message.media) {
+        $('.im_message_media', element).hide();
+        return;
+      }
+
+      var scope = $scope.$new(true);
+      scope.media = message.media;
+      scope.messageId = message.mid;
+      messageMediaCompiled(scope, function (clonedElement) {
+        $('.im_message_media', element).replaceWith(clonedElement);
+      });
+    }
+
+    function updateMessageKeyboard($scope, element, message) {
+      if (!message.reply_markup ||
+          message.reply_markup._ != 'replyInlineMarkup') {
+        $('.im_message_keyboard', element).hide();
+        return;
+      }
+
+      var scope = $scope.$new(true);
+      scope.markup = AppMessagesManager.wrapReplyMarkup(message.reply_markup);
+      scope.messageId = message.mid;
+      messageKeyboardCompiled(scope, function (clonedElement) {
+        $('.im_message_keyboard', element).replaceWith(clonedElement);
+      });
+
+      scope.$on('reply_inline_button_press', function (e, button) {
+        switch (button._) {
+          case 'keyboardButtonSwitchInline':
+            AppInlineBotsManager.switchInlineButtonClick(message.mid, button);
+            break;
+          case 'keyboardButtonCallback':
+            AppInlineBotsManager.callbackButtonClick(message.mid, button);
+            break;
+        }
+      });
+    }
+
+    function link ($scope, element, attrs) {
+      var message = $scope.message;
+      message.dir = true;
+      var msgID = message.mid;
+
+      updateMessageText($scope, element, message);
+      updateMessageMedia($scope, element, message);
+      updateMessageKeyboard($scope, element, message);
+
+      if (message.pending) {
+        var unlink = $scope.$on('messages_pending', function () {
+          if (message.mid != msgID) {
+            updateMessageText($scope, element, message);
+            unlink();
+          }
+        });
+      }
+
+      $scope.$on('message_edit', function (e, data) {
+        if (data.mid != message.mid) {
+          return;
+        }
+        // console.log(dT(), 'Directive' edit', message);
+        updateMessageText($scope, element, message);
+        updateMessageMedia($scope, element, message);
+        updateMessageKeyboard($scope, element, message);
+        $scope.$emit('ui_height');
+      });
+    }
+  })
+
+  .directive('myMessageViews', function($filter, AppMessagesManager) {
+
+    var formatNumberFilter = $filter('formatShortNumber');
 
     return {
       link: link
     };
+
+    function updateHtml (views, element) {
+      element.html(formatNumberFilter(views));
+    }
+
+    function link ($scope, element, attrs) {
+      var mid = $scope.$eval(attrs.myMessageViews);
+      // console.log(element[0], mid);
+      var views = AppMessagesManager.getMessage(mid).views || 0;
+
+      updateHtml(views, element);
+
+      $scope.$on('message_views', function (e, viewData) {
+        if (viewData.mid == mid) {
+          updateHtml(viewData.views, element);
+        }
+      })
+    }
+  })
+
+  .directive('myReplyMarkup', function() {
+
+    return {
+      templateUrl: templateUrl('reply_markup'),
+      scope: {
+        'replyMarkup': '=myReplyMarkup'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var scrollable = $('.reply_markup', element);
+      var scroller = new Scroller(scrollable, {
+        classPrefix: 'reply_markup',
+        maxHeight: 170
+      });
+      $scope.buttonClick = function (button) {
+        $scope.$emit('reply_button_press', button);
+      }
+
+      $scope.$on('ui_keyboard_update', function (e, data) {
+        onContentLoaded(function () {
+          scroller.updateHeight();
+          scroller.scrollTo(0);
+          $scope.$emit('ui_panel_update', {blur: data && data.enabled});
+        })
+      });
+      onContentLoaded(function () {
+        scroller.updateHeight();
+        $scope.$emit('ui_panel_update');
+      });
+    }
+
+  })
+
+  .directive('myMessageMedia', function() {
+    return {
+      scope: {
+        'media': '=myMessageMedia',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_media')
+    };
+  })
+  .directive('myMessagePhoto', function(AppPhotosManager) {
+    return {
+      scope: {
+        'media': '=myMessagePhoto',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_photo'),
+      link: function ($scope, element, attrs) {
+        $scope.openPhoto = AppPhotosManager.openPhoto;
+        $scope.preloadPhoto = AppPhotosManager.preloadPhoto;
+      }
+    };
+  })
+  .directive('myMessageDocument', function(AppDocsManager) {
+    return {
+      scope: {
+        'media': '=myMessageDocument',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_document'),
+      link: function ($scope, element, attrs) {
+        AppDocsManager.updateDocDownloaded($scope.media.document.id);
+        $scope.docSave = function () {
+          AppDocsManager.saveDocFile($scope.media.document.id);
+        };
+        $scope.docOpen = function () {
+          if (!$scope.media.document.withPreview) {
+            return $scope.docSave();
+          }
+          AppDocsManager.openDoc($scope.media.document.id, $scope.messageId);
+        };
+        $scope.videoOpen = function () {
+          AppDocsManager.openVideo($scope.media.document.id, $scope.messageId);
+        };
+      }
+    };
+  })
+  .directive('myMessageGeo', function() {
+    return {
+      scope: {
+        'media': '=myMessageGeo'
+      },
+      templateUrl: templateUrl('message_attach_geo')
+    };
+  })
+  .directive('myMessageVenue', function() {
+    return {
+      scope: {
+        'media': '=myMessageVenue'
+      },
+      templateUrl: templateUrl('message_attach_venue')
+    };
+  })
+  .directive('myMessageContact', function() {
+    return {
+      scope: {
+        'media': '=myMessageContact'
+      },
+      templateUrl: templateUrl('message_attach_contact')
+    };
+  })
+  .directive('myMessageWebpage', function(AppWebPagesManager, AppPhotosManager) {
+    return {
+      scope: {
+        'media': '=myMessageWebpage',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_webpage'),
+      link: function ($scope) {
+        $scope.openPhoto = AppPhotosManager.openPhoto;
+        $scope.openEmbed = function ($event) {
+          if ($scope.media.webpage &&
+              $scope.media.webpage.embed_url) {
+            AppWebPagesManager.openEmbed($scope.media.webpage.id, $scope.messageId);
+            return cancelEvent($event);
+          }
+        };
+
+        $scope.$on('webpage_updated', function (e, eventData) {
+          if ($scope.media.webpage &&
+              $scope.media.webpage.id == eventData.id) {
+            $scope.$emit('ui_height');
+          }
+        });
+      }
+    };
+  })
+  .directive('myMessagePending', function() {
+    return {
+      scope: {
+        'media': '=myMessagePending'
+      },
+      templateUrl: templateUrl('message_attach_pending')
+    };
+  })
+
+  .directive('myInlineReplyMarkup', function() {
+
+    return {
+      templateUrl: templateUrl('reply_markup'),
+      scope: {
+        'replyMarkup': '=myInlineReplyMarkup'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      $scope.buttonClick = function (button) {
+        $scope.$emit('reply_inline_button_press', button);
+      }
+    }
 
   })
 
@@ -330,16 +479,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myServiceShortMessage', function() {
+  .directive('myShortMessage', function() {
     return {
       scope: {
-        message: '=myServiceShortMessage'
+        message: '=myShortMessage'
       },
-      templateUrl: templateUrl('dialog_service')
+      templateUrl: templateUrl('short_message')
     };
   })
 
-  .directive('myReplyMessage', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
+  .directive('myReplyMessage', function(AppMessagesManager, AppPeersManager, $rootScope) {
 
     return {
       templateUrl: templateUrl('reply_message'),
@@ -400,6 +549,55 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   })
 
+  .directive('myPinnedMessage', function(AppMessagesManager, AppPeersManager, $rootScope) {
+
+    return {
+      templateUrl: templateUrl('pinned_message'),
+      scope: {
+        'pinnedMessage': '=myPinnedMessage'
+      },
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      var message = $scope.pinnedMessage;
+      if (!message.loading) {
+        updateMessage($scope, element);
+      } else {
+        var mid = message.mid;
+        var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
+          if (mids.indexOf(mid) != -1) {
+            $scope.pinnedMessage = AppMessagesManager.wrapForDialog(mid);
+            updateMessage($scope, element);
+            stopWaiting();
+          }
+        });
+      }
+    }
+
+    function updateMessage($scope, element) {
+      var message = $scope.pinnedMessage;
+      if (!message || message.deleted || !message.to_id) {
+        $(element).remove();
+        return;
+      }
+
+      if (element[0].tagName == 'A') {
+        element.on('click', function () {
+          var peerID = AppMessagesManager.getMessagePeer(message);
+          var peerString = AppPeersManager.getPeerString(peerID);
+
+          $rootScope.$broadcast('history_focus', {peerString: peerString, messageID: message.mid});
+        })
+      }
+
+      onContentLoaded(function () {
+        $scope.$emit('ui_height');
+      })
+    }
+
+  })
+
   .directive('myForwardedMessages', function(AppPhotosManager, AppMessagesManager, AppPeersManager, $rootScope) {
 
     return {
@@ -449,224 +647,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       })
     }
 
-  })
-
-  .directive('myMessageText', function(AppPeersManager, AppMessagesManager, AppChatsManager, AppUsersManager, RichTextProcessor) {
-    return {
-      link: link,
-      scope: {
-        message: '=myMessageText'
-      }
-    };
-
-    function updateHtml (message, element) {
-      var entities = message.totalEntities;
-      var fromUser = message.from_id && AppUsersManager.getUser(message.from_id);
-      var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false;
-      var toPeerID = AppPeersManager.getPeerID(message.to_id);
-      var withBot = (fromBot ||
-                    toPeerID < 0 && !(AppChatsManager.isChannel(-toPeerID) && !AppChatsManager.isMegagroup(-toPeerID)) ||
-                    toPeerID > 0 && AppUsersManager.isBot(toPeerID));
-
-      var options = {
-        noCommands: !withBot,
-        fromBot: fromBot,
-        entities: entities
-      };
-      if (message.flags & 16) {
-        var user = AppUsersManager.getSelf();
-        if (user) {
-          options.highlightUsername = user.username;
-        }
-      }
-      var html = RichTextProcessor.wrapRichText(message.message, options);
-      // console.log('dd', entities, html);
-
-      element.html(html.valueOf());
-    }
-
-    function link ($scope, element, attrs) {
-      var message = $scope.message;
-      var msgID = message.mid;
-      // var msgID = $scope.$eval(attrs.myMessageText);
-      // var message = AppMessagesManager.getMessage(msgID);
-
-      updateHtml(message, element);
-
-      if (message.pending) {
-        var unlink = $scope.$on('messages_pending', function () {
-          if (message.mid != msgID) {
-            updateHtml(message, element);
-            unlink();
-          }
-        })
-      }
-    }
-  })
-
-  .directive('myMessageViews', function($filter, AppMessagesManager) {
-
-    var formatNumberFilter = $filter('formatShortNumber');
-
-    return {
-      link: link
-    };
-
-    function updateHtml (views, element) {
-      element.html(formatNumberFilter(views));
-    }
-
-    function link ($scope, element, attrs) {
-      var mid = $scope.$eval(attrs.myMessageViews);
-      // console.log(element[0], mid);
-      var views = AppMessagesManager.getMessage(mid).views || 0;
-
-      updateHtml(views, element);
-
-      $scope.$on('message_views', function (e, viewData) {
-        if (viewData.mid == mid) {
-          updateHtml(viewData.views, element);
-        }
-      })
-    }
-  })
-
-  .directive('myReplyMarkup', function() {
-
-    return {
-      templateUrl: templateUrl('reply_markup'),
-      scope: {
-        'replyMarkup': '=myReplyMarkup'
-      },
-      link: link
-    };
-
-    function link ($scope, element, attrs) {
-      var scrollable = $('.reply_markup', element);
-      var scroller = new Scroller(scrollable, {
-        classPrefix: 'reply_markup',
-        maxHeight: 170
-      });
-      $scope.buttonSend = function (button) {
-        $scope.$emit('reply_button_press', button);
-      }
-
-      $scope.$on('ui_keyboard_update', function (e, data) {
-        onContentLoaded(function () {
-          scroller.updateHeight();
-          scroller.scrollTo(0);
-          $scope.$emit('ui_panel_update', {blur: data && data.enabled});
-        })
-      });
-      onContentLoaded(function () {
-        scroller.updateHeight();
-        $scope.$emit('ui_panel_update');
-      });
-    }
-
-  })
-
-  .directive('myMessagePhoto', function(AppPhotosManager) {
-    return {
-      scope: {
-        'media': '=myMessagePhoto',
-        'messageId': '=messageId'
-      },
-      templateUrl: templateUrl('message_attach_photo'),
-      link: function ($scope, element, attrs) {
-        $scope.openPhoto = AppPhotosManager.openPhoto;
-        $scope.preloadPhoto = AppPhotosManager.preloadPhoto;
-      }
-    };
-  })
-  .directive('myMessageVideo', function(AppVideoManager) {
-    return {
-      scope: {
-        'media': '=myMessageVideo',
-        'messageId': '=messageId'
-      },
-      templateUrl: templateUrl('message_attach_video'),
-      link: function ($scope, element, attrs) {
-        AppVideoManager.updateVideoDownloaded($scope.media.video.id);
-        $scope.videoSave = function () {
-          AppVideoManager.saveVideoFile($scope.media.video.id);
-        };
-        $scope.videoOpen = function () {
-          AppVideoManager.openVideo($scope.media.video.id, $scope.messageId);
-        };
-      }
-    };
-  })
-  .directive('myMessageDocument', function(AppDocsManager) {
-    return {
-      scope: {
-        'media': '=myMessageDocument',
-        'messageId': '=messageId'
-      },
-      templateUrl: templateUrl('message_attach_document'),
-      link: function ($scope, element, attrs) {
-        AppDocsManager.updateDocDownloaded($scope.media.document.id);
-        $scope.docSave = function () {
-          AppDocsManager.saveDocFile($scope.media.document.id);
-        };
-        $scope.docOpen = function () {
-          if (!$scope.media.document.withPreview) {
-            return $scope.docSave();
-          }
-          AppDocsManager.openDoc($scope.media.document.id, $scope.messageId);
-        };
-      }
-    };
-  })
-  .directive('myMessageGeo', function() {
-    return {
-      scope: {
-        'media': '=myMessageGeo'
-      },
-      templateUrl: templateUrl('message_attach_geo')
-    };
-  })
-  .directive('myMessageVenue', function() {
-    return {
-      scope: {
-        'venue': '=myMessageVenue'
-      },
-      templateUrl: templateUrl('message_attach_venue')
-    };
-  })
-  .directive('myMessageContact', function() {
-    return {
-      templateUrl: templateUrl('message_attach_contact')
-    };
-  })
-  .directive('myMessageWebpage', function(AppWebPagesManager, AppPhotosManager) {
-    return {
-      scope: {
-        'webpage': '=myMessageWebpage',
-        'messageId': '=messageId'
-      },
-      templateUrl: templateUrl('message_attach_webpage'),
-      link: function ($scope) {
-        $scope.openPhoto = AppPhotosManager.openPhoto;
-        $scope.openEmbed = function ($event) {
-          if ($scope.webpage && $scope.webpage.embed_url) {
-            AppWebPagesManager.openEmbed($scope.webpage.id, $scope.messageId);
-            return cancelEvent($event);
-          }
-        };
-
-        $scope.$on('webpage_updated', function (e, eventData) {
-          if ($scope.webpage && $scope.webpage.id == eventData.id) {
-            $scope.$emit('ui_height');
-          }
-        });
-      }
-    };
-  })
-  .directive('myMessagePending', function() {
-    return {
-      templateUrl: templateUrl('message_attach_pending')
-    };
   })
 
   .directive('myDialogs', function ($modalStack, $transition, $window, $timeout) {
@@ -1944,7 +1924,7 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
 
-  .directive('myLoadVideo', function($sce, AppVideoManager, ErrorService, _) {
+  .directive('myLoadVideo', function($sce, AppDocsManager, ErrorService, _) {
 
     return {
       link: link,
@@ -1957,7 +1937,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
 
-      var downloadPromise = AppVideoManager.downloadVideo($scope.video.id);
+      var downloadPromise = AppDocsManager.downloadDoc($scope.video.id);
 
       downloadPromise.then(function () {
         $scope.$emit('ui_height');
@@ -2298,12 +2278,12 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var width = element.attr('width') || 200;
       var height = element.attr('height') || 200;
+      var apiKey = Config.ExtCredentials.gmaps.api_key;
+      var zoom = width > 200 ? 15 : 13;
 
       element.attr('src', 'img/blank.gif');
 
-      var apiKey = Config.ExtCredentials.gmaps.api_key;
-
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=15&size='+width+'x'+height+'&scale=2&key=' + apiKey;
+      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size='+width+'x'+height+'&scale=2&key=' + apiKey;
 
       ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf());
@@ -2950,7 +2930,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppAudioManager, AppDocsManager, AppMessagesManager, ErrorService) {
+  .directive('myAudioPlayer', function ($timeout, $q, Storage, AppDocsManager, AppMessagesManager, ErrorService) {
 
     var currentPlayer = false;
     var audioVolume = 0.5;
@@ -2995,21 +2975,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function link($scope, element, attrs) {
-      if ($scope.audio._ == 'audio') {
-        AppAudioManager.updateAudioDownloaded($scope.audio.id);
-      } else {
-        AppDocsManager.updateDocDownloaded($scope.audio.id);
-      }
+      AppDocsManager.updateDocDownloaded($scope.audio.id);
 
       $scope.volume = audioVolume;
       $scope.mediaPlayer = {};
 
       $scope.download = function () {
-        if ($scope.audio._ == 'audio') {
-          AppAudioManager.saveAudioFile($scope.audio.id);
-        } else {
-          AppDocsManager.saveDocFile($scope.audio.id);
-        }
+        AppDocsManager.saveDocFile($scope.audio.id);
       };
 
       $scope.togglePlay = function () {
@@ -3021,14 +2993,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return;
         }
         else {
-          var downloadPromise;
-          if ($scope.audio._ == 'audio') {
-            downloadPromise = AppAudioManager.downloadAudio($scope.audio.id);
-          } else {
-            downloadPromise = AppDocsManager.downloadDoc($scope.audio.id);
-          }
-
-          downloadPromise.then(function () {
+          AppDocsManager.downloadDoc($scope.audio.id).then(function () {
             onContentLoaded(function () {
               var errorListenerEl = $('audio', element)[0] || element[0];
               if (errorListenerEl) {
@@ -3450,7 +3415,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                 result.contentUrl = url;
               });
             }
-            if (result.type == 'gif' && result.document) {
+            if ((result.type == 'gif' || result.type == 'sticker') && result.document) {
               AppDocsManager.downloadDoc(result.document.id);
             }
             if (result.type == 'photo' && result.photo) {
@@ -3467,5 +3432,155 @@ angular.module('myApp.directives', ['myApp.filters'])
         });
       }
     }
+  })
+
+
+  .directive('myExternalEmbed', function () {
+
+    var twitterAttached = false;
+    var facebookAttached = false;
+    var gplusAttached = false;
+    var twitterPendingWidgets = [];
+    var facebookPendingWidgets = [];
+    var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe';
+
+    function link ($scope, element, attrs) {
+      var embedData = $scope.$eval(attrs.myExternalEmbed);
+      if (!embedData) {
+        return;
+      }
+      var html = '';
+      var callback = false;
+      var needTwitter = false;
+      switch (embedData[0]) {
+        case 'youtube':
+          var videoID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://www.youtube.com/embed/' + videoID +
+                '?autoplay=0&amp;controls=2" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
+          break;
+
+        case 'vimeo':
+          var videoID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_video_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://player.vimeo.com/video/' + videoID +
+                '?title=0&amp;byline=0&amp;portrait=0" webkitallowfullscreen mozallowfullscreen allowfullscreen></' + embedTag + '></div>';
+          break;
+
+        case 'instagram':
+          var instaID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_insta_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://instagram.com/p/' + instaID +
+                '/embed/"></' + embedTag + '></div>';
+          break;
+
+        case 'vine':
+          var vineID = embedData[1];
+          html = '<div class="im_message_media_embed im_message_vine_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://vine.co/v/' + vineID + '/embed/simple"></' + embedTag + '></div>';
+          break;
+
+        case 'soundcloud':
+          var soundcloudUrl = embedData[1];
+          html = '<div class="im_message_media_embed im_message_soundcloud_embed"><' + embedTag + ' type="text/html" frameborder="0" ' +
+                'src="https://w.soundcloud.com/player/?url=' + encodeEntities(encodeURIComponent(soundcloudUrl)) +
+                '&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></' + embedTag + '></div>';
+          break;
+
+        case 'spotify':
+          var spotifyUrl = embedData[1];
+          html = '<div class="im_message_media_embed im_message_spotify_embed"><' + embedTag + ' type="text/html" frameborder="0" allowtransparency="true" ' +
+           'src="https://embed.spotify.com/?uri=spotify:' + encodeEntities(encodeURIComponent(spotifyUrl)) +
+           '"></' + embedTag + '></div>';
+          break;
+
+        case 'twitter':
+          html = '<div class="im_message_twitter_embed"><blockquote class="twitter-tweet" lang="en"><a href="' + embedData[1] + '"></a></blockquote></div>';
+
+          callback = function () {
+            if (!twitterAttached) {
+              twitterAttached = true;
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  twttr.events.bind('loaded', function (event) {
+                    for (var i = 0; i < twitterPendingWidgets.length; i++) {
+                      twitterPendingWidgets[i].$emit('ui_height');
+                    }
+                    twitterPendingWidgets = [];
+                  });
+                })
+                .attr('src', 'https://platform.twitter.com/widgets.js');
+            }
+            else if (window.twttr) {
+              twttr.widgets.load(element[0]);
+            }
+            twitterPendingWidgets.push($scope);
+          };
+          break;
+
+        case 'facebook':
+          html = '<div class="im_message_facebook_embed"><div class="fb-post" data-href="' + embedData[1] + '" data-width="300"></div></div>';
+
+          callback = function () {
+            if (!facebookAttached) {
+              facebookAttached = true;
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  FB.Event.subscribe('xfbml.render', function (event) {
+                    for (var i = 0; i < facebookPendingWidgets.length; i++) {
+                      facebookPendingWidgets[i].$emit('ui_height');
+                    }
+                    facebookPendingWidgets = [];
+                  });
+                })
+                .attr('src', 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&appId=254098051407226&version=v2.0');
+            }
+
+            else if (window.FB) {
+              FB.XFBML.parse(element[0]);
+            }
+            facebookPendingWidgets.push($scope);
+          };
+          break;
+
+        case 'gplus':
+          html = '<div class="im_message_gplus_embed"><div class="g-post" data-href="' + embedData[1] + '"></div></div>';
+
+          callback = function () {
+            if (!gplusAttached) {
+              gplusAttached = true;
+
+              window.___gcfg = {"parsetags": "explicit"};
+              $('<script>')
+                .appendTo('body')
+                .on('load', function () {
+                  gapi.post.go();
+                })
+                .attr('src', 'https://apis.google.com/js/plusone.js');
+            }
+            else if (window.gapi) {
+              gapi.post.go(element[0]);
+            }
+            element.one('load', function () {
+              $scope.$emit('ui_height');
+            });
+          };
+          break;
+      }
+
+      if (html) {
+        element[0].innerHTML = html;
+        if (callback) {
+          callback();
+        }
+      }
+    }
+
+    return {
+      link: link
+    };
+
   })
 
