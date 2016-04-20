@@ -1379,6 +1379,8 @@ i.icon-verified{display:inline-block;width:17px;height:17px;vertical-align:text-
 .im_dialogs_scrollable_wrap .active a.im_dialog:hover,.im_dialogs_scrollable_wrap .active a.im_dialog_selected{background-color:#6490b1}
 .im_dialogs_modal_list{padding-top:10px}
 .im_dialog_message_wrap{overflow:hidden;word-wrap:break-word}
+.im_dialog_message_typing,.im_dialog_message_wtyping .im_dialog_message_notyping{display:none}
+.im_dialog_message_wtyping .im_dialog_message_typing{display:block}
 a.im_dialog .im_dialog_chat_from_wrap,a.im_dialog .im_short_message_media,a.im_dialog .im_short_message_service{color:#3a6d99}
 a.im_dialog .im_short_message_text{color:grey}
 a.im_dialog:hover .im_short_message_text,a.im_dialog_selected .im_short_message_text{color:#698192}
@@ -1578,10 +1580,14 @@ a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_history_to_bottom .im_history_empty,.im_history_to_bottom .im_history_not_selected{display:none}
 .im_history_loading{width:35px;margin:0 auto;visibility:hidden}
 .im_history_loading.vertical-aligned{visibility:visible}
-.im_history_loading_more{display:block;width:26px;margin:0 auto;padding:20px 0 0;visibility:hidden}
+.im_history_loading_more{display:block;width:26px;height:46px;margin:0 auto;padding:20px 0 0;visibility:hidden}
+.im_history_loading_more .progress-arc-wrap{display:none}
 .im_history_loading_more.im_history_loading_more_active{visibility:visible}
+.im_history_loading_more.im_history_loading_more_active .progress-arc-wrap{display:block}
 .im_history_loading_less{display:block;width:26px;margin:0 auto;visibility:hidden}
+.im_history_loading_less .progress-arc-wrap{display:none}
 .im_history_loading_less.im_history_loading_less_active{visibility:visible}
+.im_history_loading_less.im_history_loading_less_active .progress-arc-wrap{display:block}
 .im_send_panel_wrap{margin:0 auto;padding:10px 15px 30px}
 .im_send_form_wrap{position:relative}
 .im_send_form{margin:0 auto;position:absolute;bottom:0}
@@ -1614,10 +1620,13 @@ img.img_fullsize{margin:0 auto}
 .media_modal_author{color:inherit;font-weight:700}
 .media_modal_author:hover{color:inherit}
 .non_osx .media_modal_author{font-size:12px}
-.composer_progress_icon_wrap{opacity:0;position:absolute;right:3px;top:2px;width:22px;height:22px;overflow:hidden;margin-top:1px;pointer-events:none;padding:0;transition:opacity cubic-bezier(.25,.46,.45,.94) .2s}
-.composer_progress_enabled .composer_progress_icon_wrap{opacity:1}
-.composer_emoji_insert_btn{opacity:1;display:block;position:absolute;right:3px;top:2px;cursor:pointer;padding:0;width:22px;height:22px;margin-top:1px;transition:opacity cubic-bezier(.25,.46,.45,.94) .2s}
-.composer_progress_enabled .composer_emoji_insert_btn{opacity:0}
+.composer_progress_enabled-add,.composer_progress_enabled-remove{transition-duration:.2s}
+.composer_progress_icon_wrap{position:absolute;right:3px;top:2px;width:22px;height:22px;overflow:hidden;margin-top:1px;pointer-events:none;padding:0;display:none;opacity:0}
+.composer_progress_enabled-add .composer_progress_icon_wrap,.composer_progress_enabled-remove .composer_progress_icon_wrap{transition:opacity cubic-bezier(.25,.46,.45,.94) .2s;display:block}
+.composer_progress_enabled .composer_progress_icon_wrap{display:block;opacity:1}
+.composer_emoji_insert_btn{position:absolute;right:3px;top:2px;cursor:pointer;padding:0;width:22px;height:22px;margin-top:1px;display:block;opacity:1}
+.composer_progress_enabled .composer_emoji_insert_btn{display:none;opacity:0}
+.composer_progress_enabled-add .composer_emoji_insert_btn,.composer_progress_enabled-remove .composer_emoji_insert_btn{transition:opacity cubic-bezier(.25,.46,.45,.94) .2s;display:block}
 .icon-emoji{display:inline-block;width:22px;height:22px;vertical-align:top;opacity:.8;background-image:url(../img/icons/General.png);background-repeat:no-repeat;background-position:-9px -335px}
 .is_2x .icon-emoji{background-image:url(../img/icons/General_2x.png);background-size:40px 948px}
 .composer_emoji_tooltip{display:none;position:absolute;z-index:999;width:286px;margin-left:-133px;margin-top:-330px;border:1px solid #dfdfdf;-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.1);-moz-box-shadow:0 1px 1px rgba(0,0,0,.1);box-shadow:0 1px 1px rgba(0,0,0,.1);background:#fff;padding:0}
