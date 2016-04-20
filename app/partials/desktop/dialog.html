@@ -16,21 +16,21 @@
 
   <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true"></div>
 
-  <div class="im_dialog_message_wrap">
+  <div class="im_dialog_message_wrap" ng-class="{im_dialog_message_wtyping: dialogMessage.typing > 0}">
 
     <div class="im_dialog_peer">
       <span my-peer-link="dialogMessage.peerID" verified="true"></span>
     </div>
 
-    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message">
+    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message im_dialog_message_typing">
       <span class="im_short_message_service" my-i18n="im_conversation_group_typing">
         <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
       </span>
     </div>
 
-    <div ng-show="!dialogMessage.typing" ng-switch="dialogMessage.deleted">
+    <div class="im_dialog_message_notyping" ng-switch="dialogMessage.deleted">
       <div ng-switch-when="true" class="im_dialog_message">
-        <span class="im_dialog_message_text" my-i18n="conversation_message_deleted"></span>
+        <span class="im_short_message_text" my-i18n="conversation_message_deleted"></span>
       </div>
       <div ng-switch-default class="im_dialog_message">
         <span ng-switch="dialogMessage.peerID > 0 || dialogMessage.fromID < 0">
