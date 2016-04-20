@@ -257,33 +257,32 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
 
+    function updateMessageBody($scope, element, message) {
+      updateMessageText($scope, element, message);
+      updateMessageMedia($scope, element, message);
+      updateMessageKeyboard($scope, element, message);
+    }
+
     function link ($scope, element, attrs) {
       var message = $scope.message;
       message.dir = true;
       var msgID = message.mid;
 
-      updateMessageText($scope, element, message);
-      updateMessageMedia($scope, element, message);
-      updateMessageKeyboard($scope, element, message);
+      updateMessageBody($scope, element, message);
 
       if (message.pending) {
         var unlink = $scope.$on('messages_pending', function () {
           if (message.mid != msgID) {
-            updateMessageText($scope, element, message);
+            updateMessageBody($scope, element, message);
             unlink();
           }
         });
       }
 
       $scope.$on('message_edit', function (e, data) {
-        if (data.mid != message.mid) {
-          return;
+        if (data.mid == message.mid) {
+          updateMessageBody($scope, element, message);
         }
-        // console.log(dT(), 'Directive' edit', message);
-        updateMessageText($scope, element, message);
-        updateMessageMedia($scope, element, message);
-        updateMessageKeyboard($scope, element, message);
-        $scope.$emit('ui_height');
       });
     }
   })
