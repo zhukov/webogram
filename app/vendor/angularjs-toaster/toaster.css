@@ -110,7 +110,8 @@ button.toast-close-button {
 #toast-container.toast-center > div,
 #toast-container.toast-top-center > div,
 #toast-container.toast-bottom-center > div{
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
   pointer-events: auto;
 }
 #toast-container.toast-center > button,
@@ -236,11 +237,11 @@ button.toast-close-button {
 :not(.no-enter)#toast-container > div.ng-enter,
 :not(.no-leave)#toast-container > div.ng-leave
 {
-    -webkit-transition: 1000ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
-    -moz-transition: 1000ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
-    -ms-transition: 1000ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
-    -o-transition: 1000ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
-    transition: 1000ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -webkit-transition: 200ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -moz-transition: 200ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -ms-transition: 200ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -o-transition: 200ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    transition: 200ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
 }
 
 :not(.no-enter)#toast-container > div.ng-enter.ng-enter-active,
