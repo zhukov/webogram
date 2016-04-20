@@ -1983,7 +1983,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       $timeout(function () {
         delete historyDoc.progress;
       });
-      console.log('file save done');
+      // console.log('file save done');
     }, function (e) {
       console.log('document download failed', e);
       historyDoc.progress.enabled = false;

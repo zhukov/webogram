@@ -744,10 +744,15 @@ MessageComposer.prototype.setUpAutoComplete = function () {
   var self = this;
   this.autoCompleteEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
-    var target = $(e.target), mention, code, command, inlineID;
-    if (target[0].tagName != 'A') {
-      target = $(target[0].parentNode);
+    var target = e.target;
+    var mention, code, command, inlineID;
+    while (target && target.tagName != 'A') {
+      target = target.parentNode;
     }
+    if (!target) {
+      return cancelEvent(e);
+    }
+    target = $(target);
     if (code = target.attr('data-code')) {
       if (self.onEmojiSelected) {
         self.onEmojiSelected(code, true);
