@@ -2385,12 +2385,21 @@ a.im_message_fwd_photo {
 .im_history_loading_more {
   display: block;
   width: 26px;
+  height: 46px;
   margin: 0 auto;
   padding: 20px 0 0;
   visibility: hidden;
 
+  .progress-arc-wrap {
+    display: none;
+  }
+
   &.im_history_loading_more_active {
     visibility: visible;
+
+    .progress-arc-wrap {
+      display: block;
+    }
   }
 }
 .im_history_loading_less {
@@ -2399,8 +2408,16 @@ a.im_message_fwd_photo {
   margin: 0 auto;
   visibility: hidden;
 
+  .progress-arc-wrap {
+    display: none;
+  }
+
   &.im_history_loading_less_active {
     visibility: visible;
+
+    .progress-arc-wrap {
+      display: block;
+    }
   }
 }
 
@@ -2599,8 +2616,11 @@ img.img_fullsize {
 }
 
 /* Message composer */
+.composer_progress_enabled-add,
+.composer_progress_enabled-remove {
+  transition-duration: 0.2s;
+}
 .composer_progress_icon_wrap {
-  opacity: 0;
   position: absolute;
   right: 3px;
   top: 2px;
@@ -2610,14 +2630,22 @@ img.img_fullsize {
   margin-top: 1px;
   pointer-events: none;
   padding: 0;
-  transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+  display: none;
+  opacity: 0;
+
+  .composer_progress_enabled-add &,
+  .composer_progress_enabled-remove & {
+    transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+    display: block;
+  }
+
   .composer_progress_enabled & {
+    display: block;
     opacity: 1;
   }
 }
 .composer_emoji_insert_btn {
   opacity: 1;
-  display: block;
   position: absolute;
   right: 3px;
   top: 2px;
@@ -2627,10 +2655,18 @@ img.img_fullsize {
   width: 22px;
   height: 22px;
   margin-top: 1px;
-  transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+  display: block;
+  opacity: 1;
 
   .composer_progress_enabled & {
+    display: none;
     opacity: 0;
+  }
+
+  .composer_progress_enabled-add &,
+  .composer_progress_enabled-remove & {
+    transition: opacity cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+    display: block;
   }
 }
 
