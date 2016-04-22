@@ -279,7 +279,7 @@
     "conversation_changed_channel_name": "Canal renombrado",
     "conversation_changed_channel_photo": "Foto del canal actualizada",
     "conversation_removed_channel_photo": "Foto del canal eliminada",
-    "conversation_pinned_message": "mensaje anclado",
+    "conversation_pinned_message": "ancló un mensaje",
     "conversation_message_sent": "te envió un mensaje",
     "conversation_forwarded_X_messages": "{'one': '{} mensaje reenviado', 'other': '{} mensajes reenviados'}",
     "conversation_unknown_user": "Alguien",
