@@ -1047,7 +1047,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, NotificationsManager, ErrorService, GeoLocationManager) {
+  .controller('AppImHistoryController', function ($scope, $location, $timeout, $modal, $rootScope, toaster, _, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, PeersSelectService, IdleManager, StatusManager, NotificationsManager, ErrorService, GeoLocationManager) {
 
     $scope.$watchCollection('curDialog', applyDialogSelect);
 
@@ -1581,7 +1581,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             if ($scope.historyState.canReply) {
               selectedReply(messageID);
             } else {
-              selectedForward(messageID);
+              quickForward(messageID);
             }
             return false;
           }
@@ -1718,6 +1718,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           });
         });
       }
+    }
+
+    function quickForward(msgID) {
+      PeersSelectService.selectPeers({
+        canSend: true,
+        confirm_type: 'FORWARD_PEER'
+      }).then(function (peerStrings) {
+        angular.forEach(peerStrings, function (peerString) {
+          var peerID = AppPeersManager.getPeerID(peerString);
+          AppMessagesManager.forwardMessages(peerID, [msgID]);
+        });
+        var toastData = toaster.pop({
+          type: 'info',
+          body: _('confirm_modal_forward_to_peer_success'),
+          bodyOutputType: 'trustedHtml',
+          clickHandler: function () {
+            $rootScope.$broadcast('history_focus', {
+              peerString: peerStrings[0]
+            });
+            toaster.clear(toastData);
+          },
+          showCloseButton: false
+        });
+
+      });
     }
 
     function selectedForward (selectedMessageID) {

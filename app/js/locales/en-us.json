@@ -217,6 +217,7 @@
 	"confirm_modal_contacts_import": "Telegram will now sync your contacts in order to find your friends.",
 	"confirm_modal_login_phone_correct": "Is this phone number correct?",
 	"confirm_modal_forward_to_peer": "Forward to {peer}?",
+	"confirm_modal_forward_to_peer_success": "Message was successfully forwarded.",
 	"confirm_modal_send_to_peer": "Send to {peer}?",
 	"confirm_modal_share_file_peer": "Share with {peer}?",
 	"confirm_modal_invite_peer": "Invite to {peer}?",
