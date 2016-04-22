@@ -1142,7 +1142,7 @@ button.toast-close-button{padding:0;cursor:pointer;background:0 0;border:0;-webk
 .toast-center{top:45%}
 #toast-container{position:fixed;z-index:999999;pointer-events:auto}
 #toast-container.toast-bottom-center,#toast-container.toast-center,#toast-container.toast-top-center{width:100%;pointer-events:none}
-#toast-container.toast-bottom-center>div,#toast-container.toast-center>div,#toast-container.toast-top-center>div{margin:auto;pointer-events:auto}
+#toast-container.toast-bottom-center>div,#toast-container.toast-center>div,#toast-container.toast-top-center>div{margin-left:auto;margin-right:auto;pointer-events:auto}
 #toast-container.toast-bottom-center>button,#toast-container.toast-center>button,#toast-container.toast-top-center>button{pointer-events:auto}
 #toast-container *{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
 #toast-container>div{margin:0 0 6px;padding:15px 15px 15px 50px;width:300px;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;background-position:15px center;background-repeat:no-repeat;-moz-box-shadow:0 0 12px #999;-webkit-box-shadow:0 0 12px #999;box-shadow:0 0 12px #999;color:#fff;opacity:.8;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=80);filter:alpha(opacity=80)}
@@ -1163,7 +1163,7 @@ button.toast-close-button{padding:0;cursor:pointer;background:0 0;border:0;-webk
 @media all and (min-width:241px) and (max-width:480px){#toast-container>div{padding:8px 8px 8px 50px;width:18em}
 #toast-container .toast-close-button{right:-.2em;top:-.2em}}
 @media all and (min-width:481px) and (max-width:768px){#toast-container>div{padding:15px 15px 15px 50px;width:25em}}
-:not(.no-enter)#toast-container>div.ng-enter,:not(.no-leave)#toast-container>div.ng-leave{-webkit-transition:1000ms cubic-bezier(.25,.25,.75,.75) all;-moz-transition:1000ms cubic-bezier(.25,.25,.75,.75) all;-ms-transition:1000ms cubic-bezier(.25,.25,.75,.75) all;-o-transition:1000ms cubic-bezier(.25,.25,.75,.75) all;transition:1000ms cubic-bezier(.25,.25,.75,.75) all}
+:not(.no-enter)#toast-container>div.ng-enter,:not(.no-leave)#toast-container>div.ng-leave{-webkit-transition:200ms cubic-bezier(.25,.25,.75,.75) all;-moz-transition:200ms cubic-bezier(.25,.25,.75,.75) all;-ms-transition:200ms cubic-bezier(.25,.25,.75,.75) all;-o-transition:200ms cubic-bezier(.25,.25,.75,.75) all;transition:200ms cubic-bezier(.25,.25,.75,.75) all}
 :not(.no-enter)#toast-container>div.ng-enter.ng-enter-active,:not(.no-leave)#toast-container>div.ng-leave{opacity:.8}
 :not(.no-enter)#toast-container>div.ng-enter,:not(.no-leave)#toast-container>div.ng-leave.ng-leave-active{opacity:0}
 html{display:none;background:#e7ebf0;overflow:visible}
