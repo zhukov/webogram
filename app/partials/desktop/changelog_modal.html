@@ -31,6 +31,24 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.4')">
+        <div class="md_modal_section_version">0.5.4</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Introducing Bot API 2.0, the biggest update to our bot platform since June 2015.</li>
+            <li>New inline keyboards with callback, 'open URL' or 'switch to inline mode' buttons help create seamless interfaces.</li>
+            <li>Bots can now update existing messages on the fly as you interact with them.</li>
+            <li>Prepare for the rise of location-based bots: all bots can now ask users to share their location.</li>
+            <li>Inline bots can now send all attachments supported in Telegram (videos, music, stickers, files, etc.).</li>
+            <li>Try out these sample bots to see what's coming your way soon: @music, @sticker, @youtube, @foursquare</li>
+            <li>Check out the <a href="https://telegram.org/blog/bots-2-0" target="_blank">Telegram Blog</a> for more info</li>.
+            <li>Improved quick forward in channels (Click on message date to try it out).</li>
+            <li>Improved performance.</li>
+          </ul>
+
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.3')">
         <div class="md_modal_section_version">0.5.3</div>
         <div class="md_modal_section_description changelog_version_changes">
