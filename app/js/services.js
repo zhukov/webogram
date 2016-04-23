@@ -1608,12 +1608,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     var siteName = apiWebPage.site_name;
-    var title = apiWebPage.title || apiWebPage.author || siteName;
+    var shortTitle = apiWebPage.title || apiWebPage.author || siteName || '';
     if (siteName &&
-        title == siteName) {
+        shortTitle == siteName) {
       delete apiWebPage.site_name;
     }
-    apiWebPage.rTitle = RichTextProcessor.wrapRichText(title, {noLinks: true, noLinebreaks: true});
+    if (shortTitle.length > 100) {
+      shortTitle = shortTitle.substr(0, 80) + '...';
+    }
+    apiWebPage.rTitle = RichTextProcessor.wrapRichText(shortTitle, {noLinks: true, noLinebreaks: true});
     var contextHashtag = '';
     if (siteName == 'GitHub') {
       var matches = apiWebPage.url.match(/(https?:\/\/github\.com\/[^\/]+\/[^\/]+)/);
@@ -1622,8 +1625,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
     // delete apiWebPage.description;
+    var shortDescriptionText = (apiWebPage.description || '');
+    if (shortDescriptionText.length > 180) {
+      shortDescriptionText = shortDescriptionText.substr(0, 150).replace(/(\n|\s)+$/, '') + '...';
+    }
     apiWebPage.rDescription = RichTextProcessor.wrapRichText(
-      apiWebPage.description, {
+      shortDescriptionText, {
         contextSite: siteName || 'external',
         contextHashtag: contextHashtag
       }
