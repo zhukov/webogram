@@ -194,6 +194,7 @@
     "confirm_modal_contacts_import": "Telegram zal nu je contacten synchroniseren om je vrienden te kunnen vinden.",
     "confirm_modal_login_phone_correct": "Is dit telefoonnummer juist?",
     "confirm_modal_forward_to_peer": "Doorsturen naar {peer}?",
+    "confirm_modal_forward_to_peer_success": "Doorsturen gelukt",
     "confirm_modal_send_to_peer": "Versturen naar {peer}?",
     "confirm_modal_share_file_peer": "Delen met {peer}?",
     "confirm_modal_invite_peer": "Toevoegen aan {peer}?",

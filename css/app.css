@@ -1955,6 +1955,7 @@ a.peer_modal_photo,div.peer_modal_photo{display:block;margin-right:19px}
 .md_modal_section_param_wrap{margin-top:19px;margin-bottom:19px}
 .md_modal_section_param_wrap:last-child{margin-bottom:16px}
 .md_modal_section_param_wrap .md_modal_section_param_name{color:#909090;font-size:11px;line-height:14px;margin-top:4px}
+.md_modal_section_param_wrap .md_modal_section_param_value{word-break:break-all;word-wrap:break-word;overflow:hidden}
 .md_modal_section_range_wrap{padding-right:4px;margin-bottom:25px;padding-top:1px}
 .md_modal_section_select_wrap{margin-bottom:20px}
 .md_modal_section_select{float:right;font-size:12px;padding:0}
