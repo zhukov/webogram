@@ -194,6 +194,7 @@
     "confirm_modal_contacts_import": "Telegram выполнит синхронизацию ваших контактов, чтобы найти ваших друзей.",
     "confirm_modal_login_phone_correct": "Проверьте ещё раз ваш номер:",
     "confirm_modal_forward_to_peer": "Переслать пользователю {peer}?",
+    "confirm_modal_forward_to_peer_success": "Message was successfully forwarded.",
     "confirm_modal_send_to_peer": "Отправить пользователю {peer}?",
     "confirm_modal_share_file_peer": "Поделиться с {peer}?",
     "confirm_modal_invite_peer": "Пригласить в {peer}?",

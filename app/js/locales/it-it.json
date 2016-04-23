@@ -194,6 +194,7 @@
     "confirm_modal_contacts_import": "Telegram sincronizzerà ora i tuoi contatti per cercare i tuoi amici.",
     "confirm_modal_login_phone_correct": "Il tuo numero di telefono è giusto?",
     "confirm_modal_forward_to_peer": "Inoltra a {peer}?",
+    "confirm_modal_forward_to_peer_success": "Il messaggio è stato inoltrato con successo.",
     "confirm_modal_send_to_peer": "Invia a {peer}?",
     "confirm_modal_share_file_peer": "Condividi con {peer}?",
     "confirm_modal_invite_peer": "Invitare in {peer}?",
