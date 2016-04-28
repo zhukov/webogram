@@ -1640,7 +1640,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         apiWebPage.type != 'video' &&
         apiWebPage.type != 'gif' &&
         apiWebPage.type != 'document' &&
-        apiWebPage.type != 'gif' &&
         !apiWebPage.description &&
         apiWebPage.photo) {
       apiWebPage.type = 'photo';
