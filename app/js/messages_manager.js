@@ -2887,20 +2887,17 @@ angular.module('myApp.services')
               messagesForDialogs[messageID].pFlags.unread = false;
             }
             if (!message.pFlags.out) {
-              if (foundDialog) {
+              if (foundDialog[0]) {
                 newUnreadCount = --foundDialog[0].unread_count;
               }
               NotificationsManager.cancel('msg' + messageID);
             }
           }
         }
-        if (!isOut && foundDialog) {
+        if (!isOut && foundDialog[0]) {
           if (newUnreadCount &&
               foundDialog[0].top_message <= maxID) {
             newUnreadCount = foundDialog[0].unread_count = 0;
-          }
-          if (!foundDialog[0]) {
-            console.error('empty found dialog', foundDialog, update);
           }
           foundDialog[0].read_inbox_max_id = maxID;
         }
@@ -2972,7 +2969,7 @@ angular.module('myApp.services')
 
         angular.forEach(historiesUpdated, function (updatedData, peerID) {
           var foundDialog = getDialogByPeerID(peerID);
-          if (foundDialog) {
+          if (foundDialog[0]) {
             if (updatedData.unread) {
               foundDialog[0].unread_count -= updatedData.unread;
 
