@@ -26,7 +26,7 @@
           </div>
 
           <div ng-switch-default class="stickerset_modal_stickers_list clearfix">
-            <a class="stickerset_modal_sticker_wrap" ng-repeat="sticker in documents | limitTo: slice.limit" ng-click="chooseSticker(sticker.id)">
+            <a class="stickerset_modal_sticker_wrap" ng-repeat="sticker in documents | limitTo: slice.limit" ng-click="if ($event.which == 1) chooseSticker(sticker.id)">
               <div class="stickerset_modal_sticker" my-load-sticker document="sticker" dim="stickerDimensions[sticker.id]"></div>
               <div class="stickerset_modal_sticker_alt" ng-bind-html="stickerEmojis[sticker.id]"></div>
             </a>
