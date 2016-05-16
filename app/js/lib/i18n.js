@@ -114,8 +114,13 @@ angular.module('myApp.i18n', ['izhukov.utils'])
         formats.each(function(index, element) {
           var format = angular.element(element);
           var msgid = format.attr("my-i18n") || format.attr("msgid") || format.attr("my-i18n-format") || format.html().replace(/\s+/g, ' ').trim();
-          var msgstr = _(msgid, params);
-          format.html(msgstr);
+          if (format.hasClass('nocopy')) {
+            var msgstr = _(msgid + '_raw', params);
+            format.attr('data-content', msgstr);
+          } else {
+            var msgstr = _(msgid, params);
+            format.html(msgstr);
+          }
         });
       }
     }

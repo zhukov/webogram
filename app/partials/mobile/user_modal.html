@@ -11,13 +11,13 @@
             <span class="icon-bar"></span>
           </a>
           <ul class="dropdown-menu">
-            <li ng-if="user._ == 'userContact'">
+            <li ng-if="user.pFlags.contact">
               <a ng-click="importContact(true)" my-i18n="user_modal_edit_contact"></a>
             </li>
-            <li ng-if="user._ == 'userContact'">
+            <li ng-if="user.pFlags.contact">
               <a ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
             </li>
-            <li ng-if="user.phone.length > 0 &amp;&amp; user._ != 'userContact' &amp;&amp; user._ != 'userSelf'">
+            <li ng-if="user.phone.length > 0 &amp;&amp; !user.pFlags.contact &amp;&amp; !user.pFlags.self">
               <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
             </li>
             <li>
@@ -49,19 +49,18 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(user.photo.photo_id, {u: user.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !user.photo.photo_id}">
-        <img
-          class="mobile_user_modal_image"
-          my-load-thumb
-          thumb="userPhoto"
-        />
-      </a>
+      <a ng-click="openPhoto(user.photo.photo_id, {u: user.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::user.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !user.photo.photo_id}" ng-disabled="!user.photo.photo_id"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" ng-bind="user | userName"></h4>
+        <h4 class="mobile_user_modal_header" my-peer-link="user.id" verified="true"></h4>
         <p class="mobile_user_modal_status" ng-if="user.status" my-user-status="::user.id"></p>
       </div>
 
+    </div>
+
+    <div class="mobile_modal_section" ng-if="rAbout">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_about"></h4>
+      <div class="mobile_modal_section_value" ng-bind-html="rAbout"></div>
     </div>
 
     <div class="mobile_modal_action_wrap">
@@ -71,6 +70,19 @@
     <div ng-if="user.phone.length > 0" class="mobile_modal_action_wrap">
       <a class="mobile_modal_action" ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
     </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.bot_nochats">
+      <a class="mobile_modal_action" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="bot_info.commands.settings != null">
+      <a class="mobile_modal_action" ng-click="sendCommand('settings')" my-i18n="user_modal_bot_settings"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="bot_info.commands.help != null">
+      <a class="mobile_modal_action" ng-click="sendCommand('help')" my-i18n="user_modal_bot_help"></a>
+    </div>
+
 
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">

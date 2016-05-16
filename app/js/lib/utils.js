@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.6 - messaging web application for MTProto
+ * Webogram v0.5.4 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -20,6 +20,17 @@ function checkClick (e, noprevent) {
   }
 
   return false;
+}
+
+function isInDOM (element, parentNode) {
+  if (!element) {
+    return false;
+  }
+  parentNode = parentNode || document.body;
+  if (element == parentNode) {
+    return true;
+  }
+  return isInDOM(element.parentNode, parentNode)
 }
 
 function checkDragEvent(e) {
@@ -44,10 +55,39 @@ function cancelEvent (event) {
 
     if (event.stopPropagation) event.stopPropagation();
     if (event.preventDefault) event.preventDefault();
+    event.returnValue = false;
+    event.cancelBubble = true;
   }
 
   return false;
 }
+
+function hasOnlick (element) {
+  if (element.onclick ||
+      element.getAttribute('ng-click')) {
+    return true;
+  }
+  var events = $._data(element, 'events');
+  if (events && (events.click || events.mousedown)) {
+    return true;
+  }
+  return false;
+}
+
+function getScrollWidth() {
+  var outer = $('<div>').css({
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    overflow: 'scroll',
+    top: -9999
+  }).appendTo($(document.body));
+
+  var scrollbarWidth = outer[0].offsetWidth - outer[0].clientWidth;
+  outer.remove();
+
+  return scrollbarWidth;
+};
 
 function onCtrlEnter (textarea, cb) {
   $(textarea).on('keydown', function (e) {
@@ -124,7 +164,10 @@ function getRichValue(field) {
     lines.push(line.join(''));
   }
 
-  return lines.join('\n');
+  var value = lines.join('\n');
+  value = value.replace(/\u00A0/g, ' ');
+
+  return value;
 }
 
 function getRichValueWithCaret(field) {
@@ -157,6 +200,7 @@ function getRichValueWithCaret(field) {
   if (caretPos != -1) {
     value = value.substr(0, caretPos) + value.substr(caretPos + 1);
   }
+  value = value.replace(/\u00A0/g, ' ');
 
   return [value, caretPos];
 }
@@ -174,6 +218,7 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
   if (node.nodeType != 1) { // NON-ELEMENT
     return;
   }
+  var isSelected = (selNode === node);
   var isBlock = node.tagName == 'DIV' || node.tagName == 'P';
   var curChild;
   if (isBlock && line.length || node.tagName == 'BR') {
@@ -185,7 +230,7 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
       line.push(node.alt);
     }
   }
-  if (selNode === node) {
+  if (isSelected && !selOffset) {
     line.push('\001');
   }
   var curChild = node.firstChild;
@@ -193,14 +238,24 @@ function getRichElementValue(node, lines, line, selNode, selOffset) {
     getRichElementValue(curChild, lines, line, selNode, selOffset);
     curChild = curChild.nextSibling;
   }
+  if (isSelected && selOffset) {
+    line.push('\001');
+  }
   if (isBlock && line.length) {
     lines.push(line.join(''));
     line.splice(0, line.length);
   }
 }
 
-function setRichFocus(field, selectNode) {
+function setRichFocus(field, selectNode, noCollapse) {
   field.focus();
+  if (selectNode &&
+      selectNode.parentNode == field &&
+      !selectNode.nextSibling &&
+      !noCollapse) {
+    field.removeChild(selectNode);
+    selectNode = null;
+  }
   if (window.getSelection && document.createRange) {
     var range = document.createRange();
     if (selectNode) {
@@ -208,7 +263,9 @@ function setRichFocus(field, selectNode) {
     } else {
       range.selectNodeContents(field);
     }
-    range.collapse(false);
+    if (!noCollapse) {
+      range.collapse(false);
+    }
 
     var sel = window.getSelection();
     sel.removeAllRanges();
@@ -217,12 +274,54 @@ function setRichFocus(field, selectNode) {
   else if (document.body.createTextRange !== undefined) {
     var textRange = document.body.createTextRange();
     textRange.moveToElementText(selectNode || field);
-    textRange.collapse(false);
+    if (!noCollapse) {
+      textRange.collapse(false);
+    }
     textRange.select();
   }
 }
 
+function getSelectedText () {
+  var sel = (
+    window.getSelection && window.getSelection() ||
+    document.getSelection && document.getSelection() ||
+    document.selection && document.selection.createRange().text || ''
+  ).toString().replace(/^\s+|\s+$/g, '');
+
+  return sel;
+}
+
+function scrollToNode (scrollable, node, scroller) {
+  var elTop = node.offsetTop - 15,
+      elHeight = node.offsetHeight + 30,
+      scrollTop = scrollable.scrollTop,
+      viewportHeight = scrollable.clientHeight;
+
+  if (scrollTop > elTop) { // we are below the node to scroll
+    scrollable.scrollTop = elTop;
+    $(scroller).nanoScroller({flash: true});
+  }
+  else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the node to scroll
+    scrollable.scrollTop = elTop + elHeight - viewportHeight;
+    $(scroller).nanoScroller({flash: true});
+  }
+}
+
+if (Config.Modes.animations &&
+    typeof window.requestAnimationFrame == 'function') {
+  window.onAnimationFrameCallback = function (cb) {
+    return (function () {
+      window.requestAnimationFrame(cb);
+    });
+  };
+} else {
+  window.onAnimationFrameCallback = function (cb) {
+    return cb;
+  };
+}
+
 function onContentLoaded (cb) {
+  cb = onAnimationFrameCallback(cb);
   setZeroTimeout(cb);
 }
 
@@ -281,7 +380,17 @@ function templateUrl (tplName) {
     media_modal_layout: 'desktop',
     slider: 'desktop',
     reply_message: 'desktop',
-    chat_invite_link_modal: 'desktop'
+    message_body: 'desktop',
+    message_media: 'desktop',
+    forwarded_messages: 'desktop',
+    chat_invite_link_modal: 'desktop',
+    reply_markup: 'desktop',
+    short_message: 'desktop',
+    pinned_message: 'desktop',
+    channel_edit_modal: 'desktop',
+    megagroup_edit_modal: 'desktop',
+    inline_results: 'desktop',
+    composer_dropdown: 'desktop'
   };
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop');
   return 'partials/' + layout + '/' + tplName + '.html';
@@ -290,6 +399,11 @@ function templateUrl (tplName) {
 function encodeEntities(value) {
   return value.
     replace(/&/g, '&amp;').
+    replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (value) {
+      var hi = value.charCodeAt(0);
+      var low = value.charCodeAt(1);
+      return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
+    }).
     replace(/([^\#-~| |!])/g, function (value) { // non-alphanumeric
       return '&#' + value.charCodeAt(0) + ';';
     }).
@@ -355,7 +469,7 @@ function versionCompare (ver1, ver2) {
 (function (global) {
 
   var badCharsRe = /[`~!@#$%^&*()\-_=+\[\]\\|{}'";:\/?.>,<\s]+/g,
-        trimRe = /^\s+|\s$/g;
+      trimRe = /^\s+|\s$/g;
 
   function createIndex () {
     return {
@@ -365,13 +479,21 @@ function versionCompare (ver1, ver2) {
   }
 
   function cleanSearchText (text) {
+    var hasTag = text.charAt(0) == '%';
     text = text.replace(badCharsRe, ' ').replace(trimRe, '');
     text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
       return Config.LatinizeMap[ch] || ch;
     });
     text = text.toLowerCase();
+    if (hasTag) {
+      text = '%' + text;
+    }
 
     return text;
+  }
+
+  function cleanUsername (username) {
+    return username && username.toLowerCase() || '';
   }
 
   function indexObject (id, searchText, searchIndex) {
@@ -447,106 +569,8 @@ function versionCompare (ver1, ver2) {
     createIndex: createIndex,
     indexObject: indexObject,
     cleanSearchText: cleanSearchText,
+    cleanUsername: cleanUsername,
     search: search
   };
 
-})(window);
-
-
-(function (global) {
-  var nativeWebpSupport = false;
-
-  var image = new Image();
-  image.onload = function () {
-    nativeWebpSupport = this.width === 2 && this.height === 1;
-  };
-  image.onerror = function () {
-    nativeWebpSupport = false;
-  };
-  image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
-
-  var canvas, context;
-
-
-  function getPngUrlFromData(data) {
-    var start = tsNow();
-
-    var decoder = new WebPDecoder();
-
-    var config = decoder.WebPDecoderConfig;
-    var buffer = config.j;
-    var bitstream = config.input;
-
-    if (!decoder.WebPInitDecoderConfig(config)) {
-      console.error('[webpjs] Library version mismatch!');
-      return false;
-    }
-
-    // console.log('[webpjs] status code', decoder.VP8StatusCode);
-
-    status = decoder.WebPGetFeatures(data, data.length, bitstream);
-    if (status != 0) {
-      console.error('[webpjs] status error', status);
-    }
-
-    var mode = decoder.WEBP_CSP_MODE;
-    buffer.J = 4;
-
-    try {
-      status = decoder.WebPDecode(data, data.length, config);
-    } catch (e) {
-      status = e;
-    }
-
-    ok = (status == 0);
-    if (!ok) {
-      console.error('[webpjs] decoding failed', status);
-      return false;
-    }
-
-    // console.log('[webpjs] decoded: ', buffer.width, buffer.height, bitstream.has_alpha, 'Now saving...');
-    var bitmap = buffer.c.RGBA.ma;
-
-    // console.log('[webpjs] done in ', tsNow() - start);
-
-    if (!bitmap) {
-      return false;
-    }
-    var biHeight = buffer.height;
-    var biWidth = buffer.width;
-
-    if (!canvas || !context) {
-      canvas = document.createElement('canvas');
-      context = canvas.getContext('2d');
-    } else {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    canvas.height = biHeight;
-    canvas.width = biWidth;
-
-    var output = context.createImageData(canvas.width, canvas.height);
-    var outputData = output.data;
-
-    for (var h = 0; h < biHeight; h++) {
-      for (var w = 0; w < biWidth; w++) {
-        outputData[0+w*4+(biWidth*4)*h] = bitmap[1+w*4+(biWidth*4)*h];
-        outputData[1+w*4+(biWidth*4)*h] = bitmap[2+w*4+(biWidth*4)*h];
-        outputData[2+w*4+(biWidth*4)*h] = bitmap[3+w*4+(biWidth*4)*h];
-        outputData[3+w*4+(biWidth*4)*h] = bitmap[0+w*4+(biWidth*4)*h];
-
-      };
-    }
-
-    context.putImageData(output, 0, 0);
-
-    return canvas.toDataURL('image/png');
-  }
-
-
-  global.WebpManager = {
-    isWebpSupported: function () {
-      return nativeWebpSupport;
-    },
-    getPngUrlFromData: getPngUrlFromData
-  }
 })(window);

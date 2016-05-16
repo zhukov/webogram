@@ -59,17 +59,10 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(user.photo.photo_id, {u: profile.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !user.photo.id}">
-        <img
-          class="mobile_user_modal_image"
-          my-load-thumb
-          watch="true"
-          thumb="photo"
-        />
-      </a>
+      <a ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::profile.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" my-user-link="profile.id"></h4>
+        <h4 class="mobile_user_modal_header" my-peer-link="profile.id"></h4>
         <p class="mobile_user_modal_status" my-user-status="::profile.id"></p>
       </div>
 

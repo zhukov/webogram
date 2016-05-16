@@ -1,0 +1,26 @@
+<div class="im_message_reply clearfix" ng-class="{im_message_reply_thumbed: thumb !== false}">
+  <div class="im_message_reply_border"></div>
+  <div class="im_message_reply_thumb_wrap pull-left" ng-if="thumb !== false">
+    <img
+      class="im_message_reply_thumb"
+      my-load-thumb
+      thumb="thumb"
+      watch="true"
+    />
+  </div>
+  <div class="im_message_reply_author">
+    <span my-peer-link="fromID" peer-watch="true"></span>
+  </div>
+  <div class="im_message_reply_body" ng-switch="singleMessage !== false">
+    <div ng-switch-when="true">
+      <span my-short-message="singleMessage"></span>
+    </div>
+    <div ng-switch-default>
+      <span class="im_reply_message_service">
+        <ng-pluralize count="count"
+                      when="im_X_forwarded_messages">
+        </ng-pluralize>
+      </span>
+    </div>
+  </div>
+</div>

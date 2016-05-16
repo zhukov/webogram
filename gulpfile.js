@@ -8,6 +8,7 @@ var http = require('http');
 var livereload = require('gulp-livereload');
 var st = require('st');
 var less = require('gulp-less');
+var del = require('del');
 var runSequence = require('run-sequence');
 
 // The generated file is being created at src
@@ -104,7 +105,7 @@ gulp.task('compress-dist', ['build'], function() {
 });
 
 gulp.task('cleanup-dist', ['compress-dist'], function() {
-  return gulp.src(['releases/**/*', '!releases/*.zip']).pipe($.clean());
+  return del(['releases/**/*', '!releases/*.zip']);
 });
 
 gulp.task('update-version-manifests', function() {
@@ -202,6 +203,8 @@ gulp.task('package-dev', function() {
      .pipe(gulp.dest('dist_package/img')),
     gulp.src('app/vendor/**/*')
      .pipe(gulp.dest('dist_package/vendor')),
+    gulp.src('app/**/*.json')
+     .pipe(gulp.dest('dist_package')),
 
     gulp.src('app/**/*.html')
       .pipe($.replace(/PRODUCTION_ONLY_BEGIN/g, 'PRODUCTION_ONLY_BEGIN-->'))
@@ -209,7 +212,7 @@ gulp.task('package-dev', function() {
       .pipe(gulp.dest('dist_package')),
 
     gulp.src('app/**/*.js')
-      .pipe($.ngmin())
+      .pipe($.ngAnnotate())
       .pipe($.replace(/PRODUCTION_ONLY_BEGIN(\*\/)?/g, 'PRODUCTION_ONLY_BEGIN*/'))
       .pipe($.replace(/(\/\*)?PRODUCTION_ONLY_END/g, '/*PRODUCTION_ONLY_END'))
       .pipe(gulp.dest('dist_package'))
@@ -240,7 +243,7 @@ gulp.task('server', function(done) {
 });
 
 gulp.task('clean', function() {
-  return gulp.src(['dist/*', 'app/js/templates.js', 'app/css/*', '!dist/.git']).pipe($.clean());
+  return del(['dist/*', 'app/js/templates.js', 'app/css/*', '!dist/.git']);
 });
 
 gulp.task('bump', ['update-version-manifests', 'update-version-config'], function () {

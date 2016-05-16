@@ -38,17 +38,14 @@
           <ul ng-switch-default class="sessions_modal_sessions_list nav nav-pills nav-stacked">
 
             <li class="sessions_modal_session_wrap clearfix" ng-repeat="authorization in authorizations | limitTo: slice.limit track by authorization.hash">
-              <div ng-if="authorization.current">
-                <h5 class="sessions_modal_sessions_header" my-i18n="sessions_modal_current_session"></h5>
-              </div>
               <div class="sessions_modal_session">
                 <div class="session_meta_wrap pull-right">
                   <div class="session_active_date" ng-switch="authorization.current">
-                    <span ng-switch-when="true" class="session_active_date_online" my-i18n="sessions_modal_session_online"></span>
+                    <span ng-switch-when="true" class="session_active_date_online" my-i18n="sessions_modal_current_session"></span>
                     <span ng-switch-default ng-bind="authorization.date_active | dateOrTime"></span>
                   </div>
 
-                  <a ng-if="!authorization.current" class="session_terminate_btn btn btn-md" ng-click="terminateSession(authorization.hash)" my-i18n="sessions_modal_terminate_one"></a>
+                  <a ng-if="!authorization.current" class="session_terminate_btn" ng-click="terminateSession(authorization.hash)" my-i18n="sessions_modal_terminate_one"></a>
                 </div>
 
                 <div class="sessions_modal_session_app" ng-bind="authorization.app_name + ' ' + authorization.app_version"></div>
@@ -57,10 +54,10 @@
               </div>
               <div ng-if="authorization.current && authorizations.length > 1">
                 <div class="sessions_modal_terminate_all_wrap">
-                  <button class="btn btn-md btn-md-danger" ng-click="terminateAllSessions()" my-i18n="sessions_modal_terminate_all"></button>
+                  <a ng-click="terminateAllSessions()" my-i18n="sessions_modal_terminate_all"></a>
                 </div>
 
-                <h5 class="sessions_modal_sessions_header" my-i18n="sessions_modal_active_sessions"></h5>
+                <hr class="sessions_modal_other_splitter"></hr>
               </div>
             </li>
 

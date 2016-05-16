@@ -42,23 +42,23 @@ Here are some screenshots of the interface:
 
 **Packed version**: the app is downloaded at once in a package via HTTPS. The package is updated less frequently than the Web-version.
 
-All of the apps above are submitted and maintained by [@zhukov](https://github.com/zhukov), so feel free to use them and report bugs [here](https://github.com/zhukov/webogram/issues). Please do not report bugs which reproduce only in different locations.
+All of the apps above are submitted and maintained by [@zhukov](https://github.com/zhukov), so feel free to use them and report bugs [here](https://github.com/zhukov/webogram/issues). Please do not report bugs which are only reproducible in different locations.
 
 
 ## Technical details
 
-The app is based on AngularJS JavaScript framework, written in pure JavaScript. jQuery is used for DOM manipulations, and Bootstrap is the CSS-framework.
+The app is based on the AngularJS JavaScript framework, and written in pure JavaScript. jQuery is used for DOM manipulations, and Bootstrap as the CSS-framework.
 
 
 ### Running locally
 
 
-Project repository is based on angularjs-seed and includes gulp tasks, so it's easy to launch the app locally on your desktop.
-Install [node.js](http://nodejs.org/) and run following commands in the project directory
+The project repository is based on angularjs-seed and includes gulp tasks, so it's easy to launch the app locally on your desktop.
+Install [node.js](http://nodejs.org/) and run the following commands in the project directory
 
 ```
 sudo npm install -g gulp
-sudo npm install
+npm install
 ```
 
 This will install all the needed dependencies.
@@ -67,28 +67,28 @@ This will install all the needed dependencies.
 #### Running web-server
 
 
-Just run `gulp watch` task to start web server and livereload task.
-Open page http://localhost:8000/app/index.html in your browser.
+Just run `gulp watch` to start the web server and the livereload task.
+Open http://localhost:8000/app/index.html in your browser.
 
 
 
 #### Running as Chrome Packaged App
 
-To run this application in Google Chrome browser as a packaged app, open this URL in Chrome: `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram application should appear in the list.
+To run this application in Google Chrome as a packaged app, open this URL (in Chrome): `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram should appear in the list.
 
-Launch `gulp watch` command to watch for file changes and automatically rebuild the app.
+Run `gulp watch` to watch for file changes and automatically rebuild the app.
 
 
 #### Running as Firefox OS App
 
-To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or use `Shift + F8` shortcut). Choose "Open packaged app" from Project menu and select `app` folder.
+To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or hit `Shift + F8`). Choose "Open packaged app" from the Project menu and select the `app` folder.
 
-Launch `gulp watch` command to watch for file changes and automatically rebuild the app.
+Run `gulp watch` to watch for file changes and automatically rebuild the app.
 
 
 ### Third party libraries
 
-Besides frameworks mentioned above, other libraries are used for protocol and UI needs. Here is the short list:
+Besides the frameworks mentioned above, other libraries are used for protocol and UI needs. Here is the short list:
 
 * [JSBN](http://www-cs-students.stanford.edu/~tjw/jsbn/)
 * [CryptoJS](https://code.google.com/p/crypto-js/)
@@ -99,7 +99,7 @@ Besides frameworks mentioned above, other libraries are used for protocol and UI
 * [gemoji](https://github.com/github/gemoji)
 * [emoji-data](https://github.com/iamcal/emoji-data)
 
-Many thanks to all these libraries' authors and contributors. Detailed list with descriptions and licenses is available [here](/app/vendor).
+Many thanks to all these libraries' authors and contributors. A detailed list with descriptions and licenses is available [here](/app/vendor).
 
 
 ### Licensing

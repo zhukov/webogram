@@ -65,6 +65,7 @@
 (function initApplication () {
   var classes = [
     Config.Navigator.osX ? 'osx' : 'non_osx',
+    Config.Navigator.msie ? 'msie' : 'non_msie',
     Config.Navigator.retina ? 'is_2x' : 'is_1x'
   ];
   if (Config.Modes.ios_standalone) {
@@ -95,6 +96,13 @@
             angular.bootstrap(document, ['myApp']);
           }
         };
+
+    if (Config.Modes.force_mobile) {
+      layout = 'mobile';
+    }
+    else if (Config.Modes.force_desktop) {
+      layout = 'desktop';
+    }
 
     switch (layout) {
       case 'mobile': Config.Mobile = true; break;

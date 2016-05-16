@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.6 - messaging web application for MTProto
+ * Webogram v0.5.4 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -140,6 +140,7 @@ function EmojiTooltip (btnEl, options) {
   this.getStickers = options.getStickers;
   this.getStickerImage = options.getStickerImage;
   this.onStickersetSelected = options.onStickersetSelected;
+  this.langpack = options.langpack || {};
 
   if (!Config.Navigator.touch) {
     $(this.btnEl).on('mouseenter mouseleave', function (e) {
@@ -179,7 +180,7 @@ EmojiTooltip.prototype.onMouseEnter = function (triggerShow) {
     delete this.hideTimeout;
   }
   else if (triggerShow && !this.showTimeout) {
-    this.showTimeout = setTimeout(this.show.bind(this), 200);
+    this.showTimeout = setTimeout(this.show.bind(this), 100);
   }
 };
 
@@ -188,27 +189,12 @@ EmojiTooltip.prototype.onMouseLeave = function (triggerUnshow) {
     var self = this;
     this.hideTimeout = setTimeout(function () {
       self.hide();
-    }, 400);
+    }, 600);
   }
   else if (triggerUnshow && this.showTimeout) {
     clearTimeout(this.showTimeout);
     delete this.showTimeout;
   }
-};
-
-EmojiTooltip.prototype.getScrollWidth = function() {
-  var outer = $('<div>').css({
-    position: 'absolute',
-    width: 100,
-    height: 100,
-    overflow: 'scroll',
-    top: -9999
-  }).appendTo($(document.body));
-
-  var scrollbarWidth = outer[0].offsetWidth - outer[0].clientWidth;
-  outer.remove();
-
-  return scrollbarWidth;
 };
 
 
@@ -218,29 +204,59 @@ EmojiTooltip.prototype.createTooltip = function () {
     return false;
   }
 
+  var html =
+'<div class="composer_emoji_tooltip noselect">\
+  <div class="composer_emoji_tooltip_tabs">\
+    <div class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_emoji">' +this.langpack.im_emoji_tab + '</div>\
+    <div class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_stickers">' +this.langpack.im_stickers_tab + '</div>\
+    <div class="composer_emoji_tooltip_tab_shadow"></div>\
+  </div>\
+  <div class="composer_emoji_tooltip_tabs_wrap">\
+    <div class="composer_emoji_tooltip_tabs_contents clearfix">\
+      <div class="composer_emoji_tooltip_tab_emoji_content">\
+        <div class="composer_emoji_tooltip_content_wrap">\
+          <div class="composer_emoji_tooltip_content composer_emoji_tooltip_content_emoji clearfix"></div>\
+        </div>\
+        <div class="composer_emoji_tooltip_categories">\
+          <a class="composer_emoji_tooltip_category active" data-category="0"><i class="composer_emoji_tooltip_category_recent"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="1"><i class="composer_emoji_tooltip_category_smile"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="2"><i class="composer_emoji_tooltip_category_flower"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="3"><i class="composer_emoji_tooltip_category_bell"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="4"><i class="composer_emoji_tooltip_category_car"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="5"><i class="composer_emoji_tooltip_category_grid"></i></a>\
+        </div>\
+      </div>\
+      <div class="composer_emoji_tooltip_tab_stickers_content">\
+        <div class="composer_emoji_tooltip_content_wrap">\
+            <div class="composer_emoji_tooltip_content composer_emoji_tooltip_content_stickers clearfix"></div>\
+          </div>\
+          <div class="composer_emoji_tooltip_categories"></div>\
+      </div>\
+    </div>\
+  </div>\
+  <div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div>\
+</div>';
+
+  html = html.replace(/>\s+</g, '><');
+
   var self = this;
-  this.tooltipEl = $('<div class="composer_emoji_tooltip noselect"><div class="composer_emoji_tooltip_tabs"></div><div class="composer_emoji_tooltip_content_wrap nano mobile_scrollable_wrap"><div class="composer_emoji_tooltip_content nano-content clearfix"></div></div><div class="composer_emoji_tooltip_footer"><a class="composer_emoji_tooltip_settings"></a></div><div class="composer_emoji_tooltip_tail"><i class="icon icon-tooltip-tail"></i></div></div>').appendTo(document.body);
+  this.tooltipEl = $(html).appendTo(document.body);
 
-  this.tabsEl = $('.composer_emoji_tooltip_tabs', this.tooltip);
-  this.contentWrapEl = $('.composer_emoji_tooltip_content_wrap', this.tooltip);
-  this.contentEl = $('.composer_emoji_tooltip_content', this.tooltip);
-  this.footerEl = $('.composer_emoji_tooltip_footer', this.tooltip);
-  this.settingsEl = $('.composer_emoji_tooltip_settings', this.tooltip);
+  this.tabsEl = $('.composer_emoji_tooltip_tabs', this.tooltipEl);
+  this.categoriesEl = $('.composer_emoji_tooltip_categories', this.tooltipEl);
+  this.stickersCategoriesEl = $('.composer_emoji_tooltip_tab_stickers_content .composer_emoji_tooltip_categories', this.tooltipEl);
 
-  var scrollWidth = this.getScrollWidth();
-  if (scrollWidth > 0) {
-    this.tooltipEl.css({
-      width: parseInt(this.tooltipEl.css('width')) + scrollWidth
-    });
-  }
+  this.contentEl = $('.composer_emoji_tooltip_content', this.tooltipEl);
+  this.emojiContentEl = $('.composer_emoji_tooltip_content_emoji', this.tooltipEl);
+  this.stickersContentEl = $('.composer_emoji_tooltip_content_stickers', this.tooltipEl);
 
-  angular.forEach(['recent', 'smile', 'flower', 'bell', 'car', 'grid', 'stickers'], function (tabName, tabIndex) {
-    var tab = $('<a class="composer_emoji_tooltip_tab composer_emoji_tooltip_tab_' + tabName + '"></a>')
+  // Tabs
+  angular.forEach(['emoji', 'stickers'], function (tabName, tabIndex) {
+    var tab = $('.composer_emoji_tooltip_tab_' + tabName, self.tabsEl)
       .on('mousedown', function (e) {
         self.selectTab(tabIndex);
         return cancelEvent(e);
-      })
-      .appendTo(self.tabsEl);
+      });
 
     if (!Config.Navigator.touch) {
       tab.on('mouseenter mouseleave', function (e) {
@@ -254,9 +270,51 @@ EmojiTooltip.prototype.createTooltip = function () {
     }
   });
 
-  if (!Config.Mobile) {
-    this.contentWrapEl.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+  // Categories
+  var handleEvents = 'mousedown';
+  if (!Config.Navigator.touch) {
+    handleEvents += ' mouseover mouseout';
   }
+  this.categoriesEl.on(handleEvents, function (e) {
+    e = e.originalEvent || e;
+    var target = e.target;
+    if (target.tagName != 'A') {
+      target = target.parentNode;
+    }
+    if (target.tagName != 'A') {
+      return;
+    }
+    var catIndex = parseInt(target.getAttribute('data-category'));
+    if (e.type == 'mousedown') {
+      self.selectCategory(catIndex);
+      return cancelEvent(e);
+    }
+    if (self.tab) {
+      return;
+    }
+    var isOver = e.type == 'mouseover';
+    if (isOver && self.selectCategoryIndex == catIndex) {
+      return;
+    }
+    clearTimeout(self.selectCategoryTimeout);
+    delete self.selectCategoryTimeout;
+    if (isOver) {
+      self.selectCategoryIndex = catIndex;
+      self.selectCategoryTimeout = setTimeout(function () {
+        delete self.selectCategoryIndex;
+        delete self.selectCategoryTimeout;
+        self.selectCategory(catIndex);
+      }, 300);
+    } else {
+      delete self.selectCategoryIndex;
+    }
+  });
+
+  this.emojiScroller = new Scroller(this.emojiContentEl, {classPrefix: 'composer_emoji_tooltip'});
+  this.stickersScroller = new Scroller(this.stickersContentEl, {classPrefix: 'composer_emoji_tooltip'});
+  this.stickersScroller.onScroll(function (el, st) {
+    self.onStickersScroll(el, st);
+  });
 
   this.contentEl.on('mousedown', function (e) {
     e = e.originalEvent || e;
@@ -305,67 +363,48 @@ EmojiTooltip.prototype.createTooltip = function () {
 }
 
 
-EmojiTooltip.prototype.selectTab = function (tab) {
-  if (this.tab === tab && tab != 6) {
+EmojiTooltip.prototype.selectCategory = function (cat, force) {
+  if (!this.tab && this.cat === cat && !force) {
     return false;
   }
-  $('.active', this.tabsEl).removeClass('active');
-  this.tab = tab;
-  $(this.tabsEl[0].childNodes[tab]).addClass('active');
+  $('.active', this.categoriesEl).removeClass('active');
+  this.cat = cat;
 
-  this.updateTabContents();
+  if (this.tab) {
+    this.activateStickerCategory();
+    this.updateStickersContents(force);
+  } else {
+    $(this.categoriesEl[this.tab].childNodes[cat]).addClass('active');
+    this.updateEmojiContents();
+  }
 };
 
-EmojiTooltip.prototype.updateTabContents = function () {
+EmojiTooltip.prototype.selectTab = function (tab, force) {
+  if (this.tab === tab && !force) {
+    return false;
+  }
+
+  this.tab = tab;
+  this.selectCategory(0, true);
+
+  var self = this;
+  setTimeout(function () {
+    $(self.tooltipEl).toggleClass('composer_emoji_tooltip_tabs_stickers_active', tab == 1);
+  }, 0);
+};
+
+EmojiTooltip.prototype.updateEmojiContents = function () {
   var html = [];
   var self = this;
-  var iconSize = Config.Mobile ? 26 : 20;
+  var iconSize = 26;
 
   var renderContent = function () {
-    self.contentEl.html(html.join(''));
-
-    if (!Config.Mobile) {
-      self.contentWrapEl.nanoScroller({scroll: 'top'});
-      setTimeout(function () {
-        self.contentWrapEl.nanoScroller();
-      }, 100);
-    }
+    self.emojiContentEl.html(html.join(''));
+    self.emojiScroller.reinit();
   }
 
-  if (this.tab == 6) { // Stickers
-    var renderStickers = function (stickersets) {
-      var set, docID, i, j, len1, len2;
-      for (i = 0, len1 = stickersets.length; i < len1; i++) {
-        set = stickersets[i];
-        if (!set.docIDs.length) {
-          continue;
-        }
-        html.push('<div class="composer_stickerset_wrap clearfix">');
-        if (set.id && set.title) {
-          html.push(
-            '<a class="composer_stickerset_title" data-stickerset="',
-            encodeEntities(set.short_name),
-            '">',
-            encodeEntities(set.title),
-            '</a>'
-          );
-        }
-        for (j = 0, len2 = set.docIDs.length; j < len2; j++) {
-          docID = set.docIDs[j];
-          html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
-        }
-        html.push('</div>');
-      }
-      renderContent();
-
-      self.contentEl.find('.composer_sticker_btn').each(function (k, element) {
-        self.getStickerImage($(element), element.getAttribute('data-sticker'));
-      });
-    };
-    this.getStickers(renderStickers);
-  }
-  else if (this.tab > 0) {
-    var categoryIndex = this.tab - 1;
+  if (this.cat > 0) {
+    var categoryIndex = this.cat - 1;
     var emoticonCodes = Config.EmojiCategories[categoryIndex];
     var totalColumns = Config.EmojiCategorySpritesheetDimens[categoryIndex][1];
     var count = emoticonCodes.length;
@@ -402,6 +441,154 @@ EmojiTooltip.prototype.updateTabContents = function () {
   }
 };
 
+EmojiTooltip.prototype.updateStickersContents = function (force) {
+  var html = [];
+  var categoriesHtml = [];
+  var self = this;
+  var iconSize = 26;
+
+  var scrollStickers = function () {
+    var scrollTop = self.cat ? self.stickersetPositions[self.cat][0] : 0;
+    self.stickersScroller.scrollTo(scrollTop, force ? 0 : 200);
+  }
+
+  if (!force && self.stickersetPositions.length) {
+    scrollStickers();
+    return;
+  }
+
+  var renderStickers = function (stickersets) {
+    var set, docID, i, j, len1, len2;
+    for (i = 0, len1 = stickersets.length; i < len1; i++) {
+      set = stickersets[i];
+      if (!set.docIDs.length) {
+        continue;
+      }
+      html.push('<div class="composer_stickerset_wrap clearfix">');
+      if (set.title) {
+        html.push(
+          '<a class="composer_stickerset_title',
+          set.id ? '' : ' disabled',
+          '" data-stickerset="',
+          encodeEntities(set.short_name),
+          '">',
+          encodeEntities(set.title),
+          '</a>'
+        );
+      }
+      if (!set.id) {
+        categoriesHtml.push('<a class="composer_emoji_tooltip_category active" data-category="0"><i class="composer_emoji_tooltip_category_recent"></i></a>');
+      } else {
+        categoriesHtml.push('<a class="composer_sticker_btn" data-sticker="' + set.docIDs[0] + '" data-category="' + i + '"></a>');
+      }
+      for (j = 0, len2 = set.docIDs.length; j < len2; j++) {
+        docID = set.docIDs[j];
+        html.push('<a class="composer_sticker_btn" data-sticker="' + docID + '"></a>');
+      }
+      html.push('</div>');
+    }
+
+    self.stickersContentEl.html(html.join(''));
+    self.stickersCategoriesEl.html(categoriesHtml.join(''));
+    self.stickersScroller.reinit();
+
+    var scrollPositions = [];
+    $('.composer_stickerset_wrap', self.stickersContentEl).each(function (k, stickerSetEl) {
+      var height = stickerSetEl.offsetHeight;
+      var top = stickerSetEl.offsetTop;
+      scrollPositions.push([top, height]);
+    });
+    self.stickersetPositions = scrollPositions;
+    scrollStickers();
+
+    var preload = [];
+    self.contentEl.find('.composer_sticker_btn').each(function (k, element) {
+      if (k < 12) {
+        self.replaceStickerImage(element);
+      } else {
+        preload.push([element.offsetTop, element]);
+      }
+    });
+    self.stickersPreload = preload;
+
+    self.stickersCategoriesEl.find('.composer_sticker_btn').each(function (k, element) {
+      self.replaceStickerImage(element);
+    });
+  };
+  this.getStickers(renderStickers);
+};
+
+EmojiTooltip.prototype.replaceStickerImage = function (element) {
+  element = $(element);
+  this.getStickerImage(element, element.attr('data-sticker'));
+}
+
+EmojiTooltip.prototype.onStickersScroll = function (scrollable, scrollTop) {
+  var ch = scrollable.clientHeight;
+  var sh = scrollable.scrollHeight;
+  var len = this.stickersetPositions.length;
+  var currentCat = false;
+  var currentPos, i;
+
+  if (scrollTop < 20) {
+    currentCat = 0;
+  } else if (scrollTop > sh - ch - 20) {
+    currentCat = len - 1;
+  } else {
+    for (i = 0; i < len; i++) {
+      currentPos = this.stickersetPositions[i];
+      if (scrollTop >= currentPos[0] &&
+          scrollTop < (currentPos[0] + currentPos[1])) {
+        currentCat = i;
+        break;
+      }
+    }
+  }
+  var len = this.stickersPreload.length;
+  if (len) {
+    for (i = 0; i < len; i++) {
+      currentPos = this.stickersPreload[i];
+      if (currentPos[0] >= scrollTop && currentPos[0] <= scrollTop + ch) {
+        // console.log('replace', currentPos[1], i);
+        this.replaceStickerImage(currentPos[1]);
+        this.stickersPreload.splice(i, 1);
+        i--;
+        len--;
+      }
+    }
+  }
+  // console.log('on sticker scroll', scrollTop, ch, sh, currentCat, this.stickersetPositions);
+  if (this.cat === currentCat || currentCat === false) {
+    return;
+  }
+  $('.active', this.categoriesEl).removeClass('active');
+  this.cat = currentCat;
+  this.activateStickerCategory();
+};
+
+EmojiTooltip.prototype.onStickersChanged = function () {
+  if (this.tab) {
+    this.updateStickersContents(true);
+  }
+};
+
+EmojiTooltip.prototype.activateStickerCategory = function () {
+  var categoriesEl = this.categoriesEl[1];
+  var categoryEl = categoriesEl.childNodes[this.cat];
+  if (!categoryEl) {
+    return;
+  }
+  $(categoryEl).addClass('active');
+
+  var left = categoryEl.offsetLeft;
+  var width = categoryEl.offsetWidth;
+  var viewportWidth = categoriesEl.clientWidth;
+
+  // console.log('current cat el', categoryEl, left, width, viewportWidth);
+  $(categoriesEl).stop(true).animate({scrollLeft: left - (viewportWidth - width) / 2}, 200);
+}
+
+
 EmojiTooltip.prototype.updatePosition = function () {
   var offset = this.btnEl.offset();
   this.tooltipEl.css({top: offset.top, left: offset.left});
@@ -409,7 +596,11 @@ EmojiTooltip.prototype.updatePosition = function () {
 
 EmojiTooltip.prototype.show = function () {
   this.updatePosition();
-  this.updateTabContents();
+  if (this.tab) {
+    this.updateStickersContents(true);
+  } else {
+    this.updateEmojiContents();
+  }
   this.tooltipEl.addClass('composer_emoji_tooltip_shown');
   this.btnEl.addClass('composer_emoji_insert_btn_on');
   delete this.showTimeout;
@@ -483,31 +674,19 @@ EmojiPanel.prototype.update = function () {
 
 
 function MessageComposer (textarea, options) {
+  var self = this;
+
   this.textareaEl = $(textarea);
 
   this.setUpInput();
 
-  this.autoCompleteEl = $('<ul class="composer_dropdown dropdown-menu"></ul>').appendTo(document.body);
+  this.autoCompleteWrapEl = $('<div class="composer_dropdown_wrap"></div>').appendTo(document.body);
+  var autoCompleteEl = $('<div></div>').appendTo(this.autoCompleteWrapEl);
 
-  var self = this;
-  this.autoCompleteEl.on('mousedown', function (e) {
-    e = e.originalEvent || e;
-    var target = $(e.target), mention, code;
-    if (target[0].tagName != 'A') {
-      target = $(target[0].parentNode);
-    }
-    if (code = target.attr('data-code')) {
-      if (self.onEmojiSelected) {
-        self.onEmojiSelected(code, true);
-      }
-      EmojiHelper.pushPopularEmoji(code);
-    }
-    if (mention = target.attr('data-mention')) {
-      if (self.onMentionSelected) {
-        self.onMentionSelected(mention);
-      }
-    }
-    return cancelEvent(e);
+  options.dropdownDirective(autoCompleteEl, function (scope, newAutoCompleteEl) {
+    self.autoCompleteEl = newAutoCompleteEl;
+    self.autoCompleteScope = scope;
+    self.setUpAutoComplete();
   });
 
   this.isActive = false;
@@ -516,17 +695,87 @@ function MessageComposer (textarea, options) {
   this.onMessageSubmit = options.onMessageSubmit;
   this.getSendOnEnter = options.getSendOnEnter;
   this.onFilePaste = options.onFilePaste;
+  this.onCommandSend = options.onCommandSend;
+  this.onInlineResultSend = options.onInlineResultSend;
   this.mentions = options.mentions;
-  this.getPeerImage = options.getPeerImage;
+  this.commands = options.commands;
 }
 
+MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/;
+
+
 MessageComposer.prototype.setUpInput = function () {
+  this.inlinePlaceholderWrap = $('<div class="im_inline_placeholder_wrap"></div>').prependTo(this.textareaEl[0].parentNode);
+  this.inlinePlaceholderPrefixEl = $('<span class="im_inline_placeholder_prefix"></span>').appendTo(this.inlinePlaceholderWrap);
+  this.inlinePlaceholderEl = $('<span class="im_inline_placeholder"></span>').appendTo(this.inlinePlaceholderWrap);
+
   if ('contentEditable' in document.body) {
     this.setUpRich();
   } else {
     this.setUpPlaintext();
   }
-  this.autoCompleteRegEx = /(?:\s|^)(:|@)([A-Za-z0-9\-\+\*_]*)$/;
+
+  if (!Config.Mobile) {
+    var sbWidth = getScrollWidth();
+    if (sbWidth) {
+      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
+    }
+  }
+}
+
+MessageComposer.prototype.setInlinePlaceholder = function (prefix, placeholder) {
+  this.inlinePlaceholderPrefix = prefix
+  this.inlinePlaceholderPrefixEl.html(encodeEntities(prefix));
+  this.inlinePlaceholderEl.html(encodeEntities(placeholder));
+  this.onChange();
+}
+
+MessageComposer.prototype.updateInlinePlaceholder = function () {
+  var prefix = this.inlinePlaceholderPrefix;
+  if (prefix) {
+    var value = this.textareaEl.val();
+    this.inlinePlaceholderWrap.toggleClass('active', value == prefix);
+  }
+}
+
+MessageComposer.prototype.setUpAutoComplete = function () {
+  this.scroller = new Scroller(this.autoCompleteEl, {maxHeight: 180});
+
+  var self = this;
+  this.autoCompleteEl.on('mousedown', function (e) {
+    e = e.originalEvent || e;
+    var target = e.target;
+    var mention, code, command, inlineID;
+    while (target && target.tagName != 'A') {
+      target = target.parentNode;
+    }
+    if (!target) {
+      return cancelEvent(e);
+    }
+    target = $(target);
+    if (code = target.attr('data-code')) {
+      if (self.onEmojiSelected) {
+        self.onEmojiSelected(code, true);
+      }
+      EmojiHelper.pushPopularEmoji(code);
+    }
+    if (mention = target.attr('data-mention')) {
+      self.onMentionSelected(mention);
+    }
+    if (command = target.attr('data-command')) {
+      if (self.onCommandSelected) {
+        self.onCommandSelected(command);
+      }
+      self.hideSuggestions();
+    }
+    if (inlineID = target.attr('data-inlineid')) {
+      if (self.onInlineResultSend) {
+        self.onInlineResultSend(inlineID);
+      }
+      self.hideSuggestions();
+    }
+    return cancelEvent(e);
+  });
 }
 
 MessageComposer.prototype.setUpRich = function () {
@@ -551,6 +800,7 @@ MessageComposer.prototype.setUpPlaintext = function () {
 MessageComposer.prototype.onKeyEvent = function (e) {
   var self = this;
   if (e.type == 'keyup') {
+    // console.log(dT(), 'keyup', e.keyCode);
     this.checkAutocomplete();
 
     var length = false;
@@ -560,13 +810,15 @@ MessageComposer.prototype.onKeyEvent = function (e) {
       if (this.keyupStarted === undefined) {
         this.keyupStarted = now;
       }
-      if (now - this.keyupStarted > 10000) {
+      if (now - this.keyupStarted > 3000 || true) {
         this.onChange();
       }
       else {
         length = this.richTextareaEl[0].textContent.length;
         if (this.wasEmpty != !length) {
           this.wasEmpty = !this.wasEmpty;
+          this.onChange();
+        } else if (this.inlinePlaceholderPrefix) {
           this.onChange();
         } else {
           this.updateValueTO = setTimeout(this.onChange.bind(this), 1000);
@@ -594,41 +846,60 @@ MessageComposer.prototype.onKeyEvent = function (e) {
     if (this.autocompleteShown) {
       if (e.keyCode == 38 || e.keyCode == 40) { // UP / DOWN
         var next = e.keyCode == 40;
-        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
+        var currentSel = $(this.autoCompleteEl).find('li.composer_autocomplete_option_active');
+        var allLIs = Array.prototype.slice.call($(this.autoCompleteEl).find('li'));
+        var nextSel;
 
-        if (currentSelected.length) {
-          var currentSelectedWrap = currentSelected[0].parentNode;
-          var nextWrap = currentSelectedWrap[next ? 'nextSibling' : 'previousSibling'];
-          currentSelected.removeClass('composer_autocomplete_option_active');
-          if (nextWrap) {
-            $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
+        if (currentSel.length) {
+          var pos = allLIs.indexOf(currentSel[0]);
+          var nextPos = pos + (next ? 1 : -1);
+          nextSel = allLIs[nextPos];
+          currentSel.removeClass('composer_autocomplete_option_active');
+          if (nextSel) {
+            $(nextSel).addClass('composer_autocomplete_option_active');
+            this.scroller.scrollToNode(nextSel);
+            // console.log(dT(), 'keydown cancel', e.keyCode);
             return cancelEvent(e);
           }
         }
 
-        var childNodes = this.autoCompleteEl[0].childNodes;
-        var nextWrap = childNodes[next ? 0 : childNodes.length - 1];
-        $(nextWrap).find('a').addClass('composer_autocomplete_option_active');
+        nextSel = allLIs[next ? 0 : allLIs.length - 1];
+        this.scroller.scrollToNode(nextSel);
+        $(nextSel).addClass('composer_autocomplete_option_active');
 
+        // console.log(dT(), 'keydown cancel', e.keyCode);
         return cancelEvent(e);
       }
 
       if (e.keyCode == 13 || e.keyCode == 9) { // Enter or Tab
-        var currentSelected = $(this.autoCompleteEl).find('.composer_autocomplete_option_active');
-        if (!currentSelected.length && e.keyCode == 9) {
-          currentSelected = $(this.autoCompleteEl[0].childNodes[0]).find('a');
+        var currentSel = $(this.autoCompleteEl).find('li.composer_autocomplete_option_active');
+        if (!currentSel.length && e.keyCode == 9) {
+          currentSel = $(this.autoCompleteEl).find('li:first');
         }
-        var code, mention;
-        if (code = currentSelected.attr('data-code')) {
+        currentSel = currentSel.find('a:first');
+        var code, mention, command, inlineID;
+        if (code = currentSel.attr('data-code')) {
           this.onEmojiSelected(code, true);
           EmojiHelper.pushPopularEmoji(code);
           return cancelEvent(e);
         }
-        if (mention = currentSelected.attr('data-mention')) {
-          if (this.onMentionSelected) {
-            this.onMentionSelected(mention);
-            return cancelEvent(e);
+        if (mention = currentSel.attr('data-mention')) {
+          this.onMentionSelected(mention);
+          return cancelEvent(e);
+        }
+        if (command = currentSel.attr('data-command')) {
+          if (this.onCommandSelected) {
+            this.onCommandSelected(command, e.keyCode == 9);
           }
+          return cancelEvent(e);
+        }
+        if (inlineID = currentSel.attr('data-inlineid')) {
+          if (self.onInlineResultSend) {
+            self.onInlineResultSend(inlineID);
+          }
+          self.hideSuggestions();
+          // console.log(dT(), 'keydown cancel', e.keyCode);
+          return cancelEvent(e);
         }
         checkSubmit = true;
       }
@@ -692,33 +963,43 @@ MessageComposer.prototype.restoreSelection = function () {
 
 
 
-MessageComposer.prototype.checkAutocomplete = function () {
-  if (Config.Mobile) {
-    return false;
-  }
+MessageComposer.prototype.checkAutocomplete = function (forceFull) {
   var pos, value;
   if (this.richTextareaEl) {
     var textarea = this.richTextareaEl[0];
     var valueCaret = getRichValueWithCaret(textarea);
     var value = valueCaret[0];
     var pos = valueCaret[1] >= 0 ? valueCaret[1] : value.length;
+
+    if (!pos) {
+      this.cleanRichTextarea(value, true);
+    }
   } else {
     var textarea = this.textareaEl[0];
     var pos = getFieldSelection(textarea);
     var value = textarea.value;
   }
 
-  value = value.substr(0, pos);
+  if (value &&
+      this.curInlineResults &&
+      this.curInlineResults.text == value) {
+    this.showInlineSuggestions(this.curInlineResults);
+    return;
+  };
 
-  var matches = value.match(this.autoCompleteRegEx);
+  if (!forceFull) {
+    value = value.substr(0, pos);
+  }
+
+  var matches = value.match(MessageComposer.autoCompleteRegEx);
   if (matches) {
     if (this.previousQuery == matches[0]) {
       return;
     }
     this.previousQuery = matches[0];
-    var query = SearchIndexManager.cleanSearchText(matches[2]);
+    var query = SearchIndexManager.cleanSearchText(matches[3]);
 
-    if (matches[1] == '@') { // mentions
+    if (matches[2] == '@') { // mentions
       if (this.mentions && this.mentions.index) {
         if (query.length) {
           var foundObject = SearchIndexManager.search(query, this.mentions.index);
@@ -742,7 +1023,31 @@ MessageComposer.prototype.checkAutocomplete = function () {
         this.hideSuggestions();
       }
     }
-    else { // emoji
+    else if (!matches[1] && matches[2] == '/') { // commands
+      if (this.commands && this.commands.index) {
+        if (query.length) {
+          var foundObject = SearchIndexManager.search(query, this.commands.index);
+          var foundCommands = [];
+          var command;
+          for (var i = 0, length = this.commands.list.length; i < length; i++) {
+            command = this.commands.list[i];
+            if (foundObject[command.value]) {
+              foundCommands.push(command);
+            }
+          }
+        } else {
+          var foundCommands = this.commands.list;
+        }
+        if (foundCommands.length) {
+          this.showCommandsSuggestions(foundCommands);
+        } else {
+          this.hideSuggestions();
+        }
+      } else {
+        this.hideSuggestions();
+      }
+    }
+    else if (matches[2] == ':') { // emoji
       EmojiHelper.getPopularEmoji((function (popular) {
         if (query.length) {
           var found = EmojiHelper.searchEmojis(query);
@@ -780,6 +1085,7 @@ MessageComposer.prototype.onFocusBlur = function (e) {
   this.isActive = e.type == 'focus';
 
   if (!this.isActive) {
+    this.cleanRichTextarea();
     this.hideSuggestions();
   } else {
     setTimeout(this.checkAutocomplete.bind(this), 100);
@@ -811,6 +1117,27 @@ MessageComposer.prototype.onRichPaste = function (e) {
     return cancelEvent(e);
   }
   return true;
+}
+
+MessageComposer.prototype.cleanRichTextarea = function (value, focused) {
+  if (!this.richTextareaEl[0]) {
+    return;
+  }
+  if (value === undefined) {
+    value = getRichValue(this.richTextareaEl[0]);
+  }
+  if (value.match(/^\s*$/) && this.richTextareaEl.html().length > 0) {
+    this.richTextareaEl.html('');
+    this.lastLength = 0;
+    this.wasEmpty = true;
+
+    if (focused) {
+      var self = this;
+      setZeroTimeout(function () {
+        self.focus();
+      });
+    }
+  }
 }
 
 MessageComposer.prototype.onRichPasteNode = function (e) {
@@ -861,11 +1188,17 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
       }
       textarea.value = newValue;
 
-      this.selId = (this.selId || 0) + 1;
-      var html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
-
-      this.richTextareaEl.html(html);
-      setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+      var html;
+      if (suffix.length) {
+        this.selId = (this.selId || 0) + 1;
+        html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
+        this.richTextareaEl.html(html);
+        setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+      } else {
+        html = this.getRichHtml(newValuePrefix) + '&nbsp;';
+        this.richTextareaEl.html(html);
+        setRichFocus(textarea);
+      }
     } else {
       var html = this.getEmojiHtml(code);
       if (window.getSelection) {
@@ -948,11 +1281,17 @@ MessageComposer.prototype.onMentionSelected = function (username) {
     }
     textarea.value = newValue;
 
-    this.selId = (this.selId || 0) + 1;
-    var html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
-
-    this.richTextareaEl.html(html);
-    setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+    var html;
+    if (suffix.length) {
+      this.selId = (this.selId || 0) + 1;
+      html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix);
+      this.richTextareaEl.html(html);
+      setRichFocus(textarea, $('#composer_sel' + this.selId)[0]);
+    } else {
+      html = this.getRichHtml(newValuePrefix) + '&nbsp;';
+      this.richTextareaEl.html(html);
+      setRichFocus(textarea);
+    }
   }
   else {
     var textarea = this.textareaEl[0];
@@ -977,11 +1316,32 @@ MessageComposer.prototype.onMentionSelected = function (username) {
   this.onChange();
 }
 
+MessageComposer.prototype.onCommandSelected = function (command, isTab) {
+  if (isTab) {
+    if (this.richTextareaEl) {
+      this.richTextareaEl.html(encodeEntities(command) + '&nbsp;');
+      setRichFocus(this.richTextareaEl[0]);
+    }
+    else {
+      var textarea = this.textareaEl[0];
+      textarea.value = command + ' ';
+      setFieldSelection(textarea);
+    }
+  } else {
+    this.onCommandSend(command);
+  }
+
+  this.hideSuggestions();
+  this.onChange();
+}
+
 MessageComposer.prototype.onChange = function (e) {
   if (this.richTextareaEl) {
     delete this.keyupStarted;
-    this.textareaEl.val(getRichValue(this.richTextareaEl[0])).trigger('change');
+    var richValue = getRichValue(this.richTextareaEl[0]);
+    this.textareaEl.val(richValue).trigger('change');
   }
+  this.updateInlinePlaceholder();
 }
 
 MessageComposer.prototype.getEmojiHtml = function (code, emoji) {
@@ -1007,14 +1367,44 @@ MessageComposer.prototype.setValue = function (text) {
   }
 }
 
+MessageComposer.prototype.setFocusedValue = function (parts) {
+  var prefix = parts[0];
+  var selection = parts[1];
+  var suffix = parts[2];
+
+  if (this.richTextareaEl) {
+    this.selId = (this.selId || 0) + 1;
+    var html =
+      this.getRichHtml(prefix) +
+      '<span id="composer_sel' + this.selId + '">' +
+        this.getRichHtml(selection) +
+      '</span>' +
+      this.getRichHtml(suffix);
+
+    this.richTextareaEl.html(html);
+
+    setRichFocus(this.richTextareaEl[0], $('#composer_sel' + this.selId)[0], true);
+  } else {
+    this.textareaEl.val(prefix + selection + suffix);
+    setFieldSelection(this.textareaEl[0], prefix.length, prefix.length + selection.length);
+  }
+}
+
+
+
 MessageComposer.prototype.getRichHtml = function (text) {
-  return $('<div>').text(text).html().replace(/\n/g, '<br/>').replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
+  var html = $('<div>').text(text).html();
+  html = html.replace(/\n/g, '<br/>');
+  html = html.replace(/:([A-Za-z0-9\-\+\*_]+?):/gi, (function (all, shortcut) {
     var code = EmojiHelper.shortcuts[shortcut];
     if (code !== undefined) {
       return this.getEmojiHtml(code);
     }
     return all;
   }).bind(this));
+  html = html.replace(/  /g, " \u00A0").replace(/^ | $/g, "\u00A0");
+
+  return html;
 }
 
 
@@ -1028,68 +1418,103 @@ MessageComposer.prototype.focus = function () {
   }
 }
 
-
-MessageComposer.prototype.showEmojiSuggestions = function (codes) {
-  var html = [];
-  var iconSize = Config.Mobile ? 26 : 20;
-
-  var emoticonCode, emoticonData, spritesheet, pos, categoryIndex;
-  var count = Math.min(5, codes.length);
-  var i, x, y;
-
-  for (i = 0; i < count; i++) {
-    emoticonCode = codes[i];
-    if (emoticonCode.code) {
-      emoticonCode = emoticonCode.code;
-    }
-    if (emoticonData = Config.Emoji[emoticonCode]) {
-      spritesheet = EmojiHelper.spritesheetPositions[emoticonCode];
-      categoryIndex = spritesheet[0];
-      pos = spritesheet[1];
-      x = iconSize * spritesheet[3];
-      y = iconSize * spritesheet[2];
-      html.push('<li><a class="composer_emoji_option" data-code="' + encodeEntities(emoticonCode) + '"><i class="emoji emoji-w20 emoji-spritesheet-' + categoryIndex + '" style="background-position: -' + x + 'px -' + y + 'px;"></i><span class="composer_emoji_shortcut">:' + encodeEntities(emoticonData[1][0]) + ':</span></a></li>');
-    }
+MessageComposer.prototype.blur = function () {
+  if (this.richTextareaEl) {
+    this.richTextareaEl[0].blur();
+  } else {
+    this.textareaEl[0].blur();
   }
+}
 
-  this.autoCompleteEl.html(html.join(''));
-  this.autoCompleteEl.show();
+MessageComposer.prototype.renderSuggestions = function () {
+  this.autoCompleteWrapEl.show();
+  this.scroller.reinit();
   this.updatePosition();
   this.autocompleteShown = true;
 }
 
-MessageComposer.prototype.showMentionSuggestions = function (users) {
-  var html = [];
-  var user;
-  var count = Math.min(5, users.length);
-  var i;
-
-  for (i = 0; i < count; i++) {
-    user = users[i];
-    html.push('<li><a class="composer_mention_option" data-mention="' + user.username + '"><span class="composer_user_photo" data-user-id="' + user.id + '"></span><span class="composer_user_name">' + user.rFullName + '</span><span class="composer_user_mention">@' + user.username + '</span></a></li>');
-  }
-
-  this.autoCompleteEl.html(html.join(''));
-
+MessageComposer.prototype.showEmojiSuggestions = function (codes) {
   var self = this;
-  this.autoCompleteEl.find('.composer_user_photo').each(function (k, element) {
-    self.getPeerImage($(element), element.getAttribute('data-user-id'));
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'emoji';
+      self.autoCompleteScope.emojiCodes = codes;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
   });
+}
 
-  this.autoCompleteEl.show();
-  this.updatePosition();
-  this.autocompleteShown = true;
+MessageComposer.prototype.showMentionSuggestions = function (users) {
+  var self = this;
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'mentions';
+      self.autoCompleteScope.mentionUsers = users;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
+  });
+}
+
+MessageComposer.prototype.showCommandsSuggestions = function (commands) {
+  var self = this;
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'commands';
+      self.autoCompleteScope.commands = commands;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
+  });
+}
+
+MessageComposer.prototype.showInlineSuggestions = function (botResults) {
+  if (!botResults || !botResults.results.length) {
+    this.hideSuggestions();
+    return;
+  }
+  var self = this;
+  if (self.autoCompleteScope.type == 'inline' &&
+      self.autoCompleteScope.botResults == botResults &&
+      self.autocompleteShown) {
+    return;
+  }
+  setZeroTimeout(function () {
+    self.autoCompleteScope.$apply(function () {
+      self.autoCompleteScope.type = 'inline';
+      self.autoCompleteScope.botResults = botResults;
+    });
+    onContentLoaded(function () {
+      self.renderSuggestions();
+    });
+  });
+}
+
+MessageComposer.prototype.setInlineSuggestions = function (botResults) {
+  this.curInlineResults = botResults;
+  this.checkAutocomplete();
 }
 
 MessageComposer.prototype.updatePosition = function () {
   var offset = (this.richTextareaEl || this.textareaEl).offset();
-  var height = this.autoCompleteEl.outerHeight();
-  var width = (this.richTextareaEl || this.textareaEl).outerWidth();
-  this.autoCompleteEl.css({top: offset.top - height, left: offset.left, width: width - 2});
+  var height = this.scroller.updateHeight();
+  var width = $((this.richTextareaEl || this.textareaEl)[0].parentNode).outerWidth();
+  this.autoCompleteWrapEl.css({
+    top: offset.top - height,
+    left: Config.Mobile ? 0 : offset.left,
+    width: Config.Mobile ? '100%' : width - 2
+  });
+  this.scroller.update();
 }
 
 MessageComposer.prototype.hideSuggestions = function () {
-  this.autoCompleteEl.hide();
+  // console.trace();
+  // return;
+  this.autoCompleteWrapEl.hide();
   delete this.autocompleteShown;
 }
 
@@ -1097,4 +1522,141 @@ MessageComposer.prototype.resetTyping = function () {
   this.lastTyping = 0;
   this.lastLength = 0;
 }
+
+MessageComposer.prototype.setPlaceholder = function (newPlaceholder) {
+  (this.richTextareaEl || this.textareaEl).attr('placeholder', newPlaceholder);
+}
+
+
+
+
+function Scroller(content, options) {
+  options = options || {};
+  var classPrefix = options.classPrefix || 'scroller';
+
+  this.content = $(content);
+  this.useNano = options.nano !== undefined ? options.nano : !Config.Mobile;
+  this.maxHeight = options.maxHeight;
+  this.minHeight = options.minHeight;
+
+  if (this.useNano) {
+    this.setUpNano();
+  } else {
+    this.setUpNative();
+  }
+  this.updateHeight();
+}
+Scroller.prototype.setUpNano = function () {
+  this.content.wrap('<div class="scroller_scrollable_container"><div class="scroller_scrollable_wrap nano"><div class="scroller_scrollable nano-content "></div></div></div>');
+
+  this.scrollable = $(this.content[0].parentNode);
+  this.scroller = $(this.scrollable[0].parentNode);
+  this.wrap = $(this.scroller[0].parentNode);
+
+  this.scroller.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+}
+
+Scroller.prototype.setUpNative = function () {
+  this.content.wrap('<div class="scroller_native_scrollable"></div>');
+  this.scrollable = $(this.content[0].parentNode);
+
+  this.scrollable.css({overflow: 'auto'});
+  if (this.maxHeight) {
+    this.scrollable.css({maxHeight: this.maxHeight});
+  }
+  if (this.minHeight) {
+    this.scrollable.css({minHeight: this.minHeight});
+  }
+}
+
+Scroller.prototype.onScroll = function (cb) {
+  var self = this;
+  var scrollable = this.scrollable[0];
+  this.scrollable.on('scroll', function (e) {
+    if (self.isAnimatedScroll) {
+      return;
+    }
+    cb(scrollable, scrollable.scrollTop);
+  })
+
+}
+
+Scroller.prototype.update = function () {
+  if (this.useNano) {
+    $(this.scroller).nanoScroller();
+  }
+}
+
+Scroller.prototype.reinit = function () {
+  this.scrollTo(0);
+  if (this.useNano) {
+    setTimeout((function () {
+      this.updateHeight();
+    }).bind(this), 100)
+  }
+}
+
+Scroller.prototype.updateHeight = function () {
+  var height;
+  if (this.useNano) {
+    if (this.maxHeight || this.minHeight) {
+      height = this.content[0].offsetHeight;
+      if (this.maxHeight && height > this.maxHeight) {
+        height = this.maxHeight;
+      }
+      if (this.minHeight && height < this.minHeight) {
+        height = this.minHeight;
+      }
+      this.wrap.css({height: height});
+    } else {
+      height = this.scroller[0].offsetHeight;
+    }
+    $(this.scroller).nanoScroller();
+  } else {
+    height = this.scrollable[0].offsetHeight;
+  }
+  return height;
+}
+
+
+Scroller.prototype.scrollTo = function (scrollTop, animation, cb) {
+  if (animation > 0) {
+    var self = this;
+    this.isAnimatedScroll = true;
+    this.scrollable.animate({scrollTop: scrollTop}, animation, function () {
+      delete self.isAnimatedScroll;
+      if (self.useNano) {
+        $(self.scroller).nanoScroller({flash: true});
+      }
+      self.scrollable.trigger('scroll');
+      if (cb) {
+        cb();
+      }
+    });
+  } else {
+    this.scrollable[0].scrollTop = scrollTop;
+    if (this.useNano) {
+      $(this.scroller).nanoScroller({flash: true});
+    }
+    if (cb) {
+      cb();
+    }
+  }
+}
+
+Scroller.prototype.scrollToNode = function (node) {
+  node = node[0] || node;
+  var elTop = node.offsetTop - 15,
+      elHeight = node.offsetHeight + 30,
+      scrollTop = this.scrollable[0].scrollTop,
+      viewportHeight = this.scrollable[0].clientHeight;
+
+  if (scrollTop > elTop) { // we are below the node to scroll
+    this.scrollTo(elTop);
+  }
+  else if (scrollTop < elTop + elHeight - viewportHeight) { // we are over the node to scroll
+    this.scrollTo(elTop + elHeight - viewportHeight);
+  }
+}
+
 

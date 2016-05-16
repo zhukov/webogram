@@ -26,10 +26,10 @@
           </div>
 
           <div ng-switch-default class="stickerset_modal_stickers_list clearfix">
-            <div class="stickerset_modal_sticker_wrap" ng-repeat="sticker in documents | limitTo: slice.limit">
-              <div class="stickerset_modal_sticker" my-load-sticker document="sticker" thumb="true"></div>
-              <div class="stickerset_modal_sticker_alt" ng-bind-html="sticker.stickerEmoji"></div>
-            </div>
+            <a class="stickerset_modal_sticker_wrap" ng-repeat="sticker in documents | limitTo: slice.limit" ng-click="chooseSticker(sticker.id)">
+              <div class="stickerset_modal_sticker" my-load-sticker document="sticker" dim="stickerDimensions[sticker.id]"></div>
+              <div class="stickerset_modal_sticker_alt" ng-bind-html="stickerEmojis[sticker.id]"></div>
+            </a>
           </div>
 
         </div>
@@ -39,6 +39,7 @@
 
     <div class="stickerset_actions_wrap">
       <div class="stickerset_actions" ng-switch="stickersetInstalled">
+        <button ng-if="stickersetLoaded" class="btn btn-md btn-md-primary pull-left" my-i18n="stickerset_modal_share" ng-click="share()"></button>
         <button ng-switch-when="true" class="btn btn-md btn-md-danger" my-i18n="stickerset_modal_uninstall" ng-click="toggleInstalled(false)"></button>
         <button ng-switch-when="false" class="btn btn-md btn-md-primary" my-i18n="stickerset_modal_install" ng-click="toggleInstalled(true)"></button>
       </div>

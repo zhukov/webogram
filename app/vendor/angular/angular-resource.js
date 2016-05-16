@@ -1,6 +1,6 @@
 /**
- * @license AngularJS v1.3.2
- * (c) 2010-2014 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.4.7
+ * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
 (function(window, angular, undefined) {'use strict';
@@ -10,7 +10,7 @@ var $resourceMinErr = angular.$$minErr('$resource');
 // Helper functions and regex to lookup a dotted path on an object
 // stopping at undefined/null.  The path must be composed of ASCII
 // identifiers (just like $parse)
-var MEMBER_NAME_REGEX = /^(\.[a-zA-Z_$][0-9a-zA-Z_$]*)+$/;
+var MEMBER_NAME_REGEX = /^(\.[a-zA-Z_$@][0-9a-zA-Z_$@]*)+$/;
 
 function isValidDottedPath(path) {
   return (path != null && path !== '' && path !== 'hasOwnProperty' &&
@@ -22,7 +22,7 @@ function lookupDottedPath(obj, path) {
     throw $resourceMinErr('badmember', 'Dotted member path "@{0}" is invalid.', path);
   }
   var keys = path.split('.');
-  for (var i = 0, ii = keys.length; i < ii && obj !== undefined; i++) {
+  for (var i = 0, ii = keys.length; i < ii && angular.isDefined(obj); i++) {
     var key = keys[i];
     obj = (obj !== null) ? obj[key] : undefined;
   }
@@ -90,7 +90,7 @@ function shallowClearAndCopy(src, dst) {
      }]);
  * ```
  *
- * @param {string} url A parametrized URL template with parameters prefixed by `:` as in
+ * @param {string} url A parameterized URL template with parameters prefixed by `:` as in
  *   `/user/:username`. If you are using a URL with a port number (e.g.
  *   `http://example.com:8080/api`), it will be respected.
  *
@@ -116,7 +116,7 @@ function shallowClearAndCopy(src, dst) {
  *   example, if the `defaultParam` object is `{someParam: '@someProp'}` then the value of `someParam`
  *   will be `data.someProp`.
  *
- * @param {Object.<Object>=} actions Hash with declaration of custom action that should extend
+ * @param {Object.<Object>=} actions Hash with declaration of custom actions that should extend
  *   the default set of resource actions. The declaration should be created in the format of {@link
  *   ng.$http#usage $http.config}:
  *
@@ -213,7 +213,9 @@ function shallowClearAndCopy(src, dst) {
  *   - non-GET "class" actions: `Resource.action([parameters], postData, [success], [error])`
  *   - non-GET instance actions:  `instance.$action([parameters], [success], [error])`
  *
- *   Success callback is called with (value, responseHeaders) arguments. Error callback is called
+ *
+ *   Success callback is called with (value, responseHeaders) arguments, where the value is
+ *   the populated resource instance or collection object. The error callback is called
  *   with (httpResponse) argument.
  *
  *   Class actions return empty instance (with additional properties below).
@@ -351,6 +353,7 @@ function shallowClearAndCopy(src, dst) {
  */
 angular.module('ngResource', ['ng']).
   provider('$resource', function() {
+    var PROTOCOL_AND_DOMAIN_REGEX = /^https?:\/\/[^\/]*/;
     var provider = this;
 
     this.defaults = {
@@ -425,7 +428,8 @@ angular.module('ngResource', ['ng']).
           var self = this,
             url = actionUrl || self.template,
             val,
-            encodedVal;
+            encodedVal,
+            protocolAndDomain = '';
 
           var urlParams = self.urlParams = {};
           forEach(url.split(/\W/), function(param) {
@@ -438,6 +442,10 @@ angular.module('ngResource', ['ng']).
             }
           });
           url = url.replace(/\\:/g, ':');
+          url = url.replace(PROTOCOL_AND_DOMAIN_REGEX, function(match) {
+            protocolAndDomain = match;
+            return '';
+          });
 
           params = params || {};
           forEach(self.urlParams, function(_, urlParam) {
@@ -468,7 +476,7 @@ angular.module('ngResource', ['ng']).
           // E.g. `http://url.com/id./format?q=x` becomes `http://url.com/id.format?q=x`
           url = url.replace(/\/\.(?=\w+($|\?))/, '.');
           // replace escaped `/\.` with `/.`
-          config.url = url.replace(/\/\\\./, '/.');
+          config.url = protocolAndDomain + url.replace(/\/\\\./, '/.');
 
 
           // set params - delegate param encoding to $http
@@ -585,8 +593,8 @@ angular.module('ngResource', ['ng']).
                 if (angular.isArray(data) !== (!!action.isArray)) {
                   throw $resourceMinErr('badcfg',
                       'Error in resource configuration for action `{0}`. Expected response to ' +
-                      'contain an {1} but got an {2}', name, action.isArray ? 'array' : 'object',
-                    angular.isArray(data) ? 'array' : 'object');
+                      'contain an {1} but got an {2} (Request: {3} {4})', name, action.isArray ? 'array' : 'object',
+                    angular.isArray(data) ? 'array' : 'object', httpConfig.method, httpConfig.url);
                 }
                 // jshint +W018
                 if (action.isArray) {

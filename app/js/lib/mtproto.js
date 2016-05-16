@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.6 - messaging web application for MTProto
+ * Webogram v0.5.4 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -12,15 +12,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
   var dcOptions = Config.Modes.test
     ? [
-      {id: 1, host: '149.154.175.10', port: 80},
-      {id: 2, host: '149.154.167.40', port: 80},
-      {id: 3, host: '174.140.142.5', port: 80}
+      {id: 1, host: '149.154.175.10',  port: 80},
+      {id: 2, host: '149.154.167.40',  port: 80},
+      {id: 3, host: '149.154.175.117', port: 80}
     ]
     : [
-      {id: 1, host: '149.154.175.50', port: 80},
-      {id: 2, host: '149.154.167.51', port: 80},
+      {id: 1, host: '149.154.175.50',  port: 80},
+      {id: 2, host: '149.154.167.51',  port: 80},
       {id: 3, host: '149.154.175.100', port: 80},
-      {id: 4, host: '149.154.167.91', port: 80},
+      {id: 4, host: '149.154.167.91',  port: 80},
       {id: 5, host: '149.154.171.5',   port: 80}
     ];
 
@@ -31,7 +31,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var chosenServer = false,
           i, dcOption;
 
-      if (Config.Modes.ssl) {
+      if (Config.Modes.ssl || !Config.Modes.http) {
         var subdomain = sslSubdomains[dcID - 1] + (upload ? '-1' : '');
         var path = Config.Modes.test ? 'apiw_test1' : 'apiw1';
         chosenServer = 'https://' + subdomain + '.web.telegram.org/' + path;
@@ -208,18 +208,20 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     var requestData = xhrSendBuffer ? resultBuffer : resultArray,
         requestPromise;
+    var url = MtpDcConfigurator.chooseServer(dcID);
+    var baseError = {code: 406, type: 'NETWORK_BAD_RESPONSE', url: url};
     try {
-      requestPromise =  $http.post(MtpDcConfigurator.chooseServer(dcID), requestData, {
+      requestPromise =  $http.post(url, requestData, {
         responseType: 'arraybuffer',
         transformRequest: null
       });
     } catch (e) {
-      requestPromise = $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
+      requestPromise = $q.reject(angular.extend(baseError, {originalError: e}));
     }
     return requestPromise.then(
       function (result) {
         if (!result.data || !result.data.byteLength) {
-          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
+          return $q.reject(baseError);
         }
 
         try {
@@ -230,14 +232,14 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var msg_len     = deserializer.fetchInt('msg_len');
 
         } catch (e) {
-          return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE', originalError: e});
+          return $q.reject(angular.extend(baseError, {originalError: e}));
         }
 
         return deserializer;
       },
       function (error) {
         if (!error.message && !error.type) {
-          error = {code: 406, type: 'NETWORK_BAD_REQUEST', originalError: error};
+          error = angular.extend(baseError, {originalError: error});
         }
         return $q.reject(error);
       }
@@ -286,7 +288,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         deferred.reject(error);
       });
     }, function (error) {
-      console.log(dT(), 'req_pq error', error.message);
+      console.error(dT(), 'req_pq error', error.message);
       deferred.reject(error);
     });
 
@@ -797,8 +799,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     // console.log('Set lp', this.longPollPending, tsNow());
 
     this.wrapMtpCall('http_wait', {
-      max_delay: 0,
-      wait_after: 0,
+      max_delay: 500,
+      wait_after: 150,
       max_wait: maxWait
     }, {
       noResponse: true,
@@ -1035,7 +1037,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     if (hasApiCall && !hasHttpWait) {
       var serializer = new TLSerialization({mtproto: true});
-      serializer.storeMethod('http_wait', {max_delay: 0, wait_after: 0, max_wait: 1000});
+      serializer.storeMethod('http_wait', {
+        max_delay: 500,
+        wait_after: 150,
+        max_wait: 3000
+      });
       messages.push({
         msg_id: MtpTimeManager.generateID(),
         seq_no: this.generateSeqNo(),
@@ -1093,6 +1099,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var self = this;
     this.sendEncryptedRequest(message).then(function (result) {
       self.toggleOffline(false);
+      // console.log('parse for', message);
       self.parseResponse(result.data).then(function (response) {
         if (Config.Modes.debug) {
           console.log(dT(), 'Server response', self.dcID, response);
@@ -1196,19 +1203,22 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var requestData = xhrSendBuffer ? request.getBuffer() : request.getArray();
 
       var requestPromise;
+      var url = MtpDcConfigurator.chooseServer(self.dcID, self.upload);
+      var baseError = {code: 406, type: 'NETWORK_BAD_RESPONSE', url: url};
+
       try {
         options = angular.extend(options || {}, {
           responseType: 'arraybuffer',
           transformRequest: null
         });
-        requestPromise =  $http.post(MtpDcConfigurator.chooseServer(self.dcID, self.upload), requestData, options);
+        requestPromise =  $http.post(url, requestData, options);
       } catch (e) {
         requestPromise = $q.reject(e);
       }
       return requestPromise.then(
         function (result) {
           if (!result.data || !result.data.byteLength) {
-            return $q.reject({code: 406, type: 'NETWORK_BAD_RESPONSE'});
+            return $q.reject(baseError);
           }
           return result;
         },
@@ -1223,7 +1233,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
             });
           }
           if (!error.message && !error.type) {
-            error = {code: 406, type: 'NETWORK_BAD_REQUEST'};
+            error = angular.extend(baseError, {type: 'NETWORK_BAD_REQUEST', originalError: error});
           }
           return $q.reject(error);
         }
@@ -1283,7 +1293,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
                 result.body = {_: 'parse_error', error: e};
               }
               if (this.offset != offset + result.bytes) {
-                console.warn(dT(), 'set offset', this.offset, offset, result.bytes);
+                // console.warn(dT(), 'set offset', this.offset, offset, result.bytes);
                 // console.log(dT(), result);
                 this.offset = offset + result.bytes;
               }
@@ -1295,8 +1305,12 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               var sentMessage = self.sentMessages[result.req_msg_id],
                   type = sentMessage && sentMessage.resultType || 'Object';
 
+              if (result.req_msg_id && !sentMessage) {
+                // console.warn(dT(), 'Result for unknown message', result);
+                return;
+              }
               result.result = this.fetchObject(type, field + '[result]');
-              // console.log(dT(), 'override rpc_result', type, result);
+              // console.log(dT(), 'override rpc_result', sentMessage, type, result);
             }
           }
         };

@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.6 - messaging web application for MTProto
+ * Webogram v0.5.4 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -27,13 +27,8 @@ angular.module('myApp.directives')
                               ? '.mobile_modal_body .im_dialogs_panel'
                               : '.im_dialogs_panel',
           panelWrap = $(panelWrapSelector)[0],
-          hasTabs = false,
           moreNotified = false;
 
-      $scope.$on('ui_dialogs_tabs', function (e, newHasTabs) {
-        hasTabs = newHasTabs;
-        updateSizes();
-      });
       $scope.$on('ui_dialogs_search', updateSizes);
       $scope.$on('ui_dialogs_update', updateSizes);
 
@@ -250,10 +245,14 @@ angular.module('myApp.directives')
         });
       });
 
-      $scope.$on('ui_panel_update', function () {
+      $scope.$on('ui_panel_update', function (e, data) {
         onContentLoaded(function () {
           updateSizes();
-          $scope.$broadcast('ui_message_send');
+          if (data && data.blur) {
+            $scope.$broadcast('ui_message_blur');
+          } else {
+            $scope.$broadcast('ui_message_send');
+          }
 
           $timeout(function () {
             $(scrollableWrap).trigger('scroll');

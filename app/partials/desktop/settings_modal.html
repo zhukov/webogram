@@ -17,7 +17,7 @@
         <a ng-switch-default ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})" class="peer_modal_photo" my-peer-photolink="::profile.id" img-class="peer_modal_photo" watch="true" no-open="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
       </div>
       <div class="peer_modal_profile">
-        <div class="peer_modal_profile_name" my-user-link="profile.id"></div>
+        <div class="peer_modal_profile_name" my-peer-link="profile.id"></div>
         <div class="peer_modal_profile_description" my-user-status="::profile.id"></div>
       </div>
     </div>
@@ -34,7 +34,7 @@
 
   <div class="md_modal_body">
 
-    <div class="md_modal_sections">
+    <div class="md_modal_sections clearfix">
 
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number">
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>

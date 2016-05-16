@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.4.6 - messaging web application for MTProto
+ * Webogram v0.5.4 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -7,7 +7,7 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $q, TelegramMeWebService) {
+.factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $rootScope, $q, TelegramMeWebService) {
   var cachedNetworkers = {},
       cachedUploadNetworkers = {},
       cachedExportPromise = {},
@@ -31,11 +31,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function mtpSetUserAuth (dcID, userAuth) {
+    var fullUserAuth = angular.extend({dcID: dcID}, userAuth);
     Storage.set({
       dc: dcID,
-      user_auth: angular.extend({dcID: dcID}, userAuth)
+      user_auth: fullUserAuth
     });
     telegramMeNotify(true);
+    $rootScope.$broadcast('user_auth', fullUserAuth);
 
     baseDcID = dcID;
   }
@@ -131,7 +133,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
           if (!options.noErrorBox) {
             error.input = method;
-            error.stack = error.originalError && error.originalError.stack || error.stack || (new Error()).stack;
+            error.stack = stack || (error.originalError && error.originalError.stack) || error.stack || (new Error()).stack;
             setTimeout(function () {
               if (!error.handled) {
                 if (error.code == 401) {
@@ -214,8 +216,31 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 networker.wrapApiCall(method, params, options).then(function (result) {
                   deferred.resolve(result);
                 }, rejectPromise);
-              });
+              }, rejectPromise);
             }
+          }
+          else if (!options.rawError && error.code == 420) {
+            var waitTime = error.type.match(/^FLOOD_WAIT_(\d+)/)[1] || 10;
+            if (waitTime > (options.timeout || 60)) {
+              return rejectPromise(error);
+            }
+            setTimeout(function () {
+              performRequest(cachedNetworker);
+            }, waitTime * 1000);
+          }
+          else if (!options.rawError && (error.code == 500 || error.type == 'MSG_WAIT_FAILED')) {
+            var now = tsNow();
+            if (options.stopTime) {
+              if (now >= options.stopTime) {
+                return rejectPromise(error);
+              }
+            } else {
+              options.stopTime = now + (options.timeout !== undefined ? options.timeout : 10) * 1000;
+            }
+            options.waitTime = options.waitTime ? Math.min(60, options.waitTime * 1.5) : 1;
+            setTimeout(function () {
+              performRequest(cachedNetworker);
+            }, options.waitTime * 1000);
           }
           else {
             rejectPromise(error);
@@ -255,7 +280,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 })
 
-.factory('MtpApiFileManager', function (MtpApiManager, $q, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage) {
+.factory('MtpApiFileManager', function (MtpApiManager, $q, qSync, FileManager, IdbFileStorage, TmpfsFileStorage, MemoryFileStorage, WebpManager) {
 
   var cachedFs = false;
   var cachedFsPromise = false;
@@ -314,21 +339,24 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
   function getFileName(location) {
     switch (location._) {
-      case 'inputVideoFileLocation':
-        return 'video' + location.id + '.mp4';
-
       case 'inputDocumentFileLocation':
-        return 'doc' + location.id;
+        var fileName = (location.file_name || '').split('.', 2);
+        var ext = fileName[1] || '';
+        if (location.sticker && !WebpManager.isWebpSupported()) {
+          ext += '.png';
+        }
+        return fileName[0] + '_' + location.id + '.' + ext;
 
-      case 'inputAudioFileLocation':
-        return 'audio' + location.id;
+      default:
+        if (!location.volume_id) {
+          console.trace('Empty location', location);
+        }
+        var ext = 'jpg';
+        if (location.sticker) {
+          ext = WebpManager.isWebpSupported() ? 'webp' : 'png';
+        }
+        return location.volume_id + '_' + location.local_id + '_' + location.secret + '.' + ext;
     }
-
-    if (!location.volume_id) {
-      console.trace('Empty location', location);
-    }
-
-    return location.volume_id + '_' + location.local_id + '_' + location.secret + '.jpg';
   };
 
   function getTempFileName(file) {
@@ -347,11 +375,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   }
 
   function getFileStorage () {
-    if (TmpfsFileStorage.isAvailable()) {
-      return TmpfsFileStorage;
-    }
-    if (IdbFileStorage.isAvailable()) {
-      return IdbFileStorage;
+    if (!Config.Modes.memory_only) {
+      if (TmpfsFileStorage.isAvailable()) {
+        return TmpfsFileStorage;
+      }
+      if (IdbFileStorage.isAvailable()) {
+        return IdbFileStorage;
+      }
     }
     return MemoryFileStorage;
   }
@@ -363,6 +393,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     if (!cachedSavePromises[fileName]) {
       cachedSavePromises[fileName] = getFileStorage().saveFile(fileName, bytes).then(function (blob) {
         return cachedDownloads[fileName] = blob;
+      }, function (error) {
+        delete cachedSavePromises[fileName];
       });
     }
     return cachedSavePromises[fileName];
@@ -372,9 +404,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     if (!FileManager.isAvailable()) {
       return $q.reject({type: 'BROWSER_BLOB_NOT_SUPPORTED'});
     }
-    // console.log('dload small', location);
     var fileName = getFileName(location),
-        mimeType = 'image/jpeg',
+        mimeType = location.sticker ? 'image/webp' : 'image/jpeg',
         cachedPromise = cachedSavePromises[fileName] || cachedDownloadPromises[fileName];
 
     if (cachedPromise) {
@@ -399,15 +430,25 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         }, {
           dcID: location.dc_id,
           fileDownload: true,
-          createNetworker: true
+          createNetworker: true,
+          noErrorBox: true
         });
       });
 
+      var processDownloaded = function (bytes) {
+        if (!location.sticker || WebpManager.isWebpSupported()) {
+          return qSync.when(bytes);
+        }
+        return WebpManager.getPngBlobFromWebp(bytes);
+      };
+
       return fileStorage.getFileWriter(fileName, mimeType).then(function (fileWriter) {
         return downloadPromise.then(function (result) {
-          return FileManager.write(fileWriter, result.bytes).then(function () {
-            return cachedDownloads[fileName] = fileWriter.finalize();
-          });
+          return processDownloaded(result.bytes).then(function (proccessedResult) {
+            return FileManager.write(fileWriter, proccessedResult).then(function () {
+              return cachedDownloads[fileName] = fileWriter.finalize();
+            });
+          })
         });
       });
     });
@@ -427,6 +468,16 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
     options = options || {};
 
+    var processSticker = false;
+    if (location.sticker && !WebpManager.isWebpSupported()) {
+      if (options.toFileEntry || size > 524288) {
+        delete location.sticker;
+      } else {
+        processSticker = true;
+        options.mime = 'image/png';
+      }
+    }
+
     // console.log(dT(), 'Dload file', dcID, location, size);
     var fileName = getFileName(location),
         toFileEntry = options.toFileEntry || null,
@@ -434,7 +485,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
     var fileStorage = getFileStorage();
 
-    // console.log(dT(), 'fs', fileStorage, fileName, cachedPromise);
+    // console.log(dT(), 'fs', fileStorage.name, fileName, cachedPromise);
 
     if (cachedPromise) {
       if (toFileEntry) {
@@ -470,6 +521,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       }
     }, function () {
       var fileWriterPromise = toFileEntry ? FileManager.getFileWriter(toFileEntry) : fileStorage.getFileWriter(fileName, mimeType);
+
+      var processDownloaded = function (bytes) {
+        if (!processSticker) {
+          return qSync.when(bytes);
+        }
+        return WebpManager.getPngBlobFromWebp(bytes);
+      };
 
       fileWriterPromise.then(function (fileWriter) {
         cacheFileWriter = fileWriter;
@@ -513,20 +571,22 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
                 if (canceled) {
                   return $q.when();
                 }
-                return FileManager.write(fileWriter, result.bytes).then(function () {
-                  writeFileDeferred.resolve();
-                }, errorHandler).then(function () {
-                  if (isFinal) {
-                    resolved = true;
-                    if (toFileEntry) {
-                      deferred.resolve();
+                return processDownloaded(result.bytes).then(function (processedResult) {
+                  return FileManager.write(fileWriter, processedResult).then(function () {
+                    writeFileDeferred.resolve();
+                  }, errorHandler).then(function () {
+                    if (isFinal) {
+                      resolved = true;
+                      if (toFileEntry) {
+                        deferred.resolve();
+                      } else {
+                        deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
+                      }
                     } else {
-                      deferred.resolve(cachedDownloads[fileName] = fileWriter.finalize());
-                    }
-                  } else {
-                    deferred.notify({done: offset + limit, total: size});
-                  };
-                });
+                      deferred.notify({done: offset + limit, total: size});
+                    };
+                  });
+                })
               });
             });
           })(offset + limit >= size, offset, writeFileDeferred, writeFilePromise);
@@ -658,13 +718,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
   };
 })
 
-.service('MtpSingleInstanceService', function (_, $rootScope, $interval, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
+.service('MtpSingleInstanceService', function (_, $rootScope, $compile, $timeout, $interval, $modalStack, Storage, AppRuntimeManager, IdleManager, ErrorService, MtpNetworkerFactory) {
 
   var instanceID = nextRandomInt(0xFFFFFFFF);
   var started = false;
   var masterInstance  = false;
-  var startTime       = tsNow();
-  var errorShowTime = 0;
+  var deactivatePromise = false;
+  var deactivated = false;
 
   function start() {
     if (!started && !Config.Navigator.mobile && !Config.Modes.packed) {
@@ -672,7 +732,6 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
       IdleManager.start();
 
-      startTime = tsNow();
       $rootScope.$watch('idle.isIDLE', checkInstance);
       $interval(checkInstance, 5000);
       checkInstance();
@@ -687,7 +746,38 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance');
   }
 
+  function deactivateInstance () {
+    if (masterInstance || deactivated) {
+      return false;
+    }
+    console.log(dT(), 'deactivate');
+    deactivatePromise = false;
+    deactivated = true;
+    clearInstance();
+    $modalStack.dismissAll();
+
+    document.title = _('inactive_tab_title_raw');
+
+    var inactivePageCompiled = $compile('<ng-include src="\'partials/desktop/inactive.html\'"></ng-include>');
+
+    var scope = $rootScope.$new(true);
+    scope.close = function () {
+      AppRuntimeManager.close();
+    };
+    scope.reload = function () {
+      AppRuntimeManager.reload();
+    };
+    inactivePageCompiled(scope, function (clonedElement) {
+      $('.page_wrap').hide();
+      $(clonedElement).appendTo($('body'));
+    });
+    $rootScope.idle.deactivated = true;
+  }
+
   function checkInstance() {
+    if (deactivated) {
+      return false;
+    }
     var time = tsNow();
     var idle = $rootScope.idle && $rootScope.idle.isIDLE;
     var newInstance = {id: instanceID, idle: idle, time: time};
@@ -696,38 +786,36 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       var curInstance = result[0],
           idleInstance = result[1];
 
-      if (!curInstance ||
-          curInstance.time < time - 60000 ||
+      // console.log(dT(), 'check instance', newInstance, curInstance, idleInstance);
+      if (!idle ||
+          !curInstance ||
           curInstance.id == instanceID ||
-          curInstance.idle ||
-          !idle) {
+          curInstance.time < time - 60000) {
 
-        if (idleInstance) {
-          if (idleInstance.id == instanceID) {
-            Storage.remove('xt_idle_instance');
-          }
-          else if (idleInstance.time > time - 10000 &&
-                   time > errorShowTime) {
-
-            ErrorService.alert(
-              _('error_modal_warning_title_raw'),
-              _('error_modal_multiple_open_tabs_raw')
-            );
-            errorShowTime += tsNow() + 60000;
-          }
+        if (idleInstance &&
+            idleInstance.id == instanceID) {
+          Storage.remove('xt_idle_instance');
         }
         Storage.set({xt_instance: newInstance});
         if (!masterInstance) {
           MtpNetworkerFactory.startAll();
+          console.warn(dT(), 'now master instance', newInstance);
         }
         masterInstance = true;
+        if (deactivatePromise) {
+          $timeout.cancel(deactivatePromise);
+          deactivatePromise = false;
+        }
       } else {
         Storage.set({xt_idle_instance: newInstance});
         if (masterInstance) {
           MtpNetworkerFactory.stopAll();
+          console.warn(dT(), 'now idle instance', newInstance);
+          if (!deactivatePromise) {
+            deactivatePromise = $timeout(deactivateInstance, 30000);
+          }
         }
         masterInstance = false;
-
       }
     });
   }
