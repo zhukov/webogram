@@ -2817,6 +2817,8 @@ angular.module('myApp.services')
 
       case 'updateEditMessage':
       case 'updateEditChannelMessage':
+        console.trace(dT(), 'edit msg', message);
+        break;
         var message = update.message;
         var peerID = getMessagePeer(message);
         var channelID = message.to_id._ == 'peerChannel' ? -peerID : 0;
