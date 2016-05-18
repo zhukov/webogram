@@ -1782,10 +1782,7 @@ angular.module('izhukov.utils', [])
       url = 'http://' + url;
     }
     var tgMeMatch;
-    if (unsafe) {
-      url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
-    }
-    else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+    if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
       var path = tgMeMatch[1].split('/');
       switch (path[0]) {
         case 'joinchat':
@@ -1803,6 +1800,9 @@ angular.module('izhukov.utils', [])
             url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
           }
       }
+    }
+    else if (unsafe) {
+      url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
     }
     return url;
   }
