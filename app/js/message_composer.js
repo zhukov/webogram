@@ -733,7 +733,15 @@ MessageComposer.prototype.setUpInput = function () {
   if (!Config.Mobile) {
     var sbWidth = getScrollWidth()
     if (sbWidth) {
-      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth})
+      // hide scrollbar for both LTR and RTL languages
+      // both scrollbars are hidden inside the paddings
+      // that are overflown outside of view
+      (this.richTextareaEl || this.textareaEl).css({
+        left: -sbWidth,
+        width: 'calc(100% + ' + (2 * sbWidth) + 'px)',
+        'padding-left': sbWidth + 2,
+        'padding-right': sbWidth + 28
+      })
     }
   }
 }
