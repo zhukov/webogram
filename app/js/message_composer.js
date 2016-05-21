@@ -714,13 +714,6 @@ MessageComposer.prototype.setUpInput = function () {
   } else {
     this.setUpPlaintext();
   }
-
-  if (!Config.Mobile) {
-    var sbWidth = getScrollWidth();
-    if (sbWidth) {
-      (this.richTextareaEl || this.textareaEl).css({marginRight: -sbWidth});
-    }
-  }
 }
 
 MessageComposer.prototype.setInlinePlaceholder = function (prefix, placeholder) {
