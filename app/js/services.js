@@ -2663,7 +2663,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       peer: AppPeersManager.getInputPeerByID(peerID),
       msg_id: AppMessagesManager.getMessageLocalID(id),
       data: button.data
-    }).then(function (callbackAnswer) {
+    }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function (callbackAnswer) {
       if (typeof callbackAnswer.message != 'string' ||
           !callbackAnswer.message.length) {
         return;
