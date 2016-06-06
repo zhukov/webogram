@@ -85,6 +85,10 @@ To run this application in Firefox as a packaged app, open "Menu" -> "Developer"
 
 Run `gulp watch` to watch for file changes and automatically rebuild the app.
 
+#### Running in production
+
+Run `gulp clean`, then `gulp publish` to build the minimized production version of the app. Copy `dist` folder contents to your web server. Don't forget to set `X-Frame-Options SAMEORIGIN` header ([docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)).
+
 
 ### Third party libraries
 
