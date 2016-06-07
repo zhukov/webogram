@@ -1397,7 +1397,7 @@ angular.module('izhukov.utils', [])
 
   function parseMarkdown (text, entities) {
     if (text.indexOf('`') == -1) {
-      return text;
+      return text.trim();
     }
     var raw = text;
     var match;
@@ -1447,6 +1447,9 @@ angular.module('izhukov.utils', [])
     if (!newText.replace(/\s+/g, '').length) {
       newText = text;
       entities.splice(0, entities.length);
+    }
+    if (!entities.length) {
+      newText = newText.trim();
     }
     return newText;
   }

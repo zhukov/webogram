@@ -1297,10 +1297,18 @@ angular.module('myApp.services')
   }
 
   function sendText(peerID, text, options) {
-    if (!angular.isString(text) || !text.length) {
+    if (!angular.isString(text)) {
       return;
     }
     options = options || {};
+    var entities = options.entities || [];
+    if (!options.viaBotID) {
+      text = RichTextProcessor.parseMarkdown(text, entities);
+    }
+    if (!text.length) {
+      return;
+    }
+
     var messageID = tempID--,
         randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)],
         randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString(),
@@ -1311,12 +1319,7 @@ angular.module('myApp.services')
         isChannel = AppPeersManager.isChannel(peerID),
         isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID),
         asChannel = isChannel && !isMegagroup ? true : false,
-        entities = options.entities || [],
         message;
-
-    if (!options.viaBotID) {
-      text = RichTextProcessor.parseMarkdown(text, entities);
-    }
 
     if (historyStorage === undefined) {
       historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []};
