@@ -15,7 +15,7 @@ angular.module('izhukov.utils', [])
 
   this.$get = ['$q', function ($q) {
     var methods = {};
-    angular.forEach(['get', 'set', 'remove'], function (methodName) {
+    angular.forEach(['get', 'set', 'remove', 'clear'], function (methodName) {
       methods[methodName] = function () {
         var deferred = $q.defer(),
             args = Array.prototype.slice.call(arguments);
@@ -28,6 +28,11 @@ angular.module('izhukov.utils', [])
         return deferred.promise;
       };
     });
+
+    methods.noPrefix = function () {
+      ConfigStorage.noPrefix();
+    };
+
     return methods;
   }];
 

@@ -47,7 +47,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     for (var dcID = 1; dcID <= 5; dcID++) {
       storageKeys.push('dc' + dcID + '_auth_key');
     }
-    return Storage.get.apply(Storage, storageKeys).then(function (storageResult) {
+    return Storage.get(storageKeys).then(function (storageResult) {
       var logoutPromises = [];
       for (var i = 0; i < storageResult.length; i++) {
         if (storageResult[i]) {
@@ -58,12 +58,36 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         Storage.remove('dc', 'user_auth');
         baseDcID = false;
         telegramMeNotify(false);
+        return mtpClearStorage();
       }, function (error) {
-        Storage.remove.apply(storageKeys);
-        Storage.remove('dc', 'user_auth');
+        storageKeys.push('dc', 'user_auth');
+        Storage.remove(storageKeys);
         baseDcID = false;
         error.handled = true;
         telegramMeNotify(false);
+        return mtpClearStorage();
+      });
+    });
+  }
+
+  function mtpClearStorage() {
+    var saveKeys = [];
+    for (var dcID = 1; dcID <= 5; dcID++) {
+      saveKeys.push('dc' + dcID + '_auth_key');
+      saveKeys.push('t_dc' + dcID + '_auth_key');
+    }
+    Storage.noPrefix();
+    Storage.get(saveKeys).then(function (values) {
+      Storage.clear().then(function () {
+        var restoreObj = {};
+        angular.forEach(saveKeys, function (key, i) {
+          var value = values[i];
+          if (value !== false && value !== undefined) {
+            restoreObj[key] = value;
+          }
+        });
+        Storage.noPrefix();
+        return Storage.set(restoreObj);
       });
     });
   }
@@ -95,6 +119,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           serverSaltHex = result[1];
       // console.log('ass', dcID, authKeyHex, serverSaltHex);
       if (authKeyHex && authKeyHex.length == 512) {
+        if (!serverSaltHex || serverSaltHex.length != 16) {
+          serverSaltHex = 'AAAAAAAAAAAAAAAA';
+        }
         var authKey    = bytesFromHex(authKeyHex);
         var serverSalt = bytesFromHex(serverSaltHex);
 

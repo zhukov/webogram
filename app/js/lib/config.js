@@ -140,11 +140,14 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
     return keyPrefix;
   }
 
-  function storageGetValue() {
-    var keys = Array.prototype.slice.call(arguments),
-        callback = keys.pop(),
-        result = [],
-        single = keys.length == 1,
+  function storageGetValue(keys, callback) {
+    var single = false;
+    if (!Array.isArray(keys)) {
+      keys = Array.prototype.slice.call(arguments);
+      callback = keys.pop();
+      single = keys.length == 1;
+    }
+    var result = [],
         value,
         allFound = true,
         prefix = storageGetPrefix(),
@@ -227,14 +230,16 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
     chrome.storage.local.set(keyValues, callback);
   };
 
-  function storageRemoveValue () {
-    var keys = Array.prototype.slice.call(arguments),
-        prefix = storageGetPrefix(),
-        i, key, callback;
-
-    if (typeof keys[keys.length - 1] === 'function') {
-      callback = keys.pop();
+  function storageRemoveValue (keys, callback) {
+    if (!Array.isArray(keys)) {
+      keys = Array.prototype.slice.call(arguments);
+      if (typeof keys[keys.length - 1] === 'function') {
+        callback = keys.pop();
+      }
     }
+    var prefix = storageGetPrefix(),
+        i, key;
+
 
     for (i = 0; i < keys.length; i++) {
       key = keys[i] = prefix + keys[i];
@@ -255,12 +260,33 @@ Config.LangCountries = {"es": "ES", "ru": "RU", "en": "US", "de": "DE", "it": "I
     }
   };
 
+  function storageClear(callback) {
+    if (useLs) {
+      try {
+        localStorage.clear();
+      } catch (e) {
+        useLs = false;
+      }
+    }
+
+    if (useCs) {
+      chrome.storage.local.clear(function () {
+        cache = {};
+        callback();
+      });
+    } else {
+      cache = {};
+      callback();
+    }
+  };
+
   window.ConfigStorage = {
     prefix: storageSetPrefix,
     noPrefix: storageSetNoPrefix,
     get: storageGetValue,
     set: storageSetValue,
-    remove: storageRemoveValue
+    remove: storageRemoveValue,
+    clear: storageClear
   };
 
 })(this);
