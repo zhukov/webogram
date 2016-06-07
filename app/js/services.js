@@ -4265,7 +4265,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         if (matches[2] == 'start') {
           params.startParam = matches[3];
-        } else {
+        }
+        else if (matches[2] == 'post') {
           params.messageID = AppMessagesManager.getFullMessageID(parseInt(matches[3]), -peerID);
         }
 
