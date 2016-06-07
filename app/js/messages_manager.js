@@ -1190,12 +1190,12 @@ angular.module('myApp.services')
 
       var fwdHeader = apiMessage.fwd_from;
       if (fwdHeader) {
-        apiMessage.fwdFromID = fwdHeader.from_id ? fwdHeader.from_id : -fwdHeader.channel_id;
+        apiMessage.fwdFromID = fwdHeader.channel_id ? -fwdHeader.channel_id : fwdHeader.from_id;
         fwdHeader.date -= serverTimeOffset;
       }
 
       apiMessage.toID = toPeerID;
-      apiMessage.fromID = apiMessage.from_id || toPeerID;
+      apiMessage.fromID = apiMessage.pFlags.post ? toPeerID : apiMessage.from_id;
 
       if (apiMessage.via_bot_id > 0) {
         apiMessage.viaBotID = apiMessage.via_bot_id;

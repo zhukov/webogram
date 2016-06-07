@@ -2657,6 +2657,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_message_send');
 
         fwdsSend();
+        resetDraft();
       }
       delete $scope.draftMessage.sticker;
     }
