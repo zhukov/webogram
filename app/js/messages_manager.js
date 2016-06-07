@@ -2234,7 +2234,7 @@ angular.module('myApp.services')
       angular.forEach(markupRow.buttons, function (markupButton) {
         markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true});
         if (markupButton._ == 'keyboardButtonUrl') {
-          markupButton.pUrl = RichTextProcessor.wrapUrl(markupButton.url, true);
+          markupButton.pUrl = RichTextProcessor.wrapUrl(markupButton.url, 1);
         }
       })
     });

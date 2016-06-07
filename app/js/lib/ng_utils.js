@@ -1624,7 +1624,7 @@ angular.module('izhukov.utils', [])
             break;
           }
           var url = entity.url || entityText;
-          url = wrapUrl(url, entity._ == 'messageEntityTextUrl');
+          url = wrapUrl(url, entity._ == 'messageEntityTextUrl' ? 2 : false);
           html.push(
             '<a href="',
             encodeEntities(url),
@@ -1785,7 +1785,7 @@ angular.module('izhukov.utils', [])
       url = 'http://' + url;
     }
     var tgMeMatch;
-    if (unsafe) {
+    if (unsafe == 2) {
       url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
     }
     else if ((tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
@@ -1806,6 +1806,9 @@ angular.module('izhukov.utils', [])
             url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '');
           }
       }
+    }
+    else if (unsafe) {
+      url = 'tg://unsafe_url?url=' + encodeURIComponent(url);
     }
     return url;
   }
