@@ -186,12 +186,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
         networkerPromise;
 
     var cachedNetworker;
-    var stack = (new Error()).stack;
-    if (!stack) {
-      try {window.unexistingFunction();} catch (e) {
-        stack = e.stack || '';
-      }
-    }
+    var stack = (new Error()).stack || 'empty stack';
     var performRequest = function (networker) {
       return (cachedNetworker = networker).wrapApiCall(method, params, options).then(
         function (result) {
