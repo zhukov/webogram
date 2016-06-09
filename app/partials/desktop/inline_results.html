@@ -43,7 +43,7 @@
         />
       </div>
       <div ng-switch-default class="inline_result_photo_http">
-        <img ng-switch-default ng-if="result.thumbUrl !== undefined" class="inline_result_photo_image" width="{{result.thumbW}}" height="{{result.thumbH}}" ng-src="{{result.thumbUrl}}" />
+        <img ng-if="result.thumbUrl !== undefined" class="inline_result_photo_image" width="{{result.thumbW}}" height="{{result.thumbH}}" ng-src="{{result.thumbUrl}}" />
       </div>
     </a>
 
