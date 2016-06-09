@@ -2934,6 +2934,7 @@ angular.module('myApp.services')
         var historiesUpdated = {};
         var channelID = update.channel_id;
         var messageID, message, i, peerID, foundDialog, history;
+        var peerMessagesToHandle, peerMessagesHandlePos;
 
         for (i = 0; i < update.messages.length; i++) {
           messageID = getFullMessageID(update.messages[i], channelID);
@@ -2967,6 +2968,14 @@ angular.module('myApp.services')
               pFlags: message.pFlags,
               date: message.date
             };
+
+            peerMessagesToHandle = newMessagesToHandle[peerID];
+            if (peerMessagesToHandle && peerMessagesToHandle.length) {
+              peerMessagesHandlePos = peerMessagesToHandle.indexOf(messageID);
+              if (peerMessagesHandlePos != -1) {
+                peerMessagesToHandle.splice(peerMessagesHandlePos);
+              }
+            }
           }
         }
 
