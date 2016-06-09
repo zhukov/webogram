@@ -3161,7 +3161,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         update._ == 'updateEditChannelMessage') {
       var message = update.message;
       var toPeerID = AppPeersManager.getPeerID(message.to_id);
-      var fwdHeader = message.fwdHeader || {};
+      var fwdHeader = message.fwd_from || {};
       if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post) ||
           fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) ||
           fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id) ||
