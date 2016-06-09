@@ -3410,13 +3410,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull);
       $scope.$broadcast('ui_height');
 
-      $scope.canMigrate = $scope.chatFull &&
-                          $scope.chatFull.participants &&
-                          $scope.chatFull.participants.participants &&
-                          $scope.chatFull.participants.participants.length >= 200;
+      $scope.needMigrate = $scope.chatFull &&
+                           $scope.chatFull.participants &&
+                           $scope.chatFull.participants.participants &&
+                           $scope.chatFull.participants.participants.length >= 200;
 
       if (Config.Modes.test || Config.Modes.debug) {
-        $scope.canMigrate = true;
+        $scope.needMigrate = true;
       }
 
       NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings);

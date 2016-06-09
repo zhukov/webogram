@@ -78,7 +78,7 @@
 
       </div>
 
-      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat.pFlags.creator && canMigrate">
+      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat.pFlags.creator">
 
         <div class="md_modal_section_link_wrap">
           <a class="md_modal_section_link" ng-click="migrateToSuperGroup()" my-i18n="group_modal_migrate_to_supergroup"></a>
@@ -90,7 +90,7 @@
 
     <div ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left &amp;&amp; chatFull.participants.participants.length > 0">
 
-      <div ng-switch="chatFull.chat.pFlags.creator && canMigrate">
+      <div ng-switch="chatFull.chat.pFlags.creator && needMigrate">
         <div ng-switch-when="true" class="md_modal_section_splitter md_modal_section_splitter_content">
           <h4 class="chat_modal_migrate_header" my-i18n="group_modal_migrate_header"></h4>
           <p class="chat_modal_migrate_description" my-i18n="group_modal_migrate_desc"></p>
