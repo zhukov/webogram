@@ -2668,14 +2668,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           !callbackAnswer.message.length) {
         return;
       }
+      var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true});
       if (callbackAnswer.pFlags.alert) {
-        ErrorService.alert(callbackAnswer.message);
+        ErrorService.show({
+          title_html: html,
+          alert: true
+        });
       } else {
-        var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true}).valueOf();;
         toaster.pop({
           type: 'info',
-          // timeout: 100000,
-          body: html,
+          body: html.valueOf(),
           bodyOutputType: 'trustedHtml',
           showCloseButton: false
         });

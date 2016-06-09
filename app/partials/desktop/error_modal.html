@@ -1,6 +1,6 @@
 <div class="error_modal_wrap md_simple_modal_wrap" my-modal-position>
 
-  <div class="md_simple_modal_body">
+  <div class="md_simple_modal_body" ng-class="{md_simple_modal_alert_body: alert}">
 
     <h4 ng-if="error" class="md_simple_header" ng-switch="error.type">
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_title"></span>
@@ -15,9 +15,11 @@
         <span ng-switch-when="420" my-i18n="error_modal_flood_title"></span>
         <span ng-switch-default my-i18n="error_modal_internal_title"></span>
       </span>
+      <span ng-switch-when="CALLBACK_RESPONSE"><!-- empty --></span>
     </h4>
-    <h4 ng-if="!error" class="md_simple_header" ng-switch="title.length > 0">
-      <span ng-switch-when="true" ng-bind="title"></span>
+    <h4 ng-if="!error" class="md_simple_header" ng-switch="title_html !== undefined ? 'html' : (title.length > 0 ? 'text' : 'default')">
+      <span ng-switch-when="html" ng-bind-html="title_html"></span>
+      <span ng-switch-when="text" ng-bind="title"></span>
       <span ng-switch-default my-i18n="error_modal_alert"></span>
     </h4>
 
@@ -46,6 +48,7 @@
       <span ng-switch-when="PEER_FLOOD" my-i18n="error_modal_not_contact_flood">
         <my-i18n-param name="more-info-link"><a href="https://telegram.org/faq#can-39t-send-messages-to-non-contacts" target="_blank">{0}</a></my-i18n-param>
       </span>
+      <span ng-switch-when="CALLBACK_RESPONSE" ng-bind-html="error.description_html"></span>
 
 
       <div ng-switch-default ng-switch="error.code">
@@ -71,7 +74,7 @@ Stack: {{error.originalError.stack || error.stack}}</textarea>
       </div>
     </div>
 
-    <div ng-if="!error" class="error_modal_description" ng-bind="description"></div>
+    <div ng-if="!error && description.length > 0" class="error_modal_description" ng-bind="description"></div>
 
   </div>
 
