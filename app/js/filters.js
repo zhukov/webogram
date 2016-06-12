@@ -231,6 +231,15 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   }])
 
+  .filter('shortUrl', [function () {
+    return function (text) {
+      if (typeof text !== 'string') {
+        return text;
+      }
+      return text.replace(/^https?:\/\//, '').replace(/^www\./, '');
+    }
+  }])
+
   .filter('richText', function ($filter) {
     var linkyFilter = $filter('linky');
     return function (text) {

@@ -1016,6 +1016,25 @@ angular.module('myApp.services')
     return $q.all(promises);
   }
 
+  function getMessageShareLink(fullMsgID) {
+    var info = getMessageIDInfo(fullMsgID);
+    var msgID = info[0];
+    var channelID = info[1];
+    if (!channelID) {
+      return $q.reject();
+    }
+    var message = getMessage(fullMsgID);
+    if (!message || !message.pFlags || !message.pFlags.post) {
+      return $q.reject();
+    }
+    return MtpApiManager.invokeApi('channels.exportMessageLink', {
+      channel: AppChatsManager.getChannelInput(channelID),
+      id: msgID
+    }).then(function (exportedMessageLink) {
+      return exportedMessageLink.link;
+    });
+  }
+
   function readHistory (peerID) {
     // console.trace('start read');
     var isChannel = AppPeersManager.isChannel(peerID),
@@ -3137,6 +3156,7 @@ angular.module('myApp.services')
     getMessagePeer: getMessagePeer,
     getFullMessageID: getFullMessageID,
     getMessageThumb: getMessageThumb,
+    getMessageShareLink: getMessageShareLink,
     clearDialogCache: clearDialogCache,
     wrapForDialog: wrapForDialog,
     wrapForHistory: wrapForHistory,

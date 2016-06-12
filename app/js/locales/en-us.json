@@ -206,6 +206,10 @@
 	"group_invite_revoke_active": "Revoking...",
 	"group_invite_revoke": "Revoke",
 
+	"clipboard_copied": "Copied!",
+	"clipboard_press_ctrl_c": "Press Ctrl+C to copy",
+	"clipboard_press_cmd_c": "Press ⌘ + C to copy",
+
 	"confirm_modal_logout": "Are you sure you want to log out?",
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
@@ -270,7 +274,7 @@
 	"conversations_modal_forward_submit": "Forward",
 	"conversations_modal_select_recipients": "Select recipients",
 	"conversations_modal_recipients": "Recipients:",
-
+	"conversations_modal_share_url_loading": "Loading{dots}",
 
 	"contact_edit_modal_first_name": "First name",
 	"contact_edit_modal_last_name": "Last name",

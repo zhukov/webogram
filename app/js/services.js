@@ -4223,7 +4223,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function ($rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, PeersSelectService, AppStickersManager, ErrorService) {
+.service('LocationParamsService', function (qSync, $rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, PeersSelectService, AppStickersManager, ErrorService) {
 
   var tgAddrRegExp = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -4432,8 +4432,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     checkLocationTgAddr();
   };
 
-  function shareUrl (url, text) {
-    PeersSelectService.selectPeer().then(function (toPeerString) {
+  function shareUrl (url, text, shareLink) {
+    var options = {};
+    if (shareLink) {
+      options.shareLinkPromise = qSync.when(url);
+    }
+    PeersSelectService.selectPeer(options).then(function (toPeerString) {
       $rootScope.$broadcast('history_focus', {
         peerString: toPeerString,
         attachment: {

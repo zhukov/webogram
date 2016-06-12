@@ -3217,28 +3217,58 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myCopyField', function () {
+  .directive('myCopyElement', function (toaster, _) {
 
     return {
       scope: {
-        selectEvent: '=myCopyField'
+        selectEvent: '=myCopyElement'
       },
       link: link
     };
 
     function link($scope, element, attrs) {
-      element.attr('readonly', 'true');
-      element[0].readonly = true;
-      element.on('click', function () {
-        this.select();
-      });
+      if (element[0].tagName == 'INPUT') {
+        element.attr('readonly', 'true');
+        element[0].readonly = true;
+        element.on('click', function () {
+          this.select();
+        });
 
-      if ($scope.selectEvent) {
-        $scope.$on($scope.selectEvent, function () {
-          setTimeout(function () {
-            element[0].focus();
-            element[0].select();
-          }, 100);
+        if ($scope.selectEvent) {
+          $scope.$on($scope.selectEvent, function () {
+            setTimeout(function () {
+              element[0].focus();
+              element[0].select();
+            }, 100);
+          });
+        }
+      } else {
+        var clipboard = new Clipboard(element[0]);
+
+        clipboard.on('success', function(e) {
+          toaster.pop({
+            type: 'info',
+            timeout: 2000,
+            body: _('clipboard_copied'),
+            bodyOutputType: 'trustedHtml',
+            showCloseButton: false
+          });
+          e.clearSelection();
+        });
+
+        clipboard.on('error', function(e) {
+          var langKey = Config.Navigator.osX ? 'clipboard_press_cmd_c' : 'clipboard_press_ctrl_c';
+          toaster.pop({
+            type: 'info',
+            timeout: 4000,
+            body: _(langKey),
+            bodyOutputType: 'trustedHtml',
+            showCloseButton: false
+          });
+        });
+
+        $scope.$on('$destroy', function () {
+          clipboard.destroy();
         });
       }
     };

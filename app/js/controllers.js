@@ -1723,7 +1723,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function quickForward(msgID) {
       PeersSelectService.selectPeers({
         canSend: true,
-        confirm_type: 'FORWARD_PEER'
+        confirm_type: 'FORWARD_PEER',
+        shareLinkPromise: AppMessagesManager.getMessageShareLink(msgID)
       }).then(function (peerStrings) {
         angular.forEach(peerStrings, function (peerString) {
           var peerID = AppPeersManager.getPeerID(peerString);
@@ -4482,6 +4483,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedPeers = {};
     $scope.selectedPeerIDs = [];
     $scope.selectedCount = 0;
+
+    if ($scope.shareLinkPromise) {
+      $scope.shareLink = {loading: true};
+      $scope.shareLinkPromise.then(function (url) {
+        $scope.shareLink = {url: url};
+      }, function () {
+        delete $scope.shareLink;
+      });
+    }
 
     $scope.dialogSelect = function (peerString) {
       if (!$scope.multiSelect) {
