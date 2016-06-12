@@ -1166,7 +1166,7 @@ button.toast-close-button{padding:0;cursor:pointer;background:0 0;border:0;-webk
 :not(.no-enter)#toast-container>div.ng-enter,:not(.no-leave)#toast-container>div.ng-leave{-webkit-transition:200ms cubic-bezier(.25,.25,.75,.75) all;-moz-transition:200ms cubic-bezier(.25,.25,.75,.75) all;-ms-transition:200ms cubic-bezier(.25,.25,.75,.75) all;-o-transition:200ms cubic-bezier(.25,.25,.75,.75) all;transition:200ms cubic-bezier(.25,.25,.75,.75) all}
 :not(.no-enter)#toast-container>div.ng-enter.ng-enter-active,:not(.no-leave)#toast-container>div.ng-leave{opacity:.8}
 :not(.no-enter)#toast-container>div.ng-enter,:not(.no-leave)#toast-container>div.ng-leave.ng-leave-active{opacity:0}
-html{display:none;background:#e7ebf0;overflow:visible}
+html{background:#e7ebf0;overflow:visible}
 body{color:#000;background:0 0;font:12px/18px 'Open Sans',"Lucida Grande","Lucida Sans Unicode",Arial,Helvetica,Verdana,sans-serif;overflow:hidden}
 body.non_osx{font:13px/18px Tahoma,sans-serif,Arial,Helvetica}
 h1,h2,h3,h4,h5{color:#222}
@@ -1356,7 +1356,7 @@ a.tg_radio_on:hover i.icon-radio{background-color:#5785aa}
 .im_dialogs_panel{padding:12px;position:relative}
 .im_dialogs_modal_col_wrap .im_dialogs_panel{padding:7px 12px 6px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.15);-moz-box-shadow:0 1px 1px rgba(0,0,0,.15);box-shadow:0 1px 1px rgba(0,0,0,.15);z-index:1}
 .im_dialogs_search{position:relative}
-.im_dialogs_search_field{font-size:12px;line-height:normal;border:1px solid #F2F2F2;border-radius:2px;padding:6px 20px 6px 30px;margin:0;background-color:#F2F2F2;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
+.im_dialogs_search_field{font-size:12px;line-height:normal;border:1px solid #F2F2F2;border-radius:2px;padding:6px 26px 6px 30px;margin:0;background-color:#F2F2F2;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
 .is_2x .im_dialogs_search_field{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .im_dialogs_modal_col_wrap .im_dialogs_search_field{background-color:#fff;border-color:#fff!important}
 .im_dialogs_search_field:active,.im_dialogs_search_field:focus{background-color:#fff}
@@ -1759,6 +1759,7 @@ li.inline_result_gif.composer_autocomplete_option_active a .inline_result_ind,li
 .inline_result_sticker img{object-fit:contain}
 .inline_result_gif_http,.inline_result_gif_mtproto,.inline_result_photo_http,.inline_result_photo_mtproto{pointer-events:none}
 .error_modal_description{color:#999;padding:5px 0;font-size:13px;line-height:160%}
+.md_simple_modal_alert_body .error_modal_description,.md_simple_modal_alert_body .md_simple_header{text-align:center}
 .error_modal_details textarea{display:block;font-family:Menlo,Monaco,Consolas,"Courier New",monospace;font-size:10px;line-height:100%;white-space:pre-wrap;padding:4px;margin:10px 0;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border:1px solid #ccc;border-radius:4px;width:100%;text-align:left}
 .error_modal_details_link,.error_modal_details_link:hover{font-size:11px;color:#999}
 .confirm_modal_description{text-align:center;padding:20px 0;font-size:14px;line-height:160%}
@@ -1780,7 +1781,7 @@ a:hover .icon-github{background-position:0 -43px}
 .is_2x .icon-twitter{background-image:url(../img/icons/AboutLogos_2x.png);background-size:60px 136px}
 a:hover .icon-twitter{background-position:0 -116px}
 .contacts_modal_search{position:relative;padding:7px 12px 6px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.15);-moz-box-shadow:0 1px 1px rgba(0,0,0,.15);box-shadow:0 1px 1px rgba(0,0,0,.15);z-index:1}
-.contacts_modal_search_field{font-size:12px;line-height:normal;border:1px solid #fff!important;border-radius:2px;padding:6px 15px 6px 30px;margin:0;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
+.contacts_modal_search_field{font-size:12px;line-height:normal;border:1px solid #fff!important;border-radius:2px;padding:6px 27px 6px 30px;margin:0;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-6px -205px}
 .is_2x .contacts_modal_search_field{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
 .contacts_modal_search_field::-ms-clear{display:none}
 a.contacts_modal_search_clear{right:9px;margin-top:-24px}
@@ -1955,7 +1956,7 @@ a.peer_modal_photo,div.peer_modal_photo{display:block;margin-right:19px}
 .md_modal_section_param_wrap{margin-top:19px;margin-bottom:19px}
 .md_modal_section_param_wrap:last-child{margin-bottom:16px}
 .md_modal_section_param_wrap .md_modal_section_param_name{color:#909090;font-size:11px;line-height:14px;margin-top:4px}
-.md_modal_section_param_wrap .md_modal_section_param_value{word-break:break-all;word-wrap:break-word;overflow:hidden}
+.md_modal_section_param_wrap .md_modal_section_param_value{word-break:break-word;word-wrap:break-word;overflow:hidden}
 .md_modal_section_range_wrap{padding-right:4px;margin-bottom:25px;padding-top:1px}
 .md_modal_section_select_wrap{margin-bottom:20px}
 .md_modal_section_select{float:right;font-size:12px;padding:0}

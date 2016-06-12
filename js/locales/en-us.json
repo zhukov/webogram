@@ -167,6 +167,8 @@
 	"user_status_last_month": "last seen within a month",
 	"user_status_long_ago": "last seen a long time ago",
 	"user_status_bot": "bot",
+	"user_status_service_notifications": "service notifications",
+	"user_status_support": "support",
 	"user_status_bot_noprivacy": "has access to messages",
 	"user_status_bot_privacy": "has no access to messages",
 	"chat_title_deleted": "DELETED",
