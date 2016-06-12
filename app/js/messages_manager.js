@@ -2538,7 +2538,7 @@ angular.module('myApp.services')
           break;
         case 'messageActionChatAddUser':
         case 'messageActionChatAddUsers':
-          notificationMessage = _('conversation_invited_user_message_raw_raw');
+          notificationMessage = _('conversation_invited_user_message_raw');
           break;
         case 'messageActionChatReturn':
           notificationMessage = _('conversation_returned_to_group_raw');

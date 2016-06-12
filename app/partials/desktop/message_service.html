@@ -13,7 +13,7 @@
     <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
   </span>
   <span ng-switch-when="messageActionChatAddUsers" my-i18n="message_service_invited_users">
-    <my-i18n-param name="user"><a my-peer-link="historyMessage.action.user_id" color="true"></a></my-i18n-param>
+    <my-i18n-param name="user"><a my-peer-link="historyMessage.action.users[0]" color="true"></a></my-i18n-param>
     <my-i18n-param name="num-more"><span ng-bind="historyMessage.action.users.length - 1"></span></my-i18n-param>
   </span>
   <span ng-switch-when="messageActionChatLeave" my-i18n="message_service_left_group"></span>
