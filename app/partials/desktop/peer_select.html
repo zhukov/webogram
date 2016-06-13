@@ -78,7 +78,7 @@
         <span ng-switch-when="url_loading" class="peer_select_modal_recipients_empty" my-i18n="conversations_modal_share_url_loading">
           <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
         </span>
-        <a ng-switch-when="url" class="peer_select_modal_share_link" my-copy-element ng-bind="shareLink.url | shortUrl" data-clipboard-text="{{shareLink.url}}" tooltip="{{'conversations_modal_share_url_copy' | i18n}}"></a>
+        <a ng-switch-when="url" class="peer_select_modal_share_link" my-copy-link ng-bind="shareLink.url | shortUrl" data-clipboard-text="{{shareLink.url}}" tooltip="{{'conversations_modal_share_url_copy' | i18n}}"></a>
         <span ng-switch-default class="peer_select_modal_recipients_empty" my-i18n="conversations_modal_select_recipients"></span>
       </span>
       <span ng-switch-default>
