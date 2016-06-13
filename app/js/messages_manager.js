@@ -151,13 +151,9 @@ angular.module('myApp.services')
     var message = getMessage(mid);
     var offsetDate = message.date;
 
-    if (!isMegagroup) {
-      mid = getFullMessageID(dialog.top_important_message, channelID);
-      message = getMessage(mid);
-      dialog.unread_count = dialog.unread_important_count;
-    }
     dialog.top_message = mid;
     dialog.read_inbox_max_id = getFullMessageID(dialog.read_inbox_max_id, channelID);
+    dialog.read_outbox_max_id = getFullMessageID(dialog.read_outbox_max_id, channelID);
 
     var topDate = message.date;
     var channel = AppChatsManager.getChat(channelID);
@@ -171,7 +167,8 @@ angular.module('myApp.services')
     pushDialogToStorage(dialog, offsetDate);
 
     // Because we saved message without dialog present
-    if (message.mid && message.mid > dialog.read_inbox_max_id) {
+    var unreadKey = message.pFlags.out ? 'read_outbox_max_id' : 'read_inbox_max_id';
+    if (message.mid && message.mid > dialog[unreadKey]) {
       message.pFlags.unread = true;
     }
 
@@ -215,7 +212,7 @@ angular.module('myApp.services')
       var maxSeenIdIncremented = offsetDate ? true : false;
       angular.forEach(dialogsResult.dialogs, function (dialog) {
         var peerID = AppPeersManager.getPeerID(dialog.peer);
-        if (dialog._ == 'dialogChannel') {
+        if (dialog.pts) {
           var channelID = -peerID;
           saveChannelDialog(channelID, dialog);
           ApiUpdatesManager.addChannelState(channelID, dialog.pts);
@@ -320,30 +317,15 @@ angular.module('myApp.services')
     var isChannel = AppPeersManager.isChannel(peerID);
     var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID);
 
-    var promise;
-    if (isChannel && !isMegagroup) {
-      promise = MtpApiManager.invokeApi('channels.getImportantHistory', {
-        channel: AppChatsManager.getChannelInput(-peerID),
-        offset_id: maxID ? getMessageLocalID(maxID) : 0,
-        add_offset: offset || 0,
-        limit: limit || 0
-      }, {
-        timeout: 300,
-        noErrorBox: true
-      });
-    } else {
-      promise = MtpApiManager.invokeApi('messages.getHistory', {
-        peer: AppPeersManager.getInputPeerByID(peerID),
-        offset_id: maxID ? getMessageLocalID(maxID) : 0,
-        add_offset: offset || 0,
-        limit: limit || 0
-      }, {
-        timeout: 300,
-        noErrorBox: true
-      });
-    }
-
-    return promise.then(function (historyResult) {
+    return MtpApiManager.invokeApi('messages.getHistory', {
+      peer: AppPeersManager.getInputPeerByID(peerID),
+      offset_id: maxID ? getMessageLocalID(maxID) : 0,
+      add_offset: offset || 0,
+      limit: limit || 0
+    }, {
+      timeout: 300,
+      noErrorBox: true
+    }).then(function (historyResult) {
       AppUsersManager.saveApiUsers(historyResult.users);
       AppChatsManager.saveApiChats(historyResult.chats);
       saveMessages(historyResult.messages);
@@ -1196,9 +1178,12 @@ angular.module('myApp.services')
       var mid = getFullMessageID(apiMessage.id, channelID);
       apiMessage.mid = mid;
 
-      if (channelID && !apiMessage.pFlags.out) {
+      if (channelID && !isBroadcast) {
         var dialog = getDialogByPeerID(toPeerID)[0];
-        apiMessage.pFlags.unread = dialog ? mid > dialog.read_inbox_max_id : true;
+        var dialogKey = apiMessage.pFlags.outline
+          ? 'read_outbox_max_id'
+          : 'read_inbox_max_id';
+        apiMessage.pFlags.unread = dialog ? mid > dialog[dialogKey] : true;
       }
 
       if (apiMessage.reply_to_msg_id) {
@@ -2716,11 +2701,6 @@ angular.module('myApp.services')
             historyStorage = historiesStorage[peerID];
 
         if (update._ == 'updateNewChannelMessage') {
-          if (!AppChatsManager.isMegagroup(-peerID) &&
-              !(message.pFlags.out || message.pFlags.mention || message.pFlags.post)) {
-            // we don't support not important messages in channels yet
-            break;
-          }
           var chat = AppChatsManager.getChat(-peerID);
           if (chat.pFlags && (chat.pFlags.left || chat.pFlags.kicked)) {
             break;
@@ -2868,7 +2848,8 @@ angular.module('myApp.services')
       case 'updateReadHistoryInbox':
       case 'updateReadHistoryOutbox':
       case 'updateReadChannelInbox':
-        var isOut = update._ == 'updateReadHistoryOutbox';
+      case 'updateReadChannelOutbox':
+        var isOut = update._ == 'updateReadHistoryOutbox' || update._ == 'updateReadChannelOutbox';
         var channelID = update.channel_id;
         var maxID = getFullMessageID(update.max_id, channelID);
         var peerID = channelID ? -channelID : AppPeersManager.getPeerID(update.peer);
@@ -3105,13 +3086,12 @@ angular.module('myApp.services')
       var historyResult = results[1];
       var topMsgID = historyResult.history[0];
       var dialog = {
-        _: 'dialogChannel',
+        _: 'dialog',
         peer: AppPeersManager.getOutputPeer(peerID),
         top_message: topMsgID,
-        top_important_message: topMsgID,
         read_inbox_max_id: channelResult.read_inbox_max_id,
+        read_outbox_max_id: channelResult.read_outbox_max_id,
         unread_count: channelResult.unread_count,
-        unread_important_count: channelResult.unread_important_count,
         notify_settings: channelResult.notify_settings
       };
       saveChannelDialog(channelID, dialog);

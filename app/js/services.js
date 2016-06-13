@@ -3766,12 +3766,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         registeredDevice = req.result;
         MtpApiManager.invokeApi('account.registerDevice', {
           token_type: 4,
-          token: registeredDevice,
-          device_model: navigator.userAgent || 'Unknown UserAgent',
-          system_version: navigator.platform  || 'Unknown Platform',
-          app_version: Config.App.version,
-          app_sandbox: false,
-          lang_code: navigator.language || 'en'
+          token: registeredDevice
         });
       }
 
