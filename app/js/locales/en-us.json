@@ -275,6 +275,7 @@
 	"conversations_modal_select_recipients": "Select recipients",
 	"conversations_modal_recipients": "Recipients:",
 	"conversations_modal_share_url_loading": "Loading{dots}",
+	"conversations_modal_share_url_copy": "Click to copy share link",
 
 	"contact_edit_modal_first_name": "First name",
 	"contact_edit_modal_last_name": "Last name",
