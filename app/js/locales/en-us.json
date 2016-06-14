@@ -208,7 +208,7 @@
 
 	"clipboard_copied": "Copied!",
 	"clipboard_press_ctrl_c": "Press Ctrl+C to copy",
-	"clipboard_press_cmd_c": "Press ⌘ + C to copy",
+	"clipboard_press_cmd_c": "Press ⌘+C to copy",
 
 	"confirm_modal_logout": "Are you sure you want to log out?",
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
