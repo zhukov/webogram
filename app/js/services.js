@@ -4454,3 +4454,54 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     shareUrl: shareUrl
   };
 })
+
+
+.service('DraftsManager', function (qSync, Storage) {
+
+  var localDrafts = {};
+
+  return {
+    getDraft: getDraft,
+    saveDraft: saveDraft,
+    changeDraft: changeDraft,
+    syncDraft: syncDraft
+  };
+
+  function getDraft (peerID, options) {
+    return Storage.get('draft' + peerID).then(function (draft) {
+      if (typeof draft === 'string' && draft.length > 0) {
+        draft = {
+          text: draft
+        };
+      }
+      if (draft === false || draft == null) {
+        draft = '';
+      }
+
+    });
+  }
+
+  function saveDraft(peerID, draftData) {
+    localDrafts[peerID] = draftData;
+  }
+
+  function changeDraft(peerID, message, options) {
+    options = options || {};
+    if (typeof message === 'string' || options.replyToMsgID) {
+      var localDraft = {
+        text: message,
+        replyToMsgID: replyToMsgID
+      };
+      var backupDraftObj = {};
+      backupDraftObj['draft' + peerID] = localDraft;
+      Storage.set(backupDraftObj);
+    } else {
+      Storage.remove('draft' + peerID);
+    }
+  }
+
+  function syncDraft(peerID) {
+
+  }
+
+})
