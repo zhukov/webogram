@@ -3217,61 +3217,85 @@ angular.module('myApp.directives', ['myApp.filters'])
     };
   })
 
-  .directive('myCopyElement', function (toaster, _) {
+  .directive('myCopyField', function (toaster, _) {
 
     return {
       scope: {
-        selectEvent: '=myCopyElement'
+        selectEvent: '=myCopyField'
       },
       link: link
     };
 
     function link($scope, element, attrs) {
-      if (element[0].tagName == 'INPUT') {
-        element.attr('readonly', 'true');
-        element[0].readonly = true;
-        element.on('click', function () {
-          this.select();
-        });
+      element.attr('readonly', 'true');
+      element[0].readonly = true;
+      element.on('click', function () {
+        this.select();
+      });
 
-        if ($scope.selectEvent) {
-          $scope.$on($scope.selectEvent, function () {
-            setTimeout(function () {
-              element[0].focus();
-              element[0].select();
-            }, 100);
-          });
-        }
-      } else {
-        var clipboard = new Clipboard(element[0]);
-
-        clipboard.on('success', function(e) {
-          toaster.pop({
-            type: 'info',
-            timeout: 2000,
-            body: _('clipboard_copied'),
-            bodyOutputType: 'trustedHtml',
-            showCloseButton: false
-          });
-          e.clearSelection();
-        });
-
-        clipboard.on('error', function(e) {
-          var langKey = Config.Navigator.osX ? 'clipboard_press_cmd_c' : 'clipboard_press_ctrl_c';
-          toaster.pop({
-            type: 'info',
-            timeout: 4000,
-            body: _(langKey),
-            bodyOutputType: 'trustedHtml',
-            showCloseButton: false
-          });
-        });
-
-        $scope.$on('$destroy', function () {
-          clipboard.destroy();
+      if ($scope.selectEvent) {
+        $scope.$on($scope.selectEvent, function () {
+          setTimeout(function () {
+            element[0].focus();
+            element[0].select();
+          }, 100);
         });
       }
     };
+
+  })
+
+  .directive('myCopyLink', function ($compile, $timeout, _) {
+
+    return {
+      restrict: 'A',
+      replace: false,
+      terminal: true,
+      priority: 1000,
+      link: link
+    };
+
+    function link ($scope, element, attrs) {
+      element.attr('tooltip', '{{ttLabel}}');
+      element.removeAttr('my-copy-link');
+      element.removeAttr('data-my-copy-link');
+
+      var resetPromise = false;
+      var resetTooltip = function () {
+        $timeout.cancel(resetPromise);
+        resetPromise = false;
+        $scope.ttLabel = _('conversations_modal_share_url_copy_raw');
+      };
+
+      resetTooltip();
+
+      $compile(element)($scope);
+
+      var clipboard = new Clipboard(element[0]);
+
+      clipboard.on('success', function(e) {
+        $timeout.cancel(resetPromise);
+        $scope.$apply(function () {
+          $scope.ttLabel = _('clipboard_copied_raw');
+        });
+        resetPromise = $timeout(resetTooltip, 2000);
+      });
+
+      clipboard.on('error', function(e) {
+        $timeout.cancel(resetPromise);
+        var langKey = Config.Navigator.osX
+          ? 'clipboard_press_cmd_c'
+          : 'clipboard_press_ctrl_c';
+        $scope.$apply(function () {
+          $scope.ttLabel = _(langKey + '_raw');
+        });
+        resetPromise = $timeout(resetTooltip, 5000);
+      });
+
+      $scope.$on('$destroy', function () {
+        clipboard.destroy();
+      });
+    }
 
   })
 
