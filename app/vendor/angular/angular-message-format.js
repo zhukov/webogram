@@ -1,9 +1,9 @@
 /**
- * @license AngularJS v1.4.7
- * (c) 2010-2015 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.5.7
+ * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
-(function(window, angular, undefined) {'use strict';
+(function(window, angular) {'use strict';
 
 // NOTE: ADVANCED_OPTIMIZATIONS mode.
 //
