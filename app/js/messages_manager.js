@@ -1155,7 +1155,8 @@ angular.module('myApp.services')
     });
   }
 
-  function saveMessages (apiMessages, edited) {
+  function saveMessages (apiMessages, options) {
+    options = options || {};
     angular.forEach(apiMessages, function (apiMessage) {
       if (apiMessage.pFlags === undefined) {
         apiMessage.pFlags = {};
@@ -1178,12 +1179,16 @@ angular.module('myApp.services')
       var mid = getFullMessageID(apiMessage.id, channelID);
       apiMessage.mid = mid;
 
-      if (channelID && !isBroadcast) {
-        var dialog = getDialogByPeerID(toPeerID)[0];
-        var dialogKey = apiMessage.pFlags.outline
+      var dialog = getDialogByPeerID(toPeerID)[0];
+      if (dialog) {
+        var dialogKey = apiMessage.pFlags.out
           ? 'read_outbox_max_id'
           : 'read_inbox_max_id';
-        apiMessage.pFlags.unread = dialog ? mid > dialog[dialogKey] : true;
+
+        apiMessage.pFlags.unread = mid > dialog[dialogKey];
+      }
+      else if (options.isNew) {
+        apiMessage.pFlags.unread = true;
       }
 
       if (apiMessage.reply_to_msg_id) {
@@ -1294,7 +1299,7 @@ angular.module('myApp.services')
         apiMessage.totalEntities = RichTextProcessor.mergeEntities(myEntities, apiEntities, !apiMessage.pending);
       }
 
-      if (!edited) {
+      if (!options.isEdited) {
         messagesStorage[mid] = apiMessage;
       }
     });
@@ -2707,7 +2712,7 @@ angular.module('myApp.services')
           }
         }
 
-        saveMessages([message]);
+        saveMessages([message], {isNew: true});
 
         if (historyStorage !== undefined) {
           var history = historyStorage.history;
@@ -2828,7 +2833,7 @@ angular.module('myApp.services')
         }
 
         // console.trace(dT(), 'edit message', message);
-        saveMessages([message], true);
+        saveMessages([message], {isEdited: true});
         safeReplaceObject(messagesStorage[mid], message);
 
         var wasForHistory = messagesForHistory[mid];
