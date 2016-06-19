@@ -440,7 +440,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (peerData.peerString == $scope.curDialog.peer &&
           peerData.messageID == $scope.curDialog.messageID &&
           !peerData.startParam) {
-        $scope.$broadcast(peerData.messageID ? 'ui_history_change_scroll' : 'ui_history_focus');
+        if (peerData.messageID) {
+          $scope.$broadcast('ui_history_change_scroll', true);
+        } else {
+          $scope.$broadcast('ui_history_focus');
+        }
       } else {
         var peerID = AppPeersManager.getPeerID(peerData.peerString);
         var username = AppPeersManager.getPeer(peerID).username;
@@ -1108,7 +1112,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           documents: 'inputMessagesFilterDocument',
           audio: 'inputMessagesFilterVoice'
         },
-        unfocusMessagePromise,
         jump = 0,
         moreJump = 0,
         moreActive = false,
@@ -1131,7 +1134,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           newDialog.messageID) {
         messageFocusHistory();
       }
-      else if (newDialog.peerID) {
+      else if (peerID) {
         updateHistoryPeer(true);
         loadHistory();
       }
@@ -1292,15 +1295,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var focusedMsgID = $scope.curDialog.messageID || 0;
         $scope.$broadcast('messages_focus', focusedMsgID);
         $scope.$broadcast('ui_history_change_scroll', true);
-
-        $timeout.cancel(unfocusMessagePromise);
-        if (focusedMsgID) {
-          unfocusMessagePromise = $timeout(function () {
-            if ($scope.curDialog.messageID == focusedMsgID) {
-              $scope.$broadcast('messages_focus', 0);
-            }
-          }, 2800);
-        }
       } else {
         loadHistory();
       }
@@ -1442,10 +1436,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
 
       $scope.state.mayBeHasMore = true;
-      // console.log(dT(), 'start load history', $scope.curDialog);
+      console.log(dT(), 'start load history', $scope.curDialog);
       getMessagesPromise.then(function (historyResult) {
         if (curJump != jump) return;
-        // console.log(dT(), 'history loaded', angular.copy(historyResult));
+        console.log(dT(), 'history loaded', angular.copy(historyResult));
 
         var fetchedLength = historyResult.history.length;
 
@@ -1493,15 +1487,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.$broadcast('messages_focus', focusedMsgID);
         });
         $scope.$broadcast('ui_history_change');
-
-        $timeout.cancel(unfocusMessagePromise);
-        if (focusedMsgID) {
-          unfocusMessagePromise = $timeout(function () {
-            if ($scope.curDialog.messageID == focusedMsgID) {
-              $scope.$broadcast('messages_focus', 0);
-            }
-          }, 2800);
-        }
 
         if (!$rootScope.idle.isIDLE) {
           AppMessagesManager.readHistory($scope.curDialog.peerID);

@@ -1169,9 +1169,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         var unreadSplit, focusMessage;
 
         var newScrollTop = false;
-        // console.trace('change scroll');
+        var afterScrollAdd;
+        // console.trace(dT(), 'change scroll', animated);
         if (!noFocus &&
             (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0])) {
+          // console.log(dT(), 'change scroll to focus', focusMessage);
           var ch = scrollableWrap.clientHeight,
               st = scrollableWrap.scrollTop,
               ot = focusMessage.offsetTop,
@@ -1180,12 +1182,29 @@ angular.module('myApp.directives', ['myApp.filters'])
             newScrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
           }
           atBottom = false;
+
+          afterScrollAdd = function () {
+            var unfocusMessagePromise = $(focusMessage).data('unfocus_promise');
+            if (unfocusMessagePromise) {
+              $timeout.cancel(unfocusMessagePromise);
+              $(focusMessage).removeClass('im_message_focus_active');
+            }
+            $timeout(function () {
+              $(focusMessage).addClass('im_message_focus_active');
+              unfocusMessagePromise = $timeout(function () {
+                $(focusMessage).removeClass('im_message_focus_active');
+                $(focusMessage).data('unfocus_promise', false);
+              }, 2800);
+              $(focusMessage).data('unfocus_promise', unfocusMessagePromise);
+            });
+          }
+
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
-          // console.log('change scroll unread', unreadSplit.offsetTop);
+          // console.log(dT(), 'change scroll unread', unreadSplit.offsetTop);
           newScrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
-          // console.log('change scroll bottom');
+          // console.log(dT(), 'change scroll bottom');
           newScrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
@@ -1196,6 +1215,9 @@ angular.module('myApp.directives', ['myApp.filters'])
               $(scrollableWrap).trigger('scroll');
               scrollTopInitial = scrollableWrap.scrollTop;
             });
+            if (afterScrollAdd) {
+              afterScrollAdd();
+            }
           }
           if (animated) {
             $(scrollableWrap).animate({scrollTop: newScrollTop}, 200, afterScroll);
