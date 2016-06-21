@@ -41,6 +41,8 @@
 	"channel_modal_share_loading": "Loading{dots}",
 	"channel_modal_join": "Join channel",
 	"channel_modal_add_member": "Invite members",
+	"channel_modal_add_admin": "Add administrator",
+     "channel_modal_members_remAdmin": "Remove administrator",
 	"channel_modal_leave_channel": "Leave channel",
 	"channel_modal_delete_channel": "Delete channel",
 
