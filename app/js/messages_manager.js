@@ -1120,6 +1120,7 @@ angular.module('myApp.services')
 
       apiMessage.toID = toPeerID;
       apiMessage.fromID = apiMessage.pFlags.post ? toPeerID : apiMessage.from_id;
+      apiMessage.signID = apiMessage.pFlags.post && apiMessage.from_id || fwdHeader && fwdHeader.from_id;
 
       if (apiMessage.via_bot_id > 0) {
         apiMessage.viaBotID = apiMessage.via_bot_id;

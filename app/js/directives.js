@@ -180,6 +180,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var messageMediaCompiled = $compile('<div class="im_message_media" my-message-media="media" message-id="messageId"></div>');
     var messageKeyboardCompiled = $compile('<div class="im_message_keyboard" my-inline-reply-markup="markup"></div>');
+    var messageSignCompiled = $compile('<div class="im_message_sign"><span class="im_message_sign_link" my-peer-link="signID"></span></div>');
 
     return {
       link: link,
@@ -231,6 +232,19 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
 
+    function updateMessageSignature($scope, element, message) {
+      if (!message.signID) {
+        $('.im_message_sign', element).hide();
+        return;
+      }
+
+      var scope = $scope.$new(true);
+      scope.signID = message.signID;
+      messageSignCompiled(scope, function (clonedElement) {
+        $('.im_message_sign', element).replaceWith(clonedElement);
+      });
+    }
+
     function updateMessageKeyboard($scope, element, message) {
       if (!message.reply_markup ||
           message.reply_markup._ != 'replyInlineMarkup') {
@@ -260,6 +274,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     function updateMessageBody($scope, element, message) {
       updateMessageText($scope, element, message);
       updateMessageMedia($scope, element, message);
+      updateMessageSignature($scope, element, message);
       updateMessageKeyboard($scope, element, message);
     }
 
