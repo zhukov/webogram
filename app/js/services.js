@@ -11,7 +11,7 @@
 
 angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
-.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, Storage, _) {
+.service('AppUsersManager', function ($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, RichTextProcessor, ServerTimeManager, Storage, _) {
   var users = {},
       usernames = {},
       userAccess = {},
@@ -19,14 +19,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       contactsFillPromise,
       contactsList,
       contactsIndex = SearchIndexManager.createIndex(),
-      myID,
-      serverTimeOffset = 0;
+      myID;
 
-  Storage.get('server_time_offset').then(function (to) {
-    if (to) {
-      serverTimeOffset = to;
-    }
-  });
   MtpApiManager.getUserID().then(function (id) {
     myID = id;
   });
@@ -134,10 +128,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     if (apiUser.status) {
       if (apiUser.status.expires) {
-        apiUser.status.expires -= serverTimeOffset;
+        apiUser.status.expires -= ServerTimeManager.serverTimeOffset;
       }
       if (apiUser.status.was_online) {
-        apiUser.status.was_online -= serverTimeOffset;
+        apiUser.status.was_online -= ServerTimeManager.serverTimeOffset;
       }
     }
     if (apiUser.pFlags.bot) {
@@ -428,10 +422,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           user.status = update.status;
           if (user.status) {
             if (user.status.expires) {
-              user.status.expires -= serverTimeOffset;
+              user.status.expires -= ServerTimeManager.serverTimeOffset;
             }
             if (user.status.was_online) {
-              user.status.was_online -= serverTimeOffset;
+              user.status.was_online -= ServerTimeManager.serverTimeOffset;
             }
           }
           user.sortStatus = getUserStatusForSort(user.status);
@@ -2660,7 +2654,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
       peer: AppPeersManager.getInputPeerByID(peerID),
-      msg_id: AppMessagesManager.getMessageLocalID(id),
+      msg_id: AppMessagesIDsManager.getMessageLocalID(id),
       data: button.data
     }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function (callbackAnswer) {
       if (typeof callbackAnswer.message != 'string' ||
@@ -4218,7 +4212,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('LocationParamsService', function (qSync, $rootScope, $routeParams, AppPeersManager, AppUsersManager, AppMessagesManager, PeersSelectService, AppStickersManager, ErrorService) {
+.service('LocationParamsService', function (qSync, $rootScope, $routeParams, AppPeersManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppMessagesIDsManager, MtpApiManager, ApiUpdatesManager, PeersSelectService, AppStickersManager, ErrorService) {
 
   var tgAddrRegExp = /^(web\+)?tg:(\/\/)?(.+)/;
 
@@ -4263,7 +4257,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           params.startParam = matches[3];
         }
         else if (matches[2] == 'post') {
-          params.messageID = AppMessagesManager.getFullMessageID(parseInt(matches[3]), -peerID);
+          params.messageID = AppMessagesIDsManager.getFullMessageID(parseInt(matches[3]), -peerID);
         }
 
         $rootScope.$broadcast('history_focus', params);
@@ -4272,7 +4266,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     if (matches = url.match(/^join\?invite=(.+)$/)) {
-      AppMessagesManager.openChatInviteLink(matches[1]);
+      openChatInviteLink(matches[1]);
       return true;
     }
 
@@ -4444,6 +4438,52 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     });
   }
 
+  function openChatInviteLink (hash) {
+    return MtpApiManager.invokeApi('messages.checkChatInvite', {
+      hash: hash
+    }).then(function (chatInvite) {
+      var chatTitle;
+      if (chatInvite._ == 'chatInviteAlready') {
+        AppChatsManager.saveApiChat(chatInvite.chat);
+        var canJump = !chatInvite.chat.pFlags.left ||
+                      AppChatsManager.isChannel(chatInvite.chat.id) && chatInvite.chat.username;
+        if (canJump) {
+          return $rootScope.$broadcast('history_focus', {
+            peerString: AppChatsManager.getChatString(chatInvite.chat.id)
+          });
+        }
+        chatTitle = chatInvite.chat.title;
+      } else {
+        chatTitle = chatInvite.title;
+      }
+      ErrorService.confirm({
+        type: (chatInvite.pFlags.channel && !chatInvite.pFlags.megagroup) ? 'JOIN_CHANNEL_BY_LINK' : 'JOIN_GROUP_BY_LINK',
+        title: chatTitle
+      }).then(function () {
+        return MtpApiManager.invokeApi('messages.importChatInvite', {
+          hash: hash
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
+
+          if (updates.chats && updates.chats.length == 1) {
+            $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(updates.chats[0].id)
+            });
+          }
+          else if (updates.updates && updates.updates.length) {
+            for (var i = 0, len = updates.updates.length, update; i < len; i++) {
+              update = updates.updates[i];
+              if (update._ == 'updateNewMessage') {
+                $rootScope.$broadcast('history_focus', {peerString: AppChatsManager.getChatString(update.message.to_id.chat_id)
+                });
+                break;
+              }
+            }
+          }
+        });
+      });
+    });
+  }
+
   return {
     start: start,
     shareUrl: shareUrl
@@ -4451,52 +4491,197 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 })
 
 
-.service('DraftsManager', function (qSync, Storage) {
+.service('DraftsManager', function ($rootScope, qSync, MtpApiManager, ApiUpdatesManager, AppMessagesIDsManager, AppPeersManager, RichTextProcessor, Storage, ServerTimeManager) {
 
-  var localDrafts = {};
+  var cachedServerDrafts = {};
+
+  $rootScope.$on('apiUpdate', function (e, update) {
+    if (update._ != 'updateDraftMessage') {
+      return;
+    }
+    var peerID = AppPeersManager.getPeerID(update.peer);
+    saveDraft(peerID, update.draft, true);
+  });
 
   return {
     getDraft: getDraft,
+    getServerDraft: getServerDraft,
     saveDraft: saveDraft,
     changeDraft: changeDraft,
     syncDraft: syncDraft
   };
 
-  function getDraft (peerID, options) {
+  function getDraft (peerID, unsyncOnly) {
+    console.warn(dT(), 'get draft', peerID, unsyncOnly);
     return Storage.get('draft' + peerID).then(function (draft) {
-      if (typeof draft === 'string' && draft.length > 0) {
-        draft = {
-          text: draft
-        };
+      if (typeof draft === 'string') {
+        if (draft.length > 0) {
+          draft = {
+            text: draft
+          };
+        } else {
+          draft = false;
+        }
       }
-      if (draft === false || draft == null) {
-        draft = '';
+      if (!draft && !unsyncOnly) {
+        draft = getServerDraft(peerID);
+        console.warn(dT(), 'server', draft);
+      } else {
+        console.warn(dT(), 'local', draft);
       }
-
+      var replyToMsgID = draft && draft.replyToMsgID;
+      if (replyToMsgID) {
+        var channelID = AppPeersManager.isChannel(peerID) ? -peerID : false;
+        draft.replyToMsgID = AppMessagesIDsManager.getFullMessageID(replyToMsgID, channelID);
+      }
+      return draft;
     });
   }
 
-  function saveDraft(peerID, draftData) {
-    localDrafts[peerID] = draftData;
+  function getServerDraft(peerID) {
+    var cached = cachedServerDrafts[peerID];
+    if (cached !== undefined) {
+      return cached;
+    }
+    return false;
   }
 
-  function changeDraft(peerID, message, options) {
-    options = options || {};
-    if (typeof message === 'string' || options.replyToMsgID) {
-      var localDraft = {
-        text: message,
-        replyToMsgID: replyToMsgID
+  function saveDraft(peerID, apiDraft, notify) {
+    if (notify) {
+      console.warn(dT(), 'save draft', peerID, apiDraft, notify);
+    }
+    var draft = processApiDraft(apiDraft);
+    cachedServerDrafts[peerID] = draft;
+
+    if (notify) {
+      changeDraft(peerID, draft);
+      $rootScope.$broadcast('draft_updated', {
+        peerID: peerID,
+        draft: draft
+      });
+    }
+
+    return draft;
+  }
+
+  function changeDraft(peerID, draft) {
+    console.warn(dT(), 'change draft', peerID, draft);
+    if (!peerID) {
+      console.trace('empty peerID');
+    }
+    if (!draft) {
+      draft = {
+        text: '',
+        replyToMsgID: 0
       };
+    }
+    draft.replyToMsgID = draft.replyToMsgID
+      ? AppMessagesIDsManager.getMessageLocalID(draft.replyToMsgID)
+      : 0;
+
+    var draftKey = 'draft' + peerID;
+
+    if (!isEmptyDraft(draft)) {
       var backupDraftObj = {};
-      backupDraftObj['draft' + peerID] = localDraft;
+      backupDraftObj[draftKey] = draft;
       Storage.set(backupDraftObj);
     } else {
-      Storage.remove('draft' + peerID);
+      Storage.remove(draftKey);
+    }
+  }
+
+  function draftsAreEqual(draft1, draft2) {
+    var isEmpty1 = isEmptyDraft(draft1);
+    var isEmpty2 = isEmptyDraft(draft2);
+    if (isEmpty1 && isEmpty2) {
+      return true;
+    }
+    if (isEmpty1 != isEmpty2) {
+      return false;
+    }
+    if (draft1.replyToMsgID != draft2.replyToMsgID) {
+      return false;
+    }
+    if (draft1.text != draft2.text) {
+      return false;
+    }
+    return true;
+  }
+
+  function isEmptyDraft(draft) {
+    if (!draft) {
+      return true;
+    }
+    if (draft.replyToMsgID > 0) {
+      return false;
+    }
+    if (typeof draft.text !== 'string' || !draft.text.length) {
+      return true;
+    }
+    return false;
+  }
+
+  function processApiDraft(draft) {
+    if (!draft || draft._ != 'draftMessage') {
+      return false;
+    }
+
+    var entities = RichTextProcessor.parseEntities(draft.message);
+    var serverEntities = draft.entities || [];
+    entities = RichTextProcessor.mergeEntities(entities, serverEntities);
+
+    var text = RichTextProcessor.wrapDraftText(draft.message, {entities: entities});
+    var richMessage = RichTextProcessor.wrapRichText(draft.message, {noLinks: true, noLinebreaks: true});
+
+    return {
+      text: text,
+      richMessage: richMessage,
+      replyToMsgID: draft.reply_to_msg_id || 0,
+      date: draft.date - ServerTimeManager.serverTimeOffset
     }
   }
 
   function syncDraft(peerID) {
-
+    console.warn(dT(), 'sync draft', peerID);
+    getDraft(peerID, true).then(function (localDraft) {
+      var serverDraft = cachedServerDrafts[peerID];
+      if (draftsAreEqual(serverDraft, localDraft)) {
+        console.warn(dT(), 'equal drafts', localDraft, serverDraft);
+        return;
+      }
+      console.warn(dT(), 'changed draft', localDraft, serverDraft);
+      var params = {
+        flags: 0,
+        peer: AppPeersManager.getInputPeerByID(peerID)
+      };
+      var draftObj;
+      if (isEmptyDraft(localDraft)) {
+        draftObj = {_: 'draftMessageEmpty'};
+        params.message = '';
+      } else {
+        draftObj = {_: 'draftMessage'};
+        var message = localDraft.text;
+        var entities = [];
+        message = RichTextProcessor.parseEmojis(message);
+        message = RichTextProcessor.parseMarkdown(message, entities);
+        if (localDraft.replyToMsgID > 0) {
+          params.flags |= 1;
+          params.reply_to_msg_id = localDraft.replyToMsgID;
+          draftObj.reply_to_msg_id = localDraft.replyToMsgID;
+        }
+        if (entities.length) {
+          params.flags |= 8;
+          params.entities = entities;
+          draftObj.entities = entities;
+        }
+        params.message = message;
+        draftObj.message = message;
+      }
+      MtpApiManager.invokeApi('messages.saveDraft', params).then(function () {
+        draftObj.date = tsNow(true) + ServerTimeManager.serverTimeOffset;
+        saveDraft(peerID, draftObj, true);
+      });
+    });
   }
 
 })

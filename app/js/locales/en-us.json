@@ -291,6 +291,7 @@
 
 	"conversation_message_deleted": "deleted message",
 	"conversation_you": "You",
+	"conversation_draft": "Draft:",
 	"conversation_media_photo": "Photo",
 	"conversation_media_video": "Video",
 	"conversation_media_document": "File",

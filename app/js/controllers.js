@@ -753,6 +753,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       deleteDialog(dialog.peerID);
     });
 
+    $scope.$on('draft_updated', function (e, draftUpdate) {
+      var curDialog, i;
+      for (i = 0; i < $scope.dialogs.length; i++) {
+        curDialog = $scope.dialogs[i];
+        if (curDialog.peerID == draftUpdate.peerID) {
+          curDialog.draft = draftUpdate.draft;
+          if (i > 0 && draftUpdate.draft) {
+            $scope.dialogs.splice(i, 1);
+            $scope.dialogs.unshift(curDialog);
+          }
+          break;
+        }
+      }
+    });
+
     $scope.$on('history_delete', function (e, historyUpdate) {
       for (var i = 0; i < $scope.dialogs.length; i++) {
         if ($scope.dialogs[i].peerID == historyUpdate.peerID) {
@@ -2147,13 +2162,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop);
   })
 
-  .controller('AppImSendController', function ($q, $scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, RichTextProcessor) {
+  .controller('AppImSendController', function ($rootScope, $q, $scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, DraftsManager, RichTextProcessor) {
 
     $scope.$watch('curDialog.peer', resetDraft);
     $scope.$on('user_update', angular.noop);
     $scope.$on('peer_draft_attachment', applyDraftAttachment);
     $scope.$on('reply_selected', function (e, messageID) {
-      replySelect(messageID);
+      replySelect(messageID, true);
     });
     $scope.$on('ui_typing', onTyping);
 
@@ -2188,6 +2203,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.replyKeyboardToggle = replyKeyboardToggle;
     $scope.toggleSlash = toggleSlash;
 
+    $rootScope.$watch('idle.isIDLE', function (newVal) {
+      if (newVal && $scope.curDialog.peerID) {
+        DraftsManager.syncDraft($scope.curDialog.peerID);
+      }
+    });
+
+    $scope.$on('draft_updated', function (e, draftUpdate) {
+      if (draftUpdate.peerID == $scope.curDialog.peerID) {
+        getDraft();
+      }
+    });
+
     var replyToMarkup = false;
     var forceDraft = false;
 
@@ -2200,9 +2227,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (angular.isString(text) && text.length > 0) {
           text = RichTextProcessor.parseEmojis(text);
 
-          var timeout = 0;
           var options = {
-            replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
+            replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid,
+            clearDraft: true
           };
           do {
             AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096), options);
@@ -2213,6 +2240,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (forceDraft == $scope.curDialog.peer) {
           forceDraft = false;
+        } else {
+          DraftsManager.changeDraft($scope.curDialog.peerID);
         }
 
         resetDraft();
@@ -2326,7 +2355,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       });
     }
 
-    function resetDraft (newPeer) {
+    function resetDraft (newPeer, prevPeer) {
+      if (prevPeer) {
+        var prevPeerID = AppPeersManager.getPeerID(prevPeer);
+        if (prevPeerID) {
+          DraftsManager.syncDraft(prevPeerID);
+        }
+      }
+
       updateMentions();
       updateCommands();
       replyClear();
@@ -2347,13 +2383,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       fwdsClear();
+      getDraft();
+    }
 
-      if (newPeer) {
-        Storage.get('draft' + $scope.curDialog.peerID).then(function (draftText) {
-          // console.log('Restore draft', 'draft' + $scope.curDialog.peerID, draftText);
-          $scope.draftMessage.text = draftText || '';
+    function getDraft() {
+      if ($scope.curDialog.peerID) {
+        DraftsManager.getDraft($scope.curDialog.peerID).then(function (draftData) {
+          $scope.draftMessage.text = draftData ? draftData.text : '';
           $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID) && !AppPeersManager.isMegagroup($scope.curDialog.peerID);
-          // console.log('send broadcast', $scope.draftMessage);
+          if (draftData.replyToMsgID) {
+            var replyToMsgID = draftData.replyToMsgID;
+            replySelect(replyToMsgID);
+          } else {
+            replyClear();
+          }
           $scope.$broadcast('ui_peer_draft');
         });
       } else {
@@ -2364,7 +2407,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function applyDraftAttachment (e, attachment) {
-      // console.log('apply draft attach', attachment);
+      console.log('apply draft attach', attachment);
       if (!attachment || !attachment._) {
         return;
       }
@@ -2386,14 +2429,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }, 1000);
       }
       else if (attachment._ == 'fwd_messages') {
-        forceDraft = $scope.curDialog.peer;
-        $scope.draftMessage.fwdMessages = attachment.id;
-        $scope.$broadcast('ui_peer_reply');
-        var peerID = AppPeersManager.getPeerID($scope.curDialog.peer);
-        Storage.get('draft' + peerID).then(function (draftText) {
-          $scope.draftMessage.text = draftText || '';
-          $scope.$broadcast('ui_peer_draft');
-        });
+        $timeout(function () {
+          $scope.draftMessage.fwdMessages = attachment.id;
+          $scope.$broadcast('ui_peer_reply');
+        }, 100);
       }
       else if (attachment._ == 'inline_query') {
         var mention = attachment.mention;
@@ -2413,13 +2452,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-    function replySelect(messageID) {
-      $scope.draftMessage.replyToMessage = AppMessagesManager.wrapForDialog(messageID);
+    function replySelect(messageID, byUser) {
+      $scope.draftMessage.replyToMessage = AppMessagesManager.wrapSingleMessage(messageID);
       $scope.$broadcast('ui_peer_reply');
       replyToMarkup = false;
+
+      if (byUser) {
+        DraftsManager.changeDraft($scope.curDialog.peerID, {
+          text: $scope.draftMessage.text,
+          replyToMsgID: messageID
+        });
+      }
     }
 
-    function replyClear() {
+    function replyClear(byUser) {
       var message = $scope.draftMessage.replyToMessage;
       if (message &&
           $scope.historyState.replyKeyboard &&
@@ -2430,6 +2476,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       delete $scope.draftMessage.replyToMessage;
       $scope.$broadcast('ui_peer_reply');
+
+      if (byUser) {
+        DraftsManager.changeDraft($scope.curDialog.peerID, {
+          text: $scope.draftMessage.text
+        });
+      }
     }
 
     function fwdsClear () {
@@ -2512,16 +2564,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (!$scope.historyFilter.mediaType && !$scope.historyState.skipped) {
           AppMessagesManager.readHistory($scope.curDialog.peerID);
         }
-
-        var backupDraftObj = {};
-        backupDraftObj['draft' + $scope.curDialog.peerID] = newVal;
-        Storage.set(backupDraftObj);
-        // console.log(dT(), 'draft save', backupDraftObj);
-      } else {
-        Storage.remove('draft' + $scope.curDialog.peerID);
-        // console.log(dT(), 'draft delete', 'draft' + $scope.curDialog.peerID);
       }
-      checkInlinePattern(newVal);
+      if ($scope.curDialog.peerID) {
+        var replyToMessage = $scope.draftMessage.replyToMessage;
+        DraftsManager.changeDraft($scope.curDialog.peerID, {
+          text: newVal,
+          replyToMsgID: replyToMessage && replyToMessage.mid
+        });
+        checkInlinePattern(newVal);
+      }
     }
 
     var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/;

@@ -128,6 +128,7 @@
                       <div my-arc-progress stroke="3" width="26"></div>
                     </div>
                     <div ng-switch-default class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType &amp;&amp; !state.empty" ng-switch="historyState.typing.length" my-i18n>
+                      <span ng-switch-when="0"></span>
                       <span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
                       <span ng-switch-when="2" my-i18n-format="im_two_typing"></span>
                       <span ng-switch-default my-i18n-format="im_many_typing"></span>
@@ -187,7 +188,7 @@
                     <div class="im_send_form_inline_results" my-inline-results="inlineResults"></div>
 
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
-                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear(true)"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
                       <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMessage" watch="true"></a>
                     </div>
 

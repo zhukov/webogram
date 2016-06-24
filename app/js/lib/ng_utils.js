@@ -1258,6 +1258,7 @@ angular.module('izhukov.utils', [])
   return {
     wrapRichText: wrapRichText,
     wrapPlainText: wrapPlainText,
+    wrapDraftText: wrapDraftText,
     wrapUrl: wrapUrl,
     parseEntities: parseEntities,
     parseMarkdown: parseMarkdown,
@@ -1731,6 +1732,72 @@ angular.module('izhukov.utils', [])
     return $sce.trustAs('html', text);
   }
 
+  function wrapDraftText (text, options) {
+    if (!text || !text.length) {
+      return '';
+    }
+
+    options = options || {};
+
+    var entities = options.entities;
+
+    if (entities === undefined) {
+      entities = parseEntities(text, options);
+    }
+
+    var i = 0;
+    var len = entities.length;
+    var entity;
+    var entityText;
+    var skipEntity;
+    var code = [];
+    var lastOffset = 0;
+    for (i = 0; i < len; i++) {
+      entity = entities[i];
+      if (entity.offset > lastOffset) {
+        code.push(
+          text.substr(lastOffset, entity.offset - lastOffset)
+        );
+      }
+      else if (entity.offset < lastOffset) {
+        continue;
+      }
+      skipEntity = false;
+      entityText = text.substr(entity.offset, entity.length);
+      switch (entity._) {
+        case 'messageEntityEmoji':
+          code.push(
+            ':',
+            entity.title,
+            ':'
+          );
+          break;
+
+        case 'messageEntityCode':
+          code.push(
+            '`', entityText, '`'
+          );
+          break;
+
+        case 'messageEntityPre':
+          code.push(
+            '```', entityText, '```'
+          );
+          break;
+
+        default:
+          skipEntity = true;
+      }
+      lastOffset = entity.offset + (skipEntity ? 0 : entity.length);
+    }
+
+    code.push(text.substr(lastOffset));
+
+    console.log(code, entities);
+
+    return code.join('');
+  }
+
   function checkBrackets(url) {
     var urlLength = url.length,
         urlOpenBrackets = url.split('(').length - 1,
@@ -1818,7 +1885,34 @@ angular.module('izhukov.utils', [])
     return url;
   }
 
-});
+})
+
+.service('ServerTimeManager', function (Storage) {
+
+  var timestampNow = tsNow(true);
+  var midnightNoOffset = timestampNow - (timestampNow % 86400);
+  var midnightOffseted = new Date();
+  midnightOffseted.setHours(0);
+  midnightOffseted.setMinutes(0);
+  midnightOffseted.setSeconds(0);
+
+  var midnightOffset = midnightNoOffset - (Math.floor(+midnightOffseted / 1000));
+
+  var serverTimeOffset = 0;
+  var timeParams = {
+    midnightOffset: midnightOffset,
+    serverTimeOffset: serverTimeOffset
+  };
+
+  Storage.get('server_time_offset').then(function (to) {
+    if (to) {
+      serverTimeOffset = to;
+      timeParams.serverTimeOffset = to;
+    }
+  });
+
+  return timeParams;
+})
 
 
 
