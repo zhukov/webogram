@@ -4219,9 +4219,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   function checkLocationTgAddr () {
     var tgaddr = $routeParams.tgaddr;
     if (tgaddr) {
-      try {
-        tgaddr = decodeURIComponent(tgaddr);
-      } catch (e) {};
+      if (!tgaddr.match(/[=&?]/)) {
+        try {
+          tgaddr = decodeURIComponent(tgaddr);
+        } catch (e) {};
+      }
       var matches = tgaddr.match(tgAddrRegExp);
       if (matches) {
         handleTgProtoAddr(matches[3]);
