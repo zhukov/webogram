@@ -3081,6 +3081,12 @@ angular.module('myApp.services')
           _: 'messageMediaWebPage',
           webpage: AppWebPagesManager.wrapForHistory(eventData.id)
         };
+        $rootScope.$broadcast('message_edit', {
+          peerID: getMessagePeer(historyMessage),
+          id: historyMessage.id,
+          mid: msgID,
+          justMedia: true
+        });
       }
     })
   });

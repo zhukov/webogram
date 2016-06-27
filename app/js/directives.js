@@ -296,7 +296,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.$on('message_edit', function (e, data) {
         if (data.mid == message.mid) {
-          updateMessageBody($scope, element, message);
+          if (data.justMedia) {
+            updateMessageMedia($scope, element, message);
+          } else {
+            updateMessageBody($scope, element, message);
+          }
         }
       });
     }
