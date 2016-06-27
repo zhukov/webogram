@@ -175,7 +175,8 @@ angular.module('myApp.services')
       message.pFlags.unread = true;
     }
 
-    if (historiesStorage[peerID] === undefined) {
+    if (historiesStorage[peerID] === undefined &&
+        !message.deleted) {
       var historyStorage = {count: null, history: [mid], pending: []};
       historiesStorage[peerID] = historyStorage;
       if (mergeReplyKeyboard(historyStorage, message)) {
@@ -308,10 +309,18 @@ angular.module('myApp.services')
         ApiUpdatesManager.addChannelState(-peerID, historyResult.pts);
       }
 
+      var length = historyResult.messages.length;
+      if (length &&
+          historyResult.messages[length - 1].deleted) {
+        historyResult.messages.splice(length - 1, 1);
+        length--;
+        historyResult.count--;
+      }
+
       if (
         peerID < 0 ||
         !AppUsersManager.isBot(peerID) ||
-        (historyResult.messages.length == limit && limit < historyResult.count)
+        (length == limit && limit < historyResult.count)
       ) {
         return historyResult;
       }
@@ -364,7 +373,7 @@ angular.module('myApp.services')
   function fillHistoryStorage (peerID, maxID, fullLimit, historyStorage) {
     // console.log('fill history storage', peerID, maxID, fullLimit, angular.copy(historyStorage));
     var offset = (migratedFromTo[peerID] && !maxID) ? 1 : 0;
-    return requestHistory (peerID, maxID, fullLimit, offset).then(function (historyResult) {
+    return requestHistory(peerID, maxID, fullLimit, offset).then(function (historyResult) {
       historyStorage.count = historyResult.count || historyResult.messages.length;
 
       var offset = 0;
@@ -1039,8 +1048,13 @@ angular.module('myApp.services')
     });
   }
 
-  function doFlushHistory (inputPeer) {
+  function doFlushHistory (inputPeer, justClear) {
+    var flags = 0;
+    if (justClear) {
+      flags |= 1;
+    }
     return MtpApiManager.invokeApi('messages.deleteHistory', {
+      flags: flags,
       peer: inputPeer,
       max_id: 0
     }).then(function (affectedHistory) {
@@ -1055,18 +1069,22 @@ angular.module('myApp.services')
       if (!affectedHistory.offset) {
         return true;
       }
-      return doFlushHistory(inputPeer);
+      return doFlushHistory(inputPeer, justClear);
     });
   }
 
-  function flushHistory (peerID) {
-    return doFlushHistory(AppPeersManager.getInputPeerByID(peerID)).then(function () {
-      var foundDialog = getDialogByPeerID(peerID);
-      if (foundDialog[0]) {
-        dialogsStorage.dialogs.splice(foundDialog[1], 1);
+  function flushHistory (peerID, justClear) {
+    return doFlushHistory(AppPeersManager.getInputPeerByID(peerID), justClear).then(function () {
+      if (justClear) {
+        $rootScope.$broadcast('dialog_flush', {peerID: peerID});
+      } else {
+        var foundDialog = getDialogByPeerID(peerID);
+        if (foundDialog[0]) {
+          dialogsStorage.dialogs.splice(foundDialog[1], 1);
+        }
+        delete historiesStorage[peerID];
+        $rootScope.$broadcast('dialog_drop', {peerID: peerID});
       }
-      delete historiesStorage[peerID];
-      $rootScope.$broadcast('dialog_flush', {peerID: peerID});
     });
   }
 
@@ -1120,7 +1138,8 @@ angular.module('myApp.services')
 
       apiMessage.toID = toPeerID;
       apiMessage.fromID = apiMessage.pFlags.post ? toPeerID : apiMessage.from_id;
-      apiMessage.signID = apiMessage.pFlags.post && apiMessage.from_id || fwdHeader && fwdHeader.from_id;
+      apiMessage.signID = apiMessage.pFlags.post && apiMessage.from_id ||
+                          fwdHeader && fwdHeader.channel_id && fwdHeader.from_id;
 
       if (apiMessage.via_bot_id > 0) {
         apiMessage.viaBotID = apiMessage.via_bot_id;
@@ -1199,6 +1218,13 @@ angular.module('myApp.services')
           case 'messageActionChatMigrateTo':
             migrateFrom = -channelID;
             migrateTo = -apiMessage.action.channel_id;
+            break;
+
+          case 'messageActionHistoryClear':
+            apiMessage.deleted = true;
+            apiMessage.clear_history = true;
+            apiMessage.pFlags.out = false;
+            apiMessage.pFlags.unread = false;
             break;
         }
         if (migrateFrom &&
@@ -2232,6 +2258,11 @@ angular.module('myApp.services')
     }
 
     for (i = start; i < end; i++) {
+      if (history[i].deleted) {
+        history.splice(i, 1);
+        end--;
+        continue;
+      }
       curMessage = history[i];
       curDay = Math.floor((curMessage.date + ServerTimeManager.midnightOffset) / 86400);
 
@@ -2731,11 +2762,22 @@ angular.module('myApp.services')
           safeReplaceObject(wasForHistory, newForHistory);
           messagesForHistory[mid] = wasForHistory;
         }
-        $rootScope.$broadcast('message_edit', {
-          peerID: peerID,
-          id: message.id,
-          mid: mid
-        });
+
+        if (message.clear_history) {
+          var foundDialog = getDialogByPeerID(peerID);
+          if (foundDialog[0] &&
+              foundDialog[0].top_message == mid) {
+            $rootScope.$broadcast('dialog_flush', {peerID: peerID});
+          } else {
+            $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: [mid]});
+          }
+        } else {
+          $rootScope.$broadcast('message_edit', {
+            peerID: peerID,
+            id: message.id,
+            mid: mid
+          });
+        }
         break;
 
       case 'updateReadHistoryInbox':
@@ -2875,15 +2917,6 @@ angular.module('myApp.services')
         }
 
         angular.forEach(historiesUpdated, function (updatedData, peerID) {
-          var foundDialog = getDialogByPeerID(peerID);
-          if (foundDialog[0]) {
-            if (updatedData.unread) {
-              foundDialog[0].unread_count -= updatedData.unread;
-
-              $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: foundDialog[0].unread_count});
-            }
-          }
-
           var historyStorage = historiesStorage[peerID];
           if (historyStorage !== undefined) {
             var newHistory = [],
@@ -2911,6 +2944,22 @@ angular.module('myApp.services')
             historyStorage.pending = newPending;
 
             $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: updatedData.msgs});
+          }
+
+          var foundDialog = getDialogByPeerID(peerID)[0];
+          if (foundDialog) {
+            if (updatedData.unread) {
+              foundDialog.unread_count -= updatedData.unread;
+
+              $rootScope.$broadcast('dialog_unread', {
+                peerID: peerID,
+                count: foundDialog.unread_count
+              });
+            }
+
+            if (updatedData.msgs[foundDialog.top_message]) {
+              reloadConversation(peerID);
+            }
           }
         });
         break;
@@ -2999,11 +3048,28 @@ angular.module('myApp.services')
       saveMessages(dialogsResult.messages);
 
       var updatedDialogs = {};
+      var hasUpdated = false;
       angular.forEach(dialogsResult.dialogs, function (dialog) {
-        saveConversation(dialog);
-        updatedDialogs[dialog.peerID] = dialog;
+        if (dialog.top_message) {
+          saveConversation(dialog);
+          if (getDialogByPeerID(dialog.peerID).length) {
+            $rootScope.$broadcast('dialog_top', dialog);
+          } else {
+            updatedDialogs[dialog.peerID] = dialog;
+            hasUpdated = true;
+          }
+        } else {
+          var peerID = AppPeersManager.getPeerID(dialog.peer);
+          var foundDialog = getDialogByPeerID(peerID);
+          if (foundDialog.length) {
+            dialogsStorage.dialogs.splice(foundDialog[1], 1);
+            $rootScope.$broadcast('dialog_drop', {peerID: peerID});
+          }
+        }
       });
-      $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs);
+      if (hasUpdated) {
+        $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs);
+      }
     });
   }
 

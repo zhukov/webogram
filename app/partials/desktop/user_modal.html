@@ -102,6 +102,10 @@
         </div>
 
         <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions">
+          <a class="md_modal_section_link" ng-click="flushHistory(true)" my-i18n="user_modal_clear_history"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions">
           <a class="md_modal_section_link" ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
         </div>
 

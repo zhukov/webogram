@@ -6,6 +6,8 @@
       <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout"></span>
       <span ng-switch-when="WEBOGRAM_UPDATED_RELOAD" my-i18n="confirm_modal_update_reload"></span>
       <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_history_flush"></span>
+      <span ng-switch-when="HISTORY_LEAVE_AND_FLUSH" my-i18n="confirm_modal_history_leave_flush_md"></span>
+      <span ng-switch-when="HISTORY_FLUSH_AND_DELETE" my-i18n="confirm_modal_history_flush"></span>
       <span ng-switch-when="TERMINATE_SESSIONS" my-i18n="confirm_modal_terminate_sessions"></span>
       <span ng-switch-when="TERMINATE_SESSION" my-i18n="confirm_modal_terminate_session"></span>
 
@@ -81,9 +83,11 @@
     <button class="btn btn-md" ng-click="$dismiss()">
       <span my-i18n="modal_cancel"></span>
     </button>
-    <button class="btn btn-md btn-md-primary" ng-switch="type" ng-click="$close()" ng-class="{'btn-md-danger': type == 'RESET_ACCOUNT'}" my-focused >
+    <button class="btn btn-md btn-md-primary" ng-switch="type" ng-click="$close()" ng-class="{'btn-md-danger': type == 'RESET_ACCOUNT' || type == 'HISTORY_LEAVE_AND_FLUSH' || type == 'HISTORY_FLUSH_AND_DELETE' || type == 'HISTORY_FLUSH'}" my-focused >
       <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout_submit"></span>
-      <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_history_flush_submit"></span>
+      <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_clear_history_submit"></span>
+      <span ng-switch-when="HISTORY_LEAVE_AND_FLUSH" my-i18n="confirm_modal_leave_chat_submit"></span>
+      <span ng-switch-when="HISTORY_FLUSH_AND_DELETE" my-i18n="confirm_modal_delete_chat_submit"></span>
       <span ng-switch-when="FILES_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_files_send_submit"></span>
       <span ng-switch-when="FILE_CLIPBOARD_PASTE" my-i18n="confirm_modal_clipboard_file_send_submit"></span>
       <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete_submit"></span>

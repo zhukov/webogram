@@ -746,8 +746,26 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-    $scope.$on('dialog_flush', function (e, dialog) {
-      deleteDialog(dialog.peerID);
+    $scope.$on('dialog_top', function (e, dialog) {
+      var curDialog, i;
+      for (i = 0; i < $scope.dialogs.length; i++) {
+        curDialog = $scope.dialogs[i];
+        if (curDialog.peerID == dialog.peerID) {
+          var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog);
+          $scope.dialogs.splice(i, 1, wrappedDialog);
+          break;
+        }
+      }
+    });
+    $scope.$on('dialog_flush', function (e, update) {
+      var curDialog, i;
+      for (i = 0; i < $scope.dialogs.length; i++) {
+        curDialog = $scope.dialogs[i];
+        if (curDialog.peerID == update.peerID) {
+          curDialog.deleted = true;
+          break;
+        }
+      }
     });
     $scope.$on('dialog_drop', function (e, dialog) {
       deleteDialog(dialog.peerID);
@@ -1695,7 +1713,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function selectedFlush () {
       ErrorService.confirm({type: 'HISTORY_FLUSH'}).then(function () {
-        AppMessagesManager.flushHistory($scope.curDialog.peerID).then(function () {
+        AppMessagesManager.flushHistory($scope.curDialog.peerID, true).then(function () {
           selectedCancel();
         });
       })
@@ -2645,6 +2663,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.setTyping', {
         peer: AppPeersManager.getInputPeerByID($scope.curDialog.peerID),
         action: {_: 'sendMessageTypingAction'}
+      })['catch'](function (error) {
+        error.handled = true;
       });
     }
 
@@ -3324,7 +3344,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('UserModalController', function ($scope, $location, $rootScope, AppProfileManager, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
+  .controller('UserModalController', function ($scope, $location, $rootScope, $modalInstance, AppProfileManager, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
 
     var peerString = AppUsersManager.getUserString($scope.userID);
 
@@ -3358,10 +3378,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $rootScope.$broadcast('history_focus', {peerString: peerString});
     };
 
-    $scope.flushHistory = function () {
-      ErrorService.confirm({type: 'HISTORY_FLUSH'}).then(function () {
-        AppMessagesManager.flushHistory($scope.userID).then(function () {
-          $scope.goToHistory();
+    $scope.flushHistory = function (justClear) {
+      ErrorService.confirm({type: justClear ? 'HISTORY_FLUSH' : 'HISTORY_FLUSH_AND_DELETE'}).then(function () {
+        AppMessagesManager.flushHistory($scope.userID, justClear).then(function () {
+          if (justClear) {
+            $scope.goToHistory();
+          } else {
+            $modalInstance.close();
+            $location.url('/im');
+          }
         });
       });
     };
@@ -3436,7 +3461,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   })
 
-  .controller('ChatModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
+  .controller('ChatModalController', function ($scope, $modalInstance, $location, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
 
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {});
     $scope.settings = {notifications: true};
@@ -3485,19 +3510,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
 
     $scope.leaveGroup = function () {
-      MtpApiManager.invokeApi('messages.deleteChatUser', {
-        chat_id: AppChatsManager.getChatInput($scope.chatID),
-        user_id: {_: 'inputUserSelf'}
-      }).then(onChatUpdated);
+      ErrorService.confirm({type: 'HISTORY_LEAVE_AND_FLUSH'}).then(function () {
+        MtpApiManager.invokeApi('messages.deleteChatUser', {
+          chat_id: AppChatsManager.getChatInput($scope.chatID),
+          user_id: {_: 'inputUserSelf'}
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates);
+          AppMessagesManager.flushHistory(-$scope.chatID).then(function () {
+            $modalInstance.close();
+            $location.url('/im');
+          });
+        });
+      });
     };
-
-    $scope.returnToGroup = function () {
-      MtpApiManager.invokeApi('messages.addChatUser', {
-        chat_id: AppChatsManager.getChatInput($scope.chatID),
-        user_id: {_: 'inputUserSelf'}
-      }).then(onChatUpdated);
-    };
-
 
     $scope.inviteToGroup = function () {
       var disabled = [];
@@ -3537,10 +3562,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
 
 
-    $scope.flushHistory = function () {
-      ErrorService.confirm({type: 'HISTORY_FLUSH'}).then(function () {
-        AppMessagesManager.flushHistory(-$scope.chatID).then(function () {
-          $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+    $scope.flushHistory = function (justClear) {
+      ErrorService.confirm({type: justClear ? 'HISTORY_FLUSH' : 'HISTORY_FLUSH_AND_DELETE'}).then(function () {
+        AppMessagesManager.flushHistory(-$scope.chatID, justClear).then(function () {
+          if (justClear) {
+            $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString});
+          } else {
+            $modalInstance.close();
+            $location.url('/im');
+          }
         });
       });
     };
