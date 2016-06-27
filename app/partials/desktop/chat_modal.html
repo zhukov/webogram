@@ -40,13 +40,11 @@
 
     <div class="md_modal_sections clearfix">
 
-      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="hasRights('invite') && chatFull.participants.participants.length < maxParticipants || chatFull.chat.pFlags.left">
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="hasRights('invite') && chatFull.participants.participants.length < maxParticipants">
         <i class="md_modal_section_icon md_modal_section_icon_person"></i>
 
-        <div class="md_modal_section_link_wrap" ng-switch="chatFull.chat.pFlags.left">
-
-          <a ng-switch-when="true" class="md_modal_section_link" ng-click="returnToGroup()" my-i18n="group_modal_return"></a>
-          <a ng-switch-default class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
         </div>
 
       </div>
@@ -73,7 +71,7 @@
         <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
         <div class="md_modal_section_link_wrap">
-          <a class="md_modal_section_link" ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></a>
+          <a class="md_modal_section_link" ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></a>
         </div>
 
       </div>
@@ -111,7 +109,7 @@
 
           <div class="md_modal_list_peer_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
 
-            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_menu_leave"></a>
+            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_menu_delete_group"></a>
             <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_members_kick"></a>
 
             <a class="md_modal_list_peer_photo pull-left" my-peer-photolink="::participant.user_id" img-class="md_modal_list_peer_photo"></a>

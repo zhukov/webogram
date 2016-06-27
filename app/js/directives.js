@@ -180,6 +180,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var messageMediaCompiled = $compile('<div class="im_message_media" my-message-media="media" message-id="messageId"></div>');
     var messageKeyboardCompiled = $compile('<div class="im_message_keyboard" my-inline-reply-markup="markup"></div>');
+    var messageSignCompiled = $compile('<div class="im_message_sign"><span class="im_message_sign_link" my-peer-link="signID"></span></div>');
 
     return {
       link: link,
@@ -231,6 +232,19 @@ angular.module('myApp.directives', ['myApp.filters'])
       });
     }
 
+    function updateMessageSignature($scope, element, message) {
+      if (!message.signID) {
+        $('.im_message_sign', element).hide();
+        return;
+      }
+
+      var scope = $scope.$new(true);
+      scope.signID = message.signID;
+      messageSignCompiled(scope, function (clonedElement) {
+        $('.im_message_sign', element).replaceWith(clonedElement);
+      });
+    }
+
     function updateMessageKeyboard($scope, element, message) {
       if (!message.reply_markup ||
           message.reply_markup._ != 'replyInlineMarkup') {
@@ -260,6 +274,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     function updateMessageBody($scope, element, message) {
       updateMessageText($scope, element, message);
       updateMessageMedia($scope, element, message);
+      updateMessageSignature($scope, element, message);
       updateMessageKeyboard($scope, element, message);
     }
 
@@ -1169,9 +1184,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         var unreadSplit, focusMessage;
 
         var newScrollTop = false;
-        // console.trace('change scroll');
+        var afterScrollAdd;
+        // console.trace(dT(), 'change scroll', animated);
         if (!noFocus &&
             (focusMessage = $('.im_message_focus:visible', scrollableWrap)[0])) {
+          // console.log(dT(), 'change scroll to focus', focusMessage);
           var ch = scrollableWrap.clientHeight,
               st = scrollableWrap.scrollTop,
               ot = focusMessage.offsetTop,
@@ -1180,12 +1197,29 @@ angular.module('myApp.directives', ['myApp.filters'])
             newScrollTop = Math.max(0, ot - Math.floor(ch / 2) + 26);
           }
           atBottom = false;
+
+          afterScrollAdd = function () {
+            var unfocusMessagePromise = $(focusMessage).data('unfocus_promise');
+            if (unfocusMessagePromise) {
+              $timeout.cancel(unfocusMessagePromise);
+              $(focusMessage).removeClass('im_message_focus_active');
+            }
+            $timeout(function () {
+              $(focusMessage).addClass('im_message_focus_active');
+              unfocusMessagePromise = $timeout(function () {
+                $(focusMessage).removeClass('im_message_focus_active');
+                $(focusMessage).data('unfocus_promise', false);
+              }, 2800);
+              $(focusMessage).data('unfocus_promise', unfocusMessagePromise);
+            });
+          }
+
         } else if (unreadSplit = $('.im_message_unread_split:visible', scrollableWrap)[0]) {
-          // console.log('change scroll unread', unreadSplit.offsetTop);
+          // console.log(dT(), 'change scroll unread', unreadSplit.offsetTop);
           newScrollTop = Math.max(0, unreadSplit.offsetTop - 52);
           atBottom = false;
         } else {
-          // console.log('change scroll bottom');
+          // console.log(dT(), 'change scroll bottom');
           newScrollTop = scrollableWrap.scrollHeight;
           atBottom = true;
         }
@@ -1196,6 +1230,9 @@ angular.module('myApp.directives', ['myApp.filters'])
               $(scrollableWrap).trigger('scroll');
               scrollTopInitial = scrollableWrap.scrollTop;
             });
+            if (afterScrollAdd) {
+              afterScrollAdd();
+            }
           }
           if (animated) {
             $(scrollableWrap).animate({scrollTop: newScrollTop}, 200, afterScroll);

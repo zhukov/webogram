@@ -18,7 +18,7 @@
               <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
             </li>
             <li>
-              <a ng-click="flushHistory()" my-i18n="group_modal_menu_delete_chat"></a>
+              <a ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></a>
             </li>
           </ul>
         </div>
@@ -65,10 +65,6 @@
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.pFlags.left && chatFull.chat.pFlags.creator">
       <a class="mobile_modal_action" ng-click="inviteViaLink()" my-i18n="group_modal_menu_share_link"></a>
     </div>
-
-    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; chatFull.chat.pFlags.left">
-      <a class="mobile_modal_action" ng-click="returnToGroup()" my-i18n="group_modal_return"></a>
-    </div>
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ == 'chatForbidden'">
       <a class="mobile_modal_action" ng-click="flushHistory()" my-i18n="group_modal_delete_group"></a>
     </div>
@@ -100,7 +96,7 @@
 
           <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
             <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
-            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_leave"></a>
+            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_delete_group"></a>
 
             <a class="chat_modal_participant_photo pull-left" my-peer-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
 

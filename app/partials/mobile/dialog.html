@@ -22,17 +22,26 @@
       <span my-peer-link="dialogMessage.peerID" verified="true"></span>
     </div>
 
-    <div ng-if="dialogMessage.typing > 0" class="im_dialog_message im_dialog_message_typing">
-      <span class="im_short_message_service" my-i18n="im_conversation_group_typing">
-        <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
-      </span>
-    </div>
+    <div ng-switch="dialogMessage.typing ? 'typing' : (!dialogMessage.unreadCount && dialogMessage.draft ? 'draft' : (dialogMessage.deleted ? 'deleted' : 'message'))">
 
-    <div class="im_dialog_message_notyping" ng-switch="dialogMessage.deleted">
-      <div ng-switch-when="true" class="im_dialog_message">
-        <span class="im_short_message_text" my-i18n="conversation_message_deleted"></span>
+      <div ng-switch-when="typing" class="im_dialog_message im_dialog_message_typing">
+        <span class="im_short_message_service" my-i18n="im_conversation_group_typing">
+          <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+        </span>
       </div>
-      <div ng-switch-default class="im_dialog_message">
+
+      <div ng-switch-when="draft" class="im_dialog_message">
+        <span class="im_dialog_chat_from_wrap">
+          <span class="im_dialog_draft_from" my-i18n="conversation_draft"></span>
+        </span>
+        <span class="im_short_message_text" ng-bind-html="dialogMessage.draft.richMessage"></span>
+      </div>
+
+      <div ng-switch-when="deleted" class="im_dialog_message">
+        <span class="im_short_message_text">&nbsp;</span>
+      </div>
+
+      <div ng-switch-when="message" class="im_dialog_message">
         <span ng-switch="dialogMessage.peerID > 0 || dialogMessage.fromID < 0">
           <span ng-switch-when="true">
             <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.pFlags.out && dialogMessage.fromID > 0">
@@ -62,4 +71,5 @@
     </div>
 
   </div>
+
 </a>
