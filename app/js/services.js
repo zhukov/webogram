@@ -2634,7 +2634,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
   function switchInlineButtonClick(id, button) {
     var message = AppMessagesManager.getMessage(id);
-    var botID = message.fromID;
+    var botID = message.viaBotID || message.fromID;
     return checkSwitchReturn(botID).then(function (retPeerString) {
       if (retPeerString) {
         return switchInlineQuery(botID, retPeerString, button.query);
