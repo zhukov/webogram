@@ -10,6 +10,8 @@ var st = require('st');
 var less = require('gulp-less');
 var del = require('del');
 var runSequence = require('run-sequence');
+var oghliner = require('oghliner');
+var gulpServiceWorker = require('gulp-serviceworker');
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -23,7 +25,7 @@ gulp.task('templates', function() {
     .pipe(gulp.dest('app/js'));
 });
 
-gulp.task('usemin', ['templates', 'enable-production'], function() {
+gulp.task('usemin', function() {
   return gulp.src(['app/index.html', 'app/badbrowser.html'])
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
@@ -152,37 +154,32 @@ gulp.task('disable-production', function() {
   );
 });
 
-gulp.task('add-appcache-manifest', function() {
-  var sources = [
-    './dist/**/*',
-    '!dist/manifest.*',
-    '!dist/*.html',
-    '!dist/fonts/*',
-    '!dist/img/icons/icon*.png',
-    '!dist/js/background.js'
-  ];
+var fileGlobs = [
+  './dist/**/*',
+  '!dist/manifest.*',
+  '!dist/*.html',
+  '!dist/fonts/*',
+  '!dist/img/icons/icon*.png',
+  '!dist/js/background.js',
+];
 
-  return es.concat(
-    gulp.src(sources)
-      .pipe($.manifest({
-          timestamp: true,
-          network: ['http://*', 'https://*', '*'],
-          filename: 'webogram.appcache',
-          exclude: ['webogram.appcache', 'app.manifest']
-        })
-      )
-      .pipe(gulp.dest('./dist')),
+gulp.task('generate-service-worker', ['build'], function() {
+  return gulp.src(fileGlobs)
+  .pipe(gulpServiceWorker({
+    rootDir: 'dist/',
+  }));
+});
 
-    gulp.src(sources)
-      .pipe($.manifest({
-          timestamp: true,
-          network: ['http://*', 'https://*', '*'],
-          filename: 'app.manifest',
-          exclude: ['webogram.appcache', 'app.manifest']
-        })
-      )
-      .pipe(gulp.dest('./dist'))
-  );
+gulp.task('add-appcache-manifest', ['build'], function() {
+  return gulp.src(fileGlobs)
+          .pipe($.manifest({
+              timestamp: true,
+              network: ['http://*', 'https://*', '*'],
+              filename: 'webogram.appcache',
+              exclude: ['webogram.appcache', 'app.manifest']
+            })
+          )
+          .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('package-dev', function() {
@@ -250,9 +247,9 @@ gulp.task('bump', ['update-version-manifests', 'update-version-config'], functio
   gulp.start('update-version-comments');
 });
 
-gulp.task('build', function(callback) {
+gulp.task('build', ['clean'], function(callback) {
   runSequence(
-    'less',
+    ['less', 'templates', 'enable-production'],
     'usemin',
     ['copy', 'copy-locales', 'copy-images', 'disable-production'],
     callback
@@ -261,10 +258,12 @@ gulp.task('build', function(callback) {
 
 gulp.task('package', ['cleanup-dist']);
 
-gulp.task('publish', ['build'], function() {
-  gulp.start('add-appcache-manifest');
+gulp.task('offline', ['add-appcache-manifest', 'generate-service-worker']);
+
+gulp.task('deploy', ['offline'], function() {
+  return oghliner.deploy({
+    rootDir: 'dist/',
+  });
 });
 
-gulp.task('default', ['clean'], function() {
-  gulp.start('build');
-});
+gulp.task('default', ['build']);
