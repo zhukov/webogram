@@ -51,7 +51,7 @@ gulp.task('less', function () {
 })
 
 gulp.task('standard', function () {
-  gulp.src(['app/**/*.js', 'gulpfile.js'])
+  gulp.src(['app/**/*.js', '!app/vendor/**/*', 'gulpfile.js'])
     .pipe(standard())
     .pipe(standard.reporter('default', {
       breakOnError: true
