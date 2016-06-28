@@ -25,7 +25,7 @@ gulp.task('templates', function() {
     .pipe(gulp.dest('app/js'));
 });
 
-gulp.task('usemin', ['templates', 'enable-production'], function() {
+gulp.task('usemin', function() {
   return gulp.src(['app/index.html', 'app/badbrowser.html'])
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
@@ -171,27 +171,15 @@ gulp.task('generate-service-worker', ['build'], function() {
 });
 
 gulp.task('add-appcache-manifest', ['build'], function() {
-  return es.concat(
-    gulp.src(fileGlobs)
-      .pipe($.manifest({
-          timestamp: true,
-          network: ['http://*', 'https://*', '*'],
-          filename: 'webogram.appcache',
-          exclude: ['webogram.appcache', 'app.manifest']
-        })
-      )
-      .pipe(gulp.dest('./dist')),
-
-    gulp.src(fileGlobs)
-      .pipe($.manifest({
-          timestamp: true,
-          network: ['http://*', 'https://*', '*'],
-          filename: 'app.manifest',
-          exclude: ['webogram.appcache', 'app.manifest']
-        })
-      )
-      .pipe(gulp.dest('./dist'))
-  );
+  return gulp.src(fileGlobs)
+          .pipe($.manifest({
+              timestamp: true,
+              network: ['http://*', 'https://*', '*'],
+              filename: 'webogram.appcache',
+              exclude: ['webogram.appcache', 'app.manifest']
+            })
+          )
+          .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('package-dev', function() {
@@ -261,7 +249,7 @@ gulp.task('bump', ['update-version-manifests', 'update-version-config'], functio
 
 gulp.task('build', ['clean'], function(callback) {
   runSequence(
-    'less',
+    ['less', 'templates', 'enable-production'],
     'usemin',
     ['copy', 'copy-locales', 'copy-images', 'disable-production'],
     callback
