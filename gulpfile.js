@@ -1,17 +1,12 @@
+var packageJson = require('./package.json')
 var gulp = require('gulp')
+var $ = require('gulp-load-plugins')({lazy: false})
 var es = require('event-stream')
-var pj = require('./package.json')
-var $ = require('gulp-load-plugins')()
 var path = require('path')
 var http = require('http')
-var livereload = require('gulp-livereload')
 var st = require('st')
-var less = require('gulp-less')
 var del = require('del')
 var runSequence = require('run-sequence')
-var oghliner = require('oghliner')
-var gulpServiceWorker = require('gulp-serviceworker')
-var standard = require('gulp-standard')
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -44,7 +39,7 @@ gulp.task('imagemin', function () {
 
 gulp.task('less', function () {
   gulp.src('app/less/*.less')
-    .pipe(less({
+    .pipe($.less({
       paths: [path.join(__dirname, 'less', 'includes')]
     }))
     .pipe(gulp.dest('app/css'))
@@ -52,8 +47,8 @@ gulp.task('less', function () {
 
 gulp.task('standard', function () {
   gulp.src(['app/**/*.js', '!app/vendor/**/*', 'gulpfile.js'])
-    .pipe(standard())
-    .pipe(standard.reporter('default', {
+    .pipe($.standard())
+    .pipe($.standard.reporter('default', {
       breakOnError: true
     }))
 })
@@ -96,7 +91,7 @@ gulp.task('copy-locales', function () {
   var langpackSrc = []
   var ngSrc = []
 
-  pj.locales.forEach(function (locale) {
+  packageJson.locales.forEach(function (locale) {
     langpackSrc.push('app/js/locales/' + locale + '.json')
     ngSrc.push('app/vendor/angular/i18n/angular-locale_' + locale + '.js')
   })
@@ -110,7 +105,7 @@ gulp.task('copy-locales', function () {
 
 gulp.task('compress-dist', ['build'], function () {
   return gulp.src('**/*', {cwd: path.join(process.cwd(), '/dist')})
-    .pipe($.zip('webogram_v' + pj.version + '.zip'))
+    .pipe($.zip('webogram_v' + packageJson.version + '.zip'))
     .pipe(gulp.dest('releases'))
 })
 
@@ -118,21 +113,21 @@ gulp.task('cleanup-dist', ['compress-dist'], function () {
   return del(['releases/**/*', '!releases/*.zip'])
 })
 
-gulp.task('update-version-manifests', function () {
+gulp.task('bump-version-manifests', function () {
   return gulp.src(['app/manifest.webapp', 'app/manifest.json'])
-    .pipe($.replace(/"version": ".*",/, '"version": "' + pj.version + '",'))
+    .pipe($.replace(/"version": ".*",/, '"version": "' + packageJson.version + '",'))
     .pipe(gulp.dest('app'))
 })
 
-gulp.task('update-version-config', function () {
+gulp.task('bump-version-config', function () {
   return gulp.src('app/js/lib/config.js')
-    .pipe($.replace(/version: '.*?'/, "version: '" + pj.version + "'"))
+    .pipe($.replace(/version: '.*?'/, "version: '" + packageJson.version + "'"))
     .pipe(gulp.dest('app/js/lib'))
 })
 
-gulp.task('update-version-comments', function () {
+gulp.task('bump-version-comments', function () {
   return gulp.src('app/**/*.js')
-    .pipe($.replace(/Webogram v[0-9.]*/, 'Webogram v' + pj.version))
+    .pipe($.replace(/Webogram v[0-9.]*/, 'Webogram v' + packageJson.version))
     .pipe(gulp.dest('app'))
 })
 
@@ -171,11 +166,20 @@ var fileGlobs = [
   '!dist/js/background.js'
 ]
 
-gulp.task('generate-service-worker', ['build'], function () {
-  return gulp.src(fileGlobs)
-    .pipe(gulpServiceWorker({
-      rootDir: 'dist/'
-    }))
+function writeServiceWorkerFile (rootDir, handleFetch, callback) {
+  var config = {
+    cacheId: packageJson.name,
+    handleFetch: handleFetch,
+    logger: $.util.log,
+    staticFileGlobs: fileGlobs,
+    stripPrefix: rootDir + '/',
+    verbose: true
+  }
+  swPrecache.write(path.join(rootDir, 'service_worker.js'), config, callback)
+}
+
+gulp.task('generate-service-worker', ['build'], function (callback) {
+  writeServiceWorkerFile('dist', true, callback)
 })
 
 gulp.task('add-appcache-manifest', ['build'], function () {
@@ -226,16 +230,16 @@ gulp.task('package-dev', function () {
 
 gulp.task('watchcss', function () {
   gulp.src('app/css/*.css')
-    .pipe(livereload())
+    .pipe($.livereload())
 })
 
 gulp.task('watchhtml', function () {
   gulp.src('app/partials/**/*.html')
-    .pipe(livereload())
+    .pipe($.livereload())
 })
 
 gulp.task('watch', ['server', 'less'], function () {
-  livereload.listen({ basePath: 'app' })
+  $.livereload.listen({ basePath: 'app' })
   gulp.watch('app/css/*.css', ['watchcss'])
   gulp.watch('app/less/**/*.less', ['less'])
   gulp.watch('app/partials/**/*.html', ['watchhtml'])
@@ -251,8 +255,8 @@ gulp.task('clean', function () {
   return del(['dist/*', 'app/js/templates.js', 'app/css/*', '!dist/.git'])
 })
 
-gulp.task('bump', ['update-version-manifests', 'update-version-config'], function () {
-  gulp.start('update-version-comments')
+gulp.task('bump', ['bump-version-manifests', 'bump-version-config'], function () {
+  gulp.start('bump-version-comments')
 })
 
 gulp.task('build', ['clean'], function (callback) {
@@ -268,10 +272,9 @@ gulp.task('package', ['cleanup-dist'])
 
 gulp.task('offline', ['add-appcache-manifest', 'generate-service-worker'])
 
-gulp.task('deploy', ['offline'], function () {
-  return oghliner.deploy({
-    rootDir: 'dist/'
-  })
+gulp.task('deploy', function () {
+  return gulp.src('./dist/**/*')
+    .pipe($.ghPages())
 })
 
 gulp.task('default', ['build'])

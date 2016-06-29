@@ -494,7 +494,7 @@ angular.module('myApp.services')
       var reqPeerID = peerID
       if (migratedToFrom[peerID]) {
         isMigrated = true
-        if (maxID && maxID < fullMsgIDModulus) {
+        if (maxID && maxID < AppMessagesIDsManager.fullMsgIDModulus) {
           reqPeerID = migratedToFrom[peerID]
         }
       }
@@ -3151,7 +3151,8 @@ angular.module('myApp.services')
       getFullMessageID: getFullMessageID,
       getMessageIDInfo: getMessageIDInfo,
       getMessageLocalID: getMessageLocalID,
-      splitMessageIDsByChannels: splitMessageIDsByChannels
+      splitMessageIDsByChannels: splitMessageIDsByChannels,
+      fullMsgIDModulus: fullMsgIDModulus
     }
 
     function getFullMessageID (msgID, channelID) {

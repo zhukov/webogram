@@ -2393,7 +2393,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
+  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
     var inlineResults = {}
 
     return {

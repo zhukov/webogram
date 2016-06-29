@@ -444,7 +444,7 @@ TLDeserialization.prototype.fetchBytes = function (field) {
   var len = this.byteView[this.offset++]
 
   if (len == 254) {
-    var len = this.byteView[this.offset++] |
+    len = this.byteView[this.offset++] |
       (this.byteView[this.offset++] << 8) |
       (this.byteView[this.offset++] << 16)
   }
