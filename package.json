@@ -7,7 +7,7 @@
   "dom_storage_quota": 40,
   "window": {
     "title": "Telegram",
-    "icon": "app/img/icons/icon128.png",
+    "icon": "app/img/icons/icon32.png",
     "toolbar": false,
     "frame": true,
     "position": "center",
