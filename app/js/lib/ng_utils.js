@@ -1391,7 +1391,7 @@ angular.module('izhukov.utils', [])
     }
 
     function parseMarkdown (text, entities) {
-      if (text.indexOf('`') == -1) {
+      if (text.indexOf('`') == -1 && text.indexOf('@') == -1) {
         return text.trim()
       }
       var raw = text
@@ -1433,6 +1433,7 @@ angular.module('izhukov.utils', [])
           })
           rawOffset -= 2
         } else if (match[10]) { // custom mention
+          console.log(match);
           newText.push(text)
           entities.push({
             _: 'messageEntityMentionName',
@@ -1455,6 +1456,8 @@ angular.module('izhukov.utils', [])
       if (!entities.length) {
         newText = newText.trim()
       }
+      console.warn(dT(), newText, entities);
+      // throw new Error(11);
       return newText
     }
 

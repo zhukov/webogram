@@ -1258,12 +1258,16 @@ angular.module('myApp.services')
       if (!options.viaBotID) {
         text = RichTextProcessor.parseMarkdown(text, entities)
       }
-      angular.forEach(entities, function (entity) {
-        if (entity._ == 'messageEntityMentionName') {
-          entity._ = 'inputMessageEntityMentionName'
-          entity.user_id = AppUsersManager.getUserInput(entity.user_id)
-        }
-      })
+      var sendEntites = entities
+      if (entities.length) {
+        sendEntites = angular.copy(entities)
+        angular.forEach(sendEntites, function (entity) {
+          if (entity._ == 'messageEntityMentionName') {
+            entity._ = 'inputMessageEntityMentionName'
+            entity.user_id = AppUsersManager.getUserInput(entity.user_id)
+          }
+        })
+      }
 
       if (!text.length) {
         return
@@ -1315,7 +1319,7 @@ angular.module('myApp.services')
         reply_to_msg_id: replyToMsgID,
         via_bot_id: options.viaBotID,
         reply_markup: options.reply_markup,
-        entities: entities,
+        entities: sendEntites,
         views: asChannel && 1,
         pending: true
       }
