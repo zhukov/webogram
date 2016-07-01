@@ -2,10 +2,10 @@
 
   <ul ng-switch-when="mentions" class="composer_dropdown">
     <li ng-repeat="user in mentionUsers">
-      <a class="composer_mention_option" data-mention="{{user.username}}">
+      <a class="composer_mention_option" data-mention="{{user.username.length > 0 ? user.username : ('#' + user.id)}}" data-name="{{user.first_name}}">
         <span class="composer_user_photo" my-peer-photolink="user.id" img-class="composer_user_photo"></span>
         <span class="composer_user_name" ng-bind-html="user.rFullName"></span>
-        <span class="composer_user_mention" ng-bind="'@' + user.username"></span>
+        <span class="composer_user_mention" ng-if="user.username.length > 0" ng-bind="'@' + user.username"></span>
       </a>
     </li>
   </ul>

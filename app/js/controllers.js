@@ -2291,11 +2291,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             return
           }
           done[userID] = true
-          var user = AppUsersManager.getUser(userID)
-          if (user.username) {
-            mentionUsers.push(user)
-            SearchIndexManager.indexObject(user.id, AppUsersManager.getUserSearchText(user.id), mentionIndex)
-          }
+          mentionUsers.push(AppUsersManager.getUser(userID))
+          SearchIndexManager.indexObject(userID, AppUsersManager.getUserSearchText(userID), mentionIndex)
         })
 
         safeReplaceObject($scope.mentions, {

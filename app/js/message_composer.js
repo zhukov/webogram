@@ -777,7 +777,7 @@ MessageComposer.prototype.setUpAutoComplete = function () {
       EmojiHelper.pushPopularEmoji(code)
     }
     if (mention = target.attr('data-mention')) {
-      self.onMentionSelected(mention)
+      self.onMentionSelected(mention, target.attr('data-name'))
     }
     if (command = target.attr('data-command')) {
       if (self.onCommandSelected) {
@@ -903,7 +903,7 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           return cancelEvent(e)
         }
         if (mention = currentSel.attr('data-mention')) {
-          this.onMentionSelected(mention)
+          this.onMentionSelected(mention, currentSel.attr('data-name'))
           return cancelEvent(e)
         }
         if (command = currentSel.attr('data-command')) {
@@ -1272,7 +1272,14 @@ MessageComposer.prototype.onMentionsUpdated = function (username) {
   }
 }
 
-MessageComposer.prototype.onMentionSelected = function (username) {
+MessageComposer.prototype.onMentionSelected = function (username, firstName) {
+  var hasUsername = true;
+  if (username.charAt(0) == '#') {
+    hasUsername = false;
+    username = username.substr(1);
+    firstName = firstName.replace(/\(\)@/, '')
+  }
+
   if (this.richTextareaEl) {
     var textarea = this.richTextareaEl[0]
     if (!this.isActive) {
@@ -1293,20 +1300,26 @@ MessageComposer.prototype.onMentionSelected = function (username) {
     } else {
       newValuePrefix = prefix + '@' + username
     }
-    textarea.value = newValue
 
     var html
-    if (suffix.length) {
-      this.selId = (this.selId || 0) + 1
-      html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix)
-      this.richTextareaEl.html(html)
-      setRichFocus(textarea, $('#composer_sel' + this.selId)[0])
+    if (hasUsername) {
+      if (suffix.length) {
+        this.selId = (this.selId || 0) + 1
+        html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix)
+        this.richTextareaEl.html(html)
+        setRichFocus(textarea, $('#composer_sel' + this.selId)[0])
+      } else {
+        html = this.getRichHtml(newValuePrefix) + '&nbsp;'
+        this.richTextareaEl.html(html)
+        setRichFocus(textarea)
+      }
     } else {
-      html = this.getRichHtml(newValuePrefix) + '&nbsp;'
+      this.selId = (this.selId || 0) + 1
+      html = this.getRichHtml(newValuePrefix) + '&nbsp;(<span id="composer_sel' + this.selId + '">' + encodeEntities(firstName) + '</span>)&nbsp;' + this.getRichHtml(suffix)
       this.richTextareaEl.html(html)
-      setRichFocus(textarea)
+      setRichFocus(textarea, $('#composer_sel' + this.selId)[0], true)
     }
-  }else {
+  } else {
     var textarea = this.textareaEl[0]
     var fullValue = textarea.value
     var pos = this.isActive ? getFieldSelection(textarea) : fullValue.length
@@ -1314,15 +1327,26 @@ MessageComposer.prototype.onMentionSelected = function (username) {
     var prefix = fullValue.substr(0, pos)
     var matches = prefix.match(/@([A-Za-z0-9\-\+\*_]*)$/)
 
+    var newValuePrefix
+    var newValue
+    var newPos
+    var newPosTo
     if (matches && matches[0]) {
-      var newValue = prefix.substr(0, matches.index) + '@' + username + ' ' + suffix
-      var newPos = matches.index + username.length + 2
+      newValuePrefix = prefix.substr(0, matches.index) + '@' + username
     } else {
-      var newValue = prefix + ':' + username + ': ' + suffix
-      var newPos = prefix.length + username.length + 2
+      newValuePrefix = prefix + '@' + username
+    }
+
+    if (hasUsername) {
+      newValue = newValuePrefix + '@' + username + ' ' + suffix
+      newPos = matches.index + username.length + 2
+    } else {
+      newValue = newValuePrefix + '@' + username + ' (' + firstName + ') ' + suffix
+      newPos = matches.index + username.length + 2
+      newPosTo = newPos + firstName.length
     }
     textarea.value = newValue
-    setFieldSelection(textarea, newPos)
+    setFieldSelection(textarea, newPos, newPosTo)
   }
 
   this.hideSuggestions()

@@ -1227,7 +1227,7 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
-    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)/
+    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1403,7 +1403,7 @@ angular.module('izhukov.utils', [])
         matchIndex = rawOffset + match.index
         newText.push(raw.substr(0, match.index))
 
-        var text = (match[3] || match[7])
+        var text = (match[3] || match[7] || match[10])
         rawOffset -= text.length
         text = text.replace(/^\s+|\s+$/g, '')
         rawOffset += text.length
@@ -1424,7 +1424,7 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= match[2].length + match[4].length
-        } else { // code
+        } else if (match[7]) { // code
           newText.push(match[6] + text + match[8])
           entities.push({
             _: 'messageEntityCode',
@@ -1432,6 +1432,15 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= 2
+        } else if (match[10]) { // custom mention
+          newText.push(text)
+          entities.push({
+            _: 'messageEntityMentionName',
+            user_id: match[9],
+            offset: matchIndex,
+            length: text.length
+          })
+          rawOffset -= match[0] - text.length
         }
         raw = raw.substr(match.index + match[0].length)
         rawOffset += match.index + match[0].length
@@ -1578,6 +1587,21 @@ angular.module('izhukov.utils', [])
               contextExternal ? ' target="_blank" ' : '',
               ' href="',
               contextUrl.replace('{1}', encodeURIComponent(username)),
+              '">',
+              encodeEntities(entityText),
+              '</a>'
+            )
+            break
+
+          case 'messageEntityMentionName':
+            if (!options.noLinks) {
+              skipEntity = true
+              break
+            }
+            var username = entityText.substr(1)
+            html.push(
+              '<a href="#/im?p=u',
+              encodeURIComponent(entity.user_id),
               '">',
               encodeEntities(entityText),
               '</a>'
@@ -1777,6 +1801,12 @@ angular.module('izhukov.utils', [])
           case 'messageEntityPre':
             code.push(
               '```', entityText, '```'
+            )
+            break
+
+          case 'messageEntityMentionName':
+            code.push(
+              '@', entity.user_id, ' (', entityText, ')'
             )
             break
 
