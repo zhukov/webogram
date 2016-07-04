@@ -1455,8 +1455,6 @@ angular.module('izhukov.utils', [])
       if (!entities.length) {
         newText = newText.trim()
       }
-      console.warn(dT(), newText, entities);
-      // throw new Error(11);
       return newText
     }
 
@@ -1818,8 +1816,6 @@ angular.module('izhukov.utils', [])
       }
 
       code.push(text.substr(lastOffset))
-
-      console.log(code, entities)
 
       return code.join('')
     }

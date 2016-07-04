@@ -501,28 +501,24 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myReplyMessage', function (AppMessagesManager, AppPeersManager, $rootScope) {
     return {
       templateUrl: templateUrl('reply_message'),
-      scope: {
-        'replyMessage': '=myReplyMessage'
-      },
+      scope: {},
       link: link
     }
 
     function link ($scope, element, attrs) {
       if (attrs.watch) {
-        $scope.$watch('replyMessage', function () {
-          checkMessage($scope, element)
+        $scope.$parent.$watch(attrs.myReplyMessage, function (mid) {
+          checkMessage($scope, element, mid)
         })
       } else {
-        checkMessage($scope, element)
+        var mid = $scope.$parent.$eval(attrs.myReplyMessage)
+        checkMessage($scope, element, mid)
       }
     }
 
-    function checkMessage ($scope, element) {
-      var message = $scope.replyMessage
-      if (!message.loading) {
-        updateMessage($scope, element)
-      } else {
-        var mid = message.mid
+    function checkMessage ($scope, element, mid) {
+      var message = $scope.replyMessage = AppMessagesManager.wrapSingleMessage(mid)
+      if (message.loading) {
         var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
           if (mids.indexOf(mid) != -1) {
             $scope.replyMessage = AppMessagesManager.wrapForDialog(mid)
@@ -530,6 +526,8 @@ angular.module('myApp.directives', ['myApp.filters'])
             stopWaiting()
           }
         })
+      } else {
+        updateMessage($scope, element)
       }
     }
 
@@ -559,18 +557,14 @@ angular.module('myApp.directives', ['myApp.filters'])
   .directive('myPinnedMessage', function (AppMessagesManager, AppPeersManager, $rootScope) {
     return {
       templateUrl: templateUrl('pinned_message'),
-      scope: {
-        'pinnedMessage': '=myPinnedMessage'
-      },
+      scope: {},
       link: link
     }
 
     function link ($scope, element, attrs) {
-      var message = $scope.pinnedMessage
-      if (!message.loading) {
-        updateMessage($scope, element)
-      } else {
-        var mid = message.mid
+      var mid = $scope.$parent.$eval(attrs.myPinnedMessage)
+      var message = $scope.pinnedMessage = AppMessagesManager.wrapSingleMessage(mid)
+      if (message.loading) {
         var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
           if (mids.indexOf(mid) != -1) {
             $scope.pinnedMessage = AppMessagesManager.wrapForDialog(mid)
@@ -578,6 +572,8 @@ angular.module('myApp.directives', ['myApp.filters'])
             stopWaiting()
           }
         })
+      } else {
+        updateMessage($scope, element)
       }
     }
 

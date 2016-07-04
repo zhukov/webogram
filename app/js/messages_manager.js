@@ -213,8 +213,10 @@ angular.module('myApp.services')
       var offsetDate = 0
       var offsetID = 0
       var offsetPeerID = 0
+      var offsetIndex = 0
       if (dialogsOffsetDate) {
         offsetDate = dialogsOffsetDate + ServerTimeManager.serverTimeOffset
+        offsetIndex = dialogsOffsetDate * 0x10000
       }
       return MtpApiManager.invokeApi('messages.getDialogs', {
         offset_date: offsetDate,
@@ -233,8 +235,13 @@ angular.module('myApp.services')
         saveMessages(dialogsResult.messages)
 
         var maxSeenIdIncremented = offsetDate ? true : false
+        var hasPrepend = false
         angular.forEach(dialogsResult.dialogs, function (dialog) {
           saveConversation(dialog)
+          if (offsetIndex && dialog.index > offsetIndex) {
+            newDialogsToHandle[dialog.peerID] = dialog
+            hasPrepend = true
+          }
 
           if (!maxSeenIdIncremented &&
             !AppPeersManager.isChannel(AppPeersManager.getPeerID(dialog.peer))) {
@@ -247,6 +254,11 @@ angular.module('myApp.services')
           !dialogsResult.count ||
           dialogs.length >= dialogsResult.count) {
           allDialogsLoaded = true
+        }
+
+        if (hasPrepend &&
+            !newDialogsHandlePromise) {
+          newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
         }
       })
     }
@@ -2141,11 +2153,6 @@ angular.module('myApp.services')
             })
             break
         }
-      }
-
-      var replyToMsgID = message.reply_to_mid
-      if (replyToMsgID) {
-        message.reply_to_msg = wrapSingleMessage(replyToMsgID)
       }
 
       return messagesForHistory[msgID] = message

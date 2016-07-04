@@ -7,6 +7,8 @@ var http = require('http')
 var st = require('st')
 var del = require('del')
 var runSequence = require('run-sequence')
+var swPrecache = require('sw-precache')
+
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -19,6 +21,19 @@ gulp.task('templates', function () {
     }))
     .pipe(gulp.dest('app/js'))
 })
+gulp.task('clean-templates', function () {
+  return del(['app/js/templates.js'])
+})
+
+gulp.task('usemin-index', function () {
+  return gulp.src('app/index.html')
+    .pipe($.usemin({
+      html: [$.minifyHtml({empty: true})],
+      js: ['concat', $.ngAnnotate()/*, $.uglify({outSourceMap: false})*/],
+      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})]
+    }))
+    .pipe(gulp.dest('dist'))
+})
 
 gulp.task('usemin-badbrowser', function() {
   return gulp.src('app/badbrowser.html')
@@ -28,16 +43,6 @@ gulp.task('usemin-badbrowser', function() {
     }))
     .pipe(gulp.dest('dist'));
 });
-
-gulp.task('usemin', function () {
-  return gulp.src('app/index.html')
-    .pipe($.usemin({
-      html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.ngAnnotate(), $.uglify({outSourceMap: false})],
-      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})]
-    }))
-    .pipe(gulp.dest('dist'))
-})
 
 // ulimit -n 10240 on OS X
 gulp.task('imagemin', function () {
@@ -172,7 +177,8 @@ var fileGlobs = [
   '!dist/*.html',
   '!dist/fonts/*',
   '!dist/img/icons/icon*.png',
-  '!dist/js/background.js'
+  '!dist/js/background.js',
+  '!dist/css/badbrowser.css'
 ]
 
 function writeServiceWorkerFile (rootDir, handleFetch, callback) {
@@ -181,7 +187,8 @@ function writeServiceWorkerFile (rootDir, handleFetch, callback) {
     handleFetch: handleFetch,
     logger: $.util.log,
     staticFileGlobs: fileGlobs,
-    stripPrefix: rootDir + '/',
+    stripPrefix: './' + rootDir + '/',
+    importScripts: ['js/lib/push_worker.js'],
     verbose: true
   }
   swPrecache.write(path.join(rootDir, 'service_worker.js'), config, callback)
@@ -272,16 +279,17 @@ gulp.task('build', ['clean'], function (callback) {
   runSequence(
     ['less', 'templates'],
     'enable-production',
-    'usemin',
+    'usemin-index',
     'usemin-badbrowser',
     ['copy', 'copy-locales', 'copy-images', 'disable-production'],
+    'clean-templates',
     callback
   )
 })
 
 gulp.task('package', ['cleanup-dist'])
 
-gulp.task('offline', ['add-appcache-manifest', 'generate-service-worker'])
+gulp.task('publish', ['add-appcache-manifest', 'generate-service-worker'])
 
 gulp.task('deploy', function () {
   return gulp.src('./dist/**/*')
