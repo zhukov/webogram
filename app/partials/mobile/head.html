@@ -5,20 +5,20 @@
 
       <a class="navbar-peer-wrap" my-peer-photolink="historyPeer.id" peer-watch="true"></a>
 
-      <div class="navbar-toggle-wrap dropdown" dropdown>
+      <div class="navbar-toggle-wrap dropdown" dropdown ng-switch="!curDialog.peer">
         <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </a>
-        <ul ng-if="!curDialog.peer" class="dropdown-menu">
+        <ul ng-switch-when="true" class="dropdown-menu">
           <li><a ng-click="openGroup()" my-i18n="head_new_group"></a></li>
           <li><a ng-click="importContact()" my-i18n="head_new_contact"></a></li>
           <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" my-i18n="head_contacts"></a></li>
           <li><a ng-click="openSettings()" my-i18n="head_settings"></a></li>
           <li><a ng-click="logOut()" my-i18n="head_log_out"></a></li>
         </ul>
-        <ul ng-if="curDialog.peer" class="dropdown-menu">
+        <ul ng-switch-default class="dropdown-menu">
           <li><a ng-click="toggleEdit()" my-i18n="head_edit_messages"></a></li>
           <li ng-if="!historyFilter.mediaType" class="divider"></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
@@ -38,7 +38,7 @@
 
         <span class="tg_head_logo"></span></a>
 
-        <div ng-show="curDialog.peer" ng-switch="curDialog.peer &amp;&amp; historyFilter.mediaType.length > 0">
+        <div class="tg_head_peer_menu_wrap" ng-switch="curDialog.peer &amp;&amp; historyFilter.mediaType.length > 0">
           <ul ng-switch-when="true" class="nav navbar-nav navbar-quick-nav">
             <li>
               <a ng-click="toggleMedia()" class="navbar-quick-media-back">

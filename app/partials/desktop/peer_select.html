@@ -74,7 +74,15 @@
     <button class="btn btn-md btn-md-primary pull-right" ng-click="submitSelected()" my-i18n="conversations_modal_forward_submit"></button>
 
     <div class="peer_select_modal_recipients_wrap" ng-switch="!selectedCount">
-      <span class="peer_select_modal_recipients_empty" ng-switch-when="true" my-i18n="conversations_modal_select_recipients"></span>
+      <span ng-switch-when="true" ng-switch="shareLink.loading ? 'url_loading' : (shareLink.url ? 'url' : 'empty')">
+        <span ng-switch-when="url_loading" class="peer_select_modal_recipients_empty" my-i18n="conversations_modal_share_url_loading">
+          <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+        </span>
+        <span ng-switch-when="url">
+          <a class="peer_select_modal_share_link" my-copy-link ng-bind="shareLink.url | shortUrl" data-clipboard-text="{{shareLink.url}}"></a>
+        </span>
+        <span ng-switch-default class="peer_select_modal_recipients_empty" my-i18n="conversations_modal_select_recipients"></span>
+      </span>
       <span ng-switch-default>
         <span class="peer_select_modal_recipients_name" my-i18n="conversations_modal_recipients"></span>
         <span class="peer_select_modal_recipients_list" ng-switch="selectedCount" my-i18n>

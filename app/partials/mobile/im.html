@@ -75,12 +75,13 @@
       </div>
     </div>
 
-    <div class="im_history_col_wrap" ng-controller="AppImHistoryController">
-      <div ng-show="!state.notSelected &amp;&amp; !state.loaded" class="im_history_not_selected" my-vertical-position="0.35" padding="true">
+    <div class="im_history_col_wrap" ng-controller="AppImHistoryController" ng-class="{im_history_loaded: state.loaded}">
+
+      <div class="im_history_not_selected_wrap im_history_not_selected" my-vertical-position="0.35" padding="true">
         <my-i18n msgid="im_loading_history"></my-i18n><span my-loading-dots></span>
       </div>
 
-      <div ng-show="state.loaded">
+      <div class="im_history_selected_wrap">
         <div my-history-mobile class="im_history_col">
 
           <div class="im_history_wrap im_history_scrollable_wrap mobile_scrollable_wrap">
@@ -135,7 +136,7 @@
               <div class="im_send_form_wrap1">
 
                 <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController">
-                  <form my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length}">
+                  <form my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length, composer_progress_enabled: draftMessage.inlineProgress}">
 
                     <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMessage != null">
                       <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
@@ -152,8 +153,12 @@
                         <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && (!draftMessage.text.length || draftMessage.text[0] == '/')" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
                         <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
+                        <div class="composer_progress_icon_wrap">
+                          <div class="composer_progress_icon" my-arc-progress width="22" stroke="2.5"></div>
+                        </div>
+
                         <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
-                        <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto"></textarea>
+                        <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto" ng-trim="false"></textarea>
                       </div>
 
                       <div class="im_attach pull-right">
@@ -188,3 +193,5 @@
   </div>
 
 </div>
+
+<toaster-container toaster-options="{'position-class': 'toast-bottom-center'}"></toaster-container>

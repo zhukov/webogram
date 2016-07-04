@@ -748,7 +748,6 @@ a.footer_link.active:active {
     line-height: 18px;
     width: 100%;
     height: 39px;
-    padding: 13px 0 8px;
     overflow: hidden;
     -webkit-user-select: none;
   }
@@ -758,13 +757,17 @@ a.footer_link.active:active {
     color: #999;
     max-width: 556px;
     margin: 0 auto;
-    padding: 0 81px 0 85px;
+    padding: 13px 81px 8px 85px;
 
     a.im_history_typing_author {
       color: #999;
       font-weight: bold;
     }
   }
+}
+
+.im_history_loading_less {
+  margin-top: 5px;
 }
 
 /* Contacts modal */
@@ -899,12 +902,14 @@ a.footer_link.active:active {
 .im_message_selected .im_message_audio_size,
 .im_message_selected .im_message_fwd_date,
 .im_message_selected .im_message_views_cnt,
+.im_message_selected .im_message_sign_link,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_date,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_document_size,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_audio_duration,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_audio_size,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_fwd_date,
-.im_history_select_active .im_message_outer_wrap:hover .im_message_views_cnt {
+.im_history_select_active .im_message_outer_wrap:hover .im_message_views_cnt,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_sign_link {
   color: #899daf;
 }
 
@@ -1028,6 +1033,10 @@ a.footer_link.active:active {
     text-overflow: ellipsis;
     vertical-align: bottom;
   }
+}
+
+a.peer_select_modal_share_link {
+  color: #999 !important;
 }
 
 @media (max-height: 600px), (max-width: 1010px) {
@@ -1244,6 +1253,12 @@ a.im_panel_peer_photo .peer_initials {
     &_textarea {
       min-height: 25px;
       padding-right: 25px;
+    }
+
+    &_progress_icon_wrap {
+      top: 0;
+      right: 0;
+      margin-top: 0;
     }
 
     &_emoji_insert_btn {
@@ -1793,13 +1808,13 @@ a.im_panel_peer_photo .peer_initials {
   margin-top: 4px;
   margin-bottom: 4px;
 }
+.im_grouped_short .im_message_author_wrap,
 .im_grouped_short .im_message_from_photo,
-.im_grouped_short .im_message_author,
+.im_grouped .im_message_author_wrap,
 .im_grouped .im_message_from_photo,
-.im_grouped .im_message_author,
-.im_grouped_fwd .im_message_author,
+.im_grouped_fwd .im_message_author_wrap,
 .im_grouped_fwd .im_message_from_photo,
-.im_grouped_fwd_short .im_message_author,
+.im_grouped_fwd_short .im_message_author_wrap,
 .im_grouped_fwd_short .im_message_from_photo {
   display: none;
 }
@@ -1825,7 +1840,7 @@ a.im_panel_peer_photo .peer_initials {
   .im_grouped &,
   .im_grouped_fwd &,
   .im_grouped_fwd_short & {
-    .im_message_date {
+    .im_message_meta {
       display: none;
     }
   }

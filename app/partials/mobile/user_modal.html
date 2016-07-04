@@ -58,9 +58,9 @@
 
     </div>
 
-    <div class="mobile_modal_section" ng-if="user.pFlags.bot &amp;&amp; bot_info.rAbout">
+    <div class="mobile_modal_section" ng-if="rAbout">
       <h4 class="mobile_modal_section_header" my-i18n="user_modal_about"></h4>
-      <div class="mobile_modal_section_value" ng-bind-html="bot_info.rAbout"></div>
+      <div class="mobile_modal_section_value" ng-bind-html="rAbout"></div>
     </div>
 
     <div class="mobile_modal_action_wrap">
@@ -71,7 +71,7 @@
       <a class="mobile_modal_action" ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
     </div>
 
-    <div class="mobile_modal_action_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.botNoGroups">
+    <div class="mobile_modal_action_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.bot_nochats">
       <a class="mobile_modal_action" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
     </div>
 
