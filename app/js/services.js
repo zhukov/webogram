@@ -928,6 +928,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     function resolveUsername (username) {
       var searchUserName = SearchIndexManager.cleanUsername(username)
+      if (searchUserName.match(/^\d+$/)) {
+        return qSync.when(false)
+      }
       var foundUserID
       var foundChatID, foundPeerID
       var foundUsername

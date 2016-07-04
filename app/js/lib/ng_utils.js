@@ -1433,7 +1433,6 @@ angular.module('izhukov.utils', [])
           })
           rawOffset -= 2
         } else if (match[10]) { // custom mention
-          console.log(match);
           newText.push(text)
           entities.push({
             _: 'messageEntityMentionName',
@@ -1597,11 +1596,10 @@ angular.module('izhukov.utils', [])
             break
 
           case 'messageEntityMentionName':
-            if (!options.noLinks) {
+            if (options.noLinks) {
               skipEntity = true
               break
             }
-            var username = entityText.substr(1)
             html.push(
               '<a href="#/im?p=u',
               encodeURIComponent(entity.user_id),

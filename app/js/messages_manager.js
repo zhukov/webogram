@@ -1258,6 +1258,10 @@ angular.module('myApp.services')
       if (!options.viaBotID) {
         text = RichTextProcessor.parseMarkdown(text, entities)
       }
+      if (!text.length) {
+        return
+      }
+
       var sendEntites = entities
       if (entities.length) {
         sendEntites = angular.copy(entities)
@@ -1269,9 +1273,6 @@ angular.module('myApp.services')
         })
       }
 
-      if (!text.length) {
-        return
-      }
 
       var messageID = tempID--
       var randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]
@@ -1319,7 +1320,7 @@ angular.module('myApp.services')
         reply_to_msg_id: replyToMsgID,
         via_bot_id: options.viaBotID,
         reply_markup: options.reply_markup,
-        entities: sendEntites,
+        entities: entities,
         views: asChannel && 1,
         pending: true
       }
@@ -1367,7 +1368,7 @@ angular.module('myApp.services')
             id: options.resultID
           }, sentRequestOptions)
         } else {
-          if (entities.length) {
+          if (sendEntites.length) {
             flags |= 8
           }
           apiPromise = MtpApiManager.invokeApi('messages.sendMessage', {
@@ -1376,7 +1377,7 @@ angular.module('myApp.services')
             message: text,
             random_id: randomID,
             reply_to_msg_id: AppMessagesIDsManager.getMessageLocalID(replyToMsgID),
-            entities: entities
+            entities: sendEntites
           }, sentRequestOptions)
         }
         // console.log(flags, entities)
