@@ -61,7 +61,7 @@
     "gulp-serviceworker": "0.0.3",
     "gulp-standard": "^7.0.1",
     "gulp-uglify": "^1.0.2",
-    "gulp-usemin": "^0.3.11",
+    "gulp-usemin": "=0.3.11",
     "gulp-util": "^3.0.7",
     "gulp-zip": "^0.1.2",
     "http": "0.0.0",

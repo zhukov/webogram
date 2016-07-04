@@ -261,7 +261,8 @@ gulp.task('bump', ['bump-version-manifests', 'bump-version-config'], function ()
 
 gulp.task('build', ['clean'], function (callback) {
   runSequence(
-    ['less', 'templates', 'enable-production'],
+    ['less', 'templates'],
+    'enable-production',
     'usemin',
     ['copy', 'copy-locales', 'copy-images', 'disable-production'],
     callback
