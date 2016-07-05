@@ -1647,7 +1647,7 @@ angular.module('izhukov.utils', [])
               break
             }
             var url = entity.url || entityText
-            url = wrapUrl(url, entity._ == 'messageEntityTextUrl' ? 2 : false)
+            url = wrapUrl(url, entity._ == 'messageEntityTextUrl' ? true : false)
             html.push(
               '<a href="',
               encodeEntities(url),
