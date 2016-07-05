@@ -3648,9 +3648,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.leaveChannel = function () {
-      MtpApiManager.invokeApi('channels.leaveChannel', {
-        channel: AppChatsManager.getChannelInput($scope.chatID)
-      }).then(onChatUpdated)
+      return ErrorService.confirm({type: $scope.isMegagroup ? 'MEGAGROUP_LEAVE' : 'CHANNEL_LEAVE'}).then(function () {
+        MtpApiManager.invokeApi('channels.leaveChannel', {
+          channel: AppChatsManager.getChannelInput($scope.chatID)
+        }).then(onChatUpdated)
+      })
     }
 
     $scope.deleteChannel = function () {

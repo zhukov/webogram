@@ -216,6 +216,8 @@
 	"confirm_modal_update_reload": "A new version of Telegram Web has been downloaded. Launch it?",
 	"confirm_modal_history_flush": "Are you sure? This can not be undone!",
 	"confirm_modal_history_leave_flush_md": "Are you sure, you want to delete all message history and leave the group?\n\nThis action cannot be undone.",
+	"confirm_modal_leave_channel_md": "Are you sure, you want to leave this channel?\n\nThis action cannot be undone.",
+	"confirm_modal_leave_group_md": "Are you sure, you want to leave this group?\n\nThis action cannot be undone.",
 	"confirm_modal_terminate_sessions": "Are you sure you want to log out all devices except for this one?",
 	"confirm_modal_terminate_session": "Are you sure you want to log out this device?",
 	"confirm_modal_clipboard_file_send": "Are you sure to send file(s) from clipboard?",
