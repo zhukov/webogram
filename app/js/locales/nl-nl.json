@@ -150,6 +150,8 @@
     "user_status_last_month": "afgelopen maand gezien",
     "user_status_long_ago": "lang geleden gezien",
     "user_status_bot": "bot",
+    "user_status_service_notifications": "servicemeldingen",
+    "user_status_support": "ondersteuning",
     "user_status_bot_noprivacy": "toegang tot berichten",
     "user_status_bot_privacy": "geen toegang tot berichten",
     "chat_title_deleted": "VERWIJDERD",
