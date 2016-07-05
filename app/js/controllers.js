@@ -2241,7 +2241,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           text = RichTextProcessor.parseEmojis(text)
 
           var options = {
-            replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid,
+            replyToMsgID: $scope.draftMessage.replyToMsgID,
             clearDraft: true
           }
           do {
@@ -2462,7 +2462,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function replySelect (messageID, byUser) {
-      $scope.draftMessage.replyToMessage = AppMessagesManager.wrapSingleMessage(messageID)
+      $scope.draftMessage.replyToMsgID = messageID
       $scope.$broadcast('ui_peer_reply')
       replyToMarkup = false
 
@@ -2475,15 +2475,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function replyClear (byUser) {
-      var message = $scope.draftMessage.replyToMessage
-      if (message &&
+      var mid = $scope.draftMessage.replyToMsgID
+      if (mid &&
         $scope.historyState.replyKeyboard &&
-        $scope.historyState.replyKeyboard.mid == message.mid &&
+        $scope.historyState.replyKeyboard.mid == mid &&
         !$scope.historyState.replyKeyboard.pFlags.hidden) {
         $scope.historyState.replyKeyboard.pFlags.hidden = true
         $scope.$broadcast('ui_keyboard_update')
       }
-      delete $scope.draftMessage.replyToMessage
+      delete $scope.draftMessage.replyToMsgID
       $scope.$broadcast('ui_peer_reply')
 
       if (byUser) {
@@ -2575,10 +2575,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       }
       if ($scope.curDialog.peerID) {
-        var replyToMessage = $scope.draftMessage.replyToMessage
         DraftsManager.changeDraft($scope.curDialog.peerID, {
           text: newVal,
-          replyToMsgID: replyToMessage && replyToMessage.mid
+          replyToMsgID: $scope.draftMessage.replyToMsgID
         })
         checkInlinePattern(newVal)
       }
@@ -2664,11 +2663,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       var options = {
-        replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid,
+        replyToMsgID: $scope.draftMessage.replyToMsgID,
         isMedia: $scope.draftMessage.isMedia
       }
 
-      delete $scope.draftMessage.replyToMessage
+      delete $scope.draftMessage.replyToMsgID
 
       if (newVal[0].lastModified) {
         newVal.sort(function (file1, file2) {
@@ -2699,7 +2698,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
         }
         var options = {
-          replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
+          replyToMsgID: $scope.draftMessage.replyToMsgID
         }
         AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options)
         $scope.$broadcast('ui_message_send')
@@ -2736,7 +2735,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       var options = {
-        replyToMsgID: $scope.draftMessage.replyToMessage && $scope.draftMessage.replyToMessage.mid
+        replyToMsgID: $scope.draftMessage.replyToMsgID
       }
       AppInlineBotsManager.sendInlineResult($scope.curDialog.peerID, qID, options)
       fwdsSend()
