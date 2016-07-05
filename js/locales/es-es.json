@@ -150,6 +150,8 @@
     "user_status_last_month": "última vez hace unas semanas",
     "user_status_long_ago": "última vez hace mucho tiempo",
     "user_status_bot": "bot",
+    "user_status_service_notifications": "servicio de notificaciones",
+    "user_status_support": "soporte",
     "user_status_bot_noprivacy": "tiene acceso a los mensajes",
     "user_status_bot_privacy": "no tiene acceso a los mensajes",
     "chat_title_deleted": "ELIMINADO",
