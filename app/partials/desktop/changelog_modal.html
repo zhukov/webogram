@@ -31,6 +31,18 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.5')">
+        <div class="md_modal_section_version">0.5.5</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Introducing Drafts: Seamless syncing for unsent messages on all your devices. Drafts are now visible in your chats list.</li>
+            <li>Mention people in groups by typing @ and selecting them from the list — even if they don't have a username.</li>
+            <li>Share links to specific posts in channels via quick forwarding menu (click on the date in a message to try this out).</li>
+          </ul>
+
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.4')">
         <div class="md_modal_section_version">0.5.4</div>
         <div class="md_modal_section_description changelog_version_changes">
