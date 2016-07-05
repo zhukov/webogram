@@ -1,10 +1,11 @@
 CACHE MANIFEST
-# Time: Sun Jun 12 2016 22:29:17 GMT+0300 (MSK)
+# Time: Tue Jul 05 2016 17:22:42 GMT+0300 (MSK)
 
 
 CACHE:
 favicon.ico
 favicon_unread.ico
+service_worker.js
 css/app.css
 css/desktop.css
 css/mobile.css
@@ -65,6 +66,7 @@ img/placeholders/VideoThumbModal.gif
 js/lib/bin_utils.js
 js/lib/crypto_worker.js
 js/lib/polyfill.js
+js/lib/push_worker.js
 js/locales/de-de.json
 js/locales/en-us.json
 js/locales/es-es.json
