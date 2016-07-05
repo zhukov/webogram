@@ -192,6 +192,8 @@
     "confirm_modal_update_reload": "Una nuova versione di Telegram Web è stata scaricata. Vuoi avviarla?",
     "confirm_modal_history_flush": "Sei sicuro? L'operazione non può essere annullata!",
     "confirm_modal_history_leave_flush_md": "Sei sicuro di voler eliminare tutta la cronologia dei messaggi e lasciare il gruppo?\n\nQuesta azione non può essere annullata.",
+    "confirm_modal_leave_channel_md": "Sei sicuro di voler lasciare questo canale?\n\nQuesta azione non può essere annullata.",
+    "confirm_modal_leave_group_md": "Sei sicuro di voler lasciare questo gruppo?\n\nQuesta azione non può essere annullata.",
     "confirm_modal_terminate_sessions": "Vuoi davvero uscire da tutti i dispositivi tranne questo?",
     "confirm_modal_terminate_session": "Sei sicuro di voler uscire da questo dispositivo?",
     "confirm_modal_clipboard_file_send": "Sei sicuro di inviare il(i) file presenti negli appunti?",

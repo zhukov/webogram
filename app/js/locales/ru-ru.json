@@ -192,6 +192,8 @@
     "confirm_modal_update_reload": "Новая версия веб-клиента Telegram загружена. Запустить?",
     "confirm_modal_history_flush": "Вы уверены? Это действие не может быть отменено!",
     "confirm_modal_history_leave_flush_md": "Are you sure, you want to delete all message history and leave the group?\n\nThis action cannot be undone.",
+    "confirm_modal_leave_channel_md": "Are you sure, you want to leave this channel?\n\nThis action cannot be undone.",
+    "confirm_modal_leave_group_md": "Are you sure, you want to leave this group?\n\nThis action cannot be undone.",
     "confirm_modal_terminate_sessions": "Уверены, что хотите выйти на всех устройствах, кроме этого?",
     "confirm_modal_terminate_session": "Уверены, что хотите выйти на этом устройстве?",
     "confirm_modal_clipboard_file_send": "Отправить файл(ы) из буфера обмена?",
