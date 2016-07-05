@@ -429,7 +429,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var pendingParams = false
     var pendingAttachment = false
     $scope.$on('history_focus', function (e, peerData) {
-      $modalStack.dismissAll()
       if (peerData.peerString == $scope.curDialog.peer &&
         peerData.messageID == $scope.curDialog.messageID &&
         !peerData.startParam) {
@@ -615,6 +614,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     updateCurDialog()
 
     function updateCurDialog () {
+      $modalStack.dismissAll()
       var addParams = pendingParams || {}
       pendingParams = false
       addParams.messageID = parseInt(addParams.messageID) || false
