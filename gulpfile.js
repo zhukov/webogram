@@ -29,7 +29,7 @@ gulp.task('usemin-index', function () {
   return gulp.src('app/index.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      js: ['concat', $.ngAnnotate()/*, $.uglify({outSourceMap: false})*/],
+      js: ['concat', $.ngAnnotate(), $.uglify({outSourceMap: false})],
       css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})]
     }))
     .pipe(gulp.dest('dist'))

@@ -1,5 +1,6 @@
 .DS_Store
 .idea
+.publish
 *.sublime-workspace
 
 # Node.js package manager
