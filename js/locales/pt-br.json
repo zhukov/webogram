@@ -192,6 +192,8 @@
     "confirm_modal_update_reload": "Uma nova versão do Telegram Web foi baixada. Atualizar?",
     "confirm_modal_history_flush": "Você tem certeza? Isso não pode ser desfeito!",
     "confirm_modal_history_leave_flush_md": "Você tem certeza que deseja apagar todo o histórico de mensagens e sair do grupo?\n\nEssa ação não pode ser desfeita.",
+    "confirm_modal_leave_channel_md": "Você tem certeza que deseja sair do canal?\n\nEssa ação não pode ser desfeita.",
+    "confirm_modal_leave_group_md": "Você tem certeza que deseja sair do grupo?\n\nEssa ação não pode ser desfeita.",
     "confirm_modal_terminate_sessions": "Tem certeza de que deseja sair todos os dispositivos, exceto o atual?",
     "confirm_modal_terminate_session": "Você tem certeza que deseja sair deste dispositivo?",
     "confirm_modal_clipboard_file_send": "Você tem certeza que deseja enviar arquivo(s) da área de transferência?",

@@ -192,6 +192,8 @@
     "confirm_modal_update_reload": "Eine neue Telegram Web Version wurde geladen. Jetzt starten?",
     "confirm_modal_history_flush": "Sicher? Es kann nicht rückgängig gemacht werden!",
     "confirm_modal_history_leave_flush_md": "Möchtest du aus der Gruppe wirklich austreten und deinen Verlauf löschen?\n\nDas kann nicht rückgängig gemacht werden!",
+    "confirm_modal_leave_channel_md": "Möchtest du wirklich diesen Kanal verlassen?\n\nDas kann nicht rückgängig gemacht werden.",
+    "confirm_modal_leave_group_md": "Möchtest du wirklich diese Gruppe verlassen?\n\nDas kann nicht rückgängig gemacht werden.",
     "confirm_modal_terminate_sessions": "Alle Geräte außer diesem werden abgemeldet. Bist du sicher?",
     "confirm_modal_terminate_session": "Möchtest du dieses Gerät wirklich abmelden?",
     "confirm_modal_clipboard_file_send": "Willst du wirklich die Datei(en) aus der Zwischenablage senden?",
