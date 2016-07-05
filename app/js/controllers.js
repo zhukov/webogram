@@ -171,6 +171,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.sendCode = function () {
       $timeout.cancel(nextTimeout)
 
+      var fullPhone = ($scope.credentials.phone_country || '') + ($scope.credentials.phone_number || '');
+      var badPhone = !fullPhone.match(/^[\d\-+\s]+$/);
+      if (!badPhone) {
+        fullPhone = fullPhone.replace(/\D/g, '');
+        if (fullPhone.length < 7) {
+          badPhone = true;
+        }
+      }
+      if (badPhone) {
+        $scope.progress.enabled = false
+        $scope.error = {field: 'phone'}
+        return
+      }
+
       ErrorService.confirm({
         type: 'LOGIN_PHONE_CORRECT',
         country_code: $scope.credentials.phone_country,
