@@ -2909,7 +2909,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
     }
 
-    function processUpdateMessage (updateMessage) {
+    function processUpdateMessage (updateMessage, fromMTProto) {
+      // return forceGetDifference()
       var processOpts = {
         date: updateMessage.date,
         seq: updateMessage.seq,

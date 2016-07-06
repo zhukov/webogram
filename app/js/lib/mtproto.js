@@ -1470,7 +1470,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var self = this
           Storage.get('dc').then(function (baseDcID) {
             if (baseDcID == self.dcID && !self.upload && updatesProcessor) {
-              updatesProcessor(message)
+              updatesProcessor(message, true)
             }
           })
           break
@@ -1551,7 +1551,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
           // console.log('Update', message)
           if (updatesProcessor) {
-            updatesProcessor(message)
+            updatesProcessor(message, true)
           }
           break
 
@@ -1561,7 +1561,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     function startAll () {
       if (akStopped) {
         akStopped = false
-        updatesProcessor({_: 'new_session_created'})
+        updatesProcessor({_: 'new_session_created'}, true)
       }
     }
 

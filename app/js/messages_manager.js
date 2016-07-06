@@ -1118,15 +1118,15 @@ angular.module('myApp.services')
           return
         }
 
-        var toPeerID = AppPeersManager.getPeerID(apiMessage.to_id)
+        var peerID = getMessagePeer(apiMessage)
         var isChannel = apiMessage.to_id._ == 'peerChannel'
-        var channelID = isChannel ? -toPeerID : 0
+        var channelID = isChannel ? -peerID : 0
         var isBroadcast = isChannel && !AppChatsManager.isMegagroup(channelID)
 
         var mid = AppMessagesIDsManager.getFullMessageID(apiMessage.id, channelID)
         apiMessage.mid = mid
 
-        var dialog = getDialogByPeerID(toPeerID)[0]
+        var dialog = getDialogByPeerID(peerID)[0]
         if (dialog && mid > 0) {
           var dialogKey = apiMessage.pFlags.out
             ? 'read_outbox_max_id'
@@ -1137,6 +1137,7 @@ angular.module('myApp.services')
         else if (options.isNew) {
           apiMessage.pFlags.unread = true
         }
+        // console.log(dT(), 'msg unread', mid, apiMessage.pFlags.out, dialog && dialog[apiMessage.pFlags.out ? 'read_outbox_max_id' : 'read_inbox_max_id'])
 
         if (apiMessage.reply_to_msg_id) {
           apiMessage.reply_to_mid = AppMessagesIDsManager.getFullMessageID(apiMessage.reply_to_msg_id, channelID)
@@ -1150,8 +1151,8 @@ angular.module('myApp.services')
           fwdHeader.date -= ServerTimeManager.serverTimeOffset
         }
 
-        apiMessage.toID = toPeerID
-        apiMessage.fromID = apiMessage.pFlags.post ? toPeerID : apiMessage.from_id
+        apiMessage.peerID = peerID
+        apiMessage.fromID = apiMessage.pFlags.post ? peerID : apiMessage.from_id
         apiMessage.signID = apiMessage.pFlags.post && apiMessage.from_id ||
           fwdHeader && fwdHeader.channel_id && fwdHeader.from_id
 
@@ -1483,7 +1484,7 @@ angular.module('myApp.services')
         apiFileName = 'document.' + file.type.split('/')[1]
       }
 
-      console.log(attachType, apiFileName, file.type)
+      // console.log(attachType, apiFileName, file.type)
 
       if (historyStorage === undefined) {
         historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []}
@@ -2658,6 +2659,7 @@ angular.module('myApp.services')
           }
 
           saveMessages([message], {isNew: true})
+          // console.warn(dT(), 'message unread', message.mid, message.pFlags.unread)
 
           if (historyStorage !== undefined) {
             var history = historyStorage.history
@@ -2821,6 +2823,8 @@ angular.module('myApp.services')
           var messageID, message
           var i
 
+          // console.warn(dT(), 'read', peerID, isOut ? 'out' : 'in', maxID)
+
           if (peerID > 0 && isOut) {
             AppUsersManager.forceUserOnline(peerID)
           }
@@ -2838,7 +2842,7 @@ angular.module('myApp.services')
             if (!message.pFlags.unread) {
               break
             }
-            // console.log('read', messageID, message.pFlags.unread, message)
+            // console.warn('read', messageID, message.pFlags.unread, message)
             if (message && message.pFlags.unread) {
               message.pFlags.unread = false
               if (messagesForHistory[messageID]) {
@@ -2869,6 +2873,7 @@ angular.module('myApp.services')
           }
 
           if (newUnreadCount !== false) {
+            // console.warn(dT(), 'cnt', peerID, newUnreadCount)
             $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: newUnreadCount})
           }
           if (foundAffected) {
