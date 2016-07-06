@@ -704,15 +704,19 @@ angular.module('myApp.services')
     }
 
     function getSearch (peerID, query, inputFilter, maxID, limit) {
+      peerID = peerID ? parseInt(peerID) : 0
       var foundMsgs = []
       var useSearchCache = !query
       var newSearchFilter = {peer: peerID, filter: inputFilter}
       var sameSearchCache = useSearchCache && angular.equals(lastSearchFilter, newSearchFilter)
 
       if (useSearchCache && !sameSearchCache) {
+        // console.warn(dT(), 'new search filter', lastSearchFilter, newSearchFilter)
         lastSearchFilter = newSearchFilter
         lastSearchResults = []
       }
+
+      // console.log(dT(), 'search', useSearchCache, sameSearchCache, lastSearchResults, maxID)
 
       if (peerID && !maxID && !query) {
         var historyStorage = historiesStorage[peerID]
@@ -754,8 +758,8 @@ angular.module('myApp.services')
             message = messagesStorage[historyStorage.history[i]]
             if (message.media && neededContents[message.media._]) {
               if (neededDocType !== undefined &&
-                message.media._ == 'messageMediaDocument' &&
-                message.media.document.type != neededDocType) {
+                  message.media._ == 'messageMediaDocument' &&
+                  message.media.document.type != neededDocType) {
                 continue
               }
               foundMsgs.push(message.mid)
@@ -766,11 +770,11 @@ angular.module('myApp.services')
           }
         }
 
-        // console.log(dT(), sameSearchCache, foundMsgs, lastSearchResults)
+        // console.warn(dT(), 'before append', foundMsgs)
         if (foundMsgs.length < neededLimit && lastSearchResults.length && sameSearchCache) {
-          var minID = foundMsgs.length ? foundMsgs[foundMsgs.length - 1] : 0xFFFFFFFF
+          var minID = foundMsgs.length ? foundMsgs[foundMsgs.length - 1] : false
           for (var i = 0; i < lastSearchResults.length; i++) {
-            if (lastSearchResults[i] < minID) {
+            if (minID === false || lastSearchResults[i] < minID) {
               foundMsgs.push(lastSearchResults[i])
               if (foundMsgs.length >= neededLimit) {
                 break
@@ -778,7 +782,7 @@ angular.module('myApp.services')
             }
           }
         }
-      // console.log(dT(), foundMsgs)
+        // console.warn(dT(), 'after append', foundMsgs)
       }
 
       if (foundMsgs.length || limit == 1000) {
@@ -795,20 +799,15 @@ angular.module('myApp.services')
       var apiPromise
 
       if (peerID || !query) {
-        var flags = 0
-        if (AppPeersManager.isChannel(peerID) &&
-          !AppPeersManager.isMegagroup(peerID)) {
-          flags |= 1
-        }
         apiPromise = MtpApiManager.invokeApi('messages.search', {
-          flags: flags,
+          flags: 0,
           peer: AppPeersManager.getInputPeerByID(peerID),
           q: query || '',
           filter: inputFilter || {_: 'inputMessagesFilterEmpty'},
           min_date: 0,
           max_date: 0,
           limit: limit || 20,
-          max_id: maxID || 0
+          max_id: AppMessagesIDsManager.getMessageLocalID(maxID) || 0
         }, {
           timeout: 300,
           noErrorBox: true
@@ -855,9 +854,11 @@ angular.module('myApp.services')
           foundMsgs.push(message.mid)
         })
 
-        if (useSearchCache) {
+        if (useSearchCache &&
+            (!maxID || sameSearchCache && lastSearchResults.indexOf(maxID) >= 0)) {
           lastSearchResults = listMergeSorted(lastSearchResults, foundMsgs)
         }
+        // console.log(dT(), 'after API', foundMsgs, lastSearchResults)
 
         return {
           count: foundCount,
