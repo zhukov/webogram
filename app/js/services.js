@@ -16,10 +16,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var usernames = {}
     var userAccess = {}
     var cachedPhotoLocations = {}
-    var contactsFillPromise,
-      contactsList
-    var contactsIndex = SearchIndexManager.createIndex(),
-      myID
+    var contactsIndex = SearchIndexManager.createIndex()
+    var contactsFillPromise
+    var contactsList
+    var myID
 
     MtpApiManager.getUserID().then(function (id) {
       myID = id
@@ -363,8 +363,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function onContactUpdated (userID, isContact) {
+      userID = parseInt(userID)
       if (angular.isArray(contactsList)) {
-        var curPos = curIsContact = contactsList.indexOf(parseInt(userID))
+        var curPos = curIsContact = contactsList.indexOf(userID)
         var curIsContact = curPos != -1
 
         if (isContact != curIsContact) {

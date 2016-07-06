@@ -1775,6 +1775,9 @@ angular.module('myApp.services')
         if (asChannel) {
           flags |= 16
         }
+        if (options.clearDraft) {
+          flags |= 128
+        }
 
         var sentRequestOptions = {}
         if (pendingAfterMsgs[peerID]) {

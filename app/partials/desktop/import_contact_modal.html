@@ -11,7 +11,7 @@
           <span ng-switch-when="true" my-i18n="login_incorrect_number"></span>
           <span ng-switch-default my-i18n="contact_import_modal_phone"></span>
         </label>
-        <input class="md-input" my-focused type="tel" ng-model="importContact.phone" ng-pattern="/^[-\+\(\)\d]{7,32}$/" my-submit-on-enter name="phone" />
+        <input class="md-input" my-focused type="tel" ng-model="importContact.phone" ng-pattern="/^[-\+\(\)\d\s]{7,32}$/" my-submit-on-enter name="phone" />
       </div>
 
       <div class="md-input-group" my-labeled-input>

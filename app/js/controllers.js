@@ -2735,9 +2735,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       var options = {
-        replyToMsgID: $scope.draftMessage.replyToMsgID
+        replyToMsgID: $scope.draftMessage.replyToMsgID,
+        clearDraft: true
       }
       AppInlineBotsManager.sendInlineResult($scope.curDialog.peerID, qID, options)
+
+      if (forceDraft == $scope.curDialog.peer) {
+        forceDraft = false
+      } else {
+        DraftsManager.changeDraft($scope.curDialog.peerID)
+      }
+
       fwdsSend()
       resetDraft()
       delete $scope.draftMessage.sticker
@@ -4361,7 +4369,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
+  .controller('ContactsModalController', function ($scope, $rootScope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
     $scope.contacts = []
     $scope.foundPeers = []
     $scope.search = {}
@@ -4487,7 +4495,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.importContact = function () {
-      AppUsersManager.openImportContact()
+      AppUsersManager.openImportContact().then(function (foundContact) {
+        if (foundContact) {
+          $rootScope.$broadcast('history_focus', {
+            peerString: AppUsersManager.getUserString(foundContact)
+          })
+        }
+      })
     }
   })
 
