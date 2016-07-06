@@ -1743,8 +1743,8 @@ angular.module('izhukov.utils', [])
       if (!options.nested && (emojiFound || options.hasNested)) {
         text = text.replace(/\ufe0f|&#65039;|&#65533;|&#8205;/g, '', text)
         var emojiSizeClass = curEmojiSize == 18 ? '' : (' emoji-w' + curEmojiSize)
-        text = text.replace(/<span class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
-          '<span class="emoji ' + emojiSizeClass + ' emoji-spritesheet-$1" style="background-position: -$2px -$3px;" $4</span>')
+        text = text.replace(/<span((?: [^>]*)?) class="emoji emoji-(\d)-(\d+)-(\d+)"(.+?)<\/span>/g,
+          '<span$1 class="emoji ' + emojiSizeClass + ' emoji-spritesheet-$2" style="background-position: -$3px -$4px;" $5</span>')
       }
 
       return $sce.trustAs('html', text)
