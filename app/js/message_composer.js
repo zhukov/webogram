@@ -716,7 +716,7 @@ function MessageComposer (textarea, options) {
   this.commands = options.commands
 }
 
-MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([A-Za-z0-9\-\+\*@_]*)$/
+MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([\S]*)$/
 
 MessageComposer.prototype.setUpInput = function () {
   this.inlinePlaceholderWrap = $('<div class="im_inline_placeholder_wrap"></div>').prependTo(this.textareaEl[0].parentNode)
@@ -1193,7 +1193,7 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
       var pos = valueCaret[1] >= 0 ? valueCaret[1] : fullValue.length
       var suffix = fullValue.substr(pos)
       var prefix = fullValue.substr(0, pos)
-      var matches = prefix.match(/:([A-Za-z0-9\-\+\*_]*)$/)
+      var matches = prefix.match(/:([\S]*)$/)
       var emoji = EmojiHelper.emojis[code]
 
       var newValuePrefix
@@ -1247,7 +1247,7 @@ MessageComposer.prototype.onEmojiSelected = function (code, autocomplete) {
     var pos = this.isActive ? getFieldSelection(textarea) : fullValue.length
     var suffix = fullValue.substr(pos)
     var prefix = fullValue.substr(0, pos)
-    var matches = autocomplete && prefix.match(/:([A-Za-z0-9\-\+\*_]*)$/)
+    var matches = autocomplete && prefix.match(/:([\S]*)$/)
     var emoji = EmojiHelper.emojis[code]
 
     if (matches && matches[0]) {
@@ -1292,7 +1292,7 @@ MessageComposer.prototype.onMentionSelected = function (username, firstName) {
     var pos = valueCaret[1] >= 0 ? valueCaret[1] : fullValue.length
     var suffix = fullValue.substr(pos)
     var prefix = fullValue.substr(0, pos)
-    var matches = prefix.match(/@([A-Za-z0-9\-\+\*_]*)$/)
+    var matches = prefix.match(/@([\S]*)$/)
 
     var newValuePrefix
     if (matches && matches[0]) {
@@ -1325,7 +1325,7 @@ MessageComposer.prototype.onMentionSelected = function (username, firstName) {
     var pos = this.isActive ? getFieldSelection(textarea) : fullValue.length
     var suffix = fullValue.substr(pos)
     var prefix = fullValue.substr(0, pos)
-    var matches = prefix.match(/@([A-Za-z0-9\-\+\*_]*)$/)
+    var matches = prefix.match(/@([\S]*)$/)
 
     var newValuePrefix
     var newValue
