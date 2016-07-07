@@ -942,7 +942,11 @@ angular.module('myApp.services')
         return $q.reject()
       }
       var message = getMessage(fullMsgID)
-      if (!message || !message.pFlags || !message.pFlags.post) {
+      var channel = AppChatsManager.getChat(channelID)
+      if (!message ||
+          !message.pFlags ||
+          !message.pFlags.post ||
+          !channel.username) {
         return $q.reject()
       }
       return MtpApiManager.invokeApi('channels.exportMessageLink', {

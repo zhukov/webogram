@@ -1595,10 +1595,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           if (target.className &&
             target.className.indexOf('im_message_date') != -1) {
-            if ($scope.historyState.canReply) {
-              selectedReply(messageID)
-            } else {
+            if (AppPeersManager.isChannel(peerID) &&
+                !AppPeersManager.isMegagroup(peerID)) {
               quickForward(messageID)
+            } else {
+              selectedReply(messageID)
             }
             return false
           }
