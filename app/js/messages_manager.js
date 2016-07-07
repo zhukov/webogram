@@ -1297,8 +1297,8 @@ angular.module('myApp.services')
       var replyToMsgID = options.replyToMsgID
       var isChannel = AppPeersManager.isChannel(peerID)
       var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID)
-      var asChannel = isChannel && !isMegagroup ? true : false,
-        message
+      var asChannel = isChannel && !isMegagroup ? true : false
+      var message
 
       if (historyStorage === undefined) {
         historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []}
@@ -1318,6 +1318,7 @@ angular.module('myApp.services')
       }
       if (asChannel) {
         fromID = 0
+        pFlags.post = true
       } else {
         flags |= 256
       }
@@ -1463,8 +1464,8 @@ angular.module('myApp.services')
       var replyToMsgID = options.replyToMsgID
       var isChannel = AppPeersManager.isChannel(peerID)
       var isMegagroup = isChannel && AppPeersManager.isMegagroup(peerID)
-      var asChannel = isChannel && !isMegagroup ? true : false,
-        attachType, apiFileName
+      var asChannel = isChannel && !isMegagroup ? true : false
+      var attachType, apiFileName
       var realFileName
 
       if (!options.isMedia) {
@@ -1504,6 +1505,7 @@ angular.module('myApp.services')
       }
       if (asChannel) {
         fromID = 0
+        pFlags.post = true
       } else {
         flags |= 256
       }
@@ -1730,6 +1732,7 @@ angular.module('myApp.services')
       }
       if (asChannel) {
         fromID = 0
+        pFlags.post = true
       } else {
         flags |= 256
       }
@@ -2019,8 +2022,13 @@ angular.module('myApp.services')
 
       if (!message || !message.to_id) {
         if (dialog && dialog.peerID) {
-          message = {_: 'message', to_id: AppPeersManager.getOutputPeer(dialog.peerID), deleted: true, date: tsNow(true), pFlags: {}}
-          message.deleted = true
+          message = {
+            _: 'message',
+            to_id: AppPeersManager.getOutputPeer(dialog.peerID),
+            deleted: true,
+            date: tsNow(true),
+            pFlags: {}
+          }
         } else {
           return message
         }
@@ -2030,6 +2038,7 @@ angular.module('myApp.services')
       message.peerData = AppPeersManager.getPeer(message.peerID)
       message.peerString = AppPeersManager.getPeerString(message.peerID)
       message.unreadCount = unreadCount
+      message.index = dialog && dialog.index || (message.date * 0x10000)
 
       if (message._ == 'messageService' && message.action.user_id) {
         message.action.user = AppUsersManager.getUser(message.action.user_id)

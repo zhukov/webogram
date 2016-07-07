@@ -709,18 +709,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return false
       }
 
-      var indexes = []
-      var indexesToDialogs = {}
-      angular.forEach(dialogsUpdated, function (dialog, peerID) {
-        if ($scope.noUsers && peerID > 0) {
-          return
-        }
-        indexesToDialogs[dialog.index] = dialog
-        indexes.push(dialog.index)
-      })
-      indexes.sort()
-
-      var i, dialog
+      var i
+      var dialog
+      var newPeer = false
       var len = $scope.dialogs.length
       for (i = 0; i < len; i++) {
         dialog = $scope.dialogs[i]
@@ -731,18 +722,26 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           AppMessagesManager.clearDialogCache(dialog.mid)
         }
       }
-      len = indexes.length
-      for (i = 0; i < len; i++) {
-        dialog = indexesToDialogs[indexes[i]]
+
+      angular.forEach(dialogsUpdated, function (dialog, peerID) {
+        if ($scope.noUsers && peerID > 0) {
+          return
+        }
+        if (!peersInDialogs[peerID]) {
+          peersInDialogs[peerID] = true
+          newPeer = true
+        }
         $scope.dialogs.unshift(
           AppMessagesManager.wrapForDialog(dialog.top_message, dialog)
         )
-      }
+      })
 
-      delete $scope.isEmpty.dialogs
+      $scope.dialogs.sort(function (d1, d2) {
+        return d2.index - d1.index
+      })
 
-      if (!peersInDialogs[dialog.peerID]) {
-        peersInDialogs[dialog.peerID] = true
+      if (newPeer) {
+        delete $scope.isEmpty.dialogs
         if (contactsShown) {
           showMoreConversations()
         }
