@@ -2158,7 +2158,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('history_need_more', showMoreHistory)
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
-      if (!newVal && $scope.curDialog && $scope.curDialog.peerID && !$scope.historyFilter.mediaType && !$scope.historyState.skipped) {
+      if (!newVal &&
+          $scope.curDialog &&
+          $scope.curDialog.peerID &&
+          !$scope.historyFilter.mediaType &&
+          !$scope.historyState.skipped) {
         AppMessagesManager.readHistory($scope.curDialog.peerID)
       }
       if (!newVal) {
@@ -2217,6 +2221,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.toggleSlash = toggleSlash
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
+      if ($rootScope.idle.initial) {
+        return
+      }
       if (newVal && $scope.curDialog.peerID) {
         DraftsManager.syncDraft($scope.curDialog.peerID)
       }
@@ -2365,11 +2372,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function resetDraft (newPeer, prevPeer) {
-      if (prevPeer) {
-        var prevPeerID = AppPeersManager.getPeerID(prevPeer)
-        if (prevPeerID) {
+      var prevPeerID = prevPeer ? AppPeersManager.getPeerID(prevPeer) : 0
+      if (prevPeerID) {
+        $scope.$broadcast('ui_message_before_send')
+        $timeout(function () {
           DraftsManager.syncDraft(prevPeerID)
-        }
+          resetDraft()
+        })
+        return
       }
 
       updateMentions()
@@ -2565,9 +2575,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       return cancelEvent($event)
     }
 
-    function onMessageChange (newVal) {
-      // console.log('ctrl text changed', newVal)
-      // console.trace('ctrl text changed', newVal)
+    function onMessageChange (newVal, prevVal, a) {
+      // console.log('ctrl text changed', newVal, prevVal);
+      if (newVal === '' && prevVal === '') {
+        return
+      }
 
       if (newVal && newVal.length) {
         if (!$scope.historyFilter.mediaType && !$scope.historyState.skipped) {

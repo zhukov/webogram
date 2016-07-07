@@ -1001,7 +1001,8 @@ angular.module('izhukov.utils', [])
   })
 
   .service('IdleManager', function ($rootScope, $window, $timeout) {
-    $rootScope.idle = {isIDLE: false}
+
+    $rootScope.idle = {isIDLE: false, initial: true}
 
     var toPromise
     var started = false
@@ -1031,7 +1032,7 @@ angular.module('izhukov.utils', [])
         $($window).on(visibilityChange + ' blur focus keydown mousedown touchstart', onEvent)
 
         setTimeout(function () {
-          onEvent({type: 'blur'})
+          onEvent({type: 'blur', fake_initial: true})
         }, 0)
       }
     }
@@ -1064,6 +1065,10 @@ angular.module('izhukov.utils', [])
         setTimeout(function () {
           delete $rootScope.idle.afterFocus
         }, 10)
+      }
+
+      if (e && !e.fake_initial) {
+        delete $rootScope.idle.initial;
       }
 
       if ($rootScope.idle.isIDLE == isIDLE) {
