@@ -2587,9 +2587,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       }
       if ($scope.curDialog.peerID) {
+        var replyToMsgID = $scope.draftMessage.replyToMsgID
+        if (replyToMsgID &&
+            $scope.historyState.replyKeyboard &&
+            $scope.historyState.replyKeyboard.mid == replyToMsgID) {
+          replyToMsgID = 0;
+        }
         DraftsManager.changeDraft($scope.curDialog.peerID, {
           text: newVal,
-          replyToMsgID: $scope.draftMessage.replyToMsgID
+          replyToMsgID: replyToMsgID
         })
         checkInlinePattern(newVal)
       }
