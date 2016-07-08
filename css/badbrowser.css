@@ -1163,6 +1163,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .md-textarea-group{height:66px}
 .md-input-grouped{margin-bottom:12px}
 .md-input-label{font-weight:400;color:#999;cursor:pointer;display:block;font-size:13px;margin:0;padding:0;z-index:1;pointer-events:none;-webkit-font-smoothing:antialiased;transform-origin:left center;-webkit-transform-origin:left center;-webkit-transform:translate3d(0,22px,0);transform:translate3d(0,22px,0)}
+.md-input-label span.ng-enter-prepare{display:none}
 .md-input-animated .md-input-group,.md-input-animated .md-input-label{-webkit-transition:all .15s cubic-bezier(.35,0,.25,1);transition:all .15s cubic-bezier(.35,0,.25,1)}
 .md-input{color:#000;background:#fff;display:inline-block;border:0;outline:0;font-size:13px;padding:3px 0;margin:3px 0 0;width:100%;resize:none;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
 .md-input-disabled .md-input{color:#999}
