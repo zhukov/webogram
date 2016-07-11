@@ -4643,7 +4643,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           var message = localDraft.text
           var entities = []
           message = RichTextProcessor.parseEmojis(message)
-          message = RichTextProcessor.parseMarkdown(message, entities)
+          message = RichTextProcessor.parseMarkdown(message, entities, true)
           if (localDraft.replyToMsgID > 0) {
             params.flags |= 1
             params.reply_to_msg_id = localDraft.replyToMsgID

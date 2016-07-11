@@ -1399,7 +1399,7 @@ angular.module('izhukov.utils', [])
       })
     }
 
-    function parseMarkdown (text, entities) {
+    function parseMarkdown (text, entities, noTrim) {
       if (text.indexOf('`') == -1 && text.indexOf('@') == -1) {
         return text.trim()
       }
@@ -1461,7 +1461,7 @@ angular.module('izhukov.utils', [])
         newText = text
         entities.splice(0, entities.length)
       }
-      if (!entities.length) {
+      if (!entities.length && !noTrim) {
         newText = newText.trim()
       }
       return newText
