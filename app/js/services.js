@@ -4480,7 +4480,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return
       }
       var peerID = AppPeersManager.getPeerID(update.peer)
-      saveDraft(peerID, update.draft, true)
+      saveDraft(peerID, update.draft, {notify: true})
     })
 
     return {
@@ -4526,18 +4526,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return false
     }
 
-    function saveDraft (peerID, apiDraft, notify) {
-      if (notify) {
-        console.warn(dT(), 'save draft', peerID, apiDraft, notify)
-      }
+    function saveDraft (peerID, apiDraft, options) {
+      options = options || {}
       var draft = processApiDraft(apiDraft)
       cachedServerDrafts[peerID] = draft
 
-      if (notify) {
+      if (options.notify) {
+        console.warn(dT(), 'save draft', peerID, apiDraft, options)
         changeDraft(peerID, draft)
         $rootScope.$broadcast('draft_updated', {
           peerID: peerID,
-          draft: draft
+          draft: draft,
+          local: options.sync
         })
       }
 
@@ -4659,7 +4659,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         MtpApiManager.invokeApi('messages.saveDraft', params).then(function () {
           draftObj.date = tsNow(true) + ServerTimeManager.serverTimeOffset
-          saveDraft(peerID, draftObj, true)
+          saveDraft(peerID, draftObj, {notify: true, sync: true})
         })
       })
     }

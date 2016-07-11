@@ -1005,6 +1005,7 @@ angular.module('izhukov.utils', [])
     $rootScope.idle = {isIDLE: false, initial: true}
 
     var toPromise
+    var debouncePromise
     var started = false
 
     var hidden = 'hidden'
@@ -1067,22 +1068,25 @@ angular.module('izhukov.utils', [])
         }, 10)
       }
 
+      var debounceTimeout = $rootScope.idle.initial ? 0 : 1000;
       if (e && !e.fake_initial) {
         delete $rootScope.idle.initial;
       }
+
+      $timeout.cancel(debouncePromise)
 
       if ($rootScope.idle.isIDLE == isIDLE) {
         return
       }
 
-      // console.log('IDLE changed', isIDLE)
-      $rootScope.$apply(function () {
+      debouncePromise = $timeout(function () {
+        // console.log(dT(), 'IDLE changed', isIDLE)
         $rootScope.idle.isIDLE = isIDLE
-      })
+        if (isIDLE && e.type == 'timeout') {
+          $($window).on('mousemove', onEvent)
+        }
+      }, debounceTimeout)
 
-      if (isIDLE && e.type == 'timeout') {
-        $($window).on('mousemove', onEvent)
-      }
     }
   })
 

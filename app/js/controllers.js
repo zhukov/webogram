@@ -2225,12 +2225,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       if (newVal && $scope.curDialog.peerID) {
-        DraftsManager.syncDraft($scope.curDialog.peerID)
+        $scope.$broadcast('ui_message_before_send')
+        $timeout(function () {
+          DraftsManager.syncDraft($scope.curDialog.peerID)
+        })
       }
     })
 
     $scope.$on('draft_updated', function (e, draftUpdate) {
-      if (draftUpdate.peerID == $scope.curDialog.peerID) {
+      if (draftUpdate.peerID == $scope.curDialog.peerID &&
+          !draftUpdate.local) {
         getDraft()
       }
     })
@@ -2373,7 +2377,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function resetDraft (newPeer, prevPeer) {
       var prevPeerID = prevPeer ? AppPeersManager.getPeerID(prevPeer) : 0
-      if (prevPeerID) {
+      if (newPeer != prevPeer && prevPeerID) {
         $scope.$broadcast('ui_message_before_send')
         $timeout(function () {
           DraftsManager.syncDraft(prevPeerID)
