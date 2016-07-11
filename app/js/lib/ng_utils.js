@@ -1401,7 +1401,7 @@ angular.module('izhukov.utils', [])
 
     function parseMarkdown (text, entities, noTrim) {
       if (text.indexOf('`') == -1 && text.indexOf('@') == -1) {
-        return text.trim()
+        return noTrim ? text : text.trim()
       }
       var raw = text
       var match
