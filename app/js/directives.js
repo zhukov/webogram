@@ -1557,6 +1557,8 @@ angular.module('myApp.directives', ['myApp.filters'])
       $(submitBtn).on('mousedown touchstart', onMessageSubmit)
 
       function onMessageSubmit (e) {
+        var self = this
+
         $timeout(function () {
           updateValue()
           $scope.draftMessage.send()
@@ -1564,6 +1566,8 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (composerEmojiPanel) {
             composerEmojiPanel.update()
           }
+
+          self.hideSuggestions()
         }, shouldFocusOnInteraction ? 0 : 100)
         return cancelEvent(e)
       }
