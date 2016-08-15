@@ -1,6 +1,6 @@
 {
     "modal_search": "Suchen",
-    "modal_close": "Schliessen",
+    "modal_close": "Schließen",
     "modal_edit": "Bearbeiten",
     "modal_cancel": "Abbrechen",
     "modal_more": "Weiteres...",
@@ -73,7 +73,7 @@
     "settings_modal_change_password": "Kennwort ändern",
     "settings_modal_disable_password": "Deaktivieren",
     "settings_modal_disable_password_mobile": "Kennwort deaktivieren",
-    "settings_modal_password_email_pending": "Link in {email} anklicken, um die zweistufige Bestätigung abzuschliessen.",
+    "settings_modal_password_email_pending": "Link in {email} anklicken, um die zweistufige Bestätigung abzuschließen.",
     "settings_modal_password_email_pending_cancel": "Abbrechen",
     "settings_modal_password_email_pending_cancel_mobile": "Kennwort abbrechen",
     "password_delete_title": "Kennwort deaktivieren",
