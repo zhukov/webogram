@@ -1593,7 +1593,7 @@ angular.module('izhukov.utils', [])
             html.push(
               '<a ',
               attr,
-              contextExternal ? ' target="_blank" ' : '',
+              contextExternal ? ' target="_blank" rel="noopener noreferrer" ' : '',
               ' href="',
               contextUrl.replace('{1}', encodeURIComponent(username)),
               '">',
@@ -1625,7 +1625,7 @@ angular.module('izhukov.utils', [])
             var hashtag = entityText.substr(1)
             html.push(
               '<a ',
-              contextExternal ? ' target="_blank" ' : '',
+              contextExternal ? ' target="_blank" rel="noopener noreferrer" ' : '',
               'href="',
               contextUrl.replace('{1}', encodeURIComponent(hashtag))
               ,
@@ -1643,7 +1643,7 @@ angular.module('izhukov.utils', [])
             html.push(
               '<a href="',
               encodeEntities('mailto:' + entityText),
-              '" target="_blank">',
+              '" target="_blank" rel="noopener noreferrer">',
               encodeEntities(entityText),
               '</a>'
             )
@@ -1660,7 +1660,7 @@ angular.module('izhukov.utils', [])
             html.push(
               '<a href="',
               encodeEntities(url),
-              '" target="_blank">',
+              '" target="_blank" rel="noopener noreferrer">',
               wrapRichNestedText(entityText, entity.nested, options),
               '</a>'
             )

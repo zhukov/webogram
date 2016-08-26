@@ -1,6 +1,6 @@
 <div class="im_message_venue clearfix">
 
-  <a ng-href="{{::media.mapUrl}}" target="_blank" class="im_message_venue_geopoint_wrap">
+  <a ng-href="{{::media.mapUrl}}" target="_blank" rel="noopener noreferrer" class="im_message_venue_geopoint_wrap">
     <i class="icon icon-geo-point"></i>
     <img
       class="im_message_venue_geopoint_image"
@@ -13,7 +13,7 @@
 
   <div class="im_message_venue_info">
     <div class="im_message_venue_title_wrap">
-      <a ng-href="{{::media.mapUrl}}" target="_blank" class="im_message_document_name" ng-bind="::media.title"></a>
+      <a ng-href="{{::media.mapUrl}}" target="_blank" rel="noopener noreferrer" class="im_message_document_name" ng-bind="::media.title"></a>
     </div>
     <div class="im_message_venue_address" ng-bind="::media.address"></div>
   </div>
