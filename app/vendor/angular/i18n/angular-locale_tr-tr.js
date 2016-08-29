@@ -1,6 +1,6 @@
 'use strict';
 angular.module("ngLocale", [], ["$provide", function($provide) {
-var PLURAL_CATEGORY = {ZERO: "zero", ONE: "one", TWO: "two", FEW: "few", MANY: "many", OTHER: "other"};
+var PLURAL_CATEGORY = {ZERO: "sıfır", ONE: "bir", TWO: "iki", FEW: "az", MANY: "çok", OTHER: "diğer"};
 $provide.value("$locale", {
   "DATETIME_FORMATS": {
     "AMPMS": [
