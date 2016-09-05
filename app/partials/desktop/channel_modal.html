@@ -21,6 +21,7 @@
       </div>
       <div class="peer_modal_profile">
         <div class="peer_modal_profile_name" my-peer-link="-chatFull.chat.id" verified="true"></div>
+        <div class="peer_modal_chat_id">Chat ID: {{ chatFull.chat.id }}</div>
         <div class="peer_modal_profile_description" ng-if="chatFull.participants_count > 0">
           <ng-pluralize count="chatFull.participants_count"
                         when="group_modal_pluralize_participants">

@@ -538,6 +538,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
+    $scope.apiPlayground = function () {
+      console.log("API PLAYGROUND");
+    }
+
     $scope.openGroup = function () {
       ContactsSelectService.selectContacts({action: 'new_group'}).then(function (userIDs) {
         if (userIDs.length == 1) {
