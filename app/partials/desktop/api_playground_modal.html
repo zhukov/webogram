@@ -1,0 +1,51 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <form class="modal_simple_form" ng-submit="fireApiCall()">
+
+      <h4>API Playground</h4>
+
+      <div class="playground_description">
+        You can find a full list of API functions <a ng-click="openSchema()">here</a>.
+        <br/><br/>
+      </div>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label">API Function</label>
+        <input class="md-input" my-focused type="text" ng-model="apiCall.function" ng-blur="findApiFunction()" />
+      </div>
+
+      <div class="api_function_description" ng-hide="!apiCall.details">
+        <h5>Takes <strong>{{ apiCall.details.params.length }}</strong> parameters, returns <strong>{{ apiCall.details.type }}</strong>.</h5>
+
+        <div class="api_function_parameters">
+          <div class="api_function_parameter" ng-repeat="param in apiCall.details.params">
+            <b>{{ param.name }}</b>: {{ param.type }}
+          </div>
+        </div>
+
+        <br/>
+      </div>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label">API Payload (in JSON format)</label>
+        <input class="md-input" type="text" ng-model="apiCall.payload" />
+      </div>
+
+      <h5>Response</h5>
+
+      <div class="api_playground_response">
+        <textarea style="width: 100%; max-width: 100%; min-height: 300px; font-family: monospace;">{{ apiCall.result }}</textarea>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()">Exit</button>
+    <button class="btn btn-md btn-md-primary" ng-class="{disabled: isFiring}" ng-click="fireApiCall()" ng-disabled="isFiring">Fire Call</button>
+  </div>
+
+</div>

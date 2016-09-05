@@ -437,6 +437,52 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start()
   })
 
+  .controller('EvalModalController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppPeersManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
+    $scope.evalThings = function () {
+      console.log(eval($scope.thingToEval))
+    }
+  })
+
+  .controller('ApiPlaygroundModalController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
+    $scope.apiCall = {
+      "function": "",
+      payload: "{ }",
+      result: "Press \"Fire Call\" at the bottom of this modal to fire the API call. Result will appear here."
+    }
+
+    $scope.findApiFunction = function () {
+      var matches = Config.Schema.API.methods.filter((method) => {
+        if(method.method === $scope.apiCall.function) return true
+      })
+
+      if(matches.length > 0){
+        var match = matches[0]
+        $scope.apiCall.details = match
+      }
+    }
+
+    $scope.fireApiCall = function () {
+      $scope.isFiring = true
+      try{
+        MtpApiManager.invokeApi($scope.apiCall.function, JSON.parse($scope.apiCall.payload)).then(function (result) {
+          $scope.apiCall.result = JSON.stringify(result, null, 2)
+          $scope.isFiring = false
+        }, function (error) {
+          $scope.apiCall.result = JSON.stringify(error.originalError, null, 2)
+          $scope.isFiring = false
+          error.handled = true
+        })
+      }catch(e){
+        $scope.apiCall.result = "Client error:\n\n" + e
+        $scope.isFiring = false
+      }
+    }
+
+    $scope.openSchema = function () {
+      window.open("https://core.telegram.org/schema", "_blank")
+    }
+  })
+
   .controller('AppIMController', function ($q, qSync, $scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
     $scope.$on('$routeUpdate', updateCurDialog)
 
@@ -538,8 +584,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
-    $scope.apiPlayground = function () {
-      console.log("API PLAYGROUND");
+    $scope.openPlayground = function () {
+      $modal.open({
+        templateUrl: templateUrl('api_playground_modal'),
+        controller: 'ApiPlaygroundModalController',
+        windowClass: 'api_playground_modal_window mobile_modal',
+        backdrop: 'single'
+      })
+    }
+
+    $scope.openEvaluator = function () {
+      $modal.open({
+        templateUrl: templateUrl('eval_modal'),
+        controller: 'EvalModalController',
+        windowClass: 'eval_modal_window mobile_modal',
+        backdrop: 'single'
+      })
     }
 
     $scope.openGroup = function () {

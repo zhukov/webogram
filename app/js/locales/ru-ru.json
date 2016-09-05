@@ -508,7 +508,7 @@
     "message_attach_video_download": "Загрузить",
     "message_attach_video_save": "Сохранить файл",
     "message_attach_video_play": "Воспроизвести",
-    "message_attach_unsupported": "The message is not supported on your version of Telegram Web. Update the app to view: {link}.",
+    "message_attach_unsupported": "The message is not supported on your version of Telegram for Devs. Update the app to view: {link}.",
     "conversation_select_modal_title": "Выбрать чат",
     "conversation_select_modal_contacts": "Контакты",
     "conversation_one_selected": "{name1}",

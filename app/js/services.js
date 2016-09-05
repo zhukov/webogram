@@ -4038,7 +4038,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       Storage.get('last_version').then(function (lastVersion) {
         if (lastVersion != Config.App.version) {
           if (lastVersion) {
-            showChangelog(lastVersion)
+            // showChangelog(lastVersion)
           }
           Storage.set({last_version: Config.App.version})
         }
@@ -4049,12 +4049,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var $scope = $rootScope.$new()
       $scope.lastVersion = lastVersion
 
-      $modal.open({
-        controller: 'ChangelogModalController',
-        templateUrl: templateUrl('changelog_modal'),
-        scope: $scope,
-        windowClass: 'changelog_modal_window mobile_modal'
-      })
+      // $modal.open({
+      //   controller: 'ChangelogModalController',
+      //   templateUrl: templateUrl('changelog_modal'),
+      //   scope: $scope,
+      //   windowClass: 'changelog_modal_window mobile_modal'
+      // })
     }
 
     return {
@@ -4369,10 +4369,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       if ('registerProtocolHandler' in navigator) {
         try {
-          navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web')
+          navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram for Devs')
         } catch (e) {}
         try {
-          navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web')
+          navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram for Devs')
         } catch (e) {}
       }
 

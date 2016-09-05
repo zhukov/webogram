@@ -1,0 +1,23 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <form class="modal_simple_form" ng-submit="evalThings()">
+
+      <h4>Eval</h4>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label">String to <code>eval()</code></label>
+        <input class="md-input" my-focused type="text" ng-model="thingToEval" />
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()">Exit</button>
+    <button class="btn btn-md btn-md-primary" ng-click="evalThings()">Evaluate</button>
+  </div>
+
+</div>
