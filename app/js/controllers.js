@@ -451,7 +451,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.findApiFunction = function () {
-      var matches = Config.Schema.API.methods.filter((method) => {
+      var matches = Config.Schema.API.methods.filter(function (method) {
         if(method.method === $scope.apiCall.function) return true
       })
 
