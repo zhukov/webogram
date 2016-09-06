@@ -12,13 +12,14 @@ It includes several useful features:
   set up your own client
 - Evaluator
   - Simply evaluates a JS statement inside of a Angular `$scope`d controller
+- Bot sign in
+  - Log in with your bot's API token and see what it sees. Useful for getting bot-specific
+  message IDs and testing access to certain groups.
 
 ### Coming soon
 
-- Bot sign-in
-  - Pass in your bot's token and sign in as your bot. The only reason I'm not
-  implementing this right now is because it errors literally every two seconds
-  since bots don't have access to the majority of methods.
+- Auto-fill/suggest methods on API playground
+- Show field for each payload parameter on API playground instead of raw JSON input
 
 ### Screenshots
 
