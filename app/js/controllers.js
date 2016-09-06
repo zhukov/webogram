@@ -3814,6 +3814,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     })
 
     $scope.notify = {volume: 0.5}
+    $scope.disable_webpage_preview = false
     $scope.send = {}
 
     $scope.$watch('photo.file', onPhotoSelected)
@@ -4034,6 +4035,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         $rootScope.$broadcast('settings_changed')
       }
+    })
+
+    Storage.get('disable_webpage_preview').then(function (previewDisabled) {
+      $scope.disable_webpage_preview = previewDisabled;
+
+      $scope.$watch('disable_webpage_preview', function (newValue, oldValue) {
+        if (newValue === oldValue) {
+          return
+        }
+        Storage.set({disable_webpage_preview: newValue});
+        $rootScope.$broadcast('settings_changed')
+        $rootScope.$broadcast('preview_settings_updated', newValue)
+      })
     })
 
     $scope.openChangelog = function () {

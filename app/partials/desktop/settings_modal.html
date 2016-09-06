@@ -110,6 +110,11 @@
           <div class="md_modal_section_param_name" my-i18n="settings_modal_language"></div>
         </div>
 
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="disable_webpage_preview = !disable_webpage_preview" ng-class="disable_webpage_preview ? '' : 'tg_checkbox_on'">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_webpage_preview"></span>
+        </a>
+
         <div class="md_modal_section_link_wrap">
           <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'cancel_email'})" my-i18n="settings_modal_password_email_pending_cancel">
           </a>

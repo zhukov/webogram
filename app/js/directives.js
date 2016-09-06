@@ -432,7 +432,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('message_attach_contact')
     }
   })
-  .directive('myMessageWebpage', function (AppWebPagesManager, AppPhotosManager) {
+  .directive('myMessageWebpage', function (AppWebPagesManager, AppPhotosManager, Storage) {
     return {
       scope: {
         'media': '=myMessageWebpage',
@@ -440,20 +440,30 @@ angular.module('myApp.directives', ['myApp.filters'])
       },
       templateUrl: templateUrl('message_attach_webpage'),
       link: function ($scope) {
-        $scope.openPhoto = AppPhotosManager.openPhoto
-        $scope.openEmbed = function ($event) {
-          if ($scope.media.webpage &&
-            $scope.media.webpage.embed_url) {
-            AppWebPagesManager.openEmbed($scope.media.webpage.id, $scope.messageId)
-            return cancelEvent($event)
-          }
-        }
+        Storage.get('disable_webpage_preview').then(function (previewDisabled) {
+          $scope.previewDisabled = !!previewDisabled;
+          if ($scope.previewDisabled)
+            return
 
-        $scope.$on('webpage_updated', function (e, eventData) {
-          if ($scope.media.webpage &&
-            $scope.media.webpage.id == eventData.id) {
-            $scope.$emit('ui_height')
+          $scope.openPhoto = AppPhotosManager.openPhoto
+          $scope.openEmbed = function ($event) {
+            if ($scope.media.webpage &&
+              $scope.media.webpage.embed_url) {
+              AppWebPagesManager.openEmbed($scope.media.webpage.id, $scope.messageId)
+              return cancelEvent($event)
+            }
           }
+
+          $scope.$on('webpage_updated', function (e, eventData) {
+            if ($scope.media.webpage &&
+              $scope.media.webpage.id == eventData.id) {
+              $scope.$emit('ui_height')
+            }
+          })
+
+          $scope.$on('preview_settings_updated', function (e, previewDisabled) {
+            $scope.previewDisabled = previewDisabled
+          })
         })
       }
     }

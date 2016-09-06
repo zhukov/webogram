@@ -1,4 +1,4 @@
-<div ng-show="media.webpage._ == 'webPage'" class="im_message_webpage_wrap clearfix" ng-switch="media.webpage.type">
+<div ng-show="media.webpage._ == 'webPage' && !previewDisabled" class="im_message_webpage_wrap clearfix" ng-switch="media.webpage.type">
   <div ng-switch-when="photo" class="im_message_webpage_photo">
     <div class="im_message_webpage_title">
       <a href="{{media.webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="media.webpage.rTitle"></a>
