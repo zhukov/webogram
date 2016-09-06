@@ -3495,7 +3495,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return peerSettings[peerID]
       }
 
-      if(MtpApiManager.isBotAuth()){
+      if(MtpApiManager.getIsBotAuth()){
         return false
       }else{
         return peerSettings[peerID] = MtpApiManager.invokeApi('account.getNotifySettings', {

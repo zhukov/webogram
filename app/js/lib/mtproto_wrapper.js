@@ -12,6 +12,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     var cachedUploadNetworkers = {}
     var cachedExportPromise = {}
     var baseDcID = false
+    var isBotAuth = false
 
     var telegramMeNotified
 
@@ -21,6 +22,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       if (dcID) {
         baseDcID = dcID
       }
+    })
+
+    Storage.get('user_auth').then(function (auth) {
+      isBotAuth = auth.bot || false
     })
 
     function telegramMeNotify (newValue) {
@@ -290,16 +295,14 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       return baseDcID || false
     }
 
-    function isBotAuth () {
-      return Storage.get('user_auth').then(function (auth) {
-        return auth.bot || false
-      })
+    function getIsBotAuth () {
+      return isBotAuth
     }
 
     return {
       getBaseDcID: getBaseDcID,
       getUserID: mtpGetUserID,
-      isBotAuth: isBotAuth,
+      getIsBotAuth: getIsBotAuth,
       invokeApi: mtpInvokeApi,
       getNetworker: mtpGetNetworker,
       setUserAuth: mtpSetUserAuth,

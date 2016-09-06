@@ -208,7 +208,7 @@ angular.module('myApp.services')
     }
 
     function getTopMessages (limit) {
-      if(MtpApiManager.isBotAuth()){
+      if(MtpApiManager.getIsBotAuth()){
         return false
       }else{
         var first = true
@@ -263,6 +263,8 @@ angular.module('myApp.services')
               !newDialogsHandlePromise) {
             newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
           }
+        }, function (error) {
+          error.handled = true
         })
       }
     }
@@ -992,7 +994,7 @@ angular.module('myApp.services')
         return historyStorage.readPromise
       }
 
-      if(!MtpApiManager.isBotAuth()){
+      if(!MtpApiManager.getIsBotAuth()){
         var apiPromise
         if (isChannel) {
           apiPromise = MtpApiManager.invokeApi('channels.readHistory', {
@@ -3094,7 +3096,7 @@ angular.module('myApp.services')
     })
 
     function reloadConversation (peerID) {
-      if(!MtpApiManager.isBotAuth()){
+      if(!MtpApiManager.getIsBotAuth()){
         return MtpApiManager.invokeApi('messages.getPeerDialogs', {
           peers: [
             AppPeersManager.getInputPeerByID(peerID)
