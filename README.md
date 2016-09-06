@@ -1,4 +1,4 @@
-## [Telegram for Devs](https://web.telegram.org) — Unofficial Webogram-based client
+## [Telegram for Devs](https://tjhorner.com/webogram) — Unofficial Webogram-based client
 
 This is a web app based on Webogram, the official Telegram client. This is a modified
 version that aims to help client and bot developers develop faster.
