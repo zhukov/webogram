@@ -22,6 +22,7 @@
       <div class="peer_modal_profile">
         <div class="peer_modal_profile_name" my-peer-link="-chatFull.chat.id" verified="true"></div>
         <div class="peer_modal_chat_id">Chat ID: {{ chatFull.chat.id }}</div>
+        <div class="peer_modal_access_hash">Access Hash: {{ chatFull.chat.access_hash }}</div>
         <div class="peer_modal_profile_description" ng-if="chatFull.participants_count > 0">
           <ng-pluralize count="chatFull.participants_count"
                         when="group_modal_pluralize_participants">
@@ -51,6 +52,13 @@
         <i class="md_modal_section_icon md_modal_section_icon_about"></i>
 
         <div class="md_modal_section_param_wrap" ng-if="chatFull.about.length > 0">
+          <div class="md_modal_section_param_value">
+            <span ng-bind-html="chatFull.rAbout"></span>
+          </div>
+          <div class="md_modal_section_param_name" my-i18n="channel_modal_description"></div>
+        </div>
+
+        <div class="md_modal_section_param_wrap">
           <div class="md_modal_section_param_value">
             <span ng-bind-html="chatFull.rAbout"></span>
           </div>

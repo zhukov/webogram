@@ -12,13 +12,13 @@
         </a>
 
         <ul class="dropdown-menu">
-          <li><a ng-click="openGroup()">
+          <li><a ng-click="openGroup()" ng-if="!auth.isBot">
             <i class="icon icon-new-group"></i><span my-i18n="im_new_group"></span>
           </a></li>
-          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
+          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" ng-if="!auth.isBot">
             <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
           </a></li>
-          <li><a ng-click="openSettings()">
+          <li><a ng-click="openSettings()" ng-if="!auth.isBot">
             <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
           </a></li>
           <li><a ng-click="openPlayground()">
@@ -26,6 +26,9 @@
           </a></li>
           <li><a ng-click="openEvaluator()">
             <i class="icon"></i><span>Evaluator</span>
+          </a></li>
+          <li><a ng-click="logOut()" ng-if="auth.isBot">
+            <i class="icon"></i><span>Log Out</span>
           </a></li>
         </ul>
       </div>

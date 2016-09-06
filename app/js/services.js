@@ -3495,12 +3495,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return peerSettings[peerID]
       }
 
-      return peerSettings[peerID] = MtpApiManager.invokeApi('account.getNotifySettings', {
-        peer: {
-          _: 'inputNotifyPeer',
-          peer: AppPeersManager.getInputPeerByID(peerID)
-        }
-      })
+      if(MtpApiManager.isBotAuth()){
+        return false
+      }else{
+        return peerSettings[peerID] = MtpApiManager.invokeApi('account.getNotifySettings', {
+          peer: {
+            _: 'inputNotifyPeer',
+            peer: AppPeersManager.getInputPeerByID(peerID)
+          }
+        })
+      }
     }
 
     function setFavicon (href) {

@@ -290,9 +290,16 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       return baseDcID || false
     }
 
+    function isBotAuth () {
+      return Storage.get('user_auth').then(function (auth) {
+        return auth.bot || false
+      })
+    }
+
     return {
       getBaseDcID: getBaseDcID,
       getUserID: mtpGetUserID,
+      isBotAuth: isBotAuth,
       invokeApi: mtpInvokeApi,
       getNetworker: mtpGetNetworker,
       setUserAuth: mtpSetUserAuth,

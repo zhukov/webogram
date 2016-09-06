@@ -56,6 +56,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.progress = {}
     $scope.nextPending = {}
     $scope.about = {}
+    $scope.botLogin = {isBotLogin: false}
 
     $scope.chooseCountry = function () {
       var modal = $modal.open({
@@ -159,9 +160,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var nextTimeout
     var updatePasswordTimeout = false
 
-    function saveAuth (result) {
+    function saveAuth (result, isBot) {
       MtpApiManager.setUserAuth(options.dcID, {
-        id: result.user.id
+        id: result.user.id,
+        bot: isBot || false
       })
       $timeout.cancel(nextTimeout)
 
@@ -295,6 +297,26 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.logIn()
       }
     })
+
+    $scope.botLogIn = function () {
+      $scope.progress.enabled = true
+
+      MtpApiManager.invokeApi("auth.importBotAuthorization", {
+        flags: 0,
+        api_id: Config.App.id,
+        api_hash: Config.App.hash,
+        bot_auth_token: $scope.credentials.token.trim()
+      }, options).then(function (result) {
+        saveAuth(result, true)
+        $scope.progress.enabled = false
+      }, function (error) {
+        if(error.type === "ACCESS_TOKEN_INVALID"){
+          $scope.error.message = "Invalid API token."
+          $scope.progress.enabled = false
+        }
+        error.handled = true
+      })
+    }
 
     $scope.logIn = function (forceSignUp) {
       var method = 'auth.signIn'
@@ -531,6 +553,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.search = {}
     $scope.historyFilter = {mediaType: false}
     $scope.historyPeer = {}
+    $scope.auth = {isBot: MtpApiManager.isBotAuth()}
     $scope.historyState = {
       selectActions: false,
       botActions: false,

@@ -208,59 +208,63 @@ angular.module('myApp.services')
     }
 
     function getTopMessages (limit) {
-      var first = true
-      var dialogs = dialogsStorage.dialogs
-      var offsetDate = 0
-      var offsetID = 0
-      var offsetPeerID = 0
-      var offsetIndex = 0
-      if (dialogsOffsetDate) {
-        offsetDate = dialogsOffsetDate + ServerTimeManager.serverTimeOffset
-        offsetIndex = dialogsOffsetDate * 0x10000
-      }
-      return MtpApiManager.invokeApi('messages.getDialogs', {
-        offset_date: offsetDate,
-        offset_id: AppMessagesIDsManager.getMessageLocalID(offsetID),
-        offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
-        limit: limit
-      }, {
-        timeout: 300
-      }).then(function (dialogsResult) {
-        if (!offsetDate) {
-          TelegramMeWebService.setAuthorized(true)
+      if(MtpApiManager.isBotAuth()){
+        return false
+      }else{
+        var first = true
+        var dialogs = dialogsStorage.dialogs
+        var offsetDate = 0
+        var offsetID = 0
+        var offsetPeerID = 0
+        var offsetIndex = 0
+        if (dialogsOffsetDate) {
+          offsetDate = dialogsOffsetDate + ServerTimeManager.serverTimeOffset
+          offsetIndex = dialogsOffsetDate * 0x10000
         }
-
-        AppUsersManager.saveApiUsers(dialogsResult.users)
-        AppChatsManager.saveApiChats(dialogsResult.chats)
-        saveMessages(dialogsResult.messages)
-
-        var maxSeenIdIncremented = offsetDate ? true : false
-        var hasPrepend = false
-        angular.forEach(dialogsResult.dialogs, function (dialog) {
-          saveConversation(dialog)
-          if (offsetIndex && dialog.index > offsetIndex) {
-            newDialogsToHandle[dialog.peerID] = dialog
-            hasPrepend = true
+        return MtpApiManager.invokeApi('messages.getDialogs', {
+          offset_date: offsetDate,
+          offset_id: AppMessagesIDsManager.getMessageLocalID(offsetID),
+          offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
+          limit: limit
+        }, {
+          timeout: 300
+        }).then(function (dialogsResult) {
+          if (!offsetDate) {
+            TelegramMeWebService.setAuthorized(true)
           }
 
-          if (!maxSeenIdIncremented &&
-            !AppPeersManager.isChannel(AppPeersManager.getPeerID(dialog.peer))) {
-            incrementMaxSeenID(dialog.top_message)
-            maxSeenIdIncremented = true
+          AppUsersManager.saveApiUsers(dialogsResult.users)
+          AppChatsManager.saveApiChats(dialogsResult.chats)
+          saveMessages(dialogsResult.messages)
+
+          var maxSeenIdIncremented = offsetDate ? true : false
+          var hasPrepend = false
+          angular.forEach(dialogsResult.dialogs, function (dialog) {
+            saveConversation(dialog)
+            if (offsetIndex && dialog.index > offsetIndex) {
+              newDialogsToHandle[dialog.peerID] = dialog
+              hasPrepend = true
+            }
+
+            if (!maxSeenIdIncremented &&
+              !AppPeersManager.isChannel(AppPeersManager.getPeerID(dialog.peer))) {
+              incrementMaxSeenID(dialog.top_message)
+              maxSeenIdIncremented = true
+            }
+          })
+
+          if (!dialogsResult.dialogs.length ||
+            !dialogsResult.count ||
+            dialogs.length >= dialogsResult.count) {
+            allDialogsLoaded = true
+          }
+
+          if (hasPrepend &&
+              !newDialogsHandlePromise) {
+            newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
           }
         })
-
-        if (!dialogsResult.dialogs.length ||
-          !dialogsResult.count ||
-          dialogs.length >= dialogsResult.count) {
-          allDialogsLoaded = true
-        }
-
-        if (hasPrepend &&
-            !newDialogsHandlePromise) {
-          newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
-        }
-      })
+      }
     }
 
     function generateDialogIndex (date) {
@@ -988,41 +992,43 @@ angular.module('myApp.services')
         return historyStorage.readPromise
       }
 
-      var apiPromise
-      if (isChannel) {
-        apiPromise = MtpApiManager.invokeApi('channels.readHistory', {
-          channel: AppChatsManager.getChannelInput(-peerID),
-          max_id: 0
-        })
-      } else {
-        apiPromise = MtpApiManager.invokeApi('messages.readHistory', {
-          peer: AppPeersManager.getInputPeerByID(peerID),
-          max_id: 0
-        }).then(function (affectedMessages) {
-          ApiUpdatesManager.processUpdateMessage({
-            _: 'updateShort',
-            update: {
-              _: 'updatePts',
-              pts: affectedMessages.pts,
-              pts_count: affectedMessages.pts_count
-            }
+      if(!MtpApiManager.isBotAuth()){
+        var apiPromise
+        if (isChannel) {
+          apiPromise = MtpApiManager.invokeApi('channels.readHistory', {
+            channel: AppChatsManager.getChannelInput(-peerID),
+            max_id: 0
           })
+        } else {
+          apiPromise = MtpApiManager.invokeApi('messages.readHistory', {
+            peer: AppPeersManager.getInputPeerByID(peerID),
+            max_id: 0
+          }).then(function (affectedMessages) {
+            ApiUpdatesManager.processUpdateMessage({
+              _: 'updateShort',
+              update: {
+                _: 'updatePts',
+                pts: affectedMessages.pts,
+                pts_count: affectedMessages.pts_count
+              }
+            })
+          })
+        }
+
+        historyStorage.readPromise = apiPromise.then(function () {
+          if (foundDialog) {
+            // console.log('done read history', peerID)
+            foundDialog.unread_count = 0
+            $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0})
+            $rootScope.$broadcast('messages_read')
+            if (historyStorage && historyStorage.history.length) {
+              foundDialog.read_inbox_max_id = historyStorage.history[0]
+            }
+          }
+        })['finally'](function () {
+          delete historyStorage.readPromise
         })
       }
-
-      historyStorage.readPromise = apiPromise.then(function () {
-        if (foundDialog) {
-          // console.log('done read history', peerID)
-          foundDialog.unread_count = 0
-          $rootScope.$broadcast('dialog_unread', {peerID: peerID, count: 0})
-          $rootScope.$broadcast('messages_read')
-          if (historyStorage && historyStorage.history.length) {
-            foundDialog.read_inbox_max_id = historyStorage.history[0]
-          }
-        }
-      })['finally'](function () {
-        delete historyStorage.readPromise
-      })
 
       if (historyStorage && historyStorage.history.length) {
         var messageID
@@ -3088,39 +3094,41 @@ angular.module('myApp.services')
     })
 
     function reloadConversation (peerID) {
-      return MtpApiManager.invokeApi('messages.getPeerDialogs', {
-        peers: [
-          AppPeersManager.getInputPeerByID(peerID)
-        ]
-      }).then(function (dialogsResult) {
-        AppUsersManager.saveApiUsers(dialogsResult.users)
-        AppChatsManager.saveApiChats(dialogsResult.chats)
-        saveMessages(dialogsResult.messages)
+      if(!MtpApiManager.isBotAuth()){
+        return MtpApiManager.invokeApi('messages.getPeerDialogs', {
+          peers: [
+            AppPeersManager.getInputPeerByID(peerID)
+          ]
+        }).then(function (dialogsResult) {
+          AppUsersManager.saveApiUsers(dialogsResult.users)
+          AppChatsManager.saveApiChats(dialogsResult.chats)
+          saveMessages(dialogsResult.messages)
 
-        var updatedDialogs = {}
-        var hasUpdated = false
-        angular.forEach(dialogsResult.dialogs, function (dialog) {
-          if (dialog.top_message) {
-            saveConversation(dialog)
-            if (getDialogByPeerID(dialog.peerID).length) {
-              $rootScope.$broadcast('dialog_top', dialog)
+          var updatedDialogs = {}
+          var hasUpdated = false
+          angular.forEach(dialogsResult.dialogs, function (dialog) {
+            if (dialog.top_message) {
+              saveConversation(dialog)
+              if (getDialogByPeerID(dialog.peerID).length) {
+                $rootScope.$broadcast('dialog_top', dialog)
+              } else {
+                updatedDialogs[dialog.peerID] = dialog
+                hasUpdated = true
+              }
             } else {
-              updatedDialogs[dialog.peerID] = dialog
-              hasUpdated = true
+              var peerID = AppPeersManager.getPeerID(dialog.peer)
+              var foundDialog = getDialogByPeerID(peerID)
+              if (foundDialog.length) {
+                dialogsStorage.dialogs.splice(foundDialog[1], 1)
+                $rootScope.$broadcast('dialog_drop', {peerID: peerID})
+              }
             }
-          } else {
-            var peerID = AppPeersManager.getPeerID(dialog.peer)
-            var foundDialog = getDialogByPeerID(peerID)
-            if (foundDialog.length) {
-              dialogsStorage.dialogs.splice(foundDialog[1], 1)
-              $rootScope.$broadcast('dialog_drop', {peerID: peerID})
-            }
+          })
+          if (hasUpdated) {
+            $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs)
           }
         })
-        if (hasUpdated) {
-          $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs)
-        }
-      })
+      }
     }
 
     $rootScope.$on('webpage_updated', function (e, eventData) {

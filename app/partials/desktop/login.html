@@ -3,10 +3,13 @@
   <div class="login_page">
     <div class="login_head_wrap clearfix" ng-switch="progress.enabled">
       <div ng-switch-when="true" class="login_head_submit_progress">
-        <my-i18n ng-if="!credentials.phone_code_hash" msgid="login_generating_key"></my-i18n><my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" msgid="login_checking_password"></my-i18n><span my-loading-dots></span>
+        <span ng-if="botLogin.isBotLogin">Logging in</span><my-i18n ng-if="!credentials.phone_code_hash &amp;&amp; !botLogin.isBotLogin" msgid="login_generating_key"></my-i18n><my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" msgid="login_checking_password"></my-i18n><span my-loading-dots></span>
       </div>
       <div ng-switch-default class="login_head_submit_wrap">
-        <a class="login_head_submit_btn" ng-if="!credentials.phone_code_hash" ng-click="sendCode()">
+        <a class="login_head_submit_btn" ng-if="botLogin.isBotLogin" ng-click="botLogIn()">
+          <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
+        </a>
+        <a class="login_head_submit_btn" ng-if="!credentials.phone_code_hash &amp;&amp; !botLogin.isBotLogin" ng-click="sendCode()">
           <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
         </a>
         <a class="login_head_submit_btn" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-click="logIn()">
@@ -27,7 +30,7 @@
     <div class="login_form_wrap">
       <div class="error" ng-if="error.message" ng-bind="error.message"></div>
 
-      <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
+      <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash &amp;&amp; !botLogin.isBotLogin" ng-hide="botLogin.isBotLogin" ng-submit="sendCode()">
         <h3 class="login_form_head" my-i18n="login_sign_in"></h3>
         <p class="login_form_lead" my-i18n="login_enter_number_description"></p>
 
@@ -50,7 +53,19 @@
           </div>
 
         </div>
+        <a class="logo_footer_learn_more_link" href="" ng-click="botLogin.isBotLogin = true">Log-in with Bot API token</a>
         <div class="login_form_messaging" ng-show="progress.enabled" my-i18n="login_generating_keys_info"></div>
+      </form>
+
+      <form name="myBotTokenForm" ng-show="botLogin.isBotLogin" ng-submit="botLogIn()">
+        <h3 class="login_form_head">Bot API Token</h3>
+        <p class="login_form_lead">Please type your full Bot API token to log in.</p>
+
+        <div class="md-input-group" ng-class="{'md-input-error': error.field == 'bot_token'}" my-labeled-input ng-switch="error.field == 'bot_token'">
+          <label ng-switch-default class="md-input-label">Token</label>
+          <input autocomplete="off" class="md-input" my-focused name="bot_token" type="text" ng-model="credentials.token" required />
+        </div>
+
       </form>
 
       <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
@@ -144,11 +159,9 @@
       </div>
       <div ng-switch-default class="login_footer_wrap">
         <p my-i18n="login_about_intro"></p>
-        <a class="logo_footer_learn_more_link" href="" ng-click="about.shown = true" my-i18n="login_about_learn"></a>
       </div>
 
     </div>
   </div>
 
 </div>
-
