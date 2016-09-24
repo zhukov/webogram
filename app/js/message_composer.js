@@ -1302,23 +1302,27 @@ MessageComposer.prototype.onMentionSelected = function (username, firstName) {
     }
 
     var html
-    if (hasUsername) {
-      if (suffix.length) {
-        this.selId = (this.selId || 0) + 1
-        html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix)
-        this.richTextareaEl.html(html)
-        setRichFocus(textarea, $('#composer_sel' + this.selId)[0])
-      } else {
-        html = this.getRichHtml(newValuePrefix) + '&nbsp;'
-        this.richTextareaEl.html(html)
-        setRichFocus(textarea)
-      }
-    } else {
-      this.selId = (this.selId || 0) + 1
-      html = this.getRichHtml(newValuePrefix) + '&nbsp;(<span id="composer_sel' + this.selId + '">' + encodeEntities(firstName) + '</span>)&nbsp;' + this.getRichHtml(suffix)
-      this.richTextareaEl.html(html)
-      setRichFocus(textarea, $('#composer_sel' + this.selId)[0], true)
-    }
+    this.selId = (this.selId || 0) + 1
+    html = this.getRichHtml(newValuePrefix) + '&nbsp;(<span id="composer_sel' + this.selId + '">' + encodeEntities(firstName) + '</span>)&nbsp;' + this.getRichHtml(suffix)
+    this.richTextareaEl.html(html)
+    setRichFocus(textarea, $('#composer_sel' + this.selId)[0], true)
+    // if (hasUsername) {
+    //   if (suffix.length) {
+    //     this.selId = (this.selId || 0) + 1
+    //     html = this.getRichHtml(newValuePrefix) + '&nbsp;<span id="composer_sel' + this.selId + '"></span>' + this.getRichHtml(suffix)
+    //     this.richTextareaEl.html(html)
+    //     setRichFocus(textarea, $('#composer_sel' + this.selId)[0])
+    //   } else {
+    //     html = this.getRichHtml(newValuePrefix) + '&nbsp;'
+    //     this.richTextareaEl.html(html)
+    //     setRichFocus(textarea)
+    //   }
+    // } else {
+    //   this.selId = (this.selId || 0) + 1
+    //   html = this.getRichHtml(newValuePrefix) + '&nbsp;(<span id="composer_sel' + this.selId + '">' + encodeEntities(firstName) + '</span>)&nbsp;' + this.getRichHtml(suffix)
+    //   this.richTextareaEl.html(html)
+    //   setRichFocus(textarea, $('#composer_sel' + this.selId)[0], true)
+    // }
   } else {
     var textarea = this.textareaEl[0]
     var fullValue = textarea.value
@@ -1337,14 +1341,17 @@ MessageComposer.prototype.onMentionSelected = function (username, firstName) {
       newValuePrefix = prefix + '@' + username
     }
 
-    if (hasUsername) {
-      newValue = newValuePrefix + '@' + username + ' ' + suffix
-      newPos = matches.index + username.length + 2
-    } else {
-      newValue = newValuePrefix + '@' + username + ' (' + firstName + ') ' + suffix
-      newPos = matches.index + username.length + 2
-      newPosTo = newPos + firstName.length
-    }
+    newValue = newValuePrefix + '@' + username + ' (' + firstName + ') ' + suffix
+    newPos = matches.index + username.length + 2
+    newPosTo = newPos + firstName.length
+    // if (hasUsername) {
+    //   newValue = newValuePrefix + '@' + username + ' ' + suffix
+    //   newPos = matches.index + username.length + 2
+    // } else {
+    //   newValue = newValuePrefix + '@' + username + ' (' + firstName + ') ' + suffix
+    //   newPos = matches.index + username.length + 2
+    //   newPosTo = newPos + firstName.length
+    // }
     textarea.value = newValue
     setFieldSelection(textarea, newPos, newPosTo)
   }

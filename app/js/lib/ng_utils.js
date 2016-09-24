@@ -1236,7 +1236,7 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
-    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
+    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)|(^|\s)\*([^\n]+?)\*([\s\.,:?!;]|$)|(^|\s)_([^\n]+?)_([\s\.,:?!;]|$)/
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1400,7 +1400,7 @@ angular.module('izhukov.utils', [])
     }
 
     function parseMarkdown (text, entities, noTrim) {
-      if (text.indexOf('`') == -1 && text.indexOf('@') == -1) {
+      if (text.indexOf('`') == -1 && text.indexOf('*') == -1 && text.indexOf('_') == -1 && text.indexOf('@') == -1) {
         return noTrim ? text : text.trim()
       }
       var raw = text
@@ -1412,7 +1412,7 @@ angular.module('izhukov.utils', [])
         matchIndex = rawOffset + match.index
         newText.push(raw.substr(0, match.index))
 
-        var text = (match[3] || match[7] || match[10])
+        var text = (match[3] || match[7] || match[10] || match[12] || match[15])
         rawOffset -= text.length
         text = text.replace(/^\s+|\s+$/g, '')
         rawOffset += text.length
@@ -1450,6 +1450,22 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= match[0] - text.length
+        } else if (match[12]) { // bold
+          newText.push(match[11] + text + match[13])
+          entities.push({
+            _: 'messageEntityBold',
+            offset: matchIndex + match[11].length,
+            length: text.length
+          })
+          rawOffset -= 2
+        } else if (match[15]) { // italic
+          newText.push(match[14] + text + match[16])
+          entities.push({
+            _: 'messageEntityItalic',
+            offset: matchIndex + match[14].length,
+            length: text.length
+          })
+          rawOffset -= 2
         }
         raw = raw.substr(match.index + match[0].length)
         rawOffset += match.index + match[0].length
