@@ -81,11 +81,11 @@ To run this application in Google Chrome as a packaged app, open this URL (in Ch
 Run `gulp watch` to watch for file changes and automatically rebuild the app.
 
 
-#### Running as Firefox OS App
+<!-- #### Running as Firefox OS App
 
 To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or hit `Shift + F8`). Choose "Open packaged app" from the Project menu and select the `app` folder.
 
-Run `gulp watch` to watch for file changes and automatically rebuild the app.
+Run `gulp watch` to watch for file changes and automatically rebuild the app. -->
 
 #### Running in production
 
