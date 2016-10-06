@@ -363,7 +363,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           if (location.sticker && !WebpManager.isWebpSupported()) {
             ext += '.png'
           }
-          return fileName[0] + '_' + location.id + '.' + ext
+          var versionPart = location.version ? ('v' + location.version) : ''
+          return fileName[0] + '_' + location.id + versionPart + '.' + ext
 
         default:
           if (!location.volume_id) {

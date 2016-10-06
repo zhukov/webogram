@@ -1068,9 +1068,9 @@ angular.module('izhukov.utils', [])
         }, 10)
       }
 
-      var debounceTimeout = $rootScope.idle.initial ? 0 : 1000;
+      var debounceTimeout = $rootScope.idle.initial ? 0 : 1000
       if (e && !e.fake_initial) {
-        delete $rootScope.idle.initial;
+        delete $rootScope.idle.initial
       }
 
       $timeout.cancel(debouncePromise)

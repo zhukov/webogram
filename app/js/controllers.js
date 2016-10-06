@@ -171,7 +171,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.sendCode = function () {
       $timeout.cancel(nextTimeout)
 
-      var fullPhone = ($scope.credentials.phone_country || '') + ($scope.credentials.phone_number || '');
+      var fullPhone = ($scope.credentials.phone_country || '') + ($scope.credentials.phone_number || '')
       var badPhone = !fullPhone.match(/^[\d\-+\s]+$/);
       if (!badPhone) {
         fullPhone = fullPhone.replace(/\D/g, '');
@@ -3166,8 +3166,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       ErrorService.confirm({type: 'PHOTO_DELETE'}).then(function () {
         if (myUser && myUser.photo && myUser.photo.photo_id == photoID) {
           MtpApiManager.invokeApi('photos.updateProfilePhoto', {
-            id: {_: 'inputPhotoEmpty'},
-            crop: {_: 'inputPhotoCropAuto'}
+            id: {_: 'inputPhotoEmpty'}
           }).then(function (updateResult) {
             ApiUpdatesManager.processUpdateMessage({
               _: 'updateShort',
@@ -3346,6 +3345,36 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppMessagesManager.deleteMessages([messageID])
       })
     }
+  })
+
+  .controller('GameModalController', function ($q, $scope, $rootScope, $modalInstance, AppPhotosManager, AppMessagesManager, AppPeersManager, AppGamesManager, PeersSelectService, ErrorService) {
+
+    $scope.game = AppGamesManager.wrapForFull($scope.gameID, $scope.messageID, $scope.embedUrl)
+    var messageID = $scope.messageID
+
+    var message = AppMessagesManager.getMessage(messageID)
+    $scope.botID = message.viaBotID || message.fromID
+
+    $scope.nav = {}
+
+    $scope.forward = function (withMyScore) {
+      PeersSelectService.selectPeer({canSend: true, confirm_type: 'INVITE_TO_GAME'}).then(function (peerString) {
+        var peerID = AppPeersManager.getPeerID(peerString)
+        AppMessagesManager.forwardMessages(peerID, [messageID], {
+          withMyScore: withMyScore
+        }).then(function () {
+          $rootScope.$broadcast('history_focus', {
+            peerString: peerString
+          })
+        })
+      })
+    }
+
+    $scope.$on('game_frame_event', function (e, eventData) {
+      if (eventData.eventType == 'share_score') {
+        $scope.forward(true)
+      }
+    })
   })
 
   .controller('UserModalController', function ($scope, $location, $rootScope, $modalInstance, AppProfileManager, $modal, AppUsersManager, MtpApiManager, NotificationsManager, AppPhotosManager, AppMessagesManager, AppPeersManager, PeersSelectService, ErrorService) {
@@ -3597,8 +3626,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           chat_id: AppChatsManager.getChatInput($scope.chatID),
           photo: {
             _: 'inputChatUploadedPhoto',
-            file: inputFile,
-            crop: {_: 'inputPhotoCropAuto'}
+            file: inputFile
           }
         }).then(onChatUpdated)
       })['finally'](function () {
@@ -3753,8 +3781,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           channel: AppChatsManager.getChannelInput($scope.chatID),
           photo: {
             _: 'inputChatUploadedPhoto',
-            file: inputFile,
-            crop: {_: 'inputPhotoCropAuto'}
+            file: inputFile
           }
         }).then(onChatUpdated)
       })['finally'](function () {
@@ -3876,8 +3903,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         MtpApiManager.invokeApi('photos.uploadProfilePhoto', {
           file: inputFile,
           caption: '',
-          geo_point: {_: 'inputGeoPointEmpty'},
-          crop: {_: 'inputPhotoCropAuto'}
+          geo_point: {_: 'inputGeoPointEmpty'}
         }).then(function (updateResult) {
           AppUsersManager.saveApiUsers(updateResult.users)
           MtpApiManager.getUserID().then(function (id) {
@@ -3905,8 +3931,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.deletePhoto = function () {
       $scope.photo.updating = true
       MtpApiManager.invokeApi('photos.updateProfilePhoto', {
-        id: {_: 'inputPhotoEmpty'},
-        crop: {_: 'inputPhotoCropAuto'}
+        id: {_: 'inputPhotoEmpty'}
       }).then(function (updateResult) {
         MtpApiManager.getUserID().then(function (id) {
           ApiUpdatesManager.processUpdateMessage({

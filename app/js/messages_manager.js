@@ -9,7 +9,7 @@
 
 angular.module('myApp.services')
 
-  .service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppDocsManager, AppStickersManager, AppMessagesIDsManager, DraftsManager, AppWebPagesManager, MtpApiManager, MtpApiFileManager, ServerTimeManager, RichTextProcessor, NotificationsManager, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
+  .service('AppMessagesManager', function ($q, $rootScope, $location, $filter, $timeout, $sce, ApiUpdatesManager, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, AppDocsManager, AppStickersManager, AppMessagesIDsManager, DraftsManager, AppWebPagesManager, AppGamesManager, MtpApiManager, MtpApiFileManager, ServerTimeManager, RichTextProcessor, NotificationsManager, Storage, AppProfileManager, TelegramMeWebService, ErrorService, StatusManager, _) {
     var messagesStorage = {}
     var messagesForHistory = {}
     var messagesForDialogs = {}
@@ -43,6 +43,7 @@ angular.module('myApp.services')
 
     var dateOrTimeFilter = $filter('dateOrTime')
     var fwdMessagesPluralize = _.pluralize('conversation_forwarded_X_messages')
+    var gameScorePluralize = _.pluralize('conversation_scored_X')
 
     NotificationsManager.start()
 
@@ -1183,6 +1184,10 @@ angular.module('myApp.services')
             case 'messageMediaWebPage':
               AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.mid, mediaContext)
               break
+            case 'messageMediaGame':
+              AppGamesManager.saveGame(apiMessage.media.game, apiMessage.mid, mediaContext)
+              apiMessage.media.handleMessage = true
+              break
           }
         }
         if (apiMessage.action) {
@@ -1571,7 +1576,7 @@ angular.module('myApp.services')
             var inputMedia
             switch (attachType) {
               case 'photo':
-                inputMedia = {_: 'inputMediaUploadedPhoto', file: inputFile}
+                inputMedia = {_: 'inputMediaUploadedPhoto', flags: 0, file: inputFile}
                 break
 
               case 'document':
@@ -1832,8 +1837,9 @@ angular.module('myApp.services')
       pendingByRandomID[randomIDS] = [peerID, messageID]
     }
 
-    function forwardMessages (peerID, mids) {
+    function forwardMessages (peerID, mids, options) {
       mids = mids.sort()
+      options = options || {}
 
       var flags = 0
       var isChannel = AppPeersManager.isChannel(peerID)
@@ -1842,6 +1848,9 @@ angular.module('myApp.services')
 
       if (asChannel) {
         flags |= 16
+      }
+      if (options.withMyScore) {
+        flags |= 256
       }
 
       var splitted = AppMessagesIDsManager.splitMessageIDsByChannels(mids)
@@ -1924,6 +1933,21 @@ angular.module('myApp.services')
       }
 
       return sendText(peerID, '/start')
+    }
+
+    function shareGame (botID, peerID, inputGame) {
+      var randomID = bigint(nextRandomInt(0xFFFFFFFF)).shiftLeft(32).add(bigint(nextRandomInt(0xFFFFFFFF))).toString()
+      return MtpApiManager.invokeApi('messages.sendMedia', {
+        flags: 0,
+        peer: AppPeersManager.getInputPeerByID(peerID),
+        media: {
+          _: 'inputMediaGame',
+          id: inputGame
+        },
+        random_id: randomID
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates)
+      })
     }
 
     function cancelPendingMessage (randomID) {
@@ -2148,6 +2172,10 @@ angular.module('myApp.services')
             }
             message.media.webpage = AppWebPagesManager.wrapForHistory(message.media.webpage.id)
             break
+
+          case 'messageMediaGame':
+            message.media.game = AppGamesManager.wrapForHistory(message.media.game.id)
+            break
         }
       }
       else if (message.action) {
@@ -2202,6 +2230,29 @@ angular.module('myApp.services')
         })
       })
       return replyMarkup
+    }
+
+    function wrapMessageText(msgID) {
+      var message = getMessage(msgID)
+      var fromUser = message.from_id && AppUsersManager.getUser(message.from_id)
+      var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false
+      var toPeerID = AppPeersManager.getPeerID(message.to_id)
+      var withBot = (fromBot ||
+        toPeerID < 0 && !(AppChatsManager.isChannel(-toPeerID) && !AppChatsManager.isMegagroup(-toPeerID)) ||
+        toPeerID > 0 && AppUsersManager.isBot(toPeerID))
+
+      var options = {
+        noCommands: !withBot,
+        fromBot: fromBot,
+        entities: message.totalEntities
+      }
+      if (message.pFlags.mentioned) {
+        var user = AppUsersManager.getSelf()
+        if (user) {
+          options.highlightUsername = user.username
+        }
+      }
+      return RichTextProcessor.wrapRichText(message.message, options)
     }
 
     function fetchSingleMessages () {
@@ -2452,31 +2503,41 @@ angular.module('myApp.services')
           notificationMessage = RichTextProcessor.wrapPlainText(message.message)
         }
       } else if (message.media) {
+        var captionEmoji = false;
         switch (message.media._) {
           case 'messageMediaPhoto':
             notificationMessage = _('conversation_media_photo_raw')
+            captionEmoji = '🖼'
             break
           case 'messageMediaDocument':
             switch (message.media.document.type) {
               case 'gif':
                 notificationMessage = _('conversation_media_gif_raw')
+                captionEmoji = '🎬'
                 break
               case 'sticker':
-                notificationMessage = _('conversation_media_sticker')
                 var stickerEmoji = message.media.document.stickerEmojiRaw
                 if (stickerEmoji !== undefined) {
                   notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' ' + notificationMessage
+                } else {
+                  notificationMessage = _('conversation_media_sticker')
                 }
                 break
               case 'video':
                 notificationMessage = _('conversation_media_video_raw')
+                captionEmoji = '📹'
                 break
               case 'voice':
               case 'audio':
                 notificationMessage = _('conversation_media_audio_raw')
                 break
               default:
-                notificationMessage = message.media.document.file_name || _('conversation_media_document_raw')
+                if (message.media.document.file_name) {
+                  notificationMessage = RichTextProcessor.wrapPlainText('📎 ' + message.media.document.file_name)
+                } else {
+                  notificationMessage = _('conversation_media_document_raw')
+                  captionEmoji = '📎'
+                }
                 break
             }
             break
@@ -2484,13 +2545,22 @@ angular.module('myApp.services')
           case 'messageMediaGeo':
           case 'messageMediaVenue':
             notificationMessage = _('conversation_media_location_raw')
+            captionEmoji = '📍'
             break
           case 'messageMediaContact':
             notificationMessage = _('conversation_media_contact_raw')
             break
+          case 'messageMediaGame':
+            notificationMessage = RichTextProcessor.wrapPlainText('🎮 ' + message.media.game.title)
+            break
           default:
             notificationMessage = _('conversation_media_attachment_raw')
             break
+        }
+
+        if (captionEmoji !== false &&
+            message.media.caption) {
+          notificationMessage = RichTextProcessor.wrapPlainText(captionEmoji + ' ' + message.media.caption)
         }
       } else if (message._ == 'messageService') {
         switch (message.action._) {
@@ -2536,6 +2606,12 @@ angular.module('myApp.services')
             break
           case 'messageActionChannelDeletePhoto':
             notificationMessage = _('conversation_removed_channel_photo_raw')
+            break
+          case 'messageActionPinMessage':
+            notificationMessage = _('conversation_pinned_message_raw')
+            break
+          case 'messageActionGameScore':
+            notificationMessage = gameScorePluralize(message.action.score)
             break
         }
       }
@@ -3169,6 +3245,7 @@ angular.module('myApp.services')
       sendOther: sendOther,
       forwardMessages: forwardMessages,
       startBot: startBot,
+      shareGame: shareGame,
       convertMigratedPeer: convertMigratedPeer,
       getMessagePeer: getMessagePeer,
       getMessageThumb: getMessageThumb,
@@ -3178,6 +3255,7 @@ angular.module('myApp.services')
       wrapForHistory: wrapForHistory,
       wrapReplyMarkup: wrapReplyMarkup,
       wrapSingleMessage: wrapSingleMessage,
+      wrapMessageText: wrapMessageText,
       regroupWrappedHistory: regroupWrappedHistory
     }
   })

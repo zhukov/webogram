@@ -48,8 +48,10 @@
     </a>
 
     <a ng-switch-default class="inline_result_article clearfix" data-inlineid="{{result.qID}}">
-      <div class="inline_article_thumb_wrap pull-left" ng-switch="result.thumbUrl !== undefined ? 'thumb' : (result.send_message.geo ? 'geo' : false)">
-        <img ng-switch-when="thumb" class="inline_article_thumb" ng-src="{{result.thumbUrl}}"/>
+      <div class="inline_article_thumb_wrap pull-left" ng-switch="result.thumb !== undefined ? 'thumb' : (result.thumbUrl !== undefined ? 'thumbHttp' : (result.send_message.geo ? 'geo' : false))">
+        <img ng-switch-when="thumb" class="inline_article_thumb" my-load-thumb
+          thumb="result.thumb"/>
+        <img ng-switch-when="thumbHttp" class="inline_article_thumb" ng-src="{{result.thumbUrl}}"/>
         <img
           ng-switch-when="geo"
           class="inline_article_thumb"

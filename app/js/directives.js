@@ -187,31 +187,13 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function updateMessageText ($scope, element, message) {
-      if (typeof message.message !== 'string' ||
+      if (message.media && message.media.handleMessage ||
+          typeof message.message !== 'string' ||
         !message.message.length) {
         $('.im_message_text', element).hide()
         return
       }
-      var fromUser = message.from_id && AppUsersManager.getUser(message.from_id)
-      var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false
-      var toPeerID = AppPeersManager.getPeerID(message.to_id)
-      var withBot = (fromBot ||
-        toPeerID < 0 && !(AppChatsManager.isChannel(-toPeerID) && !AppChatsManager.isMegagroup(-toPeerID)) ||
-        toPeerID > 0 && AppUsersManager.isBot(toPeerID))
-
-      var options = {
-        noCommands: !withBot,
-        fromBot: fromBot,
-        entities: message.totalEntities
-      }
-      if (message.pFlags.mentioned) {
-        var user = AppUsersManager.getSelf()
-        if (user) {
-          options.highlightUsername = user.username
-        }
-      }
-      var html = RichTextProcessor.wrapRichText(message.message, options)
-
+      var html = AppMessagesManager.wrapMessageText(message.id)
       $('.im_message_text', element).html(html.valueOf())
     }
 
@@ -263,6 +245,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             break
           case 'keyboardButtonCallback':
             AppInlineBotsManager.callbackButtonClick(message.mid, button)
+            break
+          case 'keyboardButtonGame':
+            AppInlineBotsManager.gameButtonClick(message.mid)
             break
         }
       })
@@ -455,6 +440,40 @@ angular.module('myApp.directives', ['myApp.filters'])
             $scope.$emit('ui_height')
           }
         })
+      }
+    }
+  })
+  .directive('myMessageGame', function (AppInlineBotsManager, AppMessagesManager) {
+    return {
+      scope: {
+        'media': '=myMessageGame',
+        'messageId': '=messageId'
+      },
+      templateUrl: templateUrl('message_attach_game'),
+      link: function ($scope, element) {
+        $scope.openGame = function () {
+          AppInlineBotsManager.gameButtonClick($scope.messageId)
+        }
+
+        function updateMessageText(argument) {
+          var message = AppMessagesManager.getMessage($scope.messageId)
+          if (message.message) {
+            var html = AppMessagesManager.wrapMessageText($scope.messageId)
+            $('.im_message_game_message', element).html(html.valueOf()).show()
+            $('.im_message_game_description', element).hide()
+          } else {
+            $('.im_message_game_message', element).html('').hide()
+            $('.im_message_game_description', element).show()
+          }
+        }
+
+        $scope.$on('message_edit', function (e, data) {
+          if (data.mid == $scope.messageId) {
+            updateMessageText()
+          }
+        })
+
+        updateMessageText()
       }
     }
   })
@@ -2112,6 +2131,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         access_hash: $scope.document.access_hash,
         dc_id: $scope.document.dc_id,
         file_name: $scope.document.file_name,
+        version: $scope.document.version,
         sticker: true
       }
 
@@ -3415,9 +3435,67 @@ angular.module('myApp.directives', ['myApp.filters'])
                 size: photoSize.size
               }
             }
+            if (result.type == 'game' && result.photo) {
+              var photoSize = AppPhotosManager.choosePhotoSize(result.photo, 100, 100)
+              // var dim = calcImageInBox(photoSize.w, photoSize.h, result.thumbW, result.thumbH)
+              result.thumb = {
+                // width: dim.w,
+                // height: dim.h,
+                location: photoSize.location,
+                size: photoSize.size
+              }
+            }
           })
         })
       }
+    }
+  })
+
+  .directive('myGameCommunication', function ($window) {
+    function link ($scope, element, attrs) {
+      onContentLoaded(function () {
+        var iframe = $('iframe, webview', element)[0]
+        var contentWindow = iframe.contentWindow
+        var handler = function (event) {
+          event = event.originalEvent || event
+          if (event.source && event.source != contentWindow) {
+            return
+          }
+          var data = event.data
+          try {
+            var dataParsed = JSON.parse(data)
+          } catch (e) {
+            return
+          }
+          if (!dataParsed || !dataParsed.eventType) {
+            return
+          }
+          $scope.$emit('game_frame_event', dataParsed);
+        }
+
+        $($window).on('message', handler)
+
+        $scope.$on('$destroy', function () {
+          $($window).off('message', handler)
+        })
+      })
+    }
+
+    return {
+      link: link
+    }
+  })
+
+  .directive('myEmojiImage', function (RichTextProcessor) {
+
+    function link ($scope, element, attrs) {
+      var emoji = attrs.myEmojiImage
+      var html = RichTextProcessor.wrapRichText(emoji, {noLinks: true, noLinebreaks: true})
+      element.html(html.valueOf())
+    }
+
+    return {
+      link: link
     }
   })
 

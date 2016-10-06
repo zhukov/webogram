@@ -1748,6 +1748,98 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
+  .service('AppGamesManager', function ($modal, $sce, $window, $rootScope, MtpApiManager, AppPhotosManager, AppDocsManager, RichTextProcessor) {
+    var games = {}
+
+    function saveGame (apiGame, messageID, mediaContext) {
+      if (apiGame.photo && apiGame.photo._ === 'photo') {
+        AppPhotosManager.savePhoto(apiGame.photo, mediaContext)
+      } else {
+        delete apiGame.photo
+      }
+      if (apiGame.document && apiGame.document._ === 'document') {
+        AppDocsManager.saveDoc(apiGame.document, mediaContext)
+      } else {
+        delete apiGame.document
+      }
+
+      apiGame.rTitle = RichTextProcessor.wrapRichText(apiGame.title, {noLinks: true, noLinebreaks: true})
+      apiGame.rDescription = RichTextProcessor.wrapRichText(
+        apiGame.description || '', {}
+      )
+
+      if (games[apiGame.id] === undefined) {
+        games[apiGame.id] = apiGame
+      } else {
+        safeReplaceObject(games[apiGame.id], apiGame)
+      }
+    }
+
+    function openGame (gameID, messageID, embedUrl) {
+      var scope = $rootScope.$new(true)
+
+      scope.gameID = gameID
+      scope.messageID = messageID
+      scope.embedUrl = embedUrl
+
+      $modal.open({
+        templateUrl: templateUrl('game_modal'),
+        windowTemplateUrl: templateUrl('media_modal_layout'),
+        controller: 'GameModalController',
+        scope: scope,
+        windowClass: 'photo_modal_window'
+      })
+    }
+
+    function wrapForHistory (gameID) {
+      var game = angular.copy(games[gameID]) || {_: 'gameEmpty'}
+
+      if (game.photo && game.photo.id) {
+        game.photo = AppPhotosManager.wrapForHistory(game.photo.id)
+      }
+      if (game.document && game.document.id) {
+        game.document = AppDocsManager.wrapForHistory(game.document.id)
+      }
+
+      return game
+    }
+
+    function wrapForFull (gameID, msgID, embedUrl) {
+      var game = wrapForHistory(gameID)
+
+      var fullWidth = $(window).width() - (Config.Mobile ? 0 : 10)
+      var fullHeight = $($window).height() - (Config.Mobile ? 92 : 150)
+
+      if (!Config.Mobile && fullWidth > 800) {
+        fullWidth -= 208
+      }
+
+      var full = {
+        width: fullWidth,
+        height: fullHeight
+      }
+
+      var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe'
+
+      var embedType = 'text/html'
+
+      var embedHtml = '<' + embedTag + ' src="' + encodeEntities(embedUrl) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '" style="width: ' + full.width + 'px; height: ' + full.height + 'px;"></' + embedTag + '>'
+
+      full.html = $sce.trustAs('html', embedHtml)
+
+      game.full = full
+
+      return game
+    }
+
+    return {
+      saveGame: saveGame,
+      openGame: openGame,
+      wrapForFull: wrapForFull,
+      wrapForHistory: wrapForHistory
+    }
+  })
+
   .service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, $timeout, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
     var docs = {}
     var docsForHistory = {}
@@ -1940,6 +2032,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         _: 'inputDocumentFileLocation',
         id: docID,
         access_hash: doc.access_hash,
+        version: doc.version,
         file_name: getFileName(doc)
       }
 
@@ -1959,6 +2052,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         _: 'inputDocumentFileLocation',
         id: docID,
         access_hash: doc.access_hash,
+        version: doc.version,
         file_name: getFileName(doc)
       }
 
@@ -2118,6 +2212,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           case 'updateNewStickerSet':
             var fullSet = update.stickerset
             var set = fullSet.set
+            if (set.pFlags.masks) {
+              return false
+            }
             var pos = false
             for (var i = 0, len = stickers.sets.length; i < len; i++) {
               if (stickers.sets[i].id == set.id) {
@@ -2147,6 +2244,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             break
 
           case 'updateStickerSetsOrder':
+            if (update.pFlags.masks) {
+              return
+            }
             var order = update.order
             stickers.sets.sort(function (a, b) {
               return order.indexOf(a.id) - order.indexOf(b.id)
@@ -2397,7 +2497,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
+  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, AppGamesManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
     var inlineResults = {}
 
     return {
@@ -2409,7 +2509,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       switchToPM: switchToPM,
       checkSwitchReturn: checkSwitchReturn,
       switchInlineButtonClick: switchInlineButtonClick,
-      callbackButtonClick: callbackButtonClick
+      callbackButtonClick: callbackButtonClick,
+      gameButtonClick: gameButtonClick
     }
 
     function getPopularBots () {
@@ -2650,6 +2751,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function switchInlineButtonClick (id, button) {
       var message = AppMessagesManager.getMessage(id)
       var botID = message.viaBotID || message.fromID
+      if (button.pFlags && button.pFlags.same_peer) {
+        var peerID = AppMessagesManager.getMessagePeer(message)
+        var toPeerString = AppPeersManager.getPeerString(peerID)
+        switchInlineQuery(botID, toPeerString, button.query)
+        return
+      }
       return checkSwitchReturn(botID).then(function (retPeerString) {
         if (retPeerString) {
           return switchInlineQuery(botID, retPeerString, button.query)
@@ -2668,29 +2775,60 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var peerID = AppMessagesManager.getMessagePeer(message)
 
       return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+        flags: 1,
         peer: AppPeersManager.getInputPeerByID(peerID),
         msg_id: AppMessagesIDsManager.getMessageLocalID(id),
         data: button.data
       }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function (callbackAnswer) {
-        if (typeof callbackAnswer.message != 'string' ||
-          !callbackAnswer.message.length) {
-          return
+        if (typeof callbackAnswer.message === 'string' &&
+            callbackAnswer.message.length) {
+          showCallbackMessage(callbackAnswer.message, callbackAnswer.pFlags.alert)
         }
-        var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true})
-        if (callbackAnswer.pFlags.alert) {
-          ErrorService.show({
-            title_html: html,
-            alert: true
-          })
-        } else {
-          toaster.pop({
-            type: 'info',
-            body: html.valueOf(),
-            bodyOutputType: 'trustedHtml',
-            showCloseButton: false
-          })
+        else if (typeof callbackAnswer.url === 'string') {
+          LocationParamsService.openUrl(callbackAnswer.url)
         }
       })
+    }
+
+    function gameButtonClick (id) {
+      console.trace()
+      var message = AppMessagesManager.getMessage(id)
+      var peerID = AppMessagesManager.getMessagePeer(message)
+
+      return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+        flags: 2,
+        peer: AppPeersManager.getInputPeerByID(peerID),
+        msg_id: AppMessagesIDsManager.getMessageLocalID(id)
+      }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function (callbackAnswer) {
+        if (typeof callbackAnswer.message === 'string' &&
+            callbackAnswer.message.length) {
+          showCallbackMessage(callbackAnswer.message, callbackAnswer.pFlags.alert)
+        }
+        else if (typeof callbackAnswer.url === 'string') {
+          AppGamesManager.openGame(message.media.game.id, id, callbackAnswer.url)
+        }
+      })
+    }
+
+    function showCallbackMessage(message, isAlert) {
+      if (typeof message != 'string' ||
+        !message.length) {
+        return
+      }
+      var html = RichTextProcessor.wrapRichText(message, {noLinks: true, noLinebreaks: true})
+      if (isAlert) {
+        ErrorService.show({
+          title_html: html,
+          alert: true
+        })
+      } else {
+        toaster.pop({
+          type: 'info',
+          body: html.valueOf(),
+          bodyOutputType: 'trustedHtml',
+          showCloseButton: false
+        })
+      }
     }
 
     function sendInlineResult (peerID, qID, options) {
@@ -4216,16 +4354,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function handleTgProtoAddr (url, inner) {
       var matches
 
-      if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup|post)=(.+))?$/)) {
+      if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup|post|game)=(.+))?$/)) {
         AppPeersManager.resolveUsername(matches[1]).then(function (peerID) {
-          if (peerID > 0 && AppUsersManager.isBot(peerID) && matches[2] == 'startgroup') {
+          if (peerID > 0 && AppUsersManager.isBot(peerID) &&
+              (matches[2] == 'startgroup' || matches[2] == 'game')) {
+            var isStartGroup = matches[2] == 'startgroup'
             PeersSelectService.selectPeer({
-              confirm_type: 'INVITE_TO_GROUP',
-              noUsers: true
+              confirm_type: isStartGroup ? 'INVITE_TO_GROUP' : 'INVITE_TO_GAME',
+              noUsers: isStartGroup
             }).then(function (toPeerString) {
               var toPeerID = AppPeersManager.getPeerID(toPeerString)
-              var toChatID = toPeerID < 0 ? -toPeerID : 0
-              AppMessagesManager.startBot(peerID, toChatID, matches[3]).then(function () {
+              var sendPromise
+              if (isStartGroup) {
+                var toChatID = toPeerID < 0 ? -toPeerID : 0
+                sendPromise = AppMessagesManager.startBot(peerID, toChatID, matches[3])
+              } else {
+                inputGame = {
+                  _: 'inputGameShortName',
+                  bot_id: AppUsersManager.getUserInput(peerID),
+                  short_name: matches[3]
+                }
+                sendPromise = AppMessagesManager.shareGame(peerID, toPeerID, inputGame)
+              }
+              sendPromise.then(function () {
                 $rootScope.$broadcast('history_focus', {peerString: toPeerString})
               })
             })
@@ -4403,6 +4554,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       checkLocationTgAddr()
     }
 
+    function openUrl(url) {
+      var match = url.match(tgAddrRegExp)
+      if (match) {
+        if (handleTgProtoAddr(match[3], true)) {
+          return true
+        }
+      }
+      var wnd = window.open(url, '_blank')
+      return wnd ? true : false
+    }
+
     function shareUrl (url, text, shareLink) {
       var options = {}
       if (shareLink) {
@@ -4468,7 +4630,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     return {
       start: start,
-      shareUrl: shareUrl
+      shareUrl: shareUrl,
+      openUrl: openUrl
     }
   })
 
