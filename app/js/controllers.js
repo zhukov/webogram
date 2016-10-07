@@ -782,12 +782,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       deleteDialog(dialog.peerID)
     })
 
-    $scope.$on('draft_updated', function (e, draftUpdate) {
+    $scope.$on('dialog_draft', function (e, draftUpdate) {
       var curDialog, i
       for (i = 0; i < $scope.dialogs.length; i++) {
         curDialog = $scope.dialogs[i]
         if (curDialog.peerID == draftUpdate.peerID) {
           curDialog.draft = draftUpdate.draft
+          if (draftUpdate.index) {
+            curDialog.index = draftUpdate.index
+          }
           if (i > 0 && draftUpdate.draft) {
             $scope.dialogs.splice(i, 1)
             $scope.dialogs.unshift(curDialog)

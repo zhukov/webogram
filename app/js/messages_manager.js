@@ -3156,23 +3156,6 @@ angular.module('myApp.services')
             })
           }
           break
-
-        case 'updateDraftMessage':
-          var peerID = AppPeersManager.getPeerID(update.peer)
-          var draft = DraftsManager.saveDraft(peerID, update.draft)
-
-          var dialog = getDialogByPeerID(peerID)[0]
-          if (dialog) {
-            if (dialog && draft && draft.date) {
-              dialog.index = generateDialogIndex(draft.date)
-              pushDialogToStorage(dialog)
-            }
-            $rootScope.$broadcast('dialog_draft', {
-              peerID: peerID,
-              draft: draft
-            })
-          }
-          break
       }
     })
 
@@ -3236,10 +3219,16 @@ angular.module('myApp.services')
 
       var dialog = getDialogByPeerID(peerID)[0]
       if (dialog) {
+        var newIndex
         if (dialog && draft && draft.date) {
-          dialog.index = generateDialogIndex(draft.date)
+          newIndex = dialog.index = generateDialogIndex(draft.date)
           pushDialogToStorage(dialog)
         }
+        $rootScope.$broadcast('dialog_draft', {
+          peerID: peerID,
+          draft: draft,
+          index: dialog && dialog.index
+        })
       }
     })
 
