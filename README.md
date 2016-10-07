@@ -80,13 +80,6 @@ To run this application in Google Chrome as a packaged app, open this URL (in Ch
 
 Run `gulp watch` to watch for file changes and automatically rebuild the app.
 
-
-<!-- #### Running as Firefox OS App
-
-To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or hit `Shift + F8`). Choose "Open packaged app" from the Project menu and select the `app` folder.
-
-Run `gulp watch` to watch for file changes and automatically rebuild the app. -->
-
 #### Running in production
 
 Run `gulp clean`, then `gulp publish` to build the minimized production version of the app. Copy `dist` folder contents to your web server. Don't forget to set `X-Frame-Options SAMEORIGIN` header ([docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)).
