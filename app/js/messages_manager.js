@@ -1429,6 +1429,13 @@ angular.module('myApp.services')
               }]
             }
           }
+          else if (updates.updates) {
+            angular.forEach(updates.updates, function (update) {
+              if (update._ == 'updateDraftMessage') {
+                update.local = true
+              }
+            })
+          }
           ApiUpdatesManager.processUpdateMessage(updates)
         }, function (error) {
           toggleError(true)
@@ -1450,14 +1457,9 @@ angular.module('myApp.services')
       //   message.send()
       // }, 5000)
 
-      ApiUpdatesManager.processUpdateMessage({
-        _: 'updateShort',
-        update: {
-          _: 'updateDraftMessage',
-          peer: AppPeersManager.getOutputPeer(peerID),
-          draft: {_: 'draftMessageEmpty'}
-        }
-      })
+      if (options.clearDraft) {
+        DraftsManager.clearDraft(peerID)
+      }
 
       pendingByRandomID[randomIDS] = [peerID, messageID]
     }
@@ -1817,6 +1819,13 @@ angular.module('myApp.services')
           }, sentRequestOptions)
         }
         apiPromise.then(function (updates) {
+          if (updates.updates) {
+            angular.forEach(updates.updates, function (update) {
+              if (update._ == 'updateDraftMessage') {
+                update.local = true
+              }
+            })
+          }
           ApiUpdatesManager.processUpdateMessage(updates)
         }, function (error) {
           toggleError(true)
@@ -1833,6 +1842,10 @@ angular.module('myApp.services')
       $rootScope.$broadcast('history_append', {peerID: peerID, messageID: messageID, my: true})
 
       setZeroTimeout(message.send)
+
+      if (options.clearDraft) {
+        DraftsManager.clearDraft(peerID)
+      }
 
       pendingByRandomID[randomIDS] = [peerID, messageID]
     }

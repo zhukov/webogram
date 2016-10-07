@@ -321,17 +321,7 @@ angular.module('myApp.directives')
         }
       }
 
-      function updateBottomizer () {
-        return
-        $(historyMessagesEl).css({marginTop: 0})
-        var marginTop = scrollableWrap.offsetHeight
-          - historyMessagesEl.offsetHeight
-          - 20
-
-        if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
-          $(historyMessagesEl).css({marginTop: marginTop})
-        }
-      }
+      function updateBottomizer () {}
 
       $($window).on('resize', updateSizes)
 

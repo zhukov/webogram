@@ -2258,14 +2258,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           do {
             AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096), options)
             text = text.substr(4096)
+            options = angular.copy(options)
+            delete options.clearDraft
           } while (text.length)
         }
         fwdsSend()
 
         if (forceDraft == $scope.curDialog.peer) {
           forceDraft = false
-        } else {
-          DraftsManager.changeDraft($scope.curDialog.peerID)
         }
 
         resetDraft()
@@ -2430,7 +2430,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function applyDraftAttachment (e, attachment) {
-      console.log('apply draft attach', attachment)
+      console.log(dT(), 'apply draft attach', attachment)
       if (!attachment || !attachment._) {
         return
       }
@@ -2452,6 +2452,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }, 1000)
       }
       else if (attachment._ == 'fwd_messages') {
+        forceDraft = $scope.curDialog.peer
         $timeout(function () {
           $scope.draftMessage.fwdMessages = attachment.id
           $scope.$broadcast('ui_peer_reply')
@@ -2726,7 +2727,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_message_send')
 
         fwdsSend()
-        resetDraft()
+        replyClear(true)
       }
       delete $scope.draftMessage.sticker
     }
@@ -2735,7 +2736,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (!command) {
         return
       }
-      AppMessagesManager.sendText($scope.curDialog.peerID, command)
+      AppMessagesManager.sendText($scope.curDialog.peerID, command, {
+        clearDraft: true
+      })
+
+      if (forceDraft == $scope.curDialog.peer) {
+        forceDraft = false
+      }
+
+      fwdsSend()
       resetDraft()
       delete $scope.draftMessage.sticker
       delete $scope.draftMessage.text
@@ -2764,8 +2773,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       if (forceDraft == $scope.curDialog.peer) {
         forceDraft = false
-      } else {
-        DraftsManager.changeDraft($scope.curDialog.peerID)
       }
 
       fwdsSend()

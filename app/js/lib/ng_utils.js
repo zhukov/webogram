@@ -76,8 +76,10 @@ angular.module('izhukov.utils', [])
         return fileWriteData(fileWriter, fromFileEntry).then(function () {
           return fileWriter
         }, function (error) {
+          try {
+            fileWriter.truncate(0)
+          } catch (e) {}
           return $q.reject(error)
-          fileWriter.truncate(0)
         })
       })
     }
