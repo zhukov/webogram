@@ -193,7 +193,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         $('.im_message_text', element).hide()
         return
       }
-      var html = AppMessagesManager.wrapMessageText(message.id)
+      var html = AppMessagesManager.wrapMessageText(message.mid)
       $('.im_message_text', element).html(html.valueOf())
     }
 
