@@ -41,7 +41,7 @@
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
 
         <div class="md_modal_section_param_wrap">
-          <div class="md_modal_section_param_value" ng-bind="profile.phone | phoneNumber"></div>
+          <a class="md_modal_section_param_value" ng-click="changePhone()" ng-bind="profile.phone | phoneNumber"></a>
           <div class="md_modal_section_param_name" my-i18n="user_modal_phone"></div>
         </div>
 

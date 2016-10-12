@@ -1,0 +1,53 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <form class="modal_simple_form">
+
+      <h4>Change Phone Number</h4>
+
+      <div ng-hide="phoneCodeSent">
+        <div class="modal_description">
+          From here, you can change your Telegram phone number. Right now, it's <strong>+{{ profile.phone }}</strong>.
+          <br/><br/>
+        </div>
+
+        <div class="login_phone_groups_wrap clearfix">
+
+          <div class="md-input-group login_phone_code_input_group" ng-class="{'md-input-error': error.field == 'phone'}" my-labeled-input>
+            <label class="md-input-label" my-i18n="login_code_input_placeholder"></label>
+            <input autocomplete="off" class="md-input" my-focused name="phone_country" type="tel" ng-model="credentials.phone_country" />
+          </div>
+
+          <div class="md-input-group login_phone_num_input_group" ng-class="{'md-input-error': error.field == 'phone'}" my-labeled-input ng-switch="error.field == 'phone'">
+            <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_number"></label>
+            <label ng-switch-default class="md-input-label" my-i18n="login_tel_input_placeholder"></label>
+            <input required autocomplete="off" my-submit-on-enter class="md-input" my-focus-on="country_selected" name="phone_number" type="tel" ng-model="credentials.phone_number" />
+          </div>
+
+        </div>
+      </div>
+
+      <div ng-show="phoneCodeSent">
+        <div class="modal_description">
+          We have sent an SMS with a code to your new phone number. Enter it below.
+          <br/><br/>
+        </div>
+
+        <div class="md-input-group" my-labeled-input>
+          <label class="md-input-label">Code</label>
+          <input class="md-input" type="text" ng-model="credentials.phone_code" />
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()">Cancel</button>
+    <button class="btn btn-md btn-md-primary" ng-class="{disabled: isProgress}" ng-click="changePhone()" ng-disabled="isProgress" ng-hide="phoneCodeSent">Change</button>
+    <button class="btn btn-md btn-md-primary" ng-class="{disabled: isProgress}" ng-click="submitCode()" ng-disabled="isProgress" ng-show="phoneCodeSent">Submit</button>
+  </div>
+
+</div>

@@ -181,11 +181,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           badPhone = true;
         }
       }
-      if (badPhone) {
-        $scope.progress.enabled = false
-        $scope.error = {field: 'phone'}
-        return
-      }
+      // if (badPhone) {
+      //   $scope.progress.enabled = false
+      //   $scope.error = {field: 'phone'}
+      //   return
+      // }
 
       ErrorService.confirm({
         type: 'LOGIN_PHONE_CORRECT',
@@ -3888,6 +3888,62 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
+  .controller('ChangePhoneModalController', function ($rootScope, $scope, MtpApiManager, AppUsersManager, _) {
+    $scope.profile = {}
+    $scope.error = {}
+    $scope.phoneCodeSent = false
+    $scope.credentials = {phone_country: '+1', phone_number: ''}
+
+    MtpApiManager.getUserID().then(function (id) {
+      $scope.profile = AppUsersManager.getUser(id)
+      console.log($scope.profile)
+    })
+
+    $scope.submitCode = function () {
+      $scope.isProgress = true
+      MtpApiManager.invokeApi('account.changePhone', {
+        phone_number: $scope.credentials.phone_country + $scope.credentials.phone_number,
+        phone_code_hash: $scope.credentials.phone_code_hash,
+        phone_code: $scope.credentials.phone_code
+      }).then(function (sentCode) {
+        $scope.isProgress = false
+        window.location = ""
+        console.log(sentCode)
+      }, function (error) {
+        console.log('sendCode error', error)
+        switch (error.type) {
+          case 'PHONE_NUMBER_INVALID':
+            $scope.error = {field: 'phone'}
+            error.handled = true
+            break
+        }
+      })
+    }
+
+    $scope.changePhone = function () {
+      $scope.isProgress = true
+      MtpApiManager.invokeApi('account.sendChangePhoneCode', {
+        phone_number: $scope.credentials.phone_country + $scope.credentials.phone_number
+      }).then(function (sentCode) {
+        console.log(sentCode)
+        $scope.isProgress = false
+        $scope.phoneCodeSent = true
+
+        $scope.error = {}
+        $scope.about = {}
+        $scope.credentials.phone_code_hash = sentCode.phone_code_hash
+      }, function (error) {
+        console.log('sendCode error', error)
+        switch (error.type) {
+          case 'PHONE_NUMBER_INVALID':
+            $scope.error = {field: 'phone'}
+            error.handled = true
+            break
+        }
+      })
+    }
+  })
+
   .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
     $scope.profile = {}
     $scope.photo = {}
@@ -4025,6 +4081,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $modal.open({
         templateUrl: templateUrl('profile_edit_modal'),
         controller: 'ProfileEditModalController',
+        windowClass: 'md_simple_modal_window mobile_modal'
+      })
+    }
+
+    $scope.changePhone = function () {
+      $modal.open({
+        templateUrl: templateUrl('change_phone_modal'),
+        controller: 'ChangePhoneModalController',
         windowClass: 'md_simple_modal_window mobile_modal'
       })
     }
