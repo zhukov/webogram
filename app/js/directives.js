@@ -769,8 +769,14 @@ angular.module('myApp.directives', ['myApp.filters'])
           return cancelEvent(e);
         }
 
-        if ( e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey &&
-              e.keyCode >= 49 && e.keyCode <= 57 ) { // Alt + Shift + # , switch to conversation # where # is in [1..9]
+        if (
+          (!Config.Navigator.osX && // No Mac users
+              e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey &&
+              e.keyCode >= 49 && e.keyCode <= 57 ) // Alt + Shift + # , switch to conversation # where # is in [1..9]
+          ||
+          (Config.Navigator.osX && // Mac users only
+          e.ctrlKey && e.shiftKey && !e.metaKey && !e.altKey &&
+          e.keyCode >= 49 && e.keyCode <= 57 ) ) { // Ctrl + Shift + # , switch to conversation # where # is in [1..9]
 
           var dialogNumber = e.keyCode - 49,
               dialogWraps = $(scrollableWrap).find('.im_dialog_wrap'),
