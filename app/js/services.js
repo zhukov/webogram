@@ -3307,7 +3307,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         var fwdHeader = message.fwd_from || {}
         if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post) ||
           fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) ||
-          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id) ||
+          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id, true) ||
           toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
           toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
           console.warn(dT(), 'Not enough data for message update', message)
