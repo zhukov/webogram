@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Thu Nov 17 2016 21:07:13 GMT+0300 (MSK)
+# Time: Thu Nov 17 2016 21:16:34 GMT+0300 (MSK)
 
 
 CACHE:
@@ -26,9 +26,9 @@ img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
 img/sound_a.mp3
-js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
+js/app.js
 img/changelog/card_wecandoit.png
 img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
@@ -76,8 +76,8 @@ js/locales/pt-br.json
 js/locales/ru-ru.json
 vendor/closure/long.js
 vendor/cryptoJS/crypto.js
-vendor/leemon_bigint/bigint.js
 vendor/jsbn/jsbn_combined.js
+vendor/leemon_bigint/bigint.js
 vendor/rusha/rusha.js
 vendor/angular/i18n/angular-locale_de-de.js
 vendor/angular/i18n/angular-locale_en-us.js
