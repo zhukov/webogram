@@ -1787,7 +1787,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         windowTemplateUrl: templateUrl('media_modal_layout'),
         controller: 'GameModalController',
         scope: scope,
-        windowClass: 'photo_modal_window'
+        windowClass: 'photo_modal_window mobile_modal'
       })
     }
 
@@ -1808,7 +1808,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var game = wrapForHistory(gameID)
 
       var fullWidth = $(window).width() - (Config.Mobile ? 0 : 10)
-      var fullHeight = $($window).height() - (Config.Mobile ? 92 : 150)
+      var fullHeight = $($window).height() - (Config.Mobile ? 51 : 150)
 
       if (!Config.Mobile && fullWidth > 800) {
         fullWidth -= 208

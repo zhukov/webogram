@@ -152,6 +152,9 @@
 	"media_modal_forward": "Forward",
 	"media_modal_download": "Download",
 	"media_modal_delete": "Delete",
+	"game_modal_share_game": "Share Game",
+	"game_modal_share_score": "Share Score",
+	"game_modal_bot_info": "by @{bot}",
 
 	"error_browser_no_local_file_system_image_md": "Your browser doesn't support {moz-link: https://developer.mozilla.org/en-US/docs/Web/API/LocalFileSystem | LocalFileSystem} feature which is needed to display this image.\nPlease, install {chrome-link: http://google.com/chrome | Google Chrome} or use {telegram-link: https://telegram.org/ | mobile app} instead.",
 	"error_image_download_failed": "Download failed",
