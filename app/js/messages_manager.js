@@ -3219,15 +3219,26 @@ angular.module('myApp.services')
 
       var dialog = getDialogByPeerID(peerID)[0]
       if (dialog) {
-        var newIndex
-        if (dialog && draft && draft.date) {
-          newIndex = dialog.index = generateDialogIndex(draft.date)
-          pushDialogToStorage(dialog)
+        var topDate
+        if (draft && draft.date) {
+          topDate = draft.date
+        } else {
+          var channelID = AppPeersManager.isChannel(peerID) ? -peerID : 0
+          var topDate = getMessage(dialog.top_message).date
+          if (channelID) {
+            var channel = AppChatsManager.getChat(channelID)
+            if (!topDate || channel.date && channel.date > topDate) {
+              topDate = channel.date
+            }
+          }
         }
+        dialog.index = generateDialogIndex(topDate)
+        pushDialogToStorage(dialog)
+
         $rootScope.$broadcast('dialog_draft', {
           peerID: peerID,
           draft: draft,
-          index: dialog && dialog.index
+          index: dialog.index
         })
       }
     })

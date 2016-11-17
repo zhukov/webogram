@@ -736,9 +736,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         )
       })
 
-      $scope.dialogs.sort(function (d1, d2) {
-        return d2.index - d1.index
-      })
+      sortDialogs()
 
       if (newPeer) {
         delete $scope.isEmpty.dialogs
@@ -755,6 +753,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           break
         }
       }
+    }
+
+    function sortDialogs() {
+      $scope.dialogs.sort(function (d1, d2) {
+        return d2.index - d1.index
+      })
     }
 
     $scope.$on('dialog_top', function (e, dialog) {
@@ -791,10 +795,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           if (draftUpdate.index) {
             curDialog.index = draftUpdate.index
           }
-          if (i > 0 && draftUpdate.draft) {
-            $scope.dialogs.splice(i, 1)
-            $scope.dialogs.unshift(curDialog)
-          }
+          sortDialogs();
           break
         }
       }
