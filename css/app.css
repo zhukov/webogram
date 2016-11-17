@@ -1761,6 +1761,7 @@ li.inline_result_gif.composer_autocomplete_option_active a,li.inline_result_phot
 li.inline_result_gif.composer_autocomplete_option_active a .inline_result_ind,li.inline_result_photo.composer_autocomplete_option_active a .inline_result_ind,li.inline_result_sticker.composer_autocomplete_option_active a .inline_result_ind{display:block;background:rgba(255,255,255,.3);width:100%;height:100%;position:absolute}
 .inline_result_gif .img_gif_video,.inline_result_photo .inline_result_photo_image{object-fit:cover}
 .inline_result_sticker img{object-fit:contain}
+.inline_result_game img{object-fit:cover;width:50px;height:50px}
 .inline_result_gif_http,.inline_result_gif_mtproto,.inline_result_photo_http,.inline_result_photo_mtproto{pointer-events:none}
 .error_modal_description{color:#999;padding:5px 0;font-size:13px;line-height:160%}
 .md_simple_modal_alert_body .error_modal_description,.md_simple_modal_alert_body .md_simple_header{text-align:center}

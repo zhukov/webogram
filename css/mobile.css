@@ -441,6 +441,15 @@ html {
   background: #f1f1f1;
   margin-top: 0;
 }
+.im_message_body_media .im_message_game {
+  padding: 5px;
+  border-radius: 3px;
+  background: #f1f1f1;
+  margin-top: 0;
+}
+.im_message_body_media .im_message_game .im_message_webpage_wrap {
+  margin-left: 3px;
+}
 .im_message_body_media .im_message_geopoint {
   width: 200px;
   height: 100px;
@@ -712,6 +721,11 @@ a.im_message_author_via .im_message_fwd_author {
 }
 .im_history_messages_group .im_message_sign_link {
   font-size: 12px;
+}
+.im_service_message a.im_message_author {
+  display: inline;
+  font-size: 13px;
+  font-weight: normal;
 }
 .im_grouped_short a.im_message_from_photo,
 .im_grouped_short a.im_message_author,
@@ -1049,6 +1063,9 @@ a.mobile_modal_action .tg_checkbox_label {
 .chat_modal_other_btn .dropdown-menu {
   left: auto;
   right: -9px;
+}
+.game_modal_wrap .modal-body {
+  padding: 0;
 }
 .photo_modal_window .modal-content,
 .video_modal_window .modal-content {
