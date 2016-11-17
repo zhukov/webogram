@@ -50,4 +50,4 @@
     </my-i18n-param>
   </span>
 
-</span><span class="im_short_message_text" ng-if="message.message.length" ng-bind-html="message.richMessage"></span>
+</span><span class="im_short_message_text" ng-if="message.message.length && !message.media" ng-bind-html="message.richMessage"></span>

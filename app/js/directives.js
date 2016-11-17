@@ -2287,7 +2287,12 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       element.attr('src', 'img/blank.gif')
 
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&key=' + apiKey
+      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
+      var useApiKey = false
+
+      if (useApiKey) {
+        src += '&key=' + apiKey
+      }
 
       ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf())
