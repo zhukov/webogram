@@ -58,6 +58,7 @@
     "settings_modal_vibrate": "Vibrar",
     "settings_modal_sounds": "Sons",
     "settings_modal_language": "Idioma",
+    "settings_modal_font_size": "Tamanho da Fonte",
     "settings_modal_notifications": "Notificações na área de trabalho",
     "settings_modal_message_preview": "Pré-Visualização",
     "settings_modal_sound": "Som",
@@ -774,5 +775,7 @@
     "country_select_modal_country_ye": "Iémen",
     "country_select_modal_country_zm": "Zâmbia",
     "country_select_modal_country_tz_uk": "Zanzibar",
-    "country_select_modal_country_zw": "Zimbábue"
+    "country_select_modal_country_zw": "Zimbábue",
+    
+    "list_fonts": {"n": "Normal", "m": "Médio", "l": "Grande", "xl": "X-Grande"}
 }

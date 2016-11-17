@@ -2808,6 +2808,32 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
   })
+  
+  .controller('AppFontSelectController', function ($scope, _, Storage, ErrorService, AppRuntimeManager) {
+    $scope.supportedFonts = ["n", "m", "l", "xl"]
+    $scope.fontNames = Config.I18n.messages.list_fonts;
+    
+    // TODO: This should be more angular-ly
+    var cf = localStorage.getItem('font');
+    if ((typeof cf !== "undefined") && (cf !== null)) {
+        cf = JSON.parse(cf);
+    } else {
+        cf = 'n';
+    }
+
+    $scope.curFont = cf;
+    $scope.form = {font: cf};
+
+    $scope.fontSelect = function fontSelect (newFont) {
+      newFont = newFont || $scope.form.font;
+      if ($scope.curFont !== newFont) {
+          $scope.curFont = newFont
+          Storage.set({font: newFont}).then(function () {
+            updateFont();
+          });
+      }
+    };
+  })
 
   .controller('AppFooterController', function ($scope, LayoutSwitchService) {
     $scope.switchLayout = function (mobile) {

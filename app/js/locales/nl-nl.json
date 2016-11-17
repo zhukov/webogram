@@ -58,6 +58,7 @@
     "settings_modal_vibrate": "Trillen",
     "settings_modal_sounds": "Geluiden",
     "settings_modal_language": "Taal",
+    "settings_modal_font_size": "Lettergrootte",
     "settings_modal_notifications": "Desktopmeldingen",
     "settings_modal_message_preview": "Voorvertoning",
     "settings_modal_sound": "Geluid",
@@ -774,5 +775,7 @@
     "country_select_modal_country_ye": "Jemen",
     "country_select_modal_country_zm": "Zambia",
     "country_select_modal_country_tz_uk": "Zanzibar",
-    "country_select_modal_country_zw": "Zimbabwe"
+    "country_select_modal_country_zw": "Zimbabwe",
+    
+    "list_fonts": {"n": "Normaal", "m": "Medium", "l": "Large", "xl": "X-Large"}
 }
