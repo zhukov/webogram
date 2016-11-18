@@ -1451,7 +1451,7 @@ angular.module('izhukov.utils', [])
             offset: matchIndex,
             length: text.length
           })
-          rawOffset -= match[0] - text.length
+          rawOffset -= match[0].length - text.length
         }
         raw = raw.substr(match.index + match[0].length)
         rawOffset += match.index + match[0].length
