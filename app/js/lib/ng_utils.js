@@ -1238,7 +1238,8 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
-    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
+    var markdownTestRegExp = /[`_*@]/;
+    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)([`*_])([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1252,6 +1253,12 @@ angular.module('izhukov.utils', [])
       Twitter: 'https://twitter.com/{1}',
       Instagram: 'https://instagram.com/{1}/',
       GitHub: 'https://github.com/{1}'
+    }
+
+    var markdownEntities = {
+      '`': 'messageEntityCode',
+      '*': 'messageEntityBold',
+      '_': 'messageEntityItalic'
     }
 
     return {
@@ -1402,7 +1409,7 @@ angular.module('izhukov.utils', [])
     }
 
     function parseMarkdown (text, entities, noTrim) {
-      if (text.indexOf('`') == -1 && text.indexOf('@') == -1) {
+      if (!markdownTestRegExp.test(text)) {
         return noTrim ? text : text.trim()
       }
       var raw = text
@@ -1414,7 +1421,7 @@ angular.module('izhukov.utils', [])
         matchIndex = rawOffset + match.index
         newText.push(raw.substr(0, match.index))
 
-        var text = (match[3] || match[7] || match[10])
+        var text = (match[3] || match[8] || match[11])
         rawOffset -= text.length
         text = text.replace(/^\s+|\s+$/g, '')
         rawOffset += text.length
@@ -1435,19 +1442,19 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= match[2].length + match[4].length
-        } else if (match[7]) { // code
-          newText.push(match[6] + text + match[8])
+        } else if (match[9]) { // code
+          newText.push(match[6] + text + match[9])
           entities.push({
-            _: 'messageEntityCode',
+            _: markdownEntities[match[7]],
             offset: matchIndex + match[6].length,
             length: text.length
           })
           rawOffset -= 2
-        } else if (match[10]) { // custom mention
+        } else if (match[11]) { // custom mention
           newText.push(text)
           entities.push({
             _: 'messageEntityMentionName',
-            user_id: match[9],
+            user_id: match[10],
             offset: matchIndex,
             length: text.length
           })
@@ -1805,6 +1812,18 @@ angular.module('izhukov.utils', [])
           case 'messageEntityCode':
             code.push(
               '`', entityText, '`'
+            )
+            break
+
+          case 'messageEntityBold':
+            code.push(
+              '*', entityText, '*'
+            )
+            break
+
+          case 'messageEntityItalic':
+            code.push(
+              '_', entityText, '_'
             )
             break
 
