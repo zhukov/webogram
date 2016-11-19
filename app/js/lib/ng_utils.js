@@ -1238,6 +1238,7 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
+    var markdownTestRegExp = /[`_*@]/;
     var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)([`*_])([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
 
     var siteHashtags = {
@@ -1408,7 +1409,7 @@ angular.module('izhukov.utils', [])
     }
 
     function parseMarkdown (text, entities, noTrim) {
-      if (!text.test(/[`_*@]/)) {
+      if (!markdownTestRegExp.test(text)) {
         return noTrim ? text : text.trim()
       }
       var raw = text
