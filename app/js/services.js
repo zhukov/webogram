@@ -4713,6 +4713,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (!peerID) {
         console.trace('empty peerID')
       }
+      if (peerID < 0 &&
+          AppChatsManager.hasRights(-peerID, 'send')) {
+        draft = false
+      }
       if (!draft) {
         draft = {
           text: '',
