@@ -139,7 +139,7 @@
     "media_modal_download": "Descargar",
     "media_modal_delete": "Eliminar",
     "game_modal_share_game": "Compartir juego",
-    "game_modal_share_score": "Compartir puntaje",
+    "game_modal_share_score": "Compartir puntuación",
     "error_browser_no_local_file_system_image_md": "Tu navegador no soporta la función {moz-link: https://developer.mozilla.org/es-ES/docs/Web/API/LocalFileSystem | LocalFileSystem}, necesaria para mostrar esta imagen.\nPor favor, instala {chrome-link: http://google.com/chrome | Google Chrome}, o usa {telegram-link: https://telegram.org/ | la aplicación móvil} en su lugar.",
     "error_image_download_failed": "Descarga fallida",
     "error_browser_no_local_file_system_video_md": "Tu navegador no soporta la función {moz-link: https://developer.mozilla.org/es-ES/docs/Web/API/LocalFileSystem | LocalFileSystem}, necesaria para reproducir este vídeo.\nPor favor, instala {chrome-link: http://google.com/chrome | Google Chrome}, o usa {telegram-link: https://telegram.org/ | la aplicación móvil} en su lugar.",

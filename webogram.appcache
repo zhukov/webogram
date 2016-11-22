@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Sat Nov 19 2016 18:41:45 GMT+0300 (MSK)
+# Time: Tue Nov 22 2016 18:43:44 GMT+0300 (MSK)
 
 
 CACHE:
@@ -29,7 +29,6 @@ img/sound_a.mp3
 js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
-img/changelog/card_wecandoit.png
 img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
 img/icons/General.png
@@ -46,6 +45,7 @@ img/icons/PhotoIcons.png
 img/icons/PhotoIcons_2x.png
 img/icons/ProfileIcons.png
 img/icons/ProfileIcons_2x.png
+img/changelog/card_wecandoit.png
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
