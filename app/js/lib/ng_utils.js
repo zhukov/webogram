@@ -1442,7 +1442,7 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= match[2].length + match[4].length
-        } else if (match[9]) { // code
+        } else if (match[7]) { // code
           newText.push(match[6] + text + match[9])
           entities.push({
             _: markdownEntities[match[7]],
