@@ -4635,7 +4635,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('DraftsManager', function ($rootScope, qSync, MtpApiManager, ApiUpdatesManager, AppMessagesIDsManager, AppPeersManager, RichTextProcessor, Storage, ServerTimeManager) {
+  .service('DraftsManager', function ($rootScope, qSync, MtpApiManager, ApiUpdatesManager, AppMessagesIDsManager, AppChatsManager, AppPeersManager, RichTextProcessor, Storage, ServerTimeManager) {
     var cachedServerDrafts = {}
 
     $rootScope.$on('apiUpdate', function (e, update) {
