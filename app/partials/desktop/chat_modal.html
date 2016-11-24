@@ -112,6 +112,11 @@
             <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_menu_delete_group"></a>
             <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_members_kick"></a>
 
+            <span ng-switch="participant._" class="pull-left">
+                  <span ng-switch-when="chatParticipantAdmin" class="md_modal_admin_badge"></span>
+                  <span ng-switch-when="chatParticipantCreator" class="md_modal_admin_badge md_modal_admin_badge_creator"></span>
+            </span>
+
             <a class="md_modal_list_peer_photo pull-left" my-peer-photolink="::participant.user_id" img-class="md_modal_list_peer_photo"></a>
 
             <div class="md_modal_list_peer_name">
