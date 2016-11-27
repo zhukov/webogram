@@ -48,6 +48,11 @@
       <span ng-switch-when="PEER_FLOOD" my-i18n="error_modal_not_contact_flood">
         <my-i18n-param name="more-info-link"><a href="https://telegram.me/spambot">{0}</a></my-i18n-param>
       </span>
+      <span ng-switch-when="2FA_RECENT_CONFIRM" my-i18n="error_modal_2fa_recent_confirm"></span>
+      <span ng-switch-when="2FA_CONFIRM_WAIT_TIME" my-i18n="error_modal_2fa_delayed_time_md">
+        <my-i18n-param name="time"><span ng-bind="error.waitTime | duration"></span></my-i18n-param>
+      </span>
+      
       <span ng-switch-when="CALLBACK_RESPONSE" ng-bind-html="error.description_html"></span>
 
 

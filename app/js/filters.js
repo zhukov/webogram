@@ -139,14 +139,15 @@ angular.module('myApp.filters', ['myApp.i18n'])
       if (isNaN(duration)) {
         duration = 0
       }
+      var hours = Math.floor(duration / 3600)
+      var mins = Math.floor((duration % 3600) / 60)
       var secs = duration % 60
-      var mins = Math.floor((duration - secs) / 60.0)
 
-      if (secs < 10) {
-        secs = '0' + secs
-      }
+      var durationStr = (hours ? hours + ':' : '') + mins + ':' secs
 
-      return mins + ':' + secs
+      durationStr = durationStr.replace(/:(\d(?::|$))/g, ':0\1')
+
+      return durationStr
     }
   }])
 
