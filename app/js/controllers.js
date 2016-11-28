@@ -2249,7 +2249,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.$on('draft_updated', function (e, draftUpdate) {
       if (draftUpdate.peerID == $scope.curDialog.peerID &&
-          !draftUpdate.local) {
+          !draftUpdate.local &&
+          (!$scope.draftMessage.text || $rootScope.idle.isIDLE)) {
         getDraft()
       }
     })
