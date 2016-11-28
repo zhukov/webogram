@@ -145,7 +145,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
       var durationStr = (hours ? hours + ':' : '') + mins + ':' + secs
 
-      durationStr = durationStr.replace(/:(\d(?::|$))/g, ':0\1')
+      durationStr = durationStr.replace(/:(\d(?::|$))/g, ':0$1')
 
       return durationStr
     }
