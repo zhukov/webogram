@@ -636,9 +636,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       var chat = getChat(id)
       if (chat._ == 'chatForbidden' ||
-        chat._ == 'channelForbidden' ||
-        chat.pFlags.kicked ||
-        chat.pFlags.left) {
+          chat._ == 'channelForbidden' ||
+          chat.pFlags.kicked ||
+          chat.pFlags.left) {
         return false
       }
       if (chat.pFlags.creator) {
@@ -4714,7 +4714,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         console.trace('empty peerID')
       }
       if (peerID < 0 &&
-          AppChatsManager.hasRights(-peerID, 'send')) {
+          !AppChatsManager.hasRights(-peerID, 'send')) {
         draft = false
       }
       if (!draft) {
