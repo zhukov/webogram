@@ -1823,7 +1823,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       var embedType = 'text/html'
 
-      var embedHtml = '<' + embedTag + ' src="' + encodeEntities(embedUrl) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '" style="width: ' + full.width + 'px; height: ' + full.height + 'px;"></' + embedTag + '>'
+      var embedHtml = '<' + embedTag + ' src="' + encodeEntities(embedUrl) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '" style="width: ' + full.width + 'px; height: ' + full.height + 'px;" sandbox="allow-scripts allow-same-origin"></' + embedTag + '>'
 
       full.html = $sce.trustAs('html', embedHtml)
 
