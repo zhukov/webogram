@@ -2529,11 +2529,10 @@ angular.module('myApp.services')
                 captionEmoji = '🎬'
                 break
               case 'sticker':
+                notificationMessage = _('conversation_media_sticker')
                 var stickerEmoji = message.media.document.stickerEmojiRaw
                 if (stickerEmoji !== undefined) {
                   notificationMessage = RichTextProcessor.wrapPlainText(stickerEmoji) + ' ' + notificationMessage
-                } else {
-                  notificationMessage = _('conversation_media_sticker')
                 }
                 break
               case 'video':
