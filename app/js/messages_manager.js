@@ -877,6 +877,64 @@ angular.module('myApp.services')
       return messagesStorage[messageID] || {deleted: true}
     }
 
+    function canMessageBeEdited(message) {
+      var goodMedias = ['messageMediaPhoto', 'messageMediaDocument', 'messageMediaWebPage', 'messageMediaPending']
+      if (message._ != 'message' ||
+          message.deleted ||
+          message.fwd_from ||
+          message.via_bot_id ||
+          message.media && goodMedias.indexOf(message.media._) == -1 ||
+          message.fromID && AppUsersManager.isBot(message.fromID)) {
+        return false
+      }
+
+      return true
+    }
+
+    function canEditMessage(messageID) {
+      if (messageID <= 0 ||
+          !messagesStorage[messageID]) {
+        return false
+      }
+      var message = messagesStorage[messageID]
+      if (!message ||
+          !message.canBeEdited ||
+          !message.pFlags.out ||
+          message.date < tsNow(true) - 2 * 86400) {
+        return false
+      }
+
+      return true
+    }
+
+    function getMessageEditData(messageID) {
+      if (!canEditMessage(messageID)) {
+        return $q.reject()
+      }
+      var message = getMessage(messageID)
+      if (message.media &&
+          message.media._ != 'messageMediaEmpty' &&
+          message.media._ != 'messageMediaWebPage') {
+
+        return $q.when({
+          caption: true,
+          text: typeof message.media.caption === 'string' ? message.media.caption : ''
+        })
+      }
+
+      var text = typeof message.message === 'string' ? message.message : ''
+      var entities = RichTextProcessor.parseEntities(text)
+      var serverEntities = message.entities || []
+      entities = RichTextProcessor.mergeEntities(entities, serverEntities)
+
+      text = RichTextProcessor.wrapDraftText(text, {entities: entities})
+
+      return $q.when({
+        caption: false,
+        text: text
+      })
+    }
+
     function deleteMessages (messageIDs) {
       var splitted = AppMessagesIDsManager.splitMessageIDsByChannels(messageIDs)
       var promises = []
@@ -1126,7 +1184,7 @@ angular.module('myApp.services')
         var peerID = getMessagePeer(apiMessage)
         var isChannel = apiMessage.to_id._ == 'peerChannel'
         var channelID = isChannel ? -peerID : 0
-        var isBroadcast = isChannel && !AppChatsManager.isMegagroup(channelID)
+        var isBroadcast = isChannel && AppChatsManager.isBroadcast(channelID)
 
         var mid = AppMessagesIDsManager.getFullMessageID(apiMessage.id, channelID)
         apiMessage.mid = mid
@@ -1266,6 +1324,8 @@ angular.module('myApp.services')
           apiMessage.totalEntities = RichTextProcessor.mergeEntities(myEntities, apiEntities, !apiMessage.pending)
         }
 
+        apiMessage.canBeEdited = canMessageBeEdited(apiMessage)
+
         if (!options.isEdited) {
           messagesStorage[mid] = apiMessage
         }
@@ -1285,18 +1345,7 @@ angular.module('myApp.services')
         return
       }
 
-      var sendEntites = entities
-      if (entities.length) {
-        sendEntites = angular.copy(entities)
-        angular.forEach(sendEntites, function (entity) {
-          if (entity._ == 'messageEntityMentionName') {
-            entity._ = 'inputMessageEntityMentionName'
-            entity.user_id = AppUsersManager.getUserInput(entity.user_id)
-          }
-        })
-      }
-
-
+      var sendEntites = getInputEntities(entities)
       var messageID = tempID--
       var randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]
       var randomIDS = bigint(randomID[0]).shiftLeft(32).add(bigint(randomID[1])).toString()
@@ -2038,6 +2087,51 @@ angular.module('myApp.services')
       return false
     }
 
+    function getInputEntities(entities) {
+      var sendEntites = angular.copy(entities)
+      angular.forEach(sendEntites, function (entity) {
+        if (entity._ == 'messageEntityMentionName') {
+          entity._ = 'inputMessageEntityMentionName'
+          entity.user_id = AppUsersManager.getUserInput(entity.user_id)
+        }
+      })
+      return sendEntites
+    }
+
+    function editMessage(messageID, text) {
+      if (!angular.isString(text) ||
+          !canEditMessage(messageID)) {
+        return $q.reject()
+      }
+      var entities = []
+      text = RichTextProcessor.parseMarkdown(text, entities)
+
+      var message = getMessage(messageID)
+      var peerID = getMessagePeer(message)
+      var flags = 8 | (1 << 11)
+
+      return MtpApiManager.invokeApi('messages.editMessage', {
+        flags: flags,
+        peer: AppPeersManager.getInputPeerByID(peerID),
+        id: AppMessagesIDsManager.getMessageLocalID(messageID),
+        message: text,
+        entities: getInputEntities(entities)
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates)
+      }, function (error) {
+        if (error &&
+            error.type == 'MESSAGE_NOT_MODIFIED') {
+          error.handled = true
+          return
+        }
+        if (error &&
+            error.type == 'MESSAGE_EMPTY') {
+          error.handled = true
+        }
+        return $q.reject(error)
+      })
+    }
+
     function getMessagePeer (message) {
       var toID = message.to_id && AppPeersManager.getPeerID(message.to_id) || 0
 
@@ -2250,9 +2344,11 @@ angular.module('myApp.services')
       var fromUser = message.from_id && AppUsersManager.getUser(message.from_id)
       var fromBot = fromUser && fromUser.pFlags.bot && fromUser.username || false
       var toPeerID = AppPeersManager.getPeerID(message.to_id)
-      var withBot = (fromBot ||
-        toPeerID < 0 && !(AppChatsManager.isChannel(-toPeerID) && !AppChatsManager.isMegagroup(-toPeerID)) ||
-        toPeerID > 0 && AppUsersManager.isBot(toPeerID))
+      var withBot = (
+        fromBot ||
+        AppPeersManager.isBot(toPeerID) ||
+        AppPeersManager.isAnyGroup(toPeerID)
+      )
 
       var options = {
         noCommands: !withBot,
@@ -3258,10 +3354,14 @@ angular.module('myApp.services')
       forwardMessages: forwardMessages,
       startBot: startBot,
       shareGame: shareGame,
+      editMessage: editMessage,
       convertMigratedPeer: convertMigratedPeer,
       getMessagePeer: getMessagePeer,
       getMessageThumb: getMessageThumb,
       getMessageShareLink: getMessageShareLink,
+      canMessageBeEdited: canMessageBeEdited,
+      canEditMessage: canEditMessage,
+      getMessageEditData: getMessageEditData,
       clearDialogCache: clearDialogCache,
       wrapForDialog: wrapForDialog,
       wrapForHistory: wrapForHistory,

@@ -38,7 +38,10 @@
             <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
           </div>
         </div>
-        <span class="im_message_date clickable nocopy" data-content="{{::historyMessage.date | time}}"></span>
+        <span class="im_message_date clickable">
+          <span class="im_message_edited" my-message-edited="historyMessage.mid"></span>
+          <span class="im_message_date_text nocopy" data-content="{{::historyMessage.date | time}}"></span>
+        </span>
       </div>
 
       <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media ? true : false}">

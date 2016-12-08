@@ -502,6 +502,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       channelActions: false,
       canReply: false,
       canDelete: false,
+      canEdit: false,
       actions: function () {
         return $scope.historyState.selectActions ? 'selected' : ($scope.historyState.botActions ? 'bot' : ($scope.historyState.channelActions ? 'channel' : false))
       },
@@ -1130,6 +1131,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedDelete = selectedDelete
     $scope.selectedForward = selectedForward
     $scope.selectedReply = selectedReply
+    $scope.selectedEdit = selectedEdit
     $scope.selectedCancel = selectedCancel
     $scope.selectedFlush = selectedFlush
     $scope.selectInlineBot = selectInlineBot
@@ -1610,8 +1612,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           if (target.className &&
             target.className.indexOf('im_message_date') != -1) {
-            if (AppPeersManager.isChannel(peerID) &&
-                !AppPeersManager.isMegagroup(peerID)) {
+            if (AppPeersManager.isBroadcast(peerID)) {
               quickForward(messageID)
             } else {
               selectedReply(messageID)
@@ -1630,6 +1631,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
 
         if (Config.Mobile) {
+          $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
+          
           $modal.open({
             templateUrl: templateUrl('message_actions_modal'),
             windowClass: 'message_actions_modal_window',
@@ -1638,6 +1641,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             switch (action) {
               case 'reply':
                 selectedReply(messageID)
+                break
+
+              case 'edit':
+                selectedEdit(messageID)
                 break
 
               case 'delete':
@@ -1703,6 +1710,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.historyState.selectActions = 'selected'
           $scope.$broadcast('ui_panel_update')
         }
+      }
+      if ($scope.selectedCount == 1) {
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
+        })
       }
       $scope.$broadcast('messages_select')
     }
@@ -1810,6 +1822,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (selectedMessageID) {
         selectedCancel()
         $scope.$broadcast('reply_selected', selectedMessageID)
+      }
+    }
+
+    function selectedEdit (selectedMessageID) {
+      if (!selectedMessageID && $scope.selectedCount == 1) {
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          selectedMessageID = messageID
+        })
+      }
+      if (selectedMessageID) {
+        selectedCancel()
+        $scope.$broadcast('edit_selected', selectedMessageID)
       }
     }
 
@@ -2202,13 +2226,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('reply_selected', function (e, messageID) {
       replySelect(messageID, true)
     })
+    $scope.$on('edit_selected', function (e, messageID) {
+      setEditDraft(messageID, true)
+    })
+    
     $scope.$on('ui_typing', onTyping)
 
     $scope.draftMessage = {
       text: '',
-      send: sendMessage,
+      send: submitMessage,
       replyClear: replyClear,
-      fwdsClear: fwdsClear
+      fwdsClear: fwdsClear,
+      type: 'new'
     }
     $scope.mentions = {}
     $scope.commands = {}
@@ -2231,6 +2260,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     })
 
     $scope.$on('inline_bots_popular', updateMentions)
+
+    $scope.$on('last_message_edit', setEditLastMessage)
 
     $scope.replyKeyboardToggle = replyKeyboardToggle
     $scope.toggleSlash = toggleSlash
@@ -2257,38 +2288,58 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     var replyToMarkup = false
     var forceDraft = false
+    var editMessageID = false
 
-    function sendMessage (e) {
+    function submitMessage (e) {
       $scope.$broadcast('ui_message_before_send')
 
       $timeout(function () {
-        var text = $scope.draftMessage.text
-
-        if (angular.isString(text) && text.length > 0) {
-          text = RichTextProcessor.parseEmojis(text)
-
-          var options = {
-            replyToMsgID: $scope.draftMessage.replyToMsgID,
-            clearDraft: true
-          }
-          do {
-            AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096), options)
-            text = text.substr(4096)
-            options = angular.copy(options)
-            delete options.clearDraft
-          } while (text.length)
+        if (editMessageID) {
+          editMessage()
+        } else {
+          sendMessage()
         }
-        fwdsSend()
+      })
 
-        if (forceDraft == $scope.curDialog.peer) {
-          forceDraft = false
+      return cancelEvent(e)
+    }
+
+    function sendMessage() {
+      var text = $scope.draftMessage.text
+
+      if (angular.isString(text) && text.length > 0) {
+        text = RichTextProcessor.parseEmojis(text)
+
+        var options = {
+          replyToMsgID: $scope.draftMessage.replyToMsgID,
+          clearDraft: true
         }
+        do {
+          AppMessagesManager.sendText($scope.curDialog.peerID, text.substr(0, 4096), options)
+          text = text.substr(4096)
+          options = angular.copy(options)
+          delete options.clearDraft
+        } while (text.length)
+      }
+      fwdsSend()
+
+      if (forceDraft == $scope.curDialog.peer) {
+        forceDraft = false
+      }
+
+      resetDraft()
+      $scope.$broadcast('ui_message_send')
+    }
+
+    function editMessage() {
+      var text = $scope.draftMessage.text
+
+      AppMessagesManager.editMessage(editMessageID, text).then(function () {
+        editMessageID = false
 
         resetDraft()
         $scope.$broadcast('ui_message_send')
       })
-
-      return cancelEvent(e)
     }
 
     function updateMentions () {
@@ -2402,6 +2453,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
 
+      editMessageID = false
+
       updateMentions()
       updateCommands()
       replyClear()
@@ -2413,7 +2466,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       // console.log(dT(), 'reset draft', $scope.curDialog.peer, forceDraft)
       if (forceDraft) {
         if (forceDraft == $scope.curDialog.peer) {
-          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID) && !AppPeersManager.isMegagroup($scope.curDialog.peerID)
+          $scope.draftMessage.isBroadcast = AppPeersManager.isBroadcast($scope.curDialog.peerID)
           $scope.$broadcast('ui_peer_draft')
           return
         } else {
@@ -2427,9 +2480,25 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function getDraft () {
       if ($scope.curDialog.peerID) {
-        DraftsManager.getDraft($scope.curDialog.peerID).then(function (draftData) {
+        var draftDataPromise
+        if (editMessageID) {
+          draftDataPromise = AppMessagesManager.getMessageEditData(editMessageID).then(function (draftData) {
+            draftData.replyToMsgID = editMessageID
+            return draftData
+          }, function (error) {
+            console.warn(error)
+            editMessageID = false
+            getDraft()
+            return $q.reject()
+          })
+        } else {
+          draftDataPromise = DraftsManager.getDraft($scope.curDialog.peerID)
+        }
+        draftDataPromise.then(function (draftData) {
+          console.warn('draft', editMessageID, draftData)
+          $scope.draftMessage.type = editMessageID ? 'edit' : 'new'
           $scope.draftMessage.text = draftData ? draftData.text : ''
-          $scope.draftMessage.isBroadcast = AppPeersManager.isChannel($scope.curDialog.peerID) && !AppPeersManager.isMegagroup($scope.curDialog.peerID)
+          $scope.draftMessage.isBroadcast = AppPeersManager.isBroadcast($scope.curDialog.peerID)
           if (draftData.replyToMsgID) {
             var replyToMsgID = draftData.replyToMsgID
             replySelect(replyToMsgID)
@@ -2493,11 +2562,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function replySelect (messageID, byUser) {
+      if (editMessageID && byUser) {
+        replyClear()
+        return
+      }
       $scope.draftMessage.replyToMsgID = messageID
       $scope.$broadcast('ui_peer_reply')
       replyToMarkup = false
 
-      if (byUser) {
+      if (byUser && !editMessageID) {
         DraftsManager.changeDraft($scope.curDialog.peerID, {
           text: $scope.draftMessage.text,
           replyToMsgID: messageID
@@ -2505,7 +2578,33 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
+    function setEditDraft(messageID) {
+      editMessageID = messageID
+      getDraft()
+    }
+
+    function setEditLastMessage() {
+      if (editMessageID ||
+          !$scope.curDialog.peerID) {
+        return false
+      }
+      AppMessagesManager.getHistory($scope.curDialog.peerID).then(function (historyResult) {
+        for (var i = 0, messageID; i < historyResult.history.length; i++) {
+          messageID = historyResult.history[i]
+          if (AppMessagesManager.canEditMessage(messageID)) {
+            setEditDraft(messageID)
+            break
+          }
+        }
+      })
+    }
+
     function replyClear (byUser) {
+      if (editMessageID) {
+        editMessageID = false
+        getDraft()
+        return
+      }
       var mid = $scope.draftMessage.replyToMsgID
       if (mid &&
         $scope.historyState.replyKeyboard &&
@@ -2608,16 +2707,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
       }
       if ($scope.curDialog.peerID) {
-        var replyToMsgID = $scope.draftMessage.replyToMsgID
-        if (replyToMsgID &&
-            $scope.historyState.replyKeyboard &&
-            $scope.historyState.replyKeyboard.mid == replyToMsgID) {
-          replyToMsgID = 0;
+        if (!editMessageID) {
+          var replyToMsgID = $scope.draftMessage.replyToMsgID
+          if (replyToMsgID &&
+              $scope.historyState.replyKeyboard &&
+              $scope.historyState.replyKeyboard.mid == replyToMsgID) {
+            replyToMsgID = 0;
+          }
+          DraftsManager.changeDraft($scope.curDialog.peerID, {
+            text: newVal,
+            replyToMsgID: replyToMsgID
+          })
         }
-        DraftsManager.changeDraft($scope.curDialog.peerID, {
-          text: newVal,
-          replyToMsgID: replyToMsgID
-        })
         checkInlinePattern(newVal)
       }
     }
@@ -2685,8 +2786,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function onTyping () {
-      if (AppPeersManager.isChannel($scope.curDialog.peerID) &&
-        !AppPeersManager.isMegagroup($scope.curDialog.peerID)) {
+      if (AppPeersManager.isBroadcast($scope.curDialog.peerID)) {
         return false
       }
       MtpApiManager.invokeApi('messages.setTyping', {

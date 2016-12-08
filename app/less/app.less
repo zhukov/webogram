@@ -2103,7 +2103,11 @@ img.im_message_document_thumb {
   padding: 0 0 20px 10px;
 }
 
-.im_message_date {
+.im_message_edited {
+  display: none;
+}
+
+.im_message_date_text {
   cursor: pointer;
   &:hover {
     text-decoration: underline;
@@ -3908,7 +3912,8 @@ ul.chat_modal_migrate_list {
   .audio_player_size,
   .im_message_fwd_date,
   .im_message_views_cnt,
-  .im_message_sign_link {
+  .im_message_sign_link,
+  .im_message_edited {
     color: #899daf;
   }
 

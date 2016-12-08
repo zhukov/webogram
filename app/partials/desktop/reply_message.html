@@ -11,9 +11,10 @@
       watch="true"
     />
   </div>
-  <div class="im_message_reply_author" ng-switch-default>
+  <div class="im_message_reply_author" ng-switch-default ng-switch="isEdit">
     <span class="copyonly">&gt;&nbsp;</span>
-    <span my-peer-link="replyMessage.fromID" peer-watch="true"></span>
+    <span ng-switch-when="true" my-i18n="im_edit_message_title"></span>
+    <span ng-switch-default my-peer-link="replyMessage.fromID" peer-watch="true"></span>
   </div>
   <div class="im_message_reply_body" ng-switch-default>
     <span class="copyonly">&gt;&nbsp;</span>

@@ -361,6 +361,7 @@
 	"message_service_scored_X": "{'one': 'scored {}', 'other': 'scored {}'}",
 
 	"message_action_reply": "Reply",
+	"message_action_edit": "Edit",
 	"message_action_delete": "Delete",
 	"message_action_forward": "Forward",
 	"message_action_select": "Select",
@@ -485,6 +486,7 @@
 	"im_delete": "Delete {count}",
 	"im_forward": "Forward {count}",
 	"im_reply": "Reply",
+	"im_edit": "Edit",
 	"im_start": "Start",
 	"im_channel_join": "+ Join",
 	"im_channel_mute": "Mute",
@@ -501,6 +503,8 @@
 	"im_attach_file_title": "Send file",
 	"im_emoji_btn_title": "Insert emoticon",
 	"im_submit_message": "Send",
+	"im_submit_edit_message": "Save",
+	"im_edit_message_title": "Edit message",
 
 	"login_sign_in": "Sign in",
 	"login_enter_number_description": "Please choose your country and enter your full phone number.",
@@ -556,6 +560,7 @@
 
 	"message_forwarded_message": "Forwarded message",
 	"message_via_bot": "via {bot}",
+	"message_edited": "edited",
 	"message_forwarded_message_mobile": "Forwarded from {from}",
 	"message_forwarded_via_message_mobile": "Forwarded from {from} via {bot}",
 

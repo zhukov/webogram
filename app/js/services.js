@@ -709,6 +709,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return false
     }
 
+    function isBroadcast (id) {
+      return isChannel(id) && !isMegagroup(id)
+    }
+
     function getChatInput (id) {
       return id || 0
     }
@@ -827,6 +831,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getChat: getChat,
       isChannel: isChannel,
       isMegagroup: isMegagroup,
+      isBroadcast: isBroadcast,
       hasRights: hasRights,
       saveChannelAccess: saveChannelAccess,
       saveIsMegagroup: saveIsMegagroup,
@@ -987,6 +992,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return (peerID < 0) && AppChatsManager.isMegagroup(-peerID)
     }
 
+    function isAnyGroup (peerID) {
+      return (peerID < 0) && !AppChatsManager.isBroadcast(-peerID)
+    }
+
+    function isBroadcast (id) {
+      return isChannel(id) && !isMegagroup(id)
+    }
+
     function isBot (peerID) {
       return (peerID > 0) && AppUsersManager.isBot(peerID)
     }
@@ -1002,7 +1015,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getPeerPhoto: getPeerPhoto,
       resolveUsername: resolveUsername,
       isChannel: isChannel,
+      isAnyGroup: isAnyGroup,
       isMegagroup: isMegagroup,
+      isBroadcast: isBroadcast,
       isBot: isBot
     }
   })

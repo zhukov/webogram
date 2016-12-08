@@ -708,6 +708,7 @@ function MessageComposer (textarea, options) {
 
   this.onTyping = options.onTyping
   this.onMessageSubmit = options.onMessageSubmit
+  this.onDirectionKey = options.onDirectionKey
   this.getSendOnEnter = options.getSendOnEnter
   this.onFilePaste = options.onFilePaste
   this.onCommandSend = options.onCommandSend
@@ -940,6 +941,13 @@ MessageComposer.prototype.onKeyEvent = function (e) {
         this.onMessageSubmit(e)
         return cancelEvent(e)
       }
+    }
+
+    // Control keys when content is empty
+    if ([33, 34, 35, 36, 38, 39].indexOf(e.keyCode) != -1 &&
+        this.richTextareaEl &&
+        !this.richTextareaEl[0].textContent.length) {
+      return this.onDirectionKey(e)
     }
   }
 }

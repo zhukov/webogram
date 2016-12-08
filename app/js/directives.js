@@ -527,16 +527,19 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       if (attrs.watch) {
         $scope.$parent.$watch(attrs.myReplyMessage, function (mid) {
-          checkMessage($scope, element, mid)
+          var isEdit = $scope.$parent.$eval(attrs.edit)
+          checkMessage($scope, element, mid, isEdit)
         })
       } else {
         var mid = $scope.$parent.$eval(attrs.myReplyMessage)
-        checkMessage($scope, element, mid)
+        var isEdit = $scope.$parent.$eval(attrs.edit)
+        checkMessage($scope, element, mid, isEdit)
       }
     }
 
-    function checkMessage ($scope, element, mid) {
+    function checkMessage ($scope, element, mid, isEdit) {
       var message = $scope.replyMessage = AppMessagesManager.wrapSingleMessage(mid)
+      $scope.isEdit = isEdit || false
       if (message.loading) {
         var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
           if (mids.indexOf(mid) != -1) {
@@ -664,6 +667,49 @@ angular.module('myApp.directives', ['myApp.filters'])
       onContentLoaded(function () {
         $scope.$emit('ui_height')
       })
+    }
+  })
+
+  .directive('myMessageEdited', function (_, $timeout, AppMessagesManager) {
+
+    var editedLabel = _('message_edited')
+
+    return {
+      scope: {},
+      link: link
+    }
+
+    function link($scope, element, attrs) {
+      var messageID = $scope.$parent.$eval(attrs.myMessageEdited)
+      console.log(attrs.myMessageEdited, messageID)
+      if (checkEdited($scope, element, messageID)) {
+        $scope.$on('message_edit', function (e, data) {
+          var messageID = $scope.$parent.$eval(attrs.myMessageEdited)
+          if (data.mid == messageID) {
+            checkEdited($scope, element, messageID)
+          }
+        })
+      }
+    }
+
+    function checkEdited($scope, element, messageID) {
+      var message = AppMessagesManager.getMessage(messageID)
+      console.warn('check edited', messageID, message.canBeEdited, message.edit_date)
+      if (!message.canBeEdited) {
+        $timeout(function () {
+          $scope.$destroy()
+          element.remove()
+        })
+        return false
+      }
+      if (message.edit_date) {
+        element.html(editedLabel).show()
+        $timeout(function () {
+          $scope.$destroy()
+        })
+        return false
+      }
+      return true
     }
   })
 
@@ -1528,6 +1574,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         mentions: $scope.mentions,
         commands: $scope.commands,
         onMessageSubmit: onMessageSubmit,
+        onDirectionKey: onDirectionKey,
         onInlineResultSend: onInlineResultSend,
         onFilePaste: onFilePaste,
         onCommandSend: function (command) {
@@ -1599,6 +1646,14 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.$apply(function () {
           $scope.draftMessage.inlineResultID = qID
         })
+      }
+
+      function onDirectionKey(e) {
+        if (e.keyCode == 38) {
+          $scope.$emit('last_message_edit')
+          return cancelEvent(e)
+        }
+        return true
       }
 
       function updateValue () {
