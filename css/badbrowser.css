@@ -1340,6 +1340,8 @@ a.im_dialog .im_short_message_text{color:grey}
 a.im_dialog .im_dialog_draft_from{color:#c05f5a}
 a.im_dialog:hover .im_short_message_text,a.im_dialog_selected .im_short_message_text{color:#698192}
 .active a.im_dialog .im_dialog_chat_from_wrap,.active a.im_dialog .im_dialog_draft_from,.active a.im_dialog .im_dialog_message,.active a.im_dialog .im_short_message_media,.active a.im_dialog .im_short_message_service,.active a.im_dialog .im_short_message_text{color:#fff}
+.im_dialogs_scrollable_wrap a.im_dialog_searchpeer .icon-search-clear{display:inline-block;cursor:pointer;pointer-events:all}
+.im_dialogs_scrollable_wrap a.im_dialog_searchpeer,.im_dialogs_scrollable_wrap a.im_dialog_searchpeer:hover,.im_dialogs_scrollable_wrap a.im_dialog_searchpeer_selected{background:#f3f3f3}
 .im_dialog_peer{color:#222;font-weight:700;margin-top:2px;margin-bottom:2px}
 .active .im_dialog_peer{color:#fff}
 .im_dialog_badge{background:#64c270;font-size:11px;padding:5px;border-radius:11px;min-width:21px;text-align:center;margin-top:4px}
