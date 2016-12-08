@@ -1280,6 +1280,28 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
+      $scope.$on('history_direction_key', function (e, data) {
+        var newScrollTop = false
+        console.warn('scroll top', data.keyCode)
+        switch (data.keyCode) {
+          case 33: // page up
+            newScrollTop = scrollableWrap.scrollTop - scrollableWrap.clientHeight
+            break
+          case 34: // page down
+            newScrollTop = scrollableWrap.scrollTop + scrollableWrap.clientHeight
+            break
+          case 36: // home
+            newScrollTop = 0
+            break
+          case 35: // end
+            newScrollTop = scrollableWrap.scrollHeight
+            break
+        }
+        if (newScrollTop !== false) {
+          $(scrollableWrap).stop().animate({scrollTop: newScrollTop}, 200)
+        }
+      })
+
       $scope.$on('ui_history_change', function () {
         var pr = parseInt($(scrollableWrap).css('paddingRight'))
         $(scrollableWrap).addClass('im_history_to_bottom')
@@ -1653,6 +1675,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$emit('last_message_edit')
           return cancelEvent(e)
         }
+        $scope.$emit('history_direction_key', e)
         return true
       }
 
