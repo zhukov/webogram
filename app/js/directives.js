@@ -681,7 +681,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link($scope, element, attrs) {
       var messageID = $scope.$parent.$eval(attrs.myMessageEdited)
-      console.log(attrs.myMessageEdited, messageID)
       if (checkEdited($scope, element, messageID)) {
         $scope.$on('message_edit', function (e, data) {
           var messageID = $scope.$parent.$eval(attrs.myMessageEdited)
@@ -694,7 +693,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function checkEdited($scope, element, messageID) {
       var message = AppMessagesManager.getMessage(messageID)
-      console.warn('check edited', messageID, message.canBeEdited, message.edit_date)
       if (!message.canBeEdited) {
         $timeout(function () {
           $scope.$destroy()
@@ -795,7 +793,9 @@ angular.module('myApp.directives', ['myApp.filters'])
             // Strange Chrome bug, when field doesn't get blur, but becomes inactive after location change
             setTimeout(function () {
               searchField.blur()
-              searchField.focus()
+              setTimeout(function () {
+                searchField.focus()
+              }, 0)
             }, 100)
           }
           return cancelEvent(e)

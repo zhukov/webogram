@@ -311,6 +311,8 @@
 	"conversation_media_contact": "Contact",
 	"conversation_media_attachment": "Attachment",
 
+	"conversation_search_peer": "Search in this chat",
+
 	"conversation_group_created": "created the group",
 	"conversation_group_renamed": "changed group name",
 	"conversation_group_photo_updated": "changed group photo",
@@ -433,6 +435,7 @@
 	"head_media_video": "Videos",
 	"head_media_documents": "Files",
 	"head_media_audio": "Voice messages",
+	"head_media_search": "Search",
 	"head_about": "About",
 	"head_clear_all": "Clear history",
 	"head_edit": "Edit",

@@ -716,6 +716,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     })
 
+    $scope.$on('history_search', function (e, peerID) {
+      $scope.setSearchPeer(peerID)
+    })
+
+    $scope.$on('esc_no_more', function () {
+      $scope.setSearchPeer(false)
+    })
+
     $scope.$on('dialogs_multiupdate', function (e, dialogsUpdated) {
       if ($scope.search.query !== undefined && $scope.search.query.length) {
         return false
@@ -862,7 +870,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$watchCollection('search', function () {
       $scope.dialogs = []
       $scope.foundMessages = []
-      searchMessages = false
+      searchMessages = $scope.searchPeer ? true : false
       contactsJump++
       loadDialogs()
     })
@@ -875,6 +883,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.importPhonebook = function () {
       PhonebookContactsService.openPhonebookImport()
+    }
+
+    $scope.setSearchPeer = function (peerID) {
+      $scope.searchPeer = peerID || false
+      $scope.searchClear()
+      if (peerID) {
+        $scope.dialogs = []
+        $scope.foundPeers = []
+        searchMessages = true
+        $scope.toggleSearch()
+      } else {
+        searchMessages = false
+      }
+      loadDialogs(true)
     }
 
     $scope.$on('contacts_update', function () {
@@ -901,7 +923,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (searchMessages) {
         searchTimeoutPromise = (force || maxID) ? $q.when() : $timeout(angular.noop, 500)
         return searchTimeoutPromise.then(function () {
-          return AppMessagesManager.getSearch(false, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
+          var searchPeerID = $scope.searchPeer || false
+          return AppMessagesManager.getSearch(searchPeerID, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
             if (curJump != jump) {
               return $q.reject()
             }
@@ -964,6 +987,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             }
             var wrapDialog = searchMessages ? undefined : dialog
             var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, wrapDialog)
+
+            if (searchMessages &&
+                $scope.searchPeer) {
+              var message = AppMessagesManager.getMessage(dialog.top_message)
+              if (message.fromID > 0) {
+                wrappedDialog.peerID = message.fromID
+              }
+            }
+
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
@@ -1022,11 +1054,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             }
             var wrapDialog = searchMessages ? undefined : dialog
             var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, wrapDialog)
+
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
               peersInDialogs[dialog.peerID] = true
             }
+
+            if (searchMessages &&
+                $scope.searchPeer) {
+              var message = AppMessagesManager.getMessage(dialog.top_message)
+              if (message.fromID > 0) {
+                wrappedDialog.peerID = message.fromID
+              }
+            }
+
             dialogsList.push(wrappedDialog)
           })
 
@@ -1847,6 +1889,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function toggleMedia (mediaType) {
+      if (mediaType == 'search') {
+        $rootScope.$broadcast('history_search', $scope.curDialog.peerID)
+        return
+      }
       $scope.historyFilter.mediaType = mediaType || false
       $scope.curDialog.messageID = false
       peerHistory.messages = []

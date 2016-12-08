@@ -1340,6 +1340,24 @@ a.im_dialog_selected {
   }
 }
 
+.im_dialogs_scrollable_wrap a.im_dialog_searchpeer .icon-search-clear {
+  display: inline-block;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.im_dialogs_scrollable_wrap {
+  a.im_dialog_searchpeer {
+    &,
+    &:hover,
+    &_selected {
+      background: #f3f3f3;
+    }
+  }
+}
+
+
+
 .im_dialog_peer {
   color: #222;
   font-weight: bold;

@@ -26,6 +26,33 @@
             </div>
 
             <ul class="nav nav-pills nav-stacked">
+              <li class="im_dialog_wrap" ng-if="searchPeer">
+                <a class="im_dialog im_dialog_searchpeer disabled" ng-mousedown="setSearchPeer()">
+
+                  <div class="im_dialog_meta pull-right">
+                    <div class="im_dialog_clear_searchpeer">
+                      <!-- <i class="icon icon-clear-searchpeer"></i> -->
+                      <i class="icon icon-search-clear"></i>
+                    </div>
+                  </div>
+
+                  <div class="im_dialog_photo pull-left" my-peer-photolink="searchPeer" img-class="im_dialog_photo" watch="true"></div>
+
+                  <div class="im_dialog_message_wrap">
+
+                    <div class="im_dialog_peer">
+                      <span my-peer-link="searchPeer"></span>
+                    </div>
+
+                    <div class="im_dialog_message">
+                      <span class="" my-i18n="conversation_search_peer"></span>
+                    </div>
+
+                  </div>
+
+                </a>
+
+              </li>
               <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
             </ul>
 

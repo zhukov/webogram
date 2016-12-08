@@ -754,6 +754,12 @@ angular.module('myApp.services')
               neededContents['messageMediaDocument'] = true
               neededDocType = 'voice'
               break
+
+            default:
+              return $q.when({
+                count: 0,
+                history: []
+              })
           }
           for (i = 0; i < historyStorage.history.length; i++) {
             message = messagesStorage[historyStorage.history[i]]
