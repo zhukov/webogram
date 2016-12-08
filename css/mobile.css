@@ -659,6 +659,10 @@ img.im_message_video_thumb,
   font-size: 10px;
   padding: 0;
 }
+.im_message_edited {
+  position: absolute;
+  top: -11px;
+}
 .im_message_out .im_message_fwd_date {
   color: #93a2ae;
 }

@@ -1513,8 +1513,9 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .im_service_message_photo_thumb{display:inline-block;margin:0 auto}
 .im_service_message .im_service_message_pinned{color:inherit;font-weight:700;display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 .im_message_date,.im_message_fwd_date{color:#adadad;font-size:.85em;padding:0 0 20px 10px}
-.im_message_date{cursor:pointer}
-.im_message_date:hover{text-decoration:underline}
+.im_message_edited{display:none}
+.im_message_date_text{cursor:pointer}
+.im_message_date_text:hover{text-decoration:underline}
 div.im_message_author,div.im_message_body{display:block;overflow:hidden}
 .im_message_body{-webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text}
 .im_message_error_btn{display:none}
@@ -1843,7 +1844,7 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .stickerset_actions{padding:10px 20px;height:50px;text-align:center}
 .stickerset_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
 .confirm_modal_window .modal-dialog,.error_modal_window .modal-dialog,.md_simple_modal_window .modal-dialog{max-width:348px}
-.im_message_focus_active .audio_player_duration,.im_message_focus_active .audio_player_size,.im_message_focus_active .im_message_date,.im_message_focus_active .im_message_document_size,.im_message_focus_active .im_message_fwd_date,.im_message_focus_active .im_message_sign_link,.im_message_focus_active .im_message_views_cnt{color:#899daf}
+.im_message_focus_active .audio_player_duration,.im_message_focus_active .audio_player_size,.im_message_focus_active .im_message_date,.im_message_focus_active .im_message_document_size,.im_message_focus_active .im_message_edited,.im_message_focus_active .im_message_fwd_date,.im_message_focus_active .im_message_sign_link,.im_message_focus_active .im_message_views_cnt{color:#899daf}
 .im_message_focus_active .im_message_outer_wrap{background-color:rgba(242,246,250,0);animation-name:im_message_focus_fade;-webkit-animation-timing-function:ease-in;animation-timing-function:ease-out;animation-duration:4s}
 @keyframes im_message_focus_fade{from{background-color:#f2f6fa}
 to{background-color:rgba(242,246,250,0)}}
