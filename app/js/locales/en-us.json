@@ -408,7 +408,7 @@
 	"error_modal_not_found_description": "The page was not found.",
 	"error_modal_flood_description": "You are performing too many actions. Please try again later.",
 	"error_modal_internal_description": "Internal server error occured. Please try again later.",
-	"error_modal_tech_details": "Technical details here",
+	"error_modal_tech_details": "Click for technical details",
 	"error_modal_recovery_na_description": "Since you haven't provided a recovery e-mail when setting up your password, your remaining options are either to remember your password or to reset your account.",
 	"error_modal_password_success_descripion": "Your password for Two-Step Verification is now active.",
 	"error_modal_password_disabled_descripion": "You have disabled Two-Step Verification.",
