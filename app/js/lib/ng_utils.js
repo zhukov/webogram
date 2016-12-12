@@ -1664,13 +1664,20 @@ angular.module('izhukov.utils', [])
               skipEntity = true
               break
             }
-            var url = entity.url || entityText
-            url = wrapUrl(url, entity._ == 'messageEntityTextUrl' ? true : false)
+            var inner
+            if (entity._ == 'messageEntityTextUrl') {
+              url = entity.url
+              url = wrapUrl(url, true)
+              inner = wrapRichNestedText(entityText, entity.nested, options)
+            } else {
+              url = wrapUrl(entityText, false)
+              inner = encodeEntities(replaceUrlEncodings(entityText))
+            }
             html.push(
               '<a href="',
               encodeEntities(url),
               '" target="_blank" rel="noopener noreferrer">',
-              wrapRichNestedText(entityText, entity.nested, options),
+              inner,
               '</a>'
             )
             break
@@ -1865,6 +1872,16 @@ angular.module('izhukov.utils', [])
         url = url.replace(/\)+$/, '')
       }
       return url
+    }
+
+    function replaceUrlEncodings(urlWithEncoded) {
+      return urlWithEncoded.replace(/(%[A-Z\d]{2})+/g, function (str) {
+        try {
+          return decodeURIComponent(str);
+        } catch (e) {
+          return str
+        }
+      })
     }
 
     function wrapPlainText (text, options) {
