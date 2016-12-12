@@ -16,7 +16,7 @@
 
   <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true"></div>
 
-  <div class="im_dialog_message_wrap" ng-class="{im_dialog_message_wtyping: dialogMessage.typing > 0}">
+  <div class="im_dialog_message_wrap">
 
     <div class="im_dialog_peer">
       <span my-peer-link="dialogMessage.peerID" verified="true"></span>
@@ -24,7 +24,7 @@
 
     <div ng-switch="dialogMessage.typing ? 'typing' : (!dialogMessage.unreadCount && dialogMessage.draft ? 'draft' : (dialogMessage.deleted ? 'deleted' : 'message'))">
 
-      <div ng-switch-when="typing" class="im_dialog_message im_dialog_message_typing">
+      <div ng-switch-when="typing" class="im_dialog_message">
         <span class="im_short_message_service" my-i18n="im_conversation_group_typing">
           <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
         </span>
