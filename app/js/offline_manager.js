@@ -34,7 +34,7 @@
   if (navigator.serviceWorker) {
     // If available, use a Service Worker to handle offlining.
     navigator.serviceWorker.register('service_worker.js').then(function (registration) {
-      console.log('offline worker registered')
+      console.log('Offline worker registered')
       registration.addEventListener('updatefound', function () {
         var installingWorker = this.installing
 

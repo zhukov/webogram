@@ -1238,7 +1238,7 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
-    var markdownTestRegExp = /[`_*@]/;
+    var markdownTestRegExp = /[`_*@]/
     var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)([`*_])([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
 
     var siteHashtags = {
@@ -1877,7 +1877,7 @@ angular.module('izhukov.utils', [])
     function replaceUrlEncodings(urlWithEncoded) {
       return urlWithEncoded.replace(/(%[A-Z\d]{2})+/g, function (str) {
         try {
-          return decodeURIComponent(str);
+          return decodeURIComponent(str)
         } catch (e) {
           return str
         }

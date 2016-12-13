@@ -943,8 +943,12 @@ MessageComposer.prototype.onKeyEvent = function (e) {
       }
     }
 
-    // Control keys when content is empty
+    // Direction keys when content is empty
     if ([33, 34, 35, 36, 38, 39].indexOf(e.keyCode) != -1 &&
+        !e.shiftKey &&
+        !e.altKey &&
+        !e.ctrlKey &&
+        !e.metaKey &&
         this.richTextareaEl &&
         !this.richTextareaEl[0].textContent.length) {
       return this.onDirectionKey(e)

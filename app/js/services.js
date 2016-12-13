@@ -4671,7 +4671,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function getDraft (peerID, unsyncOnly) {
-      console.warn(dT(), 'get draft', peerID, unsyncOnly)
+      // console.warn(dT(), 'get draft', peerID, unsyncOnly)
       return Storage.get('draft' + peerID).then(function (draft) {
         if (typeof draft === 'string') {
           if (draft.length > 0) {
@@ -4684,9 +4684,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         if (!draft && !unsyncOnly) {
           draft = getServerDraft(peerID)
-          console.warn(dT(), 'server', draft)
+          // console.warn(dT(), 'server', draft)
         } else {
-          console.warn(dT(), 'local', draft)
+          // console.warn(dT(), 'local', draft)
         }
         var replyToMsgID = draft && draft.replyToMsgID
         if (replyToMsgID) {
@@ -4711,7 +4711,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       cachedServerDrafts[peerID] = draft
 
       if (options.notify) {
-        console.warn(dT(), 'save draft', peerID, apiDraft, options)
+        // console.warn(dT(), 'save draft', peerID, apiDraft, options)
         changeDraft(peerID, draft)
         $rootScope.$broadcast('draft_updated', {
           peerID: peerID,
@@ -4724,7 +4724,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function changeDraft (peerID, draft) {
-      console.warn(dT(), 'change draft', peerID, draft)
+      // console.warn(dT(), 'change draft', peerID, draft)
       if (!peerID) {
         console.trace('empty peerID')
       }
@@ -4821,14 +4821,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function syncDraft (peerID) {
-      console.warn(dT(), 'sync draft', peerID)
+      // console.warn(dT(), 'sync draft', peerID)
       getDraft(peerID, true).then(function (localDraft) {
         var serverDraft = cachedServerDrafts[peerID]
         if (draftsAreEqual(serverDraft, localDraft)) {
-          console.warn(dT(), 'equal drafts', localDraft, serverDraft)
+          // console.warn(dT(), 'equal drafts', localDraft, serverDraft)
           return
         }
-        console.warn(dT(), 'changed draft', localDraft, serverDraft)
+        // console.warn(dT(), 'changed draft', localDraft, serverDraft)
         var params = {
           flags: 0,
           peer: AppPeersManager.getInputPeerByID(peerID)

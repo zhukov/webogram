@@ -2541,7 +2541,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           draftDataPromise = DraftsManager.getDraft($scope.curDialog.peerID)
         }
         draftDataPromise.then(function (draftData) {
-          console.warn('draft', editMessageID, draftData)
           $scope.draftMessage.type = editMessageID ? 'edit' : 'new'
           $scope.draftMessage.text = draftData ? draftData.text : ''
           $scope.draftMessage.isBroadcast = AppPeersManager.isBroadcast($scope.curDialog.peerID)
