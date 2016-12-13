@@ -487,6 +487,9 @@ TLDeserialization.prototype.fetchIntBytes = function (bits, typed, field) {
 TLDeserialization.prototype.fetchRawBytes = function (len, typed, field) {
   if (len === false) {
     len = this.readInt((field || '') + '_length')
+    if (len > this.byteView.byteLength) {
+      throw new Error('Invalid raw bytes length: ' + len + ', buffer len: ' + this.byteView.byteLength)
+    }
   }
 
   if (typed) {

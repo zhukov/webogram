@@ -741,6 +741,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     var masterInstance = false
     var deactivatePromise = false
     var deactivated = false
+    var initial = false
 
     function start () {
       if (!started && !Config.Navigator.mobile && !Config.Modes.packed) {
@@ -814,7 +815,11 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           Storage.set({xt_instance: newInstance})
           if (!masterInstance) {
             MtpNetworkerFactory.startAll()
-            console.warn(dT(), 'now master instance', newInstance)
+            if (!initial) {
+              initial = true
+            } else {
+              console.warn(dT(), 'now master instance', newInstance)
+            }
           }
           masterInstance = true
           if (deactivatePromise) {
