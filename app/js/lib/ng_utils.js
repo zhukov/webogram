@@ -1980,3 +1980,113 @@ angular.module('izhukov.utils', [])
 
     return timeParams
   })
+
+  .service('WebPushApiManager', function ($timeout, $q, $rootScope) {
+
+    var isAvailable = true
+    var isPushEnabled = false
+    var started = false
+
+    if (!('PushManager' in window) ||
+        !('Notification' in window) ||
+        !('serviceWorker' in navigator)) {
+      console.warn('Push messaging is not supported.')
+      isAvailable = false
+    }
+
+    if (Notification.permission === 'denied') {
+      console.warn('The user has blocked notifications.')
+    }
+
+    function start() {
+      if (!started) {
+        started = true
+        getSubscription()
+      }
+    }
+
+    function getSubscription() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.getSubscription().then(function(subscription) {
+          if (!subscription) {
+            console.log('Not yet subscribed to Push')
+            subscribe()
+            return
+          }
+
+          isPushEnabled = true
+          pushSubscriptionNotify('init', subscription)
+        })
+        .catch(function(err) {
+          console.log('Error during getSubscription()', err)
+        })
+      })
+    }
+
+    function subscribe() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.subscribe({userVisibleOnly: true}).then(function(subscription) {
+          // The subscription was successful
+          isPushEnabled = true
+          pushSubscriptionNotify('subscribe', subscription)
+        })
+        .catch(function(e) {
+          if (Notification.permission === 'denied') {
+            console.log('Permission for Notifications was denied')
+          } else {
+            console.log('Unable to subscribe to push.', e)
+          }
+        })
+      })
+    }
+
+    function unsubscribe() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.getSubscription().then(function (subscription) {
+          pushSubscriptionNotify('unsubscribe', subscription)
+
+          isPushEnabled = false
+
+          if (subscription) {
+            setTimeout(function() {
+              subscription.unsubscribe().then(function(successful) {
+                isPushEnabled = false
+              }).catch(function(e) {
+                console.error('Unsubscription error: ', e)
+              })
+            }, 3000)
+          }
+
+        }).catch(function(e) {
+          console.error('Error thrown while unsubscribing from ' +
+            'push messaging.', e)
+        })
+      })
+    }
+
+    function pushSubscriptionNotify(event, subscription) {
+      console.warn(dT(), 'Push', event, subscription.toJSON())
+      $rootScope.$emit('push_' + event, {
+        tokenType: 10,
+        tokenValue: JSON.stringify(subscription.toJSON())
+      })
+    }
+
+    return {
+      isAvailable: isAvailable,
+      start: start,
+      isPushEnabled: isPushEnabled,
+      subscribe: subscribe,
+      unsubscribe: unsubscribe
+    }
+
+  })

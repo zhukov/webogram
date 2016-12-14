@@ -37,7 +37,8 @@ Config.Modes = {
   ios_standalone: window.navigator.standalone && navigator.userAgent.match(/iOS|iPhone|iPad/),
   chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false,
   animations: true,
-  memory_only: false
+  memory_only: false,
+  push_api: location.search.indexOf('push=1') == -1
 }
 
 Config.Navigator = {

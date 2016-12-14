@@ -3516,7 +3516,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager, FileManager) {
+  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager, FileManager, WebPushApiManager) {
     navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate
 
     var notificationsMsSiteMode = false
@@ -3598,18 +3598,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     })
 
     var registeredDevice = false
-    if (window.navigator.mozSetMessageHandler) {
-      window.navigator.mozSetMessageHandler('push', function (e) {
-        console.log(dT(), 'received push', e)
-        $rootScope.$broadcast('push_received')
-      })
-
-      window.navigator.mozSetMessageHandler('push-register', function (e) {
-        console.log(dT(), 'received push', e)
-        registeredDevice = false
-        registerDevice()
-      })
-    }
+    $rootScope.$on('push_init', function (e, tokenData) {
+      if (tokenData) {
+        registerDevice(tokenData)
+      }
+    })
+    $rootScope.$on('push_subscribe', function (e, tokenData) {
+      registerDevice(tokenData)
+    })
+    $rootScope.$on('push_unsubscribe', function (e, tokenData) {
+      unregisterDevice(tokenData)
+    })
 
     return {
       start: start,
@@ -3702,7 +3701,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function start () {
       updateNotifySettings()
       $rootScope.$on('settings_changed', updateNotifySettings)
-      registerDevice()
+      WebPushApiManager.start()
 
       if (!notificationsUiSupport) {
         return false
@@ -3904,40 +3903,26 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       notificationsCount = 0
     }
 
-    var registerDevicePeriod = 1000
-    var registerDeviceTO
-    function registerDevice () {
-      if (registeredDevice) {
+    function registerDevice (tokenData) {
+      if (registeredDevice &&
+          angular.equals(registeredDevice, tokenData)) {
         return false
       }
-      if (navigator.push && Config.Navigator.ffos && Config.Modes.packed) {
-        var req = navigator.push.register()
-
-        req.onsuccess = function (e) {
-          clearTimeout(registerDeviceTO)
-          console.log(dT(), 'Push registered', req.result)
-          registeredDevice = req.result
-          MtpApiManager.invokeApi('account.registerDevice', {
-            token_type: 4,
-            token: registeredDevice
-          })
-        }
-
-        req.onerror = function (e) {
-          console.error('Push register error', e, e.toString())
-          registerDeviceTO = setTimeout(registerDevice, registerDevicePeriod)
-          registerDevicePeriod = Math.min(30000, registerDevicePeriod * 1.5)
-        }
-      }
+      MtpApiManager.invokeApi('account.registerDevice', {
+        token_type: tokenData.tokenType,
+        token: tokenData.tokenValue
+      }).then(function () {
+        registeredDevice = tokenData
+      })
     }
 
-    function unregisterDevice () {
+    function unregisterDevice (tokenData) {
       if (!registeredDevice) {
         return false
       }
       MtpApiManager.invokeApi('account.unregisterDevice', {
-        token_type: 4,
-        token: registeredDevice
+        token_type: tokenData.tokenType,
+        token: tokenData.tokenValue
       }).then(function () {
         registeredDevice = false
       })
@@ -4532,15 +4517,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return
       }
       started = true
-
-      if ('registerProtocolHandler' in navigator) {
-        try {
-          navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram Web')
-        } catch (e) {}
-        try {
-          navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram Web')
-        } catch (e) {}
-      }
 
       if (window.navigator.mozSetMessageHandler) {
         console.log(dT(), 'Set activity message handler')
