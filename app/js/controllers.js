@@ -2379,6 +2379,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function editMessage() {
       var text = $scope.draftMessage.text
+      text = RichTextProcessor.parseEmojis(text)
 
       AppMessagesManager.editMessage(editMessageID, text).then(function () {
         editMessageID = false
