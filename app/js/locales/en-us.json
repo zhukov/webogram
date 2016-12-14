@@ -63,6 +63,7 @@
 	"settings_modal_sounds": "Sounds",
 	"settings_modal_language": "Language",
 	"settings_modal_notifications": "Desktop notifications",
+	"settings_modal_webpage_preview": "Show Webpage Preview",
 	"settings_modal_message_preview": "Message preview",
 	"settings_modal_sound": "Sound",
 	"settings_modal_enter_send_description_md": "**Enter** - send message, **Shift + Enter** - new line",
