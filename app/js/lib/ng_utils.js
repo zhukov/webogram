@@ -2092,6 +2092,9 @@ angular.module('izhukov.utils', [])
     }
 
     function setUpServiceWorkerChannel() {
+      if (!isAvailable) {
+        return
+      }
       navigator.serviceWorker.addEventListener('message', function(event) {
         if (event.data &&
             event.data.type == 'push_click') {
