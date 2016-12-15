@@ -1,5 +1,11 @@
 console.log('[SW] Push worker started')
 
+<<<<<<< HEAD
+=======
+var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+var userInvisibleSupported = isFirefox ? true : false
+
+>>>>>>> Improved service worker code
 var pendingNotification = false
 
 var defaultBaseUrl
@@ -28,7 +34,11 @@ self.addEventListener('push', function(event) {
     Promise.all([getMuteUntil(), getLastAliveTime()]).then(function (result) {
       var muteUntil = result[0]
       var lastAliveTime = result[1]
+<<<<<<< HEAD
       if (userInvisibleIsSupported() &&
+=======
+      if (userInvisibleSupported &&
+>>>>>>> Improved service worker code
           muteUntil &&
           nowTime < muteUntil) {
         console.log('Supress notification because mute for ', Math.ceil((muteUntil - nowTime) / 60000), 'min')
@@ -38,8 +48,12 @@ self.addEventListener('push', function(event) {
           nowTime - lastAliveTime < 60000) {
         return clients.matchAll({type: 'window'}).then(function(clientList) {
           console.log('matched clients', clientList)
+<<<<<<< HEAD
           hasActiveWindows = clientList.length > 0
           if (hasActiveWindows) {
+=======
+          if (clientList.length) {
+>>>>>>> Improved service worker code
             console.log('Supress notification because some instance is alive')
             return reject()
           }
