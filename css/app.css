@@ -1379,9 +1379,7 @@ i.icon-verified{display:inline-block;width:17px;height:17px;vertical-align:text-
 .im_dialogs_scrollable_wrap .active a.im_dialog{border-radius:0;background-color:#6490b1}
 .im_dialogs_scrollable_wrap .active a.im_dialog:hover,.im_dialogs_scrollable_wrap .active a.im_dialog_selected{background-color:#6490b1}
 .im_dialogs_modal_list{padding-top:10px}
-.im_dialog_message_wrap{overflow:hidden;word-wrap:break-word}
-.im_dialog_message_typing,.im_dialog_message_wtyping .im_dialog_message_notyping{display:none}
-.im_dialog_message_wtyping .im_dialog_message_typing{display:block}
+.im_dialog_message_wrap{word-wrap:break-word}
 a.im_dialog .im_dialog_chat_from_wrap,a.im_dialog .im_short_message_media,a.im_dialog .im_short_message_service{color:#3a6d99}
 a.im_dialog .im_short_message_text{color:grey}
 a.im_dialog .im_dialog_draft_from{color:#c05f5a}
@@ -1402,6 +1400,7 @@ a.im_dialog:hover .im_dialog_unread,a.im_dialog_selected .im_dialog_unread{backg
 a.im_dialog:hover .im_dialog_date,a.im_dialog_selected .im_dialog_date{color:#91a6ba}
 .active .im_dialog_date,.active a.im_dialog:hover .im_dialog_date,.active a.im_dialog_selected .im_dialog_date{color:#b8d1e4}
 .im_dialog_message,.im_dialog_peer{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.im_dialog_message_wrap{height:44px;overflow:hidden}
 .im_dialog_message{color:grey}
 .icon-caret{width:8px;height:4px;display:inline-block;vertical-align:text-top;margin-top:7px;margin-left:6px;background-image:url(../img/icons/IconsetW.png);background-repeat:no-repeat;background-position:-17px -444px}
 .is_2x .icon-caret{background-image:url(../img/icons/IconsetW_2x.png);background-size:42px 1171px}
