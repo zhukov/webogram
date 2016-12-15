@@ -86,6 +86,13 @@
       </a>
     </div>
 
+    <div ng-if="notify.desktop && notify.pushAvailable" class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="togglePush()" ng-class="notify.push ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_notification_push"></span>
+      </a>
+    </div>
+
     <div class="mobile_modal_action_wrap">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="togglePreview()" ng-class="notify.preview ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>

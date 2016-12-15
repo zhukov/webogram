@@ -3989,7 +3989,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, AppRuntimeManager, ErrorService, _) {
+  .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
     $scope.profile = {}
     $scope.photo = {}
     $scope.version = Config.App.version
@@ -4142,9 +4142,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
-    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (settings) {
+    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview', 'notify_nopush').then(function (settings) {
       $scope.notify.desktop = !settings[0]
       $scope.send.enter = settings[1] ? '' : '1'
+
+      $scope.notify.pushAvailable = WebPushApiManager.isAvailable
+      $scope.notify.push = !settings[5]
 
       if (settings[2] !== false) {
         $scope.notify.volume = settings[2] > 0 && settings[2] <= 1.0 ? settings[2] : 0
@@ -4192,6 +4195,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           Storage.remove('notify_nodesktop')
         } else {
           Storage.set({notify_nodesktop: true})
+        }
+        $rootScope.$broadcast('settings_changed')
+      }
+
+      $scope.togglePush = function () {
+        $scope.notify.push = !$scope.notify.push
+
+        if ($scope.notify.push) {
+          Storage.remove('notify_nopush')
+        } else {
+          Storage.set({notify_nopush: true})
         }
         $rootScope.$broadcast('settings_changed')
       }

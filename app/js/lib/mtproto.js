@@ -1468,6 +1468,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     }
 
     MtpNetworker.prototype.processMessage = function (message, messageID, sessionID) {
+      var msgidInt = parseInt(messageID.toString(10).substr(0, -10), 10)
+      if (msgidInt % 2) {
+        console.warn('[MT] Server even message id: ', messageID, message)
+        return
+      }
       // console.log('process message', message, messageID, sessionID)
       switch (message._) {
         case 'msg_container':
@@ -1513,7 +1518,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
         case 'message':
           if (this.lastServerMessages.indexOf(messageID) != -1) {
-            console.warn('[MT] Server same messageID: ', messageID)
+            // console.warn('[MT] Server same messageID: ', messageID)
             this.ackMessage(messageID)
             return
           }

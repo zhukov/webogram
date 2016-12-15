@@ -2512,7 +2512,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, AppGamesManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
+  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, AppGamesManager, RichTextProcessor, AppUsersManager, AppPeersManager, LocationParamsService, PeersSelectService, GeoLocationManager) {
     var inlineResults = {}
 
     return {
@@ -3516,7 +3516,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager, FileManager, WebPushApiManager) {
+  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, $modal, _, MtpApiManager, AppPeersManager, AppChatsManager, AppUsersManager, IdleManager, Storage, AppRuntimeManager, FileManager, WebPushApiManager) {
     navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate
 
     var notificationsMsSiteMode = false
@@ -3598,9 +3598,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     })
 
     var registeredDevice = false
+    var pushInited = false
     $rootScope.$on('push_init', function (e, tokenData) {
-      if (tokenData) {
-        registerDevice(tokenData)
+      pushInited = true
+      if (!settings.nodesktop && !settings.nopush) {
+        if (tokenData) {
+          registerDevice(tokenData)
+        } else {
+          WebPushApiManager.subscribe()
+        }
+      } else {
+        unregisterDevice(tokenData)
       }
     })
     $rootScope.$on('push_subscribe', function (e, tokenData) {
@@ -3609,6 +3617,42 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     $rootScope.$on('push_unsubscribe', function (e, tokenData) {
       unregisterDevice(tokenData)
     })
+
+    var topMessagesDeferred = $q.defer()
+    var unregisterTopMsgs = $rootScope.$on('dialogs_multiupdate', function () {
+      unregisterTopMsgs()
+      topMessagesDeferred.resolve()
+    })
+    var topMessagesPromise = topMessagesDeferred.promise
+
+    $rootScope.$on('push_notification_click', function (e, notificationData) {
+      if (notificationData.action == 'push_settings') {
+        $modal.open({
+          templateUrl: templateUrl('settings_modal'),
+          controller: 'SettingsModalController',
+          windowClass: 'settings_modal_window mobile_modal',
+          backdrop: 'single'
+        })
+        return
+      }
+      var peerID = notificationData.custom && notificationData.custom.peerID
+      console.log('click', notificationData, peerID)
+      if (peerID) {
+        topMessagesPromise.then(function () {
+          if (notificationData.custom.channel_id &&
+              !AppChatsManager.hasChat(notificationData.custom.channel_id)) {
+            return
+          }
+          if (peerID > 0 && !AppUsersManager.hasUser(peerID)) {
+            return
+          }
+          $rootScope.$broadcast('history_focus', {
+            peerString: AppPeersManager.getPeerString(peerID)
+          })
+        })
+      }
+    })
+    
 
     return {
       start: start,
@@ -3627,7 +3671,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function updateNotifySettings () {
-      Storage.get('notify_nodesktop', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (updSettings) {
+      Storage.get('notify_nodesktop', 'notify_volume', 'notify_novibrate', 'notify_nopreview', 'notify_nopush').then(function (updSettings) {
         settings.nodesktop = updSettings[0]
         settings.volume = updSettings[1] === false
           ? 0.5
@@ -3635,6 +3679,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         settings.novibrate = updSettings[2]
         settings.nopreview = updSettings[3]
+        settings.nopush = updSettings[4]
+
+
+        if (pushInited) {
+          var needPush = !settings.nopush && !settings.nodesktop && WebPushApiManager.isAvailable || false
+          var hasPush = registeredDevice !== false
+          if (needPush != hasPush) {
+            if (needPush) {
+              WebPushApiManager.subscribe()
+            } else {
+              WebPushApiManager.unsubscribe()
+            }
+          }
+        }
       })
     }
 
@@ -3901,6 +3959,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       notificationsShown = {}
       notificationsCount = 0
+
+      WebPushApiManager.hidePushNotifications()
     }
 
     function registerDevice (tokenData) {

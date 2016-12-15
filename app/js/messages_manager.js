@@ -260,6 +260,8 @@ angular.module('myApp.services')
         if (hasPrepend &&
             !newDialogsHandlePromise) {
           newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
+        } else {
+          $rootScope.$broadcast('dialogs_multiupdate', {})
         }
       })
     }

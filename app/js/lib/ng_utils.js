@@ -394,7 +394,7 @@ angular.module('izhukov.utils', [])
 
       request.onsuccess = function (event) {
         finished = true
-        db = request.result
+        var db = request.result
 
         db.onerror = function (error) {
           storageIsAvailable = false
@@ -1981,7 +1981,7 @@ angular.module('izhukov.utils', [])
     return timeParams
   })
 
-  .service('WebPushApiManager', function ($timeout, $q, $rootScope) {
+  .service('WebPushApiManager', function ($window, $timeout, $q, $rootScope, AppRuntimeManager) {
 
     var isAvailable = true
     var isPushEnabled = false
@@ -2002,6 +2002,7 @@ angular.module('izhukov.utils', [])
       if (!started) {
         started = true
         getSubscription()
+        setUpServiceWorkerChannel()
       }
     }
 
@@ -2011,13 +2012,7 @@ angular.module('izhukov.utils', [])
       }
       navigator.serviceWorker.ready.then(function(reg) {
         reg.pushManager.getSubscription().then(function(subscription) {
-          if (!subscription) {
-            console.log('Not yet subscribed to Push')
-            subscribe()
-            return
-          }
-
-          isPushEnabled = true
+          isPushEnabled = subscription ? true : false
           pushSubscriptionNotify('init', subscription)
         })
         .catch(function(err) {
@@ -2052,11 +2047,11 @@ angular.module('izhukov.utils', [])
       }
       navigator.serviceWorker.ready.then(function(reg) {
         reg.pushManager.getSubscription().then(function (subscription) {
-          pushSubscriptionNotify('unsubscribe', subscription)
-
           isPushEnabled = false
 
           if (subscription) {
+            pushSubscriptionNotify('unsubscribe', subscription)
+
             setTimeout(function() {
               subscription.unsubscribe().then(function(successful) {
                 isPushEnabled = false
@@ -2073,12 +2068,55 @@ angular.module('izhukov.utils', [])
       })
     }
 
-    function pushSubscriptionNotify(event, subscription) {
-      console.warn(dT(), 'Push', event, subscription.toJSON())
-      $rootScope.$emit('push_' + event, {
-        tokenType: 10,
-        tokenValue: JSON.stringify(subscription.toJSON())
+    function isAliveNotify() {
+      if (!isAvailable ||
+          $rootScope.idle && $rootScope.idle.deactivated) {
+        return
+      }
+      var baseUrl = (location.href || '').replace(/#.*$/, '') + '#/im'
+      var eventData = {type: 'alive', baseUrl: baseUrl}
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage(eventData)
+      }
+      setTimeout(isAliveNotify, 10000)
+    }
+
+    function hidePushNotifications() {
+      if (!isAvailable) {
+        return
+      }
+      if (navigator.serviceWorker.controller) {
+        var eventData = {type: 'notifications_clear'}
+        navigator.serviceWorker.controller.postMessage(eventData)
+      }
+    }
+
+    function setUpServiceWorkerChannel() {
+      navigator.serviceWorker.addEventListener('message', function(event) {
+        if (event.data &&
+            event.data.type == 'push_click') {
+          if ($rootScope.idle && $rootScope.idle.deactivated) {
+            AppRuntimeManager.reload()
+            return
+          }
+          $rootScope.$emit('push_notification_click', event.data.data)
+        }
       })
+      navigator.serviceWorker.ready.then(isAliveNotify)
+    }
+
+
+    function pushSubscriptionNotify(event, subscription) {
+      if (subscription) {
+        console.warn(dT(), 'Push', event, subscription.toJSON())
+        $rootScope.$emit('push_' + event, {
+          tokenType: 10,
+          tokenValue: JSON.stringify(subscription.toJSON())
+        })
+      } else {
+        console.warn(dT(), 'Push', event, false)
+        $rootScope.$emit('push_' + event, false)
+      }
     }
 
     return {
@@ -2086,7 +2124,8 @@ angular.module('izhukov.utils', [])
       start: start,
       isPushEnabled: isPushEnabled,
       subscribe: subscribe,
-      unsubscribe: unsubscribe
+      unsubscribe: unsubscribe,
+      hidePushNotifications: hidePushNotifications
     }
 
   })
