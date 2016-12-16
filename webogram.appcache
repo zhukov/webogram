@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Fri Dec 16 2016 17:18:30 GMT+0300 (MSK)
+# Time: Fri Dec 16 2016 19:16:31 GMT+0300 (MSK)
 
 
 CACHE:
@@ -63,10 +63,6 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-js/lib/bin_utils.js
-js/lib/crypto_worker.js
-js/lib/polyfill.js
-js/lib/push_worker.js
 js/locales/de-de.json
 js/locales/en-us.json
 js/locales/es-es.json
@@ -74,6 +70,10 @@ js/locales/it-it.json
 js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
+js/lib/bin_utils.js
+js/lib/crypto_worker.js
+js/lib/polyfill.js
+js/lib/push_worker.js
 vendor/closure/long.js
 vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
