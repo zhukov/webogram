@@ -28,6 +28,7 @@ self.addEventListener('push', function(event) {
   var closeAll = obj.badge ? !fireNotification(obj, event) : true
   
   if (closeAll) {
+    console.log('[SW] Closing all notifications on push')
     var promise = self.registration.showNotification('Telegram').then(function () {
       return closeAllNotifications(obj)
     }).catch(function (error) {
