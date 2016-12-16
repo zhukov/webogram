@@ -55,6 +55,8 @@
           }
         })
       })
+    }).catch(function (error) {
+      console.error('Offline register SW error', error)
     })
   } else {
     // Otherwise, use AppCache.

@@ -1,5 +1,3 @@
-'use strict';
-
 console.log('[SW] Push worker started')
 
 
@@ -27,22 +25,23 @@ self.addEventListener('push', function(event) {
   var obj = event.data.json()
   console.log('[SW] push', obj)
   if (!obj.badge) {
-    event.waitUntil(self.registration.showNotification('Telegram').then(function () {
+    var promise = self.registration.showNotification('Telegram').then(function () {
       return closeAllNotifications(obj)
-    }))
+    }).catch(function (error) {
+      console.error('Show notification error', error)
+    })
+    if ('waitUntil' in event) {
+      event.waitUntil(promise)
+    }
   } else {
     fireNotification(obj, event)
   }
 })
 
-self.addEventListener('activate', function(event) {
-  event.waitUntil(clients.claim())
-})
-
 
 self.addEventListener('message', function(event) {
   console.log('[SW] on message', event.data)
-  var client = event.ports[0] || event.source
+  var client = event.ports && event.ports[0] || event.source
   if (event.data.type == 'ping') {
     if (event.data.localNotifications) {
       lastAliveTime = +(new Date())
@@ -76,7 +75,7 @@ function fireNotification(obj, event) {
   var nowTime = +(new Date())
   if (nowTime - lastAliveTime < 60000) {
     console.log('Supress notification because some instance is alive')
-    return false
+    // return false
   }
   if (muteUntil && nowTime < muteUntil) {
     console.log('Supress notification because mute for ', (muteUntil - nowTime) / 60000, 'min')
@@ -127,9 +126,13 @@ function fireNotification(obj, event) {
     if (event && event.notification) {
       pushToNotifications(event.notification)
     }
+  }).catch(function (error) {
+    console.error('Show notification promise', error)
   })
 
-  event.waitUntil(finalPromise)
+  if ('waitUntil' in event) {
+    event.waitUntil(finalPromise)
+  }
 
   return true
 }
@@ -163,17 +166,24 @@ function closeAllNotifications(obj) {
     } catch (e) {}
   }
 
-  var p = self.registration.getNotifications({}).then(function(notifications) {
-    for (var i = 0, len = notifications.length; i < len; i++) {
-      try {
-        notifications[i].close()
-      } catch (e) {}
-    }
-  })
+  var promise
+  if ('getNotifications' in self.registration) {
+    promise = self.registration.getNotifications({}).then(function(notifications) {
+      for (var i = 0, len = notifications.length; i < len; i++) {
+        try {
+          notifications[i].close()
+        } catch (e) {}
+      }
+    }).catch(function (error) {
+      console.error('Offline register SW error', error)
+    })
+  } else {
+    promise = Promise.resolve()
+  }
 
   notifications = []
 
-  return p
+  return promise
 }
 
 
@@ -193,7 +203,7 @@ self.addEventListener('notificationclick', function(event) {
     return
   }
 
-  event.waitUntil(clients.matchAll({
+  var promise = clients.matchAll({
     type: 'window'
   }).then(function(clientList) {
     notification.data.action = action
@@ -210,7 +220,13 @@ self.addEventListener('notificationclick', function(event) {
     if (clients.openWindow) {
       return clients.openWindow(baseUrl)
     }
-  }))
+  }).catch(function (error) {
+    console.error('Clients.matchAll error', error)
+  })
+
+  if ('waitUntil' in event) {
+    event.waitUntil(promise)
+  }
 })
 
 self.addEventListener('notificationclose', onCloseNotification)
@@ -242,12 +258,12 @@ self.addEventListener('notificationclose', onCloseNotification)
           db.createObjectStore(dbStoreName)
         }
         if (!request) {
-          throw new Exception()
+          return reject()
         }
       } catch (error) {
         console.error('error opening db', error.message)
         idbIsAvailable = false
-        return $q.reject(error)
+        return reject(error)
       }
 
       var finished = false
@@ -320,7 +336,7 @@ self.addEventListener('notificationclose', onCloseNotification)
         request.onsuccess = function (event) {
           var result = event.target.result
           if (result === undefined) {
-            reject()
+            resolve()
           } else {
             resolve(result)
           }
@@ -348,12 +364,18 @@ self.addEventListener('notificationclose', onCloseNotification)
 
 IDBManager.getItem('push_mute_until').then(function (newMuteUntil) {
   muteUntil = Math.max(muteUntil || 0, newMuteUntil || 0) || false
+}).catch(function (error) {
+  console.error('IDB error', error)
 })
 
 IDBManager.getItem('push_lang').then(function (newLang) {
   lang = newLang || {}
+}).catch(function (error) {
+  console.error('IDB error', error)
 })
 
 IDBManager.getItem('push_settings').then(function (newSettings) {
   settings = newSettings || {}
+}).catch(function (error) {
+  console.error('IDB error', error)
 })
