@@ -28,8 +28,10 @@ self.addEventListener('push', function(event) {
   var closeAll = obj.badge ? !fireNotification(obj, event) : true
   
   if (closeAll) {
+    console.log('[SW] Closing all notifications on push')
     var promise = self.registration.showNotification('Telegram').then(function () {
-      return closeAllNotifications(obj)
+      // return closeAllNotifications()
+      setTimeout(closeAllNotifications, 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
     })
@@ -65,7 +67,7 @@ self.addEventListener('message', function(event) {
     }
   }
   if (event.data.type == 'notifications_clear') {
-    closeAllNotifications(event.data)
+    closeAllNotifications()
   }
   if (event.data.baseUrl) {
     baseUrl = event.data.baseUrl
@@ -160,7 +162,7 @@ function removeFromNotifications(notification) {
   }
 }
 
-function closeAllNotifications(obj) {
+function closeAllNotifications() {
   for (var i = 0, len = notifications.length; i < len; i++) {
     try {
       notifications[i].close()

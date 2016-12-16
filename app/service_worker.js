@@ -1,3 +1,3 @@
 importScripts('js/lib/push_worker.js')
 
-// Version 49
+// Version 50
