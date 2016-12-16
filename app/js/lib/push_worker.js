@@ -113,7 +113,7 @@ function fireNotification(obj, event) {
     actions: [
       {
         action: 'mute1d',
-        title: lang.push_action_mute1d || 'Mute for 1D'
+        title: lang.push_action_mute1d || 'Mute for 24H'
       },
       {
         action: 'push_settings',
