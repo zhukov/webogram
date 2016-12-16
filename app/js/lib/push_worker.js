@@ -75,7 +75,7 @@ function fireNotification(obj, event) {
   var nowTime = +(new Date())
   if (nowTime - lastAliveTime < 60000) {
     console.log('Supress notification because some instance is alive')
-    // return false
+    return false
   }
   if (muteUntil && nowTime < muteUntil) {
     console.log('Supress notification because mute for ', (muteUntil - nowTime) / 60000, 'min')
