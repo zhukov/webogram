@@ -1998,7 +1998,8 @@ angular.module('izhukov.utils', [])
       localNotificationsAvailable = false
     }
 
-    if (Notification.permission === 'denied') {
+    if (isAvailable &&
+        Notification.permission === 'denied') {
       console.warn('The user has blocked notifications.')
     }
 
