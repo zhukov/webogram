@@ -881,6 +881,9 @@ a.im_dialog_selected .im_dialog_date {
   font-size: 12px;
   margin-right: 3px;
 }
+.im_dialog_message_wrap {
+  height: 51px;
+}
 .im_dialog_unread,
 .active .im_dialog_unread,
 a.im_dialog:hover .im_dialog_unread,
