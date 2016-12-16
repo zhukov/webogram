@@ -24,7 +24,10 @@ switch (location.hostname) {
 self.addEventListener('push', function(event) {
   var obj = event.data.json()
   console.log('[SW] push', obj)
-  if (!obj.badge) {
+
+  var closeAll = obj.badge ? !fireNotification(obj, event) : true
+  
+  if (closeAll) {
     var promise = self.registration.showNotification('Telegram').then(function () {
       return closeAllNotifications(obj)
     }).catch(function (error) {
@@ -33,8 +36,6 @@ self.addEventListener('push', function(event) {
     if ('waitUntil' in event) {
       event.waitUntil(promise)
     }
-  } else {
-    fireNotification(obj, event)
   }
 })
 
