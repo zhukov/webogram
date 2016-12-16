@@ -1981,17 +1981,21 @@ angular.module('izhukov.utils', [])
     return timeParams
   })
 
-  .service('WebPushApiManager', function ($window, $timeout, $q, $rootScope, AppRuntimeManager) {
+  .service('WebPushApiManager', function ($window, $timeout, $q, $rootScope, _, AppRuntimeManager) {
 
     var isAvailable = true
     var isPushEnabled = false
+    var localNotificationsAvailable = true
     var started = false
+    var settings = {}
+    var isAliveTO
 
     if (!('PushManager' in window) ||
         !('Notification' in window) ||
         !('serviceWorker' in navigator)) {
       console.warn('Push messaging is not supported.')
       isAvailable = false
+      localNotificationsAvailable = false
     }
 
     if (Notification.permission === 'denied') {
@@ -2004,6 +2008,10 @@ angular.module('izhukov.utils', [])
         getSubscription()
         setUpServiceWorkerChannel()
       }
+    }
+
+    function setLocalNotificationsDisabled() {
+      localNotificationsAvailable = false
     }
 
     function getSubscription() {
@@ -2073,12 +2081,33 @@ angular.module('izhukov.utils', [])
           $rootScope.idle && $rootScope.idle.deactivated) {
         return
       }
-      var baseUrl = (location.href || '').replace(/#.*$/, '') + '#/im'
-      var eventData = {type: 'alive', baseUrl: baseUrl}
+      var eventData = {
+        type: 'ping',
+        localNotifications: localNotificationsAvailable,
+        baseUrl: (location.href || '').replace(/#.*$/, '') + '#/im',
+        lang: {
+          push_action_mute1d: _(Config.Mobile
+            ? 'push_action_mute1d_mobile_raw'
+            : 'push_action_mute1d_raw'
+          ),
+          push_action_settings: _(Config.Mobile
+            ? 'push_action_settings_mobile_raw'
+            : 'push_action_settings_raw'
+          ),
+          push_message_nopreview: _('push_message_nopreview_raw'),
+        },
+        settings: settings
+      }
       if (navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage(eventData)
       }
-      setTimeout(isAliveNotify, 10000)
+      isAliveTO = setTimeout(isAliveNotify, 10000)
+    }
+
+    function setSettings(newSettings) {
+      settings = newSettings
+      clearTimeout(isAliveTO)
+      isAliveNotify()
     }
 
     function hidePushNotifications() {
@@ -2128,7 +2157,9 @@ angular.module('izhukov.utils', [])
       isPushEnabled: isPushEnabled,
       subscribe: subscribe,
       unsubscribe: unsubscribe,
-      hidePushNotifications: hidePushNotifications
+      hidePushNotifications: hidePushNotifications,
+      setLocalNotificationsDisabled: setLocalNotificationsDisabled,
+      setSettings: setSettings
     }
 
   })

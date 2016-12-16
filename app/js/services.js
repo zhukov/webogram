@@ -3693,6 +3693,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             }
           }
         }
+        WebPushApiManager.setSettings(settings)
       })
     }
 
@@ -3846,11 +3847,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var notification
 
       if ('Notification' in window) {
-        notification = new Notification(data.title, {
-          icon: data.image || '',
-          body: data.message || '',
-          tag: data.tag || ''
-        })
+        try {
+          notification = new Notification(data.title, {
+            icon: data.image || '',
+            body: data.message || '',
+            tag: data.tag || ''
+          })
+        } catch (e) {
+          notificationsUiSupport = false
+          WebPushApiManager.setLocalNotificationsDisabled()
+          return
+        }
       }
       else if ('mozNotification' in navigator) {
         notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '')
@@ -3862,7 +3869,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         notification = {
           index: idx
         }
-      }else {
+      } else {
         return
       }
 
@@ -3973,6 +3980,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         token: tokenData.tokenValue
       }).then(function () {
         registeredDevice = tokenData
+      }, function (error) {
+        error.handled = true
       })
     }
 
@@ -3985,6 +3994,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         token: tokenData.tokenValue
       }).then(function () {
         registeredDevice = false
+      }, function (error) {
+        error.handled = true
       })
     }
 

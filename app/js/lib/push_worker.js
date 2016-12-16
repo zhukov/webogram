@@ -8,6 +8,9 @@ var lastAliveTime = false
 var pendingNotification = false
 var muteUntil = false
 var baseUrl
+var settings
+var lang = {}
+
 switch (location.hostname) {
   case 'localhost':
     baseUrl = 'http://localhost:8000/app/index.html#/im'
@@ -24,7 +27,9 @@ self.addEventListener('push', function(event) {
   var obj = event.data.json()
   console.log('[SW] push', obj)
   if (!obj.badge) {
-    closeAllNotifications(obj, event)
+    event.waitUntil(self.registration.showNotification('Telegram').then(function () {
+      return closeAllNotifications(obj)
+    }))
   } else {
     fireNotification(obj, event)
   }
@@ -37,19 +42,30 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('message', function(event) {
   console.log('[SW] on message', event.data)
-  port = event.ports[0] || event.source
-  if (event.data.type == 'alive') {
-    lastAliveTime = +(new Date())
+  var client = event.ports[0] || event.source
+  if (event.data.type == 'ping') {
+    if (event.data.localNotifications) {
+      lastAliveTime = +(new Date())
+    }
 
     if (pendingNotification &&
-        port &&
-        'postMessage' in port) {
-      port.postMessage(pendingNotification)
+        client &&
+        'postMessage' in client) {
+      client.postMessage(pendingNotification)
       pendingNotification = false
+    }
+
+    if (event.data.lang) {
+      lang = event.data.lang
+      IDBManager.setItem('push_lang', lang)
+    }
+    if (event.data.settings) {
+      settings = event.data.settings
+      IDBManager.setItem('push_settings', settings)
     }
   }
   if (event.data.type == 'notifications_clear') {
-    closeAllNotifications(event.data, event)
+    closeAllNotifications(event.data)
   }
   if (event.data.baseUrl) {
     baseUrl = event.data.baseUrl
@@ -60,7 +76,7 @@ function fireNotification(obj, event) {
   var nowTime = +(new Date())
   if (nowTime - lastAliveTime < 60000) {
     console.log('Supress notification because some instance is alive')
-    return false
+    // return false
   }
   if (muteUntil && nowTime < muteUntil) {
     console.log('Supress notification because mute for ', (muteUntil - nowTime) / 60000, 'min')
@@ -82,20 +98,27 @@ function fireNotification(obj, event) {
     peerID = obj.custom && obj.custom.from_id || 0
   }
   obj.custom.peerID = peerID
+  var tag = 'peer' + peerID
+
+  if (settings && settings.nopreview) {
+    title = 'Telegram'
+    body = lang.push_message_nopreview || 'You have a new message'
+    tag = 'unknown_peer'
+  }
 
   var notificationPromise = self.registration.showNotification(title, {
     body: body,
     icon: icon,
-    tag: 'peer' + peerID,
+    tag: tag,
     data: obj,
     actions: [
       {
         action: 'mute1d',
-        title: 'Mute background alerts for 1 day'
+        title: lang.push_action_mute1d || 'Mute for 1D'
       },
       {
         action: 'push_settings',
-        title: 'Background alerts settings'
+        title: lang.push_action_settings || 'Settings'
       }
     ]
   })
@@ -133,22 +156,24 @@ function removeFromNotifications(notification) {
   }
 }
 
-function closeAllNotifications(obj, event) {
+function closeAllNotifications(obj) {
   for (var i = 0, len = notifications.length; i < len; i++) {
     try {
       notifications[i].close()
     } catch (e) {}
   }
 
-  event.waitUntil(self.registration.getNotifications({}).then(function(notifications) {
+  var p = self.registration.getNotifications({}).then(function(notifications) {
     for (var i = 0, len = notifications.length; i < len; i++) {
       try {
         notifications[i].close()
       } catch (e) {}
     }
-  }))
+  })
 
   notifications = []
+
+  return p
 }
 
 
@@ -161,7 +186,10 @@ self.addEventListener('notificationclick', function(event) {
   if (action == 'mute1d') {
     console.log('[SW] mute for 1d')
     muteUntil = +(new Date()) + 86400000
-    IDBManager.setItem('mute_until', muteUntil.toString())
+    IDBManager.setItem('push_mute_until', muteUntil.toString())
+    return
+  }
+  if (!notification.data) {
     return
   }
 
@@ -174,7 +202,7 @@ self.addEventListener('notificationclick', function(event) {
       var client = clientList[i]
       if ('focus' in client) {
         client.focus()
-        ;(port || client).postMessage(pendingNotification)
+        client.postMessage(pendingNotification)
         pendingNotification = false
         return
       }
@@ -318,6 +346,14 @@ self.addEventListener('notificationclose', onCloseNotification)
 
 
 
-IDBManager.getItem('mute_until').then(function (newMuteUntil) {
+IDBManager.getItem('push_mute_until').then(function (newMuteUntil) {
   muteUntil = Math.max(muteUntil || 0, newMuteUntil || 0) || false
+})
+
+IDBManager.getItem('push_lang').then(function (newLang) {
+  lang = newLang || {}
+})
+
+IDBManager.getItem('push_settings').then(function (newSettings) {
+  settings = newSettings || {}
 })

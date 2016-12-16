@@ -803,7 +803,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         if (searchFocused && e.keyCode == 13 && !Config.Navigator.mobile) { // Enter
           var currentSelected = $(scrollableWrap).find('.im_dialog_selected')[0] || $(scrollableWrap).find('.im_dialog_wrap a')[0]
-          if (currentSelected) {
+          if (currentSelected &&
+              !$(currentSelected).hasClass('disabled')) {
             $(currentSelected).trigger('mousedown')
           }
           return cancelEvent(e)
