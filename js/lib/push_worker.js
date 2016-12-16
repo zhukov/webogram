@@ -31,7 +31,7 @@ self.addEventListener('push', function(event) {
     console.log('[SW] Closing all notifications on push')
     var promise = self.registration.showNotification('Telegram').then(function () {
       // return closeAllNotifications()
-      setTimeout(closeAllNotifications, 0)
+      setTimeout(closeAllNotifications, 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
     })
