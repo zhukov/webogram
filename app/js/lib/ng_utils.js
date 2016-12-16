@@ -2140,10 +2140,21 @@ angular.module('izhukov.utils', [])
 
     function pushSubscriptionNotify(event, subscription) {
       if (subscription) {
-        console.warn(dT(), 'Push', event, subscription.toJSON())
+        var subscriptionObj = subscription.toJSON()
+        if (!subscriptionObj ||
+            !subscriptionObj.endpoint || 
+            !subscriptionObj.keys ||
+            !subscriptionObj.keys.p256dh ||
+            !subscriptionObj.keys.auth) {
+          console.warn(dT(), 'Invalid push subscription', subscriptionObj)
+          unsubscribe()
+          isAvailable = false
+          return pushSubscriptionNotify(event, false)
+        }
+        console.warn(dT(), 'Push', event, subscriptionObj)
         $rootScope.$emit('push_' + event, {
           tokenType: 10,
-          tokenValue: JSON.stringify(subscription.toJSON())
+          tokenValue: JSON.stringify(subscriptionObj)
         })
       } else {
         console.warn(dT(), 'Push', event, false)
