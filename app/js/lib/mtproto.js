@@ -1247,15 +1247,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
             return result
           },
           function (error) {
-            if (error.status == 404 &&
-              (error.data || '').indexOf('nginx/0.3.33') != -1) {
-              Storage.remove(
-                'dc' + self.dcID + '_server_salt',
-                'dc' + self.dcID + '_auth_key'
-              ).then(function () {
-                AppRuntimeManager.reload()
-              })
-            }
             if (!error.message && !error.type) {
               error = angular.extend(baseError, {type: 'NETWORK_BAD_REQUEST', originalError: error})
             }
