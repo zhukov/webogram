@@ -65,7 +65,7 @@ self.addEventListener('push', function(event) {
   var closePromise = notificationPromise.catch(function () {
     console.log('[SW] Closing all notifications on push')
     if (userInvisibleSupported) {
-      return closeAllNotifications
+      return closeAllNotifications()
     }
     var promise = self.registration.showNotification('Telegram').then(function () {
       // return closeAllNotifications()
