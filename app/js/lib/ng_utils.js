@@ -1989,6 +1989,8 @@ angular.module('izhukov.utils', [])
     var started = false
     var settings = {}
     var isAliveTO
+    var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+    var userVisibleOnly = isFirefox ? false : true
 
     if (!('PushManager' in window) ||
         !('Notification' in window) ||
@@ -2035,7 +2037,7 @@ angular.module('izhukov.utils', [])
         return
       }
       navigator.serviceWorker.ready.then(function(reg) {
-        reg.pushManager.subscribe({userVisibleOnly: true}).then(function(subscription) {
+        reg.pushManager.subscribe({userVisibleOnly: userVisibleOnly}).then(function(subscription) {
           // The subscription was successful
           isPushEnabled = true
           pushSubscriptionNotify('subscribe', subscription)
@@ -2045,6 +2047,10 @@ angular.module('izhukov.utils', [])
             console.log('Permission for Notifications was denied')
           } else {
             console.log('Unable to subscribe to push.', e)
+            if (!userVisibleOnly) {
+              userVisibleOnly = true
+              setTimeout(subscribe, 0)
+            }
           }
         })
       })

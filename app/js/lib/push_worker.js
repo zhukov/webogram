@@ -8,6 +8,15 @@ var muteUntil = false
 var baseUrl
 var settings
 var lang = {}
+var userInvisibleSupported = false
+
+
+var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+
+if (isFirefox) {
+  userInvisibleSupported = true
+}
+
 
 switch (location.hostname) {
   case 'localhost':
@@ -25,19 +34,49 @@ self.addEventListener('push', function(event) {
   var obj = event.data.json()
   console.log('[SW] push', obj)
 
-  var closeAll = obj.badge ? !fireNotification(obj, event) : true
-  
-  if (closeAll) {
+  var checksPromise = new Promise(function (resolve, reject) {
+    if (!obj.badge) {
+      return reject()
+    }
+    var nowTime = +(new Date())
+    if (userInvisibleSupported &&
+        muteUntil &&
+        nowTime < muteUntil) {
+      console.log('Supress notification because mute for ', (muteUntil - nowTime) / 60000, 'min')
+      return reject()
+    }
+    if (lastAliveTime && 
+        nowTime - lastAliveTime < 60000) {
+      return clients.matchAll({type: 'window'}).then(function(clientList) {
+        if (clientList.length) {
+          console.log('Supress notification because some instance is alive')
+          return reject()
+        }
+        return resolve()
+      })
+    }
+    return resolve()
+  })
+
+  var notificationPromise = checksPromise.then(function () {
+    fireNotification(obj)
+  })
+
+  var closePromise = notificationPromise.catch(function () {
     console.log('[SW] Closing all notifications on push')
+    if (userInvisibleSupported) {
+      return closeAllNotifications
+    }
     var promise = self.registration.showNotification('Telegram').then(function () {
       // return closeAllNotifications()
       setTimeout(closeAllNotifications, 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
     })
-    if ('waitUntil' in event) {
-      event.waitUntil(promise)
-    }
+  })
+
+  if ('waitUntil' in event) {
+    event.waitUntil(closePromise)
   }
 })
 
@@ -74,17 +113,7 @@ self.addEventListener('message', function(event) {
   }
 })
 
-function fireNotification(obj, event) {
-  var nowTime = +(new Date())
-  if (nowTime - lastAliveTime < 60000) {
-    console.log('Supress notification because some instance is alive')
-    return false
-  }
-  if (muteUntil && nowTime < muteUntil) {
-    console.log('Supress notification because mute for ', (muteUntil - nowTime) / 60000, 'min')
-    return false
-  }
-
+function fireNotification(obj) {
   var title = obj.title || 'Telegram'
   var body = obj.description || ''
   var icon = 'img/logo_share.png'
@@ -125,19 +154,14 @@ function fireNotification(obj, event) {
     ]
   })
 
-  var finalPromise = notificationPromise.then(function (event) {
+  return notificationPromise.then(function (event) {
     if (event && event.notification) {
       pushToNotifications(event.notification)
     }
+    return Promise.resolve()
   }).catch(function (error) {
     console.error('Show notification promise', error)
   })
-
-  if ('waitUntil' in event) {
-    event.waitUntil(finalPromise)
-  }
-
-  return true
 }
 
 
@@ -150,12 +174,10 @@ function pushToNotifications(notification) {
 }
 
 function onCloseNotification(event) {
-  muteUntil = Math.max(muteUntil || 0, +(new Date()) + 600000) // 10 min
   removeFromNotifications(event.notification)
 }
 
 function removeFromNotifications(notification) {
-  console.warn('on close', notification)
   var pos = notifications.indexOf(notification)
   if (pos != -1) {
     notifications.splice(pos, 1)
@@ -196,7 +218,7 @@ self.addEventListener('notificationclick', function(event) {
   notification.close()
 
   var action = event.action
-  if (action == 'mute1d') {
+  if (action == 'mute1d' && userInvisibleSupported) {
     console.log('[SW] mute for 1d')
     muteUntil = +(new Date()) + 86400000
     IDBManager.setItem('push_mute_until', muteUntil.toString())

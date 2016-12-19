@@ -3516,7 +3516,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, $modal, _, MtpApiManager, AppPeersManager, AppChatsManager, AppUsersManager, IdleManager, Storage, AppRuntimeManager, FileManager, WebPushApiManager) {
+  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, $modal, _, toaster, MtpApiManager, AppPeersManager, AppChatsManager, AppUsersManager, IdleManager, Storage, AppRuntimeManager, FileManager, WebPushApiManager) {
     navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate
 
     var notificationsMsSiteMode = false
@@ -3632,6 +3632,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           controller: 'SettingsModalController',
           windowClass: 'settings_modal_window mobile_modal',
           backdrop: 'single'
+        })
+        return
+      }
+      if (notificationData.action == 'mute1d') {
+        MtpApiManager.invokeApi('account.updateDeviceLocked', function () {
+          period: 86400
+        }).then(function () {
+          var toastData = toaster.pop({
+            type: 'info',
+            body: _('push_action_mute1d_success'),
+            bodyOutputType: 'trustedHtml',
+            clickHandler: function () {
+              toaster.clear(toastData)
+            },
+            showCloseButton: false
+          })
         })
         return
       }
