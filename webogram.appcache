@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# Time: Mon Dec 19 2016 18:38:20 GMT+0300 (MSK)
+# Time: Mon Dec 19 2016 19:05:49 GMT+0300 (MSK)
 
 
 CACHE:
@@ -46,10 +46,6 @@ img/icons/PhotoIcons.png
 img/icons/PhotoIcons_2x.png
 img/icons/ProfileIcons.png
 img/icons/ProfileIcons_2x.png
-js/lib/bin_utils.js
-js/lib/crypto_worker.js
-js/lib/polyfill.js
-js/lib/push_worker.js
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/GroupAvatar1@2x.png
 img/placeholders/GroupAvatar2@2x.png
@@ -67,6 +63,10 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
+js/lib/bin_utils.js
+js/lib/crypto_worker.js
+js/lib/polyfill.js
+js/lib/push_worker.js
 js/locales/de-de.json
 js/locales/en-us.json
 js/locales/es-es.json
