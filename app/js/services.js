@@ -1163,12 +1163,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       })
     }
 
-    function getChannelParticipants (id) {
+    function getChannelParticipants (id, filter, offset, limit) {
+      filter = {_: filter || 'channelParticipantsRecent'}
+      offset = offset || 0
+      limit = limit || (AppChatsManager.isMegagroup(id) ? 50 : 200)
       return MtpApiManager.invokeApi('channels.getParticipants', {
         channel: AppChatsManager.getChannelInput(id),
-        filter: {_: 'channelParticipantsRecent'},
-        offset: 0,
-        limit: AppChatsManager.isMegagroup(id) ? 50 : 200
+        filter: filter,
+        offset: offset,
+        limit: limit
       }).then(function (result) {
         AppUsersManager.saveApiUsers(result.users)
         var participants = result.participants
@@ -1335,7 +1338,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getProfile: getProfile,
       getChatInviteLink: getChatInviteLink,
       getChatFull: getChatFull,
-      getChannelFull: getChannelFull
+      getChannelFull: getChannelFull,
+      getChannelParticipants: getChannelParticipants
     }
   })
 
@@ -4227,6 +4231,27 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     return {
       selectPeer: selectPeer,
       selectPeers: selectPeers
+    }
+  })
+
+  .service('ManageUsersService', function ($rootScope, $modal) {
+    function show (options) {
+      options = options || {}
+
+      var scope = $rootScope.$new()
+      angular.extend(scope, options)
+
+      return $modal.open({
+        templateUrl: templateUrl('manage_users_modal'),
+        controller: 'ManageUsersModalController',
+        scope: scope,
+        windowClass: 'contacts_modal_window mobile_modal',
+        backdrop: 'single'
+      }).result
+    }
+
+    return {
+      show: show
     }
   })
 

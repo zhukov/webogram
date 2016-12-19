@@ -29,6 +29,8 @@
 	"group_modal_migrate_to_supergroup": "Upgrade to supergroup",
 	"group_modal_members": "Members",
 	"group_modal_members_kick": "Remove",
+	"group_modal_admins": "Administrators",
+	"group_modal_admins_everyone_is_admin": "All Members are Administrator",
 	"group_modal_migrate_header": "Members limit reached",
 	"group_modal_migrate_desc": "To go over the limit and get additional features, upgrade to a supergroup:",
 	"group_modal_migrate_item1": "Supergroups can get up to 1000 members",
@@ -42,6 +44,9 @@
 	"channel_modal_share_loading": "Loading{dots}",
 	"channel_modal_join": "Join channel",
 	"channel_modal_add_member": "Invite members",
+	"channel_modal_add_admin": "Add admins",
+	"channel_modal_admins": "Administrators",
+	"channel_modal_blocked": "Blocked users",
 	"channel_modal_leave_channel": "Leave channel",
 	"channel_modal_delete_channel": "Delete channel",
 

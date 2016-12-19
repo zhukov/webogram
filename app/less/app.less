@@ -768,7 +768,7 @@ a.tg_checkbox {
     transition: background-color ease-in-out 0.1s;
   }
 
-  &.tg_checkbox_on span.icon-checkbox-outer {
+  &.tg_checkbox_on:not(.disabled) span.icon-checkbox-outer {
     background-color: #bfd9ed;
   }
 
@@ -788,13 +788,18 @@ a.tg_checkbox {
 
     .box-shadow(0px 0px 1px rgba(0, 0, 0, 0.05));
   }
-
-  &.tg_checkbox_on i.icon-checkbox-inner {
-    background: #6b9bc2;
-    margin-left: 16px;
-    border: 0;
-
-    .box-shadow(none);
+  &.tg_checkbox_on {
+    & i.icon-checkbox-inner {
+      margin-left: 16px;
+    }
+    &:not(.disabled) i.icon-checkbox-inner {
+      background: #6b9bc2;
+      border: 0;
+      .box-shadow(none);
+    }
+    &.disabled i.icon-checkbox-inner {
+      background: #f2f2f2
+    }
   }
 }
 
