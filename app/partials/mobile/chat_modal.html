@@ -68,6 +68,9 @@
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ == 'chatForbidden'">
       <a class="mobile_modal_action" ng-click="flushHistory()" my-i18n="group_modal_delete_group"></a>
     </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.creator">
+      <a class="mobile_modal_action" ng-click="setGroupAdmins()" my-i18n="group_modal_admins"></a>
+    </div>
     <div class="mobile_modal_action_wrap" ng-if="hasRights('edit_photo') &amp;&amp; !photo.updating">
       <span class="mobile_modal_action mobile_modal_upload_action">
         <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />

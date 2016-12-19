@@ -426,8 +426,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                    error.type.substr(0, 17) == '2FA_CONFIRM_WAIT_') {
             error.waitTime = error.type.substr(17)
             error.type = '2FA_CONFIRM_WAIT_TIME'
-          }          
-          
+          }
+
           delete $scope.progress.enabled
         })
       })
@@ -1674,7 +1674,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (Config.Mobile) {
           $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
-          
+
           $modal.open({
             templateUrl: templateUrl('message_actions_modal'),
             windowClass: 'message_actions_modal_window',
@@ -2275,7 +2275,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('edit_selected', function (e, messageID) {
       setEditDraft(messageID, true)
     })
-    
+
     $scope.$on('ui_typing', onTyping)
 
     $scope.draftMessage = {
@@ -3660,7 +3660,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ChatModalController', function ($scope, $modalInstance, $location, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
+  .controller('ChatModalController', function ($scope, $modalInstance, $location, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService, ManageUsersService) {
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {})
     $scope.settings = {notifications: true}
 
@@ -3753,6 +3753,44 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       MtpApiManager.invokeApi('messages.deleteChatUser', {
         chat_id: AppChatsManager.getChatInput($scope.chatID),
         user_id: AppUsersManager.getUserInput(userID)
+      }).then(onChatUpdated)
+    }
+
+    $scope.editChatAdmin = function (userID, isAdmin) {
+      MtpApiManager.invokeApi('messages.editChatAdmin', {
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
+        user_id: AppUsersManager.getUserInput(userID),
+        is_admin: isAdmin
+      })
+    }
+
+    $scope.setGroupAdmins = function () {
+      var participants = angular.copy($scope.chatFull.participants.participants)
+      var admins_enabled = $scope.chatFull.chat.pFlags.admins_enabled
+      ManageUsersService.show({
+        text: {
+          back: 'group_modal_info',
+          header: 'group_modal_admins',
+        },
+        users: participants,
+        switch: function(user) {
+          if (!admins_enabled) return
+          switch (user._) {
+            case 'chatParticipantCreator':
+              return
+            case 'chatParticipantAdmin':
+              user._ = 'chatParticipant'
+              break
+            case 'chatParticipant':
+              user._ = 'chatParticipantAdmin'
+          }
+          $scope.editChatAdmin(user.user_id, user._ == 'chatParticipantAdmin')
+        },
+        class: function(user) {
+          if (!admins_enabled || user._ == 'chatParticipantCreator') return 'tg_checkbox_on disabled'
+          else if (user._ == 'chatParticipantAdmin') return 'tg_checkbox_on'
+          // else return ''
+        }
       }).then(onChatUpdated)
     }
 
