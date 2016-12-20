@@ -1,33 +1,21 @@
 console.log('[SW] Push worker started')
 
-
-var port
-var lastAliveTime = false
-var pendingNotification = false
-var muteUntil = false
-var baseUrl
-var settings
-var lang = {}
-var userInvisibleSupported = false
-
-
 var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+var userInvisibleSupported = isFirefox ? true : false
 
-if (isFirefox) {
-  userInvisibleSupported = true
-}
+var pendingNotification = false
 
-
+var defaultBaseUrl
 switch (location.hostname) {
   case 'localhost':
-    baseUrl = 'http://localhost:8000/app/index.html#/im'
+    defaultBaseUrl = 'http://localhost:8000/app/index.html#/im'
     break
   case 'zhukov.github.io':
-    baseUrl = 'https://zhukov.github.io/webogram/#/im'
+    defaultBaseUrl = 'https://zhukov.github.io/webogram/#/im'
     break
   default:
   case 'web.telegram.org':
-    baseUrl = 'https://' + location.hostname + '/#/im'
+    defaultBaseUrl = 'https://' + location.hostname + '/#/im'
 }
 
 self.addEventListener('push', function(event) {
@@ -39,27 +27,34 @@ self.addEventListener('push', function(event) {
       return reject()
     }
     var nowTime = +(new Date())
-    if (userInvisibleSupported &&
-        muteUntil &&
-        nowTime < muteUntil) {
-      console.log('Supress notification because mute for ', (muteUntil - nowTime) / 60000, 'min')
-      return reject()
-    }
-    if (lastAliveTime && 
-        nowTime - lastAliveTime < 60000) {
-      return clients.matchAll({type: 'window'}).then(function(clientList) {
-        if (clientList.length) {
-          console.log('Supress notification because some instance is alive')
-          return reject()
-        }
-        return resolve()
-      })
-    }
-    return resolve()
+    Promise.all([getMuteUntil(), getLastAliveTime()]).then(function (result) {
+      var muteUntil = result[0]
+      var lastAliveTime = result[1]
+      if (userInvisibleSupported &&
+          muteUntil &&
+          nowTime < muteUntil) {
+        console.log('Supress notification because mute for ', Math.ceil((muteUntil - nowTime) / 60000), 'min')
+        return reject()
+      }
+      if (lastAliveTime && 
+          nowTime - lastAliveTime < 60000) {
+        return clients.matchAll({type: 'window'}).then(function(clientList) {
+          console.log('matched clients', clientList)
+          if (clientList.length) {
+            console.log('Supress notification because some instance is alive')
+            return reject()
+          }
+          return resolve()
+        })
+      }
+      return resolve()
+    })
   })
 
   var notificationPromise = checksPromise.then(function () {
-    fireNotification(obj)
+    return Promise.all([getSettings(), getLang()]).then(function (result) {
+      return fireNotification(obj, result[0], result[1])
+    })
   })
 
   var closePromise = notificationPromise.catch(function () {
@@ -75,10 +70,16 @@ self.addEventListener('push', function(event) {
     })
   })
 
-  if ('waitUntil' in event) {
-    event.waitUntil(closePromise)
-  }
+  event.waitUntil(closePromise)
 })
+
+self.addEventListener('install', function(event) {
+  event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate', function(event) {
+  console.log('[SW] on activate')
+  event.waitUntil(self.clients.claim());
+});
 
 
 self.addEventListener('message', function(event) {
@@ -87,6 +88,7 @@ self.addEventListener('message', function(event) {
   if (event.data.type == 'ping') {
     if (event.data.localNotifications) {
       lastAliveTime = +(new Date())
+      IDBManager.setItem('push_last_alive', lastAliveTime)
     }
 
     if (pendingNotification &&
@@ -108,12 +110,9 @@ self.addEventListener('message', function(event) {
   if (event.data.type == 'notifications_clear') {
     closeAllNotifications()
   }
-  if (event.data.baseUrl) {
-    baseUrl = event.data.baseUrl
-  }
 })
 
-function fireNotification(obj) {
+function fireNotification(obj, settings, lang) {
   var title = obj.title || 'Telegram'
   var body = obj.description || ''
   var icon = 'img/logo_share.png'
@@ -221,7 +220,7 @@ self.addEventListener('notificationclick', function(event) {
   if (action == 'mute1d' && userInvisibleSupported) {
     console.log('[SW] mute for 1d')
     muteUntil = +(new Date()) + 86400000
-    IDBManager.setItem('push_mute_until', muteUntil.toString())
+    IDBManager.setItem('push_mute_until', muteUntil)
     return
   }
   if (!notification.data) {
@@ -243,15 +242,15 @@ self.addEventListener('notificationclick', function(event) {
       }
     }
     if (clients.openWindow) {
-      return clients.openWindow(baseUrl)
+      return getSettings().then(function (settings) {
+        return clients.openWindow(settings.baseUrl || defaultBaseUrl)
+      })
     }
   }).catch(function (error) {
     console.error('Clients.matchAll error', error)
   })
 
-  if ('waitUntil' in event) {
-    event.waitUntil(promise)
-  }
+  event.waitUntil(promise)
 })
 
 self.addEventListener('notificationclose', onCloseNotification)
@@ -386,21 +385,52 @@ self.addEventListener('notificationclose', onCloseNotification)
 })()
 
 
+var lastAliveTime, muteUntil, settings, lang
 
-IDBManager.getItem('push_mute_until').then(function (newMuteUntil) {
-  muteUntil = Math.max(muteUntil || 0, newMuteUntil || 0) || false
-}).catch(function (error) {
-  console.error('IDB error', error)
-})
+function getMuteUntil() {
+  if (muteUntil !== undefined) {
+    return Promise.resolve(muteUntil)
+  }
+  return IDBManager.getItem('push_mute_until').then(function (newMuteUntil) {
+    return muteUntil = Math.max(muteUntil || 0, newMuteUntil || 0) || false
+  }).catch(function (error) {
+    console.error('IDB error', error)
+    return false
+  })
+}
 
-IDBManager.getItem('push_lang').then(function (newLang) {
-  lang = newLang || {}
-}).catch(function (error) {
-  console.error('IDB error', error)
-})
+function getLastAliveTime() {
+  if (lastAliveTime !== undefined) {
+    return Promise.resolve(lastAliveTime)
+  }
+  return IDBManager.getItem('push_last_alive').then(function (newLastAliveTime) {
+    return lastAliveTime = Math.max(lastAliveTime || 0, newLastAliveTime || 0) || false
+  }).catch(function (error) {
+    console.error('IDB error', error)
+    return false
+  })
+}
 
-IDBManager.getItem('push_settings').then(function (newSettings) {
-  settings = newSettings || {}
-}).catch(function (error) {
-  console.error('IDB error', error)
-})
+function getLang() {
+  if (lang !== undefined) {
+    return Promise.resolve(lang)
+  }
+  return IDBManager.getItem('push_lang').then(function (newLang) {
+    return lang = newLang || {}
+  }).catch(function (error) {
+    console.error('IDB error', error)
+    return {}
+  })
+}
+
+function getSettings() {
+  if (settings !== undefined) {
+    return Promise.resolve(settings)
+  }
+  return IDBManager.getItem('push_settings').then(function (newSettings) {
+    return settings = newSettings || {}
+  }).catch(function (error) {
+    console.error('IDB error', error)
+    return {}
+  })
+}
