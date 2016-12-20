@@ -2088,10 +2088,11 @@ angular.module('izhukov.utils', [])
           $rootScope.idle && $rootScope.idle.deactivated) {
         return
       }
+      settings.baseUrl = (location.href || '').replace(/#.*$/, '') + '#/im'
+      
       var eventData = {
         type: 'ping',
         localNotifications: localNotificationsAvailable,
-        baseUrl: (location.href || '').replace(/#.*$/, '') + '#/im',
         lang: {
           push_action_mute1d: _(Config.Mobile
             ? 'push_action_mute1d_mobile_raw'
@@ -2112,7 +2113,7 @@ angular.module('izhukov.utils', [])
     }
 
     function setSettings(newSettings) {
-      settings = newSettings
+      settings = angular.copy(newSettings)
       clearTimeout(isAliveTO)
       isAliveNotify()
     }
