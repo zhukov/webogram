@@ -2800,13 +2800,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           showCallbackMessage(callbackAnswer.message, callbackAnswer.pFlags.alert)
         }
         else if (typeof callbackAnswer.url === 'string') {
-          LocationParamsService.openUrl(callbackAnswer.url)
+          var url = RichTextProcessor.wrapUrl(callbackAnswer.url, true)
+          LocationParamsService.openUrl(url)
         }
       })
     }
 
     function gameButtonClick (id) {
-      console.trace()
       var message = AppMessagesManager.getMessage(id)
       var peerID = AppMessagesManager.getMessagePeer(message)
 

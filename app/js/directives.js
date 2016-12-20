@@ -232,7 +232,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
 
       var scope = $scope.$new(true)
-      scope.markup = AppMessagesManager.wrapReplyMarkup(message.reply_markup)
+      scope.markup = AppMessagesManager.wrapReplyMarkup(message.reply_markup, message.fromID)
       scope.messageId = message.mid
       messageKeyboardCompiled(scope, function (clonedElement) {
         $('.im_message_keyboard', element).replaceWith(clonedElement)

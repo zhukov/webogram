@@ -2319,7 +2319,7 @@ angular.module('myApp.services')
       return messagesForHistory[msgID] = message
     }
 
-    function wrapReplyMarkup (replyMarkup) {
+    function wrapReplyMarkup (replyMarkup, fromID) {
       if (!replyMarkup ||
         replyMarkup._ == 'replyKeyboardHide') {
         return false
@@ -2340,7 +2340,9 @@ angular.module('myApp.services')
         angular.forEach(markupRow.buttons, function (markupButton) {
           markupButton.rText = RichTextProcessor.wrapRichText(markupButton.text, {noLinks: true, noLinebreaks: true})
           if (markupButton._ == 'keyboardButtonUrl') {
-            markupButton.pUrl = RichTextProcessor.wrapUrl(markupButton.url, 1)
+            var from = AppUsersManager.getUser(fromID)
+            var unsafe = !(from && from.pFlags && from.pFlags.verified)
+            markupButton.pUrl = RichTextProcessor.wrapUrl(markupButton.url, unsafe)
           }
         })
       })
