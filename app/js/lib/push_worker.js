@@ -1,8 +1,5 @@
 console.log('[SW] Push worker started')
 
-var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
-var userInvisibleSupported = isFirefox ? true : false
-
 var pendingNotification = false
 
 var defaultBaseUrl
@@ -31,7 +28,7 @@ self.addEventListener('push', function(event) {
     Promise.all([getMuteUntil(), getLastAliveTime()]).then(function (result) {
       var muteUntil = result[0]
       var lastAliveTime = result[1]
-      if (userInvisibleSupported &&
+      if (userInvisibleIsSupported() &&
           muteUntil &&
           nowTime < muteUntil) {
         console.log('Supress notification because mute for ', Math.ceil((muteUntil - nowTime) / 60000), 'min')
@@ -61,7 +58,7 @@ self.addEventListener('push', function(event) {
 
   var closePromise = notificationPromise.catch(function () {
     console.log('[SW] Closing all notifications on push', hasActiveWindows)
-    if (userInvisibleSupported) {
+    if (userInvisibleIsSupported()) {
       return closeAllNotifications()
     }
     var promise = self.registration.showNotification('Telegram').then(function () {
@@ -221,7 +218,7 @@ self.addEventListener('notificationclick', function(event) {
   notification.close()
 
   var action = event.action
-  if (action == 'mute1d' && userInvisibleSupported) {
+  if (action == 'mute1d' && userInvisibleIsSupported()) {
     console.log('[SW] mute for 1d')
     muteUntil = +(new Date()) + 86400000
     IDBManager.setItem('push_mute_until', muteUntil)
@@ -437,4 +434,9 @@ function getSettings() {
     console.error('IDB error', error)
     return {}
   })
+}
+
+function userInvisibleIsSupported() {
+  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+  return isFirefox ? true : false
 }
