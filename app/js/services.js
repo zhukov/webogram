@@ -3627,11 +3627,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     $rootScope.$on('push_notification_click', function (e, notificationData) {
       if (notificationData.action == 'push_settings') {
-        $modal.open({
-          templateUrl: templateUrl('settings_modal'),
-          controller: 'SettingsModalController',
-          windowClass: 'settings_modal_window mobile_modal',
-          backdrop: 'single'
+        topMessagesPromise.then(function () {
+          $modal.open({
+            templateUrl: templateUrl('settings_modal'),
+            controller: 'SettingsModalController',
+            windowClass: 'settings_modal_window mobile_modal',
+            backdrop: 'single'
+          })
         })
         return
       }

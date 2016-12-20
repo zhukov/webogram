@@ -60,13 +60,15 @@ self.addEventListener('push', function(event) {
   })
 
   var closePromise = notificationPromise.catch(function () {
-    console.log('[SW] Closing all notifications on push')
-    if (userInvisibleSupported || hasActiveWindows) {
+    console.log('[SW] Closing all notifications on push', hasActiveWindows)
+    if (userInvisibleSupported) {
       return closeAllNotifications()
     }
     var promise = self.registration.showNotification('Telegram').then(function () {
-      // return closeAllNotifications()
-      setTimeout(closeAllNotifications, 100)
+      // if (hasActiveWindows) {
+      //   return closeAllNotifications()
+      // }
+      setTimeout(closeAllNotifications, hasActiveWindows ? 0 : 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
     })
