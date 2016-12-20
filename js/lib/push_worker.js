@@ -22,6 +22,7 @@ self.addEventListener('push', function(event) {
   var obj = event.data.json()
   console.log('[SW] push', obj)
 
+  var hasActiveWindows = false
   var checksPromise = new Promise(function (resolve, reject) {
     if (!obj.badge) {
       return reject()
@@ -40,7 +41,8 @@ self.addEventListener('push', function(event) {
           nowTime - lastAliveTime < 60000) {
         return clients.matchAll({type: 'window'}).then(function(clientList) {
           console.log('matched clients', clientList)
-          if (clientList.length) {
+          hasActiveWindows = clientList.length > 0
+          if (hasActiveWindows) {
             console.log('Supress notification because some instance is alive')
             return reject()
           }
@@ -58,13 +60,15 @@ self.addEventListener('push', function(event) {
   })
 
   var closePromise = notificationPromise.catch(function () {
-    console.log('[SW] Closing all notifications on push')
+    console.log('[SW] Closing all notifications on push', hasActiveWindows)
     if (userInvisibleSupported) {
       return closeAllNotifications()
     }
     var promise = self.registration.showNotification('Telegram').then(function () {
-      // return closeAllNotifications()
-      setTimeout(closeAllNotifications, 100)
+      // if (hasActiveWindows) {
+      //   return closeAllNotifications()
+      // }
+      setTimeout(closeAllNotifications, hasActiveWindows ? 0 : 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
     })
