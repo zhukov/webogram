@@ -20,7 +20,7 @@
   },
   "scripts": {
     "start": "gulp watch",
-    "test": "node_modules/.bin/karma start"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
