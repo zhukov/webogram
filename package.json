@@ -19,7 +19,7 @@
     "show": true
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "gulp watch",
     "test": "node_modules/.bin/karma start"
   },
   "repository": {
