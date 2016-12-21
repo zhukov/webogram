@@ -2,12 +2,6 @@ describe('AppWelcomeController', function () {
     var $controller, $rootScope, $scope, $location, MtApiManager, ErrorService,
         ChangelogNotifyService, LayoutSwitchService;
 
-    beforeEach(module('izhukov.mtproto'));
-    beforeEach(module('izhukov.utils'));
-    beforeEach(module('izhukov.mtproto.wrapper'));
-    beforeEach(module('ui.bootstrap'));
-    beforeEach(module('myApp.services'));
-    beforeEach(module('myApp.i18n'));
     beforeEach(module('myApp.controllers'));
 
     beforeEach(function () {

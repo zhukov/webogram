@@ -1,9 +1,7 @@
 describe('PhonebookContactsService', function () {
   var PhonebookContactsService;
 
-  beforeEach(module('izhukov.utils'));
   beforeEach(module('ui.bootstrap'));
-  beforeEach(module('myApp.i18n'));
   beforeEach(module('myApp.services'));
 
   beforeEach(inject(function (_PhonebookContactsService_) {

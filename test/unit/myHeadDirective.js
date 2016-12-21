@@ -1,9 +1,7 @@
 describe('myHead directive', function () {
   var $compile, $rootScope;
 
-  beforeEach(module('myApp.partialCache'));
-  beforeEach(module('myApp.i18n'));
-  beforeEach(module('myApp.filters'));
+  beforeEach(module('myApp.templates'));
   beforeEach(module('myApp.directives'));
 
   beforeEach(inject(function (_$compile_, _$rootScope_) {

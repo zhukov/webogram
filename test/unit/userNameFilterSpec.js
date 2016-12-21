@@ -1,7 +1,6 @@
 describe('userName filter', function () {
   var $filter, _, userNameFilter;
 
-  beforeEach(module('myApp.i18n'));
   beforeEach(module('myApp.filters'));
 
   beforeEach(inject(function (_$filter_, ___) {

@@ -2,8 +2,6 @@ describe('AppLangSelectController', function () {
   var $controller, $scope;
 
   beforeEach(module('ui.bootstrap'));
-  beforeEach(module('izhukov.utils'));
-  beforeEach(module('myApp.i18n'));
   beforeEach(module('myApp.services'));
   beforeEach(module('myApp.controllers'));
 

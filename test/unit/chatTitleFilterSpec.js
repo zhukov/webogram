@@ -1,7 +1,6 @@
 describe('chatTitle filter', function () {
   var $filter, _, chatTitleFilter;
 
-  beforeEach(module('myApp.i18n'));
   beforeEach(module('myApp.filters'));
 
   beforeEach(inject(function (_$filter_, ___) {

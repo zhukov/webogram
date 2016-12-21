@@ -8,6 +8,7 @@ var st = require('st')
 var del = require('del')
 var runSequence = require('run-sequence')
 var swPrecache = require('sw-precache')
+var Server = require('karma').Server
 
 
 // The generated file is being created at src
@@ -21,6 +22,7 @@ gulp.task('templates', function () {
     }))
     .pipe(gulp.dest('app/js'))
 })
+
 gulp.task('clean-templates', function () {
   return del(['app/js/templates.js'])
 })
@@ -274,6 +276,35 @@ gulp.task('clean', function () {
 gulp.task('bump', ['bump-version-manifests', 'bump-version-config'], function () {
   gulp.start('bump-version-comments')
 })
+
+// Single run of karma
+gulp.task('karma-single', function (done) {
+    new Server({
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: true
+    }, done).start();
+});
+
+// Continuous testing with karma by watching for changes
+gulp.task('karma-tdd', function (done) {
+    new Server({
+        configFile: __dirname + '/karma.conf.js',
+    }, done).start();
+});
+
+gulp.task('test', function (callback) {
+    runSequence(
+        ['templates', 'karma-single'],
+        callback
+    )
+});
+
+gulp.task('tdd', function (callback) {
+    runSequence(
+        ['templates', 'karma-tdd'],
+        callback
+    )
+});
 
 gulp.task('build', ['clean'], function (callback) {
   runSequence(
