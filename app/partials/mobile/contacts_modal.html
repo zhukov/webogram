@@ -8,7 +8,7 @@
 
           <ul ng-switch-when="edit" class="nav navbar-nav navbar-quick-nav">
             <li class="navbar-quick-left">
-              <a ng-click="toggleEdit(false)" my-i18n="contacts_modal_edit_cancel"></a>
+              <a ng-click="toggleSelect(false)" my-i18n="contacts_modal_edit_cancel"></a>
             </li>
             <li class="navbar-quick-right">
               <a ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
@@ -26,7 +26,7 @@
             </a>
             <ul class="dropdown-menu">
               <li>
-                <a ng-click="toggleEdit(true)" my-i18n="contacts_modal_edit_list"></a>
+                <a ng-click="toggleSelect(true)" my-i18n="contacts_modal_edit_list"></a>
               </li>
               <li>
                 <a ng-click="importContact()" my-i18n="contacts_modal_new_contact"></a>
