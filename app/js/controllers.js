@@ -4934,7 +4934,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function updateLink (force) {
       var chat = AppChatsManager.getChat($scope.chatID)
       if (chat.username) {
-        $scope.exportedInvite = {link: 'https://telegram.me/' + chat.username, short: true}
+        $scope.exportedInvite = {link: 'https://t.me/' + chat.username, short: true}
         selectLink()
         return
       }
@@ -5197,6 +5197,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.share = function () {
-      LocationParamsService.shareUrl('https://telegram.me/addstickers/' + $scope.stickerset.short_name, $scope.stickerset.title)
+      LocationParamsService.shareUrl('https://t.me/addstickers/' + $scope.stickerset.short_name, $scope.stickerset.title)
     }
   })

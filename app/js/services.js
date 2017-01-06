@@ -4409,11 +4409,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         Storage.set({tgme_sync: {canRedirect: canRedirect, ts: ts}})
 
-        var script = $('<script>').appendTo('body')
+        var script1 = $('<script>').appendTo('body')
           .on('load error', function () {
-            script.remove()
+            script1.remove()
           })
           .attr('src', '//telegram.me/_websync_?authed=' + (canRedirect ? '1' : '0'))
+
+        var script2 = $('<script>').appendTo('body')
+          .on('load error', function () {
+            script2.remove()
+          })
+          .attr('src', '//t.me/_websync_?authed=' + (canRedirect ? '1' : '0'))
       })
     }
 
@@ -4513,7 +4519,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           url: url
         }).then(function () {
           var target = '_blank'
-          if (url.search('https://telegram.me/') === 0) {
+          if (url.search('https://telegram.me/') === 0 ||
+              url.search('https://t.me/') === 0) {
             target = '_self'
           }
           window.open(url, target)

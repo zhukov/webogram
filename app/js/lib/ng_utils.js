@@ -1660,10 +1660,6 @@ angular.module('izhukov.utils', [])
 
           case 'messageEntityUrl':
           case 'messageEntityTextUrl':
-            if (options.noLinks) {
-              skipEntity = true
-              break
-            }
             var inner
             if (entity._ == 'messageEntityTextUrl') {
               url = entity.url
@@ -1673,13 +1669,17 @@ angular.module('izhukov.utils', [])
               url = wrapUrl(entityText, false)
               inner = encodeEntities(replaceUrlEncodings(entityText))
             }
-            html.push(
-              '<a href="',
-              encodeEntities(url),
-              '" target="_blank" rel="noopener noreferrer">',
-              inner,
-              '</a>'
-            )
+            if (options.noLinks) {
+              html.push(inner);
+            } else {
+              html.push(
+                '<a href="',
+                encodeEntities(url),
+                '" target="_blank" rel="noopener noreferrer">',
+                inner,
+                '</a>'
+              )
+            }
             break
 
           case 'messageEntityLinebreak':
@@ -1929,7 +1929,7 @@ angular.module('izhukov.utils', [])
       if (unsafe == 2) {
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
       }
-      else if ( (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+      else if ( (tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
         var path = tgMeMatch[1].split('/')
         switch (path[0]) {
           case 'joinchat':
