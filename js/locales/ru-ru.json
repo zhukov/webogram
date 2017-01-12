@@ -547,6 +547,7 @@
     "push_action_mute1d_mobile": "Mute for 24H",
     "push_action_settings_mobile": "Alerts settings",
     "push_message_nopreview": "You have a new message",
+    "push_action_mute1d_success": "Notification settings were successfully saved.",
     "country_select_modal_country_ab": "Абхазия",
     "country_select_modal_country_af": "Афганистан",
     "country_select_modal_country_ax": "Аландские о-ва",
