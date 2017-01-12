@@ -35,11 +35,12 @@ angular.module('myApp.services')
     var incrementMessageViewsTimeout = false
 
     var maxSeenID = false
-    if (Config.Modes.packed) {
-      Storage.get('max_seen_msg').then(function (maxID) {
-        maxSeenID = maxID || 0
-      })
-    }
+    Storage.get('max_seen_msg').then(function (maxID) {
+      if (maxID &&
+          !AppMessagesIDsManager.getMessageIDInfo(maxID)[1]) {
+        maxSeenID = maxID
+      }
+    })
 
     var dateOrTimeFilter = $filter('dateOrTime')
     var fwdMessagesPluralize = _.pluralize('conversation_forwarded_X_messages')
@@ -190,21 +191,21 @@ angular.module('myApp.services')
       }
 
       if (
+        Config.Modes.packed &&
         !channelID &&
         dialog.unread_count > 0 &&
         maxSeenID &&
-        dialog.top_message > maxSeenID
+        dialog.top_message > maxSeenID &&
+        message.pFlags.unread &&
+        !message.pFlags.out &&
+        !message.pFlags.silent
       ) {
         var notifyPeer = message.flags & 16 ? message.from_id : peerID
-        if (message.pFlags.unread &&
-          !message.pFlags.out &&
-          !message.pFlags.silent) {
-          NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
-            if (!muted) {
-              notifyAboutMessage(message)
-            }
-          })
-        }
+        NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
+          if (!muted) {
+            notifyAboutMessage(message)
+          }
+        })
       }
     }
 
@@ -245,7 +246,7 @@ angular.module('myApp.services')
           }
 
           if (!maxSeenIdIncremented &&
-            !AppPeersManager.isChannel(AppPeersManager.getPeerID(dialog.peer))) {
+              !AppPeersManager.isChannel(AppPeersManager.getPeerID(dialog.peer))) {
             incrementMaxSeenID(dialog.top_message)
             maxSeenIdIncremented = true
           }
@@ -2595,11 +2596,15 @@ angular.module('myApp.services')
     }
 
     function incrementMaxSeenID (maxID) {
-      if (maxSeenID !== false && maxID && maxID > maxSeenID) {
-        Storage.set({
-          max_seen_msg: maxID
-        })
+      if (!maxID || !(!maxSeenID || maxID > maxSeenID)) {
+        return false
       }
+      Storage.set({
+        max_seen_msg: maxID
+      })
+      MtpApiManager.invokeApi('messages.receivedMessages', {
+        max_id: maxID
+      })
     }
 
     function notifyAboutMessage (message, options) {
@@ -2945,8 +2950,8 @@ angular.module('myApp.services')
           }
 
           if (inboxUnread &&
-            ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
-            !message.pFlags.silent) {
+              ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
+              !message.pFlags.silent) {
             var notifyPeer = message.flags & 16 ? message.from_id : peerID
             var notifyPeerToHandle = notificationsToHandle[notifyPeer]
             if (notifyPeerToHandle === undefined) {
@@ -2972,7 +2977,9 @@ angular.module('myApp.services')
             }
           }
 
-          incrementMaxSeenID(message.id)
+          if (!AppPeersManager.isChannel(peerID)) {
+            incrementMaxSeenID(message.id)
+          }
           break
 
         case 'updateEditMessage':
