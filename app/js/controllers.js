@@ -621,7 +621,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-    $scope.toggleEdit = function () {
+    $scope.toggleSelect = function () {
       $scope.$broadcast('history_edit_toggle')
     }
     $scope.selectedFlush = function () {
@@ -1183,11 +1183,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.joinChannel = joinChannel
     $scope.togglePeerMuted = togglePeerMuted
 
-    $scope.toggleEdit = toggleEdit
+    $scope.toggleSelect = toggleSelect
     $scope.toggleMedia = toggleMedia
     $scope.returnToRecent = returnToRecent
 
-    $scope.$on('history_edit_toggle', toggleEdit)
+    $scope.$on('history_edit_toggle', toggleSelect)
     $scope.$on('history_edit_flush', selectedFlush)
     $scope.$on('history_media_toggle', function (e, mediaType) {
       toggleMedia(mediaType)
@@ -1879,7 +1879,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     }
 
-    function toggleEdit () {
+    function toggleSelect () {
       if ($scope.historyState.selectActions) {
         selectedCancel()
       } else {
@@ -4680,7 +4680,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       updateContacts($scope.search && $scope.search.query || '')
     })
 
-    $scope.toggleEdit = function (enabled) {
+    $scope.toggleSelect = function (enabled) {
       $scope.action = enabled ? 'edit' : ''
       $scope.multiSelect = enabled
       resetSelected()
@@ -4719,7 +4719,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           selectedUserIDs.push(userID)
         })
         AppUsersManager.deleteContacts(selectedUserIDs).then(function () {
-          $scope.toggleEdit(false)
+          $scope.toggleSelect(false)
         })
       }
     }

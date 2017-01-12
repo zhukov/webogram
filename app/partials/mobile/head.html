@@ -19,7 +19,7 @@
           <li><a ng-click="logOut()" my-i18n="head_log_out"></a></li>
         </ul>
         <ul ng-switch-default class="dropdown-menu">
-          <li><a ng-click="toggleEdit()" my-i18n="head_edit_messages"></a></li>
+          <li><a ng-click="toggleSelect()" my-i18n="head_select_messages"></a></li>
           <li ng-if="!historyFilter.mediaType" class="divider"></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
@@ -55,7 +55,7 @@
           <div ng-switch-default ng-switch="historyState.selectActions">
             <ul ng-switch-when="selected" class="nav navbar-navbar navbar-quick-nav navbar-history-edit">
               <li class="navbar-quick-right">
-                <a ng-click="toggleEdit()" my-i18n="modal_cancel"></a>
+                <a ng-click="toggleSelect()" my-i18n="modal_cancel"></a>
               </li>
               <li class="navbar-quick-left">
                 <a ng-click="selectedFlush()" my-i18n="head_clear_all"></a>

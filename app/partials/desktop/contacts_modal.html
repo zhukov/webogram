@@ -4,8 +4,8 @@
     <div class="md_modal_title_wrap">
       <div class="md_modal_actions_wrap clearfix">
         <a class="md_modal_action md_modal_action_close" ng-if="action != 'edit'" ng-click="$dismiss()" my-i18n="modal_close"></a>
-        <a class="md_modal_action" ng-if="action == 'edit'" class="contacts_modal_edit_link" ng-click="toggleEdit(false)" my-i18n="contacts_modal_edit_cancel"></a>
-        <a class="md_modal_action" ng-if="!action" ng-click="toggleEdit(true)" my-i18n="contacts_modal_edit_list"></a>
+        <a class="md_modal_action" ng-if="action == 'edit'" class="contacts_modal_edit_link" ng-click="toggleSelect(false)" my-i18n="contacts_modal_edit_cancel"></a>
+        <a class="md_modal_action" ng-if="!action" ng-click="toggleSelect(true)" my-i18n="contacts_modal_edit_list"></a>
       </div>
     </div>
     <div class="md_modal_title" ng-switch="action">
