@@ -11,7 +11,7 @@
 
 angular.module('myApp.controllers', ['myApp.i18n'])
 
-  .controller('AppWelcomeController', function ($scope, $location, MtpApiManager, ErrorService, ChangelogNotifyService, LayoutSwitchService) {
+  .controller('AppWelcomeController', function ($scope, $location, MtpApiManager, ChangelogNotifyService, LayoutSwitchService) {
     MtpApiManager.getUserID().then(function (id) {
       if (id) {
         $location.url('/im')
