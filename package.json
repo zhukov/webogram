@@ -19,7 +19,8 @@
     "show": true
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "gulp watch",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -65,6 +66,12 @@
     "gulp-util": "^3.0.7",
     "gulp-zip": "^0.1.2",
     "http": "0.0.0",
+    "jasmine-core": "^2.5.2",
+    "karma": "^1.3.0",
+    "karma-coverage": "^1.1.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "phantomjs-prebuilt": "^2.1.14",
     "run-sequence": "^1.0.2",
     "st": "^0.5.2",
     "sw-precache": "^3.2.0"
