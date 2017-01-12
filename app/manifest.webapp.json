@@ -1,0 +1,57 @@
+{
+  "name": "Telegram",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.5.5",
+  "short_name": "Telegram",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#497495",
+  "gcm_sender_id": "122867383838",
+  "icons": [
+    {
+      "src": "img/icons/icon16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "img/icons/icon32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "img/icons/icon60.png",
+      "type": "image/png",
+      "sizes": "60x60"
+    },
+    {
+      "src": "img/icons/icon64.png",
+      "type": "image/png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "img/icons/icon90.png",
+      "type": "image/png",
+      "sizes": "90x90"
+    },
+    {
+      "src": "img/icons/icon128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "img/icons/icon192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "img/icons/icon512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "img/icons/icon.svg",
+      "type": "image/svg",
+      "sizes": "513x513"
+    }
+  ]
+}
