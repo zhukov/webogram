@@ -1,0 +1,26 @@
+{
+  "gcm_sender_id": "122867383838",
+  "name": "Telegram Web",
+  "short_name": "Telegram",
+  "start_url": "./?utm_source=homescreen",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#497495",
+  "background_color": "#fff",
+  "icons": [
+    {
+      "src": "./img/icons/icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./img/icons/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./img/icons/icon.svg",
+      "type": "image/svg+xml"
+    }
+  ]
+}
