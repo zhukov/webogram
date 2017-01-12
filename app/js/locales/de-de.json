@@ -547,6 +547,7 @@
     "push_action_mute1d_mobile": "Stumm für 24h",
     "push_action_settings_mobile": "Einstellungen",
     "push_message_nopreview": "Du hast eine neue Nachricht",
+    "push_action_mute1d_success": "Benachrichtigungseinstellungen erfolgreich gespeichert.",
     "country_select_modal_country_ab": "Abchasien",
     "country_select_modal_country_af": "Afghanistan",
     "country_select_modal_country_ax": "Åland-Inseln",

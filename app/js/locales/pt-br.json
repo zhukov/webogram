@@ -547,6 +547,7 @@
     "push_action_mute1d_mobile": "Silenciar por 24H",
     "push_action_settings_mobile": "Configurações de alerta",
     "push_message_nopreview": "Você tem uma nova mensagem",
+    "push_action_mute1d_success": "Configurações de notificação salvas com sucesso.",
     "country_select_modal_country_ab": "Abcássia",
     "country_select_modal_country_af": "Afeganistão",
     "country_select_modal_country_ax": "Ilhas Aland",
