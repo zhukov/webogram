@@ -908,8 +908,12 @@ angular.module('myApp.services')
       var message = messagesStorage[messageID]
       if (!message ||
           !message.canBeEdited ||
-          !message.pFlags.out ||
           message.date < tsNow(true) - 2 * 86400) {
+        return false
+      }
+      var peerID = getMessagePeer(message)
+      if (!message.pFlags.out &&
+          message.peerID != AppUsersManager.getSelf().id) {
         return false
       }
 
