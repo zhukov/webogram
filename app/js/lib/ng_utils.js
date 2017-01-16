@@ -1239,7 +1239,7 @@ angular.module('izhukov.utils', [])
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
     var markdownTestRegExp = /[`_*@]/
-    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)([`*_])([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
+    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)(`|\*\*|__)([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1257,8 +1257,8 @@ angular.module('izhukov.utils', [])
 
     var markdownEntities = {
       '`': 'messageEntityCode',
-      '*': 'messageEntityBold',
-      '_': 'messageEntityItalic'
+      '**': 'messageEntityBold',
+      '__': 'messageEntityItalic'
     }
 
     return {
@@ -1824,13 +1824,13 @@ angular.module('izhukov.utils', [])
 
           case 'messageEntityBold':
             code.push(
-              '*', entityText, '*'
+              '**', entityText, '**'
             )
             break
 
           case 'messageEntityItalic':
             code.push(
-              '_', entityText, '_'
+              '__', entityText, '__'
             )
             break
 
@@ -2089,7 +2089,7 @@ angular.module('izhukov.utils', [])
         return
       }
       settings.baseUrl = (location.href || '').replace(/#.*$/, '') + '#/im'
-      
+
       var eventData = {
         type: 'ping',
         localNotifications: localNotificationsAvailable,
@@ -2150,7 +2150,7 @@ angular.module('izhukov.utils', [])
       if (subscription) {
         var subscriptionObj = subscription.toJSON()
         if (!subscriptionObj ||
-            !subscriptionObj.endpoint || 
+            !subscriptionObj.endpoint ||
             !subscriptionObj.keys ||
             !subscriptionObj.keys.p256dh ||
             !subscriptionObj.keys.auth) {
