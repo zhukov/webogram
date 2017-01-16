@@ -2386,6 +2386,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         resetDraft()
         $scope.$broadcast('ui_message_send')
+        $timeout(function () {
+          $scope.$broadcast('ui_peer_reply')
+        })
       })
     }
 
