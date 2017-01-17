@@ -76,7 +76,7 @@ gulp.task('copy-images', function () {
 
 gulp.task('copy', function () {
   return es.concat(
-    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json', 'app/**/*worker.js'])
+    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.webapp.json', 'app/manifest.json', 'app/**/*worker.js'])
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
