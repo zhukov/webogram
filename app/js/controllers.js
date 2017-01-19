@@ -725,7 +725,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     })
 
     $scope.$on('dialogs_multiupdate', function (e, dialogsUpdated) {
-      if ($scope.search.query !== undefined && $scope.search.query.length) {
+      if (searchMessages) {
+        return false
+      }
+      if ($scope.search.query !== undefined &&
+          $scope.search.query.length) {
         return false
       }
 

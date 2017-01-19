@@ -272,8 +272,10 @@
   }
 }
 
-.tg_head_msgs_edit_btn {
+.tg_head_peer_search_btn {
   float: right;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .tg_head_peer {
@@ -290,6 +292,10 @@
       max-width: 100%;
       border-radius: 0;
       padding: 9px 0;
+
+      float: none;
+      right: 0;
+      left: auto;
 
       margin: -1px 0 0 0;
       border: 1px solid rgba(15, 60, 96, 0.2);
@@ -366,6 +372,37 @@
     line-height: 20px;
     float: left;
     font-weight: bold;
+  }
+}
+
+.icon-search {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -12px -1037px;
+  vertical-align: middle;
+  opacity: 0.9;
+}
+
+
+.tg_head_peer_media_dropdown {
+  .dropdown-toggle  {
+    display: block;
+
+    .icon-bar {
+      display: block;
+      background-color: #d7e5f0;
+      width: 4px;
+      height: 4px;
+      border-radius: 2px;
+      margin-left: 3px;
+      margin-right: 3px;
+
+      & + .icon-bar {
+        margin-top: 2px;
+      }
+    }
   }
 }
 
