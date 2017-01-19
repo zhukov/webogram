@@ -1954,7 +1954,7 @@ a.md_modal_list_peer_name{color:inherit}
 .inactive_actions{margin-top:15px}
 @media print{body,html{background:#fff}
 body .im_page_wrap{border:0;box-shadow:none;overflow:visible}
-body .im_bottom_panel_wrap,body .im_dialogs_col_wrap,body .tg_head_logo_wrap,body .tg_head_msgs_edit_btn,body .tg_head_peer_dropdown,body .tg_head_peer_return_btn{display:none}
+body .im_bottom_panel_wrap,body .im_dialogs_col_wrap,body .tg_head_logo_wrap,body .tg_head_peer_dropdown,body .tg_head_peer_return_btn,body .tg_head_peer_search_btn{display:none}
 body .im_history_wrap{height:auto!important}
 body .nano-pane{display:none}
 body .nano>.nano-content{position:static}

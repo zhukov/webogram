@@ -4,9 +4,6 @@
   "version": "0.5.5",
   "short_name": "Telegram",
   "manifest_version": 2,
-  "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#497495",
   "app": {
     "background": {
       "scripts": ["js/background.js"]
