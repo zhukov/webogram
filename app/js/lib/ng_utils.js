@@ -1442,14 +1442,14 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= match[2].length + match[4].length
-        } else if (match[7]) { // code
+        } else if (match[7]) { // code|italic|bold
           newText.push(match[6] + text + match[9])
           entities.push({
             _: markdownEntities[match[7]],
             offset: matchIndex + match[6].length,
             length: text.length
           })
-          rawOffset -= 2
+          rawOffset -= match[7].length * 2
         } else if (match[11]) { // custom mention
           newText.push(text)
           entities.push({
