@@ -197,8 +197,7 @@ angular.module('myApp.services')
         maxSeenID &&
         dialog.top_message > maxSeenID &&
         message.pFlags.unread &&
-        !message.pFlags.out &&
-        !message.pFlags.silent
+        !message.pFlags.out
       ) {
         var notifyPeer = message.flags & 16 ? message.from_id : peerID
         NotificationsManager.getPeerMuted(notifyPeer).then(function (muted) {
@@ -2784,6 +2783,7 @@ angular.module('myApp.services')
       notification.message = notificationMessage
       notification.key = 'msg' + message.mid
       notification.tag = peerString
+      notification.silent = message.pFlags.silent || false
 
       if (notificationPhoto.location && !notificationPhoto.location.empty) {
         MtpApiFileManager.downloadSmallFile(notificationPhoto.location, notificationPhoto.size).then(function (blob) {
@@ -2954,8 +2954,7 @@ angular.module('myApp.services')
           }
 
           if (inboxUnread &&
-              ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE) &&
-              !message.pFlags.silent) {
+              ($rootScope.selectedPeerID != peerID || $rootScope.idle.isIDLE)) {
             var notifyPeer = message.flags & 16 ? message.from_id : peerID
             var notifyPeerToHandle = notificationsToHandle[notifyPeer]
             if (notifyPeerToHandle === undefined) {

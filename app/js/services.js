@@ -3869,7 +3869,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           notification = new Notification(data.title, {
             icon: data.image || '',
             body: data.message || '',
-            tag: data.tag || ''
+            tag: data.tag || '',
+            silent: data.silent || false
           })
         } catch (e) {
           notificationsUiSupport = false
