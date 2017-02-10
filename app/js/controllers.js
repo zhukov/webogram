@@ -541,7 +541,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           url += '/br'
           break
       }
-      window.open(url, '_blank')
+      var popup = window.open(url, '_blank')
+      try {
+        popup.opener = null;
+      } catch (e) {}
     }
 
     $scope.openContacts = function () {
