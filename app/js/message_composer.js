@@ -785,7 +785,12 @@ MessageComposer.prototype.setUpAutoComplete = function () {
       }
       EmojiHelper.pushPopularEmoji(code)
     }
-    if (mention = target.attr('data-mention')) {
+    if (e.altKey || !target.attr('data-username')) {
+      mention = target.attr('data-user-id')
+    } else {
+      mention = target.attr('data-username')
+    }
+    if (mention) {
       self.onMentionSelected(mention, target.attr('data-name'))
     }
     if (command = target.attr('data-command')) {
@@ -911,7 +916,12 @@ MessageComposer.prototype.onKeyEvent = function (e) {
           EmojiHelper.pushPopularEmoji(code)
           return cancelEvent(e)
         }
-        if (mention = currentSel.attr('data-mention')) {
+        if (e.altKey || !currentSel.attr('data-username')) {
+          mention = currentSel.attr('data-user-id')
+        } else {
+          mention = currentSel.attr('data-username')
+        }
+        if (mention) {
           this.onMentionSelected(mention, currentSel.attr('data-name'))
           return cancelEvent(e)
         }
