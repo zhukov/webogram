@@ -1,9 +1,8 @@
 describe('ChangeLogModalController', function() {
-  // Define used variables
   var $controller, $rootScope, $scope, $location, modal, modalFlag;
 
-  // Create scope, inject data and modals
   beforeEach(module('myApp.controllers'));
+
   beforeEach(function () {
     modalFlag = false;
     modal = {
@@ -29,7 +28,7 @@ describe('ChangeLogModalController', function() {
   it('will have standard data when no function is called', function (done) {
     expect($scope.changelogHidden).toBe(false);
     expect($scope.changelogShown).toBe(false);
-    expect($scope.currentVersion).toBe('0.5.5');
+    expect($scope.currentVersion).toBe(Config.App.version);
     expect($scope.lastVersion).toBe('0.5.4');
     done();
   });
