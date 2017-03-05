@@ -1,5 +1,5 @@
 describe('AppFooterController', function() {
-  var $controller, $rootScope, $scope, $location, service, serviceFlag;
+  var $controller, $scope, service, serviceFlag;
 
   beforeEach(module('myApp.controllers'));
 
@@ -11,12 +11,10 @@ describe('AppFooterController', function() {
       }
     }
 
-    inject(function (_$controller_, _$rootScope_, _$location_) {
+    inject(function (_$controller_, _$rootScope_) {
         $controller = _$controller_;
-        $rootScope = _$rootScope_;
-        $location = _$location_;
 
-        $scope = $rootScope.$new();
+        $scope = _$rootScope_.$new();
         $controller('AppFooterController', {
             $scope: $scope,
             LayoutSwitchService: service

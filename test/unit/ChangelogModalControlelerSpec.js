@@ -1,5 +1,5 @@
 describe('ChangeLogModalController', function() {
-  var $controller, $rootScope, $scope, $location, modal, modalFlag;
+  var $controller, $rootScope, $scope, modal, modalFlag;
 
   beforeEach(module('myApp.controllers'));
 
@@ -11,12 +11,10 @@ describe('ChangeLogModalController', function() {
       }
     };
 
-    inject(function (_$controller_, _$rootScope_, _$location_) {
+    inject(function (_$controller_, _$rootScope_) {
         $controller = _$controller_;
-        $rootScope = _$rootScope_;
-        $location = _$location_;
 
-        $scope = $rootScope.$new();
+        $scope = _$rootScope_.$new();
         $controller('ChangelogModalController', {
             $scope: $scope,
             $modal: modal
@@ -29,7 +27,6 @@ describe('ChangeLogModalController', function() {
     expect($scope.changelogHidden).toBe(false);
     expect($scope.changelogShown).toBe(false);
     expect($scope.currentVersion).toBe(Config.App.version);
-    expect($scope.lastVersion).toBe('0.5.4');
     done();
   });
 
