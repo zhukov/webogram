@@ -1,6 +1,6 @@
 describe('PeerSelectController', function () {
   var $controller, $scope, $q, $mod, $APManager, $EService;
-  var createController;
+  var createController, timeoutTime;
   var $promiseData, $promise, $promiseFlag;
 
   beforeEach(module('myApp.controllers'));
@@ -13,6 +13,8 @@ describe('PeerSelectController', function () {
         return arr;
       }
     };
+
+    timeoutTime = 1000;
 
     $APManager = {
       getPeerString: function (str){
@@ -72,7 +74,7 @@ describe('PeerSelectController', function () {
       expect($scope.selectedPeers).toBeDefined();
       expect($scope.selectedPeersIDs).toBeDefined();
       expect($scope.selectedCount).toBeDefined();
-    }, 1000);
+    }, timeoutTime);
 
     done();
   });
@@ -80,7 +82,7 @@ describe('PeerSelectController', function () {
   it('compiles with a shareLinkPromise that resolves', function (done) {
     $scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(resolve("test"), 1000);
+        setTimeout(resolve("test"), timeoutTime);
       }
     }
     createController();
@@ -90,8 +92,8 @@ describe('PeerSelectController', function () {
       expect($scope.shareLink.url).not.toBeDefined();
       setTimeout(function () {
         expect($scope.shareLink.url).toBe("test");
-      }, 1000);
-    }, 1000);
+      }, timeoutTime);
+    }, timeoutTime);
     done();
   });
 
@@ -99,7 +101,7 @@ describe('PeerSelectController', function () {
   it('compiles with a shareLinkPromise that doesn\'t resolve', function (done) {
     $scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(reject(), 1000);
+        setTimeout(reject(), timeoutTime);
       }
     }
     createController();
@@ -108,8 +110,8 @@ describe('PeerSelectController', function () {
       expect($scope.shareLink.loading).toBe(true);
       setTimeout(function () {
         expect($scope.shareLink).not.toBeDefined();
-      }, 1000);
-    }, 1000);
+      }, timeoutTime);
+    }, timeoutTime);
     done();
   });
 
