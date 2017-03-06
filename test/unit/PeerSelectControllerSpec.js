@@ -1,7 +1,5 @@
 describe('PeerSelectController', function () {
-  var $controller, $scope, $q, $mod, $APManager, $EService;
-  var createController, timeoutTime;
-  var $promiseData, $promise, $promiseFlag;
+  var $controller, $scope, $q, $mod, $APManager, $EService, createController, timeoutTime, $promiseData, $promise, $promiseFlag;
 
   beforeEach(module('myApp.controllers'));
 
@@ -20,7 +18,7 @@ describe('PeerSelectController', function () {
       getPeerString: function (str){
         return "P".concat(str);
       },
-      getPeerID: function(str) {
+      getPeerID: function (str) {
         return str.slice(-1);
       },
       getPeer: function (id) {
@@ -29,7 +27,7 @@ describe('PeerSelectController', function () {
     };
 
     // The controller is created in the test in order to test different initial content of scope variables.
-    createController = function() {
+    createController = function () {
       $controller('PeerSelectController', {
         $scope: $scope,
         $modalInstance: $mod,
@@ -48,7 +46,7 @@ describe('PeerSelectController', function () {
     };
 
     $EService = {
-      confirm: function(data){
+      confirm: function (data) {
         $promiseData = data;
         return $promise;
       }
@@ -66,11 +64,11 @@ describe('PeerSelectController', function () {
     });
   });
 
-  it('compiles', function (done) {
+  it('initialises properties', function (done) {
     createController();
 
     // Set timer to give the controller time to resolve.
-    setTimeout(function(){
+    setTimeout(function () {
       expect($scope.selectedPeers).toBeDefined();
       expect($scope.selectedPeersIDs).toBeDefined();
       expect($scope.selectedCount).toBeDefined();
@@ -80,18 +78,19 @@ describe('PeerSelectController', function () {
   });
 
   it('compiles with a shareLinkPromise that resolves', function (done) {
+    var expected = "testURL";
     $scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(resolve("test"), timeoutTime);
+        setTimeout(resolve(expected), timeoutTime);
       }
     }
     createController();
 
-    setTimeout(function(){
+    setTimeout(function () {
       expect($scope.shareLink.loading).toBe(true);
       expect($scope.shareLink.url).not.toBeDefined();
       setTimeout(function () {
-        expect($scope.shareLink.url).toBe("test");
+        expect($scope.shareLink.url).toBe(expected);
       }, timeoutTime);
     }, timeoutTime);
     done();
@@ -106,7 +105,7 @@ describe('PeerSelectController', function () {
     }
     createController();
 
-    setTimeout(function(){
+    setTimeout(function () {
       expect($scope.shareLink.loading).toBe(true);
       setTimeout(function () {
         expect($scope.shareLink).not.toBeDefined();

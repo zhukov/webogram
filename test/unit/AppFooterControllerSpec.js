@@ -1,4 +1,4 @@
-describe('AppFooterController', function() {
+describe('AppFooterController', function () {
   var $controller, $scope, service, serviceFlag;
 
   beforeEach(module('myApp.controllers'));
@@ -6,7 +6,7 @@ describe('AppFooterController', function() {
   beforeEach(function () {
     serviceFlag = false;
     service = {
-      switchLayout: function(parameter){
+      switchLayout: function (parameter) {
         serviceFlag = true;
       }
     }
@@ -23,11 +23,6 @@ describe('AppFooterController', function() {
   });
 
   // define tests
-  it('compiles', function (done) {
-    expect(true).toBe(true);
-    done();
-  });
-
   it('calls the right function', function (done) {
     expect(serviceFlag).toBe(false);
     $scope.switchLayout(null);

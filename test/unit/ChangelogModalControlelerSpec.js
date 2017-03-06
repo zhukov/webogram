@@ -1,4 +1,4 @@
-describe('ChangeLogModalController', function() {
+describe('ChangeLogModalController', function () {
   var $controller, $rootScope, $scope, modal, modalFlag;
 
   beforeEach(module('myApp.controllers'));
