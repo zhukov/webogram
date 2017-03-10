@@ -10,7 +10,6 @@ var runSequence = require('run-sequence')
 var swPrecache = require('sw-precache')
 var Server = require('karma').Server
 
-
 // The generated file is being created at src
 // so it can be fetched by usemin.
 gulp.task('templates', function () {
@@ -37,14 +36,14 @@ gulp.task('usemin-index', function () {
     .pipe(gulp.dest('dist'))
 })
 
-gulp.task('usemin-badbrowser', function() {
+gulp.task('usemin-badbrowser', function () {
   return gulp.src('app/badbrowser.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})],
+      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})]
     }))
-    .pipe(gulp.dest('dist'));
-});
+    .pipe(gulp.dest('dist'))
+})
 
 // ulimit -n 10240 on OS X
 gulp.task('imagemin', function () {
@@ -279,32 +278,32 @@ gulp.task('bump', ['bump-version-manifests', 'bump-version-config'], function ()
 
 // Single run of karma
 gulp.task('karma-single', function (done) {
-    new Server({
-        configFile: __dirname + '/karma.conf.js',
-        singleRun: true
-    }, done).start();
-});
+  new Server({
+    configFile: path.join(__dirname, '/karma.conf.js'),
+    singleRun: true
+  }, done).start()
+})
 
 // Continuous testing with karma by watching for changes
 gulp.task('karma-tdd', function (done) {
-    new Server({
-        configFile: __dirname + '/karma.conf.js',
-    }, done).start();
-});
+  new Server({
+    configFile: path.join(__dirname, '/karma.conf.js')
+  }, done).start()
+})
 
 gulp.task('test', function (callback) {
-    runSequence(
-        ['templates', 'karma-single'],
-        callback
-    )
-});
+  runSequence(
+    ['templates', 'karma-single'],
+    callback
+  )
+})
 
 gulp.task('tdd', function (callback) {
-    runSequence(
-        ['templates', 'karma-tdd'],
-        callback
-    )
-});
+  runSequence(
+    ['templates', 'karma-tdd'],
+    callback
+  )
+})
 
 gulp.task('build', ['clean'], function (callback) {
   runSequence(
