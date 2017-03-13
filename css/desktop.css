@@ -1040,7 +1040,7 @@ a.im_panel_peer_photo .peer_initials {
   padding: 1px 28px 1px 0;
   position: relative;
   margin: 0;
-  min-height: 50px;
+  min-height: 52px;
   line-height: 20px;
   height: auto;
   box-sizing: border-box;
@@ -1130,7 +1130,7 @@ a.im_panel_peer_photo .peer_initials {
   }
   .composer_rich_textarea,
   .composer_textarea {
-    min-height: 25px;
+    min-height: 27px;
     padding-right: 25px;
   }
   .composer_progress_icon_wrap {
