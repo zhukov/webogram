@@ -6,6 +6,7 @@
  */
 
 'use strict'
+/* global Config, templateUrl */
 
 var extraModules = []
 if (Config.Modes.animations) {
