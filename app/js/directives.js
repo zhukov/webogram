@@ -2966,7 +2966,9 @@ angular.module('myApp.directives', ['myApp.filters'])
       if (attrs.watch) {
         $scope.$on('user_update', function (e, updUserID) {
           if (peerID == updUserID) {
-            if (!angular.equals(peer.photo && peer.photo.photo_small, peerPhoto)) {
+            peer = AppPeersManager.getPeer(peerID)
+            if (!angular.equals(peer.photo && peer.photo.photo_small, peerPhoto) ||
+                !peerPhoto) {
               updatePeerPhoto()
             }
           }
