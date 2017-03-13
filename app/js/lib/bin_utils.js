@@ -127,16 +127,36 @@ function dataUrlToBlob (url) {
 
 function blobConstruct (blobParts, mimeType) {
   var blob
+  var safeMimeType = blobSafeMimeType(mimeType)
   try {
-    blob = new Blob(blobParts, {type: mimeType})
+    blob = new Blob(blobParts, {type: safeMimeType})
   } catch (e) {
     var bb = new BlobBuilder
     angular.forEach(blobParts, function (blobPart) {
       bb.append(blobPart)
     })
-    blob = bb.getBlob(mimeType)
+    blob = bb.getBlob(safeMimeType)
   }
   return blob
+}
+
+function blobSafeMimeType(mimeType) {
+  if ([
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/bmp',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'audio/ogg',
+    'audio/mpeg',
+    'audio/mp4',
+  ].indexOf(mimeType) == -1) {
+    return 'application/octet-stream'
+  }
+  return mimeType
 }
 
 function bytesCmp (bytes1, bytes2) {

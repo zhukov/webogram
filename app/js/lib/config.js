@@ -38,6 +38,7 @@ Config.Modes = {
   chrome_packed: window.chrome && chrome.app && chrome.app.window && true || false,
   animations: true,
   memory_only: false,
+  allow_tmpfs: location.search.indexOf('tmpfs=yeahImSureIknowWhatImDoing') > 0 || false,
   push_api: location.search.indexOf('push=1') == -1
 }
 

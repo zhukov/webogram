@@ -180,14 +180,15 @@ angular.module('izhukov.utils', [])
     }
 
     function getUrl (fileData, mimeType) {
+      var safeMimeType = blobSafeMimeType(mimeType)
       // console.log(dT(), 'get url', fileData, mimeType, fileData.toURL !== undefined, fileData instanceof Blob)
       if (fileData.toURL !== undefined) {
-        return fileData.toURL(mimeType)
+        return fileData.toURL(safeMimeType)
       }
       if (fileData instanceof Blob) {
         return URL.createObjectURL(fileData)
       }
-      return 'data:' + mimeType + ';base64,' + bytesToBase64(fileData)
+      return 'data:' + safeMimeType + ';base64,' + bytesToBase64(fileData)
     }
 
     function getByteArray (fileData) {
@@ -466,8 +467,8 @@ angular.module('izhukov.utils', [])
         return $q.reject()
       }
       if (!(blob instanceof Blob)) {
-        var mimeType = blob.type || 'image/jpeg'
-        var address = 'data:' + mimeType + ';base64,' + bytesToBase64(blob)
+        var safeMimeType = blobSafeMimeType(blob.type || 'image/jpeg')
+        var address = 'data:' + safeMimeType + ';base64,' + bytesToBase64(blob)
         return storagePutB64String(db, fileName, address).then(function () {
           return blob
         })
@@ -604,7 +605,7 @@ angular.module('izhukov.utils', [])
     }
 
     function isAvailable () {
-      return storageIsAvailable
+      return Config.allow_tmpfs && storageIsAvailable
     }
 
     function getFile (fileName, size) {
