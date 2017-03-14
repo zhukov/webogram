@@ -133,7 +133,7 @@
 
     <div ng-switch="about.shown">
       <div ng-switch-when="true" class="login_footer_about_wrap" my-scroll-to-on="$init">
-        <h3 my-i18n="login_about_title"></h3>
+        <h3 my-i18n="login_about_title"></h3> <small><a ng-click="about.shown = false" my-i18n="modal_close"></a></small>
         <p my-i18n="login_about_desc1_md"></p>
         <p my-i18n="login_about_desc2_md"></p>
         <p my-i18n="login_about_desc3_md">
