@@ -62,7 +62,7 @@ function cancelEvent (event) {
   return false
 }
 
-function hasOnlick (element) {
+function hasOnclick (element) {
   if (element.onclick ||
     element.getAttribute('ng-click')) {
     return true

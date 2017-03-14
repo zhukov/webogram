@@ -6,7 +6,7 @@
  */
 
 'use strict'
-/* global Config, templateUrl, onContentLoaded, cancelEvent, dT, setZeroTimeout calcImageInBox, getSelectedText,Scroller, setFieldSelection, scrollToNode, EmojiTooltip, EmojiPanel, MessageComposer, checkDragEvent, checkClick, Image, Clipboard, EmojiHelper, encodeEntities, FB, twttr, gapi, isInDOM */
+/* global Config, templateUrl, onContentLoaded, cancelEvent, dT, setZeroTimeout calcImageInBox, getSelectedText,Scroller, setFieldSelection, scrollToNode, EmojiTooltip, EmojiPanel, MessageComposer, checkDragEvent, checkClick, Image, Clipboard, EmojiHelper, encodeEntities, FB, twttr, gapi, isInDOM, hasOnclick */
 
 /* Directives */
 
@@ -2848,7 +2848,7 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
       }
 
-      if (element[0].tagName == 'A' && !hasOnlick(element[0])) {
+      if (element[0].tagName == 'A' && !hasOnclick(element[0])) {
         element.on('click', function () {
           if (peerID > 0) {
             AppUsersManager.openUser(peerID, override)
