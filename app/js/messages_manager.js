@@ -886,13 +886,23 @@ angular.module('myApp.services')
     }
 
     function canMessageBeEdited(message) {
-      var goodMedias = ['messageMediaPhoto', 'messageMediaDocument', 'messageMediaWebPage', 'messageMediaPending']
+      var goodMedias = [
+        'messageMediaPhoto',
+        'messageMediaDocument',
+        'messageMediaWebPage',
+        'messageMediaPending'
+      ]
       if (message._ != 'message' ||
           message.deleted ||
           message.fwd_from ||
           message.via_bot_id ||
           message.media && goodMedias.indexOf(message.media._) == -1 ||
           message.fromID && AppUsersManager.isBot(message.fromID)) {
+        return false
+      }
+      if (message.media &&
+          message.media._ == 'messageMediaDocument' &&
+          message.media.document.sticker) {
         return false
       }
 
