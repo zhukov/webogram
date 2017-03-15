@@ -1,31 +1,33 @@
-describe('chatTitle filter', function () {
-  var $filter, _, chatTitleFilter;
+/* global describe, it, inject, expect, beforeEach */
 
-  beforeEach(module('myApp.filters'));
+describe('chatTitle filter', function () {
+  var $filter, _, chatTitleFilter
+
+  beforeEach(module('myApp.filters'))
 
   beforeEach(inject(function (_$filter_, ___) {
-    $filter = _$filter_;
-    _ = ___;
-  }));
+    $filter = _$filter_
+    _ = ___
+  }))
 
   beforeEach(function () {
-    chatTitleFilter = $filter('chatTitle');
-  });
+    chatTitleFilter = $filter('chatTitle')
+  })
 
   it('displays chat title deleted', function () {
-    var expected = _('chat_title_deleted');
-    var actual = chatTitleFilter(null);
+    var expected = _('chat_title_deleted')
+    var actual = chatTitleFilter(null)
 
-    expect(actual).toEqual(expected);
-  });
+    expect(actual).toEqual(expected)
+  })
 
   it('displays the chat title', function () {
     var chat = {
       title: 'Telegraph is hot!'
-    };
-    var expected = chat.title;
-    var actual = chatTitleFilter(chat);
+    }
+    var expected = chat.title
+    var actual = chatTitleFilter(chat)
 
-    expect(actual).toEqual(expected);
-  });
-});
+    expect(actual).toEqual(expected)
+  })
+})
