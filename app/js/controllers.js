@@ -6,7 +6,7 @@
  */
 
 'use strict'
-/* global Config, location, templateUrl, onContentLoaded, tsNow, cancelEvent, safeReplaceObject, dT, SearchIndexManager, setZeroTimeout, versionCompare, calcImageInBox, getSelectedText, SVGElement  */
+/* global Config, location, templateUrl, onContentLoaded, tsNow, cancelEvent, safeReplaceObject, dT, SearchIndexManager, setZeroTimeout, versionCompare, calcImageInBox, getSelectedText, SVGElement, hasOnclick  */
 
 /* Controllers */
 
@@ -1666,7 +1666,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             target.className.indexOf('im_message_body') != -1) {
             break
           }
-          if (target.tagName == 'A' || hasOnlick(target)) {
+          if (target.tagName == 'A' || hasOnclick(target)) {
             return false
           }
           target = target.parentNode
