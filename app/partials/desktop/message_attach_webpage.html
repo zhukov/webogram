@@ -1,0 +1,59 @@
+<div ng-show="media.webpage._ == 'webPage'" class="im_message_webpage_wrap clearfix" ng-switch="media.webpage.type">
+  <div ng-switch-when="photo" class="im_message_webpage_photo">
+    <div class="im_message_webpage_title">
+      <a href="{{media.webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="media.webpage.rTitle"></a>
+    </div>
+    <div ng-if="media.webpage.description.length" class="im_message_webpage_description" ng-bind-html="media.webpage.rDescription"></div>
+    <a class="im_message_photo_thumb" ng-click="openPhoto(media.webpage.photo.id, {w: media.webpage.id, m: messageId})" ng-style="::{width: media.webpage.photo.thumb.width + 'px'}" ng-mouseover="preloadPhoto(media.webpage.photo.id)">
+      <img
+        class="im_message_photo_thumb"
+        my-load-thumb
+        thumb="media.webpage.photo.thumb"
+        alt="[{{::'conversation_media_photo' | i18n}}]"
+      />
+    </a>
+  </div>
+  <div ng-switch-when="video" class="im_message_webpage_video">
+    <div class="im_message_webpage_site" ng-bind="media.webpage.site_name || media.webpage.display_url"></div>
+    <div class="im_message_webpage_title">
+      <a ng-click="openEmbed($event)" href="{{media.webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="media.webpage.rTitle"></a>
+    </div>
+    <div ng-if="media.webpage.description.length" class="im_message_webpage_description" ng-bind-html="media.webpage.rDescription"></div>
+    <a class="im_message_video_thumb" ng-click="openEmbed($event)" ng-href="{{media.webpage.url}}" target="_blank" rel="noopener noreferrer" ng-style="::{width: video.thumb.width + 'px'}">
+      <span ng-if="media.webpage.duration > 0" class="im_message_video_duration nocopy" data-content="{{::media.webpage.duration | duration}}"></span>
+      <i class="icon icon-videoplay"></i>
+      <img
+        class="im_message_video_thumb"
+        my-load-thumb
+        thumb="media.webpage.photo.thumb"
+        alt="[{{::'conversation_media_video' | i18n}}]"
+      />
+    </a>
+  </div>
+
+  <div ng-switch-when="document" class="im_message_webpage_document">
+    <div my-message-document="media.webpage" message-id="messageId"></div>
+  </div>
+
+  <div ng-switch-when="gif" class="im_message_webpage_gif">
+    <div class="im_message_webpage_title">
+      <a href="{{media.webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="media.webpage.rTitle"></a>
+    </div>
+    <div my-message-document="media.webpage" message-id="messageId"></div>
+  </div>
+
+  <div ng-switch-default class="im_message_webpage_article">
+    <a ng-if="media.webpage.photo" href="{{media.webpage.url}}" target="_blank" rel="noopener noreferrer" class="im_message_webpage_article_photo pull-right">
+      <img
+        class="im_message_article_thumb"
+        my-load-thumb
+        thumb="media.webpage.photo.thumb"
+      />
+    </a>
+    <div ng-if="media.webpage.site_name" class="im_message_webpage_site" ng-bind="media.webpage.site_name"></div>
+    <div class="im_message_webpage_title">
+      <a ng-click="openEmbed($event)" href="{{media.webpage.url}}" target="_blank" ng-bind-html="media.webpage.rTitle"></a>
+    </div>
+    <div ng-if="media.webpage.description.length" class="im_message_webpage_description" ng-bind-html="media.webpage.rDescription"></div>
+  </div>
+</div>

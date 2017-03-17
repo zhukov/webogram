@@ -787,6 +787,15 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
         element.addClass(attrs.windowClass || '');
         scope.size = attrs.size;
 
+        // moved from template to fix issue #2280
+        element.on('click', function(evt) {
+          scope.close(evt);
+        });
+
+        $modalStack.registerObserverCallback(function(hiddenBySingle) {
+          scope.hiddenBySingle = hiddenBySingle || false;
+        });
+
         $timeout(function () {
           // trigger CSS transitions
           scope.animate = true;
@@ -835,6 +844,25 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
       var backdropDomEl, backdropScope;
       var openedWindows = $$stackedMap.createNew();
       var $modalStack = {};
+      var observerCallbacks = [];
+
+      function notifyObservers() {
+        angular.forEach(observerCallbacks, function(callback, index) {
+          var hasSingleParent = false,
+              opened = openedWindows.keys();
+
+          for (var i = 0; i < opened.length; i++) {
+            var item = openedWindows.get(opened[i]).value;
+
+            if (item.backdrop == 'single' && item.index > index) {
+              hasSingleParent = true;
+              break;
+            }
+          }
+
+          callback(hasSingleParent);
+        });
+      };
 
       function backdropIndex() {
         var topBackdropIndex = -1;
@@ -854,12 +882,14 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
       });
 
       function removeModalWindow(modalInstance) {
-
         var body = $document.find('body').eq(0);
         var modalWindow = openedWindows.get(modalInstance).value;
 
         //clean up the stack
         openedWindows.remove(modalInstance);
+
+        //clean up the observer
+        observerCallbacks.splice(modalWindow.index, 1);
 
         //remove window DOM element
         removeAfterAnimate(modalWindow.modalDomEl, modalWindow.modalScope, 0, function() {
@@ -879,6 +909,8 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
             });
             backdropDomEl = undefined;
             backdropScope = undefined;
+          } else {
+            notifyObservers();
           }
       }
 
@@ -928,8 +960,11 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
         }
       });
 
-      $modalStack.open = function (modalInstance, modal) {
+      $modalStack.registerObserverCallback = function(callback){
+        observerCallbacks.push(callback);
+      };
 
+      $modalStack.open = function (modalInstance, modal) {
         openedWindows.add(modalInstance, {
           deferred: modal.deferred,
           modalScope: modal.scope,
@@ -949,19 +984,24 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
           body.append(backdropDomEl);
         }
 
-        var angularDomEl = angular.element('<div modal-window></div>');
+        var angularDomEl = angular.element('<div modal-window></div>'),
+            index = openedWindows.length() - 1;
+
         angularDomEl.attr({
           'template-url': modal.windowTemplateUrl,
           'window-class': modal.windowClass,
           'size': modal.size,
-          'index': openedWindows.length() - 1,
+          'index': index,
           'animate': 'animate'
         }).html(modal.content);
 
         var modalDomEl = $compile(angularDomEl)(modal.scope);
         openedWindows.top().value.modalDomEl = modalDomEl;
+        openedWindows.top().value.index = index;
         body.append(modalDomEl);
         body.addClass(OPENED_MODAL_CLASS);
+
+        notifyObservers();
       };
 
       $modalStack.close = function (modalInstance, result) {
@@ -1222,7 +1262,7 @@ angular.module("template/modal/backdrop.html", []).run(["$templateCache", functi
 
 angular.module("template/modal/window.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/modal/window.html",
-    "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\n" +
+    "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: hiddenBySingle ? 'none' : 'block'}\">\n" +
     "  <div class=\"modal_close_wrap\" ng-click=\"close($event)\">\n" +
     "    <div class=\"modal_close\"></div>\n" +
     "  </div>\n" +

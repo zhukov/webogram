@@ -17,7 +17,7 @@
         <a ng-switch-default ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})" class="peer_modal_photo" my-peer-photolink="::profile.id" img-class="peer_modal_photo" watch="true" no-open="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
       </div>
       <div class="peer_modal_profile">
-        <div class="peer_modal_profile_name" my-user-link="profile.id"></div>
+        <div class="peer_modal_profile_name" my-peer-link="profile.id"></div>
         <div class="peer_modal_profile_description" my-user-status="::profile.id"></div>
       </div>
     </div>
@@ -34,7 +34,7 @@
 
   <div class="md_modal_body">
 
-    <div class="md_modal_sections">
+    <div class="md_modal_sections clearfix">
 
       <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number">
         <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
@@ -60,6 +60,13 @@
           <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
           <span class="tg_checkbox_label" my-i18n="settings_modal_notifications"></span>
         </a>
+
+        <a ng-if="notify.desktop && notify.pushAvailable" class="md_modal_section_toggle_wrap tg_checkbox" ng-click="togglePush()" ng-class="notify.push ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_pushes"></span>
+        </a>
+
+        
 
         <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="togglePreview()" ng-class="notify.preview ? 'tg_checkbox_on' : ''">
           <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
@@ -111,7 +118,21 @@
         </div>
 
         <div class="md_modal_section_link_wrap">
-          <a class="md_modal_section_link" ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
+          <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'cancel_email'})" my-i18n="settings_modal_password_email_pending_cancel">
+          </a>
+          <span class="md_modal_section_text" ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link" my-i18n="settings_modal_password_email_pending">
+            <my-i18n-param name="email">
+              <span ng-bind="password.email_unconfirmed_pattern"></span>
+            </my-i18n-param>
+          </span>
+          <a ng-if="password._ == 'account.noPassword' && !password.email_unconfirmed_pattern" class="md_modal_section_link" ng-click="changePassword({action: 'create'})" my-i18n="settings_modal_set_password"></a>
+
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'disable'})" my-i18n="settings_modal_disable_password"></a>
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link" ng-click="changePassword({action: 'change'})" my-i18n="settings_modal_change_password"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="showSessions()" my-i18n="settings_modal_active_sessions"></a>
         </div>
 
         <div class="md_modal_section_link_wrap">

@@ -22,17 +22,23 @@
       </a>
     </div>
 
-    <div class="media_modal_info_wrap pull-left" ng-switch="messageID > 0">
+    <div class="media_modal_info_wrap pull-left" ng-if="!webpageID && photo.user_id">
       <a class="media_modal_author_photo pull-left" my-peer-photolink="photo.user_id" img-class="media_modal_author_photo" watch="true"></a>
       <div class="media_modal_author_name">
-        <a class="media_modal_author" my-user-link="photo.user_id" user-watch="true"></a>
+        <a class="media_modal_author" my-peer-link="photo.user_id" peer-watch="true"></a>
       </div>
-      <div class="media_modal_date">
+      <div class="media_modal_date" ng-if="photo.date > 0" ng-switch="messageID > 0">
         <a ng-switch-when="true" class="media_modal_date" ng-click="goToMessage()" ng-bind="photo.date | dateOrTime :true"></a>
         <span ng-switch-default ng-bind="photo.date | dateOrTime :true"></span>
       </div>
     </div>
 
+    <div class="media_modal_info_wrap pull-left" ng-if="webpageID">
+      <div class="media_modal_author_name">
+        <a class="media_modal_author" href="{{webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="webpage.rTitle"></a>
+      </div>
+      <div class="media_modal_date"  ng-bind="webpage.site_name || webpage.display_url"></div>
+    </div>
 
     <div class="media_modal_title_wrap" ng-switch="count > 1 &amp;&amp; pos > 0">
       <my-i18n ng-switch-when="true" msgid="media_modal_photo_index">

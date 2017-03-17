@@ -23,7 +23,7 @@
   <div class="md_modal_body">
 
     <div class="contacts_modal_search">
-      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query" autocomplete="off" />
       <a class="im_dialogs_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
         <i class="icon icon-search-clear"></i>
       </a>
@@ -44,7 +44,7 @@
               <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
 
                 <div class="md_modal_list_peer_photo pull-left" my-peer-photolink="::contact.userID" img-class="md_modal_list_peer_photo"></div>
-                <div class="md_modal_list_peer_name" my-user-link="contact.userID"></div>
+                <div class="md_modal_list_peer_name" my-peer-link="contact.userID"></div>
                 <div class="md_modal_list_peer_description" ng-switch="contact.found">
                   <span ng-switch-when="true" ng-bind="'@' + contact.user.username"></span>
                   <span ng-switch-default my-user-status="::contact.userID"></span>

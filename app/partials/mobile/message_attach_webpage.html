@@ -1,0 +1,47 @@
+<div ng-show="webpage._ == 'webPage'" class="im_message_webpage_wrap clearfix" ng-switch="webpage.type">
+  <div ng-switch-when="photo" class="im_message_webpage_photo">
+    <div class="im_message_webpage_site" ng-bind="webpage.site_name || webpage.display_url"></div>
+    <div class="im_message_webpage_title">
+      <a href="{{webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="webpage.rTitle"></a>
+    </div>
+    <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
+    <a class="im_message_photo_thumb" ng-click="openPhoto(webpage.photo.id, {w: webpage.id, m: messageId})" ng-style="::{width: webpage.photo.thumb.width + 'px'}" ng-mouseover="preloadPhoto(webpage.photo.id)">
+      <img
+        class="im_message_photo_thumb"
+        my-load-thumb
+        thumb="webpage.photo.thumb"
+      />
+    </a>
+  </div>
+  <div ng-switch-when="video" class="im_message_webpage_video">
+    <div class="im_message_webpage_site" ng-bind="webpage.site_name || webpage.display_url"></div>
+    <div class="im_message_webpage_title">
+      <a ng-click="openEmbed($event)" href="{{webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="webpage.rTitle"></a>
+    </div>
+    <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
+    <a class="im_message_video_thumb" ng-click="openEmbed($event)" ng-href="{{webpage.url}}" target="_blank" rel="noopener noreferrer" ng-style="::{width: video.thumb.width + 'px'}">
+      <span ng-if="webpage.duration > 0" class="im_message_video_duration" ng-bind="::webpage.duration | duration"></span>
+      <i class="icon icon-videoplay"></i>
+      <img
+        class="im_message_video_thumb"
+        my-load-thumb
+        thumb="webpage.photo.thumb"
+      />
+    </a>
+  </div>
+
+  <div ng-switch-default class="im_message_webpage_article">
+    <div class="im_message_webpage_site" ng-bind="webpage.site_name"></div>
+    <a ng-if="webpage.photo" href="{{webpage.url}}" target="_blank" rel="noopener noreferrer" class="im_message_webpage_article_photo pull-right">
+      <img
+        class="im_message_article_thumb"
+        my-load-thumb
+        thumb="webpage.photo.thumb"
+      />
+    </a>
+    <div class="im_message_webpage_title">
+      <a ng-click="openEmbed($event)" href="{{webpage.url}}" target="_blank" rel="noopener noreferrer" ng-bind-html="webpage.rTitle"></a>
+    </div>
+    <div ng-if="webpage.description.length" class="im_message_webpage_description" ng-bind-html="webpage.rDescription"></div>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+<div class="reply_markup_wrap">
+  <div class="reply_markup" ng-class="replyMarkup.splitCount ? 'reply_markup_h' + replyMarkup.splitCount : ''">
+    <div class="reply_markup_row" ng-repeat="row in replyMarkup.rows">
+      <div class="reply_markup_button_wrap" ng-class="'reply_markup_button_w' + row.buttons.length" ng-repeat="button in row.buttons" ng-switch="button._">
+        <a ng-switch-when="keyboardButtonUrl" class="btn reply_markup_button" href="{{button.pUrl}}" ng-bind-html="::button.rText"></a>
+        <button ng-switch-default class="btn reply_markup_button" ng-bind-html="::button.rText" ng-click="buttonClick(button)"></button>
+      </div>
+    </div>
+  </div>
+</div>

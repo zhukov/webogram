@@ -21,7 +21,17 @@
               <a ng-click="changeUsername()" my-i18n="settings_modal_edit_username"></a>
             </li>
             <li>
-              <a ng-click="terminateSessions()" my-i18n="settings_modal_terminate_sessions"></a>
+              <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" ng-click="changePassword({action: 'cancel_email'})" my-i18n="settings_modal_password_email_pending_cancel_mobile">
+              </a>
+              <a ng-if="password._ == 'account.noPassword' && !password.email_unconfirmed_pattern" ng-click="changePassword({action: 'create'})" my-i18n="settings_modal_set_password"></a>
+              <a ng-if="password._ == 'account.password'" ng-click="changePassword({action: 'change'})" my-i18n="settings_modal_change_password"></a>
+            </li>
+            <li ng-if="password._ == 'account.password'">
+              <a ng-click="changePassword({action: 'disable'})" my-i18n="settings_modal_disable_password_mobile"></a>
+            </li>
+
+            <li>
+              <a ng-click="showSessions()" my-i18n="settings_modal_active_sessions"></a>
             </li>
           </ul>
         </div>
@@ -49,17 +59,10 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a href="" ng-click="openPhoto(user.photo.photo_id, {u: profile.id})" class="mobile_user_modal_image_wrap pull-left" ng-class="{disabled: !user.photo.id}">
-        <img
-          class="mobile_user_modal_image"
-          my-load-thumb
-          watch="true"
-          thumb="photo"
-        />
-      </a>
+      <a ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::profile.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
-        <h4 class="mobile_user_modal_header" my-user-link="profile.id"></h4>
+        <h4 class="mobile_user_modal_header" my-peer-link="profile.id"></h4>
         <p class="mobile_user_modal_status" my-user-status="::profile.id"></p>
       </div>
 
@@ -80,6 +83,13 @@
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
         <span class="tg_checkbox_label" my-i18n="settings_modal_notification_alert"></span>
+      </a>
+    </div>
+
+    <div ng-if="notify.desktop && notify.pushAvailable" class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="togglePush()" ng-class="notify.push ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_notification_push"></span>
       </a>
     </div>
 
@@ -131,6 +141,12 @@
       <div class="mobile_modal_section_value" ng-click="changeUsername()" ng-switch="profile.username.length > 0">
         <a class="settings_modal_username_link" ng-switch-when="true" href="" ng-click="changeUsername()" ng-bind="'@' + profile.username"></a>
         <a ng-switch-default href="" ng-click="changeUsername()" my-i18n="settings_modal_empty_username_set"></a>
+      </div>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="switchBackToDesktop">
+      <div class="mobile_modal_section_value">
+        <a href="" ng-click="switchToDesktop()" my-i18n="settings_switch_back_to_desktop"></a>
       </div>
     </div>
 

@@ -81,8 +81,8 @@
 
             <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
 
-            <div class="contacts_modal_contact_photo pull-left" my-user-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
-            <div class="contacts_modal_contact_name" my-user-link="contact.userID"></div>
+            <div class="contacts_modal_contact_photo pull-left" my-peer-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
+            <div class="contacts_modal_contact_name" my-peer-link="contact.userID"></div>
             <div class="contacts_modal_contact_status" ng-switch="contact.found">
               <span ng-switch-when="true" ng-bind="'@' + contact.user.username"></span>
               <span ng-switch-default my-user-status="::contact.userID"></span>

@@ -1,6 +1,9 @@
 .DS_Store
 .idea
+.publish
 *.sublime-workspace
+*.*~
+*.swp
 
 # Node.js package manager
 node_modules
@@ -10,4 +13,6 @@ dist_package
 releases
 webogram*.zip
 app/js/templates.js
+app/css
 cldr
+coverage/

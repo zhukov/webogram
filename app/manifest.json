@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.4.0",
+  "version": "0.5.5",
   "short_name": "Telegram",
   "manifest_version": 2,
   "app": {
@@ -14,8 +14,10 @@
     "webview",
     {"fileSystem": ["write"]},
     "storage",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "fullscreen"
   ],
+  "gcm_sender_id": "122867383838",
   "icons": {
     "16": "img/icons/icon16.png",
     "32": "img/icons/icon32.png",

@@ -1,0 +1,19 @@
+<div class="im_message_game">
+  <div class="im_message_webpage_wrap clearfix">
+    <div class="im_message_webpage_photo">
+      <div class="im_message_webpage_title">
+        <a href=""  ng-click="openGame()" target="_blank" rel="noopener noreferrer" ng-bind-html="media.game.rTitle"></a>
+      </div>
+      <div class="im_message_webpage_description im_message_game_description" ng-bind-html="::media.game.rDescription"></div>
+      <div class="im_message_webpage_description im_message_game_message"></div>
+      <a class="im_message_photo_thumb" ng-click="openGame()" ng-style="::{width: media.game.photo.thumb.width + 'px'}">
+        <img
+          class="im_message_photo_thumb"
+          my-load-thumb
+          thumb="media.game.photo.thumb"
+          alt="[{{::media.game.title}}]"
+        />
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<div class="im_message_venue clearfix">
+
+  <a ng-href="{{::media.mapUrl}}" target="_blank" rel="noopener noreferrer" class="im_message_venue_geopoint_wrap">
+    <img
+      class="im_message_venue_geopoint_image"
+      my-geo-point-map="media.geo"
+      width="100"
+      height="100"
+      alt="[{{::'conversation_media_location' | i18n}} {{::media.mapUrl}}]"
+    />
+  </a>
+
+  <div class="im_message_venue_info">
+    <div class="im_message_venue_title_wrap">
+      <a ng-href="{{::media.mapUrl}}" target="_blank" rel="noopener noreferrer" class="im_message_document_name" ng-bind="::media.title"></a>
+    </div>
+    <div class="im_message_venue_address" ng-bind="::media.address"></div>
+  </div>
+
+</div>

@@ -1,0 +1,27 @@
+<div ng-switch="type">
+
+  <ul ng-switch-when="mentions" class="composer_dropdown">
+    <li ng-repeat="user in mentionUsers">
+      <a class="composer_mention_option" data-user-id="{{'#' + user.id}}" data-username="{{user.username}}" data-name="{{user.first_name}}">
+        <span class="composer_user_photo" my-peer-photolink="user.id" img-class="composer_user_photo"></span>
+        <span class="composer_user_name" ng-bind-html="user.rFullName"></span>
+        <span class="composer_user_mention" ng-if="user.username.length > 0" ng-bind="'@' + user.username"></span>
+      </a>
+    </li>
+  </ul>
+
+  <ul ng-switch-when="commands" class="composer_dropdown">
+    <li ng-repeat="command in commands track by (command.botID + command.value)">
+      <a class="composer_command_option" data-command="{{command.value}}">
+        <span class="composer_user_photo" my-peer-photolink="command.botID" img-class="composer_user_photo"></span>
+        <span class="composer_command_value" ng-bind="command.value"></span>
+        <span class="composer_command_desc" ng-bind-html="command.rDescription"></span>
+      </a>
+    </li>
+  </ul>
+
+  <ul ng-switch-when="emoji" my-emoji-suggestions="emojiCodes" class="composer_dropdown"></ul>
+
+  <div ng-switch-when="inline" my-inline-results="botResults"></div>
+
+</div>

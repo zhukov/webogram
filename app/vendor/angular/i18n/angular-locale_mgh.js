@@ -23,7 +23,7 @@ $provide.value("$locale", {
   "DATETIME_FORMATS": {
     "AMPMS": [
       "wichishu",
-      "mchochil'l"
+      "mchochil\u2019l"
     ],
     "DAY": [
       "Sabato",
@@ -34,6 +34,15 @@ $provide.value("$locale", {
       "Ijumaa",
       "Jumamosi"
     ],
+    "ERANAMES": [
+      "Hinapiya yesu",
+      "Yopia yesu"
+    ],
+    "ERAS": [
+      "HY",
+      "YY"
+    ],
+    "FIRSTDAYOFWEEK": 0,
     "MONTH": [
       "Mweri wo kwanza",
       "Mweri wo unayeli",
@@ -46,7 +55,7 @@ $provide.value("$locale", {
       "Mweri wo tisa",
       "Mweri wo kumi",
       "Mweri wo kumi na moja",
-      "Mweri wo kumi na yel'li"
+      "Mweri wo kumi na yel\u2019li"
     ],
     "SHORTDAY": [
       "Sab",
@@ -70,6 +79,24 @@ $provide.value("$locale", {
       "Kum",
       "Moj",
       "Yel"
+    ],
+    "STANDALONEMONTH": [
+      "Mweri wo kwanza",
+      "Mweri wo unayeli",
+      "Mweri wo uneraru",
+      "Mweri wo unecheshe",
+      "Mweri wo unethanu",
+      "Mweri wo thanu na mocha",
+      "Mweri wo saba",
+      "Mweri wo nane",
+      "Mweri wo tisa",
+      "Mweri wo kumi",
+      "Mweri wo kumi na moja",
+      "Mweri wo kumi na yel\u2019li"
+    ],
+    "WEEKENDRANGE": [
+      5,
+      6
     ],
     "fullDate": "EEEE, d MMMM y",
     "longDate": "d MMMM y",
@@ -102,7 +129,7 @@ $provide.value("$locale", {
         "maxFrac": 2,
         "minFrac": 2,
         "minInt": 1,
-        "negPre": "\u00a4\u00a0-",
+        "negPre": "-\u00a4\u00a0",
         "negSuf": "",
         "posPre": "\u00a4\u00a0",
         "posSuf": ""
@@ -110,6 +137,7 @@ $provide.value("$locale", {
     ]
   },
   "id": "mgh",
+  "localeID": "mgh",
   "pluralCat": function(n, opt_precision) {  var i = n | 0;  var vf = getVF(n, opt_precision);  if (i == 1 && vf.v == 0) {    return PLURAL_CATEGORY.ONE;  }  return PLURAL_CATEGORY.OTHER;}
 });
 }]);
