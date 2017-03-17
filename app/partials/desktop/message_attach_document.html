@@ -64,7 +64,7 @@
 
     <div class="im_message_document_info">
       <div class="im_message_document_name_wrap">
-        <span class="copyonly">[</span><a href="" ng-attr-title="{{media.document.file_name}}" ng-click="docOpen()" class="im_message_document_name" ng-bind="::media.document.file_name"></a><span class="copyonly">]</span>
+        <a href="" ng-attr-title="{{media.document.file_name}}" ng-attr-data-name="{{media_file_name_without_ext}}" ng-attr-data-ext="{{media_file_ext}}" ng-click="docOpen()" class="im_message_document_name"></a><span class="copyonly">[<span ng-bind="::media.document.file_name"></span>]</span>
         <span class="im_message_document_size" ng-if="!media.document.progress.enabled" ng-bind="::media.document.size | formatSize"></span>
         <span class="im_message_document_size" ng-if="media.document.progress.enabled" ng-bind="media.document.progress | formatSizeProgress"></span>
       </div>

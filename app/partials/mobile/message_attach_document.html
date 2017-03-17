@@ -41,7 +41,7 @@
 
     <div class="im_message_document_info">
       <div class="im_message_document_name_wrap">
-        <a href="" ng-click="docOpen()" class="im_message_document_name" ng-bind="::media.document.file_name"></a>
+        <a href="" ng-attr-data-name="{{media_file_name_without_ext}}" ng-attr-data-ext="{{media_file_ext}}" ng-click="docOpen()" class="im_message_document_name"></a>
         <span class="im_message_document_size" ng-if="!media.document.progress.enabled" ng-bind="::media.document.size | formatSize"></span>
         <span class="im_message_document_size" ng-if="media.document.progress.enabled" ng-bind="media.document.progress | formatSizeProgress"></span>
       </div>
