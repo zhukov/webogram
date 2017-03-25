@@ -64,7 +64,7 @@
 	"settings_modal_sounds": "Sounds",
 	"settings_modal_language": "ภาษา",
 	"settings_modal_notifications": "การแจ้งเตือนบน Desktop",
-	"settings_modal_pushes": "Background notifications",
+	"settings_modal_pushes": "การแจ้งเตือนเบื้องหลัง",
 	"settings_modal_message_preview": "ดูตัวอย่างข้อความ",
 	"settings_modal_sound": "Sound",
 	"settings_modal_enter_send_description_md": "**Enter** - เพื่อส่งข้อความ, **Shift + Enter** - สำหรับขึ้นบรรทัดใหม่",
