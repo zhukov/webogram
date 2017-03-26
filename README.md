@@ -15,7 +15,7 @@ MTProto data can be carried over HTTP (SSL is also supported), so this project i
 
 Here are some screenshots of the interface:
 
-
+![Sample screenshot 0](/app/img/screenshot0.png)
 ![Sample screenshot 1](/app/img/screenshot1.png)
 ![Mobile screenshot 2](/app/img/screenshot2.png)
 ![Mobile screenshot 3](/app/img/screenshot3.png)
