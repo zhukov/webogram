@@ -1872,20 +1872,6 @@ img.im_message_document_thumb {
   vertical-align: text-top;
   white-space: nowrap;
   text-overflow: ellipsis;
-
-  &:after {
-    content: attr(data-name);
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  &:before {
-    content: attr(data-ext);
-    float: right;
-  }
-  &:hover:before {
-    text-decoration: underline;
-  }
 }
 .im_message_document_size {
   color: #999;
