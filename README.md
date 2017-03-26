@@ -31,7 +31,7 @@ MTProto data can be carried over HTTP (SSL is also supported), so this project i
 | ------------- |-------------| -----:|
 | Online Web-version (hosted on Telegram servers)      | https://web.telegram.org/ | hosted
 | Online Web-version (hosted on GitHub pages)      | https://zhukov.github.io/webogram | hosted
-| Online Web-version (UNOFFICIAL (Thai Edition))      | https://www.telegram.in.th | hosted
+| Online Web-version (UNOFFICIAL (Thai Edition)      | https://www.telegram.in.th | hosted
 | Chrome Web Store      | [https://chrome.google.com/webstore/detail/telegram/ clhhggbfdinjmjhajaheehoeibfljjno](https://chrome.google.com/webstore/detail/telegram/clhhggbfdinjmjhajaheehoeibfljjno) |   packed
 | Firefox & FirefoxOS Marketplace | https://marketplace.firefox.com/app/telegram |    packed
 
