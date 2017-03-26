@@ -390,20 +390,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.videoOpen = function () {
           AppDocsManager.openVideo($scope.media.document.id, $scope.messageId)
         }
-        if ($scope.media.document.file_name) {
-          var fileNameParts = $scope.media.document.file_name.split('.')
-          if (fileNameParts.length > 1) {
-            $scope.media_file_ext = '.' + fileNameParts.pop()
-            $scope.media_file_name_without_ext = fileNameParts.join('.')
-            if (!$scope.media_file_name_without_ext) {
-              $scope.media_file_name_without_ext = $scope.media_file_ext
-              $scope.media_file_ext = ''
-            }
-          } else {
-            $scope.media_file_ext = ''
-            $scope.media_file_name_without_ext = fileNameParts[0]
-          }
-        }
       }
     }
   })
@@ -496,25 +482,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       scope: {
         'media': '=myMessagePending'
       },
-      templateUrl: templateUrl('message_attach_pending'),
-      link: link
-    }
-
-    function link ($scope, element, attrs) {
-      if ($scope.media.file_name) {
-        var fileNameParts = $scope.media.file_name.split('.')
-        if (fileNameParts.length > 1) {
-          $scope.media_file_ext = '.' + fileNameParts.pop()
-          $scope.media_file_name_without_ext = fileNameParts.join('.')
-          if (!$scope.media_file_name_without_ext) {
-            $scope.media_file_name_without_ext = $scope.media_file_ext
-            $scope.media_file_ext = ''
-          }
-        } else {
-          $scope.media_file_ext = ''
-          $scope.media_file_name_without_ext = fileNameParts[0]
-        }
-      }
+      templateUrl: templateUrl('message_attach_pending')
     }
   })
 
