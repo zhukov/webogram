@@ -3017,10 +3017,10 @@ angular.module('myApp.services')
             messagesForHistory[mid] = wasForHistory
           }
 
+          var foundDialog = getDialogByPeerID(peerID)[0]
+          var isTopMessage = foundDialog && foundDialog.top_message == mid
           if (message.clear_history) {
-            var foundDialog = getDialogByPeerID(peerID)
-            if (foundDialog[0] &&
-              foundDialog[0].top_message == mid) {
+            if (isTopMessage) {
               $rootScope.$broadcast('dialog_flush', {peerID: peerID})
             } else {
               $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: [mid]})
@@ -3031,6 +3031,11 @@ angular.module('myApp.services')
               id: message.id,
               mid: mid
             })
+            if (isTopMessage) {
+              var updatedDialogs = {}
+              updatedDialogs[peerID] = foundDialog
+              $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs)
+            }
           }
           break
 
