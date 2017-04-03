@@ -89,7 +89,7 @@ Config.I18n = {
 
 Config.ExtCredentials = {
   gmaps: {
-    api_key: 'AIzaSyC32ij28dCa0YzEV_HqbWfIwTZQql-RNS0'
+    api_key: 'AIzaSyC72t5GDcP-dob20d-ARwSwOQ41-zgbArg'
   }
 }
 
