@@ -603,6 +603,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $rootScope.$broadcast('history_focus', params)
     }
 
+    $scope.scrollChatToBottom = function () {
+      $scope.$broadcast('ui_history_change_scroll', true)
+    }
+
     $scope.logOut = function () {
       ErrorService.confirm({type: 'LOGOUT'}).then(function () {
         MtpApiManager.logOut().then(function () {
