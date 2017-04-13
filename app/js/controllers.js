@@ -456,7 +456,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var pendingAttachment = false
     $scope.$on('history_focus', function (e, peerData) {
       if (peerData.peerString == $scope.curDialog.peer &&
-        peerData.messageID == $scope.curDialog.messageID &&
+          (peerData.messageID ? peerData.messageID == $scope.curDialog.messageID : !$scope.curDialog.messageID) &&
         !peerData.startParam) {
         if (peerData.messageID) {
           $scope.$broadcast('ui_history_change_scroll', true)
@@ -601,10 +601,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         params.peerString = AppPeersManager.getPeerString(converted)
       }
       $rootScope.$broadcast('history_focus', params)
-    }
-
-    $scope.scrollChatToBottom = function () {
-      $scope.$broadcast('ui_history_change_scroll', true)
     }
 
     $scope.logOut = function () {
