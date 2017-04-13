@@ -28,16 +28,16 @@
         <a class="tg_checkbox" ng-if="revocable" ng-click="data.revoke = !data.revoke" ng-class="data.revoke ? 'tg_checkbox_on' : ''">
           <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
           <span class="tg_checkbox_label" my-i18n="confirm_modal_message_revoke">
-            <my-i18n-param name="recipient">
-              <span ng-if="isUser" ng-bind="userFirstName"></span>
-              <span ng-if="!isUser" my-i18n="confirm_modal_message_revoke_recipient_group"></span>
+            <my-i18n-param name="recipient" ng-switch="isUser">
+              <span ng-switch-when="true" my-peer-link="peerID" short="true"></span>
+              <span ng-switch-default my-i18n="confirm_modal_message_revoke_recipient_group"></span>
             </my-i18n-param>
           </span>
         </a>
-        <p class="tg_checkbox" ng-if="!revocable && !isChannel">
-          <ng-pluralize ng-if="isUser" count="count" when="confirm_modal_X_messages_non_configurable_for_user_only"></ng-pluralize>
-          <ng-pluralize ng-if="isSupergroup" count="count" when="confirm_modal_X_messages_non_configurable_for_everyone"></ng-pluralize>
-          <ng-pluralize ng-if="isUsualGroup" count="count" when="confirm_modal_X_messages_non_configurable_for_user_only_in_group"></ng-pluralize>
+        <p class="tg_checkbox" ng-if="!revocable && !isChannel" ng-switch="isUser ? 'user' : (isSupergroup ? 'supergroup' : (isUsualGroup ? 'group' : 'default'))">
+          <ng-pluralize ng-switch-when="user" count="count" when="confirm_modal_X_messages_non_configurable_for_user_only"></ng-pluralize>
+          <ng-pluralize ng-switch-when="supergroup" count="count" when="confirm_modal_X_messages_non_configurable_for_everyone"></ng-pluralize>
+          <ng-pluralize ng-switch-when="group" count="count" when="confirm_modal_X_messages_non_configurable_for_user_only_in_group"></ng-pluralize>
         </p>
       </span>
       <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete"></span>

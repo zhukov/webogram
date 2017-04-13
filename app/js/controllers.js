@@ -1812,17 +1812,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
         }
 
-        var userFirstName = false
-        if (isUser) {
-          userFirstName = AppUsersManager.getUser(peerID).first_name
-        }
-
         ErrorService.confirm({
           type: 'MESSAGES_DELETE',
           count: selectedMessageIDs.length,
           revocable: revocable,
           isUser: isUser,
-          userFirstName: userFirstName,
+          peerID: peerID,
           isChannel: isBroadcast,
           isSupergroup: isMegagroup,
           isUsualGroup: isUsualGroup
