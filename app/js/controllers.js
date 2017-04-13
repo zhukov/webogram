@@ -1797,8 +1797,32 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
       if (selectedMessageIDs.length) {
-        ErrorService.confirm({type: 'MESSAGES_DELETE', count: selectedMessageIDs.length}).then(function () {
-          AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
+        var peerID = $scope.curDialog.peerID
+        var isUser = peerID > 0
+        var isChannel = AppPeersManager.isChannel(peerID)
+        var isBroadcast = AppPeersManager.isBroadcast(peerID)
+        var isMegagroup = AppPeersManager.isMegagroup(peerID)
+        var isUsualGroup = !isChannel && !isUser
+
+        var revocable = !isChannel
+        for (var i = 0; revocable && i < selectedMessageIDs.length; i++) {
+          var messageID = selectedMessageIDs[i]
+          if (!AppMessagesManager.canRevokeMessage(messageID)) {
+            revocable = false
+          }
+        }
+
+        ErrorService.confirm({
+          type: 'MESSAGES_DELETE',
+          count: selectedMessageIDs.length,
+          revocable: revocable,
+          isUser: isUser,
+          peerID: peerID,
+          isChannel: isBroadcast,
+          isSupergroup: isMegagroup,
+          isUsualGroup: isUsualGroup
+        }, {}, { revoke: false }).then(function (data) {
+          AppMessagesManager.deleteMessages(selectedMessageIDs, data.revoke).then(function () {
             selectedCancel()
           })
         })
