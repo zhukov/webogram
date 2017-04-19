@@ -46,7 +46,7 @@ Normalize, CSS-framework
 ### [nanoScrollerJS](https://github.com/jamesflorentino/nanoScrollerJS)
 
 **Author**: James Florentino
-**License**: MIT, https://github.com/jamesflorentino/nanoScrollerJS/blob/master/LICENSE-MIT
+**License**: MIT, https://github.com/jamesflorentino/nanoScrollerJS/blob/master/LICENSE
 
 Beautiful OS X Lion-like scrollbars
 
