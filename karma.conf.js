@@ -49,7 +49,7 @@ module.exports = function(config) {
         'js/filters.js',
         'js/controllers.js',
         'js/directives.js',
-        '../test/unit/*.js'
+        '../test/unit/**/*.js'
     ],
 
 

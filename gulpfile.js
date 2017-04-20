@@ -293,14 +293,14 @@ gulp.task('karma-tdd', function (done) {
 
 gulp.task('test', function (callback) {
   runSequence(
-    ['templates', 'karma-single'],
+    'templates', 'karma-single',
     callback
   )
 })
 
 gulp.task('tdd', function (callback) {
   runSequence(
-    ['templates', 'karma-tdd'],
+    'templates', 'karma-tdd',
     callback
   )
 })

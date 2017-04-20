@@ -6,6 +6,7 @@
  */
 
 'use strict'
+/* global Config, tsNow */
 
 /* Filters */
 
@@ -97,8 +98,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
       if (diff > 518400000) { // 6 days
         format = extended ? 'mediumDate' : 'shortDate'
-      }
-      else if (diff > 43200000) { // 12 hours
+      } else if (diff > 43200000) { // 12 hours
         format = extended ? 'EEEE' : 'EEE'
       }
 
@@ -174,11 +174,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
     return function (size, progressing) {
       if (!size) {
         return '0'
-      }
-      else if (size < 1024) {
+      } else if (size < 1024) {
         return size + ' b'
-      }
-      else if (size < 1048576) {
+      } else if (size < 1048576) {
         return Math.round(size / 1024) + ' KB'
       }
       var mbs = size / 1048576
@@ -211,17 +209,16 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
   .filter('formatShortNumber', [function () {
     return function (num) {
+      var mult
       if (!num) {
         return '0'
-      }
-      else if (num < 1000) {
+      } else if (num < 1000) {
         return num.toString()
-      }
-      else if (num < 900000) {
-        var mult = num > 10000 ? 1 : 10
+      } else if (num < 900000) {
+        mult = num > 10000 ? 1 : 10
         return (Math.round(num / 1000 * mult) / mult) + 'K'
       }
-      var mult = num > 10000000 ? 1 : 10
+      mult = num > 10000000 ? 1 : 10
       return (Math.round(num / 1000000 * mult) / mult) + 'M'
     }
   }])
