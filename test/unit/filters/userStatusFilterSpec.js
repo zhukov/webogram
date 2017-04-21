@@ -115,6 +115,8 @@ describe('userStatus filter', function () {
     expect(result).toBe(expected)
   })
 
+  // Further testing of relativeTimeFilter is done in relativeTimeFilterSpec.js
+
   it('can display that the user was online last week', function () {
     var input = { id: 12321, status: {_: 'userStatusLastWeek'} }
     var expected = _('user_status_last_week')

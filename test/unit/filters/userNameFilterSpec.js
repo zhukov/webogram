@@ -31,6 +31,16 @@ describe('userName filter', function () {
     expect(actual).toEqual(expected)
   })
 
+  it('displays the last name', function () {
+    var user = {
+      last_name: 'Doe'
+    }
+    var expected = user.last_name
+    var actual = userNameFilter(user)
+
+    expect(actual).toEqual(expected)
+  })
+
   it('displays both, the first and the last name', function () {
     var user = {
       first_name: 'John',

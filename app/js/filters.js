@@ -17,7 +17,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
       if (!user || !user.first_name && !user.last_name) {
         return _('user_name_deleted')
       }
-      return user.first_name + (user.last_name ? ' ' + user.last_name : '')
+      return user.first_name ? (user.first_name + (user.last_name ? ' ' + user.last_name : '')) : user.last_name
     }
   })
 
@@ -201,7 +201,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
       var totalParts = total.split(' ')
 
       if (totalParts[1] === doneParts[1]) {
-        return _('format_size_progress_mulitple', {done: doneParts[0], total: totalParts[0], parts: (doneParts[1] || '')})
+        return _('format_size_progress_mulitple', {done: doneParts[0], total: totalParts[0], parts: doneParts[1]})
       }
       return _('format_size_progress', {done: done, total: total})
     }
