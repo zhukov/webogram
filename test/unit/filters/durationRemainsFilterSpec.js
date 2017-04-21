@@ -1,6 +1,6 @@
 /* global describe, it, inject, expect, beforeEach */
 
-describe('duration filter', function () {
+describe('durationRemains filter', function () {
   var $filter, durationRemainsFilter
 
   beforeEach(module('myApp.filters'))

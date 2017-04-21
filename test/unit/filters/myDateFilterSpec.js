@@ -1,6 +1,6 @@
 /* global describe, it, inject, expect, beforeEach */
 
-describe('formatSizeProgress filter', function () {
+describe('myDate filter', function () {
   var $filter, myDateFilter
 
   beforeEach(module('myApp.filters'))
