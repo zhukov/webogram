@@ -13,10 +13,15 @@ describe('formatShortNumber filter', function () {
     formatShortNumberFilter = $filter('formatShortNumber')
   })
 
-  it('converts zero', function () {
+  it('converts zero or undefined', function () {
     var input = 0
     var expected = '0'
     var result = formatShortNumberFilter(input)
+
+    expect(result).toBe(expected)
+
+    input = undefined
+    result = formatShortNumberFilter(input)
 
     expect(result).toBe(expected)
   })

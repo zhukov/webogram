@@ -21,7 +21,7 @@ describe('myDate filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('can create a date based on timestamp', function () {
+  it('can recollect a date based on timestamp', function () {
     var input = 12111114111
     var expected = 'Thursday, October 15, 2353'
     var result1 = myDateFilter(input)

@@ -23,6 +23,7 @@ describe('dateOrTime filter', function () {
 
   it('can display the time based on timestamp', function () {
     var input = tsNow(true)
+    // Outcome format expected: HH:MM AM/PM
     var expected = $filter('date')(input * 1000, 'shortTime')
     var result = dateOrTimeFilter(input, false)
 
@@ -31,6 +32,7 @@ describe('dateOrTime filter', function () {
 
   it('can display the short date based on timestamp', function () {
     var input = tsNow(true)
+    // Outcome format expected: (M or MM)/(D or DD)/YY
     var expected = $filter('date')(input * 1000 - 518400000, 'shortDate')
     var result = dateOrTimeFilter(input - 518400, false)
 
@@ -39,6 +41,7 @@ describe('dateOrTime filter', function () {
 
   it('can display the medium-size date based on timestamp', function () {
     var input = tsNow(true)
+    // Outcome format expected: Month(3 letters) Day, Year
     var expected = $filter('date')(input * 1000 - 518400000, 'mediumDate')
     var result = dateOrTimeFilter(input - 518400, true)
 
@@ -47,6 +50,7 @@ describe('dateOrTime filter', function () {
 
   it('can display the day of the week (in short) based on timestamp', function () {
     var input = tsNow(true)
+    // Outcome format expcected: Day of week in three letters (Mon, Tue, etc.)
     var expected = $filter('date')(input * 1000 - 43200000, 'EEE')
     var result = dateOrTimeFilter(input - 43200, false)
 
@@ -55,6 +59,7 @@ describe('dateOrTime filter', function () {
 
   it('can display the day of the week based on timestamp', function () {
     var input = tsNow(true)
+    // Outcome format expcected: Day of week (Monday, Tuesday, etc.)
     var expected = $filter('date')(input * 1000 - 43200000, 'EEEE')
     var result = dateOrTimeFilter(input - 43200, true)
 

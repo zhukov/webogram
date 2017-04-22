@@ -14,7 +14,7 @@ describe('userStatus filter', function () {
     userStatusFilter = $filter('userStatus')
   })
 
-  it('can handle null values', function () {
+  it('can recognize support users', function () {
     var input = { id: 1000 }
     var expected = _('user_status_support')
     var result = userStatusFilter(input)
@@ -22,15 +22,7 @@ describe('userStatus filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('can handle null values', function () {
-    var input = { id: 777000 }
-    var expected = _('user_status_service_notifications')
-    var result = userStatusFilter(input)
-
-    expect(result).toBe(expected)
-  })
-
-  it('can handle null values', function () {
+  it('can recognize service notifications', function () {
     var input = { id: 777000 }
     var expected = _('user_status_service_notifications')
     var result = userStatusFilter(input)
