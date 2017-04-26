@@ -32,10 +32,33 @@ describe('shortUrl filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('removes "https" from a Url', function () {
+  it('removes "http(s)" from a Url', function () {
     var input = 'https://github.com'
     var expected = 'github.com'
     var result = this.shortUrlFilter(input)
+
+    expect(result).toBe(expected)
+
+    input = 'http://github.com'
+    result = this.shortUrlFilter(input)
+
+    expect(result).toBe(expected)
+  })
+
+  it('does not remove other protocols from a Url', function () {
+    var input, expected
+    input = expected = 'ftp://github.com'
+    var result = this.shortUrlFilter(input)
+
+    expect(result).toBe(expected)
+
+    input = expected = 'irc://github.com'
+    result = this.shortUrlFilter(input)
+
+    expect(result).toBe(expected)
+
+    input = expected = 'tg://github.com'
+    result = this.shortUrlFilter(input)
 
     expect(result).toBe(expected)
   })
