@@ -1,3 +1,4 @@
+'use strict'
 /* global describe, it, inject, expect, beforeEach, jasmine, tsNow*/
 
 describe('relativeTime filter', function () {

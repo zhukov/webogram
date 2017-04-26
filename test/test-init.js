@@ -1,3 +1,4 @@
+'use strict'
 /* global ConfigStorage, Config */
 
 ;(function initTestApplication () {
