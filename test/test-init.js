@@ -11,20 +11,6 @@
       i18n_messages: false,
       i18n_fallback: false
     }
-    var checkReady = function checkReady () {
-      var i
-      var ready = true
-      for (i in bootReady) {
-        if (bootReady.hasOwnProperty(i) && bootReady[i] === false) {
-          ready = false
-          break
-        }
-      }
-      if (ready) {
-        bootReady.boot = false
-        angular.bootstrap(document, ['myApp'])
-      }
-    }
 
     if (!locale) {
       locale = (navigator.language || '').toLowerCase()
@@ -44,14 +30,12 @@
       if (Config.I18n.locale === defaultLocale) { // No fallback, leave empty object
         bootReady.i18n_fallback = true
       }
-      checkReady()
     })
 
     if (Config.I18n.locale !== defaultLocale) {
       $.getJSON('base/js/locales/' + defaultLocale + '.json').success(function (json) {
         Config.I18n.fallback_messages = json
         bootReady.i18n_fallback = true
-        checkReady()
       })
     }
   })
