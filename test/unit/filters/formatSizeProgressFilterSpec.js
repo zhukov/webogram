@@ -21,7 +21,7 @@ describe('formatSizeProgress filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('can format progress with different scale of machnitude', function () {
+  it('can format progress with different scale of magnitude', function () {
     var input = { total: 1024, done: 1023 }
     var expected = this._('format_size_progress', {done: '1023 b', total: '1 KB'})
     var result = this.formatSizeProgressFilter(input)

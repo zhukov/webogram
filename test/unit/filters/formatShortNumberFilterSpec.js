@@ -39,7 +39,7 @@ describe('formatShortNumber filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('converts numbers between 1000 and 900000 to string with shorten value', function () {
+  it('converts numbers between 1000 and 900000 to string with shortened value', function () {
     var input = 1276
     var expected = '1.3K'
     var result = this.formatShortNumberFilter(input)
@@ -59,7 +59,7 @@ describe('formatShortNumber filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('converts numbers above 900000 to string with shorten value', function () {
+  it('converts numbers above 900000 to string with shortened value', function () {
     var input = 900000
     var expected = '0.9M'
     var result = this.formatShortNumberFilter(input)

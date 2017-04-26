@@ -80,7 +80,7 @@ describe('userStatus filter', function () {
     expect(result).toBe(expected)
   })
 
-  it('can display a online status', function () {
+  it('can display an online status', function () {
     var input = { id: 12321, status: {_: 'userStatusOnline'} }
     var expected = this._('user_status_online')
     var result = this.userStatusFilter(input)

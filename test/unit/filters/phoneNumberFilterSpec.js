@@ -12,10 +12,20 @@ describe('phoneNumber filter', function () {
     this.phoneNumberFilter = this.$filter('phoneNumber')
   })
 
-  it('can handle null values', function () {
-    var input = null
+  it('can handle "zero" values', function () {
+    var input
     var expected = '+'
     var result = this.phoneNumberFilter(input)
+
+    expect(result).toBe(expected)
+
+    input = null
+    result = this.phoneNumberFilter(input)
+
+    expect(result).toBe(expected)
+
+    input = 0
+    result = this.phoneNumberFilter(input)
 
     expect(result).toBe(expected)
   })
