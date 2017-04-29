@@ -1,22 +1,21 @@
+'use strict'
 /* global describe, it, inject, expect, beforeEach */
 
 describe('chatTitle filter', function () {
-  var $filter, _, chatTitleFilter
-
   beforeEach(module('myApp.filters'))
 
   beforeEach(inject(function (_$filter_, ___) {
-    $filter = _$filter_
-    _ = ___
+    this.$filter = _$filter_
+    this._ = ___
   }))
 
   beforeEach(function () {
-    chatTitleFilter = $filter('chatTitle')
+    this.chatTitleFilter = this.$filter('chatTitle')
   })
 
   it('displays chat title deleted', function () {
-    var expected = _('chat_title_deleted')
-    var actual = chatTitleFilter(null)
+    var expected = this._('chat_title_deleted')
+    var actual = this.chatTitleFilter(null)
 
     expect(actual).toEqual(expected)
   })
@@ -26,7 +25,7 @@ describe('chatTitle filter', function () {
       title: 'Telegraph is hot!'
     }
     var expected = chat.title
-    var actual = chatTitleFilter(chat)
+    var actual = this.chatTitleFilter(chat)
 
     expect(actual).toEqual(expected)
   })
