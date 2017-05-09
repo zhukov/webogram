@@ -9,9 +9,10 @@
 
 /* EmojiHelper */
 
-;(function (global, emojis, categories, spritesheets) {
+;(function (global, emojiData, categories, spritesheets) {
   var emojis = {}
   var shortcuts = {}
+  var emojiMap = {}
   var spritesheetPositions = {}
   var index = false
 
@@ -32,13 +33,17 @@
     totalColumns = spritesheets[i][1]
     for (j = 0, len2 = categories[i].length; j < len2; j++) {
       code = categories[i][j]
-      emoji = Config.Emoji[code]
+      emoji = emojiData[code]
       shortcut = emoji[1][0]
       emojis[code] = [emoji[0], shortcut]
       shortcuts[shortcut] = code
       spritesheetPositions[code] = [i, j, Math.floor(j / totalColumns), j % totalColumns]
     }
   }
+
+  angular.forEach(emojiData, function (emoji, emojiCode) {
+    emojiMap[emoji[0]] = emojiCode
+  })
 
   function getPopularEmoji (callback) {
     ConfigStorage.get('emojis_popular', function (popEmojis) {
@@ -126,6 +131,7 @@
 
   global.EmojiHelper = {
     emojis: emojis,
+    emojiMap: emojiMap,
     shortcuts: shortcuts,
     spritesheetPositions: spritesheetPositions,
     getPopularEmoji: getPopularEmoji,
@@ -715,6 +721,7 @@ function MessageComposer (textarea, options) {
   this.onInlineResultSend = options.onInlineResultSend
   this.mentions = options.mentions
   this.commands = options.commands
+  this.renderToggleCnt = 0
 }
 
 MessageComposer.autoCompleteRegEx = /(\s|^)(:|@|\/)([\S]*)$/
@@ -1096,6 +1103,9 @@ MessageComposer.prototype.checkAutocomplete = function (forceFull) {
       }
     }
     else if (matches[2] == ':') { // emoji
+      if (value.match(/^\s*:(.+):\s*$/)) {
+        return
+      }
       EmojiHelper.getPopularEmoji((function (popular) {
         if (query.length) {
           var found = EmojiHelper.searchEmojis(query)
@@ -1497,6 +1507,7 @@ MessageComposer.prototype.renderSuggestions = function () {
 }
 
 MessageComposer.prototype.showEmojiSuggestions = function (codes) {
+  var renderCnt = ++this.renderToggleCnt
   var self = this
   setZeroTimeout(function () {
     self.autoCompleteScope.$apply(function () {
@@ -1504,12 +1515,15 @@ MessageComposer.prototype.showEmojiSuggestions = function (codes) {
       self.autoCompleteScope.emojiCodes = codes
     })
     onContentLoaded(function () {
-      self.renderSuggestions()
+      if (renderCnt == self.renderToggleCnt) {
+        self.renderSuggestions()
+      }
     })
   })
 }
 
 MessageComposer.prototype.showMentionSuggestions = function (users) {
+  var renderCnt = ++this.renderToggleCnt
   var self = this
   setZeroTimeout(function () {
     self.autoCompleteScope.$apply(function () {
@@ -1517,12 +1531,15 @@ MessageComposer.prototype.showMentionSuggestions = function (users) {
       self.autoCompleteScope.mentionUsers = users
     })
     onContentLoaded(function () {
-      self.renderSuggestions()
+      if (renderCnt == self.renderToggleCnt) {
+        self.renderSuggestions()
+      }
     })
   })
 }
 
 MessageComposer.prototype.showCommandsSuggestions = function (commands) {
+  var renderCnt = ++this.renderToggleCnt
   var self = this
   setZeroTimeout(function () {
     self.autoCompleteScope.$apply(function () {
@@ -1530,7 +1547,9 @@ MessageComposer.prototype.showCommandsSuggestions = function (commands) {
       self.autoCompleteScope.commands = commands
     })
     onContentLoaded(function () {
-      self.renderSuggestions()
+      if (renderCnt == self.renderToggleCnt) {
+        self.renderSuggestions()
+      }
     })
   })
 }
@@ -1540,6 +1559,7 @@ MessageComposer.prototype.showInlineSuggestions = function (botResults) {
     this.hideSuggestions()
     return
   }
+  var renderCnt = ++this.renderToggleCnt
   var self = this
   if (self.autoCompleteScope.type == 'inline' &&
     self.autoCompleteScope.botResults == botResults &&
@@ -1552,7 +1572,9 @@ MessageComposer.prototype.showInlineSuggestions = function (botResults) {
       self.autoCompleteScope.botResults = botResults
     })
     onContentLoaded(function () {
-      self.renderSuggestions()
+      if (renderCnt == self.renderToggleCnt) {
+        self.renderSuggestions()
+      }
     })
   })
 }
@@ -1575,7 +1597,8 @@ MessageComposer.prototype.updatePosition = function () {
 }
 
 MessageComposer.prototype.hideSuggestions = function () {
-  // console.trace()
+  var renderCnt = ++this.renderToggleCnt
+  // console.trace(dT())
   // return
   this.autoCompleteWrapEl.hide()
   delete this.autocompleteShown
