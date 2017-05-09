@@ -457,7 +457,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('history_focus', function (e, peerData) {
       if (peerData.peerString == $scope.curDialog.peer &&
           (peerData.messageID ? peerData.messageID == $scope.curDialog.messageID : !$scope.curDialog.messageID) &&
-        !peerData.startParam) {
+          !peerData.startParam &&
+          !peerData.attachment) {
         if (peerData.messageID) {
           $scope.$broadcast('ui_history_change_scroll', true)
         } else {
