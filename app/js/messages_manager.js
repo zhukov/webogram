@@ -1353,6 +1353,10 @@ angular.module('myApp.services')
               apiMessage.pFlags.out = false
               apiMessage.pFlags.unread = false
               break
+
+            case 'messageActionPhoneCall':
+              delete apiMessage.fromID
+              break
           }
           if (migrateFrom &&
             migrateTo &&

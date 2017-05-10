@@ -534,9 +534,26 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myServiceMessage', function () {
+  .directive('myServiceMessage', function (ErrorService, AppMessagesManager) {
     return {
-      templateUrl: templateUrl('message_service')
+      templateUrl: templateUrl('message_service'),
+      scope: {
+        'historyMessage': '=myServiceMessage'
+      },
+      link: link
+    }
+
+    function link ($scope, element, attrs) {
+      $scope.phoneCallClick = function (messageID) {
+        var message = AppMessagesManager.getMessage(messageID)
+        var userID = AppMessagesManager.getMessagePeer(message)
+        ErrorService.show({
+          error: {
+            type: 'PHONECALLS_NOT_SUPPORTED',
+            userID: userID
+          }
+        })
+      }
     }
   })
 
