@@ -1410,6 +1410,26 @@ a.im_dialog_selected {
   }
 }
 
+.im_dialog_pinned {
+  background: red;
+  display: inline-block;
+  float: right;
+  width: 8px;
+  height: 8px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 12px 0 0;
+
+  a.im_dialog:hover &,
+  a.im_dialog_selected & {
+    background: red;
+  }
+
+  .active & {
+    background-color: red;
+  }
+}
+
 .im_dialog_date {
   color: #b3b3b3;
   font-size: 0.85em;

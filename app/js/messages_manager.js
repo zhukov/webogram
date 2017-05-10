@@ -50,6 +50,7 @@ angular.module('myApp.services')
 
     var allDialogsLoaded = false
     var dialogsOffsetDate = 0
+    var pinnedIndex = 0
     var dialogsNum = 0
 
     var migratedFromTo = {}
@@ -163,6 +164,9 @@ angular.module('myApp.services')
       if (savedDraft && savedDraft.date > topDate) {
         topDate = savedDraft.date
       }
+      if (dialog.pFlags.pinned) {
+        topDate = generateDialogPinnedDate()
+      }
 
       dialog.index = generateDialogIndex(topDate)
       dialog.peerID = peerID
@@ -237,6 +241,7 @@ angular.module('myApp.services')
 
         var maxSeenIdIncremented = offsetDate ? true : false
         var hasPrepend = false
+        dialogsResult.dialogs.reverse()
         angular.forEach(dialogsResult.dialogs, function (dialog) {
           saveConversation(dialog)
           if (offsetIndex && dialog.index > offsetIndex) {
@@ -250,6 +255,7 @@ angular.module('myApp.services')
             maxSeenIdIncremented = true
           }
         })
+        dialogsResult.dialogs.reverse()
 
         if (!dialogsResult.dialogs.length ||
           !dialogsResult.count ||
@@ -264,6 +270,10 @@ angular.module('myApp.services')
           $rootScope.$broadcast('dialogs_multiupdate', {})
         }
       })
+    }
+
+    function generateDialogPinnedDate() {
+      return 0x7fffff00 + ((pinnedIndex++) & 0xff)
     }
 
     function generateDialogIndex (date) {
@@ -2232,6 +2242,7 @@ angular.module('myApp.services')
       message.peerString = AppPeersManager.getPeerString(message.peerID)
       message.unreadCount = unreadCount
       message.index = dialog && dialog.index || (message.date * 0x10000)
+      message.pinned = dialog && dialog.pFlags.pinned || false
 
       if (message._ == 'messageService' && message.action.user_id) {
         message.action.user = AppUsersManager.getUser(message.action.user_id)
@@ -3018,7 +3029,9 @@ angular.module('myApp.services')
           if (inboxUnread) {
             dialog.unread_count++
           }
-          dialog.index = generateDialogIndex(message.date)
+          if (!dialog.pFlags.pinned || !dialog.index) {
+            dialog.index = generateDialogIndex(message.date)
+          }
 
           newDialogsToHandle[peerID] = dialog
           if (!newDialogsHandlePromise) {
@@ -3051,6 +3064,80 @@ angular.module('myApp.services')
               notificationsHandlePromise = $timeout(handleNotifications, 1000)
             }
           }
+          break
+
+        case 'updateDialogPinned':
+          var peerID = AppPeersManager.getPeerID(update.peer)
+          var foundDialog = getDialogByPeerID(peerID)
+
+          if (!foundDialog.length || !update.pFlags.pinned) {
+            newDialogsToHandle[peerID] = {reload: true}
+            if (!newDialogsHandlePromise) {
+              newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
+            }
+            break
+          }
+
+          var dialog = foundDialog[0]
+          dialog.index = generateDialogIndex(generateDialogPinnedDate())
+          dialog.pFlags.pinned = true
+          break
+
+        case 'updatePinnedDialogs':
+          var changedDialogs = {}
+          var newPinned = {}
+          if (!update.order) {
+            MtpApiManager.invokeApi('messages.getPinnedDialogs', {}).then(function (dialogsResult) {
+              dialogsResult.dialogs.reverse()
+              applyConversations(dialogsResult)
+              angular.forEach(dialogsResult.dialogs, function (dialog) {
+                newPinned[dialog.peerID] = true
+              })
+              angular.forEach(dialogsStorage.dialogs, function (dialog) {
+                var peerID = dialog.peerID
+                if (dialog.pFlags.pinned && !newPinned[peerID]) {
+                  newDialogsToHandle[peerID] = {reload: true}
+                  if (!newDialogsHandlePromise) {
+                    newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
+                  }
+                }
+              })
+            })
+            break
+          }
+          update.order.reverse()
+          angular.forEach(update.order, function (peer) {
+            var peerID = AppPeersManager.getPeerID(peer)
+            newPinned[peerID] = true
+
+            var foundDialog = getDialogByPeerID(peerID)
+
+            if (!foundDialog.length) {
+              newDialogsToHandle[peerID] = {reload: true}
+              if (!newDialogsHandlePromise) {
+                newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
+              }
+              return
+            }
+
+            var dialog = foundDialog[0]
+            dialog.index = generateDialogIndex(generateDialogPinnedDate())
+            dialog.pFlags.pinned = true
+
+            newDialogsToHandle[peerID] = dialog
+            if (!newDialogsHandlePromise) {
+              newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
+            }
+          })
+          angular.forEach(dialogsStorage.dialogs, function (dialog) {
+            var peerID = dialog.peerID
+            if (dialog.pFlags.pinned && !newPinned[peerID]) {
+              newDialogsToHandle[peerID] = {reload: true}
+              if (!newDialogsHandlePromise) {
+                newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
+              }
+            }
+          })
           break
 
         case 'updateEditMessage':
@@ -3352,36 +3439,38 @@ angular.module('myApp.services')
         peers: [
           AppPeersManager.getInputPeerByID(peerID)
         ]
-      }).then(function (dialogsResult) {
-        AppUsersManager.saveApiUsers(dialogsResult.users)
-        AppChatsManager.saveApiChats(dialogsResult.chats)
-        saveMessages(dialogsResult.messages)
+      }).then(applyConversations)
+    }
 
-        var updatedDialogs = {}
-        var hasUpdated = false
-        angular.forEach(dialogsResult.dialogs, function (dialog) {
-          if (dialog.top_message) {
-            var wasBefore = getDialogByPeerID(dialog.peerID).length > 0
-            saveConversation(dialog)
-            if (wasBefore) {
-              $rootScope.$broadcast('dialog_top', dialog)
-            } else {
-              updatedDialogs[dialog.peerID] = dialog
-              hasUpdated = true
-            }
+    function applyConversations(dialogsResult) {
+      AppUsersManager.saveApiUsers(dialogsResult.users)
+      AppChatsManager.saveApiChats(dialogsResult.chats)
+      saveMessages(dialogsResult.messages)
+
+      var updatedDialogs = {}
+      var hasUpdated = false
+      angular.forEach(dialogsResult.dialogs, function (dialog) {
+        if (dialog.top_message) {
+          var wasBefore = getDialogByPeerID(dialog.peerID).length > 0
+          saveConversation(dialog)
+          if (wasBefore) {
+            $rootScope.$broadcast('dialog_top', dialog)
           } else {
-            var peerID = AppPeersManager.getPeerID(dialog.peer)
-            var foundDialog = getDialogByPeerID(peerID)
-            if (foundDialog.length) {
-              dialogsStorage.dialogs.splice(foundDialog[1], 1)
-              $rootScope.$broadcast('dialog_drop', {peerID: peerID})
-            }
+            updatedDialogs[dialog.peerID] = dialog
+            hasUpdated = true
           }
-        })
-        if (hasUpdated) {
-          $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs)
+        } else {
+          var peerID = AppPeersManager.getPeerID(dialog.peer)
+          var foundDialog = getDialogByPeerID(peerID)
+          if (foundDialog.length) {
+            dialogsStorage.dialogs.splice(foundDialog[1], 1)
+            $rootScope.$broadcast('dialog_drop', {peerID: peerID})
+          }
         }
       })
+      if (hasUpdated) {
+        $rootScope.$broadcast('dialogs_multiupdate', updatedDialogs)
+      }
     }
 
     $rootScope.$on('webpage_updated', function (e, eventData) {
@@ -3421,7 +3510,9 @@ angular.module('myApp.services')
             }
           }
         }
-        dialog.index = generateDialogIndex(topDate)
+        if (!dialog.pFlags.pinned) {
+          dialog.index = generateDialogIndex(topDate)
+        }
         pushDialogToStorage(dialog)
 
         $rootScope.$broadcast('dialog_draft', {
