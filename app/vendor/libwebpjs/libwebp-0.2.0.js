@@ -24,6 +24,8 @@
 // Author: Dominik Homberger (dominik.homberger@gmail.com)
 (function() {
 
+  var self;
+
   var ca = void 0,
     p = null,
     s = 0,
@@ -617,7 +619,7 @@
 
     function Y(a, b, c) {
       a.a == L && (a.a = b, a.xc = c, a.za = 0);
-      alert(b + ": " + c);
+      // alert(b + ": " + c);
       return 0
     }
 
@@ -2657,7 +2659,7 @@
         Hd(a, g) ? (e = zd(g.width, g.height, d.Qa, d.j), e == L && !Mf(a, g) && (e = a.a)) : e = a.a;
         a != p && ke(a)
       }
-      e != L && this.Yc(d.j);
+      e != L && (self || this).Yc(d.j);
       return e
     }
 
@@ -3225,6 +3227,7 @@
     this.WebPFreeDecBuffer = this.Yc = function(a) {
       a != p && (a.Fc || (a.Jb = ""), a.jc = 0, a.Jb = a.jc = p)
     };
+    self = this;
     var va = U(511, x),
       tc = U(511, x),
       sc = U(2041, 0),
