@@ -1356,6 +1356,14 @@ angular.module('myApp.services')
 
             case 'messageActionPhoneCall':
               delete apiMessage.fromID
+              apiMessage.action.type = 
+                (apiMessage.pFlags.out ? 'out_' : 'in_') +
+                (
+                  apiMessage.action.reason._ == 'phoneCallDiscardReasonMissed' ||
+                  apiMessage.action.reason._ == 'phoneCallDiscardReasonBusy'
+                     ? 'missed'
+                     : 'ok'
+                )
               break
           }
           if (migrateFrom &&
@@ -2776,6 +2784,23 @@ angular.module('myApp.services')
             break
           case 'messageActionGameScore':
             notificationMessage = gameScorePluralize(message.action.score)
+            break
+
+          case 'messageActionPhoneCall':
+            switch (message.action.type) {
+              case 'out_missed':
+                notificationMessage = _('message_service_phonecall_canceled_raw')
+                break
+              case 'in_missed':
+                notificationMessage = _('message_service_phonecall_missed_raw')
+                break
+              case 'out_ok':
+                notificationMessage = _('message_service_phonecall_outgoing_raw')
+                break
+              case 'in_ok':
+                notificationMessage = _('message_service_phonecall_incoming_raw')
+                break
+            }
             break
         }
       }

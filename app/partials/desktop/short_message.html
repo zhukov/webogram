@@ -49,5 +49,11 @@
                      when="conversation_scored_X"></ng-pluralize>
     </my-i18n-param>
   </span>
+  <span ng-switch-when="messageActionPhoneCall" ng-switch="message.action.type">
+    <span ng-switch-when="out_missed" my-i18n="message_service_phonecall_canceled"></span>
+    <span ng-switch-when="in_missed" my-i18n="message_service_phonecall_missed"></span>
+    <span ng-switch-when="out_ok" my-i18n="message_service_phonecall_outgoing"></span>
+    <span ng-switch-when="in_ok" my-i18n="message_service_phonecall_incoming"></span>
+  </span>
 
 </span><span class="im_short_message_text" ng-if="message.message.length && (!message.media || message.media._ == 'messageMediaWebPage')" ng-bind-html="message.richMessage"></span>

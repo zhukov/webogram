@@ -42,14 +42,12 @@
     <my-i18n-param name="message"><a class="im_service_message_pinned" my-pinned-message="::historyMessage.reply_to_mid"></a></my-i18n-param>
   </span>
 
-  <a ng-switch-when="messageActionPhoneCall" class="im_service_message_phonecall" ng-click="phoneCallClick(historyMessage.mid)">
-    <my-i18n ng-switch="(historyMessage.pFlags.out ? 'out' : 'in') + (historyMessage.action.reason._ == 'phoneCallDiscardReasonMissed' || historyMessage.action.reason._ == 'phoneCallDiscardReasonBusy' ? 'missed' : 'ok')">
-      <span ng-switch-when="outmissed" my-i18n-format="message_service_phonecall_canceled"></span>
-      <span ng-switch-when="inmissed" my-i18n-format="message_service_phonecall_missed"></span>
-      <span ng-switch-when="outok" my-i18n-format="message_service_phonecall_outgoing"></span>
-      <span ng-switch-when="inok" my-i18n-format="message_service_phonecall_incoming"></span>
-      <my-i18n-param name="duration"><span ng-if="historyMessage.action.duration > 0" ng-bind="historyMessage.action.duration | duration" class="im_service_message_phonecall_duration"></span></my-i18n-param>
-    </my-i18n>
+  <a ng-switch-when="messageActionPhoneCall" class="im_service_message_phonecall" ng-click="phoneCallClick(historyMessage.mid)" ng-switch="historyMessage.action.type">
+    <span ng-switch-when="out_missed" my-i18n="message_service_phonecall_canceled"></span>
+    <span ng-switch-when="in_missed" my-i18n="message_service_phonecall_missed"></span>
+    <span ng-switch-when="out_ok" my-i18n="message_service_phonecall_outgoing"></span>
+    <span ng-switch-when="in_ok" my-i18n="message_service_phonecall_incoming"></span>
+    <span ng-if="historyMessage.action.duration > 0" ng-bind="historyMessage.action.duration | duration" class="im_service_message_phonecall_duration"></span>
   </a>
 
 
