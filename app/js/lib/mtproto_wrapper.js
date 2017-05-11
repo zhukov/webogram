@@ -803,7 +803,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       var newInstance = {id: instanceID, idle: idle, time: time}
 
       Storage.get('xt_instance').then(function (curInstance) {
-        console.log(dT(), 'check instance', newInstance, curInstance)
+        // console.log(dT(), 'check instance', newInstance, curInstance)
         if (!idle ||
             !curInstance ||
             curInstance.id == instanceID ||
