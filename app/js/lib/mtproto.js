@@ -802,8 +802,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var isClean = this.cleanupSent()
       // console.log('Check lp', this.longPollPending, tsNow(), this.dcID, isClean)
       if (this.longPollPending && tsNow() < this.longPollPending ||
-        this.offline ||
-        akStopped) {
+          this.offline ||
+          akStopped) {
         return false
       }
       var self = this

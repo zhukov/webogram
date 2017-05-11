@@ -760,7 +760,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     function clearInstance () {
-      Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance')
+      if (masterInstance && !deactivated) {
+        console.warn('clear master instance');
+        Storage.remove('xt_instance')
+      }
     }
 
     function deactivateInstance () {
@@ -799,19 +802,12 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       var idle = $rootScope.idle && $rootScope.idle.isIDLE
       var newInstance = {id: instanceID, idle: idle, time: time}
 
-      Storage.get('xt_instance', 'xt_idle_instance').then(function (result) {
-        var curInstance = result[0]
-        var idleInstance = result[1]
-
-        // console.log(dT(), 'check instance', newInstance, curInstance, idleInstance)
+      Storage.get('xt_instance').then(function (curInstance) {
+        console.log(dT(), 'check instance', newInstance, curInstance)
         if (!idle ||
             !curInstance ||
             curInstance.id == instanceID ||
-            curInstance.time < time - 60000) {
-          if (idleInstance &&
-            idleInstance.id == instanceID) {
-            Storage.remove('xt_idle_instance')
-          }
+            curInstance.time < time - 20000) {
           Storage.set({xt_instance: newInstance})
           if (!masterInstance) {
             MtpNetworkerFactory.startAll()
@@ -820,22 +816,21 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             } else {
               console.warn(dT(), 'now master instance', newInstance)
             }
+            masterInstance = true
           }
-          masterInstance = true
           if (deactivatePromise) {
             $timeout.cancel(deactivatePromise)
             deactivatePromise = false
           }
         } else {
-          Storage.set({xt_idle_instance: newInstance})
           if (masterInstance) {
             MtpNetworkerFactory.stopAll()
             console.warn(dT(), 'now idle instance', newInstance)
             if (!deactivatePromise) {
               deactivatePromise = $timeout(deactivateInstance, 30000)
             }
+            masterInstance = false
           }
-          masterInstance = false
         }
       })
     }
