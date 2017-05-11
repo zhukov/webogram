@@ -1350,6 +1350,9 @@ a.im_dialog:hover .im_short_message_text,a.im_dialog_selected .im_short_message_
 .im_dialog_unread{background:#c1d6e5;display:inline-block;float:right;width:8px;height:8px;border-radius:5px;overflow:hidden;margin:12px 0 0}
 a.im_dialog:hover .im_dialog_unread,a.im_dialog_selected .im_dialog_unread{background:#a3c0d4}
 .active .im_dialog_unread{background-color:#a4c4dd}
+.im_dialog_pinned{display:inline-block;float:right;width:14px;height:14px;overflow:hidden;margin:12px 0 0;background-image:url(../img/icons/General.png);background-repeat:no-repeat;background-position:-13px -916px}
+.is_2x .im_dialog_pinned{background-image:url(../img/icons/General_2x.png);background-size:40px 948px}
+.active .im_dialog_pinned,a.im_dialog:hover .im_dialog_pinned,a.im_dialog_selected .im_dialog_pinned{background-position:-13px -916px}
 .im_dialog_date{color:#b3b3b3;font-size:.85em}
 a.im_dialog:hover .im_dialog_date,a.im_dialog_selected .im_dialog_date{color:#91a6ba}
 .active .im_dialog_date,.active a.im_dialog:hover .im_dialog_date,.active a.im_dialog_selected .im_dialog_date{color:#b8d1e4}
@@ -1470,6 +1473,8 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .im_service_message{display:block;min-width:10px;padding:4px 7px;line-height:1.4;color:#999;text-align:center;border-radius:10px;margin:5px 0}
 .im_service_message_photo_thumb{display:inline-block;margin:0 auto}
 .im_service_message .im_service_message_pinned{color:inherit;font-weight:700;display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.im_service_message_phonecall{color:inherit!important;font-weight:700}
+.im_service_message_phonecall_duration{font-weight:400}
 .im_message_date,.im_message_fwd_date{color:#adadad;font-size:.85em;padding:0 0 20px 10px}
 .im_message_edited{display:none}
 .im_message_date_text{cursor:pointer}
