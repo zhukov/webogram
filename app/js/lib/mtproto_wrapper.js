@@ -805,9 +805,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
         // console.log(dT(), 'check instance', newInstance, curInstance, idleInstance)
         if (!idle ||
-          !curInstance ||
-          curInstance.id == instanceID ||
-          curInstance.time < time - 60000) {
+            !curInstance ||
+            curInstance.id == instanceID ||
+            curInstance.time < time - 60000) {
           if (idleInstance &&
             idleInstance.id == instanceID) {
             Storage.remove('xt_idle_instance')

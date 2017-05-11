@@ -22,22 +22,23 @@
       </div>
       <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete"></span>
       <span ng-switch-when="MESSAGES_DELETE">
-        <ng-pluralize count="count"
-                     when="confirm_modal_X_messages_delete">
-        </ng-pluralize>
+        <span my-i18n="confirm_modal_delete_messages">
+          <my-i18n-param name="messages"><strong><ng-pluralize when="confirm_modal_delete_X_messages" count="count"></ng-pluralize></strong></my-i18n-param>
+        </span>
+
         <a class="tg_checkbox" ng-if="revocable" ng-click="data.revoke = !data.revoke" ng-class="data.revoke ? 'tg_checkbox_on' : ''">
           <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
           <span class="tg_checkbox_label" my-i18n="confirm_modal_message_revoke">
             <my-i18n-param name="recipient" ng-switch="isUser">
               <span ng-switch-when="true" my-peer-link="peerID" short="true"></span>
-              <span ng-switch-default my-i18n="confirm_modal_message_revoke_recipient_group"></span>
+              <span ng-switch-default my-i18n="confirm_modal_message_revoke_recipient_chat"></span>
             </my-i18n-param>
           </span>
         </a>
         <p class="tg_checkbox" ng-if="!revocable && !isChannel" ng-switch="isUser ? 'user' : (isSupergroup ? 'supergroup' : (isUsualGroup ? 'group' : 'default'))">
-          <ng-pluralize ng-switch-when="user" count="count" when="confirm_modal_X_messages_non_configurable_for_user_only"></ng-pluralize>
-          <ng-pluralize ng-switch-when="supergroup" count="count" when="confirm_modal_X_messages_non_configurable_for_everyone"></ng-pluralize>
-          <ng-pluralize ng-switch-when="group" count="count" when="confirm_modal_X_messages_non_configurable_for_user_only_in_group"></ng-pluralize>
+          <span ng-switch-when="supergroup" my-i18n="confirm_modal_delete_messages_for_everyone_chat"></span>
+          <span ng-switch-when="group" my-i18n="confirm_modal_delete_messages_for_you_only_chat"></span>
+          <span ng-switch-when="user" my-i18n="confirm_modal_delete_messages_for_you_only_pm"><my-i18n-param name="user"><strong my-peer-link="peerID"></strong></my-i18n-param></span>
         </p>
       </span>
       <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete"></span>

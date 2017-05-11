@@ -1411,22 +1411,24 @@ a.im_dialog_selected {
 }
 
 .im_dialog_pinned {
-  background: red;
   display: inline-block;
   float: right;
-  width: 8px;
-  height: 8px;
-  border-radius: 5px;
+  width: 14px;
+  height: 14px;
   overflow: hidden;
   margin: 12px 0 0;
 
+  .image-2x('../img/icons/General.png', 40px, 948px);
+  background-position: -13px -916px;
+  // background-position: -13px -892px;
+
   a.im_dialog:hover &,
   a.im_dialog_selected & {
-    background: red;
+    background-position: -13px -916px;
   }
 
   .active & {
-    background-color: red;
+    background-position: -13px -916px;
   }
 }
 

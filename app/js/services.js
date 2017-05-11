@@ -648,8 +648,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       switch (action) {
         case 'send':
           if (chat._ == 'channel' &&
-            !chat.pFlags.megagroup &&
-            !chat.pFlags.editor) {
+              !chat.pFlags.megagroup &&
+              !chat.pFlags.editor) {
             return false
           }
           break
@@ -660,7 +660,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           if (chat._ == 'channel') {
             if (chat.pFlags.megagroup) {
               if (!chat.pFlags.editor &&
-                !(action == 'invite' && chat.pFlags.democracy)) {
+                  !(action == 'invite' && chat.pFlags.democracy)) {
                 return false
               }
             } else {
@@ -668,7 +668,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             }
           } else {
             if (chat.pFlags.admins_enabled &&
-              !chat.pFlags.admin) {
+                !chat.pFlags.admin) {
               return false
             }
           }

@@ -975,8 +975,20 @@ angular.module('myApp.services')
 
       var message = messagesStorage[messageID]
       if (message._ != 'message' ||
-          message.deleted ||
-          !message.pFlags.out ||
+          message.deleted) {
+        return false
+      }
+
+      var peerID = getMessagePeer(message)
+      if (peerID < 0 && !AppChatsManager.isChannel(-peerID)) {
+        var chat = AppChatsManager.getChat(-peerID)
+        if (chat.pFlags.creator ||
+            chat.pFlags.admins_enabled && chat.pFlags.admin) {
+          return true
+        }
+      }
+
+      if (!message.pFlags.out ||
           message.date < tsNow(true) - 2 * 86400) {
         return false
       }
