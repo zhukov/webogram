@@ -203,7 +203,7 @@
     "confirm_modal_clipboard_file_send": "Bestand(en) echt vanaf klembord versturen?",
     "confirm_modal_clipboard_X_files_send": "{'one': 'Weet je zeker dat het je het bestand van het klembord wilt versturen?', 'other': 'weet je zeker dat je {} bestanden van het klembord wilt versturen?'}",
     "confirm_modal_message_delete": "Bericht echt verwijderen?",
-    "confirm_modal_delete_X_messages": "{'one': '{} message', 'other': '{} messages'}",
+    "confirm_modal_delete_X_messages": "{'one': '{} bericht', 'other': '{} berichten'}",
     "confirm_modal_delete_messages": "Are you sure you want to delete {messages}?",
     "confirm_modal_message_revoke": "Delete for {recipient}",
     "confirm_modal_message_revoke_recipient_chat": "everyone",
