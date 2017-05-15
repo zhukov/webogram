@@ -3746,7 +3746,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ChatModalController', function ($scope, $modalInstance, $location, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
+  .controller('ChatModalController', function ($scope, $modalInstance, $location, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService, ManageUsersService) {
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {})
     $scope.settings = {notifications: true}
 
@@ -3842,6 +3842,44 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }).then(onChatUpdated)
     }
 
+    $scope.editChatAdmin = function (userID, isAdmin) {
+      MtpApiManager.invokeApi('messages.editChatAdmin', {
+        chat_id: AppChatsManager.getChatInput($scope.chatID),
+        user_id: AppUsersManager.getUserInput(userID),
+        is_admin: isAdmin
+      })
+    }
+
+    $scope.setGroupAdmins = function () {
+      var participants = angular.copy($scope.chatFull.participants.participants)
+      var admins_enabled = $scope.chatFull.chat.pFlags.admins_enabled
+      ManageUsersService.show({
+        text: {
+          back: 'group_modal_info',
+          header: 'group_modal_admins',
+        },
+        users: participants,
+        switch: function(user) {
+          if (!admins_enabled) return
+          switch (user._) {
+            case 'chatParticipantCreator':
+              return
+            case 'chatParticipantAdmin':
+              user._ = 'chatParticipant'
+              break
+            case 'chatParticipant':
+              user._ = 'chatParticipantAdmin'
+          }
+          $scope.editChatAdmin(user.user_id, user._ == 'chatParticipantAdmin')
+        },
+        class: function(user) {
+          if (!admins_enabled || user._ == 'chatParticipantCreator') return 'tg_checkbox_on disabled'
+          else if (user._ == 'chatParticipantAdmin') return 'tg_checkbox_on'
+          // else return ''
+        }
+      }).then(onChatUpdated)
+    }
+
     $scope.flushHistory = function (justClear) {
       ErrorService.confirm({type: justClear ? 'HISTORY_FLUSH' : 'HISTORY_FLUSH_AND_DELETE'}).then(function () {
         AppMessagesManager.flushHistory(-$scope.chatID, justClear).then(function () {
@@ -3916,7 +3954,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ChannelModalController', function ($scope, $timeout, $rootScope, $modal, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService) {
+  .controller('ChannelModalController', function ($scope, $timeout, $rootScope, $modal, $q, AppUsersManager, AppChatsManager, AppProfileManager, AppPhotosManager, MtpApiManager, MtpApiFileManager, NotificationsManager, AppMessagesManager, AppPeersManager, ApiUpdatesManager, ContactsSelectService, ErrorService, ManageUsersService) {
     $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, {})
     $scope.settings = {notifications: true}
     $scope.isMegagroup = AppChatsManager.isMegagroup($scope.chatID)
@@ -4001,10 +4039,99 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.kickFromChannel = function (userID) {
-      MtpApiManager.invokeApi('channels.kickFromChannel', {
+      $scope.editChannelKicked(userID, true).then(onChatUpdated)
+    }
+
+    $scope.editChannelAdmin = function (userID, userRole) {
+      return MtpApiManager.invokeApi('channels.editAdmin', {
         channel: AppChatsManager.getChannelInput($scope.chatID),
         user_id: AppUsersManager.getUserInput(userID),
-        kicked: true
+        role: {_: userRole}
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates)
+      })
+    }
+
+    $scope.editChannelKicked = function (userID, kicked) {
+      return MtpApiManager.invokeApi('channels.kickFromChannel', {
+        channel: AppChatsManager.getChannelInput($scope.chatID),
+        user_id: AppUsersManager.getUserInput(userID),
+        kicked: kicked
+      }).then(function (updates) {
+        ApiUpdatesManager.processUpdateMessage(updates)
+      })
+    }
+
+    $scope.addChannelAdmin = function () {
+      var disabled = []
+      angular.forEach(($scope.chatFull.participants || {}).participants || [], function(participant){
+        if (
+          participant._ == 'channelParticipantEditor' ||
+          participant._ == 'channelParticipantModerator' ||
+          participant._ == 'channelParticipantCreator'
+        ) {
+          disabled.push(participant.user_id)
+        }
+      })
+
+      ContactsSelectService.selectContact({disabled: disabled}).then(function (userID) {
+        var userRole = "channelRoleEditor";  // channelRoleEditor is used in other apps (because moderator is useless, huh)
+        $scope.editChannelAdmin(userID, userRole)
+      })
+    }
+
+    $scope.manageChannelAdmins = function () {
+      var limit = 50
+      var offset = 0
+      var filter = 'channelParticipantsAdmins'
+      var can_edit = $scope.chatFull.chat.pFlags.creator;
+      AppProfileManager.getChannelParticipants($scope.chatID, filter, offset, limit).then(function (participants) {
+        return ManageUsersService.show({
+          text: {
+            back: 'channel_modal_info',
+            header: 'channel_modal_admins',
+            topButton: 'channel_modal_add_admin',
+          },
+          users: participants,
+          switch: function(user) {
+            if (!can_edit) return;
+            var isAdmin = (user._ == 'channelParticipantEditor' || user._ == 'channelParticipantModerator')
+            if (isAdmin) user._ = 'channelParticipant'
+            else user._ = 'channelParticipantEditor'
+            $scope.editChannelAdmin(user.user_id, isAdmin ? 'channelRoleEmpty' : 'channelRoleEditor')
+          },
+          class: function(user) {
+            if (!can_edit || user._ == 'channelParticipantCreator') return 'tg_checkbox_on disabled'
+            else if (user._ != 'channelParticipant') return 'tg_checkbox_on'
+            // else return ''
+          },
+          topButton: can_edit ? $scope.addChannelAdmin : null
+        })
+      }).then(onChatUpdated)
+    }
+
+    $scope.manageChannelBlocked = function () {
+      var limit = 50
+      var offset = 0
+      var filter = 'channelParticipantsKicked'
+      AppProfileManager.getChannelParticipants($scope.chatID, filter, offset, limit).then(function (participants) {
+        participants.shift()  // First participant is myParticipant, but we're obviously not banned
+        return ManageUsersService.show({
+          text: {
+            back: 'channel_modal_info',
+            header: 'channel_modal_blocked',
+          },
+          users: participants,
+          switch: function(user) {
+             var isKicked = (user._ == 'channelParticipantKicked')
+             if (isKicked) user._ = 'channelParticipant'
+             else user._ = 'channelParticipantKicked'
+             $scope.editChannelKicked(user.user_id, !isKicked)
+          },
+          class: function(user) {
+            return (user._ == 'channelParticipantKicked') ? 'tg_checkbox_on' : ''
+          }
+        })
       }).then(onChatUpdated)
     }
 
@@ -4682,7 +4809,20 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
   })
+  .controller('ManageUsersModalController', function($scope, $rootScope, $timeout, $modalInstance, MtpApiManager, AppUsersManager, ErrorService, ContactsSelectService) {
+    $scope.close = function() {
+      $modalInstance.close()
+    }
 
+    $scope.loadMore = function() {
+      $scope.loading = true
+      $scope.load().then(function(result) {
+        $scope.loaded = result.loaded
+        Array.prototype.push.apply($scope.users, result.users)
+        $scope.loading = false
+      })
+    }
+  })
   .controller('ContactsModalController', function ($scope, $rootScope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
     $scope.contacts = []
     $scope.foundPeers = []

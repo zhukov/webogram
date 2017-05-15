@@ -1,0 +1,49 @@
+<div class="chat_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$close()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4>{{::text.back | i18n}}</h4>
+                </div>
+              </a>
+            </li>
+            <li class="navbar-quick-right" ng-if="topButton && text.topButton">
+              <a ng-click="topButton()">{{::text.topButton | i18n}} </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header" ng-if="text.header">{{::text.header | i18n}}</h4>
+
+      <div class="chat_modal_members_list">
+        <div class="chat_modal_participant_wrap clearfix" ng-repeat="user in users track by user.user_id">
+          <a class="chat_modal_participant_photo pull-left" my-peer-photolink="::user.user_id" img-class="md_modal_list_peer_photo"></a>
+
+          <span ng-click="switch(user)" ng-class="class(user)" class="tg_checkbox">
+            <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+
+            <div class="chat_modal_participant_name">
+              <a my-peer-link="user.user_id"></a>
+            </div>
+            <div class="chat_modal_participant_status" my-user-status="::user.user_id" bot-chat-privacy="true"></div>
+          </span>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

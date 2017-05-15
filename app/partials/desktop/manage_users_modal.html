@@ -1,0 +1,32 @@
+<div class="contacts_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+        <a class="md_modal_action" ng-if="topButton && text.topButton" ng-click="topButton()">{{::text.topButton | i18n}}</a>
+      </div>
+      <div class="md_modal_title">{{::text.header | i18n}}</div>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+    <div class="md_modal_iconed_section_wrap md_modal_iconed_section_peers">
+      <i class="md_modal_section_icon md_modal_section_icon_people"></i>
+        <div class="md_modal_section_peers_wrap">
+          <div class="md_modal_list_peer_wrap clearfix" ng-repeat="user in users track by user.user_id">
+            <a class="md_modal_list_peer_photo pull-left" my-peer-photolink="::user.user_id" img-class="md_modal_list_peer_photo"></a>
+            <span ng-click="switch(user)" ng-class="class(user)" class="tg_checkbox">
+              <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+              <div class="md_modal_list_peer_name">
+                <a class="md_modal_list_peer_name" my-peer-link="user.user_id"></a>
+              </div>
+              <div class="md_modal_list_peer_description" my-user-status="::user.user_id" bot-chat-privacy="true"></div>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

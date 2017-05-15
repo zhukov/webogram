@@ -79,6 +79,20 @@
       <a class="mobile_modal_action" ng-click="inviteToChannel()" my-i18n="channel_modal_add_member"></a>
     </div>
 
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.admins_count !== undefined">
+      <a class="mobile_modal_action" ng-click="manageChannelAdmins()">
+        <span my-i18n="channel_modal_admins"></span>
+        <span ng-bind="chatFull.admins_count" class="pull-right"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.kicked_count > 0">
+      <a class="mobile_modal_action" ng-click="manageChannelBlocked()">
+        <span  my-i18n="channel_modal_blocked"></span>
+        <span ng-bind="chatFull.kicked_count" class="pull-right"></span>
+      </a>
+    </div>
+
     <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.left">
       <a class="mobile_modal_action" ng-click="joinChannel()" my-i18n="channel_modal_join"></a>
     </div>
