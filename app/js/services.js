@@ -3381,9 +3381,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       if (update._ == 'updateNewMessage' ||
-        update._ == 'updateEditMessage' ||
-        update._ == 'updateNewChannelMessage' ||
-        update._ == 'updateEditChannelMessage') {
+          update._ == 'updateEditMessage' ||
+          update._ == 'updateNewChannelMessage' ||
+          update._ == 'updateEditChannelMessage') {
         var message = update.message
         var toPeerID = AppPeersManager.getPeerID(message.to_id)
         var fwdHeader = message.fwd_from || {}

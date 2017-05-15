@@ -219,11 +219,14 @@ angular.module('myApp.services')
       var offsetID = 0
       var offsetPeerID = 0
       var offsetIndex = 0
+      var flags = 0
       if (dialogsOffsetDate) {
         offsetDate = dialogsOffsetDate + ServerTimeManager.serverTimeOffset
         offsetIndex = dialogsOffsetDate * 0x10000
+        flags |= 1
       }
       return MtpApiManager.invokeApi('messages.getDialogs', {
+        flags: flags,
         offset_date: offsetDate,
         offset_id: AppMessagesIDsManager.getMessageLocalID(offsetID),
         offset_peer: AppPeersManager.getInputPeerByID(offsetPeerID),
@@ -284,13 +287,20 @@ angular.module('myApp.services')
     }
 
     function pushDialogToStorage (dialog, offsetDate) {
-      if (offsetDate && (!dialogsOffsetDate || offsetDate < dialogsOffsetDate)) {
-        dialogsOffsetDate = offsetDate
-      }
       var dialogs = dialogsStorage.dialogs
       var pos = getDialogByPeerID(dialog.peerID)[1]
       if (pos !== undefined) {
         dialogs.splice(pos, 1)
+      }
+
+      if (offsetDate &&
+          !dialog.pFlags.pinned &&
+          (!dialogsOffsetDate || offsetDate < dialogsOffsetDate)) {
+        if (pos !== undefined) {
+          // So the dialog jumped to the last position
+          return false
+        }
+        dialogsOffsetDate = offsetDate
       }
 
       var index = dialog.index
@@ -301,7 +311,8 @@ angular.module('myApp.services')
       }
       else if (index >= dialogs[0].index) {
         dialogs.unshift(dialog)
-      }else {
+      }
+      else {
         for (i = 0; i < len; i++) {
           if (index > dialogs[i].index) {
             dialogs.splice(i, 0, dialog)
@@ -3462,17 +3473,18 @@ angular.module('myApp.services')
       var updatedDialogs = {}
       var hasUpdated = false
       angular.forEach(dialogsResult.dialogs, function (dialog) {
+        var peerID = AppPeersManager.getPeerID(dialog.peer)
         if (dialog.top_message) {
-          var wasBefore = getDialogByPeerID(dialog.peerID).length > 0
+          var wasBefore = getDialogByPeerID(peerID).length > 0
           saveConversation(dialog)
           if (wasBefore) {
+            clearDialogCache(dialog.top_message)
             $rootScope.$broadcast('dialog_top', dialog)
           } else {
-            updatedDialogs[dialog.peerID] = dialog
+            updatedDialogs[peerID] = dialog
             hasUpdated = true
           }
         } else {
-          var peerID = AppPeersManager.getPeerID(dialog.peer)
           var foundDialog = getDialogByPeerID(peerID)
           if (foundDialog.length) {
             dialogsStorage.dialogs.splice(foundDialog[1], 1)

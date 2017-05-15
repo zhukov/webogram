@@ -790,14 +790,19 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('dialog_top', function (e, dialog) {
-      var curDialog, i
-      for (i = 0; i < $scope.dialogs.length; i++) {
+      var curDialog, i, wrappedDialog
+      var len = $scope.dialogs.length
+      for (i = 0; i < len; i++) {
         curDialog = $scope.dialogs[i]
         if (curDialog.peerID == dialog.peerID) {
-          var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog)
+          wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog)
           $scope.dialogs.splice(i, 1, wrappedDialog)
           break
         }
+      }
+      sortDialogs()
+      if (wrappedDialog == $scope.dialogs[len - 1]) {
+        $scope.dialogs.splice(len - 1, 1)
       }
     })
     $scope.$on('dialog_flush', function (e, update) {
@@ -989,8 +994,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (dialogsResult.dialogs.length) {
           angular.forEach(dialogsResult.dialogs, function (dialog) {
             if ($scope.canSend &&
-              AppPeersManager.isChannel(dialog.peerID) &&
-              !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
+                AppPeersManager.isChannel(dialog.peerID) &&
+                !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
               return
             }
             var wrapDialog = searchMessages ? undefined : dialog
@@ -1056,8 +1061,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
           angular.forEach(dialogsResult.dialogs, function (dialog) {
             if ($scope.canSend &&
-              AppPeersManager.isChannel(dialog.peerID) &&
-              !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
+                AppPeersManager.isChannel(dialog.peerID) &&
+                !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
               return
             }
             var wrapDialog = searchMessages ? undefined : dialog
@@ -1066,7 +1071,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
-              peersInDialogs[dialog.peerID] = true
+              if (peersInDialogs[dialog.peerID]) {
+                return
+              } else {
+                peersInDialogs[dialog.peerID] = true
+              }
             }
 
             if (searchMessages &&
