@@ -25,6 +25,7 @@ Here are some screenshots of the interface:
 
 * Secret chats
 * Black list
+* Two-factor password protected accounts
 * ...
 
 
