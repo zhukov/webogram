@@ -2297,6 +2297,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function getStickers (force) {
+      if (MtpApiManager.getIsBotAuth()) {
+        return false
+      }
+
       return Storage.get('all_stickers').then(function (stickers) {
         var layer = Config.Schema.API.layer
         if (stickers.layer != layer ||
@@ -3554,9 +3558,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       lastOnlineUpdated = offline ? 0 : date
       AppUsersManager.setUserStatus(myID, offline)
-      return MtpApiManager.invokeApi('account.updateStatus', {
-        offline: offline
-      }, {noErrorBox: true})
+      if (!MtpApiManager.getIsBotAuth()) {
+        return MtpApiManager.invokeApi('account.updateStatus', {
+          offline: offline
+        }, {noErrorBox: true})
+      }
     }
 
     function checkIDLE () {
