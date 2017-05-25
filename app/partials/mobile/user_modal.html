@@ -21,6 +21,9 @@
               <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
             </li>
             <li>
+              <a ng-click="flushHistory(true)" my-i18n="user_modal_clear_history"></a>
+            </li>
+            <li>
               <a ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
             </li>
           </ul>
@@ -58,6 +61,16 @@
 
     </div>
 
+    <div class="mobile_modal_section" ng-if="user.phone.length > 0">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_phone"></h4>
+      <div class="mobile_modal_section_value" ng-bind="user.phone | phoneNumber"></div>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="user.username">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_username"></h4>
+      <div class="mobile_modal_section_value" ng-bind="'@' + user.username"></div>
+    </div>
+
     <div class="mobile_modal_section" ng-if="rAbout">
       <h4 class="mobile_modal_section_header" my-i18n="user_modal_about"></h4>
       <div class="mobile_modal_section_value" ng-bind-html="rAbout"></div>
@@ -91,14 +104,11 @@
       </a>
     </div>
 
-    <div class="mobile_modal_section" ng-if="user.phone.length > 0">
-      <h4 class="mobile_modal_section_header" my-i18n="user_modal_phone"></h4>
-      <div class="mobile_modal_section_value" ng-bind="user.phone | phoneNumber"></div>
-    </div>
-
-    <div class="mobile_modal_section" ng-if="user.username">
-      <h4 class="mobile_modal_section_header" my-i18n="user_modal_username"></h4>
-      <div class="mobile_modal_section_value" ng-bind="'@' + user.username"></div>
+    <div class="mobile_modal_action_wrap" ng-if="!user.pFlags.self">
+      <a class="mobile_modal_action" ng-click="toggleBlock(!blocked)" ng-switch="blocked">
+        <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
+        <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>
+      </a>
     </div>
 
   </div>

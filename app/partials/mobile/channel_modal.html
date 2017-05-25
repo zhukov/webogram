@@ -70,7 +70,7 @@
     <div class="mobile_modal_section" ng-if="chatFull.chat.username || chatFull.chat.pFlags.creator">
       <h4 class="mobile_modal_section_header" my-i18n="channel_modal_share_link"></h4>
       <div class="mobile_modal_section_value" ng-switch="chatFull.chat.username.length > 0">
-        <a ng-switch-when="true" class="settings_modal_username_link" ng-click="shareLink($event)" ng-bind="'https://telegram.me/' + chatFull.chat.username" ng-href="https://telegram.me/{{chatFull.chat.username}}" target="_blank"></a>
+        <a ng-switch-when="true" class="settings_modal_username_link" ng-click="shareLink($event)" ng-bind="'https://t.me/' + chatFull.chat.username" ng-href="https://t.me/{{chatFull.chat.username}}" target="_blank"></a>
         <a ng-switch-default ng-click="shareLink($event)" ng-bind="chatFull.exported_invite.link" ng-href="{{chatFull.exported_invite.link}}" target="_blank"></a>
       </div>
     </div>

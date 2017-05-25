@@ -584,6 +584,17 @@ html {
     margin-top: 0;
   }
 
+  .im_message_game {
+    padding: 5px;
+    border-radius: 3px;
+    background: #f1f1f1;
+    margin-top: 0;
+
+    .im_message_webpage_wrap {
+      margin-left: 3px;
+    }
+  }
+
   .im_message_geopoint {
     width: 200px;
     height: 100px;
@@ -845,6 +856,10 @@ img.im_message_video_thumb,
   font-size: 10px;
   padding: 0;
 }
+.im_message_edited {
+  position: absolute;
+  top: -11px;
+}
 
 .im_message_out {
   .im_message_fwd_date {
@@ -919,6 +934,11 @@ a.im_message_author_via {
   .im_message_sign_link {
     font-size: 12px;
   }
+}
+.im_service_message a.im_message_author {
+  display: inline;
+  font-size: 13px;
+  font-weight: normal;
 }
 
 .im_grouped_short a.im_message_from_photo,
@@ -1099,6 +1119,9 @@ a.im_dialog {
     font-size: 12px;
     margin-right: 3px;
   }
+}
+.im_dialog_message_wrap {
+  height: 51px;
 }
 
 .im_dialog_unread {
@@ -1340,6 +1363,11 @@ a.im_message_fwd_author {
     }
   }
 }
+
+.game_modal_wrap .modal-body {
+  padding: 0;
+}
+
 
 .modal-content {
   .photo_modal_window &,

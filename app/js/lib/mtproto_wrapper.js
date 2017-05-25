@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -373,7 +373,8 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           if (location.sticker && !WebpManager.isWebpSupported()) {
             ext += '.png'
           }
-          return fileName[0] + '_' + location.id + '.' + ext
+          var versionPart = location.version ? ('v' + location.version) : ''
+          return fileName[0] + '_' + location.id + versionPart + '.' + ext
 
         default:
           if (!location.volume_id) {
@@ -750,6 +751,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     var masterInstance = false
     var deactivatePromise = false
     var deactivated = false
+    var initial = false
 
     function start () {
       if (!started && !Config.Navigator.mobile && !Config.Modes.packed) {
@@ -768,7 +770,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     function clearInstance () {
-      Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance')
+      if (masterInstance && !deactivated) {
+        console.warn('clear master instance');
+        Storage.remove('xt_instance')
+      }
     }
 
     function deactivateInstance () {
@@ -807,39 +812,35 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       var idle = $rootScope.idle && $rootScope.idle.isIDLE
       var newInstance = {id: instanceID, idle: idle, time: time}
 
-      Storage.get('xt_instance', 'xt_idle_instance').then(function (result) {
-        var curInstance = result[0]
-        var idleInstance = result[1]
-
-        // console.log(dT(), 'check instance', newInstance, curInstance, idleInstance)
+      Storage.get('xt_instance').then(function (curInstance) {
+        // console.log(dT(), 'check instance', newInstance, curInstance)
         if (!idle ||
-          !curInstance ||
-          curInstance.id == instanceID ||
-          curInstance.time < time - 60000) {
-          if (idleInstance &&
-            idleInstance.id == instanceID) {
-            Storage.remove('xt_idle_instance')
-          }
+            !curInstance ||
+            curInstance.id == instanceID ||
+            curInstance.time < time - 20000) {
           Storage.set({xt_instance: newInstance})
           if (!masterInstance) {
             MtpNetworkerFactory.startAll()
-            console.warn(dT(), 'now master instance', newInstance)
+            if (!initial) {
+              initial = true
+            } else {
+              console.warn(dT(), 'now master instance', newInstance)
+            }
+            masterInstance = true
           }
-          masterInstance = true
           if (deactivatePromise) {
             $timeout.cancel(deactivatePromise)
             deactivatePromise = false
           }
         } else {
-          Storage.set({xt_idle_instance: newInstance})
           if (masterInstance) {
             MtpNetworkerFactory.stopAll()
             console.warn(dT(), 'now idle instance', newInstance)
             if (!deactivatePromise) {
               deactivatePromise = $timeout(deactivateInstance, 30000)
             }
+            masterInstance = false
           }
-          masterInstance = false
         }
       })
     }

@@ -31,6 +31,21 @@
 
     <div class="md_modal_sections">
 
+      <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.6')">
+        <div class="md_modal_section_version">0.5.6</div>
+        <div class="md_modal_section_description changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Edit the text of your messages after sending them. This works across all Telegram chats, including groups and one-on-one conversations. Select a message and click 'Edit' or just press the up arrow button to edit your last message.</li>
+            <li>Unsend Messages: retract any messages within 48 hours of sending them. Check out the <a href="https://telegram.org/blog/unsend-and-usage" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Pinned chats. Check out the <a href="https://telegram.org/blog/pin-and-ifttt" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Sticker suggestions by emoji.</li>
+            <li>Search for messages in specific chats.</li>
+            <li>Background notifications in Chrome and Firefox (can be disabled in Settings)</li>
+          </ul>
+
+        </div>
+      </div>
+
       <div class="md_modal_versioned_section_wrap" ng-if="canShowVersion('0.5.5')">
         <div class="md_modal_section_version">0.5.5</div>
         <div class="md_modal_section_description changelog_version_changes">
