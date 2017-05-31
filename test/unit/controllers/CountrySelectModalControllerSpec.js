@@ -109,6 +109,30 @@ describe('CountrySelectModalController', function () {
         expect(this.$scope.countries).toEqual(expected)
         done()
       })
+
+      it('restore the original list when the input is deleted', function (done) {
+
+        this.$rootScope.$digest()
+        this.$scope.search.query = ''
+        this.$rootScope.$digest()
+
+        var expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }, { name: 'Netherlands', code: '+31' }, { name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+
+        expect(this.$scope.countries).toEqual(expected)
+        done()
+      })
+
+      it('restore the original list when the input is deleted', function (done) {
+
+        this.$rootScope.$digest()
+        this.$scope.search.query = 'Ne'
+        this.$rootScope.$digest()
+
+        var expected = [{ name: 'Netherlands', code: '+31' }]
+
+        expect(this.$scope.countries).toEqual(expected)
+        done()
+      })
     })
 
     describe(', when no sorting is available,', function () {
