@@ -8,7 +8,7 @@ var st = require('st')
 var del = require('del')
 var runSequence = require('run-sequence')
 var swPrecache = require('sw-precache')
-
+var Server = require('karma').Server
 
 // The generated file is being created at src
 // so it can be fetched by usemin.
@@ -21,6 +21,7 @@ gulp.task('templates', function () {
     }))
     .pipe(gulp.dest('app/js'))
 })
+
 gulp.task('clean-templates', function () {
   return del(['app/js/templates.js'])
 })
@@ -35,14 +36,14 @@ gulp.task('usemin-index', function () {
     .pipe(gulp.dest('dist'))
 })
 
-gulp.task('usemin-badbrowser', function() {
+gulp.task('usemin-badbrowser', function () {
   return gulp.src('app/badbrowser.html')
     .pipe($.usemin({
       html: [$.minifyHtml({empty: true})],
-      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})],
+      css: ['concat', $.minifyCss({compatibility: true, keepBreaks: true})]
     }))
-    .pipe(gulp.dest('dist'));
-});
+    .pipe(gulp.dest('dist'))
+})
 
 // ulimit -n 10240 on OS X
 gulp.task('imagemin', function () {
@@ -74,7 +75,7 @@ gulp.task('copy-images', function () {
 
 gulp.task('copy', function () {
   return es.concat(
-    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json', 'app/**/*worker.js'])
+    gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.webapp.json', 'app/manifest.json', 'app/**/*worker.js'])
       .pipe(gulp.dest('dist')),
     gulp.src(['app/img/**/*.wav'])
       .pipe(gulp.dest('dist/img')),
@@ -273,6 +274,35 @@ gulp.task('clean', function () {
 
 gulp.task('bump', ['bump-version-manifests', 'bump-version-config'], function () {
   gulp.start('bump-version-comments')
+})
+
+// Single run of karma
+gulp.task('karma-single', function (done) {
+  new Server({
+    configFile: path.join(__dirname, '/karma.conf.js'),
+    singleRun: true
+  }, done).start()
+})
+
+// Continuous testing with karma by watching for changes
+gulp.task('karma-tdd', function (done) {
+  new Server({
+    configFile: path.join(__dirname, '/karma.conf.js')
+  }, done).start()
+})
+
+gulp.task('test', function (callback) {
+  runSequence(
+    'templates', 'karma-single', 'clean-templates',
+    callback
+  )
+})
+
+gulp.task('tdd', function (callback) {
+  runSequence(
+    'templates', 'karma-tdd',
+    callback
+  )
 })
 
 gulp.task('build', ['clean'], function (callback) {

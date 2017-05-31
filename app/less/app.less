@@ -741,7 +741,7 @@ a {
   }
 }
 
-a.tg_checkbox {
+a.tg_checkbox, p.tg_checkbox {
   color: #000;
   display: block;
   line-height: 18px;
@@ -1076,6 +1076,13 @@ a.tg_radio_on:hover i.icon-radio {
     font-size: 15px;
     font-weight: bold;
     text-align: left;
+
+    .login_footer_about_hide {
+      color: #999;
+      font-size: 80%;
+      font-weight: normal;
+      margin-left: 8px;
+    }
   }
 
   p {
@@ -1296,14 +1303,6 @@ i.icon-verified {
   word-wrap: break-word;
 }
 
-.im_dialog_message_typing,
-.im_dialog_message_wtyping .im_dialog_message_notyping {
-  display: none;
-}
-.im_dialog_message_wtyping .im_dialog_message_typing {
-  display: block;
-}
-
 
 a.im_dialog {
   .im_dialog_chat_from_wrap,
@@ -1339,6 +1338,24 @@ a.im_dialog_selected {
     }
   }
 }
+
+.im_dialogs_scrollable_wrap a.im_dialog_searchpeer .icon-search-clear {
+  display: inline-block;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.im_dialogs_scrollable_wrap {
+  a.im_dialog_searchpeer {
+    &,
+    &:hover,
+    &_selected {
+      background: #f3f3f3;
+    }
+  }
+}
+
+
 
 .im_dialog_peer {
   color: #222;
@@ -1393,6 +1410,28 @@ a.im_dialog_selected {
   }
 }
 
+.im_dialog_pinned {
+  display: inline-block;
+  float: right;
+  width: 14px;
+  height: 14px;
+  overflow: hidden;
+  margin: 12px 0 0;
+
+  .image-2x('../img/icons/General.png', 40px, 948px);
+  background-position: -13px -916px;
+  // background-position: -13px -892px;
+
+  a.im_dialog:hover &,
+  a.im_dialog_selected & {
+    background-position: -13px -916px;
+  }
+
+  .active & {
+    background-position: -13px -916px;
+  }
+}
+
 .im_dialog_date {
   color: #b3b3b3;
   font-size: 0.85em;
@@ -1413,6 +1452,10 @@ a.im_dialog_selected {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.im_dialog_message_wrap {
+  height: 44px;
+  overflow: hidden;
 }
 .im_dialog_message {
   color: #808080;
@@ -1851,6 +1894,20 @@ img.im_message_document_thumb {
   vertical-align: text-top;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  &:after {
+    content: attr(data-name);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  &:before {
+    content: attr(data-ext);
+    float: right;
+  }
+  &:hover:before {
+    text-decoration: underline;
+  }
 }
 .im_message_document_size {
   color: #999;
@@ -2095,6 +2152,13 @@ img.im_message_document_thumb {
   text-overflow: ellipsis;
   vertical-align: middle;
 }
+.im_service_message_phonecall {
+  color: inherit !important;
+  font-weight: bold;
+}
+.im_service_message_phonecall_duration {
+  font-weight: normal;
+}
 
 .im_message_date,
 .im_message_fwd_date {
@@ -2103,7 +2167,11 @@ img.im_message_document_thumb {
   padding: 0 0 20px 10px;
 }
 
-.im_message_date {
+.im_message_edited {
+  display: none;
+}
+
+.im_message_date_text {
   cursor: pointer;
   &:hover {
     text-decoration: underline;
@@ -3415,6 +3483,11 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 .inline_result_sticker img {
   object-fit: contain;
 }
+.inline_result_game img {
+  object-fit: cover;
+  width: 50px;
+  height: 50px;
+}
 .inline_result_gif_mtproto,
 .inline_result_gif_http,
 .inline_result_photo_mtproto,
@@ -3903,7 +3976,8 @@ ul.chat_modal_migrate_list {
   .audio_player_size,
   .im_message_fwd_date,
   .im_message_views_cnt,
-  .im_message_sign_link {
+  .im_message_sign_link,
+  .im_message_edited {
     color: #899daf;
   }
 
@@ -4703,7 +4777,7 @@ a.countries_modal_search_clear {
   body .im_dialogs_col_wrap,
   body .im_bottom_panel_wrap,
   body .tg_head_logo_wrap,
-  body .tg_head_msgs_edit_btn,
+  body .tg_head_peer_search_btn,
   body .tg_head_peer_return_btn,
   body .tg_head_peer_dropdown {
     display: none;

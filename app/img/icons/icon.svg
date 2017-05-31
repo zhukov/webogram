@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="IFTTT_Applet_Logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" width="620px" height="620px" viewBox="0 0 620 620" enable-background="new 0 0 620 620" xml:space="preserve">
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="311.1667" y1="603.3333" x2="311.1667" y2="19">
+	<stop  offset="0" style="stop-color:#1D93D2"/>
+	<stop  offset="1" style="stop-color:#38B0E3"/>
+</linearGradient>
+<circle fill="url(#SVGID_1_)" stroke="#FFFFFF" stroke-width="28" stroke-miterlimit="10" cx="311.167" cy="311.167" r="292.167"/>
+<path fill="#C8DAEA" d="M220.759,338.848l35.363,97.88c0,0,4.42,9.157,9.157,9.157s75.147-73.252,75.147-73.252l78.304-151.24
+	l-196.707,92.197L220.759,338.848z"/>
+<path fill="#A9C6D8" d="M267.646,363.949l-6.788,72.147c0,0-2.842,22.102,19.26,0c22.102-22.102,43.257-39.152,43.257-39.152"/>
+<g>
+	<path fill="#FFFFFF" d="M221.398,342.34l-72.734-23.7c0,0-8.683-3.526-5.894-11.525c0.575-1.65,1.736-3.052,5.21-5.473
+		c16.119-11.234,298.324-112.667,298.324-112.667s7.969-2.683,12.677-0.898c2.152,0.816,3.526,1.737,4.684,5.104
+		c0.421,1.225,0.663,3.83,0.631,6.42c-0.023,1.868-0.253,3.599-0.421,6.315c-1.719,27.732-53.145,234.705-53.145,234.705
+		s-3.076,12.112-14.103,12.524c-4.02,0.15-8.9-0.664-14.734-5.683c-21.635-18.612-96.42-68.87-112.944-79.924
+		c-0.93-0.622-1.197-1.433-1.354-2.222c-0.233-1.165,1.034-2.61,1.034-2.61S398.847,246.957,402.31,234.811
+		c0.268-0.941-0.739-1.406-2.105-1c-8.65,3.182-158.58,97.857-175.126,108.312C224.112,342.734,221.398,342.34,221.398,342.34z"/>
+</g>
+</svg>

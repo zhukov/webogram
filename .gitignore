@@ -2,6 +2,8 @@
 .idea
 .publish
 *.sublime-workspace
+*.*~
+*.swp
 
 # Node.js package manager
 node_modules
@@ -13,3 +15,4 @@ webogram*.zip
 app/js/templates.js
 app/css
 cldr
+coverage/

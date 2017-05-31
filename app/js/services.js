@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -636,9 +636,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       var chat = getChat(id)
       if (chat._ == 'chatForbidden' ||
-        chat._ == 'channelForbidden' ||
-        chat.pFlags.kicked ||
-        chat.pFlags.left) {
+          chat._ == 'channelForbidden' ||
+          chat.pFlags.kicked ||
+          chat.pFlags.left) {
         return false
       }
       if (chat.pFlags.creator) {
@@ -648,8 +648,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       switch (action) {
         case 'send':
           if (chat._ == 'channel' &&
-            !chat.pFlags.megagroup &&
-            !chat.pFlags.editor) {
+              !chat.pFlags.megagroup &&
+              !chat.pFlags.editor) {
             return false
           }
           break
@@ -660,7 +660,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           if (chat._ == 'channel') {
             if (chat.pFlags.megagroup) {
               if (!chat.pFlags.editor &&
-                !(action == 'invite' && chat.pFlags.democracy)) {
+                  !(action == 'invite' && chat.pFlags.democracy)) {
                 return false
               }
             } else {
@@ -668,7 +668,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             }
           } else {
             if (chat.pFlags.admins_enabled &&
-              !chat.pFlags.admin) {
+                !chat.pFlags.admin) {
               return false
             }
           }
@@ -707,6 +707,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return true
       }
       return false
+    }
+
+    function isBroadcast (id) {
+      return isChannel(id) && !isMegagroup(id)
     }
 
     function getChatInput (id) {
@@ -827,6 +831,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getChat: getChat,
       isChannel: isChannel,
       isMegagroup: isMegagroup,
+      isBroadcast: isBroadcast,
       hasRights: hasRights,
       saveChannelAccess: saveChannelAccess,
       saveIsMegagroup: saveIsMegagroup,
@@ -987,6 +992,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return (peerID < 0) && AppChatsManager.isMegagroup(-peerID)
     }
 
+    function isAnyGroup (peerID) {
+      return (peerID < 0) && !AppChatsManager.isBroadcast(-peerID)
+    }
+
+    function isBroadcast (id) {
+      return isChannel(id) && !isMegagroup(id)
+    }
+
     function isBot (peerID) {
       return (peerID > 0) && AppUsersManager.isBot(peerID)
     }
@@ -1002,7 +1015,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getPeerPhoto: getPeerPhoto,
       resolveUsername: resolveUsername,
       isChannel: isChannel,
+      isAnyGroup: isAnyGroup,
       isMegagroup: isMegagroup,
+      isBroadcast: isBroadcast,
       isBot: isBot
     }
   })
@@ -1103,7 +1118,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (chatFullPromises[id] !== undefined) {
         return chatFullPromises[id]
       }
-      console.trace(dT(), 'Get chat full', id, AppChatsManager.getChat(id))
+      // console.trace(dT(), 'Get chat full', id, AppChatsManager.getChat(id))
       return chatFullPromises[id] = MtpApiManager.invokeApi('messages.getFullChat', {
         chat_id: AppChatsManager.getChatInput(id)
       }).then(function (result) {
@@ -1748,6 +1763,98 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
+  .service('AppGamesManager', function ($modal, $sce, $window, $rootScope, MtpApiManager, AppPhotosManager, AppDocsManager, RichTextProcessor) {
+    var games = {}
+
+    function saveGame (apiGame, messageID, mediaContext) {
+      if (apiGame.photo && apiGame.photo._ === 'photo') {
+        AppPhotosManager.savePhoto(apiGame.photo, mediaContext)
+      } else {
+        delete apiGame.photo
+      }
+      if (apiGame.document && apiGame.document._ === 'document') {
+        AppDocsManager.saveDoc(apiGame.document, mediaContext)
+      } else {
+        delete apiGame.document
+      }
+
+      apiGame.rTitle = RichTextProcessor.wrapRichText(apiGame.title, {noLinks: true, noLinebreaks: true})
+      apiGame.rDescription = RichTextProcessor.wrapRichText(
+        apiGame.description || '', {}
+      )
+
+      if (games[apiGame.id] === undefined) {
+        games[apiGame.id] = apiGame
+      } else {
+        safeReplaceObject(games[apiGame.id], apiGame)
+      }
+    }
+
+    function openGame (gameID, messageID, embedUrl) {
+      var scope = $rootScope.$new(true)
+
+      scope.gameID = gameID
+      scope.messageID = messageID
+      scope.embedUrl = embedUrl
+
+      $modal.open({
+        templateUrl: templateUrl('game_modal'),
+        windowTemplateUrl: templateUrl('media_modal_layout'),
+        controller: 'GameModalController',
+        scope: scope,
+        windowClass: 'photo_modal_window mobile_modal'
+      })
+    }
+
+    function wrapForHistory (gameID) {
+      var game = angular.copy(games[gameID]) || {_: 'gameEmpty'}
+
+      if (game.photo && game.photo.id) {
+        game.photo = AppPhotosManager.wrapForHistory(game.photo.id)
+      }
+      if (game.document && game.document.id) {
+        game.document = AppDocsManager.wrapForHistory(game.document.id)
+      }
+
+      return game
+    }
+
+    function wrapForFull (gameID, msgID, embedUrl) {
+      var game = wrapForHistory(gameID)
+
+      var fullWidth = $(window).width() - (Config.Mobile ? 0 : 10)
+      var fullHeight = $($window).height() - (Config.Mobile ? 51 : 150)
+
+      if (!Config.Mobile && fullWidth > 800) {
+        fullWidth -= 208
+      }
+
+      var full = {
+        width: fullWidth,
+        height: fullHeight
+      }
+
+      var embedTag = Config.Modes.chrome_packed ? 'webview' : 'iframe'
+
+      var embedType = 'text/html'
+
+      var embedHtml = '<' + embedTag + ' src="' + encodeEntities(embedUrl) + '" type="' + encodeEntities(embedType) + '" frameborder="0" border="0" webkitallowfullscreen mozallowfullscreen allowfullscreen width="' + full.width + '" height="' + full.height + '" style="width: ' + full.width + 'px; height: ' + full.height + 'px;" sandbox="allow-scripts allow-same-origin"></' + embedTag + '>'
+
+      full.html = $sce.trustAs('html', embedHtml)
+
+      game.full = full
+
+      return game
+    }
+
+    return {
+      saveGame: saveGame,
+      openGame: openGame,
+      wrapForFull: wrapForFull,
+      wrapForHistory: wrapForHistory
+    }
+  })
+
   .service('AppDocsManager', function ($sce, $rootScope, $modal, $window, $q, $timeout, RichTextProcessor, MtpApiFileManager, FileManager, qSync) {
     var docs = {}
     var docsForHistory = {}
@@ -1940,6 +2047,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         _: 'inputDocumentFileLocation',
         id: docID,
         access_hash: doc.access_hash,
+        version: doc.version,
         file_name: getFileName(doc)
       }
 
@@ -1959,6 +2067,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         _: 'inputDocumentFileLocation',
         id: docID,
         access_hash: doc.access_hash,
+        version: doc.version,
         file_name: getFileName(doc)
       }
 
@@ -2100,6 +2209,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var started = false
     var applied = false
     var currentStickerSets = []
+    var emojiIndex = {}
 
     $rootScope.$on('apiUpdate', function (e, update) {
       if (update._ != 'updateStickerSets' &&
@@ -2111,13 +2221,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       return Storage.get('all_stickers').then(function (stickers) {
         if (!stickers ||
-          stickers.layer != Config.Schema.API.layer) {
+            stickers.layer != Config.Schema.API.layer) {
           $rootScope.$broadcast('stickers_changed')
         }
         switch (update._) {
           case 'updateNewStickerSet':
             var fullSet = update.stickerset
             var set = fullSet.set
+            if (set.pFlags.masks) {
+              return false
+            }
             var pos = false
             for (var i = 0, len = stickers.sets.length; i < len; i++) {
               if (stickers.sets[i].id == set.id) {
@@ -2131,6 +2244,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             set.pFlags.installed = true
             stickers.sets.unshift(set)
             stickers.fullSets[set.id] = fullSet
+            indexStickerSetEmoticons(fullSet)
             break
 
           case 'updateDelStickerSet':
@@ -2147,6 +2261,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             break
 
           case 'updateStickerSetsOrder':
+            if (update.pFlags.masks) {
+              return
+            }
             var order = update.order
             stickers.sets.sort(function (a, b) {
               return order.indexOf(a.id) - order.indexOf(b.id)
@@ -2168,6 +2285,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       openStickerset: openStickerset,
       installStickerset: installStickerset,
       pushPopularSticker: pushPopularSticker,
+      searchStickers: searchStickers,
       getStickerset: getStickerset
     }
 
@@ -2179,12 +2297,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function getStickers (force) {
+      if (MtpApiManager.getIsBotAuth()) {
+        return false
+      }
+
       return Storage.get('all_stickers').then(function (stickers) {
         var layer = Config.Schema.API.layer
-        if (stickers.layer != layer) {
+        if (stickers.layer != layer ||
+            stickers.emojiIndex === undefined) {
           stickers = false
         }
         if (stickers && stickers.date > tsNow(true) && !force) {
+          emojiIndex = stickers.emojiIndex
           return processRawStickers(stickers)
         }
         return MtpApiManager.invokeApi('messages.getAllStickers', {
@@ -2200,6 +2324,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
           if (notModified) {
             Storage.set({all_stickers: newStickers})
+            emojiIndex = newStickers.emojiIndex
             return processRawStickers(newStickers)
           }
 
@@ -2261,14 +2386,74 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       })
     }
 
+    function indexStickerSetEmoticons(fullSet) {
+      angular.forEach(fullSet.packs, function (pack) {
+        var emoji = pack.emoticon
+        var emojiCode = false
+        while (emoji.length) {
+          emojiCode = EmojiHelper.emojiMap[emoji]
+          if (emojiCode !== undefined) {
+            break
+          }
+          emoji = emoji.substr(0, -1)
+        }
+        // console.warn('index', fullSet, pack, emojiCode)
+        if (emojiCode === undefined) {
+          return
+        }
+        var stickersList = emojiIndex[emojiCode]
+        if (stickersList === undefined) {
+          emojiIndex[emojiCode] = stickersList = []
+        }
+        angular.forEach(pack.documents, function (docID) {
+          if (stickersList.indexOf(docID) === -1) {
+            stickersList.push(docID)
+          }
+        })
+      })
+    }
+
+    function searchStickers(emojiCode) {
+      return getPopularStickers().then(function () {
+        // console.warn('search', emojiCode, emojiIndex, emojiIndex[emojiCode])
+        var stickersList = emojiIndex[emojiCode]
+        var result = []
+        if (stickersList === undefined) {
+          return result
+        }
+        var setIDs = []
+        angular.forEach(currentStickerSets, function (set) {
+          setIDs.push(set.id)
+        })
+        angular.forEach(stickersList, function (docID) {
+          var doc = AppDocsManager.getDoc(docID)
+          if (!doc || !doc.stickerSetInput) {
+            return
+          }
+          var setID = doc.stickerSetInput.id
+          if (setIDs.indexOf(setID) == -1) {
+            return
+          }
+          result.push(doc)
+        })
+        result.sort(function (doc1, doc2) {
+          return setIDs.indexOf(doc1.stickerSetInput.id) - setIDs.indexOf(doc2.stickerSetInput.id)
+        })
+        return result
+      })
+
+    }
+
     function getStickerSets (allStickers, prevCachedSets) {
       var promises = []
       var cachedSets = prevCachedSets || allStickers.fullSets || {}
       allStickers.fullSets = {}
+      emojiIndex = allStickers.emojiIndex = {}
       angular.forEach(allStickers.sets, function (shortSet) {
         var fullSet = cachedSets[shortSet.id]
         if (fullSet && fullSet.set.hash == shortSet.hash) {
           allStickers.fullSets[shortSet.id] = fullSet
+          indexStickerSetEmoticons(fullSet)
         } else {
           var promise = MtpApiManager.invokeApi('messages.getStickerSet', {
             stickerset: {
@@ -2278,6 +2463,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             }
           }).then(function (fullSet) {
             allStickers.fullSets[shortSet.id] = fullSet
+            indexStickerSetEmoticons(fullSet)
           })
           promises.push(promise)
         }
@@ -2397,7 +2583,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, RichTextProcessor, AppUsersManager, AppPeersManager, PeersSelectService, GeoLocationManager) {
+  .service('AppInlineBotsManager', function (qSync, $q, $rootScope, toaster, Storage, ErrorService, MtpApiManager, AppMessagesManager, AppMessagesIDsManager, AppDocsManager, AppPhotosManager, AppGamesManager, RichTextProcessor, AppUsersManager, AppPeersManager, LocationParamsService, PeersSelectService, GeoLocationManager) {
     var inlineResults = {}
 
     return {
@@ -2409,7 +2595,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       switchToPM: switchToPM,
       checkSwitchReturn: checkSwitchReturn,
       switchInlineButtonClick: switchInlineButtonClick,
-      callbackButtonClick: callbackButtonClick
+      callbackButtonClick: callbackButtonClick,
+      gameButtonClick: gameButtonClick
     }
 
     function getPopularBots () {
@@ -2537,8 +2724,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     function regroupWrappedResults (results, rowW, rowH) {
       if (!results ||
-        !results[0] ||
-        results[0].type != 'photo' && results[0].type != 'gif' && results[0].type != 'sticker') {
+          !results[0] ||
+          ['photo', 'gif', 'sticker'].indexOf(results[0].type) == -1) {
         return
       }
       var ratios = []
@@ -2650,6 +2837,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function switchInlineButtonClick (id, button) {
       var message = AppMessagesManager.getMessage(id)
       var botID = message.viaBotID || message.fromID
+      if (button.pFlags && button.pFlags.same_peer) {
+        var peerID = AppMessagesManager.getMessagePeer(message)
+        var toPeerString = AppPeersManager.getPeerString(peerID)
+        switchInlineQuery(botID, toPeerString, button.query)
+        return
+      }
       return checkSwitchReturn(botID).then(function (retPeerString) {
         if (retPeerString) {
           return switchInlineQuery(botID, retPeerString, button.query)
@@ -2668,29 +2861,60 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var peerID = AppMessagesManager.getMessagePeer(message)
 
       return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+        flags: 1,
         peer: AppPeersManager.getInputPeerByID(peerID),
         msg_id: AppMessagesIDsManager.getMessageLocalID(id),
         data: button.data
       }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function (callbackAnswer) {
-        if (typeof callbackAnswer.message != 'string' ||
-          !callbackAnswer.message.length) {
-          return
+        if (typeof callbackAnswer.message === 'string' &&
+            callbackAnswer.message.length) {
+          showCallbackMessage(callbackAnswer.message, callbackAnswer.pFlags.alert)
         }
-        var html = RichTextProcessor.wrapRichText(callbackAnswer.message, {noLinks: true, noLinebreaks: true})
-        if (callbackAnswer.pFlags.alert) {
-          ErrorService.show({
-            title_html: html,
-            alert: true
-          })
-        } else {
-          toaster.pop({
-            type: 'info',
-            body: html.valueOf(),
-            bodyOutputType: 'trustedHtml',
-            showCloseButton: false
-          })
+        else if (typeof callbackAnswer.url === 'string') {
+          var url = RichTextProcessor.wrapUrl(callbackAnswer.url, true)
+          LocationParamsService.openUrl(url)
         }
       })
+    }
+
+    function gameButtonClick (id) {
+      var message = AppMessagesManager.getMessage(id)
+      var peerID = AppMessagesManager.getMessagePeer(message)
+
+      return MtpApiManager.invokeApi('messages.getBotCallbackAnswer', {
+        flags: 2,
+        peer: AppPeersManager.getInputPeerByID(peerID),
+        msg_id: AppMessagesIDsManager.getMessageLocalID(id)
+      }, {timeout: 1, stopTime: -1, noErrorBox: true}).then(function (callbackAnswer) {
+        if (typeof callbackAnswer.message === 'string' &&
+            callbackAnswer.message.length) {
+          showCallbackMessage(callbackAnswer.message, callbackAnswer.pFlags.alert)
+        }
+        else if (typeof callbackAnswer.url === 'string') {
+          AppGamesManager.openGame(message.media.game.id, id, callbackAnswer.url)
+        }
+      })
+    }
+
+    function showCallbackMessage(message, isAlert) {
+      if (typeof message != 'string' ||
+        !message.length) {
+        return
+      }
+      var html = RichTextProcessor.wrapRichText(message, {noLinks: true, noLinebreaks: true})
+      if (isAlert) {
+        ErrorService.show({
+          title_html: html,
+          alert: true
+        })
+      } else {
+        toaster.pop({
+          type: 'info',
+          body: html.valueOf(),
+          bodyOutputType: 'trustedHtml',
+          showCloseButton: false
+        })
+      }
     }
 
     function sendInlineResult (peerID, qID, options) {
@@ -3161,15 +3385,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       if (update._ == 'updateNewMessage' ||
-        update._ == 'updateEditMessage' ||
-        update._ == 'updateNewChannelMessage' ||
-        update._ == 'updateEditChannelMessage') {
+          update._ == 'updateEditMessage' ||
+          update._ == 'updateNewChannelMessage' ||
+          update._ == 'updateEditChannelMessage') {
         var message = update.message
         var toPeerID = AppPeersManager.getPeerID(message.to_id)
         var fwdHeader = message.fwd_from || {}
         if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post) ||
           fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) ||
-          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id) ||
+          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id, true) ||
           toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
           toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
           console.warn(dT(), 'Not enough data for message update', message)
@@ -3334,9 +3558,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       lastOnlineUpdated = offline ? 0 : date
       AppUsersManager.setUserStatus(myID, offline)
-      return MtpApiManager.invokeApi('account.updateStatus', {
-        offline: offline
-      }, {noErrorBox: true})
+      if (!MtpApiManager.getIsBotAuth()) {
+        return MtpApiManager.invokeApi('account.updateStatus', {
+          offline: offline
+        }, {noErrorBox: true})
+      }
     }
 
     function checkIDLE () {
@@ -3363,7 +3589,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, _, MtpApiManager, AppPeersManager, IdleManager, Storage, AppRuntimeManager, FileManager) {
+  .service('NotificationsManager', function ($rootScope, $window, $interval, $q, $modal, _, toaster, MtpApiManager, AppPeersManager, AppChatsManager, AppUsersManager, IdleManager, Storage, AppRuntimeManager, FileManager, WebPushApiManager) {
     navigator.vibrate = navigator.vibrate || navigator.mozVibrate || navigator.webkitVibrate
 
     var notificationsMsSiteMode = false
@@ -3445,18 +3671,79 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     })
 
     var registeredDevice = false
-    if (window.navigator.mozSetMessageHandler) {
-      window.navigator.mozSetMessageHandler('push', function (e) {
-        console.log(dT(), 'received push', e)
-        $rootScope.$broadcast('push_received')
-      })
+    var pushInited = false
+    $rootScope.$on('push_init', function (e, tokenData) {
+      pushInited = true
+      if (!settings.nodesktop && !settings.nopush) {
+        if (tokenData) {
+          registerDevice(tokenData)
+        } else {
+          WebPushApiManager.subscribe()
+        }
+      } else {
+        unregisterDevice(tokenData)
+      }
+    })
+    $rootScope.$on('push_subscribe', function (e, tokenData) {
+      registerDevice(tokenData)
+    })
+    $rootScope.$on('push_unsubscribe', function (e, tokenData) {
+      unregisterDevice(tokenData)
+    })
 
-      window.navigator.mozSetMessageHandler('push-register', function (e) {
-        console.log(dT(), 'received push', e)
-        registeredDevice = false
-        registerDevice()
-      })
-    }
+    var topMessagesDeferred = $q.defer()
+    var unregisterTopMsgs = $rootScope.$on('dialogs_multiupdate', function () {
+      unregisterTopMsgs()
+      topMessagesDeferred.resolve()
+    })
+    var topMessagesPromise = topMessagesDeferred.promise
+
+    $rootScope.$on('push_notification_click', function (e, notificationData) {
+      if (notificationData.action == 'push_settings') {
+        topMessagesPromise.then(function () {
+          $modal.open({
+            templateUrl: templateUrl('settings_modal'),
+            controller: 'SettingsModalController',
+            windowClass: 'settings_modal_window mobile_modal',
+            backdrop: 'single'
+          })
+        })
+        return
+      }
+      if (notificationData.action == 'mute1d') {
+        MtpApiManager.invokeApi('account.updateDeviceLocked', function () {
+          period: 86400
+        }).then(function () {
+          var toastData = toaster.pop({
+            type: 'info',
+            body: _('push_action_mute1d_success'),
+            bodyOutputType: 'trustedHtml',
+            clickHandler: function () {
+              toaster.clear(toastData)
+            },
+            showCloseButton: false
+          })
+        })
+        return
+      }
+      var peerID = notificationData.custom && notificationData.custom.peerID
+      console.log('click', notificationData, peerID)
+      if (peerID) {
+        topMessagesPromise.then(function () {
+          if (notificationData.custom.channel_id &&
+              !AppChatsManager.hasChat(notificationData.custom.channel_id)) {
+            return
+          }
+          if (peerID > 0 && !AppUsersManager.hasUser(peerID)) {
+            return
+          }
+          $rootScope.$broadcast('history_focus', {
+            peerString: AppPeersManager.getPeerString(peerID)
+          })
+        })
+      }
+    })
+    
 
     return {
       start: start,
@@ -3475,7 +3762,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function updateNotifySettings () {
-      Storage.get('notify_nodesktop', 'notify_volume', 'notify_novibrate', 'notify_nopreview').then(function (updSettings) {
+      Storage.get('notify_nodesktop', 'notify_volume', 'notify_novibrate', 'notify_nopreview', 'notify_nopush').then(function (updSettings) {
         settings.nodesktop = updSettings[0]
         settings.volume = updSettings[1] === false
           ? 0.5
@@ -3483,6 +3770,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
         settings.novibrate = updSettings[2]
         settings.nopreview = updSettings[3]
+        settings.nopush = updSettings[4]
+
+
+        if (pushInited) {
+          var needPush = !settings.nopush && !settings.nodesktop && WebPushApiManager.isAvailable || false
+          var hasPush = registeredDevice !== false
+          if (needPush != hasPush) {
+            if (needPush) {
+              WebPushApiManager.subscribe()
+            } else {
+              WebPushApiManager.unsubscribe()
+            }
+          }
+        }
+        WebPushApiManager.setSettings(settings)
       })
     }
 
@@ -3495,16 +3797,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return peerSettings[peerID]
       }
 
-      if(MtpApiManager.getIsBotAuth()){
-        return false
-      }else{
-        return peerSettings[peerID] = MtpApiManager.invokeApi('account.getNotifySettings', {
-          peer: {
-            _: 'inputNotifyPeer',
-            peer: AppPeersManager.getInputPeerByID(peerID)
-          }
-        })
-      }
+      return peerSettings[peerID] = MtpApiManager.invokeApi('account.getNotifySettings', {
+        peer: {
+          _: 'inputNotifyPeer',
+          peer: AppPeersManager.getInputPeerByID(peerID)
+        }
+      })
     }
 
     function setFavicon (href) {
@@ -3553,7 +3851,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function start () {
       updateNotifySettings()
       $rootScope.$on('settings_changed', updateNotifySettings)
-      registerDevice()
+      WebPushApiManager.start()
 
       if (!notificationsUiSupport) {
         return false
@@ -3640,11 +3938,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var notification
 
       if ('Notification' in window) {
-        notification = new Notification(data.title, {
-          icon: data.image || '',
-          body: data.message || '',
-          tag: data.tag || ''
-        })
+        try {
+          notification = new Notification(data.title, {
+            icon: data.image || '',
+            body: data.message || '',
+            tag: data.tag || '',
+            silent: data.silent || false
+          })
+        } catch (e) {
+          notificationsUiSupport = false
+          WebPushApiManager.setLocalNotificationsDisabled()
+          return
+        }
       }
       else if ('mozNotification' in navigator) {
         notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '')
@@ -3656,7 +3961,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         notification = {
           index: idx
         }
-      }else {
+      } else {
         return
       }
 
@@ -3753,44 +4058,36 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       notificationsShown = {}
       notificationsCount = 0
+
+      WebPushApiManager.hidePushNotifications()
     }
 
-    var registerDevicePeriod = 1000
-    var registerDeviceTO
-    function registerDevice () {
-      if (registeredDevice) {
+    function registerDevice (tokenData) {
+      if (registeredDevice &&
+          angular.equals(registeredDevice, tokenData)) {
         return false
       }
-      if (navigator.push && Config.Navigator.ffos && Config.Modes.packed) {
-        var req = navigator.push.register()
-
-        req.onsuccess = function (e) {
-          clearTimeout(registerDeviceTO)
-          console.log(dT(), 'Push registered', req.result)
-          registeredDevice = req.result
-          MtpApiManager.invokeApi('account.registerDevice', {
-            token_type: 4,
-            token: registeredDevice
-          })
-        }
-
-        req.onerror = function (e) {
-          console.error('Push register error', e, e.toString())
-          registerDeviceTO = setTimeout(registerDevice, registerDevicePeriod)
-          registerDevicePeriod = Math.min(30000, registerDevicePeriod * 1.5)
-        }
-      }
+      MtpApiManager.invokeApi('account.registerDevice', {
+        token_type: tokenData.tokenType,
+        token: tokenData.tokenValue
+      }).then(function () {
+        registeredDevice = tokenData
+      }, function (error) {
+        error.handled = true
+      })
     }
 
-    function unregisterDevice () {
+    function unregisterDevice (tokenData) {
       if (!registeredDevice) {
         return false
       }
       MtpApiManager.invokeApi('account.unregisterDevice', {
-        token_type: 4,
-        token: registeredDevice
+        token_type: tokenData.tokenType,
+        token: tokenData.tokenValue
       }).then(function () {
         registeredDevice = false
+      }, function (error) {
+        error.handled = true
       })
     }
 
@@ -3928,10 +4225,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       })
     }
 
-    function confirm (params, options) {
+    function confirm (params, options, data) {
       options = options || {}
+      data = data || {}
       var scope = $rootScope.$new()
       angular.extend(scope, params)
+      angular.extend(scope, { data: data })
 
       var modal = $modal.open({
         templateUrl: templateUrl('confirm_modal'),
@@ -4042,7 +4341,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       Storage.get('last_version').then(function (lastVersion) {
         if (lastVersion != Config.App.version) {
           if (lastVersion) {
-            // showChangelog(lastVersion)
+            showChangelog(lastVersion)
           }
           Storage.set({last_version: Config.App.version})
         }
@@ -4053,12 +4352,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var $scope = $rootScope.$new()
       $scope.lastVersion = lastVersion
 
-      // $modal.open({
-      //   controller: 'ChangelogModalController',
-      //   templateUrl: templateUrl('changelog_modal'),
-      //   scope: $scope,
-      //   windowClass: 'changelog_modal_window mobile_modal'
-      // })
+      $modal.open({
+        controller: 'ChangelogModalController',
+        templateUrl: templateUrl('changelog_modal'),
+        scope: $scope,
+        windowClass: 'changelog_modal_window mobile_modal'
+      })
     }
 
     return {
@@ -4186,11 +4485,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         Storage.set({tgme_sync: {canRedirect: canRedirect, ts: ts}})
 
-        var script = $('<script>').appendTo('body')
+        var script1 = $('<script>').appendTo('body')
           .on('load error', function () {
-            script.remove()
+            script1.remove()
           })
           .attr('src', '//telegram.me/_websync_?authed=' + (canRedirect ? '1' : '0'))
+
+        var script2 = $('<script>').appendTo('body')
+          .on('load error', function () {
+            script2.remove()
+          })
+          .attr('src', '//t.me/_websync_?authed=' + (canRedirect ? '1' : '0'))
       })
     }
 
@@ -4220,16 +4525,29 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function handleTgProtoAddr (url, inner) {
       var matches
 
-      if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup|post)=(.+))?$/)) {
+      if (matches = url.match(/^resolve\?domain=(.+?)(?:&(start|startgroup|post|game)=(.+))?$/)) {
         AppPeersManager.resolveUsername(matches[1]).then(function (peerID) {
-          if (peerID > 0 && AppUsersManager.isBot(peerID) && matches[2] == 'startgroup') {
+          if (peerID > 0 && AppUsersManager.isBot(peerID) &&
+              (matches[2] == 'startgroup' || matches[2] == 'game')) {
+            var isStartGroup = matches[2] == 'startgroup'
             PeersSelectService.selectPeer({
-              confirm_type: 'INVITE_TO_GROUP',
-              noUsers: true
+              confirm_type: isStartGroup ? 'INVITE_TO_GROUP' : 'INVITE_TO_GAME',
+              noUsers: isStartGroup
             }).then(function (toPeerString) {
               var toPeerID = AppPeersManager.getPeerID(toPeerString)
-              var toChatID = toPeerID < 0 ? -toPeerID : 0
-              AppMessagesManager.startBot(peerID, toChatID, matches[3]).then(function () {
+              var sendPromise
+              if (isStartGroup) {
+                var toChatID = toPeerID < 0 ? -toPeerID : 0
+                sendPromise = AppMessagesManager.startBot(peerID, toChatID, matches[3])
+              } else {
+                inputGame = {
+                  _: 'inputGameShortName',
+                  bot_id: AppUsersManager.getUserInput(peerID),
+                  short_name: matches[3]
+                }
+                sendPromise = AppMessagesManager.shareGame(peerID, toPeerID, inputGame)
+              }
+              sendPromise.then(function () {
                 $rootScope.$broadcast('history_focus', {peerString: toPeerString})
               })
             })
@@ -4277,10 +4595,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           url: url
         }).then(function () {
           var target = '_blank'
-          if (url.search('https://telegram.me/') === 0) {
+          if (url.search('https://telegram.me/') === 0 ||
+              url.search('https://t.me/') === 0) {
             target = '_self'
           }
-          window.open(url, target)
+          var popup = window.open(url, target)
+          try {
+            popup.opener = null;
+          } catch (e) {}
         })
         return true
       }
@@ -4371,15 +4693,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       started = true
 
-      if ('registerProtocolHandler' in navigator) {
-        try {
-          navigator.registerProtocolHandler('tg', '#im?tgaddr=%s', 'Telegram for Devs')
-        } catch (e) {}
-        try {
-          navigator.registerProtocolHandler('web+tg', '#im?tgaddr=%s', 'Telegram for Devs')
-        } catch (e) {}
-      }
-
       if (window.navigator.mozSetMessageHandler) {
         console.log(dT(), 'Set activity message handler')
         window.navigator.mozSetMessageHandler('activity', function (activityRequest) {
@@ -4405,6 +4718,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       $rootScope.$on('$routeUpdate', checkLocationTgAddr)
       checkLocationTgAddr()
+    }
+
+    function openUrl(url) {
+      var match = url.match(tgAddrRegExp)
+      if (match) {
+        if (handleTgProtoAddr(match[3], true)) {
+          return true
+        }
+      }
+      var popup = window.open(url, '_blank')
+      try {
+        popup.opener = null;
+      } catch (e) {}
+      return popup ? true : false
     }
 
     function shareUrl (url, text, shareLink) {
@@ -4472,11 +4799,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
     return {
       start: start,
-      shareUrl: shareUrl
+      shareUrl: shareUrl,
+      openUrl: openUrl
     }
   })
 
-  .service('DraftsManager', function ($rootScope, qSync, MtpApiManager, ApiUpdatesManager, AppMessagesIDsManager, AppPeersManager, RichTextProcessor, Storage, ServerTimeManager) {
+  .service('DraftsManager', function ($rootScope, qSync, MtpApiManager, ApiUpdatesManager, AppMessagesIDsManager, AppChatsManager, AppPeersManager, RichTextProcessor, Storage, ServerTimeManager) {
     var cachedServerDrafts = {}
 
     $rootScope.$on('apiUpdate', function (e, update) {
@@ -4484,7 +4812,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return
       }
       var peerID = AppPeersManager.getPeerID(update.peer)
-      saveDraft(peerID, update.draft, {notify: true})
+      saveDraft(peerID, update.draft, {notify: true, local: update.local})
     })
 
     return {
@@ -4492,11 +4820,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getServerDraft: getServerDraft,
       saveDraft: saveDraft,
       changeDraft: changeDraft,
+      clearDraft: clearDraft,
       syncDraft: syncDraft
     }
 
     function getDraft (peerID, unsyncOnly) {
-      console.warn(dT(), 'get draft', peerID, unsyncOnly)
+      // console.warn(dT(), 'get draft', peerID, unsyncOnly)
       return Storage.get('draft' + peerID).then(function (draft) {
         if (typeof draft === 'string') {
           if (draft.length > 0) {
@@ -4509,8 +4838,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         if (!draft && !unsyncOnly) {
           draft = getServerDraft(peerID)
-          console.warn(dT(), 'server', draft)
+          // console.warn(dT(), 'server', draft)
         } else {
+          // console.warn(dT(), 'local', draft)
           console.warn(dT(), 'local', draft)
         }
         var replyToMsgID = draft && draft.replyToMsgID
@@ -4536,12 +4866,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       cachedServerDrafts[peerID] = draft
 
       if (options.notify) {
-        console.warn(dT(), 'save draft', peerID, apiDraft, options)
+        // console.warn(dT(), 'save draft', peerID, apiDraft, options)
         changeDraft(peerID, draft)
         $rootScope.$broadcast('draft_updated', {
           peerID: peerID,
           draft: draft,
-          local: options.sync
+          local: options.local
         })
       }
 
@@ -4549,9 +4879,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function changeDraft (peerID, draft) {
-      console.warn(dT(), 'change draft', peerID, draft)
+      // console.warn(dT(), 'change draft', peerID, draft)
       if (!peerID) {
         console.trace('empty peerID')
+      }
+      if (peerID < 0 &&
+          !AppChatsManager.hasRights(-peerID, 'send')) {
+        draft = false
       }
       if (!draft) {
         draft = {
@@ -4571,6 +4905,22 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         Storage.set(backupDraftObj)
       } else {
         Storage.remove(draftKey)
+      }
+    }
+
+    function clearDraft (peerID, alsoSync) {
+      changeDraft(peerID)
+      ApiUpdatesManager.processUpdateMessage({
+        _: 'updateShort',
+        update: {
+          _: 'updateDraftMessage',
+          peer: AppPeersManager.getOutputPeer(peerID),
+          draft: {_: 'draftMessageEmpty'},
+          local: true
+        }
+      })
+      if (alsoSync) {
+        syncDraft(peerID)
       }
     }
 
@@ -4626,14 +4976,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function syncDraft (peerID) {
-      console.warn(dT(), 'sync draft', peerID)
+      // console.warn(dT(), 'sync draft', peerID)
       getDraft(peerID, true).then(function (localDraft) {
         var serverDraft = cachedServerDrafts[peerID]
         if (draftsAreEqual(serverDraft, localDraft)) {
-          console.warn(dT(), 'equal drafts', localDraft, serverDraft)
+          // console.warn(dT(), 'equal drafts', localDraft, serverDraft)
           return
         }
-        console.warn(dT(), 'changed draft', localDraft, serverDraft)
+        // console.warn(dT(), 'changed draft', localDraft, serverDraft)
         var params = {
           flags: 0,
           peer: AppPeersManager.getInputPeerByID(peerID)
@@ -4663,7 +5013,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         MtpApiManager.invokeApi('messages.saveDraft', params).then(function () {
           draftObj.date = tsNow(true) + ServerTimeManager.serverTimeOffset
-          saveDraft(peerID, draftObj, {notify: true, sync: true})
+          saveDraft(peerID, draftObj, {notify: true, local: true})
         })
       })
     }

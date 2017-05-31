@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -254,11 +254,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         var response = deserializer.fetchObject('ResPQ')
 
         if (response._ != 'resPQ') {
-          throw new Error('resPQ response invalid: ' + response._)
+          throw new Error('[MT] resPQ response invalid: ' + response._)
         }
 
         if (!bytesCmp(auth.nonce, response.nonce)) {
-          throw new Error('resPQ nonce mismatch')
+          throw new Error('[MT] resPQ nonce mismatch')
         }
 
         auth.serverNonce = response.server_nonce
@@ -270,7 +270,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         auth.publicKey = MtpRsaKeysManager.select(auth.fingerprints)
 
         if (!auth.publicKey) {
-          throw new Error('No public key found')
+          throw new Error('[MT] No public key found')
         }
 
         console.log(dT(), 'PQ factorization start', auth.pq)
@@ -327,27 +327,27 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         var response = deserializer.fetchObject('Server_DH_Params', 'RESPONSE')
 
         if (response._ != 'server_DH_params_fail' && response._ != 'server_DH_params_ok') {
-          deferred.reject(new Error('Server_DH_Params response invalid: ' + response._))
+          deferred.reject(new Error('[MT] Server_DH_Params response invalid: ' + response._))
           return false
         }
 
         if (!bytesCmp(auth.nonce, response.nonce)) {
-          deferred.reject(new Error('Server_DH_Params nonce mismatch'))
+          deferred.reject(new Error('[MT] Server_DH_Params nonce mismatch'))
           return false
         }
 
         if (!bytesCmp(auth.serverNonce, response.server_nonce)) {
-          deferred.reject(new Error('Server_DH_Params server_nonce mismatch'))
+          deferred.reject(new Error('[MT] Server_DH_Params server_nonce mismatch'))
           return false
         }
 
         if (response._ == 'server_DH_params_fail') {
           var newNonceHash = sha1BytesSync(auth.newNonce).slice(-16)
           if (!bytesCmp(newNonceHash, response.new_nonce_hash)) {
-            deferred.reject(new Error('server_DH_params_fail new_nonce_hash mismatch'))
+            deferred.reject(new Error('[MT] server_DH_params_fail new_nonce_hash mismatch'))
             return false
           }
-          deferred.reject(new Error('server_DH_params_fail'))
+          deferred.reject(new Error('[MT] server_DH_params_fail'))
           return false
         }
 
@@ -380,15 +380,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var response = deserializer.fetchObject('Server_DH_inner_data')
 
       if (response._ != 'server_DH_inner_data') {
-        throw new Error('server_DH_inner_data response invalid: ' + constructor)
+        throw new Error('[MT] server_DH_inner_data response invalid: ' + constructor)
       }
 
       if (!bytesCmp(auth.nonce, response.nonce)) {
-        throw new Error('server_DH_inner_data nonce mismatch')
+        throw new Error('[MT] server_DH_inner_data nonce mismatch')
       }
 
       if (!bytesCmp(auth.serverNonce, response.server_nonce)) {
-        throw new Error('server_DH_inner_data serverNonce mismatch')
+        throw new Error('[MT] server_DH_inner_data serverNonce mismatch')
       }
 
       console.log(dT(), 'Done decrypting answer')
@@ -398,13 +398,53 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       auth.serverTime = response.server_time
       auth.retry = 0
 
+      mtpVerifyDhParams(auth.g, auth.dhPrime, auth.gA)
+
       var offset = deserializer.getOffset()
 
       if (!bytesCmp(hash, sha1BytesSync(answerWithPadding.slice(0, offset)))) {
-        throw new Error('server_DH_inner_data SHA1-hash mismatch')
+        throw new Error('[MT] server_DH_inner_data SHA1-hash mismatch')
       }
 
       MtpTimeManager.applyServerTime(auth.serverTime, auth.localTime)
+    }
+
+    function mtpVerifyDhParams(g, dhPrime, gA) {
+      console.log(dT(), 'Verifying DH params')
+      var dhPrimeHex = bytesToHex(dhPrime);
+      if (g != 3 ||
+          dhPrimeHex !== 'c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b') {
+        // The verified value is from https://core.telegram.org/mtproto/security_guidelines
+        throw new Error('[MT] DH params are not verified: unknown dhPrime')
+      }
+      console.log(dT(), 'dhPrime cmp OK')
+
+      var gABigInt = new BigInteger(bytesToHex(gA), 16)
+      var dhPrimeBigInt = new BigInteger(dhPrimeHex, 16)
+
+      if (gABigInt.compareTo(BigInteger.ONE) <= 0) {
+        throw new Error('[MT] DH params are not verified: gA <= 1')
+      }
+
+      if (gABigInt.compareTo(dhPrimeBigInt.subtract(BigInteger.ONE)) >= 0) {
+        throw new Error('[MT] DH params are not verified: gA >= dhPrime - 1')
+      }
+      console.log(dT(), '1 < gA < dhPrime-1 OK')
+
+
+      var two = new BigInteger(null)
+      two.fromInt(2)
+      var twoPow = two.pow(2048 - 64)
+
+      if (gABigInt.compareTo(twoPow) < 0) {
+        throw new Error('[MT] DH params are not verified: gA < 2^{2048-64}')
+      }
+      if (gABigInt.compareTo(dhPrimeBigInt.subtract(twoPow)) >= 0) {
+        throw new Error('[MT] DH params are not verified: gA > dhPrime - 2^{2048-64}')
+      }
+      console.log(dT(), '2^{2048-64} < gA < dhPrime-2^{2048-64} OK')
+
+      return true
     }
 
     function mtpSendSetClientDhParams (auth) {
@@ -440,17 +480,17 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var response = deserializer.fetchObject('Set_client_DH_params_answer')
 
           if (response._ != 'dh_gen_ok' && response._ != 'dh_gen_retry' && response._ != 'dh_gen_fail') {
-            deferred.reject(new Error('Set_client_DH_params_answer response invalid: ' + response._))
+            deferred.reject(new Error('[MT] Set_client_DH_params_answer response invalid: ' + response._))
             return false
           }
 
           if (!bytesCmp(auth.nonce, response.nonce)) {
-            deferred.reject(new Error('Set_client_DH_params_answer nonce mismatch'))
+            deferred.reject(new Error('[MT] Set_client_DH_params_answer nonce mismatch'))
             return false
           }
 
           if (!bytesCmp(auth.serverNonce, response.server_nonce)) {
-            deferred.reject(new Error('Set_client_DH_params_answer server_nonce mismatch'))
+            deferred.reject(new Error('[MT] Set_client_DH_params_answer server_nonce mismatch'))
             return false
           }
 
@@ -465,7 +505,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
                 var newNonceHash1 = sha1BytesSync(auth.newNonce.concat([1], authKeyAux)).slice(-16)
 
                 if (!bytesCmp(newNonceHash1, response.new_nonce_hash1)) {
-                  deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash1 mismatch'))
+                  deferred.reject(new Error('[MT] Set_client_DH_params_answer new_nonce_hash1 mismatch'))
                   return false
                 }
 
@@ -482,7 +522,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               case 'dh_gen_retry':
                 var newNonceHash2 = sha1BytesSync(auth.newNonce.concat([2], authKeyAux)).slice(-16)
                 if (!bytesCmp(newNonceHash2, response.new_nonce_hash2)) {
-                  deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash2 mismatch'))
+                  deferred.reject(new Error('[MT] Set_client_DH_params_answer new_nonce_hash2 mismatch'))
                   return false
                 }
 
@@ -491,11 +531,11 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
               case 'dh_gen_fail':
                 var newNonceHash3 = sha1BytesSync(auth.newNonce.concat([3], authKeyAux)).slice(-16)
                 if (!bytesCmp(newNonceHash3, response.new_nonce_hash3)) {
-                  deferred.reject(new Error('Set_client_DH_params_answer new_nonce_hash3 mismatch'))
+                  deferred.reject(new Error('[MT] Set_client_DH_params_answer new_nonce_hash3 mismatch'))
                   return false
                 }
 
-                deferred.reject(new Error('Set_client_DH_params_answer fail'))
+                deferred.reject(new Error('[MT] Set_client_DH_params_answer fail'))
                 return false
             }
           }, function (error) {
@@ -522,7 +562,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
 
       if (!MtpDcConfigurator.chooseServer(dcID)) {
-        return $q.reject(new Error('No server found for dc ' + dcID))
+        return $q.reject(new Error('[MT] No server found for dc ' + dcID))
       }
 
       var auth = {
@@ -583,11 +623,12 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       this.updateSession()
 
+      this.lastServerMessages = []
+
       this.currentRequests = 0
       this.checkConnectionPeriod = 0
 
       this.sentMessages = {}
-      this.serverMessages = []
       this.clientMessages = []
 
       this.pendingMessages = {}
@@ -613,13 +654,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     MtpNetworker.prototype.updateSession = function () {
       this.seqNo = 0
+      this.prevSessionID = this.sessionID
       this.sessionID = new Array(8)
       MtpSecureRandom.nextBytes(this.sessionID)
-
-      if (false) {
-        this.sessionID[0] = 0xAB
-        this.sessionID[1] = 0xCD
-      }
     }
 
     MtpNetworker.prototype.setupMobileSleep = function () {
@@ -765,8 +802,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var isClean = this.cleanupSent()
       // console.log('Check lp', this.longPollPending, tsNow(), this.dcID, isClean)
       if (this.longPollPending && tsNow() < this.longPollPending ||
-        this.offline ||
-        akStopped) {
+          this.offline ||
+          akStopped) {
         return false
       }
       var self = this
@@ -1210,15 +1247,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
             return result
           },
           function (error) {
-            if (error.status == 404 &&
-              (error.data || '').indexOf('nginx/0.3.33') != -1) {
-              Storage.remove(
-                'dc' + self.dcID + '_server_salt',
-                'dc' + self.dcID + '_auth_key'
-              ).then(function () {
-                AppRuntimeManager.reload()
-              })
-            }
             if (!error.message && !error.type) {
               error = angular.extend(baseError, {type: 'NETWORK_BAD_REQUEST', originalError: error})
             }
@@ -1236,7 +1264,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       var authKeyID = deserializer.fetchIntBytes(64, false, 'auth_key_id')
       if (!bytesCmp(authKeyID, this.authKeyID)) {
-        throw new Error('Invalid server auth_key_id: ' + bytesToHex(authKeyID))
+        throw new Error('[MT] Invalid server auth_key_id: ' + bytesToHex(authKeyID))
       }
       var msgKey = deserializer.fetchIntBytes(128, true, 'msg_key')
       var encryptedData = deserializer.fetchRawBytes(responseBuffer.byteLength - deserializer.getOffset(), true, 'encrypted_data')
@@ -1249,17 +1277,35 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
         var sessionID = deserializer.fetchIntBytes(64, false, 'session_id')
         var messageID = deserializer.fetchLong('message_id')
 
+        if (!bytesCmp(sessionID, self.sessionID) &&
+            (!self.prevSessionID || !bytesCmp(sessionID, self.prevSessionID))) {
+          console.warn('Sessions', sessionID, self.sessionID, self.prevSessionID)
+          throw new Error('[MT] Invalid server session_id: ' + bytesToHex(sessionID))
+        }
+
         var seqNo = deserializer.fetchInt('seq_no')
 
-        var messageBody = deserializer.fetchRawBytes(false, true, 'message_data')
+        var offset = deserializer.getOffset()
+        var totalLength = dataWithPadding.byteLength
 
-        // console.log(dT(), 'before hash')
-        var hashData = convertToUint8Array(dataWithPadding).subarray(0, deserializer.getOffset())
+        var messageBodyLength = deserializer.fetchInt('message_data[length]')
+        if ((messageBodyLength % 4) ||
+            messageBodyLength > totalLength - offset) {
+          throw new Error('[MT] Invalid body length: ' + messageBodyLength)
+        }
+        var messageBody = deserializer.fetchRawBytes(messageBodyLength, true, 'message_data')
+
+        var offset = deserializer.getOffset()
+        var paddingLength = totalLength - offset
+        if (paddingLength < 0 || paddingLength > 15) {
+          throw new Error('[MT] Invalid padding length: ' + paddingLength)
+        }
+        var hashData = convertToUint8Array(dataWithPadding).subarray(0, offset)
 
         return CryptoWorker.sha1Hash(hashData).then(function (dataHash) {
           if (!bytesCmp(msgKey, bytesFromArrayBuffer(dataHash).slice(-16))) {
             console.warn(msgKey, bytesFromArrayBuffer(dataHash))
-            throw new Error('server msgKey mismatch')
+            throw new Error('[MT] server msgKey mismatch')
           }
 
           var buffer = bytesToArrayBuffer(messageBody)
@@ -1413,12 +1459,17 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     }
 
     MtpNetworker.prototype.processMessage = function (message, messageID, sessionID) {
+      var msgidInt = parseInt(messageID.toString(10).substr(0, -10), 10)
+      if (msgidInt % 2) {
+        console.warn('[MT] Server even message id: ', messageID, message)
+        return
+      }
       // console.log('process message', message, messageID, sessionID)
       switch (message._) {
         case 'msg_container':
           var len = message.messages.length
           for (var i = 0; i < len; i++) {
-            this.processMessage(message.messages[i], messageID, sessionID)
+            this.processMessage(message.messages[i], message.messages[i].msg_id, sessionID)
           }
           break
 
@@ -1427,7 +1478,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var sentMessage = this.sentMessages[message.bad_msg_id]
           if (!sentMessage || sentMessage.seq_no != message.bad_msg_seqno) {
             console.log(message.bad_msg_id, message.bad_msg_seqno)
-            throw new Error('Bad server salt for invalid message')
+            throw new Error('[MT] Bad server salt for invalid message')
           }
 
           this.applyServerSalt(message.new_server_salt)
@@ -1440,7 +1491,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           var sentMessage = this.sentMessages[message.bad_msg_id]
           if (!sentMessage || sentMessage.seq_no != message.bad_msg_seqno) {
             console.log(message.bad_msg_id, message.bad_msg_seqno)
-            throw new Error('Bad msg notification for invalid message')
+            throw new Error('[MT] Bad msg notification for invalid message')
           }
 
           if (message.error_code == 16 || message.error_code == 17) {
@@ -1457,7 +1508,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           break
 
         case 'message':
-          this.serverMessages.push(message.msg_id)
+          if (this.lastServerMessages.indexOf(messageID) != -1) {
+            // console.warn('[MT] Server same messageID: ', messageID)
+            this.ackMessage(messageID)
+            return
+          }
+          this.lastServerMessages.push(messageID)
+          if (this.lastServerMessages.length > 100) {
+            this.lastServerMessages.shift()
+          }
           this.processMessage(message.body, message.msg_id, sessionID)
           break
 

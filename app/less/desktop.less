@@ -272,8 +272,10 @@
   }
 }
 
-.tg_head_msgs_edit_btn {
+.tg_head_peer_search_btn {
   float: right;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .tg_head_peer {
@@ -290,6 +292,10 @@
       max-width: 100%;
       border-radius: 0;
       padding: 9px 0;
+
+      float: none;
+      right: 0;
+      left: auto;
 
       margin: -1px 0 0 0;
       border: 1px solid rgba(15, 60, 96, 0.2);
@@ -366,6 +372,37 @@
     line-height: 20px;
     float: left;
     font-weight: bold;
+  }
+}
+
+.icon-search {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -12px -1037px;
+  vertical-align: middle;
+  opacity: 0.9;
+}
+
+
+.tg_head_peer_media_dropdown {
+  .dropdown-toggle  {
+    display: block;
+
+    .icon-bar {
+      display: block;
+      background-color: #d7e5f0;
+      width: 4px;
+      height: 4px;
+      border-radius: 2px;
+      margin-left: 3px;
+      margin-right: 3px;
+
+      & + .icon-bar {
+        margin-top: 2px;
+      }
+    }
   }
 }
 
@@ -881,6 +918,14 @@ a.footer_link.active:active {
   }
 }
 
+.im_submit_edit_label,
+.im_submit_edit .im_submit_send_label {
+  display: none;
+}
+.im_submit_edit .im_submit_edit_label {
+  display: inline;
+}
+
 .composer_emoji_panel {
   display: block;
   height: 30px;
@@ -1116,6 +1161,13 @@ a.im_panel_peer_photo .peer_initials {
   margin-left: 36px;
 }
 
+.composer_emoji_insert_btn,
+.composer_progress_icon_wrap,
+.composer_command_btn,
+.composer_keyboard_btn {
+  z-index: 1;
+}
+
 .composer_emoji_insert_btn {
   &:hover {
     .icon-emoji {
@@ -1146,11 +1198,13 @@ a.im_panel_peer_photo .peer_initials {
   box-shadow: none;
   outline: none;
   box-shadow: 0 1px 0 0 #e8e8e8;
-  padding: 1px 30px 1px 0;
+  padding: 1px 28px 1px 0;
+  position: relative;
   margin: 0;
-  min-height: 50px;
+  min-height: 52px;
   line-height: 20px;
   height: auto;
+  box-sizing: border-box;
 
   &:focus {
     border: 0;
@@ -1251,7 +1305,7 @@ a.im_panel_peer_photo .peer_initials {
   .composer {
     &_rich_textarea,
     &_textarea {
-      min-height: 25px;
+      min-height: 27px;
       padding-right: 25px;
     }
 

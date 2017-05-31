@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -321,17 +321,7 @@ angular.module('myApp.directives')
         }
       }
 
-      function updateBottomizer () {
-        return
-        $(historyMessagesEl).css({marginTop: 0})
-        var marginTop = scrollableWrap.offsetHeight
-          - historyMessagesEl.offsetHeight
-          - 20
-
-        if (historyMessagesEl.offsetHeight > 0 && marginTop > 0) {
-          $(historyMessagesEl).css({marginTop: marginTop})
-        }
-      }
+      function updateBottomizer () {}
 
       $($window).on('resize', updateSizes)
 

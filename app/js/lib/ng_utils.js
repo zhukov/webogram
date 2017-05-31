@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.6 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -76,8 +76,10 @@ angular.module('izhukov.utils', [])
         return fileWriteData(fileWriter, fromFileEntry).then(function () {
           return fileWriter
         }, function (error) {
+          try {
+            fileWriter.truncate(0)
+          } catch (e) {}
           return $q.reject(error)
-          fileWriter.truncate(0)
         })
       })
     }
@@ -178,14 +180,15 @@ angular.module('izhukov.utils', [])
     }
 
     function getUrl (fileData, mimeType) {
+      var safeMimeType = blobSafeMimeType(mimeType)
       // console.log(dT(), 'get url', fileData, mimeType, fileData.toURL !== undefined, fileData instanceof Blob)
       if (fileData.toURL !== undefined) {
-        return fileData.toURL(mimeType)
+        return fileData.toURL(safeMimeType)
       }
       if (fileData instanceof Blob) {
         return URL.createObjectURL(fileData)
       }
-      return 'data:' + mimeType + ';base64,' + bytesToBase64(fileData)
+      return 'data:' + safeMimeType + ';base64,' + bytesToBase64(fileData)
     }
 
     function getByteArray (fileData) {
@@ -392,7 +395,7 @@ angular.module('izhukov.utils', [])
 
       request.onsuccess = function (event) {
         finished = true
-        db = request.result
+        var db = request.result
 
         db.onerror = function (error) {
           storageIsAvailable = false
@@ -464,8 +467,8 @@ angular.module('izhukov.utils', [])
         return $q.reject()
       }
       if (!(blob instanceof Blob)) {
-        var mimeType = blob.type || 'image/jpeg'
-        var address = 'data:' + mimeType + ';base64,' + bytesToBase64(blob)
+        var safeMimeType = blobSafeMimeType(blob.type || 'image/jpeg')
+        var address = 'data:' + safeMimeType + ';base64,' + bytesToBase64(blob)
         return storagePutB64String(db, fileName, address).then(function () {
           return blob
         })
@@ -602,7 +605,7 @@ angular.module('izhukov.utils', [])
     }
 
     function isAvailable () {
-      return storageIsAvailable
+      return Config.allow_tmpfs && storageIsAvailable
     }
 
     function getFile (fileName, size) {
@@ -1068,9 +1071,9 @@ angular.module('izhukov.utils', [])
         }, 10)
       }
 
-      var debounceTimeout = $rootScope.idle.initial ? 0 : 1000;
+      var debounceTimeout = $rootScope.idle.initial ? 0 : 1000
       if (e && !e.fake_initial) {
-        delete $rootScope.idle.initial;
+        delete $rootScope.idle.initial
       }
 
       $timeout.cancel(debouncePromise)
@@ -1157,17 +1160,12 @@ angular.module('izhukov.utils', [])
   })
 
   .service('RichTextProcessor', function ($sce, $sanitize) {
-    var emojiMap = {}
     var emojiData = Config.Emoji
     var emojiIconSize = 18
     var emojiSupported = navigator.userAgent.search(/OS X|iPhone|iPad|iOS|Android/i) != -1,
       emojiCode
 
     var emojiRegExp = '\\u0023\\u20E3|\\u00a9|\\u00ae|\\u203c|\\u2049|\\u2139|[\\u2194-\\u2199]|\\u21a9|\\u21aa|\\u231a|\\u231b|\\u23e9|[\\u23ea-\\u23ec]|\\u23f0|\\u24c2|\\u25aa|\\u25ab|\\u25b6|\\u2611|\\u2614|\\u26fd|\\u2705|\\u2709|[\\u2795-\\u2797]|\\u27a1|\\u27b0|\\u27bf|\\u2934|\\u2935|[\\u2b05-\\u2b07]|\\u2b1b|\\u2b1c|\\u2b50|\\u2b55|\\u3030|\\u303d|\\u3297|\\u3299|[\\uE000-\\uF8FF\\u270A-\\u2764\\u2122\\u25C0\\u25FB-\\u25FE\\u2615\\u263a\\u2648-\\u2653\\u2660-\\u2668\\u267B\\u267F\\u2693\\u261d\\u26A0-\\u26FA\\u2708\\u2702\\u2601\\u260E]|[\\u2600\\u26C4\\u26BE\\u23F3\\u2764]|\\uD83D[\\uDC00-\\uDFFF]|\\uD83C[\\uDDE8-\\uDDFA\uDDEC]\\uD83C[\\uDDEA-\\uDDFA\uDDE7]|[0-9]\\u20e3|\\uD83C[\\uDC00-\\uDFFF]'
-
-    for (emojiCode in emojiData) {
-      emojiMap[emojiData[emojiCode][0]] = emojiCode
-    }
 
     var alphaCharsRegExp = 'a-z' +
       '\\u00c0-\\u00d6\\u00d8-\\u00f6\\u00f8-\\u00ff' + // Latin-1
@@ -1236,7 +1234,8 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
-    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)`([^\n]+?)`([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)|(^|\s)\*([^\n]+?)\*([\s\.,:?!;]|$)|(^|\s)_([^\n]+?)_([\s\.,:?!;]|$)/
+    var markdownTestRegExp = /[`_*@]/
+    var markdownRegExp = /(^|\s|\n)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)(`|\*\*|__)([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/m
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1250,6 +1249,12 @@ angular.module('izhukov.utils', [])
       Twitter: 'https://twitter.com/{1}',
       Instagram: 'https://instagram.com/{1}/',
       GitHub: 'https://github.com/{1}'
+    }
+
+    var markdownEntities = {
+      '`': 'messageEntityCode',
+      '**': 'messageEntityBold',
+      '__': 'messageEntityItalic'
     }
 
     return {
@@ -1353,8 +1358,8 @@ angular.module('izhukov.utils', [])
           })
         }
         else if (match[8]) { // Emoji
-          if ((emojiCode = emojiMap[match[8]]) &&
-            (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
+          if ((emojiCode = EmojiHelper.emojiMap[match[8]]) &&
+              (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
             entities.push({
               _: 'messageEntityEmoji',
               offset: matchIndex,
@@ -1400,7 +1405,7 @@ angular.module('izhukov.utils', [])
     }
 
     function parseMarkdown (text, entities, noTrim) {
-      if (text.indexOf('`') == -1 && text.indexOf('*') == -1 && text.indexOf('_') == -1 && text.indexOf('@') == -1) {
+      if (!markdownTestRegExp.test(text)) {
         return noTrim ? text : text.trim()
       }
       var raw = text
@@ -1412,7 +1417,7 @@ angular.module('izhukov.utils', [])
         matchIndex = rawOffset + match.index
         newText.push(raw.substr(0, match.index))
 
-        var text = (match[3] || match[7] || match[10] || match[12] || match[15])
+        var text = (match[3] || match[8] || match[11])
         rawOffset -= text.length
         text = text.replace(/^\s+|\s+$/g, '')
         rawOffset += text.length
@@ -1433,39 +1438,23 @@ angular.module('izhukov.utils', [])
             length: text.length
           })
           rawOffset -= match[2].length + match[4].length
-        } else if (match[7]) { // code
-          newText.push(match[6] + text + match[8])
+        } else if (match[7]) { // code|italic|bold
+          newText.push(match[6] + text + match[9])
           entities.push({
-            _: 'messageEntityCode',
+            _: markdownEntities[match[7]],
             offset: matchIndex + match[6].length,
             length: text.length
           })
-          rawOffset -= 2
-        } else if (match[10]) { // custom mention
+          rawOffset -= match[7].length * 2
+        } else if (match[11]) { // custom mention
           newText.push(text)
           entities.push({
             _: 'messageEntityMentionName',
-            user_id: match[9],
+            user_id: match[10],
             offset: matchIndex,
             length: text.length
           })
-          rawOffset -= match[0] - text.length
-        } else if (match[12]) { // bold
-          newText.push(match[11] + text + match[13])
-          entities.push({
-            _: 'messageEntityBold',
-            offset: matchIndex + match[11].length,
-            length: text.length
-          })
-          rawOffset -= 2
-        } else if (match[15]) { // italic
-          newText.push(match[14] + text + match[16])
-          entities.push({
-            _: 'messageEntityItalic',
-            offset: matchIndex + match[14].length,
-            length: text.length
-          })
-          rawOffset -= 2
+          rawOffset -= match[0].length - text.length
         }
         raw = raw.substr(match.index + match[0].length)
         rawOffset += match.index + match[0].length
@@ -1667,19 +1656,26 @@ angular.module('izhukov.utils', [])
 
           case 'messageEntityUrl':
           case 'messageEntityTextUrl':
-            if (options.noLinks) {
-              skipEntity = true
-              break
+            var inner
+            if (entity._ == 'messageEntityTextUrl') {
+              url = entity.url
+              url = wrapUrl(url, true)
+              inner = wrapRichNestedText(entityText, entity.nested, options)
+            } else {
+              url = wrapUrl(entityText, false)
+              inner = encodeEntities(replaceUrlEncodings(entityText))
             }
-            var url = entity.url || entityText
-            url = wrapUrl(url, entity._ == 'messageEntityTextUrl' ? true : false)
-            html.push(
-              '<a href="',
-              encodeEntities(url),
-              '" target="_blank" rel="noopener noreferrer">',
-              wrapRichNestedText(entityText, entity.nested, options),
-              '</a>'
-            )
+            if (options.noLinks) {
+              html.push(inner);
+            } else {
+              html.push(
+                '<a href="',
+                encodeEntities(url),
+                '" target="_blank" rel="noopener noreferrer">',
+                inner,
+                '</a>'
+              )
+            }
             break
 
           case 'messageEntityLinebreak':
@@ -1822,6 +1818,18 @@ angular.module('izhukov.utils', [])
             )
             break
 
+          case 'messageEntityBold':
+            code.push(
+              '**', entityText, '**'
+            )
+            break
+
+          case 'messageEntityItalic':
+            code.push(
+              '__', entityText, '__'
+            )
+            break
+
           case 'messageEntityPre':
             code.push(
               '```', entityText, '```'
@@ -1862,6 +1870,16 @@ angular.module('izhukov.utils', [])
       return url
     }
 
+    function replaceUrlEncodings(urlWithEncoded) {
+      return urlWithEncoded.replace(/(%[A-Z\d]{2})+/g, function (str) {
+        try {
+          return decodeURIComponent(str)
+        } catch (e) {
+          return str
+        }
+      })
+    }
+
     function wrapPlainText (text, options) {
       if (emojiSupported) {
         return text
@@ -1883,7 +1901,7 @@ angular.module('izhukov.utils', [])
         text.push(raw.substr(0, match.index))
 
         if (match[8]) {
-          if ((emojiCode = emojiMap[match[8]]) &&
+          if ((emojiCode = EmojiHelper.emojiMap[match[8]]) &&
             (emojiTitle = emojiData[emojiCode][1][0])) {
             text.push(':' + emojiTitle + ':')
           } else {
@@ -1907,7 +1925,7 @@ angular.module('izhukov.utils', [])
       if (unsafe == 2) {
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
       }
-      else if ( (tgMeMatch = url.match(/^https?:\/\/telegram\.me\/(.+)/))) {
+      else if ( (tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
         var path = tgMeMatch[1].split('/')
         switch (path[0]) {
           case 'joinchat':
@@ -1957,4 +1975,206 @@ angular.module('izhukov.utils', [])
     })
 
     return timeParams
+  })
+
+  .service('WebPushApiManager', function ($window, $timeout, $q, $rootScope, _, AppRuntimeManager) {
+
+    var isAvailable = true
+    var isPushEnabled = false
+    var localNotificationsAvailable = true
+    var started = false
+    var settings = {}
+    var isAliveTO
+    var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+    var userVisibleOnly = isFirefox ? false : true
+
+    if (!('PushManager' in window) ||
+        !('Notification' in window) ||
+        !('serviceWorker' in navigator)) {
+      console.warn('Push messaging is not supported.')
+      isAvailable = false
+      localNotificationsAvailable = false
+    }
+
+    if (isAvailable &&
+        Notification.permission === 'denied') {
+      console.warn('The user has blocked notifications.')
+    }
+
+    function start() {
+      if (!started) {
+        started = true
+        getSubscription()
+        setUpServiceWorkerChannel()
+      }
+    }
+
+    function setLocalNotificationsDisabled() {
+      localNotificationsAvailable = false
+    }
+
+    function getSubscription() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.getSubscription().then(function(subscription) {
+          isPushEnabled = subscription ? true : false
+          pushSubscriptionNotify('init', subscription)
+        })
+        .catch(function(err) {
+          console.log('Error during getSubscription()', err)
+        })
+      })
+    }
+
+    function subscribe() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.subscribe({userVisibleOnly: userVisibleOnly}).then(function(subscription) {
+          // The subscription was successful
+          isPushEnabled = true
+          pushSubscriptionNotify('subscribe', subscription)
+        })
+        .catch(function(e) {
+          if (Notification.permission === 'denied') {
+            console.log('Permission for Notifications was denied')
+          } else {
+            console.log('Unable to subscribe to push.', e)
+            if (!userVisibleOnly) {
+              userVisibleOnly = true
+              setTimeout(subscribe, 0)
+            }
+          }
+        })
+      })
+    }
+
+    function unsubscribe() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.getSubscription().then(function (subscription) {
+          isPushEnabled = false
+
+          if (subscription) {
+            pushSubscriptionNotify('unsubscribe', subscription)
+
+            setTimeout(function() {
+              subscription.unsubscribe().then(function(successful) {
+                isPushEnabled = false
+              }).catch(function(e) {
+                console.error('Unsubscription error: ', e)
+              })
+            }, 3000)
+          }
+
+        }).catch(function(e) {
+          console.error('Error thrown while unsubscribing from ' +
+            'push messaging.', e)
+        })
+      })
+    }
+
+    function isAliveNotify() {
+      if (!isAvailable ||
+          $rootScope.idle && $rootScope.idle.deactivated) {
+        return
+      }
+      settings.baseUrl = (location.href || '').replace(/#.*$/, '') + '#/im'
+
+      var eventData = {
+        type: 'ping',
+        localNotifications: localNotificationsAvailable,
+        lang: {
+          push_action_mute1d: _(Config.Mobile
+            ? 'push_action_mute1d_mobile_raw'
+            : 'push_action_mute1d_raw'
+          ),
+          push_action_settings: _(Config.Mobile
+            ? 'push_action_settings_mobile_raw'
+            : 'push_action_settings_raw'
+          ),
+          push_message_nopreview: _('push_message_nopreview_raw'),
+        },
+        settings: settings
+      }
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage(eventData)
+      }
+      isAliveTO = setTimeout(isAliveNotify, 10000)
+    }
+
+    function setSettings(newSettings) {
+      settings = angular.copy(newSettings)
+      clearTimeout(isAliveTO)
+      isAliveNotify()
+    }
+
+    function hidePushNotifications() {
+      if (!isAvailable) {
+        return
+      }
+      if (navigator.serviceWorker.controller) {
+        var eventData = {type: 'notifications_clear'}
+        navigator.serviceWorker.controller.postMessage(eventData)
+      }
+    }
+
+    function setUpServiceWorkerChannel() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.addEventListener('message', function(event) {
+        if (event.data &&
+            event.data.type == 'push_click') {
+          if ($rootScope.idle && $rootScope.idle.deactivated) {
+            AppRuntimeManager.reload()
+            return
+          }
+          $rootScope.$emit('push_notification_click', event.data.data)
+        }
+      })
+      navigator.serviceWorker.ready.then(isAliveNotify)
+    }
+
+
+    function pushSubscriptionNotify(event, subscription) {
+      if (subscription) {
+        var subscriptionObj = subscription.toJSON()
+        if (!subscriptionObj ||
+            !subscriptionObj.endpoint ||
+            !subscriptionObj.keys ||
+            !subscriptionObj.keys.p256dh ||
+            !subscriptionObj.keys.auth) {
+          console.warn(dT(), 'Invalid push subscription', subscriptionObj)
+          unsubscribe()
+          isAvailable = false
+          return pushSubscriptionNotify(event, false)
+        }
+        console.warn(dT(), 'Push', event, subscriptionObj)
+        $rootScope.$emit('push_' + event, {
+          tokenType: 10,
+          tokenValue: JSON.stringify(subscriptionObj)
+        })
+      } else {
+        console.warn(dT(), 'Push', event, false)
+        $rootScope.$emit('push_' + event, false)
+      }
+    }
+
+    return {
+      isAvailable: isAvailable,
+      start: start,
+      isPushEnabled: isPushEnabled,
+      subscribe: subscribe,
+      unsubscribe: unsubscribe,
+      hidePushNotifications: hidePushNotifications,
+      setLocalNotificationsDisabled: setLocalNotificationsDisabled,
+      setSettings: setSettings
+    }
+
   })

@@ -4,7 +4,7 @@
   </div>
   <div class="im_message_document_info">
     <div class="im_message_document_name_wrap">
-      <span class="im_message_document_name" ng-bind="::media.file_name"></span>
+      <span class="im_message_document_name" ng-attr-data-name="{{media_file_name_without_ext}}" ng-attr-data-ext="{{media_file_ext}}"></span>
       <span class="im_message_document_size" ng-if="media.progress" ng-bind="media.progress | formatSizeProgress"></span>
     </div>
     <div class="clearfix im_message_cancelable_progress_wrap">

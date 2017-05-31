@@ -14,6 +14,10 @@
   <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
   <span ng-switch-when="messageMediaVenue" my-i18n="conversation_media_location"></span>
   <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
+  <span ng-switch-when="messageMediaGame">
+    <span my-emoji-image="🎮"></span>
+    <span ng-bind-html="message.media.game.rTitle"></span>
+  </span>
 </span><span class="im_short_message_service" ng-if="message._ == 'messageService'" ng-switch="message.action._">
   <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
   <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
@@ -40,4 +44,16 @@
   <span ng-switch-when="messageActionChannelEditTitle" my-i18n="conversation_changed_channel_name"></span>
   <span ng-switch-when="messageActionChannelEditPhoto" my-i18n="conversation_changed_channel_photo"></span>
   <span ng-switch-when="messageActionPinMessage" my-i18n="conversation_pinned_message"></span>
-</span><span class="im_short_message_text" ng-if="message.message.length" ng-bind-html="message.richMessage"></span>
+  <span ng-switch-when="messageActionGameScore">
+      <ng-pluralize count="message.action.score"
+                     when="conversation_scored_X"></ng-pluralize>
+    </my-i18n-param>
+  </span>
+  <span ng-switch-when="messageActionPhoneCall" ng-switch="message.action.type">
+    <span ng-switch-when="out_missed" my-i18n="message_service_phonecall_canceled"></span>
+    <span ng-switch-when="in_missed" my-i18n="message_service_phonecall_missed"></span>
+    <span ng-switch-when="out_ok" my-i18n="message_service_phonecall_outgoing"></span>
+    <span ng-switch-when="in_ok" my-i18n="message_service_phonecall_incoming"></span>
+  </span>
+
+</span><span class="im_short_message_text" ng-if="message.message.length && (!message.media || message.media._ == 'messageMediaWebPage')" ng-bind-html="message.richMessage"></span>

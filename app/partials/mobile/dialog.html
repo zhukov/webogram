@@ -12,6 +12,10 @@
       class="im_dialog_unread ng-hide"
       ng-show="dialogMessage.pFlags.out && dialogMessage.pFlags.unread"
     ></i>
+    <i
+      class="im_dialog_pinned ng-hide"
+      ng-show="dialogMessage.pinned && !dialogMessage.unreadCount && !dialogMessage.pFlags.unread"
+    ></i>
   </div>
 
   <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true"></div>
