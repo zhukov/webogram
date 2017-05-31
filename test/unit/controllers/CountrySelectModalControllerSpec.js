@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, inject, expect, beforeEach */
+/* global describe, it, inject, expect, beforeEach, spyOn, jasmine, Config, SearchIndexManager */
 
 describe('CountrySelectModalController', function () {
   beforeEach(module('myApp.controllers'))
@@ -21,7 +21,7 @@ describe('CountrySelectModalController', function () {
     }
 
     // Spy on IndexObject
-    spyOn(SearchIndexManager, "indexObject").and.callThrough()
+    spyOn(SearchIndexManager, 'indexObject').and.callThrough()
   }))
 
   // define tests
@@ -35,7 +35,7 @@ describe('CountrySelectModalController', function () {
 
     this.createController()
 
-    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(0, expected, jasmine.any(Object));
+    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(0, expected, jasmine.any(Object))
     done()
   })
 
@@ -45,7 +45,7 @@ describe('CountrySelectModalController', function () {
 
     this.createController()
 
-    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(0, expected, jasmine.any(Object));
+    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(0, expected, jasmine.any(Object))
     done()
   })
 
@@ -56,11 +56,10 @@ describe('CountrySelectModalController', function () {
 
     this.createController()
 
-    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(0, expected1, jasmine.any(Object));
-    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(1, expected2, jasmine.any(Object));
+    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(0, expected1, jasmine.any(Object))
+    expect(SearchIndexManager.indexObject).toHaveBeenCalledWith(1, expected2, jasmine.any(Object))
     done()
   })
-
 
   describe('(after initiation)', function () {
     beforeEach(function () {
@@ -104,14 +103,13 @@ describe('CountrySelectModalController', function () {
         expect(this.$scope.countries).toEqual(expected)
 
         this.$rootScope.$digest()
-        expected =[{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }]
+        expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }]
 
         expect(this.$scope.countries).toEqual(expected)
         done()
       })
 
       it('restore the original list when the input is deleted', function (done) {
-
         this.$rootScope.$digest()
         this.$scope.search.query = ''
         this.$rootScope.$digest()
@@ -123,7 +121,6 @@ describe('CountrySelectModalController', function () {
       })
 
       it('restore the original list when the input is deleted', function (done) {
-
         this.$rootScope.$digest()
         this.$scope.search.query = 'Ne'
         this.$rootScope.$digest()

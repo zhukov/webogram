@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, inject, expect, beforeEach */
+/* global describe, it, inject, expect, beforeEach, jasmine */
 
 describe('ImportContactModalController', function () {
   beforeEach(module('myApp.controllers'))
@@ -13,11 +13,12 @@ describe('ImportContactModalController', function () {
       isAvailable: function () {
         return false
       },
-      openPhonebookImport: function() {
-        if(this.importSwitch)
+      openPhonebookImport: function () {
+        if (this.importSwitch) {
           return this.importTrue
-        else
+        } else {
           return this.importFalse
+        }
       },
       importFalse: {
         result: {
@@ -57,20 +58,21 @@ describe('ImportContactModalController', function () {
           first: first,
           last: last
         }
-        if(this.importSwitch)
+        if (this.importSwitch) {
           return this.importTrue
-        else
+        } else {
           return this.importFalse
+        }
       },
       importFalse: {
-        then: function(f) {
+        then: function (f) {
           f(null)
           return this.finally
         },
         finally: fin
       },
       importTrue: {
-        then: function(f) {
+        then: function (f) {
           f(rID)
           return this.finally
         },
@@ -88,7 +90,7 @@ describe('ImportContactModalController', function () {
     this.createController = function () {
       this.$controller('ImportContactModalController', {
         $scope: scope,
-        $modalInstance: mi  ,
+        $modalInstance: mi,
         $rootScope: _$rootScope_,
         AppUsersManager: aum,
         ErrorService: errs,
@@ -109,14 +111,14 @@ describe('ImportContactModalController', function () {
   it('can create a controller when imported contacts are defined', function (done) {
     this.$scope.importContact = { non_empty: true }
     this.createController()
-    var expected =  { non_empty: true }
+    var expected = { non_empty: true }
 
     expect(this.$scope.importContact).toEqual(expected)
     done()
   })
 
-  describe('(when the controller is created), ',function () {
-    beforeEach(function (){
+  describe('(when the controller is created), ', function () {
+    beforeEach(function () {
       this.createController()
     })
 
