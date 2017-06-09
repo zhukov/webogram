@@ -8,41 +8,33 @@ describe('ProfileEditModalController', function () {
     var id = 534196
     this.randomID = id
 
-    this.API = {
-      apiError: null,
+    this.MtpApiManager = {
+      errorField: null,
       getUserID: function () {
         return {
-          then: function (f) {
-            f(id)
+          then: function (callback) {
+            callback(id)
           }
         }
       },
       invokeApi: function (action, params) {
-        var fin = {
-          finally: function (f) {
-            f()
-          }
-        }
-        if (!this.apiError) {
-          return {
-            then: function (action, error) {
-              action({})
-              return fin
-            }
-          }
+        return this
+      },
+      then: function (callback, error) {
+        if (!this.errorField) {
+          callback({})
         } else {
-          var err = this.apiError
-          return {
-            then: function (action, error) {
-              error(err)
-              return fin
-            }
+          error(this.errorField)
+        }
+        return {
+          finally: function (final) {
+            final()
           }
         }
       }
     }
 
-    this.aum = {
+    this.AppUsersManager = {
       getUser: function (userId) {
         return {
           first_name: 'John',
@@ -51,11 +43,11 @@ describe('ProfileEditModalController', function () {
       },
       saveApiUser: jasmine.createSpy('saveApiUser')
     }
-    this.mi = { close: jasmine.createSpy('close') }
+    this.modalInstance = { close: jasmine.createSpy('close') }
 
-    var api = this.API
-    var aum = this.aum
-    var mi = this.mi
+    var MtpApiManager = this.MtpApiManager
+    var AppUsersManager = this.AppUsersManager
+    var modalInstance = this.modalInstance
 
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
@@ -63,14 +55,12 @@ describe('ProfileEditModalController', function () {
       this.$scope = $scope
       this.$controller('ProfileEditModalController', {
         $scope: $scope,
-        $modalInstance: mi,
-        AppUsersManager: aum,
-        MtpApiManager: api
+        $modalInstance: modalInstance,
+        AppUsersManager: AppUsersManager,
+        MtpApiManager: MtpApiManager
       })
     })
   })
-
-  // tests
 
   it('should initiate the right scope', function (done) {
     expect(this.$scope.profile).toEqual({first_name: 'John', last_name: 'Doe'})
@@ -81,8 +71,8 @@ describe('ProfileEditModalController', function () {
   it('can send a successful profile update request', function (done) {
     this.$scope.updateProfile()
 
-    expect(this.aum.saveApiUser).toHaveBeenCalled()
-    expect(this.mi.close).toHaveBeenCalled()
+    expect(this.AppUsersManager.saveApiUser).toHaveBeenCalled()
+    expect(this.modalInstance.close).toHaveBeenCalled()
     done()
   })
 
@@ -91,13 +81,13 @@ describe('ProfileEditModalController', function () {
     delete this.$scope.profile.last_name
     this.$scope.updateProfile()
 
-    expect(this.aum.saveApiUser).toHaveBeenCalled()
-    expect(this.mi.close).toHaveBeenCalled()
+    expect(this.AppUsersManager.saveApiUser).toHaveBeenCalled()
+    expect(this.modalInstance.close).toHaveBeenCalled()
     done()
   })
 
   it('can handle an invalid first name error', function (done) {
-    this.API.apiError = {type: 'FIRSTNAME_INVALID'}
+    this.MtpApiManager.errorField = {type: 'FIRSTNAME_INVALID'}
     this.$scope.updateProfile()
 
     expect(this.$scope.error.field).toEqual('first_name')
@@ -105,7 +95,7 @@ describe('ProfileEditModalController', function () {
   })
 
   it('can handle an invalid last name error', function (done) {
-    this.API.apiError = {type: 'LASTNAME_INVALID'}
+    this.MtpApiManager.errorField = {type: 'LASTNAME_INVALID'}
     this.$scope.updateProfile()
 
     expect(this.$scope.error.field).toEqual('last_name')
@@ -113,10 +103,10 @@ describe('ProfileEditModalController', function () {
   })
 
   it('can handle an unmodified name error', function (done) {
-    this.API.apiError = {type: 'NAME_NOT_MODIFIED'}
+    this.MtpApiManager.errorField = {type: 'NAME_NOT_MODIFIED'}
     this.$scope.updateProfile()
 
-    expect(this.mi.close).toHaveBeenCalled()
+    expect(this.modalInstance.close).toHaveBeenCalled()
     done()
   })
 })

@@ -4,102 +4,79 @@
 describe('ImportContactModalController', function () {
   beforeEach(module('myApp.controllers'))
 
-  beforeEach(inject(function (_$controller_, _$rootScope_) {
-    this.$controller = _$controller_
-    this.$rootScope = _$rootScope_
-
-    this.pcs = {
-      importSwitch: false,
-      isAvailable: function () {
-        return false
-      },
-      openPhonebookImport: function () {
-        if (this.importSwitch) {
-          return this.importTrue
-        } else {
-          return this.importFalse
-        }
-      },
-      importFalse: {
-        result: {
-          then: function (f) {
-            f(false)
-          }
-        }
-      },
-      importTrue: {
-        result: {
-          then: function (f) {
-            f({0: 'dummy'})
-          }
-        }
-      }
+  beforeEach(function () {
+    this.modalInstance = {
+      close: jasmine.createSpy('close'),
+      dismiss: jasmine.createSpy('dismiss')
     }
 
-    var pcs = this.pcs
-
-    this.modalInst = {}
-    this.modalInst.dismiss = jasmine.createSpy('dismiss')
-    this.modalInst.close = jasmine.createSpy('close')
-    var mi = this.modalInst
-
-    var fin = {
-      finally: function (f) {
-        f()
-      }
-    }
     this.randomID = 123456852
-    var rID = this.randomID
-    this.aum = {
-      importSwitch: false,
+
+    function thenFinallyFactory (input) {
+      return {
+        then: function (callback) {
+          callback(input)
+          return {
+            finally: function (callback) {
+              callback()
+            }
+          }
+        }
+      }
+    }
+
+    this.AppUsersManager = {
+      thenValue: null,
       importContact: function (phone, first, last) {
         this.input = {
           phone: phone,
           first: first,
           last: last
         }
-        if (this.importSwitch) {
-          return this.importTrue
-        } else {
-          return this.importFalse
-        }
-      },
-      importFalse: {
-        then: function (f) {
-          f(null)
-          return this.finally
-        },
-        finally: fin
-      },
-      importTrue: {
-        then: function (f) {
-          f(rID)
-          return this.finally
-        },
-        finally: fin
+        return thenFinallyFactory(this.thenValue)
       }
     }
-    var aum = this.aum
 
-    this.errs = {}
-    this.errs.show = jasmine.createSpy('show')
-    var errs = this.errs
-
-    this.$scope = _$rootScope_.$new()
-    var scope = this.$scope
-    this.createController = function () {
-      this.$controller('ImportContactModalController', {
-        $scope: scope,
-        $modalInstance: mi,
-        $rootScope: _$rootScope_,
-        AppUsersManager: aum,
-        ErrorService: errs,
-        PhonebookContactsService: pcs
-      })
+    this.ErrorService = {
+      show: jasmine.createSpy('show')
     }
-  }))
 
-  // define tests
+    this.PhonebookContactsService = {
+      thenValue: false,
+      isAvailable: function () {
+        return false
+      },
+      openPhonebookImport: function () {
+        var then = thenFinallyFactory(this.thenValue)
+        return {
+          result: then
+        }
+      }
+    }
+
+    var modalInstance = this.modalInstance
+    var AppUsersManager = this.AppUsersManager
+    var ErrorService = this.ErrorService
+    var PhonebookContactsService = this.PhonebookContactsService
+
+    inject(function (_$controller_, _$rootScope_) {
+      this.$controller = _$controller_
+      this.$rootScope = _$rootScope_
+
+      this.$scope = _$rootScope_.$new()
+      var scope = this.$scope
+      this.createController = function () {
+        this.$controller('ImportContactModalController', {
+          $scope: scope,
+          $modalInstance: modalInstance,
+          $rootScope: _$rootScope_,
+          AppUsersManager: AppUsersManager,
+          ErrorService: ErrorService,
+          PhonebookContactsService: PhonebookContactsService
+        })
+      }
+    })
+  })
 
   it('can create a controller when no imported contacts are defined', function (done) {
     this.createController()
@@ -122,12 +99,11 @@ describe('ImportContactModalController', function () {
       this.createController()
     })
 
-    it('does nothing when no information was entered', function (done) {
+    it('does nothing when no phonenumber was entered', function (done) {
       this.$scope.doImport()
 
       expect(this.$scope.progress).not.toBeDefined()
 
-      // no Phonenumber
       this.$scope.importContact = {
         first_name: 'bob'
       }
@@ -145,20 +121,20 @@ describe('ImportContactModalController', function () {
       it('can handle phoneNumber that are not telegram users', function (done) {
         this.$scope.doImport()
 
-        expect(this.errs.show).toHaveBeenCalledWith({ error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'} })
-        expect(this.modalInst.close).toHaveBeenCalledWith(null)
+        expect(this.ErrorService.show).toHaveBeenCalledWith({ error: {code: 404, type: 'USER_NOT_USING_TELEGRAM'} })
+        expect(this.modalInstance.close).toHaveBeenCalledWith(null)
         expect(this.$scope.progress.enabled).not.toBeDefined()
         done()
       })
 
       it('can import contacts that are telegram users', function (done) {
-        this.aum.importSwitch = true
+        this.AppUsersManager.thenValue = this.randomID
         this.$scope.doImport()
 
-        expect(this.errs.show).not.toHaveBeenCalled()
-        expect(this.modalInst.close).toHaveBeenCalledWith(this.randomID)
+        expect(this.ErrorService.show).not.toHaveBeenCalled()
+        expect(this.modalInstance.close).toHaveBeenCalledWith(this.randomID)
         expect(this.$scope.progress.enabled).not.toBeDefined()
-        expect(this.aum.input).toEqual({phone: '+316132465798', first: '', last: ''})
+        expect(this.AppUsersManager.input).toEqual({phone: '+316132465798', first: '', last: ''})
         done()
       })
 
@@ -167,23 +143,23 @@ describe('ImportContactModalController', function () {
         this.$scope.importContact.last_name = 'wandelaar'
         this.$scope.doImport()
 
-        expect(this.aum.input).toEqual({phone: '+316132465798', first: 'jan', last: 'wandelaar'})
+        expect(this.AppUsersManager.input).toEqual({phone: '+316132465798', first: 'jan', last: 'wandelaar'})
         done()
       })
     })
 
-    it('can\'t import contacts from a phonebook if none were found', function (done) {
+    it('can not import contacts from a phonebook if none were found', function (done) {
       this.$scope.importPhonebook()
 
-      expect(this.modalInst.dismiss).toHaveBeenCalled()
+      expect(this.modalInstance.dismiss).toHaveBeenCalled()
       done()
     })
 
     it('can import contacts from a phonebook', function (done) {
-      this.pcs.importSwitch = true
+      this.PhonebookContactsService.thenValue = {0: 'dummy'}
       this.$scope.importPhonebook()
 
-      expect(this.modalInst.close).toHaveBeenCalledWith('dummy')
+      expect(this.modalInstance.close).toHaveBeenCalledWith('dummy')
       done()
     })
   })

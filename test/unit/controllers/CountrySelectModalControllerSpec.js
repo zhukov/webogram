@@ -1,5 +1,5 @@
 'use strict'
-/* global describe, it, inject, expect, beforeEach, spyOn, jasmine, Config, SearchIndexManager */
+/* global describe, it, inject, expect, beforeEach, afterEach, spyOn, jasmine, Config, SearchIndexManager */
 
 describe('CountrySelectModalController', function () {
   beforeEach(module('myApp.controllers'))
@@ -20,18 +20,25 @@ describe('CountrySelectModalController', function () {
       })
     }
 
-    // Spy on IndexObject
     spyOn(SearchIndexManager, 'indexObject').and.callThrough()
   }))
 
-  // define tests
+  beforeEach(function () {
+    this.ConfigCountryCodes = Config.CountryCodes
+    this.NL_COUNTRY_CODE = 'NL Netherlands +31'
+    this.VATICAN_COUNTRY_CODE = 'VA Vatican City +39 06 698 +379'
+  })
+
+  afterEach(function () {
+    Config.CountryCodes = this.ConfigCountryCodes
+  })
 
   // The tests before controller initiation.
   // In order to mock Config data
 
   it('initiates Country to select', function (done) {
     Config.CountryCodes = [['NL', 'country_select_modal_country_nl', '+31']]
-    var expected = 'NL Netherlands +31'
+    var expected = this.NL_COUNTRY_CODE
 
     this.createController()
 
@@ -41,7 +48,7 @@ describe('CountrySelectModalController', function () {
 
   it('initiates Countriy to select with 2 (or more) country codes', function (done) {
     Config.CountryCodes = [['VA', 'country_select_modal_country_va', '+39 06 698', '+379']]
-    var expected = 'VA Vatican City +39 06 698 +379'
+    var expected = this.VATICAN_COUNTRY_CODE
 
     this.createController()
 
@@ -51,8 +58,8 @@ describe('CountrySelectModalController', function () {
 
   it('initiates Countries to select', function (done) {
     Config.CountryCodes = [['NL', 'country_select_modal_country_nl', '+31'], ['VA', 'country_select_modal_country_va', '+39 06 698', '+379']]
-    var expected1 = 'NL Netherlands +31'
-    var expected2 = 'VA Vatican City +39 06 698 +379'
+    var expected1 = this.NL_COUNTRY_CODE
+    var expected2 = this.VATICAN_COUNTRY_CODE
 
     this.createController()
 
@@ -134,7 +141,12 @@ describe('CountrySelectModalController', function () {
 
     describe(', when no sorting is available,', function () {
       beforeEach(function () {
+        this.StringCompare = String.prototype.localeCompare
         String.prototype.localeCompare = null
+      })
+
+      afterEach(function () {
+        String.prototype.localeCompare = this.StringCompare
       })
 
       it('creates a list of all selectable countries', function (done) {

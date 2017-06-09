@@ -5,7 +5,7 @@ describe('UsernameEditModalController', function () {
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
-    this.mam = {
+    this.MtpApiManager = {
       errorField: false,
       isValid: true,
       invokeApi: function () {
@@ -14,34 +14,34 @@ describe('UsernameEditModalController', function () {
       getUserID: function () {
         return this
       },
-      then: function (action, error) {
+      then: function (callback, error) {
         if (!this.errorField) {
-          action(this.isValid)
+          callback(this.isValid)
         } else {
           error(this.errorField)
         }
         return {
-          finally: function (f) {
-            f()
+          finally: function (final) {
+            final()
           }
         }
       }
     }
 
-    this.aum = {
+    this.AppUsersManager = {
       saveApiUser: jasmine.createSpy('saveApiUser'),
       getUser: function (id) {
         return { username: 'bob' }
       }
     }
 
-    this.mi = {
+    this.modalInstance = {
       close: jasmine.createSpy('close')
     }
 
-    var mam = this.mam
-    var aum = this.aum
-    var mi = this.mi
+    var MtpApiManager = this.MtpApiManager
+    var AppUsersManager = this.AppUsersManager
+    var modalInstance = this.modalInstance
 
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
@@ -49,14 +49,12 @@ describe('UsernameEditModalController', function () {
       this.$scope = $scope
       this.$controller('UsernameEditModalController', {
         $scope: $scope,
-        $modalInstance: mi,
-        AppUsersManager: aum,
-        MtpApiManager: mam
+        $modalInstance: modalInstance,
+        AppUsersManager: AppUsersManager,
+        MtpApiManager: MtpApiManager
       })
     })
   })
-
-  // tests
 
   it('constructs the information for the modal', function (done) {
     var expected = {
@@ -71,8 +69,8 @@ describe('UsernameEditModalController', function () {
     this.$scope.updateUsername()
 
     expect(this.$scope.checked).toEqual({})
-    expect(this.aum.saveApiUser).toHaveBeenCalled()
-    expect(this.mi.close).toHaveBeenCalled()
+    expect(this.AppUsersManager.saveApiUser).toHaveBeenCalled()
+    expect(this.modalInstance.close).toHaveBeenCalled()
     done()
   })
 
@@ -81,18 +79,18 @@ describe('UsernameEditModalController', function () {
     this.$scope.updateUsername()
 
     expect(this.$scope.checked).toEqual({})
-    expect(this.aum.saveApiUser).toHaveBeenCalled()
-    expect(this.mi.close).toHaveBeenCalled()
+    expect(this.AppUsersManager.saveApiUser).toHaveBeenCalled()
+    expect(this.modalInstance.close).toHaveBeenCalled()
     done()
   })
 
   it('can handle an unsuccessful update of an unmodified username', function (done) {
-    this.mam.errorField = { type: 'USERNAME_NOT_MODIFIED' }
+    this.MtpApiManager.errorField = { type: 'USERNAME_NOT_MODIFIED' }
     this.$scope.updateUsername()
 
     expect(this.$scope.checked).not.toBeDefined()
-    expect(this.aum.saveApiUser).not.toHaveBeenCalled()
-    expect(this.mi.close).toHaveBeenCalled()
+    expect(this.AppUsersManager.saveApiUser).not.toHaveBeenCalled()
+    expect(this.modalInstance.close).toHaveBeenCalled()
     done()
   })
 
@@ -123,7 +121,7 @@ describe('UsernameEditModalController', function () {
     done()
   })
 
-  it('doesn\'t check anything when the name isn\'t changed', function (done) {
+  it('does not check anything when the name is not changed', function (done) {
     this.$scope.$digest()
     delete this.$scope.checked.success
     this.$scope.$digest()
@@ -133,7 +131,7 @@ describe('UsernameEditModalController', function () {
   })
 
   it('can check an invalid username submission', function (done) {
-    this.mam.isValid = false
+    this.MtpApiManager.isValid = false
     this.$scope.$digest()
     var expected = true
 
@@ -142,7 +140,7 @@ describe('UsernameEditModalController', function () {
   })
 
   it('can check an invalid username submission 2', function (done) {
-    this.mam.errorField = { type: 'USERNAME_INVALID' }
+    this.MtpApiManager.errorField = { type: 'USERNAME_INVALID' }
     this.$scope.$digest()
     var expected = true
 
