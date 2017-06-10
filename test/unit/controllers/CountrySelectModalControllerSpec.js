@@ -25,8 +25,29 @@ describe('CountrySelectModalController', function () {
 
   beforeEach(function () {
     this.ConfigCountryCodes = Config.CountryCodes
-    this.NL_COUNTRY_CODE = 'NL Netherlands +31'
-    this.VATICAN_COUNTRY_CODE = 'VA Vatican City +39 06 698 +379'
+    this.testData = {
+      singleCode: {
+        countryCode: ['NL', 'country_select_modal_country_nl', '+31'],
+        countryCode_full: 'NL Netherlands +31',
+        countryPhoneSets: [{ name: 'Netherlands', code: '+31' }]
+      },
+      multipleCode: {
+        countryCode: ['VA', 'country_select_modal_country_va', '+39 06 698', '+379'],
+        countryCode_full: 'VA Vatican City +39 06 698 +379',
+        countryPhoneSets: [{ name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+      },
+      multipleCode2: {
+        countryCode: ['AB', 'country_select_modal_country_ab', '+7 840', '+7 940', '+995 44'],
+        countryCode_full: 'AB Abkhazia +7 840 +7 940 +995 44',
+        countryPhoneSets: [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }]
+      },
+      allSetsSorted: function () {
+        return [].concat(this.multipleCode2.countryPhoneSets, this.singleCode.countryPhoneSets, this.multipleCode.countryPhoneSets)
+      },
+      allSetsUnsorted: function () {
+        return [].concat(this.singleCode.countryPhoneSets, this.multipleCode2.countryPhoneSets, this.multipleCode.countryPhoneSets)
+      }
+    }
   })
 
   afterEach(function () {
@@ -37,8 +58,8 @@ describe('CountrySelectModalController', function () {
   // In order to mock Config data
 
   it('initiates Country to select', function (done) {
-    Config.CountryCodes = [['NL', 'country_select_modal_country_nl', '+31']]
-    var expected = this.NL_COUNTRY_CODE
+    Config.CountryCodes = [this.testData.singleCode.countryCode]
+    var expected = this.testData.singleCode.countryCode_full
 
     this.createController()
 
@@ -47,8 +68,8 @@ describe('CountrySelectModalController', function () {
   })
 
   it('initiates Countriy to select with 2 (or more) country codes', function (done) {
-    Config.CountryCodes = [['VA', 'country_select_modal_country_va', '+39 06 698', '+379']]
-    var expected = this.VATICAN_COUNTRY_CODE
+    Config.CountryCodes = [this.testData.multipleCode.countryCode]
+    var expected = this.testData.multipleCode.countryCode_full
 
     this.createController()
 
@@ -57,9 +78,9 @@ describe('CountrySelectModalController', function () {
   })
 
   it('initiates Countries to select', function (done) {
-    Config.CountryCodes = [['NL', 'country_select_modal_country_nl', '+31'], ['VA', 'country_select_modal_country_va', '+39 06 698', '+379']]
-    var expected1 = this.NL_COUNTRY_CODE
-    var expected2 = this.VATICAN_COUNTRY_CODE
+    Config.CountryCodes = [this.testData.singleCode.countryCode, this.testData.multipleCode.countryCode]
+    var expected1 = this.testData.singleCode.countryCode_full
+    var expected2 = this.testData.multipleCode.countryCode_full
 
     this.createController()
 
@@ -70,7 +91,7 @@ describe('CountrySelectModalController', function () {
 
   describe('(after initiation)', function () {
     beforeEach(function () {
-      Config.CountryCodes = [['NL', 'country_select_modal_country_nl', '+31'], ['AB', 'country_select_modal_country_ab', '+7 840', '+7 940', '+995 44'], ['VA', 'country_select_modal_country_va', '+39 06 698', '+379']]
+      Config.CountryCodes = [this.testData.singleCode.countryCode, this.testData.multipleCode2.countryCode, this.testData.multipleCode.countryCode]
       this.createController()
     })
 
@@ -82,7 +103,7 @@ describe('CountrySelectModalController', function () {
 
     it('creates a sorted list of all selectable countries', function (done) {
       this.$rootScope.$digest()
-      var expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }, { name: 'Netherlands', code: '+31' }, { name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+      var expected = this.testData.allSetsSorted()
 
       expect(this.$scope.countries).toEqual(expected)
       done()
@@ -92,7 +113,7 @@ describe('CountrySelectModalController', function () {
       this.$rootScope.$digest()
       this.$scope.search.query = ''
       this.$rootScope.$digest()
-      var expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }, { name: 'Netherlands', code: '+31' }, { name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+      var expected = this.testData.allSetsSorted()
 
       expect(this.$scope.countries).toEqual(expected)
       done()
@@ -105,12 +126,12 @@ describe('CountrySelectModalController', function () {
       })
 
       it('creates a sorted list of all countries containing the input', function (done) {
-        var expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }, { name: 'Netherlands', code: '+31' }, { name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+        var expected = this.testData.allSetsSorted()
 
         expect(this.$scope.countries).toEqual(expected)
 
         this.$rootScope.$digest()
-        expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }]
+        expected = this.testData.multipleCode2.countryPhoneSets
 
         expect(this.$scope.countries).toEqual(expected)
         done()
@@ -121,18 +142,18 @@ describe('CountrySelectModalController', function () {
         this.$scope.search.query = ''
         this.$rootScope.$digest()
 
-        var expected = [{ name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }, { name: 'Netherlands', code: '+31' }, { name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+        var expected = this.testData.allSetsSorted()
 
         expect(this.$scope.countries).toEqual(expected)
         done()
       })
 
-      it('restore the original list when the input is deleted', function (done) {
+      it('restore the original list when the input is changed', function (done) {
         this.$rootScope.$digest()
         this.$scope.search.query = 'Ne'
         this.$rootScope.$digest()
 
-        var expected = [{ name: 'Netherlands', code: '+31' }]
+        var expected = this.testData.singleCode.countryPhoneSets
 
         expect(this.$scope.countries).toEqual(expected)
         done()
@@ -151,7 +172,7 @@ describe('CountrySelectModalController', function () {
 
       it('creates a list of all selectable countries', function (done) {
         this.$rootScope.$digest()
-        var expected = [{ name: 'Netherlands', code: '+31' }, { name: 'Abkhazia', code: '+7 840' }, { name: 'Abkhazia', code: '+7 940' }, { name: 'Abkhazia', code: '+995 44' }, { name: 'Vatican City', code: '+39 06 698' }, { name: 'Vatican City', code: '+379' }]
+        var expected = this.testData.allSetsUnsorted()
 
         expect(this.$scope.countries).toEqual(expected)
         done()
