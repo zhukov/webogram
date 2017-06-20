@@ -2,21 +2,18 @@
 /* global describe, it, inject, expect, beforeEach */
 
 describe('AppWelcomeController', function () {
-  var $controller, $rootScope, $scope, $location, MtpApiManager, ErrorService,
-    ChangelogNotifyService, LayoutSwitchService
-
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
-    ChangelogNotifyService = {
+    this.ChangelogNotifyService = {
       checkUpdate: function () {}
     }
 
-    LayoutSwitchService = {
+    this.LayoutSwitchService = {
       start: function () {}
     }
 
-    MtpApiManager = {
+    this.MtpApiManager = {
       getUserID: function () {
         return {
           then: function () {}
@@ -24,17 +21,25 @@ describe('AppWelcomeController', function () {
       }
     }
 
+    var MtpApiManager = this.MtpApiManager
+    var ErrorService = this.ErrorService
+    var ChangelogNotifyService = this.ChangelogNotifyService
+    var LayoutSwitchService = this.LayoutSwitchService
+
     module(function ($provide) {
       $provide.value('MtpApiManager', MtpApiManager)
     })
 
     inject(function (_$controller_, _$rootScope_, _$location_) {
-      $controller = _$controller_
-      $rootScope = _$rootScope_
-      $location = _$location_
+      this.$controller = _$controller_
+      this.$rootScope = _$rootScope_
+      this.$location = _$location_
+      this.$scope = _$rootScope_.$new()
 
-      $scope = $rootScope.$new()
-      $controller('AppWelcomeController', {
+      var $location = this.$location
+      var $scope = this.$scope
+
+      this.$controller('AppWelcomeController', {
         $scope: $scope,
         $location: $location,
         MtpApiManager: MtpApiManager,
