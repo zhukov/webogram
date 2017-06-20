@@ -17,12 +17,9 @@ describe('ChangeLogModalController', function () {
 
       this.$scope = _$rootScope_.$new()
 
-      var $scope = this.$scope
-      var $modal = this.modal
-
       this.$controller('ChangelogModalController', {
-        $scope: $scope,
-        $modal: $modal
+        $scope: this.$scope,
+        $modal: this.modal
       })
     })
   })

@@ -12,16 +12,13 @@ describe('AppFooterController', function () {
       }
     }
 
-    var LayoutSwitchService = this.LayoutSwitchService
-
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
 
       this.$scope = _$rootScope_.$new()
-      var $scope = this.$scope
       this.$controller('AppFooterController', {
-        $scope: $scope,
-        LayoutSwitchService: LayoutSwitchService
+        $scope: this.$scope,
+        LayoutSwitchService: this.LayoutSwitchService
       })
     })
   })
@@ -29,7 +26,7 @@ describe('AppFooterController', function () {
   // define tests
   it('calls the right function', function (done) {
     expect(this.LayoutSwitchService.serviceFlag).toBe(false)
-    this.$scope.switchLayout(null)
+    this.$scope.switchLayout(true)
     expect(this.LayoutSwitchService.serviceFlag).toBe(true)
     done()
   })

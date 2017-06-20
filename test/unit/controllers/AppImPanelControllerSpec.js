@@ -8,8 +8,7 @@ describe('AppImPanelController', function () {
     inject(function (_$controller_, _$rootScope_) {
       this.$scope = _$rootScope_.$new()
       this.$scope.$on = jasmine.createSpy('$on')
-      var $scope = this.$scope
-      _$controller_('AppImPanelController', { $scope: $scope })
+      _$controller_('AppImPanelController', { $scope: this.$scope })
     })
   })
 

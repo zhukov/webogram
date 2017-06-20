@@ -12,13 +12,13 @@ describe('myHead directive', function () {
 
   it('compiles a my-head attribute', function () {
     var compiledElement = this.$compile('<div my-head></div>')(this.$rootScope)
-    this.$rootScope.$digest()  // Fire watchers
+    this.$rootScope.$digest()
     expect(compiledElement.html()).toContain('tg_page_head')
   })
 
   it('compiles a my-head element', function () {
     var compiledElement = this.$compile('<my-head></my-head>')(this.$rootScope)
-    this.$rootScope.$digest()  // Fire watchers
+    this.$rootScope.$digest()
     expect(compiledElement.html()).toContain('tg_page_head')
   })
 })

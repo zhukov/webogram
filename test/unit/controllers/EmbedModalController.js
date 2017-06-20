@@ -41,31 +41,23 @@ describe('EmbedModalController', function () {
       dismiss: jasmine.createSpy('dismissModal')
     }
 
-    var $modalInstance = this.$modalInstance
-    var PeersSelectService = this.PeersSelectService
-    var AppMessagesManager = this.AppMessagesManager
-    var AppWebPagesManager = this.AppWebPagesManager
-    var ErrorService = this.ErrorService
-
     inject(function (_$controller_, _$rootScope_) {
       this.$rootScope = _$rootScope_
       this.$rootScope.$broadcast = jasmine.createSpy('$broadcast')
       this.$scope = this.$rootScope.$new()
       this.$scope.webpageID = 'www.notRelevant.com'
 
-      var $scope = this.$scope
-      var $rootScope = this.$rootScope
       _$controller_('EmbedModalController', {
         $q: {},
-        $scope: $scope,
-        $rootScope: $rootScope,
-        $modalInstance: $modalInstance,
-        PeersSelectService: PeersSelectService,
-        AppMessagesManager: AppMessagesManager,
+        $scope: this.$scope,
+        $rootScope: this.$rootScope,
+        $modalInstance: this.$modalInstance,
+        PeersSelectService: this.PeersSelectService,
+        AppMessagesManager: this.AppMessagesManager,
         AppPeersManager: {},
         AppPhotosManager: {},
-        AppWebPagesManager: AppWebPagesManager,
-        ErrorService: ErrorService
+        AppWebPagesManager: this.AppWebPagesManager,
+        ErrorService: this.ErrorService
       })
     })
   })

@@ -11,9 +11,8 @@ describe('AppLangSelectController', function () {
       this.$controller = _$controller_
       this.$scope = _$rootScope_.$new()
 
-      var $scope = this.$scope
       this.$controller('AppLangSelectController', {
-        $scope: $scope,
+        $scope: this.$scope,
         _: _,
         Storage: Storage,
         ErrorService: ErrorService,

@@ -42,12 +42,6 @@ describe('DocumentModalController', function () {
       dismiss: jasmine.createSpy('dismissModal')
     }
 
-    var AppDocsManager = this.AppDocsManager
-    var ErrorService = this.ErrorService
-    var PeersSelectService = this.PeersSelectService
-    var AppMessagesManager = this.AppMessagesManager
-    var $modalInstance = this.$modalInstance
-
     inject(function (_$controller_, _$rootScope_) {
       this.$rootScope = _$rootScope_
       this.$scope = this.$rootScope.$new()
@@ -58,18 +52,15 @@ describe('DocumentModalController', function () {
       spyOn(this.$rootScope, '$broadcast').and.callThrough()
       spyOn(this.$scope, '$on').and.callThrough()
 
-      var $scope = this.$scope
-      var $rootScope = this.$rootScope
-
       this.$controller('DocumentModalController', {
-        $scope: $scope,
-        $rootScope: $rootScope,
-        $modalInstance: $modalInstance,
-        PeersSelectService: PeersSelectService,
-        AppMessagesManager: AppMessagesManager,
-        AppDocsManager: AppDocsManager,
+        $scope: this.$scope,
+        $rootScope: this.$rootScope,
+        $modalInstance: this.$modalInstance,
+        PeersSelectService: this.PeersSelectService,
+        AppMessagesManager: this.AppMessagesManager,
+        AppDocsManager: this.AppDocsManager,
         AppPeersManager: {},
-        ErrorService: ErrorService
+        ErrorService: this.ErrorService
       })
     })
   })
@@ -114,13 +105,13 @@ describe('DocumentModalController', function () {
   it('can not delete a document not linked to a message', function (done) {
     this.$scope.messageID = 'id42'
 
-    var update = {}
-    this.$rootScope.$broadcast('history_delete', update)
+    var historyUpdate = {}
+    this.$rootScope.$broadcast('history_delete', historyUpdate)
     expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
     expect(this.$modalInstance.dismiss).not.toHaveBeenCalled()
 
-    update.msgs = {}
-    this.$rootScope.$broadcast('history_delete', update)
+    historyUpdate.msgs = {}
+    this.$rootScope.$broadcast('history_delete', historyUpdate)
     expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
     expect(this.$modalInstance.dismiss).not.toHaveBeenCalled()
     done()
@@ -128,15 +119,15 @@ describe('DocumentModalController', function () {
 
   describe('when the document is related to the message', function () {
     beforeEach(function () {
-      this.update = {
+      this.historyUpdate = {
         msgs: {}
       }
     })
     it('delete that document', function (done) {
       this.$scope.messageID = 'id33'
-      this.update.msgs[this.$scope.messageID] = 'an update for id33'
+      this.historyUpdate.msgs[this.$scope.messageID] = 'an update for id33'
 
-      this.$rootScope.$broadcast('history_delete', this.update)
+      this.$rootScope.$broadcast('history_delete', this.historyUpdate)
       expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
       expect(this.$modalInstance.dismiss).toHaveBeenCalled()
       done()

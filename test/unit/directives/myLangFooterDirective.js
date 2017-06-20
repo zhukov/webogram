@@ -17,14 +17,14 @@ describe('myLangFooter directive', function () {
 
   it('compiles a my-lang-footer attribute', function () {
     var compiledElement = this.$compile('<div my-lang-footer></div>')(this.$rootScope)
-    this.$rootScope.$digest()  // Fire watchers
+    this.$rootScope.$digest()
     expect(compiledElement.html()).toContain('footer_lang_link')
     expect(compiledElement.html()).toContain('AppLangSelectController')
   })
 
   it('compiles a my-lang-footer element', function () {
     var compiledElement = this.$compile('<my-lang-footer></my-lang-footer>')(this.$rootScope)
-    this.$rootScope.$digest()  // Fire watchers
+    this.$rootScope.$digest()
     expect(compiledElement.html()).toContain('footer_lang_link')
     expect(compiledElement.html()).toContain('AppLangSelectController')
   })

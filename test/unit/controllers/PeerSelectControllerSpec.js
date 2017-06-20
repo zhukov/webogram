@@ -13,7 +13,7 @@ describe('PeerSelectController', function () {
       }
     }
 
-    this.waitOneSecond = 1000
+    this.oneSecond = 1000
 
     this.AppPeersManager = {
       getPeerString: function (str) {
@@ -51,25 +51,18 @@ describe('PeerSelectController', function () {
       }
     }
 
-    var $q = this.$q
-    var AppPeersManager = this.AppPeersManager
-    var $modalInstance = this.$modalInstance
-    var ErrorService = this.ErrorService
-
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
       this.$scope = _$rootScope_.$new()
-      var $scope = this.$scope
-      var $controller = this.$controller
 
       // The controller is created in the test in order to test different initial content of scope variables.
       this.createController = function () {
-        $controller('PeerSelectController', {
-          $scope: $scope,
-          $modalInstance: $modalInstance,
-          $q: $q,
-          AppPeersManager: AppPeersManager,
-          ErrorService: ErrorService
+        this.$controller('PeerSelectController', {
+          $scope: this.$scope,
+          $modalInstance: this.$modalInstance,
+          $q: this.$q,
+          AppPeersManager: this.AppPeersManager,
+          ErrorService: this.ErrorService
         })
       }
     })
@@ -83,46 +76,54 @@ describe('PeerSelectController', function () {
       expect(this.$scope.selectedPeers).toBeDefined()
       expect(this.$scope.selectedPeersIDs).toBeDefined()
       expect(this.$scope.selectedCount).toBeDefined()
-    }, this.waitOneSecond)
+    }, this.oneSecond)
 
     done()
   })
 
   it('compiles with a shareLinkPromise that resolves', function (done) {
     var expected = 'testURL'
-    var waitOneSecond = this.waitOneSecond
+    var oneSecond = this.oneSecond
     this.$scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(resolve(expected), waitOneSecond)
+        setTimeout(resolve(expected), oneSecond)
       }
     }
     this.createController()
 
-    setTimeout(function () {
+    function afterLoad () {
+      expect(this.$scope.shareLink.url).toBe(expected)
+    }
+
+    function duringLoad () {
       expect(this.$scope.shareLink.loading).toBe(true)
       expect(this.$scope.shareLink.url).not.toBeDefined()
-      setTimeout(function () {
-        expect(this.$scope.shareLink.url).toBe(expected)
-      }, waitOneSecond)
-    }, waitOneSecond)
+      setTimeout(afterLoad, oneSecond)
+    }
+
+    setTimeout(duringLoad, oneSecond)
     done()
   })
 
   it('compiles with a shareLinkPromise that doesn\'t resolve', function (done) {
-    var waitOneSecond = this.waitOneSecond
+    var oneSecond = this.oneSecond
     this.$scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(reject(), waitOneSecond)
+        setTimeout(reject(), oneSecond)
       }
     }
     this.createController()
 
-    setTimeout(function () {
+    function afterLoad () {
+      expect(this.$scope.shareLink).not.toBeDefined()
+    }
+
+    function duringLoad () {
       expect(this.$scope.shareLink.loading).toBe(true)
-      setTimeout(function () {
-        expect(this.$scope.shareLink).not.toBeDefined()
-      }, waitOneSecond)
-    }, waitOneSecond)
+      setTimeout(afterLoad, oneSecond)
+    }
+
+    setTimeout(duringLoad, oneSecond)
     done()
   })
 
@@ -144,10 +145,11 @@ describe('PeerSelectController', function () {
       this.$scope.confirm_type = 'INVITE_TO_GROUP'
       this.$scope.dialogSelect('dialogX')
 
+      var peerId = 'X'
       var expected = {
         type: 'INVITE_TO_GROUP',
-        peer_id: 'X',
-        peer_data: 'Xpeer'
+        peer_id: peerId,
+        peer_data: this.AppPeersManager.getPeer(peerId)
       }
 
       expect(this.ErrorService.$promiseData).toEqual(expected)
@@ -160,11 +162,14 @@ describe('PeerSelectController', function () {
       this.$scope.multiSelect = true
       this.$scope.dialogSelect('dialogX')
 
-      var expected = ['X']
+      var expected = {
+        selectedPeers: 'Xpeer',
+        selectedPeerIDs: ['X']
+      }
 
-      expect(this.$scope.selectedPeers['X']).toBe('Xpeer')
+      expect(this.$scope.selectedPeers['X']).toBe(expected.selectedPeers)
       expect(this.$scope.selectedCount).toBe(1)
-      expect(this.$scope.selectedPeerIDs).toEqual(expected)
+      expect(this.$scope.selectedPeerIDs).toEqual(expected.selectedPeerIDs)
 
       done()
     })
