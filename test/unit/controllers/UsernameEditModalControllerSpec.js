@@ -39,19 +39,15 @@ describe('UsernameEditModalController', function () {
       close: jasmine.createSpy('close')
     }
 
-    var MtpApiManager = this.MtpApiManager
-    var AppUsersManager = this.AppUsersManager
-    var modalInstance = this.modalInstance
-
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
-      var $scope = _$rootScope_.$new()
-      this.$scope = $scope
+      this.$scope = _$rootScope_.$new()
+
       this.$controller('UsernameEditModalController', {
-        $scope: $scope,
-        $modalInstance: modalInstance,
-        AppUsersManager: AppUsersManager,
-        MtpApiManager: MtpApiManager
+        $scope: this.$scope,
+        $modalInstance: this.modalInstance,
+        AppUsersManager: this.AppUsersManager,
+        MtpApiManager: this.MtpApiManager
       })
     })
   })

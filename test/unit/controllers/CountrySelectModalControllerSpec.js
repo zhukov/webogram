@@ -10,13 +10,12 @@ describe('CountrySelectModalController', function () {
     this._ = ___
 
     this.$scope = _$rootScope_.$new()
-    var scope = this.$scope
     this.createController = function () {
       this.$controller('CountrySelectModalController', {
-        $scope: scope,
+        $scope: this.$scope,
         $modalInstance: {},
-        $rootScope: _$rootScope_,
-        _: ___
+        $rootScope: this.$rootScope,
+        _: this._
       })
     }
 

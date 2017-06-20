@@ -5,7 +5,7 @@ describe('ProfileEditModalController', function () {
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
-    var id = 534196
+    var id = 42
     this.randomID = id
 
     this.MtpApiManager = {
@@ -43,21 +43,17 @@ describe('ProfileEditModalController', function () {
       },
       saveApiUser: jasmine.createSpy('saveApiUser')
     }
-    this.modalInstance = { close: jasmine.createSpy('close') }
-
-    var MtpApiManager = this.MtpApiManager
-    var AppUsersManager = this.AppUsersManager
-    var modalInstance = this.modalInstance
+    this.$modalInstance = { close: jasmine.createSpy('close') }
 
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
-      var $scope = _$rootScope_.$new()
-      this.$scope = $scope
+      this.$scope = _$rootScope_.$new()
+
       this.$controller('ProfileEditModalController', {
-        $scope: $scope,
-        $modalInstance: modalInstance,
-        AppUsersManager: AppUsersManager,
-        MtpApiManager: MtpApiManager
+        $scope: this.$scope,
+        $modalInstance: this.$modalInstance,
+        AppUsersManager: this.AppUsersManager,
+        MtpApiManager: this.MtpApiManager
       })
     })
   })
@@ -72,7 +68,7 @@ describe('ProfileEditModalController', function () {
     this.$scope.updateProfile()
 
     expect(this.AppUsersManager.saveApiUser).toHaveBeenCalled()
-    expect(this.modalInstance.close).toHaveBeenCalled()
+    expect(this.$modalInstance.close).toHaveBeenCalled()
     done()
   })
 
@@ -82,7 +78,7 @@ describe('ProfileEditModalController', function () {
     this.$scope.updateProfile()
 
     expect(this.AppUsersManager.saveApiUser).toHaveBeenCalled()
-    expect(this.modalInstance.close).toHaveBeenCalled()
+    expect(this.$modalInstance.close).toHaveBeenCalled()
     done()
   })
 
@@ -106,7 +102,7 @@ describe('ProfileEditModalController', function () {
     this.MtpApiManager.errorField = {type: 'NAME_NOT_MODIFIED'}
     this.$scope.updateProfile()
 
-    expect(this.modalInstance.close).toHaveBeenCalled()
+    expect(this.$modalInstance.close).toHaveBeenCalled()
     done()
   })
 })

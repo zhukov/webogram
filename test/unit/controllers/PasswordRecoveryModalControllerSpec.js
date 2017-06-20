@@ -30,23 +30,19 @@ describe('PasswordRecoveryModalController', function () {
       dismiss: jasmine.createSpy('dismiss')
     }
 
-    var PasswordManager = this.PasswordManager
-    var ErrorService = this.ErrorService
-    var modalInstance = this.modalInstance
-
     inject(function (_$controller_, _$rootScope_, ___) {
       this.$controller = _$controller_
-      var $scope = _$rootScope_.$new()
-      $scope.recovery = {}
-      this.$scope = $scope
+      this.$scope = _$rootScope_.$new()
+      this.$scope.recovery = {}
+
       this.$controller('PasswordRecoveryModalController', {
-        $scope: $scope,
+        $scope: this.$scope,
         $q: {},
         _: ___,
-        PasswordManager: PasswordManager,
+        PasswordManager: this.PasswordManager,
         MtpApiManager: {},
-        ErrorService: ErrorService,
-        $modalInstance: modalInstance
+        ErrorService: this.ErrorService,
+        $modalInstance: this.modalInstance
       })
     })
   })

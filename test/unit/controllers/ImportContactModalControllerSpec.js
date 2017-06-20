@@ -54,25 +54,19 @@ describe('ImportContactModalController', function () {
       }
     }
 
-    var modalInstance = this.modalInstance
-    var AppUsersManager = this.AppUsersManager
-    var ErrorService = this.ErrorService
-    var PhonebookContactsService = this.PhonebookContactsService
-
     inject(function (_$controller_, _$rootScope_) {
       this.$controller = _$controller_
       this.$rootScope = _$rootScope_
 
       this.$scope = _$rootScope_.$new()
-      var scope = this.$scope
       this.createController = function () {
         this.$controller('ImportContactModalController', {
-          $scope: scope,
-          $modalInstance: modalInstance,
-          $rootScope: _$rootScope_,
-          AppUsersManager: AppUsersManager,
-          ErrorService: ErrorService,
-          PhonebookContactsService: PhonebookContactsService
+          $scope: this.$scope,
+          $modalInstance: this.modalInstance,
+          $rootScope: this.$rootScope,
+          AppUsersManager: this.AppUsersManager,
+          ErrorService: this.ErrorService,
+          PhonebookContactsService: this.PhonebookContactsService
         })
       }
     })
