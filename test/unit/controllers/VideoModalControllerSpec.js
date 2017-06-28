@@ -1,20 +1,19 @@
 'use strict'
-/* global describe, it, inject, expect, beforeEach, jasmine */
+/* global describe, it, inject, expect, beforeEach, jasmine, spyOn */
 
 describe('VideoModalController', function () {
-  var $controller, $scope, $rootScope, $docManager, $errService, $input, $messManager, $pSelectService, $modalI, createController
-
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
-    $docManager = {}
-    $docManager.wrapVideoForFull = jasmine.createSpy('wrapVideoForFull')
-    $docManager.saveDocFile = jasmine.createSpy('saveDocFile')
+    this.AppDocsManager = {
+      wrapVideoForFull: jasmine.createSpy('wrapVideoForFull'),
+      saveDocFile: jasmine.createSpy('saveDocFile')
+    }
 
-    $input = {}
-    $errService = {
+    this.ErrorService = {
+      input: {},
       confirm: function (message) {
-        $input = message
+        this.input = message
         return {
           then: function (f) {
             f()
@@ -23,9 +22,10 @@ describe('VideoModalController', function () {
       }
     }
 
-    $pSelectService = {
+    this.PeersSelectService = {
+      input: {},
       selectPeer: function (options) {
-        $input = options
+        this.input = options
         return {
           then: function (f) {
             f('Peerselected')
@@ -34,102 +34,114 @@ describe('VideoModalController', function () {
       }
     }
 
-    createController = function (spyBroadcast, spyOn) {
-      if (spyBroadcast) {
-        $rootScope.$broadcast = jasmine.createSpy('$broadcast')
-      }
-      if (spyOn) {
-        $scope.$on = jasmine.createSpy('$on')
-      }
-      $controller('VideoModalController', {
-        $scope: $scope,
-        $rootScope: $rootScope,
-        $modalInstance: $modalI,
-        PeersSelectService: $pSelectService,
-        AppMessagesManager: $messManager,
-        AppDocsManager: $docManager,
-        AppPeersManager: {},
-        ErrorService: $errService
-      })
+    this.AppMessagesManager = {
+      deleteMessages: jasmine.createSpy('deleteMessages')
     }
 
-    $messManager = {}
-    $messManager.deleteMessages = jasmine.createSpy('deleteMessages')
-
-    $modalI = {}
-    $modalI.dismiss = jasmine.createSpy('dismissModal')
+    this.$modalInstance = {
+      dismiss: jasmine.createSpy('dismissModal')
+    }
 
     inject(function (_$controller_, _$rootScope_) {
-      $rootScope = _$rootScope_
-      $scope = $rootScope.$new()
-      $scope.docID = 'randomvideo'
+      this.$rootScope = _$rootScope_
+      this.$scope = this.$rootScope.$new()
+      this.$scope.docID = 'randomvideo'
 
-      $controller = _$controller_
+      this.$controller = _$controller_
+
+      spyOn(this.$rootScope, '$broadcast').and.callThrough()
+      spyOn(this.$scope, '$on').and.callThrough()
+
+      this.$controller('VideoModalController', {
+        $scope: this.$scope,
+        $rootScope: this.$rootScope,
+        $modalInstance: this.$modalInstance,
+        PeersSelectService: this.PeersSelectService,
+        AppMessagesManager: this.AppMessagesManager,
+        AppDocsManager: this.AppDocsManager,
+        AppPeersManager: {},
+        ErrorService: this.ErrorService
+      })
     })
   })
 
   // define tests
   it('sets the video in the scope', function (done) {
-    createController(false, false)
-
-    expect($scope.progress).toEqual({enabled: false})
-    expect($scope.player).toEqual({})
-    expect($docManager.wrapVideoForFull).toHaveBeenCalledWith($scope.docID)
+    expect(this.$scope.progress).toEqual({enabled: false})
+    expect(this.$scope.player).toEqual({})
+    expect(this.AppDocsManager.wrapVideoForFull).toHaveBeenCalledWith(this.$scope.docID)
     done()
   })
 
   it('forwards a message with a video', function (done) {
-    createController(true, false)
-    $scope.messageID = 'id68567'
+    this.$scope.messageID = 'id68567'
+    var messageID = this.$scope.messageID
 
-    $scope.forward()
-    expect($input).toEqual({canSend: true})
-    expect($scope.$broadcast).toHaveBeenCalledWith('history_focus', {
+    this.$scope.forward()
+    expect(this.PeersSelectService.input).toEqual({canSend: true})
+    expect(this.$scope.$broadcast).toHaveBeenCalledWith('history_focus', {
       peerString: 'Peerselected',
       attachment: {
         _: 'fwd_messages',
-        id: [$scope.messageID]
+        id: [messageID]
       }
     })
     done()
   })
 
   it('deletes a message with a video', function (done) {
-    createController(false, false)
-    $scope.messageID = 'id235235'
+    this.$scope.messageID = 'id235235'
 
-    $scope.delete()
-    expect($input).toEqual({type: 'MESSAGE_DELETE'})
-    expect($messManager.deleteMessages).toHaveBeenCalledWith([$scope.messageID])
+    this.$scope.delete()
+    expect(this.ErrorService.input).toEqual({type: 'MESSAGE_DELETE'})
+    expect(this.AppMessagesManager.deleteMessages).toHaveBeenCalledWith([this.$scope.messageID])
     done()
   })
 
   it('downloads the document (video)', function (done) {
-    createController(false, false)
-
-    $scope.download()
-    expect($docManager.saveDocFile).toHaveBeenCalledWith($scope.docID)
+    this.$scope.download()
+    expect(this.AppDocsManager.saveDocFile).toHaveBeenCalledWith(this.$scope.docID)
     done()
   })
 
   it('delete a video linked to a message', function (done) {
-    createController(false, true)
-    $scope.messageID = 'id2352'
+    this.$scope.messageID = 'id2352'
 
-    $rootScope.$broadcast('history_delete')
-    expect($scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
-    expect($modalI.dismiss).not.toHaveBeenCalled()
+    this.$rootScope.$broadcast('history_delete')
+    expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
+    expect(this.$modalInstance.dismiss).not.toHaveBeenCalled()
     done()
   })
 
-  it('delete a video linked to a modal instance', function (done) {
-    createController(false, false)
-    $scope.messageID = 'id6234'
+  it('can not delete a video not linked to a message', function (done) {
+    this.$scope.messageID = 'id42'
 
-    var $msgs = {}
-    $msgs[$scope.messageID] = {message: 'some non-empty message'}
-    $rootScope.$broadcast('history_delete', {msgs: $msgs})
-    expect($modalI.dismiss).toHaveBeenCalled()
+    var historyUpdate = {}
+    this.$rootScope.$broadcast('history_delete', historyUpdate)
+    expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
+    expect(this.$modalInstance.dismiss).not.toHaveBeenCalled()
+
+    historyUpdate.msgs = {}
+    this.$rootScope.$broadcast('history_delete', historyUpdate)
+    expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
+    expect(this.$modalInstance.dismiss).not.toHaveBeenCalled()
     done()
+  })
+
+  describe('when the video is related to the message', function () {
+    beforeEach(function () {
+      this.historyUpdate = {
+        msgs: {}
+      }
+    })
+    it('delete that video', function (done) {
+      this.$scope.messageID = 'id33'
+      this.historyUpdate.msgs[this.$scope.messageID] = 'an update for id33'
+
+      this.$rootScope.$broadcast('history_delete', this.historyUpdate)
+      expect(this.$scope.$on).toHaveBeenCalledWith('history_delete', jasmine.any(Function))
+      expect(this.$modalInstance.dismiss).toHaveBeenCalled()
+      done()
+    })
   })
 })

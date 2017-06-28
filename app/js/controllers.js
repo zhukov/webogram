@@ -3537,7 +3537,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('history_delete', function (e, historyUpdate) {
-      if (historyUpdate.msgs[$scope.messageID]) {
+      if (historyUpdate && historyUpdate.msgs && historyUpdate.msgs[$scope.messageID]) {
         $modalInstance.dismiss()
       }
     })
@@ -3571,7 +3571,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('history_delete', function (e, historyUpdate) {
-      if (historyUpdate.msgs[$scope.messageID]) {
+      if (historyUpdate && historyUpdate.msgs && historyUpdate.msgs[$scope.messageID]) {
         $modalInstance.dismiss()
       }
     })
@@ -4455,9 +4455,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppUsersManager.saveApiUser(user)
         $modalInstance.close()
       }, function (error) {
-        if (error.type == 'USERNAME_NOT_MODIFIED') {
-          error.handled = true
-          $modalInstance.close()
+        switch (error.type) {
+          case 'USERNAME_NOT_MODIFIED':
+            error.handled = true
+            $modalInstance.close()
+            break
         }
       })['finally'](function () {
         delete $scope.profile.updating
@@ -4470,9 +4472,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       MtpApiManager.invokeApi('account.checkUsername', {
-        username: newVal || ''
+        username: newVal
       }).then(function (valid) {
-        if ($scope.profile.username != newVal) {
+        if ($scope.profile.username !== newVal) {
           return
         }
         if (valid) {
@@ -4481,7 +4483,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.checked = {error: true}
         }
       }, function (error) {
-        if ($scope.profile.username != newVal) {
+        if ($scope.profile.username !== newVal) {
           return
         }
         switch (error.type) {
