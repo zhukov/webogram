@@ -59,7 +59,6 @@
     "gulp-ng-annotate": "~0.5.2",
     "gulp-replace": "^0.2.0",
     "gulp-rev": "^1.1.0",
-    "gulp-serviceworker": "0.0.3",
     "gulp-standard": "^7.0.1",
     "gulp-uglify": "^1.0.2",
     "gulp-usemin": "=0.3.11",
