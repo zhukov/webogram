@@ -2,18 +2,17 @@
 /* global describe, it, inject, expect, beforeEach, jasmine */
 
 describe('EmbedModalController', function () {
-  var $scope, $rootScope, $webpageManager, $errService, $input, $messManager, $pSelectService, $modalI
-
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
-    $webpageManager = {}
-    $webpageManager.wrapForFull = jasmine.createSpy('wrapForFull')
+    this.AppWebPagesManager = {
+      wrapForFull: jasmine.createSpy('wrapForFull')
+    }
 
-    $input = {}
-    $errService = {
+    this.ErrorService = {
+      input: {},
       confirm: function (message) {
-        $input = message
+        this.input = message
         return {
           then: function (f) {
             f()
@@ -22,9 +21,10 @@ describe('EmbedModalController', function () {
       }
     }
 
-    $pSelectService = {
+    this.PeersSelectService = {
+      input: {},
       selectPeer: function (options) {
-        $input = options
+        this.input = options
         return {
           then: function (f) {
             f('Peerselected')
@@ -33,60 +33,64 @@ describe('EmbedModalController', function () {
       }
     }
 
-    $messManager = {}
-    $messManager.deleteMessages = jasmine.createSpy('deleteMessages')
+    this.AppMessagesManager = {
+      deleteMessages: jasmine.createSpy('deleteMessages')
+    }
 
-    $modalI = {}
-    $modalI.dismiss = jasmine.createSpy('dismissModal')
+    this.$modalInstance = {
+      dismiss: jasmine.createSpy('dismissModal')
+    }
 
     inject(function (_$controller_, _$rootScope_) {
-      $rootScope = _$rootScope_
-      $rootScope.$broadcast = jasmine.createSpy('$broadcast')
-      $scope = $rootScope.$new()
-      $scope.webpageID = 'www.notRelevant.com'
+      this.$rootScope = _$rootScope_
+      this.$rootScope.$broadcast = jasmine.createSpy('$broadcast')
+      this.$scope = this.$rootScope.$new()
+      this.$scope.webpageID = 'www.notRelevant.com'
+
       _$controller_('EmbedModalController', {
         $q: {},
-        $scope: $scope,
-        $rootScope: $rootScope,
-        $modalInstance: $modalI,
-        PeersSelectService: $pSelectService,
-        AppMessagesManager: $messManager,
+        $scope: this.$scope,
+        $rootScope: this.$rootScope,
+        $modalInstance: this.$modalInstance,
+        PeersSelectService: this.PeersSelectService,
+        AppMessagesManager: this.AppMessagesManager,
         AppPeersManager: {},
         AppPhotosManager: {},
-        AppWebPagesManager: $webpageManager,
-        ErrorService: $errService
+        AppWebPagesManager: this.AppWebPagesManager,
+        ErrorService: this.ErrorService
       })
     })
   })
 
   // define tests
   it('sets the embeded webpage in the scope', function (done) {
-    expect($scope.nav).toEqual({})
-    expect($webpageManager.wrapForFull).toHaveBeenCalledWith($scope.webpageID)
+    expect(this.$scope.nav).toEqual({})
+    expect(this.AppWebPagesManager.wrapForFull).toHaveBeenCalledWith(this.$scope.webpageID)
     done()
   })
 
   it('forwards a message with an embeded link', function (done) {
-    $scope.messageID = 'id1234234'
+    this.$scope.messageID = 'id1234234'
+    var messageID = this.$scope.messageID
 
-    $scope.forward()
-    expect($input).toEqual({canSend: true})
-    expect($scope.$broadcast).toHaveBeenCalledWith('history_focus', {
+    this.$scope.forward()
+    expect(this.PeersSelectService.input).toEqual({canSend: true})
+    expect(this.$scope.$broadcast).toHaveBeenCalledWith('history_focus', {
       peerString: 'Peerselected',
       attachment: {
         _: 'fwd_messages',
-        id: [$scope.messageID]
+        id: [messageID]
       }
     })
     done()
   })
 
   it('deletes a message with an embeded link', function (done) {
-    $scope.messageID = 'id979565673'
+    this.$scope.messageID = 'id979565673'
 
-    $scope.delete()
-    expect($input).toEqual({type: 'MESSAGE_DELETE'})
-    expect($messManager.deleteMessages).toHaveBeenCalledWith([$scope.messageID])
+    this.$scope.delete()
+    expect(this.ErrorService.input).toEqual({type: 'MESSAGE_DELETE'})
+    expect(this.AppMessagesManager.deleteMessages).toHaveBeenCalledWith([this.$scope.messageID])
     done()
   })
 })

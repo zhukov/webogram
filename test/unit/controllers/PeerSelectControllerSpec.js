@@ -2,22 +2,20 @@
 /* global describe, it, inject, expect, beforeEach */
 
 describe('PeerSelectController', function () {
-  var $controller, $scope, $q, $mod, $APManager, $EService, createController, timeoutTime, $promiseData, $promise, $promiseFlag
-
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
     // The modalInstance will propably usually give a boolean as return.
     // However, for testing purposes it is important to gain knowledge about the input of the function
-    $mod = {
+    this.$modalInstance = {
       close: function (arr) {
         return arr
       }
     }
 
-    timeoutTime = 1000
+    this.oneSecond = 1000
 
-    $APManager = {
+    this.AppPeersManager = {
       getPeerString: function (str) {
         return 'P'.concat(str)
       },
@@ -29,229 +27,232 @@ describe('PeerSelectController', function () {
       }
     }
 
-    // The controller is created in the test in order to test different initial content of scope variables.
-    createController = function () {
-      $controller('PeerSelectController', {
-        $scope: $scope,
-        $modalInstance: $mod,
-        $q: $q,
-        AppPeersManager: $APManager,
-        ErrorService: $EService
-      })
-    }
-
-    $promiseFlag = false
-    $promise = {
+    this.promise = {
+      promiseFlag: false,
       then: function (f) {
-        $promiseFlag = true
+        this.$promiseFlag = true
         f()
       }
     }
 
-    $EService = {
-      confirm: function (data) {
-        $promiseData = data
-        return $promise
+    var promise = this.promise
+
+    this.$q = {
+      when: function () {
+        return promise
       }
     }
 
-    $q = {
-      when: function () {
-        return $promise
+    this.ErrorService = {
+      $promiseData: {},
+      confirm: function (data) {
+        this.$promiseData = data
+        return promise
       }
     }
 
     inject(function (_$controller_, _$rootScope_) {
-      $controller = _$controller_
-      $scope = _$rootScope_.$new()
+      this.$controller = _$controller_
+      this.$scope = _$rootScope_.$new()
+
+      // The controller is created in the test in order to test different initial content of scope variables.
+      this.createController = function () {
+        this.$controller('PeerSelectController', {
+          $scope: this.$scope,
+          $modalInstance: this.$modalInstance,
+          $q: this.$q,
+          AppPeersManager: this.AppPeersManager,
+          ErrorService: this.ErrorService
+        })
+      }
     })
   })
 
   it('initialises properties', function (done) {
-    createController()
+    this.createController()
 
     // Set timer to give the controller time to resolve.
     setTimeout(function () {
-      expect($scope.selectedPeers).toBeDefined()
-      expect($scope.selectedPeersIDs).toBeDefined()
-      expect($scope.selectedCount).toBeDefined()
-    }, timeoutTime)
+      expect(this.$scope.selectedPeers).toBeDefined()
+      expect(this.$scope.selectedPeersIDs).toBeDefined()
+      expect(this.$scope.selectedCount).toBeDefined()
+    }, this.oneSecond)
 
     done()
   })
 
   it('compiles with a shareLinkPromise that resolves', function (done) {
     var expected = 'testURL'
-    $scope.shareLinkPromise = {
+    var oneSecond = this.oneSecond
+    this.$scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(resolve(expected), timeoutTime)
+        setTimeout(resolve(expected), oneSecond)
       }
     }
-    createController()
+    this.createController()
 
-    setTimeout(function () {
-      expect($scope.shareLink.loading).toBe(true)
-      expect($scope.shareLink.url).not.toBeDefined()
-      setTimeout(function () {
-        expect($scope.shareLink.url).toBe(expected)
-      }, timeoutTime)
-    }, timeoutTime)
+    function afterLoad () {
+      expect(this.$scope.shareLink.url).toBe(expected)
+    }
+
+    function duringLoad () {
+      expect(this.$scope.shareLink.loading).toBe(true)
+      expect(this.$scope.shareLink.url).not.toBeDefined()
+      setTimeout(afterLoad, oneSecond)
+    }
+
+    setTimeout(duringLoad, oneSecond)
     done()
   })
 
   it('compiles with a shareLinkPromise that doesn\'t resolve', function (done) {
-    $scope.shareLinkPromise = {
+    var oneSecond = this.oneSecond
+    this.$scope.shareLinkPromise = {
       then: function (resolve, reject) {
-        setTimeout(reject(), timeoutTime)
+        setTimeout(reject(), oneSecond)
       }
     }
-    createController()
+    this.createController()
 
-    setTimeout(function () {
-      expect($scope.shareLink.loading).toBe(true)
-      setTimeout(function () {
-        expect($scope.shareLink).not.toBeDefined()
-      }, timeoutTime)
-    }, timeoutTime)
-    done()
-  })
-
-  it('can select and submit a single dialog without confirmed type', function (done) {
-    createController()
-
-    $scope.dialogSelect('dialogX')
-
-    expect($promiseData).not.toBeDefined()
-    expect($promiseFlag).toBe(true)
-
-    done()
-  })
-
-  it('can select and submit a single dialog with confirmed type', function (done) {
-    createController()
-
-    $scope.confirm_type = 'INVITE_TO_GROUP'
-    $scope.dialogSelect('dialogX')
-
-    var expected = {
-      type: 'INVITE_TO_GROUP',
-      peer_id: 'X',
-      peer_data: 'Xpeer'
+    function afterLoad () {
+      expect(this.$scope.shareLink).not.toBeDefined()
     }
 
-    expect($promiseData).toEqual(expected)
-    expect($promiseFlag).toBe(true)
+    function duringLoad () {
+      expect(this.$scope.shareLink.loading).toBe(true)
+      setTimeout(afterLoad, oneSecond)
+    }
 
+    setTimeout(duringLoad, oneSecond)
     done()
   })
 
-  it('can select a dialog', function (done) {
-    createController()
+  describe('after initialisation', function () {
+    beforeEach(function () {
+      this.createController()
+    })
 
-    $scope.multiSelect = true
-    $scope.dialogSelect('dialogX')
+    it('can select and submit a single dialog without confirmed type', function (done) {
+      this.$scope.dialogSelect('dialogX')
 
-    var expected = ['X']
+      expect(this.ErrorService.$promiseData).toEqual({})
+      expect(this.promise.$promiseFlag).toBe(true)
 
-    expect($scope.selectedPeers['X']).toBe('Xpeer')
-    expect($scope.selectedCount).toBe(1)
-    expect($scope.selectedPeerIDs).toEqual(expected)
+      done()
+    })
 
-    done()
-  })
+    it('can select and submit a single dialog with confirmed type', function (done) {
+      this.$scope.confirm_type = 'INVITE_TO_GROUP'
+      this.$scope.dialogSelect('dialogX')
 
-  it('can select multiple dialogs', function (done) {
-    createController()
+      var peerId = 'X'
+      var expected = {
+        type: 'INVITE_TO_GROUP',
+        peer_id: peerId,
+        peer_data: this.AppPeersManager.getPeer(peerId)
+      }
 
-    $scope.multiSelect = true
-    $scope.dialogSelect('dialogX')
-    $scope.dialogSelect('dialogZ')
-    $scope.dialogSelect('dialogY')
+      expect(this.ErrorService.$promiseData).toEqual(expected)
+      expect(this.promise.$promiseFlag).toBe(true)
 
-    var expected = ['Y', 'Z', 'X']
+      done()
+    })
 
-    expect($scope.selectedCount).toBe(3)
-    expect($scope.selectedPeerIDs).toEqual(expected)
+    it('can select a dialog', function (done) {
+      this.$scope.multiSelect = true
+      this.$scope.dialogSelect('dialogX')
 
-    done()
-  })
+      var expected = {
+        selectedPeers: 'Xpeer',
+        selectedPeerIDs: ['X']
+      }
 
-  it('can unselect a dialog', function (done) {
-    createController()
+      expect(this.$scope.selectedPeers['X']).toBe(expected.selectedPeers)
+      expect(this.$scope.selectedCount).toBe(1)
+      expect(this.$scope.selectedPeerIDs).toEqual(expected.selectedPeerIDs)
 
-    $scope.multiSelect = true
-    $scope.selectedCount = 1
-    $scope.selectedPeers['Y'] = 'aYPeer'
-    $scope.selectedPeerIDs.unshift('Y')
+      done()
+    })
 
-    $scope.dialogSelect('dialogY')
+    it('can select multiple dialogs', function (done) {
+      this.$scope.multiSelect = true
+      this.$scope.dialogSelect('dialogX')
+      this.$scope.dialogSelect('dialogZ')
+      this.$scope.dialogSelect('dialogY')
 
-    var expected = []
+      var expected = ['Y', 'Z', 'X']
 
-    expect($scope.selectedPeers['Y']).not.toBeDefined()
-    expect($scope.selectedCount).toBe(0)
-    expect($scope.selectedPeerIDs).toEqual(expected)
+      expect(this.$scope.selectedCount).toBe(3)
+      expect(this.$scope.selectedPeerIDs).toEqual(expected)
 
-    done()
-  })
+      done()
+    })
 
-  it('can select multiple dialogs', function (done) {
-    createController()
+    it('can unselect a dialog', function (done) {
+      this.$scope.multiSelect = true
+      this.$scope.selectedCount = 1
+      this.$scope.selectedPeers['Y'] = 'aYPeer'
+      this.$scope.selectedPeerIDs.unshift('Y')
 
-    $scope.multiSelect = true
-    $scope.dialogSelect('dialogX')
-    $scope.dialogSelect('dialogZ')
-    $scope.dialogSelect('dialogY')
-    $scope.dialogSelect('dialogZ')
+      this.$scope.dialogSelect('dialogY')
 
-    var expected = ['Y', 'X']
+      var expected = []
 
-    expect($scope.selectedCount).toBe(2)
-    expect($scope.selectedPeerIDs).toEqual(expected)
+      expect(this.$scope.selectedPeers['Y']).not.toBeDefined()
+      expect(this.$scope.selectedCount).toBe(0)
+      expect(this.$scope.selectedPeerIDs).toEqual(expected)
 
-    done()
-  })
+      done()
+    })
 
-  it('can\'t submit a empty set of dialogs', function (done) {
-    createController()
+    it('can select multiple dialogs', function (done) {
+      this.$scope.multiSelect = true
+      this.$scope.dialogSelect('dialogX')
+      this.$scope.dialogSelect('dialogZ')
+      this.$scope.dialogSelect('dialogY')
+      this.$scope.dialogSelect('dialogZ')
 
-    expect($scope.submitSelected()).not.toBeDefined()
+      var expected = ['Y', 'X']
 
-    done()
-  })
+      expect(this.$scope.selectedCount).toBe(2)
+      expect(this.$scope.selectedPeerIDs).toEqual(expected)
 
-  it('can submit one dialog', function (done) {
-    createController()
+      done()
+    })
 
-    $scope.selectedCount = 1
-    $scope.selectedPeers['test'] = 'peer'
-    var expected = ['Ptest']
-    expect($scope.submitSelected()).toEqual(expected)
+    it('can\'t submit a empty set of dialogs', function (done) {
+      expect(this.$scope.submitSelected()).not.toBeDefined()
 
-    done()
-  })
+      done()
+    })
 
-  it('can submit multiple dialogs', function (done) {
-    createController()
+    it('can submit one dialog', function (done) {
+      this.$scope.selectedCount = 1
+      this.$scope.selectedPeers['test'] = 'peer'
+      var expected = ['Ptest']
+      expect(this.$scope.submitSelected()).toEqual(expected)
 
-    $scope.selectedCount = 3
-    $scope.selectedPeers['test1'] = $scope.selectedPeers['test2'] = $scope.selectedPeers['test4'] = 'peer'
+      done()
+    })
 
-    var expected = ['Ptest4', 'Ptest2', 'Ptest1']
-    expect($scope.submitSelected()).toEqual(expected)
+    it('can submit multiple dialogs', function (done) {
+      this.$scope.selectedCount = 3
+      this.$scope.selectedPeers['test1'] = this.$scope.selectedPeers['test2'] = this.$scope.selectedPeers['test4'] = 'peer'
 
-    done()
-  })
+      var expected = ['Ptest4', 'Ptest2', 'Ptest1']
+      expect(this.$scope.submitSelected()).toEqual(expected)
 
-  it('can toggle', function (done) {
-    createController()
+      done()
+    })
 
-    var broadcastFlag = ''
-    $scope.$broadcast = function (input) { broadcastFlag = input }
+    it('can toggle', function (done) {
+      var broadcastFlag = ''
+      this.$scope.$broadcast = function (input) { broadcastFlag = input }
 
-    $scope.toggleSearch()
-    expect(broadcastFlag).toBe('dialogs_search_toggle')
+      this.$scope.toggleSearch()
+      expect(broadcastFlag).toBe('dialogs_search_toggle')
 
-    done()
+      done()
+    })
   })
 })

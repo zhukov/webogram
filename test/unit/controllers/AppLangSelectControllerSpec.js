@@ -2,18 +2,17 @@
 /* global describe, it, inject, expect, beforeEach, xit */
 
 describe('AppLangSelectController', function () {
-  var $controller, $scope
-
   beforeEach(module('ui.bootstrap'))
   beforeEach(module('myApp.services'))
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
     inject(function (_$controller_, _$rootScope_, _, Storage, ErrorService, AppRuntimeManager) {
-      $controller = _$controller_
-      $scope = _$rootScope_.$new()
-      $controller('AppLangSelectController', {
-        $scope: $scope,
+      this.$controller = _$controller_
+      this.$scope = _$rootScope_.$new()
+
+      this.$controller('AppLangSelectController', {
+        $scope: this.$scope,
         _: _,
         Storage: Storage,
         ErrorService: ErrorService,
@@ -23,24 +22,24 @@ describe('AppLangSelectController', function () {
   })
 
   it('holds the supportedLocales', function () {
-    expect($scope.supportedLocales).toBeDefined()
+    expect(this.$scope.supportedLocales).toBeDefined()
   })
 
   it('holds langNames', function () {
-    expect($scope.langNames).toBeDefined()
+    expect(this.$scope.langNames).toBeDefined()
   })
 
   it('holds the current locale', function () {
-    expect($scope.curLocale).toBeDefined()
+    expect(this.$scope.curLocale).toBeDefined()
   })
 
   it('has a locale form', function () {
-    expect($scope.form).toBeDefined()
-    expect($scope.form.locale).toBeDefined()
+    expect(this.$scope.form).toBeDefined()
+    expect(this.$scope.form.locale).toBeDefined()
   })
 
   it('allows to select a locale', function () {
-    expect($scope.localeSelect).toBeDefined()
+    expect(this.$scope.localeSelect).toBeDefined()
   })
 
   describe('when the user switches the locale', function () {
