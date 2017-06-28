@@ -2411,17 +2411,22 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var width = element.attr('width') || 200
       var height = element.attr('height') || 200
-      var apiKey = Config.ExtCredentials.gmaps.api_key
       var zoom = width > 200 ? 15 : 13
+      var useGoogle = false
+      var src
+
+      if (useGoogle) {
+        var apiKey = Config.ExtCredentials.gmaps.api_key
+        var useApiKey = true
+        src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
+        if (useApiKey) {
+          src += '&key=' + apiKey
+        }
+      } else {
+        src = 'https://static-maps.yandex.ru/1.x/?l=map&ll=' + $scope.point['long'] + ',' + $scope.point['lat'] + '&z=' + zoom + '&size=' + width + ',' + height + '&scale=1&pt=' + $scope.point['long'] + ',' + $scope.point['lat'] + ',pm2rdm&lang=en_US'
+      }
 
       element.attr('src', 'img/blank.gif')
-
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
-      var useApiKey = true
-
-      if (useApiKey) {
-        src += '&key=' + apiKey
-      }
 
       ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf())
