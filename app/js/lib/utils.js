@@ -381,6 +381,7 @@ function templateUrl (tplName) {
     media_modal_layout: 'desktop',
     slider: 'desktop',
     reply_message: 'desktop',
+    full_round: 'desktop',
     message_body: 'desktop',
     message_media: 'desktop',
     message_attach_game: 'desktop',
