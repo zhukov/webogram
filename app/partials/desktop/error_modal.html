@@ -61,6 +61,9 @@
       
       <span ng-switch-when="CALLBACK_RESPONSE" ng-bind-html="error.description_html"></span>
 
+      <span ng-switch-when="FRESH_RESET_AUTHORISATION_FORBIDDEN" my-i18n="error_modal_fresh_reset_authorization_forbidden"></span>
+
+
 
       <div ng-switch-default ng-switch="error.code">
         <span ng-switch-when="400" my-i18n="error_modal_bad_request_description"></span>
