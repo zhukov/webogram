@@ -1323,6 +1323,9 @@ angular.module('myApp.services')
               AppGamesManager.saveGame(apiMessage.media.game, apiMessage.mid, mediaContext)
               apiMessage.media.handleMessage = true
               break
+            case 'messageMediaInvoice':
+              apiMessage.media = {_: 'messageMediaUnsupported'}
+              break
           }
         }
         if (apiMessage.action) {
@@ -2733,6 +2736,10 @@ angular.module('myApp.services')
                 notificationMessage = _('conversation_media_video_raw')
                 captionEmoji = '📹'
                 break
+              case 'round':
+                notificationMessage = _('conversation_media_round_raw')
+                captionEmoji = '📹'
+                break
               case 'voice':
               case 'audio':
                 notificationMessage = _('conversation_media_audio_raw')
@@ -2758,6 +2765,9 @@ angular.module('myApp.services')
             break
           case 'messageMediaGame':
             notificationMessage = RichTextProcessor.wrapPlainText('🎮 ' + message.media.game.title)
+            break
+          case 'messageMediaUnsupported':
+            notificationMessage = _('conversation_media_unsupported_raw')
             break
           default:
             notificationMessage = _('conversation_media_attachment_raw')
@@ -2900,6 +2910,7 @@ angular.module('myApp.services')
     var newDialogsToHandle = {}
     var notificationsHandlePromise = false
     var notificationsToHandle = {}
+    var newUpdatesAfterReloadToHandle = {}
 
     function handleNewMessages () {
       $timeout.cancel(newMessagesHandlePromise)
@@ -2955,10 +2966,7 @@ angular.module('myApp.services')
       notificationsToHandle = {}
     }
 
-    $rootScope.$on('apiUpdate', function (e, update) {
-      // if (update._ != 'updateUserStatus') {
-      //   console.log('on apiUpdate', update)
-      // }
+    function handleUpdate(update) {
       switch (update._) {
         case 'updateMessageID':
           var randomID = update.random_id
@@ -2982,6 +2990,10 @@ angular.module('myApp.services')
             if (!newDialogsHandlePromise) {
               newDialogsHandlePromise = $timeout(handleNewDialogs, 0)
             }
+            if (newUpdatesAfterReloadToHandle[peerID] === undefined) {
+              newUpdatesAfterReloadToHandle[peerID] = []
+            }
+            newUpdatesAfterReloadToHandle[peerID].push(update)
             break
           }
 
@@ -3455,6 +3467,13 @@ angular.module('myApp.services')
           }
           break
       }
+    }
+
+    $rootScope.$on('apiUpdate', function (e, update) {
+      // if (update._ != 'updateUserStatus') {
+      //   console.log('on apiUpdate', update)
+      // }
+      handleUpdate(update)
     })
 
     function reloadConversation (peerID) {
@@ -3490,6 +3509,12 @@ angular.module('myApp.services')
             dialogsStorage.dialogs.splice(foundDialog[1], 1)
             $rootScope.$broadcast('dialog_drop', {peerID: peerID})
           }
+        }
+        if (newUpdatesAfterReloadToHandle[peerID] !== undefined) {
+          angular.forEach(newUpdatesAfterReloadToHandle[peerID], function (update) {
+            handleUpdate(update)
+          })
+          delete newUpdatesAfterReloadToHandle[peerID]
         }
       })
       if (hasUpdated) {

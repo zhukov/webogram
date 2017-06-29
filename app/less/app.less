@@ -4113,6 +4113,81 @@ h5 {
   opacity: 1;
 }
 
+
+/* Round documents */
+.img_round_image_wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.img_round_meta {
+  background: rgba(0,0,0,0.4);
+  width: 40px;
+  height: 40px;
+  line-height: 0;
+  position: absolute;
+  z-index: 2;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto;
+  top: 50%;
+  left: 50%;
+  margin-left: -20px;
+  margin-top: -20px;
+  pointer-events: none;
+}
+.icon-cancel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -9px;
+  margin-top: -1px;
+
+  .icon-bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: #FFF;
+    transform-origin: 50% 50%;
+
+    &:first-child {
+      .transform(rotate(-45deg));
+    }
+    &:last-child {
+      .transform(translate3d(0,-2px,0) rotate(45deg));
+    }
+  }
+}
+
+.img_round_thumb {
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  -o-filter: blur(2px);
+  -ms-filter: blur(2px);
+  filter: blur(2px);
+  filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='3');
+  transform-origin: center center;
+  -webkit-transform-origin: center center;
+  -webkit-transform: scale(1.02, 1.02);
+  transform: scale(1.02, 1.02);
+
+  max-width: 100%;
+  height: auto;
+}
+
+.img_round_meta_contents {
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.2s;
+}
+.img_round_meta_contents.ng-leave.ng-leave-active,
+.img_round_meta_contents.ng-enter {
+  opacity: 0;
+}
+.img_round_meta_contents.ng-leave,
+.img_round_meta_contents.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+
 .countries_modal_window {
   .modal-dialog {
     max-width: 392px;

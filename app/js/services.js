@@ -1893,7 +1893,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             apiDoc.duration = attribute.duration
             apiDoc.w = attribute.w
             apiDoc.h = attribute.h
-            if (apiDoc.thumb) {
+            if (apiDoc.thumb &&
+                attribute.pFlags.round_message) {
+              apiDoc.type = 'round'
+            }
+            else if (apiDoc.thumb) {
               apiDoc.type = 'video'
             }
             break
@@ -1935,6 +1939,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             apiDoc.mime_type = 'video/mp4'
             break
           case 'video':
+          case 'round':
             apiDoc.mime_type = 'video/mp4'
             break
           case 'sticker':
@@ -2008,6 +2013,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           inlineImage = true
           boxWidth = Math.min(windowW - 80, Config.Mobile ? 210 : 260)
           boxHeight = Math.min(windowH - 100, Config.Mobile ? 210 : 260)
+          break
+
+        case 'round':
+          inlineImage = true
+          boxWidth = Math.min(windowW - 80, 200)
+          boxHeight = Math.min(windowH - 100, 200)
           break
 
         default:

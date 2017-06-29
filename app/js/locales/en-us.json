@@ -311,6 +311,7 @@
 	"conversation_draft": "Draft:",
 	"conversation_media_photo": "Photo",
 	"conversation_media_video": "Video",
+	"conversation_media_round": "Video message",
 	"conversation_media_document": "File",
 	"conversation_media_sticker": "Sticker",
 	"conversation_media_gif": "GIF",
@@ -318,6 +319,7 @@
 	"conversation_media_location": "Location",
 	"conversation_media_contact": "Contact",
 	"conversation_media_attachment": "Attachment",
+	"conversation_media_unsupported": "Unsupported attachment",
 
 	"conversation_search_peer": "Search in this chat",
 
@@ -374,6 +376,7 @@
 	"message_service_changed_channel_photo": "Channel photo updated",
 	"message_service_removed_channel_photo": "Channel photo removed",
 	"message_service_scored_X": "{'one': 'scored {}', 'other': 'scored {}'}",
+	"message_service_payment_sent": "Payment sent",
 
 	"message_action_reply": "Reply",
 	"message_action_edit": "Edit",

@@ -1918,14 +1918,15 @@ angular.module('izhukov.utils', [])
     }
 
     function wrapUrl (url, unsafe) {
-      if (!url.match(/^https?:\/\//i)) {
+      if (!url.match(/^(https?|tg):\/\//i)) {
         url = 'http://' + url
       }
       var tgMeMatch
+      var telescoPeMatch
       if (unsafe == 2) {
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
       }
-      else if ( (tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
+      else if ((tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
         var path = tgMeMatch[1].split('/')
         switch (path[0]) {
           case 'joinchat':
@@ -1943,6 +1944,9 @@ angular.module('izhukov.utils', [])
               url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '')
             }
         }
+      }
+      else if ((telescoPeMatch = url.match(/^https?:\/\/telesco\.pe\/([^/?]+)\/(\d+)/))) {
+        url = 'tg://resolve?domain=' + telescoPeMatch[1] + '&post=' + telescoPeMatch[2]
       }
       else if (unsafe) {
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)

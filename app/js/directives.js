@@ -2195,13 +2195,95 @@ angular.module('myApp.directives', ['myApp.filters'])
           }, 200)
         })
       }
+    }
+  })
 
-    // Autoplay small GIFs
-    // if (!Config.Mobile &&
-    //     $scope.document.size &&
-    //     $scope.document.size < 1024 * 1024) {
-    //   $scope.toggle()
-    // }
+  .directive('myLoadRound', function (AppDocsManager, $timeout) {
+
+    var currentPlayer = false
+    var currentPlayerScope = false
+
+    return {
+      link: link,
+      templateUrl: templateUrl('full_round'),
+      scope: {
+        document: '='
+      }
+    }
+
+    function checkPlayer(newPlayer, newScope) {
+      if (currentPlayer === newPlayer) {
+        return false
+      }
+      if (currentPlayer) {
+        currentPlayer.pause()
+        currentPlayer.currentTime = 0
+        currentPlayerScope.isActive = false
+      }
+      currentPlayer = newPlayer
+      currentPlayerScope = newScope
+    }
+
+    function link ($scope, element, attrs) {
+      var imgWrap = $('.img_round_image_wrap', element)
+      imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
+
+      var downloadPromise = false
+
+      $scope.isActive = false
+
+      $scope.toggle = function (e) {
+        if (e && checkClick(e, true)) {
+          AppDocsManager.saveDocFile($scope.document.id)
+          return false
+        }
+
+        if ($scope.document.url) {
+          $scope.isActive = !$scope.isActive
+          onContentLoaded(function () {
+            $scope.$emit('ui_height')
+
+            var video = $('video', element)[0]
+            if (video) {
+              if (!$scope.isActive) {
+                video.pause()
+                video.currentTime = 0
+              } else {
+                checkPlayer(video, $scope)
+                video.play()
+              }
+            }
+          })
+          return
+        }
+
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
+          return
+        }
+
+        downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
+
+        downloadPromise.then(function () {
+          $timeout(function () {
+            var video = $('video', element)[0]
+            checkPlayer(video, $scope)
+            $(video).on('ended', function () {
+              if ($scope.isActive) {
+                $scope.toggle()
+              }
+            })
+            $scope.isActive = true
+          }, 200)
+        })
+      }
+
+      $scope.$on('ui_history_change', function () {
+        if ($scope.isActive) {
+          $scope.toggle()
+        }
+      })
     }
   })
 
