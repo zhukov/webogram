@@ -219,6 +219,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               $scope.error = {field: 'phone'}
               error.handled = true
               break
+
+            case 'PHONE_NUMBER_APP_SIGNUP_FORBIDDEN':
+              $scope.error = {field: 'phone'}
+              break
           }
         })['finally'](function () {
           if ($rootScope.idle.isIDLE || tsNow() - authKeyStarted > 60000) {

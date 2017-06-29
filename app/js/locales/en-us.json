@@ -420,6 +420,7 @@
 	 "error_modal_username_not_found_description": "There is no Telegram account with the username you provided.",
 	"error_modal_phonecalls_not_supported_description_md": "Unfortunately calls are not supported in the Web App at the moment.\n\nYou can call {user} using our mobile apps or native desktop applications.\n{download-link: Download »}",
 	"error_modal_fresh_reset_authorization_forbidden": "For security reasons, you can't terminate older sessions from a device that you've just connected. Please use an earlier connection or wait for a few hours",
+	"error_modal_app_signup_forbidden_md": "You don't have a Telegram account yet, please **sign up** with {signup-link: Android / iPhone} first.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",
 	"error_modal_unauthorized_description": "This action requires authorization access. Please {login-link: log in}.",
