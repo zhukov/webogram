@@ -4341,16 +4341,23 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('ChangelogNotifyService', function (Storage, $rootScope, $modal) {
+  .service('ChangelogNotifyService', function (Storage, $rootScope, $modal, $timeout, MtpApiManager, ApiUpdatesManager) {
     function checkUpdate () {
-      Storage.get('last_version').then(function (lastVersion) {
-        if (lastVersion != Config.App.version) {
-          if (lastVersion) {
-            showChangelog(lastVersion)
+      $timeout(function () {
+        Storage.get('last_version').then(function (lastVersion) {
+          if (lastVersion != Config.App.version) {
+            MtpApiManager.invokeApi('help.getAppChangelog', {
+              prev_app_version: lastVersion
+            }).then(function (updates) {
+              if (updates._ == 'updates' && !updates.updates.length) {
+                return false
+              }
+              ApiUpdatesManager.processUpdateMessage(updates)
+              Storage.set({last_version: Config.App.version})
+            })
           }
-          Storage.set({last_version: Config.App.version})
-        }
-      })
+        })
+      }, 5000)
     }
 
     function showChangelog (lastVersion) {

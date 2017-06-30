@@ -157,6 +157,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
           }
           deferred.reject(error)
 
+          if (error.code == 406) {
+            error.handled = true
+          }
+
           if (!options.noErrorBox) {
             error.input = method
             error.stack = stack || (error.originalError && error.originalError.stack) || error.stack || (new Error()).stack

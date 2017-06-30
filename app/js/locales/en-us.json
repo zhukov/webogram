@@ -187,6 +187,8 @@
 	"changelog_modal_header_recent_updates_md": "Recent updates in **Telegram Web**",
 	"changelog_modal_header_new_updates_md": "**Telegram Web** has been updated!",
 	"changelog_modal_title_current_version": "current version",
+	"changelog_modal_full_description_md": "Official free messaging app based on Telegram API for speed and security.\n\nThis software is licensed under GNU GPL version 3.",
+	"changelog_modal_changelog_link": "Changelog",
 
 	"group_create_contacts_modal_title": "New group",
 	"group_create_modal_title": "Create group",
@@ -419,7 +421,6 @@
 	 "error_modal_media_not_supported_description": "Your browser cannot play this media file. Try downloading the file and opening it in a standalone player.",
 	 "error_modal_username_not_found_description": "There is no Telegram account with the username you provided.",
 	"error_modal_phonecalls_not_supported_description_md": "Unfortunately calls are not supported in the Web App at the moment.\n\nYou can call {user} using our mobile apps or native desktop applications.\n{download-link: Download »}",
-	"error_modal_fresh_reset_authorization_forbidden": "For security reasons, you can't terminate older sessions from a device that you've just connected. Please use an earlier connection or wait for a few hours",
 	"error_modal_app_signup_forbidden_md": "You don't have a Telegram account yet, please **sign up** with {signup-link: Android / iPhone} first.",
 
 	"error_modal_bad_request_description": "One of the params is missing or invalid.",

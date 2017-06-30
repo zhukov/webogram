@@ -18,6 +18,7 @@ angular.module('myApp.services')
     var pendingByRandomID = {}
     var pendingByMessageID = {}
     var pendingAfterMsgs = {}
+    var pendingTopMsgs = {}
     var sendFilePromise = $q.when()
     var tempID = -1
 
@@ -181,7 +182,11 @@ angular.module('myApp.services')
 
       if (historiesStorage[peerID] === undefined &&
         !message.deleted) {
-        var historyStorage = {count: null, history: [mid], pending: []}
+        var historyStorage = {count: null, history: [], pending: []}
+        historyStorage[mid > 0 ? 'history' : 'pending'].push(mid)
+        if (mid < 0 && message.pFlags.unread) {
+          dialog.unread_count++
+        }
         historiesStorage[peerID] = historyStorage
         if (mergeReplyKeyboard(historyStorage, message)) {
           $rootScope.$broadcast('history_reply_markup', {peerID: peerID})
@@ -526,6 +531,9 @@ angular.module('myApp.services')
         historyStorage = historiesStorage[peerID] = {count: null, history: [], pending: []}
       }
 
+      if (maxID < 0) {
+        maxID = 0
+      }
       var isMigrated = false
       var reqPeerID = peerID
       if (migratedToFrom[peerID]) {
@@ -3007,27 +3015,28 @@ angular.module('myApp.services')
           saveMessages([message], {isNew: true})
           // console.warn(dT(), 'message unread', message.mid, message.pFlags.unread)
 
-          if (historyStorage !== undefined) {
-            var history = historyStorage.history
-            if (history.indexOf(message.mid) != -1) {
-              return false
-            }
-            var topMsgID = history[0]
-            history.unshift(message.mid)
-            if (message.mid > 0 && message.mid < topMsgID) {
-              history.sort(function (a, b) {
-                return b - a
-              })
-            }
-            if (historyStorage.count !== null) {
-              historyStorage.count++
-            }
-          } else {
-            historyStorage = historiesStorage[peerID] = {
+          if (historyStorage === undefined) {
+           historyStorage = historiesStorage[peerID] = {
               count: null,
-              history: [message.mid],
+              history: [],
               pending: []
             }
+          }
+
+          var history = message.mid > 0 ? historyStorage.history : historyStorage.pending
+          if (history.indexOf(message.mid) != -1) {
+            return false
+          }
+          var topMsgID = history[0]
+          history.unshift(message.mid)
+          if (message.mid > 0 && message.mid < topMsgID) {
+            history.sort(function (a, b) {
+              return b - a
+            })
+          }
+          if (message.mid > 0 &&
+              historyStorage.count !== null) {
+            historyStorage.count++
           }
 
           if (mergeReplyKeyboard(historyStorage, message)) {
@@ -3466,6 +3475,49 @@ angular.module('myApp.services')
             })
           }
           break
+
+        case 'updateServiceNotification':
+          // update.inbox_date = tsNow(true)
+          // update.pFlags = {popup: true}
+          var fromID = 777000
+          var peerID = fromID
+          var messageID = tempID--
+          var message = {
+            _: 'message',
+            id: messageID,
+            from_id: fromID,
+            to_id: AppPeersManager.getOutputPeer(peerID),
+            flags: 0,
+            pFlags: {unread: true},
+            date: (update.inbox_date || tsNow(true)) + ServerTimeManager.serverTimeOffset,
+            message: update.message,
+            media: update.media,
+            entities: update.entities
+          }
+          if (!AppUsersManager.hasUser(fromID)) {
+            AppUsersManager.saveApiUsers([{
+              _: 'user',
+              id: fromID,
+              pFlags: {verified: true},
+              access_hash: 0,
+              first_name: 'Telegram',
+              phone: '42777'
+            }])
+          }
+          saveMessages([message])
+
+          if (update.inbox_date) {
+            pendingTopMsgs[peerID] = messageID
+            handleUpdate({
+              _: 'updateNewMessage',
+              message: message
+            })
+          }
+          if (update.pFlags.popup && update.message) {
+            var historyMessage = wrapForHistory(messageID)
+            ErrorService.show({error: {code: 400, type: 'UPDATE_SERVICE_NOTIFICATION'}, historyMessage: historyMessage})
+          }
+          break
       }
     }
 
@@ -3493,11 +3545,18 @@ angular.module('myApp.services')
       var hasUpdated = false
       angular.forEach(dialogsResult.dialogs, function (dialog) {
         var peerID = AppPeersManager.getPeerID(dialog.peer)
-        if (dialog.top_message) {
+        var topMessage = dialog.top_message
+        var topPendingMesage = pendingTopMsgs[peerID]
+        if (topPendingMesage) {
+          if (!topMessage || getMessage(topPendingMesage).date > getMessage(topMessage).date) {
+            dialog.top_message = topMessage = topPendingMesage
+          }
+        }
+        if (topMessage) {
           var wasBefore = getDialogByPeerID(peerID).length > 0
           saveConversation(dialog)
           if (wasBefore) {
-            clearDialogCache(dialog.top_message)
+            clearDialogCache(topMessage)
             $rootScope.$broadcast('dialog_top', dialog)
           } else {
             updatedDialogs[peerID] = dialog

@@ -2150,8 +2150,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var lastIsRead = !historyMessage || !historyMessage.pFlags.unread
         for (i = 0; i < len; i++) {
           messageID = msgs[i]
-          if (messageID < maxID ||
-            history.ids.indexOf(messageID) !== -1) {
+          if (messageID > 0 && messageID < maxID ||
+              history.ids.indexOf(messageID) !== -1) {
             continue
           }
           historyMessage = AppMessagesManager.wrapForHistory(messageID)
