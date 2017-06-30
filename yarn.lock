@@ -1411,7 +1411,7 @@ event-stream@3.3.2:
     stream-combiner "~0.0.4"
     through "~2.3.1"
 
-event-stream@~3.0.18, event-stream@~3.0.20:
+event-stream@~3.0.18:
   version "3.0.20"
   resolved "https://registry.yarnpkg.com/event-stream/-/event-stream-3.0.20.tgz#038bbb2ea9ea90385b26fbc1854d0b539f2abea3"
   dependencies:
@@ -2126,12 +2126,13 @@ gulp-load-plugins@^0.4.0:
     findup-sync "~0.1.2"
     globule "~0.1.0"
 
-gulp-manifest@0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/gulp-manifest/-/gulp-manifest-0.0.3.tgz#239187c0b322c24afed952393770d427dc31d2b2"
+gulp-manifest@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/gulp-manifest/-/gulp-manifest-0.1.1.tgz#68a801a5a15c12f7f3f1d34082070b534df9f717"
   dependencies:
-    event-stream "~3.0.20"
     gulp-util "~2.2.6"
+    minimatch "~2.0.1"
+    slash "^1.0.0"
     through "~2.3.4"
 
 gulp-minify-css@^0.3.12:
@@ -3564,7 +3565,7 @@ minimatch@^1.0.0:
     lru-cache "2"
     sigmund "~1.0.0"
 
-minimatch@^2.0.1:
+minimatch@^2.0.1, minimatch@~2.0.1:
   version "2.0.10"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-2.0.10.tgz#8d087c39c6b38c001b97fca7ce6d0e1e80afbac7"
   dependencies:
@@ -4430,6 +4431,10 @@ simple-fmt@~0.1.0:
 simple-is@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/simple-is/-/simple-is-0.2.0.tgz#2abb75aade39deb5cc815ce10e6191164850baf0"
+
+slash@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/slash/-/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
 
 slice-ansi@0.0.4:
   version "0.0.4"
