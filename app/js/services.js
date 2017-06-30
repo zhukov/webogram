@@ -4350,17 +4350,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         $timeout(function () {
           Storage.get('last_version').then(function (lastVersion) {
             if (lastVersion != Config.App.version) {
-              MtpApiManager.invokeApi('help.getAppChangelog', {
-                prev_app_version: lastVersion
-              }, {
-                noErrorBox: true,
-              }).then(function (updates) {
-                if (updates._ == 'updates' && !updates.updates.length) {
-                  return false
-                }
-                ApiUpdatesManager.processUpdateMessage(updates)
+              if (!lastVersion) {
                 Storage.set({last_version: Config.App.version})
-              })
+              } else {
+                MtpApiManager.invokeApi('help.getAppChangelog', {
+                  prev_app_version: lastVersion
+                }, {
+                  noErrorBox: true,
+                }).then(function (updates) {
+                  if (updates._ == 'updates' && !updates.updates.length) {
+                    return false
+                  }
+                  ApiUpdatesManager.processUpdateMessage(updates)
+                  Storage.set({last_version: Config.App.version})
+                })
+              }
             }
           })
         }, 5000)
