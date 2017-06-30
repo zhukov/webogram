@@ -71,7 +71,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     function mtpClearStorage () {
-      var saveKeys = []
+      var saveKeys = ['user_auth', 't_user_auth', 'dc', 't_dc']
       for (var dcID = 1; dcID <= 5; dcID++) {
         saveKeys.push('dc' + dcID + '_auth_key')
         saveKeys.push('t_dc' + dcID + '_auth_key')
