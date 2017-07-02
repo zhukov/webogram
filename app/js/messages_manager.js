@@ -138,6 +138,9 @@ angular.module('myApp.services')
       var isMegagroup = AppPeersManager.isMegagroup(channelID)
       var mid = AppMessagesIDsManager.getFullMessageID(dialog.top_message, channelID)
       var message = getMessage(mid)
+      if (message.deleted) {
+        console.warn(dT(), 'Deleted message in coversaion', dialog, message, mid)
+      }
       var offsetDate = message.date
 
       if (!channelID && peerID < 0) {
@@ -911,7 +914,11 @@ angular.module('myApp.services')
     }
 
     function getMessage (messageID) {
-      return messagesStorage[messageID] || {deleted: true}
+      return messagesStorage[messageID] || {
+        _: 'messageEmpty',
+        deleted: true,
+        pFlags: {out: false, unread: false}
+      }
     }
 
     function canMessageBeEdited(message) {
