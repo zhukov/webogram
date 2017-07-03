@@ -136,10 +136,24 @@ angular.module('myApp.services')
       SearchIndexManager.indexObject(peerID, peerText, dialogsIndex)
 
       var isMegagroup = AppPeersManager.isMegagroup(channelID)
-      var mid = AppMessagesIDsManager.getFullMessageID(dialog.top_message, channelID)
-      var message = getMessage(mid)
-      if (message.deleted) {
-        console.warn(dT(), 'Deleted message in coversaion', dialog, message, mid)
+      if (dialog.top_message) {
+        var mid = AppMessagesIDsManager.getFullMessageID(dialog.top_message, channelID)
+        var message = getMessage(mid)
+      } else {
+        var mid = tempID--
+        var message = {
+          _: 'message',
+          id: mid,
+          mid: mid,
+          from_id: AppUsersManager.getSelf().id,
+          to_id: AppPeersManager.getOutputPeer(peerID),
+          deleted: true,
+          flags: 0,
+          pFlags: {unread: false, out: true},
+          date: 0,
+          message: ''
+        }
+        saveMessages([message])
       }
       var offsetDate = message.date
 
