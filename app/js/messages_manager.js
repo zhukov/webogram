@@ -803,6 +803,11 @@ angular.module('myApp.services')
               neededDocType = 'voice'
               break
 
+            case 'inputMessagesFilterRoundVideo':
+              neededContents['messageMediaDocument'] = true
+              neededDocType = 'round'
+              break
+
             default:
               return $q.when({
                 count: 0,
