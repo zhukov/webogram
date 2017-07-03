@@ -31,7 +31,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start()
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, WebPushApiManager, TelegramMeWebService, _) {
     $modalStack.dismissAll()
     IdleManager.start()
 
@@ -47,6 +47,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       TelegramMeWebService.setAuthorized(false)
+      WebPushApiManager.forceUnsubscribe()
     })
 
     var options = {dcID: 2, createNetworker: true}
