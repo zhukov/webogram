@@ -2083,6 +2083,29 @@ angular.module('izhukov.utils', [])
       })
     }
 
+    function forceUnsubscribe() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.getSubscription().then(function (subscription) {
+          console.warn('force unsubscribe', subscription)
+          if (subscription) {
+            subscription.unsubscribe().then(function(successful) {
+              console.warn('force unsubscribe successful', successful)
+              isPushEnabled = false
+            }).catch(function(e) {
+              console.error('Unsubscription error: ', e)
+            })
+          }
+
+        }).catch(function(e) {
+          console.error('Error thrown while unsubscribing from ' +
+            'push messaging.', e)
+        })
+      })
+    }
+
     function isAliveNotify() {
       if (!isAvailable ||
           $rootScope.idle && $rootScope.idle.deactivated) {
@@ -2176,6 +2199,7 @@ angular.module('izhukov.utils', [])
       isPushEnabled: isPushEnabled,
       subscribe: subscribe,
       unsubscribe: unsubscribe,
+      forceUnsubscribe: forceUnsubscribe,
       hidePushNotifications: hidePushNotifications,
       setLocalNotificationsDisabled: setLocalNotificationsDisabled,
       setSettings: setSettings

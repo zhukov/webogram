@@ -7,7 +7,7 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-  .factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $rootScope, $q, TelegramMeWebService) {
+  .factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $rootScope, $q, WebPushApiManager, TelegramMeWebService) {
     var cachedNetworkers = {}
     var cachedUploadNetworkers = {}
     var cachedExportPromise = {}
@@ -47,11 +47,12 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       for (var dcID = 1; dcID <= 5; dcID++) {
         storageKeys.push('dc' + dcID + '_auth_key')
       }
+      WebPushApiManager.forceUnsubscribe()
       return Storage.get(storageKeys).then(function (storageResult) {
         var logoutPromises = []
         for (var i = 0; i < storageResult.length; i++) {
           if (storageResult[i]) {
-            logoutPromises.push(mtpInvokeApi('auth.logOut', {}, {dcID: i + 1}))
+            logoutPromises.push(mtpInvokeApi('auth.logOut', {}, {dcID: i + 1, ignoreErrors: true}))
           }
         }
         return $q.all(logoutPromises).then(function () {
@@ -156,6 +157,9 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             error = {message: error}
           }
           deferred.reject(error)
+          if (options.ignoreErrors) {
+            return
+          }
 
           if (error.code == 406) {
             error.handled = true
