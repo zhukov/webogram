@@ -1,3 +1,8 @@
+### 0.5.7
+* Video messages and Telescope
+* Notifications about new logins
+* Changelog is now received as a message
+
 ### 0.5.6
 * Edit the text of your messages after sending them. This works across all Telegram chats, including groups and one-on-one conversations. Select a message and click 'Edit' or just press the up arrow button to edit your last message.
 * Unsend Messages: retract any messages within 48 hours of sending them. Check out the [Telegram Blog](https://telegram.org/blog/unsend-and-usage) for more info.
