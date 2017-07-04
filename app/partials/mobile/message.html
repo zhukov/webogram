@@ -10,7 +10,7 @@
       </div>
       <div ng-switch-default class="im_service_message">
         <a class="im_message_author" ng-if="::historyMessage.fromID > 0" my-peer-link="historyMessage.fromID" short="historyMessage.peerID > 0" color="historyMessage.peerID < 0" no-watch="true"></a>
-        <span class="im_message_service" my-service-message></span>
+        <span class="im_message_service" my-service-message="historyMessage"></span>
       </div>
 
       <a ng-if="::historyMessage.action._ == 'messageActionChatEditPhoto' || historyMessage.action._ == 'messageActionChannelEditPhoto'" class="im_service_message_photo_thumb" href="" ng-click="openPhoto(historyMessage.action.photo.id)">

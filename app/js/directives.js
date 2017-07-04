@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.7 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -534,9 +534,26 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myServiceMessage', function () {
+  .directive('myServiceMessage', function (ErrorService, AppMessagesManager) {
     return {
-      templateUrl: templateUrl('message_service')
+      templateUrl: templateUrl('message_service'),
+      scope: {
+        'historyMessage': '=myServiceMessage'
+      },
+      link: link
+    }
+
+    function link ($scope, element, attrs) {
+      $scope.phoneCallClick = function (messageID) {
+        var message = AppMessagesManager.getMessage(messageID)
+        var userID = AppMessagesManager.getMessagePeer(message)
+        ErrorService.show({
+          error: {
+            type: 'PHONECALLS_NOT_SUPPORTED',
+            userID: userID
+          }
+        })
+      }
     }
   })
 
@@ -2178,13 +2195,95 @@ angular.module('myApp.directives', ['myApp.filters'])
           }, 200)
         })
       }
+    }
+  })
 
-    // Autoplay small GIFs
-    // if (!Config.Mobile &&
-    //     $scope.document.size &&
-    //     $scope.document.size < 1024 * 1024) {
-    //   $scope.toggle()
-    // }
+  .directive('myLoadRound', function (AppDocsManager, $timeout) {
+
+    var currentPlayer = false
+    var currentPlayerScope = false
+
+    return {
+      link: link,
+      templateUrl: templateUrl('full_round'),
+      scope: {
+        document: '='
+      }
+    }
+
+    function checkPlayer(newPlayer, newScope) {
+      if (currentPlayer === newPlayer) {
+        return false
+      }
+      if (currentPlayer) {
+        currentPlayer.pause()
+        currentPlayer.currentTime = 0
+        currentPlayerScope.isActive = false
+      }
+      currentPlayer = newPlayer
+      currentPlayerScope = newScope
+    }
+
+    function link ($scope, element, attrs) {
+      var imgWrap = $('.img_round_image_wrap', element)
+      imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
+
+      var downloadPromise = false
+
+      $scope.isActive = false
+
+      $scope.toggle = function (e) {
+        if (e && checkClick(e, true)) {
+          AppDocsManager.saveDocFile($scope.document.id)
+          return false
+        }
+
+        if ($scope.document.url) {
+          $scope.isActive = !$scope.isActive
+          onContentLoaded(function () {
+            $scope.$emit('ui_height')
+
+            var video = $('video', element)[0]
+            if (video) {
+              if (!$scope.isActive) {
+                video.pause()
+                video.currentTime = 0
+              } else {
+                checkPlayer(video, $scope)
+                video.play()
+              }
+            }
+          })
+          return
+        }
+
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
+          return
+        }
+
+        downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
+
+        downloadPromise.then(function () {
+          $timeout(function () {
+            var video = $('video', element)[0]
+            checkPlayer(video, $scope)
+            $(video).on('ended', function () {
+              if ($scope.isActive) {
+                $scope.toggle()
+              }
+            })
+            $scope.isActive = true
+          }, 200)
+        })
+      }
+
+      $scope.$on('ui_history_change', function () {
+        if ($scope.isActive) {
+          $scope.toggle()
+        }
+      })
     }
   })
 
@@ -2394,17 +2493,22 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var width = element.attr('width') || 200
       var height = element.attr('height') || 200
-      var apiKey = Config.ExtCredentials.gmaps.api_key
       var zoom = width > 200 ? 15 : 13
+      var useGoogle = false
+      var src
+
+      if (useGoogle) {
+        var apiKey = Config.ExtCredentials.gmaps.api_key
+        var useApiKey = true
+        src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
+        if (useApiKey) {
+          src += '&key=' + apiKey
+        }
+      } else {
+        src = 'https://static-maps.yandex.ru/1.x/?l=map&ll=' + $scope.point['long'] + ',' + $scope.point['lat'] + '&z=' + zoom + '&size=' + width + ',' + height + '&scale=1&pt=' + $scope.point['long'] + ',' + $scope.point['lat'] + ',pm2rdm&lang=en_US'
+      }
 
       element.attr('src', 'img/blank.gif')
-
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
-      var useApiKey = false
-
-      if (useApiKey) {
-        src += '&key=' + apiKey
-      }
 
       ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf())

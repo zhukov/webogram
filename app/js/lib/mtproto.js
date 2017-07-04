@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.7 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -802,8 +802,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var isClean = this.cleanupSent()
       // console.log('Check lp', this.longPollPending, tsNow(), this.dcID, isClean)
       if (this.longPollPending && tsNow() < this.longPollPending ||
-        this.offline ||
-        akStopped) {
+          this.offline ||
+          akStopped) {
         return false
       }
       var self = this

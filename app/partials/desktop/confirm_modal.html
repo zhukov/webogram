@@ -22,9 +22,24 @@
       </div>
       <span ng-switch-when="MESSAGE_DELETE" my-i18n="confirm_modal_message_delete"></span>
       <span ng-switch-when="MESSAGES_DELETE">
-        <ng-pluralize count="count"
-                     when="confirm_modal_X_messages_delete">
-        </ng-pluralize>
+        <span my-i18n="confirm_modal_delete_messages">
+          <my-i18n-param name="messages"><strong><ng-pluralize when="confirm_modal_delete_X_messages" count="count"></ng-pluralize></strong></my-i18n-param>
+        </span>
+
+        <a class="tg_checkbox" ng-if="revocable" ng-click="data.revoke = !data.revoke" ng-class="data.revoke ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="confirm_modal_message_revoke">
+            <my-i18n-param name="recipient" ng-switch="isUser">
+              <span ng-switch-when="true" my-peer-link="peerID" short="true"></span>
+              <span ng-switch-default my-i18n="confirm_modal_message_revoke_recipient_chat"></span>
+            </my-i18n-param>
+          </span>
+        </a>
+        <p class="tg_checkbox" ng-if="!revocable && !isChannel" ng-switch="isUser ? 'user' : (isSupergroup ? 'supergroup' : (isUsualGroup ? 'group' : 'default'))">
+          <span ng-switch-when="supergroup" my-i18n="confirm_modal_delete_messages_for_everyone_chat"></span>
+          <span ng-switch-when="group" my-i18n="confirm_modal_delete_messages_for_you_only_chat"></span>
+          <span ng-switch-when="user" my-i18n="confirm_modal_delete_messages_for_you_only_pm"><my-i18n-param name="user"><strong my-peer-link="peerID"></strong></my-i18n-param></span>
+        </p>
       </span>
       <span ng-switch-when="PHOTO_DELETE" my-i18n="confirm_modal_photo_delete"></span>
       <span ng-switch-when="CONTACTS_IMPORT_PERFORM" my-i18n="confirm_modal_contacts_import"></span>
@@ -86,7 +101,7 @@
     <button class="btn btn-md" ng-click="$dismiss()">
       <span my-i18n="modal_cancel"></span>
     </button>
-    <button class="btn btn-md btn-md-primary" ng-switch="type" ng-click="$close()" ng-class="{'btn-md-danger': type == 'RESET_ACCOUNT' || type == 'HISTORY_LEAVE_AND_FLUSH' || type == 'HISTORY_FLUSH_AND_DELETE' || type == 'HISTORY_FLUSH'}" my-focused >
+    <button class="btn btn-md btn-md-primary" ng-switch="type" ng-click="$close(data)" ng-class="{'btn-md-danger': type == 'RESET_ACCOUNT' || type == 'HISTORY_LEAVE_AND_FLUSH' || type == 'HISTORY_FLUSH_AND_DELETE' || type == 'HISTORY_FLUSH'}" my-focused >
       <span ng-switch-when="LOGOUT" my-i18n="confirm_modal_logout_submit"></span>
       <span ng-switch-when="HISTORY_FLUSH" my-i18n="confirm_modal_clear_history_submit"></span>
       <span ng-switch-when="HISTORY_LEAVE_AND_FLUSH" my-i18n="confirm_modal_leave_chat_submit"></span>

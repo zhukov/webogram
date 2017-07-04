@@ -202,7 +202,8 @@ gulp.task('generate-service-worker', ['build'], function (callback) {
 gulp.task('add-appcache-manifest', ['build'], function () {
   return gulp.src(fileGlobs)
     .pipe($.manifest({
-      timestamp: true,
+      timestamp: false,
+      hash: true,
       network: ['http://*', 'https://*', '*'],
       filename: 'webogram.appcache',
       exclude: ['webogram.appcache', 'app.manifest']
@@ -293,14 +294,14 @@ gulp.task('karma-tdd', function (done) {
 
 gulp.task('test', function (callback) {
   runSequence(
-    ['templates', 'karma-single'],
+    'templates', 'karma-single', 'clean-templates',
     callback
   )
 })
 
 gulp.task('tdd', function (callback) {
   runSequence(
-    ['templates', 'karma-tdd'],
+    'templates', 'karma-tdd',
     callback
   )
 })

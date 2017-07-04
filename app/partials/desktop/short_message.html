@@ -6,6 +6,7 @@
       <my-i18n msgid="conversation_media_sticker"></my-i18n>
     </span>
     <span ng-switch-when="gif" my-i18n="conversation_media_gif"></span>
+    <span ng-switch-when="round" my-i18n="conversation_media_round"></span>
     <span ng-switch-when="audio" my-i18n="conversation_media_audio"></span>
     <span ng-switch-when="voice" my-i18n="conversation_media_audio"></span>
     <span ng-switch-when="video" my-i18n="conversation_media_video"></span>
@@ -18,6 +19,7 @@
     <span my-emoji-image="🎮"></span>
     <span ng-bind-html="message.media.game.rTitle"></span>
   </span>
+  <span ng-switch-when="messageMediaUnsupported" my-i18n="conversation_media_unsupported"></span>
 </span><span class="im_short_message_service" ng-if="message._ == 'messageService'" ng-switch="message.action._">
   <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
   <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
@@ -49,5 +51,12 @@
                      when="conversation_scored_X"></ng-pluralize>
     </my-i18n-param>
   </span>
+  <span ng-switch-when="messageActionPhoneCall" ng-switch="message.action.type">
+    <span ng-switch-when="out_missed" my-i18n="message_service_phonecall_canceled"></span>
+    <span ng-switch-when="in_missed" my-i18n="message_service_phonecall_missed"></span>
+    <span ng-switch-when="out_ok" my-i18n="message_service_phonecall_outgoing"></span>
+    <span ng-switch-when="in_ok" my-i18n="message_service_phonecall_incoming"></span>
+  </span>
+  <span ng-switch-when="messageActionPaymentSent" my-i18n="message_service_payment_sent"></span>
 
 </span><span class="im_short_message_text" ng-if="message.message.length && (!message.media || message.media._ == 'messageMediaWebPage')" ng-bind-html="message.richMessage"></span>

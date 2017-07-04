@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.7 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -7,7 +7,7 @@
 
 angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
 
-  .factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $rootScope, $q, TelegramMeWebService) {
+  .factory('MtpApiManager', function (Storage, MtpAuthorizer, MtpNetworkerFactory, MtpSingleInstanceService, AppRuntimeManager, ErrorService, qSync, $rootScope, $q, WebPushApiManager, TelegramMeWebService) {
     var cachedNetworkers = {}
     var cachedUploadNetworkers = {}
     var cachedExportPromise = {}
@@ -47,11 +47,12 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       for (var dcID = 1; dcID <= 5; dcID++) {
         storageKeys.push('dc' + dcID + '_auth_key')
       }
+      WebPushApiManager.forceUnsubscribe()
       return Storage.get(storageKeys).then(function (storageResult) {
         var logoutPromises = []
         for (var i = 0; i < storageResult.length; i++) {
           if (storageResult[i]) {
-            logoutPromises.push(mtpInvokeApi('auth.logOut', {}, {dcID: i + 1}))
+            logoutPromises.push(mtpInvokeApi('auth.logOut', {}, {dcID: i + 1, ignoreErrors: true}))
           }
         }
         return $q.all(logoutPromises).then(function () {
@@ -71,7 +72,7 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     function mtpClearStorage () {
-      var saveKeys = []
+      var saveKeys = ['user_auth', 't_user_auth', 'dc', 't_dc']
       for (var dcID = 1; dcID <= 5; dcID++) {
         saveKeys.push('dc' + dcID + '_auth_key')
         saveKeys.push('t_dc' + dcID + '_auth_key')
@@ -156,6 +157,13 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             error = {message: error}
           }
           deferred.reject(error)
+          if (options.ignoreErrors) {
+            return
+          }
+
+          if (error.code == 406) {
+            error.handled = true
+          }
 
           if (!options.noErrorBox) {
             error.input = method
@@ -760,7 +768,10 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
     }
 
     function clearInstance () {
-      Storage.remove(masterInstance ? 'xt_instance' : 'xt_idle_instance')
+      if (masterInstance && !deactivated) {
+        console.warn('clear master instance');
+        Storage.remove('xt_instance')
+      }
     }
 
     function deactivateInstance () {
@@ -799,19 +810,12 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
       var idle = $rootScope.idle && $rootScope.idle.isIDLE
       var newInstance = {id: instanceID, idle: idle, time: time}
 
-      Storage.get('xt_instance', 'xt_idle_instance').then(function (result) {
-        var curInstance = result[0]
-        var idleInstance = result[1]
-
-        // console.log(dT(), 'check instance', newInstance, curInstance, idleInstance)
+      Storage.get('xt_instance').then(function (curInstance) {
+        // console.log(dT(), 'check instance', newInstance, curInstance)
         if (!idle ||
-          !curInstance ||
-          curInstance.id == instanceID ||
-          curInstance.time < time - 60000) {
-          if (idleInstance &&
-            idleInstance.id == instanceID) {
-            Storage.remove('xt_idle_instance')
-          }
+            !curInstance ||
+            curInstance.id == instanceID ||
+            curInstance.time < time - 20000) {
           Storage.set({xt_instance: newInstance})
           if (!masterInstance) {
             MtpNetworkerFactory.startAll()
@@ -820,22 +824,21 @@ angular.module('izhukov.mtproto.wrapper', ['izhukov.utils', 'izhukov.mtproto'])
             } else {
               console.warn(dT(), 'now master instance', newInstance)
             }
+            masterInstance = true
           }
-          masterInstance = true
           if (deactivatePromise) {
             $timeout.cancel(deactivatePromise)
             deactivatePromise = false
           }
         } else {
-          Storage.set({xt_idle_instance: newInstance})
           if (masterInstance) {
             MtpNetworkerFactory.stopAll()
             console.warn(dT(), 'now idle instance', newInstance)
             if (!deactivatePromise) {
               deactivatePromise = $timeout(deactivateInstance, 30000)
             }
+            masterInstance = false
           }
-          masterInstance = false
         }
       })
     }

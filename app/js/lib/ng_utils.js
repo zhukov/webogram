@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.5.7 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1160,17 +1160,12 @@ angular.module('izhukov.utils', [])
   })
 
   .service('RichTextProcessor', function ($sce, $sanitize) {
-    var emojiMap = {}
     var emojiData = Config.Emoji
     var emojiIconSize = 18
     var emojiSupported = navigator.userAgent.search(/OS X|iPhone|iPad|iOS|Android/i) != -1,
       emojiCode
 
     var emojiRegExp = '\\u0023\\u20E3|\\u00a9|\\u00ae|\\u203c|\\u2049|\\u2139|[\\u2194-\\u2199]|\\u21a9|\\u21aa|\\u231a|\\u231b|\\u23e9|[\\u23ea-\\u23ec]|\\u23f0|\\u24c2|\\u25aa|\\u25ab|\\u25b6|\\u2611|\\u2614|\\u26fd|\\u2705|\\u2709|[\\u2795-\\u2797]|\\u27a1|\\u27b0|\\u27bf|\\u2934|\\u2935|[\\u2b05-\\u2b07]|\\u2b1b|\\u2b1c|\\u2b50|\\u2b55|\\u3030|\\u303d|\\u3297|\\u3299|[\\uE000-\\uF8FF\\u270A-\\u2764\\u2122\\u25C0\\u25FB-\\u25FE\\u2615\\u263a\\u2648-\\u2653\\u2660-\\u2668\\u267B\\u267F\\u2693\\u261d\\u26A0-\\u26FA\\u2708\\u2702\\u2601\\u260E]|[\\u2600\\u26C4\\u26BE\\u23F3\\u2764]|\\uD83D[\\uDC00-\\uDFFF]|\\uD83C[\\uDDE8-\\uDDFA\uDDEC]\\uD83C[\\uDDEA-\\uDDFA\uDDE7]|[0-9]\\u20e3|\\uD83C[\\uDC00-\\uDFFF]'
-
-    for (emojiCode in emojiData) {
-      emojiMap[emojiData[emojiCode][0]] = emojiCode
-    }
 
     var alphaCharsRegExp = 'a-z' +
       '\\u00c0-\\u00d6\\u00d8-\\u00f6\\u00f8-\\u00ff' + // Latin-1
@@ -1240,7 +1235,7 @@ angular.module('izhukov.utils', [])
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
     var markdownTestRegExp = /[`_*@]/
-    var markdownRegExp = /(^|\s)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)(`|\*\*|__)([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/
+    var markdownRegExp = /(^|\s|\n)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)(`|\*\*|__)([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/m
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1363,8 +1358,8 @@ angular.module('izhukov.utils', [])
           })
         }
         else if (match[8]) { // Emoji
-          if ((emojiCode = emojiMap[match[8]]) &&
-            (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
+          if ((emojiCode = EmojiHelper.emojiMap[match[8]]) &&
+              (emojiCoords = getEmojiSpritesheetCoords(emojiCode))) {
             entities.push({
               _: 'messageEntityEmoji',
               offset: matchIndex,
@@ -1906,7 +1901,7 @@ angular.module('izhukov.utils', [])
         text.push(raw.substr(0, match.index))
 
         if (match[8]) {
-          if ((emojiCode = emojiMap[match[8]]) &&
+          if ((emojiCode = EmojiHelper.emojiMap[match[8]]) &&
             (emojiTitle = emojiData[emojiCode][1][0])) {
             text.push(':' + emojiTitle + ':')
           } else {
@@ -1923,14 +1918,15 @@ angular.module('izhukov.utils', [])
     }
 
     function wrapUrl (url, unsafe) {
-      if (!url.match(/^https?:\/\//i)) {
+      if (!url.match(/^(https?|tg):\/\//i)) {
         url = 'http://' + url
       }
       var tgMeMatch
+      var telescoPeMatch
       if (unsafe == 2) {
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
       }
-      else if ( (tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
+      else if ((tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
         var path = tgMeMatch[1].split('/')
         switch (path[0]) {
           case 'joinchat':
@@ -1948,6 +1944,9 @@ angular.module('izhukov.utils', [])
               url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '')
             }
         }
+      }
+      else if ((telescoPeMatch = url.match(/^https?:\/\/telesco\.pe\/([^/?]+)\/(\d+)/))) {
+        url = 'tg://resolve?domain=' + telescoPeMatch[1] + '&post=' + telescoPeMatch[2]
       }
       else if (unsafe) {
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
@@ -2084,6 +2083,29 @@ angular.module('izhukov.utils', [])
       })
     }
 
+    function forceUnsubscribe() {
+      if (!isAvailable) {
+        return
+      }
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.pushManager.getSubscription().then(function (subscription) {
+          console.warn('force unsubscribe', subscription)
+          if (subscription) {
+            subscription.unsubscribe().then(function(successful) {
+              console.warn('force unsubscribe successful', successful)
+              isPushEnabled = false
+            }).catch(function(e) {
+              console.error('Unsubscription error: ', e)
+            })
+          }
+
+        }).catch(function(e) {
+          console.error('Error thrown while unsubscribing from ' +
+            'push messaging.', e)
+        })
+      })
+    }
+
     function isAliveNotify() {
       if (!isAvailable ||
           $rootScope.idle && $rootScope.idle.deactivated) {
@@ -2177,6 +2199,7 @@ angular.module('izhukov.utils', [])
       isPushEnabled: isPushEnabled,
       subscribe: subscribe,
       unsubscribe: unsubscribe,
+      forceUnsubscribe: forceUnsubscribe,
       hidePushNotifications: hidePushNotifications,
       setLocalNotificationsDisabled: setLocalNotificationsDisabled,
       setSettings: setSettings
