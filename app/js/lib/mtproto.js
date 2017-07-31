@@ -1121,7 +1121,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       this.pendingAcks = []
 
-      var self = this
       this.sendEncryptedRequest(message).then(function (result) {
         self.toggleOffline(false)
         // console.log('parse for', message)
