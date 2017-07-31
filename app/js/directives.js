@@ -3120,8 +3120,31 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myOgvPlayer', function ($compile) {
+    return {
+      link: function ($scope, $element, $attrs) {
+        var audio = $scope.audio
+        var playerEl
+        if (audio.mime_type == 'audio/ogg' &&
+            // false &&
+            OGVCompat.hasWebAudio() && // we don't want to use Flash
+            OGVCompat.supported('OGVPlayer')) {
+          playerEl = new OGVPlayer({debug: false, worker: false})
+        } else {
+          playerEl = document.createElement('audio')
+        }
+
+        $(playerEl).attr('media-player', $attrs.myOgvPlayer)
+        $(playerEl).attr('src', '{{::' + $attrs.src + '}}')
+
+        $compile(playerEl)($scope)
+        $($element).append(playerEl)
+      }
+    }
+  })
+
   .directive('myAudioPlayer', function ($timeout, $q, Storage, AppDocsManager, AppMessagesManager, ErrorService) {
-    var currentPlayer = false
+    var currentPlayerScope = false
     var audioVolume = 0.5
 
     Storage.get('audio_volume').then(function (newAudioVolume) {
@@ -3147,20 +3170,23 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       scope: {
-        audio: '=',
-        message: '='
+        audio: '='
       },
       templateUrl: templateUrl('audio_player')
     }
 
-    function checkPlayer (newPlayer) {
-      if (newPlayer === currentPlayer) {
+    function checkAudioPlayer (newPlayerScope) {
+      if (newPlayerScope === currentPlayerScope) {
         return false
       }
-      if (currentPlayer) {
-        currentPlayer.pause()
+      if (currentPlayerScope) {
+        ;(function ($scope) {
+          setZeroTimeout(function () {
+            $scope.mediaPlayer.player.pause()
+          })
+        })(currentPlayerScope)
       }
-      currentPlayer = newPlayer
+      currentPlayerScope = newPlayerScope
     }
 
     function link ($scope, element, attrs) {
@@ -3168,20 +3194,34 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.volume = audioVolume
       $scope.mediaPlayer = {}
+      if ($scope.$parent.messageId) {
+        $scope.message = AppMessagesManager.wrapForHistory($scope.$parent.messageId)
+      }
 
       $scope.download = function () {
         AppDocsManager.saveDocFile($scope.audio.id)
       }
 
+      $scope.duration = function () {
+        if ($scope.mediaPlayer.player &&
+            $scope.mediaPlayer.player.duration > 0 &&
+            $scope.mediaPlayer.player.duration < Infinity) {
+          return $scope.mediaPlayer.player.duration
+        }
+        return $scope.audio && $scope.audio.duration || 0
+      }
+
       $scope.togglePlay = function () {
         if ($scope.audio.url) {
-          checkPlayer($scope.mediaPlayer.player)
-          $scope.mediaPlayer.player.playPause()
+          checkAudioPlayer($scope)
+          setZeroTimeout(function () {
+            $scope.mediaPlayer.player.playPause()
+          })
         } else if ($scope.audio.progress && $scope.audio.progress.enabled) {
         } else {
           AppDocsManager.downloadDoc($scope.audio.id).then(function () {
             onContentLoaded(function () {
-              var errorListenerEl = $('audio', element)[0] || element[0]
+              var errorListenerEl = $('audio, ogvjs', element)[0] || element[0]
               if (errorListenerEl) {
                 var errorAlready = false
                 var onAudioError = function (event) {
@@ -3209,13 +3249,13 @@ angular.module('myApp.directives', ['myApp.filters'])
                 })
               }
               setTimeout(function () {
-                checkPlayer($scope.mediaPlayer.player)
+                checkAudioPlayer($scope)
                 $scope.mediaPlayer.player.setVolume(audioVolume)
                 $scope.mediaPlayer.player.play()
 
                 if ($scope.message &&
-                  !$scope.message.pFlags.out &&
-                  $scope.message.pFlags.media_unread) {
+                    !$scope.message.pFlags.out &&
+                    $scope.message.pFlags.media_unread) {
                   AppMessagesManager.readMessages([$scope.message.mid])
                 }
               }, 300)

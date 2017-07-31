@@ -4869,7 +4869,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           // console.warn(dT(), 'server', draft)
         } else {
           // console.warn(dT(), 'local', draft)
-          console.warn(dT(), 'local', draft)
         }
         var replyToMsgID = draft && draft.replyToMsgID
         if (replyToMsgID) {
