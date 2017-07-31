@@ -1229,7 +1229,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       photos: 'inputMessagesFilterPhotos',
       video: 'inputMessagesFilterVideo',
       documents: 'inputMessagesFilterDocument',
-      audio: 'inputMessagesFilterVoice'
+      audio: 'inputMessagesFilterVoice',
+      round: 'inputMessagesFilterRoundVideo',
     }
     var jump = 0
     var moreJump = 0
