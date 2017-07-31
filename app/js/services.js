@@ -4737,16 +4737,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           !target.onclick &&
           !target.onmousedown) {
           var href = $(target).attr('href') || target.href || ''
-          if (Config.Modes.chrome_packed && 
-              href.length &&
-              $(target).attr('target') == '_blank') {
-            $(target).attr('rel', '')
-          }
           var match = href.match(tgAddrRegExp)
           if (match) {
             if (handleTgProtoAddr(match[3], true)) {
               return cancelEvent(event)
             }
+          }
+        }
+      })
+
+      $(document).on('mousedown', function (event) {
+        var target = event.target
+        if (target &&
+            target.tagName == 'A') {
+          var href = $(target).attr('href') || target.href || ''
+          if (Config.Modes.chrome_packed && 
+              href.length &&
+              $(target).attr('target') == '_blank') {
+            $(target).attr('rel', '')
           }
         }
       })
