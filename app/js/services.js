@@ -4342,7 +4342,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   })
 
   .service('ChangelogNotifyService', function (Storage, $rootScope, $modal, $timeout, MtpApiManager, ApiUpdatesManager) {
+
+    var checked = false
+
     function checkUpdate () {
+      if (checked) {
+        return
+      }
+      checked = true
       MtpApiManager.getUserID().then(function (userID) {
         if (!userID) {
           return
