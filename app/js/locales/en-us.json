@@ -528,7 +528,7 @@
 	"im_submit_message": "Send",
 	"im_submit_edit_message": "Save",
 	"im_edit_message_title": "Edit message",
-
+  "im_voice_recorder_label": "Swipe left to abort",
 	"login_sign_in": "Sign in",
 	"login_enter_number_description": "Please choose your country and enter your full phone number.",
 	"login_incorrect_number": "Incorrect phone number",

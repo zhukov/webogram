@@ -131,7 +131,7 @@
               </div>
             </div>
 
-            <div class="im_send_panel_wrap" ng-show="!historyState.actions()">
+            <div class="im_send_panel_wrap" ng-show="!historyState.actions()" ng-class="{im_voice_recording: voiceRecorder.recording, im_processing_recording: voiceRecorder.processing}">
 
               <div class="im_send_form_wrap1">
 
@@ -161,9 +161,22 @@
                         <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto" ng-trim="false"></textarea>
                       </div>
 
+                      <div class="im_voice_recorder_wrap">
+                          <div class="im_recorder_indicator"><i></i></div>
+                          <div class="im_recorder_time">{{voiceRecorder.time}}</div>
+                          <div class="im_recorder_label">
+                              <i class="icon icon-back"></i>
+                              <span my-i18n="im_voice_recorder_label"></span>
+                          </div>
+                      </div>
+
                       <div class="im_attach pull-right">
                         <input type="file" class="im_attach_input" size="28" multiple="true" title="{{'im_media_attach_title' | i18n}}" />
                         <i class="icon icon-paperclip"></i>
+                      </div>
+
+                      <div class="im_record pull-right">
+                        <i class="icon icon-mic"></i>
                       </div>
 
                       <a class="composer_emoji_insert_btn pull-right"><i class="icon icon-emoji"></i></a>

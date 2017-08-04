@@ -1567,9 +1567,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       var dragStarted
       var dragTimeout
       var submitBtn = $('.im_submit', element)[0]
+      var voiceRecord = $('.im_record', element);
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>')
       var cachedStickerImages = {}
+
+      var audioRecorder = null;
+      var audioPromise = null;
+      var audioStream = null;
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
@@ -1683,7 +1688,82 @@ angular.module('myApp.directives', ['myApp.filters'])
         })
       })
 
-      var sendOnEnter = true
+      navigator.getUserMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+
+      voiceRecord.on('touchstart', function(e) {
+        if ($scope.$parent.$parent.voiceRecorder.processing) { return; }
+
+        navigator.getUserMedia({audio : true}, function(stream){
+          var start = Date.now();
+          var touch = null;
+
+          audioPromise = null;
+          audioStream = stream;
+          audioRecorder = new MediaRecorder(stream);
+
+          var interval = setInterval(function(){
+            var time = (new Date());
+
+            time.setTime(Date.now() - start);
+
+            $scope.$apply(function(){
+              $scope.$parent.$parent.voiceRecorder.time = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes() + ':' + (time.getSeconds() < 10 ? '0' : '') + time.getSeconds();
+            });
+          }, 1000);
+
+          $scope.$apply(function(){
+            $scope.$parent.$parent.voiceRecorder.time = '00:00';
+            $scope.$parent.$parent.voiceRecorder.recording = interval;
+          });
+
+          audioRecorder.start();
+
+          console.log('recording now!');
+
+        }, function(e){
+          console.error(e);
+        });
+      });
+
+      voiceRecord.on('click', function(){
+        if (audioPromise) {
+          $scope.$parent.$parent.voiceRecorder.processing = true;
+
+          audioPromise.then(function(e) {
+            var blob = e.data;
+
+            console.log(blob);
+            $scope.draftMessage.files = [blob];
+            $scope.draftMessage.isMedia = true;
+
+            $scope.$parent.$parent.voiceRecorder.processing = false;
+
+            audioPromise = null;
+          });
+        }
+      });
+
+      $($window).on('touchend', function(){
+        if (audioStream && audioRecorder) {
+          audioPromise = new Promise(function(resolve) {
+            audioRecorder.ondataavailable = resolve;
+          });
+
+          audioRecorder.stop();
+          audioStream.stop();
+
+          audioRecorder = null;
+          audioStream   = null;
+
+          clearInterval($scope.$parent.$parent.voiceRecorder.recording);
+
+          $scope.$apply(function(){
+            $scope.$parent.$parent.voiceRecorder.recording = null;
+          });
+        }
+      });
+
+      var sendOnEnter = true;
       function updateSendSettings () {
         Storage.get('send_ctrlenter').then(function (sendOnCtrl) {
           sendOnEnter = !sendOnCtrl

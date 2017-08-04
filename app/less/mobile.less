@@ -1416,7 +1416,7 @@ a.im_message_fwd_author {
   }
 }
 
-.icon-paperclip {
+.icon-paperclip, .icon-mic {
   display: inline-block;
   width: 19px;
   height: 23px;
@@ -1427,12 +1427,16 @@ a.im_message_fwd_author {
   background-position: -12px -68px;
 }
 
-.im_attach {
+.icon-mic {
+  background-position: -12px -285px;
+}
+
+.im_attach, .im_record {
   cursor: pointer;
   display: none;
   overflow: hidden;
   position: absolute;
-  right: 0;
+  right: 34px;
   top: 0;
   margin: 0;
   width: 50px;
@@ -1447,6 +1451,32 @@ a.im_message_fwd_author {
   }
 }
 
+.non_ffos {
+  .im_attach {
+    right: 0;
+  }
+}
+
+.im_record {
+    right: 0;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.ffos {
+  .im_send_form_empty {
+    .im_send_field_wrap {
+      margin-right: 85px;
+    }
+
+    .im_record {
+      display: block;
+    }
+  }
+}
+
 .im_send_form_empty {
   .im_submit {
     display: none;
@@ -1454,6 +1484,38 @@ a.im_message_fwd_author {
 
   .im_attach {
     display: block;
+  }
+}
+
+.im_voice_recording, .im_processing_recording {
+  background-color: rgb(23, 23, 23);
+  color: white;
+
+  .im_voice_recorder_wrap {
+    display: block;
+  }
+
+  .im_send_field_wrap {
+    display: none;
+  }
+
+  .im_attach {
+    display: none;
+  }
+
+  .composer_emoji_insert_btn {
+    display: none;
+  }
+
+}
+
+.im_processing_recording {
+  .im_recorder_indicator i {
+    background-color: green;
+  }
+
+  .im_record {
+    display: none;
   }
 }
 
@@ -1494,6 +1556,45 @@ a.im_message_fwd_author {
 
   .form-control {
     border-radius: 4px;
+  }
+}
+
+.im_voice_recorder_wrap {
+  margin-left: 0px;
+  padding-left: 10px;
+  height: 38px;
+  display: none;
+  line-height: 38px;
+  color: white;
+}
+
+.im_recorder_indicator, .im_recorder_time {
+  float: left;
+  vertical-align: middle;
+}
+
+.im_recorder_indicator i {
+  background-color: #F00;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.im_recorder_label {
+  overflow: auto;
+  font-size: 17px;
+  text-align: center;
+  margin-right: 50px;
+
+  i, span {
+    vertical-align: middle;
+  }
+
+  i {
+    margin-right: 5px;
   }
 }
 
@@ -1876,7 +1977,6 @@ a.media_modal_date:hover {
 .im_send_keyboard_wrap {
   padding: 0 5px;
 }
-
 .composer_progress_icon_wrap {
   right: 6px;
   top: 4px;
