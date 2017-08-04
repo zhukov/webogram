@@ -1431,7 +1431,7 @@ a.im_message_fwd_author {
   background-position: -12px -285px;
 }
 
-.im_attach, .im_record {
+.im_attach {
   cursor: pointer;
   display: none;
   overflow: hidden;
@@ -1442,6 +1442,7 @@ a.im_message_fwd_author {
   width: 50px;
   height: 32px;
   padding: 3px 13px 4px 16px;
+  right: 0;
 
   &:active {
     .icon-paperclip {
@@ -1451,29 +1452,15 @@ a.im_message_fwd_author {
   }
 }
 
-.non_ffos {
-  .im_attach {
-    right: 0;
-  }
-}
-
 .im_record {
-    right: 0;
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-}
+  right: 0;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 
-.ffos {
-  .im_send_form_empty {
-    .im_send_field_wrap {
-      margin-right: 85px;
-    }
-
-    .im_record {
-      display: block;
-    }
+  .im_record_supported .im_send_form_empty & {
+    display: block;
   }
 }
 

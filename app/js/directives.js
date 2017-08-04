@@ -1547,7 +1547,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('mySendForm', function (_, $q, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+  .directive('mySendForm', function (_, $q, $timeout, $interval, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
     return {
       link: link,
       scope: {
@@ -1564,17 +1564,25 @@ angular.module('myApp.directives', ['myApp.filters'])
       var fileSelects = $('input', element)
       var dropbox = $('.im_send_dropbox_wrap', element)[0]
       var messageFieldWrap = $('.im_send_field_wrap', element)[0]
+      var sendFieldPanel = $('.im_send_field_panel', element)[0]
       var dragStarted
       var dragTimeout
       var submitBtn = $('.im_submit', element)[0]
-      var voiceRecord = $('.im_record', element);
+      var voiceRecordBtn = $('.im_record', element)[0]
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>')
       var cachedStickerImages = {}
 
-      var audioRecorder = null;
-      var audioPromise = null;
-      var audioStream = null;
+      var voiceRecorder = null
+      var voiceRecordSuccess = false
+      var voiceRecordSupported = Recorder.isRecordingSupported()
+      var voiceRecordDurationInterval = null
+      var voiceRecorderPromise = null
+      if (voiceRecordSupported) {
+        $(sendFieldPanel).addClass('im_record_supported')
+      }
+
+      $scope.voiceRecorder = {duration: 0, recording: false, processing: false}
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
@@ -1688,82 +1696,82 @@ angular.module('myApp.directives', ['myApp.filters'])
         })
       })
 
-      navigator.getUserMedia = ( navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+      $(voiceRecordBtn).on('contextmenu', cancelEvent)
 
-      voiceRecord.on('touchstart', function(e) {
-        if ($scope.$parent.$parent.voiceRecorder.processing) { return; }
-
-        navigator.getUserMedia({audio : true}, function(stream){
-          var start = Date.now();
-          var touch = null;
-
-          audioPromise = null;
-          audioStream = stream;
-          audioRecorder = new MediaRecorder(stream);
-
-          var interval = setInterval(function(){
-            var time = (new Date());
-
-            time.setTime(Date.now() - start);
-
-            $scope.$apply(function(){
-              $scope.$parent.$parent.voiceRecorder.time = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes() + ':' + (time.getSeconds() < 10 ? '0' : '') + time.getSeconds();
-            });
-          }, 1000);
-
-          $scope.$apply(function(){
-            $scope.$parent.$parent.voiceRecorder.time = '00:00';
-            $scope.$parent.$parent.voiceRecorder.recording = interval;
-          });
-
-          audioRecorder.start();
-
-          console.log('recording now!');
-
-        }, function(e){
-          console.error(e);
-        });
-      });
-
-      voiceRecord.on('click', function(){
-        if (audioPromise) {
-          $scope.$parent.$parent.voiceRecorder.processing = true;
-
-          audioPromise.then(function(e) {
-            var blob = e.data;
-
-            console.log(blob);
-            $scope.draftMessage.files = [blob];
-            $scope.draftMessage.isMedia = true;
-
-            $scope.$parent.$parent.voiceRecorder.processing = false;
-
-            audioPromise = null;
-          });
+      $(voiceRecordBtn).on('touchstart', function(e) {
+        if ($scope.voiceRecorder.processing) {
+          return
         }
-      });
 
-      $($window).on('touchend', function(){
-        if (audioStream && audioRecorder) {
-          audioPromise = new Promise(function(resolve) {
-            audioRecorder.ondataavailable = resolve;
-          });
+        voiceRecorderPromise = null
 
-          audioRecorder.stop();
-          audioStream.stop();
+        voiceRecorder = new Recorder({
+          monitorGain: 0,
+          numberOfChannels: 1,
+          bitRate: 64000,
+          encoderSampleRate: 48000,
+          encoderPath: 'vendor/recorderjs/encoder_worker.js'
+        })
 
-          audioRecorder = null;
-          audioStream   = null;
+        voiceRecorder.addEventListener('start', function(e) {
+          var startTime = tsNow(true)
 
-          clearInterval($scope.$parent.$parent.voiceRecorder.recording);
+          voiceRecordSuccess = false
 
-          $scope.$apply(function(){
-            $scope.$parent.$parent.voiceRecorder.recording = null;
-          });
-        }
-      });
+          voiceRecordDurationInterval = $interval(function() {
+            $scope.voiceRecorder.duration = tsNow(true) - startTime
+          }, 1000)
 
-      var sendOnEnter = true;
+          $scope.$apply(function() {
+            $scope.voiceRecorder.recording = true
+          })
+
+          console.warn(dT(), 'recording now!')
+        })
+
+        voiceRecorder.addEventListener('streamReady', function(e) {
+          voiceRecorder.start()
+        })
+
+        voiceRecorder.initStream()
+
+        $($window).one('touchend', function() {
+          var deferred = $q.defer()
+          voiceRecorder.addEventListener('dataAvailable', function(e) {
+            var blob = blobConstruct([e.detail], 'audio/ogg')
+            deferred.resolve(blob)
+          })
+          voiceRecorderPromise = deferred.promise
+          voiceRecorder.stop()
+
+          $interval.cancel(voiceRecordDurationInterval)
+
+          $scope.$apply(function() {
+            $scope.voiceRecorder.recording = false
+          })
+        })
+      })
+
+      $(voiceRecordBtn).on('touchend', function(e) {
+        voiceRecordSuccess = true
+        $timeout(function () {
+          if (voiceRecorderPromise) {
+            $scope.voiceRecorder.processing = true
+
+            voiceRecorderPromise.then(function(blob) {
+              console.warn(dT(), 'got audio', blob)
+              $scope.draftMessage.files = [blob]
+              $scope.draftMessage.isMedia = true
+
+              $scope.voiceRecorder.processing = false
+
+              voiceRecorderPromise = null
+            })
+          }
+        }, 100)
+      })
+
+      var sendOnEnter = true
       function updateSendSettings () {
         Storage.get('send_ctrlenter').then(function (sendOnCtrl) {
           sendOnEnter = !sendOnCtrl
