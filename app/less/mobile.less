@@ -574,6 +574,9 @@ html {
 .audio_player_button {
   margin-right: 8px;
 }
+.audio_player_volume_slider .tg_slider_wrap {
+  display: none;
+}
 
 .im_message_body_media {
   .im_message_document,
@@ -1329,6 +1332,11 @@ a.im_message_fwd_author {
   &_modal_section_value {
     font-size: 15px;
     padding: 0 12px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    width: 100%;
   }
 
   &_modal_section_body {
