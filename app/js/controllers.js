@@ -2321,6 +2321,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       send: submitMessage,
       replyClear: replyClear,
       fwdsClear: fwdsClear,
+      toggleSlash: toggleSlash,
+      replyKeyboardToggle: replyKeyboardToggle,
       type: 'new'
     }
     $scope.mentions = {}
@@ -2346,9 +2348,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('inline_bots_popular', updateMentions)
 
     $scope.$on('last_message_edit', setEditLastMessage)
-
-    $scope.replyKeyboardToggle = replyKeyboardToggle
-    $scope.toggleSlash = toggleSlash
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
       if ($rootScope.idle.initial) {

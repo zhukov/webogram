@@ -1548,8 +1548,11 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
   .directive('mySendForm', function (_, $q, $timeout, $interval, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+
     return {
       link: link,
+      templateUrl: templateUrl('send_form'),
+      replace: true,
       scope: {
         draftMessage: '=',
         mentions: '=',
@@ -1574,7 +1577,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       var cachedStickerImages = {}
 
       var voiceRecorder = null
-      var voiceRecordSuccess = false
       var voiceRecordSupported = Recorder.isRecordingSupported()
       var voiceRecordDurationInterval = null
       var voiceRecorderPromise = null
@@ -1698,7 +1700,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $(voiceRecordBtn).on('contextmenu', cancelEvent)
 
-      $(voiceRecordBtn).on('touchstart', function(e) {
+      $(voiceRecordBtn).on('touchstart', function(event) {
         if ($scope.voiceRecorder.processing) {
           return
         }
@@ -1715,8 +1717,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         voiceRecorder.addEventListener('start', function(e) {
           var startTime = tsNow(true)
-
-          voiceRecordSuccess = false
 
           voiceRecordDurationInterval = $interval(function() {
             $scope.voiceRecorder.duration = tsNow(true) - startTime
@@ -1735,40 +1735,67 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         voiceRecorder.initStream()
 
-        $($window).one('touchend', function() {
-          var deferred = $q.defer()
-          voiceRecorder.addEventListener('dataAvailable', function(e) {
-            var blob = blobConstruct([e.detail], 'audio/ogg')
-            deferred.resolve(blob)
-          })
-          voiceRecorderPromise = deferred.promise
+        var curHover = false
+        var curBoundaries = {}
+
+        var updateVoiceHoverBoundaries = function () {
+          var offset = element.offset()
+          curBoundaries = {
+            top: offset.top,
+            left: offset.left,
+            width: element.outerWidth(),
+            height: element.outerHeight(),
+          }
+        }
+
+        var updateVoiceHoveredClass = function (event, returnHover) {
+          var originalEvent = event.originalEvent || event
+          var touch = originalEvent.changedTouches && originalEvent.changedTouches[0]
+          var isHover = touch &&
+                        touch.pageX >= curBoundaries.left &&
+                        touch.pageX <= curBoundaries.left + curBoundaries.width &&
+                        touch.pageY >= curBoundaries.top &&
+                        touch.pageY <= curBoundaries.top + curBoundaries.height
+
+          if (curHover != isHover) {
+            element.toggleClass('im_send_form_hover', isHover)
+            curHover = isHover
+          }
+          return returnHover && isHover
+        }
+
+        updateVoiceHoverBoundaries()
+        updateVoiceHoveredClass(event)
+
+        $($window).on('touchmove', updateVoiceHoveredClass)
+
+        $($window).one('touchend', function(event) {
+          $($window).off('touchmove', updateVoiceHoveredClass)
+
+          var isHover = updateVoiceHoveredClass(event, true)
+
+          if ($scope.voiceRecorder.duration > 0 && isHover) {
+            $scope.voiceRecorder.processing = true
+            voiceRecorder.addEventListener('dataAvailable', function(e) {
+              var blob = blobConstruct([e.detail], 'audio/ogg')
+              console.warn(dT(), 'got audio', blob)
+
+              $scope.draftMessage.files = [blob]
+              $scope.draftMessage.isMedia = true
+
+              $scope.voiceRecorder.processing = false
+            })
+          }
           voiceRecorder.stop()
+          console.warn(dT(), 'stop audio')
 
           $interval.cancel(voiceRecordDurationInterval)
 
           $scope.$apply(function() {
             $scope.voiceRecorder.recording = false
+            $scope.voiceRecorder.duration = 0
           })
         })
-      })
-
-      $(voiceRecordBtn).on('touchend', function(e) {
-        voiceRecordSuccess = true
-        $timeout(function () {
-          if (voiceRecorderPromise) {
-            $scope.voiceRecorder.processing = true
-
-            voiceRecorderPromise.then(function(blob) {
-              console.warn(dT(), 'got audio', blob)
-              $scope.draftMessage.files = [blob]
-              $scope.draftMessage.isMedia = true
-
-              $scope.voiceRecorder.processing = false
-
-              voiceRecorderPromise = null
-            })
-          }
-        }, 100)
       })
 
       var sendOnEnter = true

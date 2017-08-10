@@ -185,6 +185,9 @@ var root = (typeof self === 'object' && self.self === self && self) || (typeof g
         this.clearStream();
       }
 
+      this.audioContext.close();
+      this.audioContext = null;
+
       this.encoder.postMessage({ command: "done" });
     }
   };
