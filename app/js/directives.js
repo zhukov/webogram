@@ -1494,6 +1494,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
         if ($(sendFormWrap).is(':visible')) {
+          if (!sendForm || !sendForm.offsetHeight) {
+            sendForm = $('.im_send_form', element)[0]
+          }
           $(sendFormWrap).css({
             height: $(sendForm).height()
           })
@@ -1547,9 +1550,11 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('mySendForm', function (_, $q, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+  .directive('mySendForm', function (_, $q, $timeout, $interval, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+
     return {
       link: link,
+      templateUrl: templateUrl('send_form'),
       scope: {
         draftMessage: '=',
         mentions: '=',
@@ -1558,18 +1563,30 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function link ($scope, element, attrs) {
+      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
       var messageField = $('textarea', element)[0]
       var emojiButton = $('.composer_emoji_insert_btn', element)[0]
       var emojiPanel = $('.composer_emoji_panel', element)[0]
       var fileSelects = $('input', element)
       var dropbox = $('.im_send_dropbox_wrap', element)[0]
-      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
       var dragStarted
       var dragTimeout
       var submitBtn = $('.im_submit', element)[0]
+      var voiceRecorderWrap = $('.im_voice_recorder_wrap', element)[0]
+      var voiceRecordBtn = $('.im_record', element)[0]
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>')
       var cachedStickerImages = {}
+
+      var voiceRecorder = null
+      var voiceRecordSupported = Recorder.isRecordingSupported()
+      var voiceRecordDurationInterval = null
+      var voiceRecorderPromise = null
+      if (voiceRecordSupported) {
+        element.addClass('im_record_supported')
+      }
+
+      $scope.voiceRecorder = {duration: 0, recording: false, processing: false}
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
@@ -1680,6 +1697,126 @@ angular.module('myApp.directives', ['myApp.filters'])
               self.value = ''
             } catch (e) {}
           }, 1000)
+        })
+      })
+
+      $(voiceRecordBtn).on('contextmenu', cancelEvent)
+
+      var voiceRecordTouch = Config.Navigator.touch ? true : false
+      var voiceRecordEvents = {
+        start: voiceRecordTouch ? 'touchstart' : 'mousedown',
+        move: voiceRecordTouch ? 'touchmove' : 'mousemove',
+        stop: voiceRecordTouch ? 'touchend' : 'mouseup'
+      }
+      $(voiceRecordBtn).on(voiceRecordEvents.start, function(event) {
+        if ($scope.voiceRecorder.processing) {
+          return
+        }
+
+        voiceRecorderPromise = null
+
+        voiceRecorder = new Recorder({
+          monitorGain: 0,
+          numberOfChannels: 1,
+          bitRate: 64000,
+          encoderSampleRate: 48000,
+          encoderPath: 'vendor/recorderjs/encoder_worker.js'
+        })
+
+        voiceRecorder.addEventListener('start', function(e) {
+          var startTime = tsNow(true)
+
+          voiceRecordDurationInterval = $interval(function() {
+            $scope.voiceRecorder.duration = tsNow(true) - startTime
+          }, 1000)
+
+          $scope.$apply(function() {
+            $scope.voiceRecorder.recording = true
+          })
+
+          console.warn(dT(), 'recording now!')
+        })
+
+        voiceRecorder.addEventListener('streamReady', function(e) {
+          voiceRecorder.start()
+        })
+
+        voiceRecorder.initStream()
+
+        var curHover = false
+        var curBoundaries = {}
+
+        var updateVoiceHoverBoundaries = function () {
+          var boundElement = $('.im_bottom_panel_wrap')
+          // console.warn(dT(), 'bound', boundElement[0])
+          var offset = boundElement.offset()
+          curBoundaries = {
+            top: offset.top,
+            left: offset.left,
+            width: boundElement.outerWidth(),
+            height: boundElement.outerHeight(),
+          }
+        }
+
+        var updateVoiceHoveredClass = function (event, returnHover) {
+          var originalEvent = event.originalEvent || event
+          var touch = voiceRecordTouch
+                  ? originalEvent.changedTouches && originalEvent.changedTouches[0]
+                  : originalEvent
+          // console.log('event', voiceRecordTouch, originalEvent)
+          var isHover = touch &&
+                        touch.pageX >= curBoundaries.left &&
+                        touch.pageX <= curBoundaries.left + curBoundaries.width &&
+                        touch.pageY >= curBoundaries.top &&
+                        touch.pageY <= curBoundaries.top + curBoundaries.height
+
+          if (curHover != isHover) {
+            console.warn(dT(), 'change hover', isHover)
+            element.toggleClass('im_send_form_hover', isHover)
+            curHover = isHover
+          }
+          return returnHover && isHover
+        }
+
+        updateVoiceHoverBoundaries()
+        updateVoiceHoveredClass(event)
+
+        if (!Config.Mobile) {
+          $(voiceRecorderWrap).css({
+            height: messageFieldWrap.offsetHeight,
+            width: messageFieldWrap.offsetWidth
+          })
+        }
+
+        $($window).on(voiceRecordEvents.move, updateVoiceHoveredClass)
+
+        $($window).one(voiceRecordEvents.stop, function(event) {
+          console.warn(111)
+          $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
+
+          var isHover = updateVoiceHoveredClass(event, true)
+
+          if ($scope.voiceRecorder.duration > 0 && isHover) {
+            $scope.voiceRecorder.processing = true
+            voiceRecorder.addEventListener('dataAvailable', function(e) {
+              var blob = blobConstruct([e.detail], 'audio/ogg')
+              console.warn(dT(), 'got audio', blob)
+
+              $scope.draftMessage.files = [blob]
+              $scope.draftMessage.isMedia = true
+
+              $scope.voiceRecorder.processing = false
+            })
+          }
+          voiceRecorder.stop()
+          console.warn(dT(), 'stop audio')
+
+          $interval.cancel(voiceRecordDurationInterval)
+
+          $scope.$apply(function() {
+            $scope.voiceRecorder.recording = false
+            $scope.voiceRecorder.duration = 0
+          })
         })
       })
 
@@ -1867,14 +2004,14 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
-              if (!Config.Mobile) {
-                $(emojiButton).hide()
-              }
-              $(dropbox)
-                .css({height: messageFieldWrap.offsetHeight + 2, width: messageFieldWrap.offsetWidth})
-                .show()
+              $(dropbox).css({
+                height: messageFieldWrap.offsetHeight,
+                width: messageFieldWrap.offsetWidth
+              })
+              element.addClass('im_send_form_dragging')
             }
           } else {
+            return cancelEvent(e)
             if (e.type == 'drop') {
               $scope.$apply(function () {
                 $scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files)
@@ -1882,10 +2019,7 @@ angular.module('myApp.directives', ['myApp.filters'])
               })
             }
             dragTimeout = setTimeout(function () {
-              $(dropbox).hide()
-              if (!Config.Mobile) {
-                $(emojiButton).show()
-              }
+              element.removeClass('im_send_form_dragging')
               dragStarted = false
               dragTimeout = false
             }, 300)

@@ -44,6 +44,9 @@
     "device-storage:videos": {
     "description": "Required for videos download",
       "access": "createonly"
+    },
+    "audio-capture" : {
+    "description" : "Required to record voice messages"
     }
   },
   "activities": {

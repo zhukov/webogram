@@ -20,6 +20,9 @@
             <li>
               <a ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></a>
             </li>
+            <li ng-if="chatFull.chat.pFlags.creator">
+              <a ng-click="migrateToSuperGroup()" my-i18n="group_modal_migrate_to_supergroup"></a>
+            </li>
           </ul>
         </div>
 
@@ -71,12 +74,12 @@
     <div class="mobile_modal_action_wrap" ng-if="hasRights('edit_photo') &amp;&amp; !photo.updating">
       <span class="mobile_modal_action mobile_modal_upload_action">
         <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
-        <my-i18n="group_modal_update_photo"></my-i18n>
+        <span my-i18n="group_modal_update_photo"></span>
       </span>
     </div>
     <div class="mobile_modal_action_wrap" ng-if="photo.updating">
       <span class="mobile_modal_action" my-i18n>
-        <my-i18n="group_modal_update_active"></my-i18n>
+        <span my-i18n="group_modal_update_active"></span>
         <span my-loading-dots></span>
       </span>
     </div>
