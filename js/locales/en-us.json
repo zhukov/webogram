@@ -531,6 +531,7 @@
 	"im_submit_edit_message": "Save",
 	"im_edit_message_title": "Edit message",
   "im_voice_recording_label": "Release outside this form to cancel",
+  "im_voice_recording_cancel_label": "Release to cancel record",
   "im_voice_processing_label": "Processing{dots}",
 	"login_sign_in": "Sign in",
 	"login_enter_number_description": "Please choose your country and enter your full phone number.",

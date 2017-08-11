@@ -1739,6 +1739,8 @@ to{opacity:0}}
 .im_recorder_label{overflow:auto;font-size:12px;text-align:center;vertical-align:middle;color:#3a6d99;transition:color linear .2s}
 .im_recorder_label i{margin-right:5px}
 .im_send_form_hover .im_recorder_label{color:#CCC}
+.im_recorder_label_hover,.im_send_form_hover .im_recorder_label_hout{display:none}
+.im_send_form_hover .im_recorder_label_hover{display:inline}
 .im_processing_recording,.im_voice_recording{color:#AAA}
 .im_processing_recording .im_voice_recorder_wrap,.im_voice_recording .im_voice_recorder_wrap{display:block}
 .error_modal_description{color:#999;padding:5px 0;font-size:13px;line-height:160%}
