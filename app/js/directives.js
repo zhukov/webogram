@@ -1494,6 +1494,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
         if ($(sendFormWrap).is(':visible')) {
+          if (!sendForm || !sendForm.offsetHeight) {
+            sendForm = $('.im_send_form', element)[0]
+          }
           $(sendFormWrap).css({
             height: $(sendForm).height()
           })
@@ -1552,7 +1555,6 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       templateUrl: templateUrl('send_form'),
-      replace: true,
       scope: {
         draftMessage: '=',
         mentions: '=',
@@ -1561,16 +1563,16 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function link ($scope, element, attrs) {
+      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
       var messageField = $('textarea', element)[0]
       var emojiButton = $('.composer_emoji_insert_btn', element)[0]
       var emojiPanel = $('.composer_emoji_panel', element)[0]
       var fileSelects = $('input', element)
       var dropbox = $('.im_send_dropbox_wrap', element)[0]
-      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
-      var sendFieldPanel = $('.im_send_field_panel', element)[0]
       var dragStarted
       var dragTimeout
       var submitBtn = $('.im_submit', element)[0]
+      var voiceRecorderWrap = $('.im_voice_recorder_wrap', element)[0]
       var voiceRecordBtn = $('.im_record', element)[0]
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>')
@@ -1581,7 +1583,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var voiceRecordDurationInterval = null
       var voiceRecorderPromise = null
       if (voiceRecordSupported) {
-        $(sendFieldPanel).addClass('im_record_supported')
+        element.addClass('im_record_supported')
       }
 
       $scope.voiceRecorder = {duration: 0, recording: false, processing: false}
@@ -1700,7 +1702,13 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $(voiceRecordBtn).on('contextmenu', cancelEvent)
 
-      $(voiceRecordBtn).on('touchstart', function(event) {
+      var voiceRecordTouch = Config.Navigator.touch ? true : false
+      var voiceRecordEvents = {
+        start: voiceRecordTouch ? 'touchstart' : 'mousedown',
+        move: voiceRecordTouch ? 'touchmove' : 'mousemove',
+        stop: voiceRecordTouch ? 'touchend' : 'mouseup'
+      }
+      $(voiceRecordBtn).on(voiceRecordEvents.start, function(event) {
         if ($scope.voiceRecorder.processing) {
           return
         }
@@ -1739,18 +1747,23 @@ angular.module('myApp.directives', ['myApp.filters'])
         var curBoundaries = {}
 
         var updateVoiceHoverBoundaries = function () {
-          var offset = element.offset()
+          var boundElement = $('.im_bottom_panel_wrap')
+          // console.warn(dT(), 'bound', boundElement[0])
+          var offset = boundElement.offset()
           curBoundaries = {
             top: offset.top,
             left: offset.left,
-            width: element.outerWidth(),
-            height: element.outerHeight(),
+            width: boundElement.outerWidth(),
+            height: boundElement.outerHeight(),
           }
         }
 
         var updateVoiceHoveredClass = function (event, returnHover) {
           var originalEvent = event.originalEvent || event
-          var touch = originalEvent.changedTouches && originalEvent.changedTouches[0]
+          var touch = voiceRecordTouch
+                  ? originalEvent.changedTouches && originalEvent.changedTouches[0]
+                  : originalEvent
+          // console.log('event', voiceRecordTouch, originalEvent)
           var isHover = touch &&
                         touch.pageX >= curBoundaries.left &&
                         touch.pageX <= curBoundaries.left + curBoundaries.width &&
@@ -1758,6 +1771,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                         touch.pageY <= curBoundaries.top + curBoundaries.height
 
           if (curHover != isHover) {
+            console.warn(dT(), 'change hover', isHover)
             element.toggleClass('im_send_form_hover', isHover)
             curHover = isHover
           }
@@ -1767,10 +1781,18 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateVoiceHoverBoundaries()
         updateVoiceHoveredClass(event)
 
-        $($window).on('touchmove', updateVoiceHoveredClass)
+        if (!Config.Mobile) {
+          $(voiceRecorderWrap).css({
+            height: messageFieldWrap.offsetHeight,
+            width: messageFieldWrap.offsetWidth
+          })
+        }
 
-        $($window).one('touchend', function(event) {
-          $($window).off('touchmove', updateVoiceHoveredClass)
+        $($window).on(voiceRecordEvents.move, updateVoiceHoveredClass)
+
+        $($window).one(voiceRecordEvents.stop, function(event) {
+          console.warn(111)
+          $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
 
           var isHover = updateVoiceHoveredClass(event, true)
 
@@ -1982,14 +2004,14 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
-              if (!Config.Mobile) {
-                $(emojiButton).hide()
-              }
-              $(dropbox)
-                .css({height: messageFieldWrap.offsetHeight + 2, width: messageFieldWrap.offsetWidth})
-                .show()
+              $(dropbox).css({
+                height: messageFieldWrap.offsetHeight,
+                width: messageFieldWrap.offsetWidth
+              })
+              element.addClass('im_send_form_dragging')
             }
           } else {
+            return cancelEvent(e)
             if (e.type == 'drop') {
               $scope.$apply(function () {
                 $scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files)
@@ -1997,10 +2019,7 @@ angular.module('myApp.directives', ['myApp.filters'])
               })
             }
             dragTimeout = setTimeout(function () {
-              $(dropbox).hide()
-              if (!Config.Mobile) {
-                $(emojiButton).show()
-              }
+              element.removeClass('im_send_form_dragging')
               dragStarted = false
               dragTimeout = false
             }, 300)

@@ -13,13 +13,13 @@
   <div class="im_send_field_panel">
 
     <div class="im_voice_recorder_wrap">
-        <div class="im_recorder_indicator"><i></i></div>
-        <div class="im_recorder_time" ng-bind="voiceRecorder.duration | duration"></div>
-        <div class="im_recorder_label" ng-switch="voiceRecorder.processing" my-i18n>
-          <span ng-switch-when="true" my-i18n-format="im_voice_processing_label"></span>
-          <span ng-switch-default my-i18n-format="im_voice_recording_label"></span>
-          <my-i18n-param name="dots"></my-i18n-param>
-        </div>
+      <div class="im_recorder_indicator"><i></i></div>
+      <div class="im_recorder_time" ng-bind="voiceRecorder.duration | duration"></div>
+      <div class="im_recorder_label" ng-switch="voiceRecorder.processing" my-i18n>
+        <span ng-switch-when="true" my-i18n-format="im_voice_processing_label"></span>
+        <span ng-switch-default my-i18n-format="im_voice_recording_label"></span>
+        <my-i18n-param name="dots"></my-i18n-param>
+      </div>
     </div>
 
     <div class="im_send_field_wrap" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">

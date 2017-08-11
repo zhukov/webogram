@@ -1473,7 +1473,7 @@ a.im_message_fwd_author {
 .im_record {
   display: none;
   right: 0;
-  top: -9px;
+  top: -8px;
   width: 50px;
   height: 50px;
   position: absolute;
@@ -1488,7 +1488,7 @@ a.im_message_fwd_author {
   background: #fff;
   transition: background-color linear 0.2s;
 
-  .im_send_form_empty .im_record_supported & {
+  .im_record_supported .im_send_form_empty & {
     display: block;
   }
 }
@@ -1499,13 +1499,24 @@ a.im_message_fwd_author {
 .im_send_form_empty .im_submit {
   opacity: 0.4;
 }
-.im_send_form_empty .im_record_supported .im_submit {
+.im_record_supported .im_send_form_empty .im_submit {
   display: none;
+}
+
+.im_voice_recorder_wrap {
+  height: 32px;
+  line-height: 32px;
+  right: 50px;
+  left: 0;
+  padding: 0 0 0 20px;
+}
+.im_recorder_label {
+  padding-right: 48px;
 }
 
 
 .im_voice_recording,
-.im_processing_recording {
+.im_processing_recording {
   color: #AAA;
 
   .im_voice_recorder_wrap {
@@ -1515,11 +1526,12 @@ a.im_message_fwd_author {
   .im_submit,
   .im_attach {
     display: none;
+    // visibility: hidden;
   }
 }
 
 .im_processing_recording {
-  .im_recorder_indicator i {
+  .im_recorder_indicator i {
     background-color: green;
   }
 
@@ -1560,61 +1572,6 @@ a.im_message_fwd_author {
 
   .form-control {
     border-radius: 4px;
-  }
-}
-
-.im_voice_recorder_wrap {
-  height: 32px;
-  display: none;
-  line-height: 32px;
-  right: 50px;
-  left: 0;
-  z-index: 100;
-  padding: 0 0 0 20px;
-}
-
-.im_recorder_indicator, .im_recorder_time {
-  float: left;
-  vertical-align: middle;
-  color: #333;
-}
-
-.im_recorder_indicator i {
-  background-color: #ff1010;
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
-  margin-right: 5px;
-  vertical-align: baseline;
-  display: inline-block;
-  animation: blinker 0.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
-}
-
-@keyframes blinker {  
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-.im_recorder_label {
-  overflow: auto;
-  font-size: 12px;
-  text-align: center;
-  vertical-align: middle;
-  padding-right: 48px;
-  color: #3a6d99;
-
-  transition: color linear 0.2s;
-
-  i, span {
-    vertical-align: middle;
-  }
-
-  i {
-    margin-right: 5px;
-  }
-
-  .im_send_form_hover & {
-    color: #CCC;
   }
 }
 

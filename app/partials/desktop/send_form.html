@@ -1,4 +1,4 @@
-<form class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length, composer_progress_enabled: draftMessage.inlineProgress}">
+<form class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length, composer_progress_enabled: draftMessage.inlineProgress, im_voice_recording: voiceRecorder.recording, im_processing_recording: voiceRecorder.processing}">
 
   <div class="im_send_form_inline_results" my-inline-results="inlineResults"></div>
 
@@ -21,6 +21,16 @@
     <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="draftMessage.replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
 
     <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
+    <div class="im_voice_recorder_wrap">
+      <div class="im_recorder_indicator"><i></i></div>
+      <div class="im_recorder_time" ng-bind="voiceRecorder.duration | duration"></div>
+      <div class="im_recorder_label" ng-switch="voiceRecorder.processing" my-i18n>
+        <span ng-switch-when="true" my-i18n-format="im_voice_processing_label"></span>
+        <span ng-switch-default my-i18n-format="im_voice_recording_label"></span>
+        <my-i18n-param name="dots"></my-i18n-param>
+      </div>
+    </div>
+
     <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto" ng-trim="false"></textarea>
   </div>
 
@@ -39,6 +49,10 @@
       <input type="file" class="im_media_attach_input" size="28" multiple="multiple" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
       <i class="icon icon-camera"></i>
     </div>
+
+    <a class="im_record pull-left">
+      <i class="icon icon-mic"></i>
+    </a>
 
     <div class="composer_emoji_panel"></div>
   </div>
