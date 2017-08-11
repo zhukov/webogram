@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.5.7.1",
+  "version": "0.6.0",
   "short_name": "Telegram",
   "manifest_version": 2,
   "app": {
