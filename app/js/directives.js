@@ -1771,7 +1771,7 @@ angular.module('myApp.directives', ['myApp.filters'])
                         touch.pageY <= curBoundaries.top + curBoundaries.height
 
           if (curHover != isHover) {
-            console.warn(dT(), 'change hover', isHover)
+            // console.warn(dT(), 'change hover', isHover)
             element.toggleClass('im_send_form_hover', isHover)
             curHover = isHover
           }
@@ -1791,7 +1791,6 @@ angular.module('myApp.directives', ['myApp.filters'])
         $($window).on(voiceRecordEvents.move, updateVoiceHoveredClass)
 
         $($window).one(voiceRecordEvents.stop, function(event) {
-          console.warn(111)
           $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
 
           var isHover = updateVoiceHoveredClass(event, true)

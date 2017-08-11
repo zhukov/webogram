@@ -1610,7 +1610,6 @@ MessageComposer.prototype.resetTyping = function () {
 }
 
 MessageComposer.prototype.setPlaceholder = function (newPlaceholder) {
-  console.warn(dT(), 'set placeholder', this.richTextareaEl)
   ;(this.richTextareaEl || this.textareaEl).attr('placeholder', newPlaceholder)
 }
 
