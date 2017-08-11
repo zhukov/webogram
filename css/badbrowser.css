@@ -1457,6 +1457,8 @@ img.im_message_document_thumb{max-width:100px;max-height:100px;vertical-align:mi
 .audio_player_volume_slider .tg_slider_track_fill{background:#6490b1;height:4px;width:0}
 .audio_player_progress_wrap{overflow:hidden}
 .audio_player_progress_wrap .tg_down_progress{margin-top:5px}
+.audio_player_media{position:absolute;visibility:hidden}
+.audio_player_media canvas{display:none}
 .im_message_download_progress_wrap,.im_message_upload_progress_wrap{margin-top:5px;width:200px}
 .im_message_document_thumbed .im_message_document_actions,.im_message_document_thumbed .im_message_document_name_wrap,.im_message_document_thumbed .im_message_download_progress_wrap,.im_message_document_thumbed .im_message_upload_progress_wrap{width:207px}
 .im_message_document_thumbed .im_message_document_name{max-width:110px}
@@ -1561,6 +1563,8 @@ a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .im_send_form{margin:0 auto;position:absolute;bottom:0}
 .im_attach_input,.im_media_attach_input{cursor:pointer;font-size:120px!important;opacity:.01;position:absolute;z-index:100;margin:0;padding:0;top:0;right:0}
 .im_send_dropbox_wrap{background:#fff;display:none;padding:17px 10px 0;border:1px dashed #999;overflow:hidden;text-align:center;color:#999;position:absolute}
+.im_send_form_dragging .im_send_dropbox_wrap{display:block}
+.im_send_form_dragging .composer_command_btn,.im_send_form_dragging .composer_emoji_insert_btn,.im_send_form_dragging .composer_keyboard_btn,.im_send_form_dragging .composer_progress_icon_wrap,.im_send_form_dragging .composer_rich_textarea,.im_send_form_dragging .im_inline_placeholder_wrap,.im_send_form_dragging .im_message_field{visibility:hidden}
 .im_send_field_wrap{position:relative}
 textarea.im_message_field{font-size:12px;margin-bottom:10px;padding:6px;min-height:50px;height:50px;resize:none}
 .im_inline_placeholder_wrap{color:#9aa2ab;position:absolute;margin-top:2px;white-space:nowrap;pointer-events:none;text-overflow:ellipsis;display:none;width:100%;width:calc(100% - 30px);overflow:hidden}
@@ -1727,6 +1731,16 @@ li.inline_result_gif.composer_autocomplete_option_active a .inline_result_ind,li
 .inline_result_sticker img{object-fit:contain}
 .inline_result_game img{object-fit:cover;width:50px;height:50px}
 .inline_result_gif_http,.inline_result_gif_mtproto,.inline_result_photo_http,.inline_result_photo_mtproto{pointer-events:none}
+.im_voice_recorder_wrap{display:none;z-index:100}
+.im_recorder_indicator,.im_recorder_time{float:left;vertical-align:middle;color:#333}
+.im_recorder_indicator i{background-color:#ff1010;height:10px;width:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;display:inline-block;animation:blinker .5s cubic-bezier(.5,0,1,1) infinite alternate}
+@keyframes blinker{from{opacity:1}
+to{opacity:0}}
+.im_recorder_label{overflow:auto;font-size:12px;text-align:center;vertical-align:middle;color:#3a6d99;transition:color linear .2s}
+.im_recorder_label i{margin-right:5px}
+.im_send_form_hover .im_recorder_label{color:#CCC}
+.im_processing_recording,.im_voice_recording{color:#AAA}
+.im_processing_recording .im_voice_recorder_wrap,.im_voice_recording .im_voice_recorder_wrap{display:block}
 .error_modal_description{color:#999;padding:5px 0;font-size:13px;line-height:160%}
 .md_simple_modal_alert_body .error_modal_description,.md_simple_modal_alert_body .md_simple_header{text-align:center}
 .error_modal_details textarea{display:block;font-family:Menlo,Monaco,Consolas,"Courier New",monospace;font-size:10px;line-height:100%;white-space:pre-wrap;padding:4px;margin:10px 0;word-break:break-all;word-wrap:break-word;color:#333;background-color:#f5f5f5;border:1px solid #ccc;border-radius:4px;width:100%;text-align:left}

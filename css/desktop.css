@@ -1120,6 +1120,74 @@ a.im_panel_peer_photo .peer_initials {
   background-position: -10px -427px;
   opacity: 1;
 }
+.im_record {
+  display: none;
+  width: 50px;
+  height: 50px;
+  margin: -8px 0 0 -18px;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  padding: 13px 16px 13px 16px;
+  border-radius: 50px;
+  overflow: hidden;
+  background: #fff;
+  transition: background-color linear 0.2s;
+}
+.im_record_supported .im_record {
+  display: block;
+}
+.im_send_form_hover .im_voice_recording .im_record {
+  background: #bfd9ed;
+}
+.icon-mic {
+  display: inline-block;
+  width: 18px;
+  height: 22px;
+  vertical-align: text-top;
+  opacity: 0.8;
+  background-image: url(../img/icons/IconsetW.png);
+  background-repeat: no-repeat;
+  background-position: -12px -285px;
+  background-color: transparent;
+}
+.is_2x .icon-mic {
+  background-image: url(../img/icons/IconsetW_2x.png);
+  background-size: 42px 1171px;
+}
+.im_record:hover .icon-mic {
+  opacity: 1;
+}
+.im_record:active .icon-mic,
+.im_voice_recording .icon-mic {
+  background-position: -12px -705px;
+}
+.im_voice_recorder_wrap {
+  padding: 17px 10px 0;
+  display: none;
+  position: absolute;
+}
+.im_voice_recording .im_voice_recorder_wrap,
+.im_processing_recording .im_voice_recorder_wrap {
+  display: block;
+}
+.im_voice_recording .composer_rich_textarea,
+.im_processing_recording .composer_rich_textarea,
+.im_voice_recording .im_message_field,
+.im_processing_recording .im_message_field,
+.im_voice_recording .composer_emoji_insert_btn,
+.im_processing_recording .composer_emoji_insert_btn,
+.im_voice_recording .composer_progress_icon_wrap,
+.im_processing_recording .composer_progress_icon_wrap,
+.im_voice_recording .composer_command_btn,
+.im_processing_recording .composer_command_btn,
+.im_voice_recording .composer_keyboard_btn,
+.im_processing_recording .composer_keyboard_btn,
+.im_voice_recording .im_inline_placeholder_wrap,
+.im_processing_recording .im_inline_placeholder_wrap {
+  visibility: hidden;
+}
 @media (max-height: 600px) {
   a.im_panel_peer_photo,
   a.im_panel_own_photo {
@@ -1159,6 +1227,9 @@ a.im_panel_peer_photo .peer_initials {
     top: 0;
     left: 100%;
     margin: 0 0 0 15px;
+  }
+  .im_record_supported .im_send_form_empty .im_submit {
+    display: none;
   }
   .im_media_attach {
     position: absolute;
@@ -1226,6 +1297,18 @@ a.im_panel_peer_photo .peer_initials {
   .im_send_dropbox_wrap {
     padding-top: 5px;
     padding-bottom: 5px;
+  }
+  .im_record {
+    display: none;
+    position: absolute;
+    top: -4px;
+    right: -56px;
+  }
+  .im_record_supported .im_send_form_empty .im_record {
+    display: block;
+  }
+  .im_voice_recorder_wrap {
+    padding-top: 4px;
   }
 }
 .im_edit_panel_wrap.im_edit_small_panel_wrap {

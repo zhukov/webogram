@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
@@ -44,6 +44,9 @@
     "device-storage:videos": {
     "description": "Required for videos download",
       "access": "createonly"
+    },
+    "audio-capture" : {
+    "description" : "Required to record voice messages"
     }
   },
   "activities": {
