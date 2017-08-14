@@ -1581,7 +1581,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       var voiceRecorder = null
       var voiceRecordSupported = Recorder.isRecordingSupported()
       var voiceRecordDurationInterval = null
-      var voiceRecorderPromise = null
       if (voiceRecordSupported) {
         element.addClass('im_record_supported')
       }
@@ -1706,14 +1705,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       var voiceRecordEvents = {
         start: voiceRecordTouch ? 'touchstart' : 'mousedown',
         move: voiceRecordTouch ? 'touchmove' : 'mousemove',
-        stop: voiceRecordTouch ? 'touchend' : 'mouseup'
+        stop: voiceRecordTouch ? 'touchend blur' : 'mouseup blur'
       }
+      var onRecordStart, onRecordStreamReady, onRecordStop
+
       $(voiceRecordBtn).on(voiceRecordEvents.start, function(event) {
         if ($scope.voiceRecorder.processing) {
           return
         }
-
-        voiceRecorderPromise = null
 
         voiceRecorder = new Recorder({
           monitorGain: 0,
@@ -1723,7 +1722,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           encoderPath: 'vendor/recorderjs/encoder_worker.js'
         })
 
-        voiceRecorder.addEventListener('start', function(e) {
+        onRecordStart = function(e) {
           var startTime = tsNow(true)
 
           voiceRecordDurationInterval = $interval(function() {
@@ -1733,13 +1732,13 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$apply(function() {
             $scope.voiceRecorder.recording = true
           })
+        }
+        voiceRecorder.addEventListener('start', onRecordStart)
 
-          console.warn(dT(), 'recording now!')
-        })
-
-        voiceRecorder.addEventListener('streamReady', function(e) {
+        onRecordStreamReady = function(e) {
           voiceRecorder.start()
-        })
+        }
+        voiceRecorder.addEventListener('streamReady', onRecordStreamReady)
 
         voiceRecorder.initStream()
 
@@ -1748,7 +1747,6 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         var updateVoiceHoverBoundaries = function () {
           var boundElement = $('.im_bottom_panel_wrap')
-          // console.warn(dT(), 'bound', boundElement[0])
           var offset = boundElement.offset()
           curBoundaries = {
             top: offset.top,
@@ -1763,7 +1761,6 @@ angular.module('myApp.directives', ['myApp.filters'])
           var touch = voiceRecordTouch
                   ? originalEvent.changedTouches && originalEvent.changedTouches[0]
                   : originalEvent
-          // console.log('event', voiceRecordTouch, originalEvent)
           var isHover = touch &&
                         touch.pageX >= curBoundaries.left &&
                         touch.pageX <= curBoundaries.left + curBoundaries.width &&
@@ -1771,7 +1768,6 @@ angular.module('myApp.directives', ['myApp.filters'])
                         touch.pageY <= curBoundaries.top + curBoundaries.height
 
           if (curHover != isHover) {
-            // console.warn(dT(), 'change hover', isHover)
             element.toggleClass('im_send_form_hover', isHover)
             curHover = isHover
           }
@@ -1781,6 +1777,32 @@ angular.module('myApp.directives', ['myApp.filters'])
         updateVoiceHoverBoundaries()
         updateVoiceHoveredClass(event)
 
+        onRecordStop = function(event) {
+          $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
+          $($window).off(voiceRecordEvents.stop, onRecordStop)
+
+          var isHover = event == 'blur' ? false : updateVoiceHoveredClass(event, true)
+
+          if ($scope.voiceRecorder.duration > 0 && isHover) {
+            $scope.voiceRecorder.processing = true
+            voiceRecorder.addEventListener('dataAvailable', function(e) {
+              var blob = blobConstruct([e.detail], 'audio/ogg')
+              console.warn(dT(), 'got audio', blob)
+
+              $scope.$apply(function () {
+                if (blob.size !== undefined && 
+                    blob.size > 1024) {
+                  $scope.draftMessage.files = [blob]
+                  $scope.draftMessage.isMedia = true
+                }
+
+                $scope.voiceRecorder.processing = false
+              })
+            })
+          }
+          cancelRecord()
+        }
+
         if (!Config.Mobile) {
           $(voiceRecorderWrap).css({
             height: messageFieldWrap.offsetHeight,
@@ -1789,35 +1811,25 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         $($window).on(voiceRecordEvents.move, updateVoiceHoveredClass)
+        $($window).one(voiceRecordEvents.stop, onRecordStop)
+      })
 
-        $($window).one(voiceRecordEvents.stop, function(event) {
-          $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
-
-          var isHover = updateVoiceHoveredClass(event, true)
-
-          if ($scope.voiceRecorder.duration > 0 && isHover) {
-            $scope.voiceRecorder.processing = true
-            voiceRecorder.addEventListener('dataAvailable', function(e) {
-              var blob = blobConstruct([e.detail], 'audio/ogg')
-              console.warn(dT(), 'got audio', blob)
-
-              $scope.draftMessage.files = [blob]
-              $scope.draftMessage.isMedia = true
-
-              $scope.voiceRecorder.processing = false
-            })
-          }
+      function cancelRecord() {
+        if (voiceRecorder) {
           voiceRecorder.stop()
-          console.warn(dT(), 'stop audio')
+          voiceRecorder.removeEventListener('streamReady', onRecordStreamReady)
+          voiceRecorder.removeEventListener('start', onRecordStart)
+        }
 
+        if ($scope.voiceRecorder.recording) {
           $interval.cancel(voiceRecordDurationInterval)
 
           $scope.$apply(function() {
             $scope.voiceRecorder.recording = false
             $scope.voiceRecorder.duration = 0
           })
-        })
-      })
+        }
+      }
 
       var sendOnEnter = true
       function updateSendSettings () {
