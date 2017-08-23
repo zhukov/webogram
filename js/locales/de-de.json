@@ -377,7 +377,7 @@
     "error_modal_media_not_supported_description": "Dein Browser kann diese Mediendatei nicht wiedergeben. Lade die Datei herunter und versuche sie mit einem externen Player zu öffnen.",
     "error_modal_username_not_found_description": "Es gibt leider kein Telegram Konto mit dem Benutzernamen.",
     "error_modal_phonecalls_not_supported_description_md": "Leider werden Anrufe in der Web App noch nicht unterstützt.\n\nDu kannst {user} über unsere mobilen Apps oder Desktop Clients anrufen.\n{download-link: Download »}",
-    "error_modal_bad_request_description": "Eine Parameter fehlt oder ist ungültig.",
+    "error_modal_bad_request_description": "Ein Parameter fehlt oder ist ungültig.",
     "error_modal_unauthorized_description": "Diese Aktion benötigt autorisierten Zugriff. Bitte {login-link: melde dich an}.",
     "error_modal_forbidden_description": "Diese Aktion ist für dich nicht erlaubt.",
     "error_modal_not_found_description": "Die Seite wurde nicht gefunden.",
