@@ -2022,7 +2022,6 @@ angular.module('myApp.directives', ['myApp.filters'])
               element.addClass('im_send_form_dragging')
             }
           } else {
-            return cancelEvent(e)
             if (e.type == 'drop') {
               $scope.$apply(function () {
                 $scope.draftMessage.files = Array.prototype.slice.call(e.originalEvent.dataTransfer.files)
