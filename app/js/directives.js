@@ -1557,6 +1557,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       templateUrl: templateUrl('send_form'),
       scope: {
         draftMessage: '=',
+        replyKeyboard: '=',
         mentions: '=',
         commands: '='
       }
