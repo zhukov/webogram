@@ -29,23 +29,6 @@ js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
 img/changelog/card_wecandoit.png
-img/placeholders/DialogListAvatarSystem@2x.png
-img/placeholders/GroupAvatar1@2x.png
-img/placeholders/GroupAvatar2@2x.png
-img/placeholders/GroupAvatar3@2x.png
-img/placeholders/GroupAvatar4@2x.png
-img/placeholders/PhotoThumbConversation.gif
-img/placeholders/PhotoThumbModal.gif
-img/placeholders/UserAvatar1@2x.png
-img/placeholders/UserAvatar2@2x.png
-img/placeholders/UserAvatar3@2x.png
-img/placeholders/UserAvatar4@2x.png
-img/placeholders/UserAvatar5@2x.png
-img/placeholders/UserAvatar6@2x.png
-img/placeholders/UserAvatar7@2x.png
-img/placeholders/UserAvatar8@2x.png
-img/placeholders/VideoThumbConversation.gif
-img/placeholders/VideoThumbModal.gif
 img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
 img/icons/General.png
@@ -63,6 +46,23 @@ img/icons/PhotoIcons_2x.png
 img/icons/ProfileIcons.png
 img/icons/ProfileIcons_2x.png
 img/icons/icon.svg
+img/placeholders/DialogListAvatarSystem@2x.png
+img/placeholders/GroupAvatar1@2x.png
+img/placeholders/GroupAvatar2@2x.png
+img/placeholders/GroupAvatar3@2x.png
+img/placeholders/GroupAvatar4@2x.png
+img/placeholders/PhotoThumbConversation.gif
+img/placeholders/PhotoThumbModal.gif
+img/placeholders/UserAvatar1@2x.png
+img/placeholders/UserAvatar2@2x.png
+img/placeholders/UserAvatar3@2x.png
+img/placeholders/UserAvatar4@2x.png
+img/placeholders/UserAvatar5@2x.png
+img/placeholders/UserAvatar6@2x.png
+img/placeholders/UserAvatar7@2x.png
+img/placeholders/UserAvatar8@2x.png
+img/placeholders/VideoThumbConversation.gif
+img/placeholders/VideoThumbModal.gif
 js/lib/bin_utils.js
 js/lib/crypto_worker.js
 js/lib/polyfill.js
@@ -94,4 +94,4 @@ http://*
 https://*
 *
 
-# hash: 8b8f21e1256ea4856a22c117708f12746c050bf0ac2ec0e20ca9c24159fc8c8e
+# hash: b351db81dc4eeecb76850c6e23a69413d0ab8e3af3dc79648fca991cd20a50a1
