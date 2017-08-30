@@ -1545,7 +1545,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
             break
           }
         case 'msg_new_detailed_info':
-          // this.ackMessage(message.answer_msg_id)
+          if (this.pendingAcks.indexOf(message.answer_msg_id)) {
+            break
+          }
           this.reqResendMessage(message.answer_msg_id)
           break
 
