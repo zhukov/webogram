@@ -33,7 +33,7 @@
   <div class="md_modal_split_actions_wrap">
     <div class="md_modal_split_actions" ng-switch="hasRights('edit_photo')">
       <div ng-switch-when="true" class="md_modal_split_action">
-        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" title="{{'group_modal_update_photo' | i18n}}" />
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" accept="image/x-png, image/png, image/gif, image/jpeg" title="{{'group_modal_update_photo' | i18n}}" />
         <i class="md_modal_split_action_camera"></i>
       </div>
       <a ng-switch-default class="md_modal_split_action" href="" ng-click="goToHistory()" title="{{'user_modal_send_message' | i18n}}">
