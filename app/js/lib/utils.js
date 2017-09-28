@@ -477,7 +477,8 @@ function versionCompare (ver1, ver2) {
     var hasTag = text.charAt(0) == '%'
     text = text.replace(badCharsRe, ' ').replace(trimRe, '')
     text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
-      return Config.LatinizeMap[ch] || ch
+      var latinizeCh = Config.LatinizeMap[ch]
+      return latinizeCh !== undefined ? latinizeCh : ch
     })
     text = text.toLowerCase()
     if (hasTag) {
