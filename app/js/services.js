@@ -1513,9 +1513,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       scope.photoID = photoID
 
       var controller = 'PhotoModalController'
-      if (list && list.p > 0) {
+      if (list && (list.p > 0 || list.u > 0)) {
         controller = 'UserpicModalController'
-        scope.userID = list.p
+        scope.userID = list.p | list.u
       }
       else if (list && list.p < 0) {
         controller = 'ChatpicModalController'
