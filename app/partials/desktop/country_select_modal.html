@@ -1,0 +1,45 @@
+<div class="countries_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()" my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title" my-i18n="country_select_modal_title"></div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="countries_modal_search">
+      <input class="form-control countries_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query" autocomplete="off" />
+      <a class="countries_modal_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
+
+    </div>
+
+    <div class="countries_modal_col" my-countries-list>
+
+      <div class="countries_wrap nano" my-infinite-scroller>
+        <div class="countries_scrollable_wrap nano-content">
+
+          <ul class="countries_modal_members_list nav nav-pills nav-stacked">
+
+            <li class="countries_modal_country_wrap clearfix" ng-repeat="country in countries | limitTo : slice.limit track by $index">
+              <a class="countries_modal_country" ng-click="$close(country)">
+                <span class="countries_modal_country_code pull-right" ng-bind="country.code"></span>
+                <span class="countries_modal_country_name" ng-bind="country.name"></span>
+              </a>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

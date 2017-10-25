@@ -1,8 +1,18 @@
 .DS_Store
+.idea
+.publish
+*.sublime-workspace
+*.*~
+*.swp
 
 # Node.js package manager
-/node_modules
-/npm-debug.log
+node_modules
+npm-debug.log
 dist
-package_dist
+dist_package
+releases
 webogram*.zip
+app/js/templates.js
+app/css
+cldr
+coverage/

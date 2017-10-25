@@ -1,0 +1,123 @@
+<div class="user_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+        <a class="md_modal_action" ng-if="user.pFlags.contact" ng-click="importContact(true)" my-i18n="modal_edit"></a>
+      </div>
+      <div class="md_modal_title" my-i18n="user_modal_contact_info"></div>
+    </div>
+
+    <div class="peer_modal_profile_wrap clearfix">
+      <div class="peer_modal_photo_wrap pull-left">
+        <a ng-click="openPhoto(user.photo.photo_id, {p: user.id})" class="peer_modal_photo" ng-class="{disabled: !user.photo.photo_id}" ng-disabled="!user.photo.photo_id" my-peer-photolink="::user.id" img-class="peer_modal_photo" no-open="true"></a>
+      </div>
+      <div class="peer_modal_profile">
+        <div class="peer_modal_profile_name" my-peer-link="user.id" verified="true"></div>
+        <div class="peer_modal_profile_description" my-user-status="::user.id"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <a class="md_modal_split_action" href="" ng-click="goToHistory()" title="{{'user_modal_send_message' | i18n}}">
+        <i class="md_modal_split_action_msg"></i>
+      </a>
+    </div>
+  </div>
+
+
+  <div class="md_modal_body">
+
+    <div class="md_modal_sections clearfix">
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number" ng-if="user.phone || user.username || rAbout">
+        <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
+
+        <div class="md_modal_section_param_wrap" ng-if="user.phone">
+          <div class="md_modal_section_param_value" ng-bind="user.phone | phoneNumber"></div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_phone"></div>
+        </div>
+
+        <div class="md_modal_section_param_wrap" ng-if="user.username">
+          <div class="md_modal_section_param_value">
+            <span ng-bind="'@' + user.username"></span>
+          </div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_username"></div>
+        </div>
+
+        <div class="md_modal_section_param_wrap" ng-if="rAbout">
+          <div class="md_modal_section_param_value">
+            <span ng-bind-html="rAbout"></span>
+          </div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_about"></div>
+        </div>
+      </div>
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_toggle">
+        <i class="md_modal_section_icon md_modal_section_icon_notification"></i>
+
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="user_modal_notifications"></span>
+        </a>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-init="f.showMoreActions = !user.phone.length">
+        <i class="md_modal_section_icon md_modal_section_icon_more"></i>
+
+        <div class="md_modal_section_link_wrap" ng-if="user.pFlags.bot &amp;&amp; !user.pFlags.bot_nochats">
+          <a class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="user_modal_add_to_group"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="bot_info.commands.settings != null">
+          <a class="md_modal_section_link" ng-click="sendCommand('settings')" my-i18n="user_modal_bot_settings"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="bot_info.commands.help != null">
+          <a class="md_modal_section_link" ng-click="sendCommand('help')" my-i18n="user_modal_bot_help"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0 &amp;&amp; !user.pFlags.contact &amp;&amp; !user.pFlags.self">
+          <a class="md_modal_section_link" ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="user.phone.length > 0">
+          <a class="md_modal_section_link" ng-click="shareContact()" my-i18n="user_modal_share_contact"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; user.pFlags.contact">
+          <a class="md_modal_section_link" ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
+        </div>
+
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions &amp;&amp; !user.pFlags.self">
+          <a class="md_modal_section_link" ng-click="toggleBlock(!blocked)" ng-switch="blocked">
+            <my-i18n ng-switch-when="true" msgid="user_modal_unblock_user"></my-i18n>
+            <my-i18n ng-switch-default msgid="user_modal_block_user"></my-i18n>
+          </a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions">
+          <a class="md_modal_section_link" ng-click="flushHistory(true)" my-i18n="user_modal_clear_history"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="f.showMoreActions">
+          <a class="md_modal_section_link" ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap" ng-if="!f.showMoreActions">
+          <a class="md_modal_section_link" ng-click="f.showMoreActions = true" my-i18n="modal_more"></a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+

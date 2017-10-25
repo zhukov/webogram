@@ -1,0 +1,38 @@
+<div class="modal_close_wrap" ng-click="$close()">
+  <div class="modal_close"></div>
+</div>
+
+<div class="media_modal_bottom_panel_wrap">
+  <div class="media_modal_bottom_panel">
+    <div class="media_modal_bottom_actions pull-right">
+      <a class="media_modal_action_btn" ng-click="forward()"  title="{{'media_modal_forward' | i18n}}">
+        <i class="media_modal_action_btn_forward"></i>
+      </a>
+      <a class="media_modal_action_btn" ng-click="delete()" title="{{'media_modal_delete' | i18n}}">
+        <i class="media_modal_action_btn_delete"></i>
+      </a>
+    </div>
+
+    <div class="media_modal_info_wrap pull-left" ng-if="webpageID">
+      <div class="media_modal_author_name">
+        <a class="media_modal_author" href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
+      </div>
+      <div class="media_modal_date"  ng-bind="webpage.site_name || webpage.display_url"></div>
+    </div>
+
+    <div class="media_modal_title_wrap" my-i18n="media_modal_video"></div>
+  </div>
+</div>
+
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div my-modal-width="{{webpage.full.width - 32}}" class="media_modal_wrap embed_modal_wrap" my-modal-position animation="no">
+
+      <div class="modal-body" ng-bind-html="webpage.full.html">
+
+
+      </div>
+
+    </div>
+  </div>
+</div>

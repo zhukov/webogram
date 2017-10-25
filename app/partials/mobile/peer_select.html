@@ -1,0 +1,86 @@
+<div class="peer_select_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <a class="navbar-search-wrap" ng-click="toggleSearch()">
+          <i class="icon-search"></i>
+        </a>
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="conversation_select_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="im_dialogs_modal_col_wrap" ng-controller="AppImDialogsController" my-dialogs ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
+      <div class="im_dialogs_panel">
+        <div class="im_dialogs_search">
+          <input my-focused class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query" autocomplete="off" />
+          <a class="im_dialogs_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+            <i class="icon icon-search-clear"></i>
+          </a>
+        </div>
+      </div>
+      <div my-dialogs-list-mobile modal="true" class="im_dialogs_modal_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
+        <ul class="nav nav-pills nav-stacked">
+          <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"></li>
+        </ul>
+        <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
+          <h5 my-i18n="conversation_select_modal_contacts"></h5>
+          <ul class="nav nav-pills nav-stacked">
+            <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
+              <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
+                <div class="im_dialog_photo pull-left" my-peer-photolink="::contact.userID" img-class="im_dialog_photo" watch="true"></div>
+                <div class="im_dialog_message_wrap">
+                  <div class="im_dialog_peer">
+                    <span class="im_dialog_user" my-peer-link="contact.userID"></span>
+                  </div>
+                  <div class="im_dialog_message">
+                    <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="im_dialogs_contacts_wrap" ng-show="foundPeers.length > 0">
+          <h5 my-i18n="im_found_title"></h5>
+          <ul class="nav nav-pills nav-stacked">
+            <li class="im_dialog_wrap" ng-repeat="foundPeer in foundPeers track by foundPeer.id" ng-class="{active: selectedPeers[foundPeer.id] !== undefined}">
+              <a class="im_dialog" ng-click="dialogSelect(foundPeer.peerString)">
+                <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true"></div>
+                <div class="im_dialog_message_wrap">
+                  <div class="im_dialog_peer">
+                    <span class="im_dialog_user" my-peer-link="foundPeer.id"></span>
+                  </div>
+                  <div class="im_dialog_message">
+                    <span class="im_dialog_message_text" ng-bind="::'@' + foundPeer.username"></span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

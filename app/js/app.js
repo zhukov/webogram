@@ -1,69 +1,50 @@
 /*!
- * Webogram v0.0.18 - messaging web application for MTProto
+ * Webogram v0.6.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
-'use strict';
+'use strict'
+/* global Config, templateUrl */
 
-window._testMode = location.search.indexOf('test=1') > 0;
-window._debugMode = location.search.indexOf('debug=1') > 0;
-window._osX = (navigator.platform || '').toLowerCase().indexOf('mac') != -1 ||
-              (navigator.userAgent || '').toLowerCase().indexOf('mac') != -1;
-window._retina = window.devicePixelRatio > 1;
-
-if (!window._osX) {
-  $('body').addClass('non_osx');
+var extraModules = []
+if (Config.Modes.animations) {
+  extraModules.push('ngAnimate')
 }
-$('body').addClass(window._retina ? 'is_2x' : 'is_1x');
-
-$(window).on('load', function () {
-  setTimeout(function () {
-    window.scrollTo(0,1);
-  }, 0);
-});
 
 // Declare app level module which depends on filters, and services
 angular.module('myApp', [
   'ngRoute',
-  'ngAnimate',
   'ngSanitize',
+  'ngTouch',
   'ui.bootstrap',
+  'mediaPlayer',
+  'toaster',
+  'izhukov.utils',
+  'izhukov.mtproto',
+  'izhukov.mtproto.wrapper',
   'myApp.filters',
   'myApp.services',
-  'mtproto.services',
+  /*PRODUCTION_ONLY_BEGIN
+  'myApp.templates',
+  PRODUCTION_ONLY_END*/
   'myApp.directives',
   'myApp.controllers'
-]).
-config(['$locationProvider', '$routeProvider', '$compileProvider', function($locationProvider, $routeProvider, $compileProvider) {
+].concat(extraModules)).config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvider', function ($locationProvider, $routeProvider, $compileProvider, StorageProvider) {
+  $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//)
+  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|file|tg|mailto|blob|filesystem|chrome-extension|app):|data:/)
 
-  var icons = {}, reverseIcons = {}, i, j, hex, name, dataItem,
-      ranges = [[0x1f600, 0x1f637], [0x261d, 0x263f], [0x270a, 0x270c], [0x1f446, 0x1f450]];
+  /*PRODUCTION_ONLY_BEGIN
+  $compileProvider.debugInfoEnabled(false)
+  PRODUCTION_ONLY_END*/
 
-  for (j in ranges) {
-    for (i = ranges[j][0]; i <= ranges[j][1]; i++) {
-      hex = i.toString(16);
-      if (dataItem = Config.Emoji[hex]) {
-        name = dataItem[1][0];
-        icons[':' + name + ':'] = hex + '.png';
-        reverseIcons[name] = dataItem[0];
-      }
-    }
+  if (Config.Modes.test) {
+    StorageProvider.setPrefix('t_')
   }
 
-  $.emojiarea.path = 'vendor/gemoji/images';
-  $.emojiarea.icons = icons;
-  $.emojiarea.reverseIcons = reverseIcons;
-
-  $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//);
-  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|file|mailto|blob|filesystem|chrome-extension|app):|data:image\//);
-
-
-  // $locationProvider.html5Mode(true);
-  $routeProvider.when('/', {templateUrl: 'partials/welcome.html?4', controller: 'AppWelcomeController'});
-  $routeProvider.when('/login', {templateUrl: 'partials/login.html?5', controller: 'AppLoginController'});
-  $routeProvider.when('/im', {templateUrl: 'partials/im.html?13', controller: 'AppIMController', reloadOnSearch: false});
-  $routeProvider.otherwise({redirectTo: '/'});
-
-}]);
+  $routeProvider.when('/', {template: '', controller: 'AppWelcomeController'})
+  $routeProvider.when('/login', {templateUrl: templateUrl('login'), controller: 'AppLoginController'})
+  $routeProvider.when('/im', {templateUrl: templateUrl('im'), controller: 'AppIMController', reloadOnSearch: false})
+  $routeProvider.otherwise({redirectTo: '/'})
+}])

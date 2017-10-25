@@ -1,0 +1,12 @@
+<div class="message_actions_modal_wrap" my-modal-position>
+
+  <div class="message_actions_wrap">
+    <button ng-if="historyState.canReply" class="btn btn-md btn-md-primary btn-block" my-i18n="message_action_reply" ng-click="$close('reply')"></button>
+    <button ng-if="historyState.canEdit" class="btn btn-md btn-md-primary btn-block" my-i18n="message_action_edit" ng-click="$close('edit')"></button>
+    <button class="btn btn-md btn-md-primary btn-block" my-i18n="message_action_forward" ng-click="$close('forward')"></button>
+    <button ng-if="historyState.canDelete" class="btn btn-md btn-md-primary btn-block" my-i18n="message_action_delete" ng-click="$close('delete')"></button>
+    <button class="btn btn-md btn-md-primary btn-block" my-i18n="message_action_select" ng-click="$close('select')"></button>
+    <button class="btn btn-md btn-block" my-i18n="message_action_cancel" ng-click="$dismiss()"></button>
+  </div>
+
+</div>

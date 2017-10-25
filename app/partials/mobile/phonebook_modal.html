@@ -1,0 +1,89 @@
+<div class="contacts_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-right">
+              <a ng-class="{disabled: !selectedCount || progress.enabled}" ng-click="submitSelected()" ng-switch="progress.enabled">
+                <span ng-switch-when="true">
+                  <my-i18n msgid="phonebook_modal_submit_active"></my-i18n>
+                  <span my-loading-dots></span>
+                </span>
+                <span ng-switch-default my-i18n="phonebook_modal_submit"></span>
+              </a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="phonebook_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="contacts_modal_search">
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query" autocomplete="off" />
+      <a class="contacts_modal_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
+    </div>
+
+
+    <div class="contacts_modal_col contacts_wrap contacts_scrollable_wrap mobile_scrollable_wrap" my-contacts-list-mobile my-infinite-scroller-mobile>
+      <div ng-switch="contactsEmpty">
+
+        <div ng-switch-when="true" class="contacts_modal_contacts_empty" my-vertical-position="0.2" padding="true" my-i18n="phonebook_modal_empty"></div>
+
+        <ul ng-switch-default class="contacts_modal_members_list nav nav-pills nav-stacked">
+
+          <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | limitTo: slice.limit track by contact.id" ng-class="{active: selectedContacts[contact.id]}">
+            <a class="contacts_modal_contact" ng-click="contactSelect(contact.id)">
+
+              <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
+
+              <div class="contacts_modal_contact_photo pull-left">
+                <img
+                  class="contacts_modal_contact_photo"
+                  ng-src="{{contact.photo}}"
+                />
+              </div>
+
+              <div class="contacts_modal_contact_name">
+                <span ng-bind="contact.first_name"></span>
+                <span ng-bind="contact.last_name"></span>
+              </div>
+              <div class="contacts_modal_contact_status" ng-repeat="phone in contact.phones">
+                <span ng-bind="phone | phoneNumber"></span>
+              </div>
+
+            </a>
+          </li>
+
+        </ul>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-footer contacts_modal_panel" ng-show="multiSelect">
+    <button class="btn btn-primary" ng-click="toggleSelection()" ng-switch="selectedCount > 0">
+      <span ng-switch-when="true" my-i18n="phonebook_modal_deselect_all"></span>
+      <span ng-switch-default my-i18n="phonebook_modal_select_all"></span>
+    </button>
+  </div>
+
+</div>

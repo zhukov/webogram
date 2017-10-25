@@ -1,0 +1,119 @@
+<div class="chat_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-toggle-wrap dropdown" dropdown>
+          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-if="chatFull.thumb.location" ng-if="hasRights('edit_title')">
+              <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
+            </li>
+            <li ng-if="hasRights('edit_title')">
+              <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
+            </li>
+            <li>
+              <a ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></a>
+            </li>
+            <li ng-if="chatFull.chat.pFlags.creator">
+              <a ng-click="migrateToSuperGroup()" my-i18n="group_modal_migrate_to_supergroup"></a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$close()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="group_modal_info"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="mobile_user_modal_photo_profile_wrap">
+
+      <a ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::-chatFull.chat.id" img-class="mobile_user_modal_image mobile_chat_modal_image" no-open="true" watch="true" ng-class="{disabled: !chatFull.chat.photo.photo_small}" ng-disabled="!chatFull.chat.photo.photo_small"></a>
+
+      <div class="mobile_user_modal_info_wrap clearfix">
+        <h4 class="mobile_user_modal_header" my-peer-link="-chatFull.chat.id"></h4>
+        <p class="mobile_user_modal_status"  ng-if="chatFull.chat.participants_count > 0">
+          <ng-pluralize count="chatFull.chat.participants_count"
+                           when="group_modal_pluralize_participants">
+          </ng-pluralize>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="hasRights('invite') &amp;&amp; chatFull.participants.participants.length">
+      <a class="mobile_modal_action" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.pFlags.left && chatFull.chat.pFlags.creator">
+      <a class="mobile_modal_action" ng-click="inviteViaLink()" my-i18n="group_modal_menu_share_link"></a>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat._ == 'chatForbidden'">
+      <a class="mobile_modal_action" ng-click="flushHistory()" my-i18n="group_modal_delete_group"></a>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="hasRights('edit_photo') &amp;&amp; !photo.updating">
+      <span class="mobile_modal_action mobile_modal_upload_action">
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+        <span my-i18n="group_modal_update_photo"></span>
+      </span>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="photo.updating">
+      <span class="mobile_modal_action" my-i18n>
+        <span my-i18n="group_modal_update_active"></span>
+        <span my-loading-dots></span>
+      </span>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="group_modal_notifications"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header" my-i18n="group_modal_members"></h4>
+      <div class="mobile_modal_section_body">
+
+        <div class="chat_modal_members_list">
+
+          <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
+            <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
+            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_delete_group"></a>
+
+            <a class="chat_modal_participant_photo pull-left" my-peer-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
+
+            <div class="chat_modal_participant_name">
+              <a my-peer-link="participant.user_id"></a>
+            </div>
+            <div class="chat_modal_participant_status" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

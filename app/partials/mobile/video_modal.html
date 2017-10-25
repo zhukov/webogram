@@ -1,0 +1,55 @@
+<div class="media_modal_bottom_panel_wrap">
+  <div class="media_modal_bottom_panel">
+    <div class="media_modal_bottom_actions pull-right">
+      <a class="media_modal_action_btn" ng-if="messageID" ng-click="delete()" title="{{'media_modal_delete' | i18n}}">
+        <i class="media_modal_action_btn_delete"></i>
+      </a>
+    </div>
+
+    <div class="media_modal_bottom_actions pull-left">
+      <a class="media_modal_action_btn" ng-if="messageID" ng-click="forward()"  title="{{'media_modal_forward' | i18n}}">
+        <i class="media_modal_action_btn_forward"></i>
+      </a>
+    </div>
+
+    <div class="media_modal_info_wrap" ng-if="video.user_id > 0">
+      <a class="media_modal_author" my-peer-link="video.user_id" peer-watch="true"></a>
+      <br/>
+      <span class="media_modal_date" ng-bind="video.date | dateOrTime :true"></span>
+    </div>
+
+  </div>
+</div>
+
+<div class="media_modal_top_panel_wrap">
+  <div class="media_modal_top_panel">
+    <div class="media_modal_top_actions pull-right">
+      <a class="media_modal_action_btn" ng-click="download()" title="{{'media_modal_download' | i18n}}">
+        <i class="media_modal_action_btn_download"></i>
+      </a>
+    </div>
+    <div class="media_modal_top_actions pull-left">
+      <a ng-click="$close()" class="navbar-quick-media-back">
+        <i class="icon icon-back"></i>
+        <div class="navbar-quick-back-title">
+          <h4 class="media_modal_title_wrap" my-i18n="media_modal_video"></h4>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div my-modal-width="{{video.full.width}}" class="media_modal_wrap video_modal_wrap" my-vertical-position="0.5">
+
+      <div class="modal-body">
+
+        <div class="video_modal_image_wrap" my-load-video video="video"></div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+

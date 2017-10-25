@@ -1,0 +1,148 @@
+<div class="settings_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+        <a class="md_modal_action" ng-click="editProfile()" my-i18n="modal_edit"></a>
+      </div>
+      <div class="md_modal_title" my-i18n="settings_modal_title"></div>
+    </div>
+
+    <div class="peer_modal_profile_wrap clearfix">
+      <div class="peer_modal_photo_wrap pull-left" ng-switch="photo.updating">
+        <div ng-switch-when="true" class="peer_modal_photo md_photo_loading loading_dots">
+          <i></i><i></i><i></i>
+        </div>
+        <a ng-switch-default ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})" class="peer_modal_photo" my-peer-photolink="::profile.id" img-class="peer_modal_photo" watch="true" no-open="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
+      </div>
+      <div class="peer_modal_profile">
+        <div class="peer_modal_profile_name" my-peer-link="profile.id"></div>
+        <div class="peer_modal_profile_description" my-user-status="::profile.id"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <div class="md_modal_split_action">
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" title="{{'settings_modal_set_photo' | i18n}}" />
+        <i class="md_modal_split_action_camera"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="md_modal_sections clearfix">
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_number">
+        <i class="md_modal_section_icon md_modal_section_icon_phone"></i>
+
+        <div class="md_modal_section_param_wrap">
+          <div class="md_modal_section_param_value" ng-bind="profile.phone | phoneNumber"></div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_phone"></div>
+        </div>
+
+        <div class="md_modal_section_param_wrap">
+          <div class="md_modal_section_param_value" ng-switch="profile.username.length > 0">
+            <a ng-switch-when="true" class="settings_modal_username_link" ng-click="changeUsername()" ng-bind="'@' + profile.username"></a>
+            <a ng-switch-default ng-click="changeUsername()" my-i18n="settings_modal_empty_username_set"></a>
+          </div>
+          <div class="md_modal_section_param_name" my-i18n="user_modal_username"></div>
+        </div>
+      </div>
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_toggle">
+        <i class="md_modal_section_icon md_modal_section_icon_notification"></i>
+
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_notifications"></span>
+        </a>
+
+        <a ng-if="notify.desktop && notify.pushAvailable" class="md_modal_section_toggle_wrap tg_checkbox" ng-click="togglePush()" ng-class="notify.push ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_pushes"></span>
+        </a>
+
+        
+
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="togglePreview()" ng-class="notify.preview ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_message_preview"></span>
+        </a>
+
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_sound"></span>
+        </a>
+
+        <div class="md_modal_section_range_wrap tg_range_wrap" ng-show="notify.volume > 0">
+          <div my-slider slider-model="notify.volume"></div>
+        </div>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_radio">
+        <i class="md_modal_section_icon md_modal_section_icon_keyboard"></i>
+
+        <div class="tg_radios_wrap">
+          <a class="md_modal_section_radio_wrap tg_radio" ng-click="toggleCtrlEnter(1)" ng-class="send.enter == 1 ? 'tg_radio_on' : ''">
+            <span class="icon icon-radio-outer"><i class="icon-radio"></i></span>
+            <span my-i18n="settings_modal_enter_send_description_md"></span>
+          </a>
+
+          <a class="md_modal_section_radio_wrap tg_radio" ng-click="toggleCtrlEnter(0)" ng-class="send.enter == 0 ? 'tg_radio_on' : ''">
+            <span class="icon icon-radio-outer"><i class="icon-radio"></i></span>
+            <span my-i18n="settings_modal_ctrl_enter_send_description_md"></span>
+          </a>
+        </div>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link">
+        <i class="md_modal_section_icon md_modal_section_icon_more"></i>
+
+        <div class="md_modal_section_select_wrap" ng-controller="AppLangSelectController">
+          <div class="dropdown md_modal_section_select" dropdown>
+            <button class="btn btn-link dropdown-toggle" dropdown-toggle ng-bind="langNames[curLocale]"></button>
+            <ul class="dropdown-menu dropdown-menu-to-up">
+              <li ng-repeat="locale in ::supportedLocales">
+                <a ng-click="localeSelect(locale)" ng-bind="langNames[locale]"></a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="md_modal_section_param_name" my-i18n="settings_modal_language"></div>
+        </div>
+
+        <div class="md_modal_section_link_wrap">
+          <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'cancel_email'})" my-i18n="settings_modal_password_email_pending_cancel">
+          </a>
+          <span class="md_modal_section_text" ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" class="md_modal_section_link" my-i18n="settings_modal_password_email_pending">
+            <my-i18n-param name="email">
+              <span ng-bind="password.email_unconfirmed_pattern"></span>
+            </my-i18n-param>
+          </span>
+          <a ng-if="password._ == 'account.noPassword' && !password.email_unconfirmed_pattern" class="md_modal_section_link" ng-click="changePassword({action: 'create'})" my-i18n="settings_modal_set_password"></a>
+
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link pull-right" ng-click="changePassword({action: 'disable'})" my-i18n="settings_modal_disable_password"></a>
+          <a ng-if="password._ == 'account.password'" class="md_modal_section_link" ng-click="changePassword({action: 'change'})" my-i18n="settings_modal_change_password"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="showSessions()" my-i18n="settings_modal_active_sessions"></a>
+        </div>
+
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="logOut()" my-i18n="head_log_out"></a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

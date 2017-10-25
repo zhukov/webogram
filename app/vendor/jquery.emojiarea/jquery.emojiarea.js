@@ -29,8 +29,14 @@
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/*! MODIFICATION START
+	 Options 'spritesheetPath', 'spritesheetDimens', 'iconSize' added by Andre Staltz.
+	 */
 	$.emojiarea = {
 		path: '',
+		spritesheetPath: '',
+		spritesheetDimens: [],
+		iconSize: 20,
 		icons: {},
 		defaults: {
 			button: null,
@@ -38,6 +44,8 @@
 			buttonPosition: 'after'
 		}
 	};
+	var defaultRecentEmojis = ':joy:,:kissing_heart:,:heart:,:heart_eyes:,:blush:,:grin:,:+1:,:relaxed:,:pensive:,:smile:,:sob:,:kiss:,:unamused:,:flushed:,:stuck_out_tongue_winking_eye:,:see_no_evil:,:wink:,:smiley:,:cry:,:stuck_out_tongue_closed_eyes:,:scream:,:rage:,:smirk:,:disappointed:,:sweat_smile:,:kissing_closed_eyes:,:speak_no_evil:,:relieved:,:grinning:,:yum:,:laughing:,:ok_hand:,:neutral_face:,:confused:'.split(',');
+	/*! MODIFICATION END */
 
 	$.fn.emojiarea = function(options) {
 		options = $.extend({}, $.emojiarea.defaults, options);
@@ -161,6 +169,49 @@
 		return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 	};
 
+	/*! MODIFICATION START
+		 This function was added by Igor Zhukov to save recent used emojis.
+		 */
+	util.emojiInserted = function (emojiKey, menu, quickSelect) {
+		ConfigStorage.get('emojis_recent', function (curEmojis) {
+			curEmojis = curEmojis || defaultRecentEmojis || [];
+			if (curEmojis.length && typeof curEmojis[0] === 'string') {
+				var newCurEmojis = [];
+				for (var i = 0, l = curEmojis.length; i < l; i++) {
+					newCurEmojis.push([curEmojis[i], 1]);
+				}
+				curEmojis = newCurEmojis;
+			}
+
+			var exists = false;
+			for (var i = 0, l = curEmojis.length; i < l; i++) {
+				if (curEmojis[i][0] == emojiKey) {
+					exists = true;
+					curEmojis[i][1]++;
+					break;
+				}
+			}
+			if (exists) {
+				curEmojis.sort(function (a, b) {
+					if (a[1] == b[1]) return 0;
+					return a[1] > b[1] ? -1 : 1;
+				});
+			} else {
+				if (curEmojis.length > 41) {
+					curEmojis = curEmojis.slice(0, 41);
+				}
+				curEmojis.push([emojiKey, 1]);
+			}
+
+			ConfigStorage.set({emojis_recent: curEmojis});
+
+			if (quickSelect) {
+				quickSelect.changed = true;
+			}
+		})
+	};
+	/*! MODIFICATION END */
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	var EmojiArea = function() {};
@@ -172,6 +223,11 @@
 		this.$editor.on('blur', function() { self.hasFocus = false; });
 
 		this.setupButton();
+
+		if (this.options.quickSelect) {
+			var $items = $(this.options.quickSelect);
+			this.quickSelect = new EmojiQuickSelectArea(self, $items);
+		}
 	};
 
 	EmojiArea.prototype.setupButton = function() {
@@ -198,14 +254,29 @@
 		this.$button = $button;
 	};
 
-	EmojiArea.createIcon = function(emoji) {
-		var filename = $.emojiarea.icons[emoji];
-		var path = $.emojiarea.path || '';
-		if (path.length && path.charAt(path.length - 1) !== '/') {
-			path += '/';
-		}
-		return '<img src="' + path + filename + '" alt="' + util.htmlEntities(emoji) + '">';
+	/*! MODIFICATION START
+	 This function was modified by Andre Staltz so that the icon is created from a spritesheet.
+	 */
+	EmojiArea.createIcon = function(emoji, menu) {
+		var category = emoji[0];
+		var row = emoji[1];
+		var column = emoji[2];
+		var name = emoji[3];
+		var filename = $.emojiarea.spritesheetPath;
+		var iconSize = menu && Config.Mobile ? 26 : $.emojiarea.iconSize
+		var xoffset = -(iconSize * column);
+		var yoffset = -(iconSize * row);
+		var scaledWidth = ($.emojiarea.spritesheetDimens[category][1] * iconSize);
+		var scaledHeight = ($.emojiarea.spritesheetDimens[category][0] * iconSize);
+
+		var style = 'display:inline-block;';
+		style += 'width:' + iconSize + 'px;';
+		style += 'height:' + iconSize + 'px;';
+		style += 'background:url(\'' + filename.replace('!',category) + '\') ' + xoffset + 'px ' + yoffset + 'px no-repeat;';
+		style += 'background-size:' + scaledWidth + 'px ' + scaledHeight + 'px;';
+		return '<img src="img/blank.gif" class="img" style="'+ style +'" alt="' + util.htmlEntities(name) + '">';
 	};
+	/*! MODIFICATION END */
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -227,6 +298,8 @@
 	EmojiArea_Plain.prototype.insert = function(emoji) {
 		if (!$.emojiarea.icons.hasOwnProperty(emoji)) return;
 		util.insertAtCursor(emoji, this.$textarea[0]);
+		/* MODIFICATION: Following line was added by Igor Zhukov, in order to save recent emojis */
+		util.emojiInserted(emoji, this.menu, this.quickSelect);
 		this.$textarea.trigger('change');
 	};
 
@@ -272,7 +345,8 @@
 		var emojis = $.emojiarea.icons;
 		for (var key in emojis) {
 			if (emojis.hasOwnProperty(key)) {
-				html = html.replace(new RegExp(util.escapeRegex(key), 'g'), EmojiArea.createIcon(key));
+				/* MODIFICATION: Following line was modified by Andre Staltz, to use new implementation of createIcon function.*/
+				html = html.replace(new RegExp(util.escapeRegex(key), 'g'), EmojiArea.createIcon(emojis[key]));
 			}
 		}
 		this.$editor.html(html);
@@ -293,17 +367,27 @@
 			Following code was modified by Igor Zhukov, in order to improve rich text paste
 		*/
 	EmojiArea_WYSIWYG.prototype.onPaste = function(e) {
-    var text = (e.originalEvent || e).clipboardData.getData('text/plain'),
-    		self = this;
-    setTimeout(function () {
-	    self.onChange();
-    }, 0);
-    if (text.length) {
-	    document.execCommand('insertText', false, text);
-	    return cancelEvent(e);
-    }
-    return true;
-	}
+		var cData = (e.originalEvent || e).clipboardData,
+				items = cData && cData.items || [],
+				i;
+		for (i = 0; i < items.length; i++) {
+			if (items[i].kind == 'file') {
+				e.preventDefault();
+				return true;
+			}
+		}
+
+		var text = (e.originalEvent || e).clipboardData.getData('text/plain'),
+				self = this;
+		setTimeout(function () {
+			self.onChange();
+		}, 0);
+		if (text.length) {
+			document.execCommand('insertText', false, text);
+			return cancelEvent(e);
+		}
+		return true;
+	};
 	/*! MODIFICATION END */
 
 	EmojiArea_WYSIWYG.prototype.onChange = function(e) {
@@ -312,14 +396,17 @@
 
 	EmojiArea_WYSIWYG.prototype.insert = function(emoji) {
 		var content;
-		var $img = $(EmojiArea.createIcon(emoji));
+		/* MODIFICATION: Following line was modified by Andre Staltz, to use new implementation of createIcon function.*/
+		var $img = $(EmojiArea.createIcon($.emojiarea.icons[emoji]));
 		if ($img[0].attachEvent) {
 			$img[0].attachEvent('onresizestart', function(e) { e.returnValue = false; }, false);
 		}
 
-		this.$editor.trigger('focus');
-		if (this.selection) {
-			util.restoreSelection(this.selection);
+		if (!this.hasFocus) {
+			this.$editor.trigger('focus');
+			if (this.selection) {
+				util.restoreSelection(this.selection);
+			}
 		}
 		try { util.replaceSelection($img[0]); } catch (e) {}
 
@@ -331,6 +418,10 @@
 			self.selection = util.saveSelection();
 		}, 100);
 		/*! MODIFICATION END */
+
+		/* MODIFICATION: Following line was added by Igor Zhukov, in order to save recent emojis */
+		util.emojiInserted(emoji, this.menu, this.quickSelect);
+
 
 		this.onChange();
 	};
@@ -403,22 +494,37 @@
 
 		/*! MODIFICATION START
 			Following code was modified by Igor Zhukov, in order to add scrollbars and tail to EmojiMenu
+			Also modified by Andre Staltz, to include tabs for categories, on the menu header.
 		*/
 		this.$itemsTailWrap = $('<div class="emoji-items-wrap1"></div>').appendTo(this.$menu);
-		this.$itemsWrap = $('<div class="emoji-items-wrap nano"></div>').appendTo(this.$itemsTailWrap);
-		this.$items = $('<div class="emoji-items content">').appendTo(this.$itemsWrap);
-		$('<div class="emoji-menu-tail">').appendTo(this.$menu);
+		this.$categoryTabs = $('<table class="emoji-menu-tabs"><tr>' +
+		'<td><a class="emoji-menu-tab icon-recent" ></a></td>' +
+		'<td><a class="emoji-menu-tab icon-smile" ></a></td>' +
+		'<td><a class="emoji-menu-tab icon-flower"></a></td>' +
+		'<td><a class="emoji-menu-tab icon-bell"></a></td>' +
+		'<td><a class="emoji-menu-tab icon-car"></a></td>' +
+		'<td><a class="emoji-menu-tab icon-grid"></a></td>' +
+		'</tr></table>').appendTo(this.$itemsTailWrap);
+		this.$itemsWrap = $('<div class="emoji-items-wrap nano mobile_scrollable_wrap"></div>').appendTo(this.$itemsTailWrap);
+		this.$items = $('<div class="emoji-items nano-content">').appendTo(this.$itemsWrap);
 		/*! MODIFICATION END */
 
 		$body.append(this.$menu);
 
-		/*! MODIFICATION: Following line is added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
-		this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+		/*! MODIFICATION: Following 3 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu  */
+		if (!Config.Mobile) {
+			this.$itemsWrap.nanoScroller({preventPageScrolling: true, tabIndex: -1});
+		}
 
 		$body.on('keydown', function(e) {
 			if (e.keyCode === KEY_ESC || e.keyCode === KEY_TAB) {
 				self.hide();
 			}
+		});
+
+		/*! MODIFICATION: Following 3 lines were added by Igor Zhukov, in order to hide menu on message submit with keyboard */
+		$body.on('message_send', function(e) {
+			self.hide();
 		});
 
 		$body.on('mouseup', function(e) {
@@ -447,6 +553,16 @@
 		});
 
 		this.$menu.on('click', 'a', function(e) {
+			/*! MODIFICATION START
+			 Following code was modified by Andre Staltz, to capture clicks on category tabs and change the category selection.
+			 */
+			if ($(this).hasClass('emoji-menu-tab')) {
+				if (self.getTabIndex(this) !== self.currentCategory) {
+					self.selectCategory(self.getTabIndex(this));
+				}
+				return false;
+			}
+			/*! MODIFICATION END */
 			var emoji = $('.label', $(this)).text();
 			window.setTimeout(function() {
 				self.onItemSelected(emoji);
@@ -462,35 +578,87 @@
 			return false;
 		});
 
-		this.load();
+		/* MODIFICATION: Following line was modified by Andre Staltz, in order to select a default category. */
+		this.selectCategory(0);
 	};
+
+	/*! MODIFICATION START
+	 Following code was added by Andre Staltz, to implement category selection.
+	 */
+	EmojiMenu.prototype.getTabIndex = function(tab) {
+		return this.$categoryTabs.find('.emoji-menu-tab').index(tab);
+	};
+
+	EmojiMenu.prototype.selectCategory = function(category) {
+		var self = this;
+		this.$categoryTabs.find('.emoji-menu-tab').each(function(index) {
+			if (index === category) {
+				this.className += '-selected';
+			}
+			else {
+				this.className = this.className.replace('-selected', '');
+			}
+		});
+		this.currentCategory = category;
+		this.load(category);
+		if (!Config.Mobile) {
+	    this.$itemsWrap.nanoScroller({ scroll: 'top' });
+		}
+	};
+	/*! MODIFICATION END */
 
 	EmojiMenu.prototype.onItemSelected = function(emoji) {
 		this.emojiarea.insert(emoji);
 	};
 
-	EmojiMenu.prototype.load = function() {
+	/* MODIFICATION:
+		The following function argument was modified by Andre Staltz, in order to load only icons from a category.
+		Also function was modified by Igor Zhukov in order to display recent emojis from localStorage
+	*/
+	EmojiMenu.prototype.load = function(category) {
 		var html = [];
 		var options = $.emojiarea.icons;
 		var path = $.emojiarea.path;
+		var self = this;
 		if (path.length && path.charAt(path.length - 1) !== '/') {
 			path += '/';
 		}
 
-		for (var key in options) {
-			if (options.hasOwnProperty(key)) {
-				var filename = options[key];
-				html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(key) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+		/*! MODIFICATION: Following function was added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
+		var updateItems = function () {
+			self.$items.html(html.join(''));
+
+			if (!Config.Mobile && self.$itemsWrap) {
+				setTimeout(function () {
+					self.$itemsWrap.nanoScroller();
+				}, 100);
 			}
 		}
 
-		this.$items.html(html.join(''));
-
-		/*! MODIFICATION: Following 4 lines were added by Igor Zhukov, in order to add scrollbars to EmojiMenu */
-		var self = this;
-		setTimeout(function () {
-			self.$itemsWrap.nanoScroller();
-		}, 100);
+		if (category > 0) {
+			for (var key in options) {
+				/* MODIFICATION: The following 2 lines were modified by Andre Staltz, in order to load only icons from the specified category. */
+				if (options.hasOwnProperty(key) && options[key][0] === (category - 1)) {
+					html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+				}
+			}
+			updateItems();
+		} else {
+			ConfigStorage.get('emojis_recent', function (curEmojis) {
+				curEmojis = curEmojis || defaultRecentEmojis || [];
+				var key, i;
+				for (i = 0; i < curEmojis.length; i++) {
+					key = curEmojis[i];
+					if (Array.isArray(key)) {
+						key = key[0];
+					}
+					if (options[key]) {
+						html.push('<a href="javascript:void(0)" title="' + util.htmlEntities(key) + '">' + EmojiArea.createIcon(options[key], true) + '<span class="label">' + util.htmlEntities(key) + '</span></a>');
+					}
+				}
+				updateItems();
+			});
+		}
 	};
 
 	EmojiMenu.prototype.reposition = function() {
@@ -526,6 +694,10 @@
 
 		this.reposition();
 		this.$menu.show();
+		/* MODIFICATION: Following 3 lines were added by Igor Zhukov, in order to update EmojiMenu contents */
+		if (!this.currentCategory) {
+			this.load(0);
+		}
 		this.visible = true;
 	};
 
@@ -536,5 +708,31 @@
 			menu.show(emojiarea);
 		};
 	})();
+
+	var EmojiQuickSelectArea = function(emojiarea, $items) {
+		var self = this;
+		var $body = $(document.body);
+
+		this.emojiarea = emojiarea;
+		this.changed = false;
+		this.$items = $items;
+
+		this.load(0);
+		this.$items.on('mousedown', 'a', function(e) {
+			var emoji = $('.label', $(this)).text();
+			self.onItemSelected(emoji);
+			self.changed = true;
+			e.stopPropagation();
+			return false;
+		});
+		$body.on('message_send', function(e) {
+			if (self.changed) {
+				self.load(0);
+				self.changed = false;
+			}
+		});
+	};
+
+	util.extend(EmojiQuickSelectArea.prototype, EmojiMenu.prototype);
 
 })(jQuery, window, document);

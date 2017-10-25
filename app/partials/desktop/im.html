@@ -1,0 +1,235 @@
+<div my-head></div>
+
+<div class="im_page_wrap clearfix" ng-class="{im_page_peer_not_selected: !curDialog.peer}">
+
+  <div class="im_page_split clearfix">
+
+    <div class="im_dialogs_col_wrap noselect" ng-controller="AppImDialogsController" my-dialogs ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
+      <div class="im_dialogs_panel">
+        <div class="im_dialogs_search">
+          <input class="form-control im_dialogs_search_field no_outline" type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query" autocomplete="off" />
+          <a class="im_dialogs_search_clear tg_search_clear" ng-click="searchClear()" ng-show="search.query.length">
+            <i class="icon icon-search-clear"></i>
+          </a>
+        </div>
+      </div>
+
+      <div my-dialogs-list class="im_dialogs_col">
+        <div class="im_dialogs_wrap nano">
+          <div class="im_dialogs_scrollable_wrap nano-content">
+
+            <div class="im_dialogs_empty_wrap" ng-if="isEmpty.dialogs && isEmpty.contacts">
+              <h3 class="im_dialogs_empty_header" my-i18n="im_no_contacts"></h3>
+              <p class="im_dialogs_empty_lead" my-i18n="im_get_started_long"></p>
+              <button type="button" class="btn btn-primary btn-sm" ng-click="importContact()" my-i18n="im_add_contact"></button>
+              <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-sm im_dialogs_import_phonebook" ng-click="importPhonebook()" my-i18n="im_import_phonebook"></button>
+            </div>
+
+            <ul class="nav nav-pills nav-stacked">
+              <li class="im_dialog_wrap" ng-if="searchPeer">
+                <a class="im_dialog im_dialog_searchpeer disabled" ng-mousedown="setSearchPeer()">
+
+                  <div class="im_dialog_meta pull-right">
+                    <div class="im_dialog_clear_searchpeer">
+                      <!-- <i class="icon icon-clear-searchpeer"></i> -->
+                      <i class="icon icon-search-clear"></i>
+                    </div>
+                  </div>
+
+                  <div class="im_dialog_photo pull-left" my-peer-photolink="searchPeer" img-class="im_dialog_photo" watch="true"></div>
+
+                  <div class="im_dialog_message_wrap">
+
+                    <div class="im_dialog_peer">
+                      <span my-peer-link="searchPeer"></span>
+                    </div>
+
+                    <div class="im_dialog_message">
+                      <span class="" my-i18n="conversation_search_peer"></span>
+                    </div>
+
+                  </div>
+
+                </a>
+
+              </li>
+              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            </ul>
+
+            <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
+              <h5 my-i18n="im_contacts_title"></h5>
+              <ul class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
+                  <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="contact.userID" img-class="im_dialog_photo" watch="true"></div>
+                    <div class="im_dialog_message_wrap">
+                      <div class="im_dialog_peer">
+                        <span class="im_dialog_user" my-peer-link="contact.userID"  verified="true"></span>
+                      </div>
+                      <div class="im_dialog_message">
+                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="im_dialogs_contacts_wrap" ng-show="foundPeers.length > 0">
+              <h5 my-i18n="im_found_title"></h5>
+              <ul class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" ng-repeat="foundPeer in foundPeers track by foundPeer.id" ng-class="{active: curDialog.peerID == foundPeer.id}">
+                  <a class="im_dialog" ng-mousedown="dialogSelect(foundPeer.peerString)">
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true"></div>
+                    <div class="im_dialog_message_wrap">
+                      <div class="im_dialog_peer">
+                        <span class="im_dialog_user" my-peer-link="foundPeer.id"  verified="true"></span>
+                      </div>
+                      <div class="im_dialog_message">
+                        <span class="im_dialog_message_text" ng-bind="::'@' + foundPeer.username"></span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="im_dialogs_messages_wrap" ng-show="foundMessages.length > 0">
+              <h5 my-i18n="im_messages"></h5>
+              <ul class="nav nav-pills nav-stacked">
+                <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in foundMessages track by dialogMessage.mid" ng-class="{active: curDialog.peerID == dialogMessage.peerID &amp;&amp; curDialog.messageID == dialogMessage.id}"></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="im_history_col_wrap noselect" ng-controller="AppImHistoryController" ng-class="{im_history_loaded: state.loaded}">
+
+      <div class="im_history_not_selected_wrap" ng-switch="isEmpty.contacts &amp;&amp; isEmpty.dialogs">
+        <div ng-switch-when="true" class="im_history_no_dialogs_wrap">
+          <h3 class="im_dialogs_empty_header" my-i18n="im_get_started"></h3>
+          <p class="im_dialogs_empty_lead" my-i18n="im_welcome_text"></p>
+          <button type="button" class="btn btn-primary btn-sm" ng-click="openSettings()" my-i18n="im_open_settings"></button>
+        </div>
+        <div ng-switch-default class="im_history_not_selected" my-vertical-position="0.35" padding="true" my-i18n="im_select_a_chat"></div>
+      </div>
+
+      <div class="im_history_selected_loading_wrap im_history_loading" my-vertical-position="0.4" padding="true">
+        <div my-arc-progress stroke="4" width="32"></div>
+      </div>
+
+      <div class="im_history_selected_wrap">
+        <div my-history class="im_history_col">
+
+          <div class="im_history_wrap nano">
+
+            <div class="im_history_scrollable_wrap nano-content">
+
+              <div class="im_history_scrollable">
+                  <div class="im_history" ng-class="{im_history_selectable: !historyState.botActions, im_history_select_active: historyState.selectActions}">
+
+                    <div class="im_history_empty_wrap" ng-show="state.empty" ng-switch="state.mayBeHasMore">
+                      <div ng-switch-when="true" class="im_history_loading" my-vertical-position="0.3" padding="true">
+                        <div my-arc-progress stroke="4" width="32"></div>
+                      </div>
+                      <div ng-switch-default class="im_history_empty" my-vertical-position="0.25" padding="true" my-i18n="im_no_messages"></div>
+                    </div>
+
+                    <div class="im_history_messages" ng-class="{im_history_messages_group: historyPeer.id < 0}">
+                      <div class="im_history_loading_more" ng-class="{im_history_loading_more_active: state.moreActive}">
+                        <div my-arc-progress stroke="3" width="26"></div>
+                      </div>
+                      <div class="im_history_messages_peer" ng-show="peerHistory.peerID == historyPeer.id" ng-repeat="peerHistory in peerHistories">
+                        <div class="im_history_message_wrap" my-message ng-repeat="historyMessage in peerHistory.messages"></div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="im_history_typing_wrap" ng-switch="historyState.skipped">
+
+                    <div ng-switch-when="true" class="im_history_loading_less" ng-class="{im_history_loading_less_active: state.lessActive}">
+                      <div my-arc-progress stroke="3" width="26"></div>
+                    </div>
+                    <div ng-switch-default class="im_history_typing" ng-show="historyState.typing.length > 0 &amp;&amp; !historyFilter.mediaType &amp;&amp; !state.empty" ng-switch="historyState.typing.length" my-i18n>
+                      <span ng-switch-when="0"></span>
+                      <span ng-switch-when="1" my-i18n-format="im_one_typing"></span>
+                      <span ng-switch-when="2" my-i18n-format="im_two_typing"></span>
+                      <span ng-switch-default my-i18n-format="im_many_typing"></span>
+                      <my-i18n-param name="name1"><a class="im_history_typing_author" my-peer-link="historyState.typing[0]"></a></my-i18n-param>
+                      <my-i18n-param name="name2"><a class="im_history_typing_author" my-peer-link="historyState.typing[1]"></a></my-i18n-param>
+                      <my-i18n-param name="count">{{historyState.typing.length - 2}}</my-i18n-param>
+                      <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+                    </div>
+                  </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="im_bottom_panel_wrap">
+
+            <div class="im_edit_panel_wrap clearfix" ng-show="historyState.actions()" ng-switch="historyState.actions()" ng-class="historyState.channelActions !== false ? 'im_edit_small_panel_wrap' : ''">
+              <div class="im_edit_panel_border"></div>
+
+              <div ng-switch-when="bot">
+                <a ng-show="historyState.botActions == 'param'" class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="cancelBot()" my-i18n="modal_cancel"></a>
+                <div class="im_edit_start_actions">
+                  <a class="btn btn-primary im_start_btn" ng-click="startBot()" my-i18n="im_start"></a>
+                </div>
+              </div>
+              <div ng-switch-when="channel">
+                <div class="im_edit_start_actions" ng-switch="historyState.channelActions">
+                  <a ng-switch-when="join" class="btn btn-primary im_start_btn" ng-click="joinChannel()" my-i18n="im_channel_join"></a>
+                  <a ng-switch-when="mute" class="btn btn-link im_start_btn" ng-click="togglePeerMuted(true)" my-i18n="im_channel_mute"></a>
+                  <a ng-switch-when="unmute" class="btn btn-link im_start_btn" ng-click="togglePeerMuted(false)" my-i18n="im_channel_unmute"></a>
+                </div>
+              </div>
+              <div ng-switch-when="selected" class="im_edit_selected_actions" my-i18n>
+                <a class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
+                <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
+                <a class="btn btn-primary im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete" ng-show="historyState.canDelete"></a>
+                <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedReply()" ng-show="selectedCount == 1 &amp;&amp; historyState.canReply" my-i18n="im_reply"></a>
+                <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedEdit()" ng-show="selectedCount == 1 &amp;&amp; historyState.canEdit" my-i18n="im_edit"></a>
+                <my-i18n-param name="count"><strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong></my-i18n-param>
+              </div>
+            </div>
+
+            <div class="im_send_panel_wrap noselect" ng-show="!historyState.actions()">
+
+              <div class="im_send_form_wrap1">
+
+                <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController" ng-class="{im_send_reply_form_wrap: draftMessage.replyToMsgID > 0}">
+
+                  <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true" ng-show="!draftMessage.isBroadcast">
+                    <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
+                  </a>
+                  <a class="pull-left im_panel_own_photo" my-peer-photolink="draftMessage.isBroadcast ? historyPeer.id : ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
+
+                  <div my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" reply-keyboard="historyState.replyKeyboard"></div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer_wrap footer_empty"></div>
+
+<toaster-container toaster-options="{'position-class': 'toast-bottom-center'}"></toaster-container>

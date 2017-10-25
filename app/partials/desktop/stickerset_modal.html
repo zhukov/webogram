@@ -1,0 +1,50 @@
+<div class="stickerset_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()" my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title" ng-switch="!stickersetLoaded">
+      <span ng-switch-when="true" my-i18n="stickerset_modal_title_loading"></span>
+      <span ng-switch-default ng-bind="stickerset.title"></span>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div my-stickers-list class="stickerset_modal_col">
+
+      <div class="stickerset_wrap nano" my-infinite-scroller>
+        <div class="stickerset_scrollable_wrap nano-content" ng-switch="!stickersetLoaded">
+
+          <div ng-switch-when="true" class="stickerset_modal_loading" my-vertical-position="0.2" padding="true" my-i18n="stickerset_modal_loading">
+            <my-i18n-param name="dots">
+              <span my-loading-dots></span>
+            </my-i18n-param>
+          </div>
+
+          <div ng-switch-default class="stickerset_modal_stickers_list clearfix">
+            <a class="stickerset_modal_sticker_wrap" ng-repeat="sticker in documents | limitTo: slice.limit" ng-click="chooseSticker(sticker.id)">
+              <div class="stickerset_modal_sticker" my-load-sticker document="sticker" dim="stickerDimensions[sticker.id]"></div>
+              <div class="stickerset_modal_sticker_alt" ng-bind-html="stickerEmojis[sticker.id]"></div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="stickerset_actions_wrap">
+      <div class="stickerset_actions" ng-switch="stickersetInstalled">
+        <button ng-if="stickersetLoaded" class="btn btn-md btn-md-primary pull-left" my-i18n="stickerset_modal_share" ng-click="share()"></button>
+        <button ng-switch-when="true" class="btn btn-md btn-md-danger" my-i18n="stickerset_modal_uninstall" ng-click="toggleInstalled(false)"></button>
+        <button ng-switch-when="false" class="btn btn-md btn-md-primary" my-i18n="stickerset_modal_install" ng-click="toggleInstalled(true)"></button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,45 @@
+<div class="modal_close_wrap" ng-class="{modal_close_wrap_wnext: nav.hasNext}" ng-click="$close()">
+  <div class="modal_close"></div>
+</div>
+
+<div class="media_modal_bottom_panel_wrap">
+  <div class="media_modal_bottom_panel">
+    <div class="media_modal_bottom_actions pull-right">
+      <a class="media_modal_action_btn" ng-click="download()" title="{{'media_modal_download' | i18n}}">
+        <i class="media_modal_action_btn_download"></i>
+      </a>
+      <a class="media_modal_action_btn" ng-if="messageID" ng-click="forward()"  title="{{'media_modal_forward' | i18n}}">
+        <i class="media_modal_action_btn_forward"></i>
+      </a>
+      <a class="media_modal_action_btn" ng-if="messageID" ng-click="delete()" title="{{'media_modal_delete' | i18n}}">
+        <i class="media_modal_action_btn_delete"></i>
+      </a>
+    </div>
+
+    <div class="media_modal_info_wrap pull-left" ng-if="video.user_id > 0" ng-switch="messageID > 0">
+      <a class="media_modal_author_photo pull-left" my-peer-photolink="video.user_id" img-class="media_modal_author_photo" watch="true"></a>
+      <div class="media_modal_author_name">
+        <a class="media_modal_author" my-peer-link="video.user_id" peer-watch="true"></a>
+      </div>
+      <div class="media_modal_date" ng-if="video.date > 0">
+        <a ng-switch-when="true" class="media_modal_date" ng-click="goToMessage()" ng-bind="video.date | dateOrTime :true"></a>
+        <span ng-switch-default ng-bind="video.date | dateOrTime :true"></span>
+      </div>
+    </div>
+
+    <div class="media_modal_title_wrap" my-i18n="media_modal_video"></div>
+  </div>
+</div>
+
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div my-modal-width="{{video.full.width - 32}}" class="media_modal_wrap video_modal_wrap" my-modal-position animation="no">
+
+      <div class="modal-body">
+        <div class="video_modal_image_wrap" my-load-video video="video"></div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

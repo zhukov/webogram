@@ -1,0 +1,50 @@
+<div class="changelog_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+      </div>
+      <div class="md_modal_title" my-i18n="head_about"></div>
+    </div>
+
+    <div class="peer_modal_profile_wrap clearfix">
+      <div class="peer_modal_photo_wrap pull-left">
+        <div class="peer_modal_photo telegram_modal_logo"></div>
+      </div>
+      <div class="peer_modal_profile">
+        <div class="peer_modal_profile_name">Telegram Web</div>
+        <div class="peer_modal_profile_description" my-i18n="changelog_app_version">
+          <my-i18n-param name="version" ng-bind="currentVersion"></my-i18n-param>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <a href="https://twitter.com/telegram_web" target="_blank" class="md_modal_split_action">
+        <i class="md_modal_split_action_twitter"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="md_modal_sections">
+
+      <div class="md_modal_versioned_section_wrap">
+        <div class="md_modal_section_description changelog_version_changes" my-i18n="changelog_modal_full_description_md"></div>
+      </div>
+
+    </div>
+
+
+    <div class="changelog_footer_wrap clearfix">
+      <a class="changelog_github_link" href="https://github.com/zhukov/webogram" target="_blank">GitHub</a>
+      <a class="changelog_more_link" href="https://github.com/zhukov/webogram/blob/master/CHANGELOG.md" target="_blank" my-i18n="changelog_modal_changelog_link"></a>
+    </div>
+
+  </div>
+
+</div>

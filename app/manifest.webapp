@@ -1,7 +1,8 @@
 {
-  "name": "Webogram",
-  "description": "Webogram – UNOFFICIAL Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.0.18",
+  "name": "Telegram",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "version": "0.6.0",
+  "type": "privileged",
   "launch_path": "/index.html",
   "developer": {
     "name": "Igor Zhukov",
@@ -10,11 +11,72 @@
   "installs_allowed_from": [
     "*"
   ],
+  "messages": [{
+    "push": "/index.html"
+  }, {
+    "push-register": "/index.html"
+  }, {
+    "notification": "/index.html"
+  }],
   "permissions": {
     "desktop-notification": {
-      "description": "To show new message notifications etc"
+      "description": "Required to show new message notifications"
+    },
+    "contacts": {
+      "description": "Required to import phonebook contacts",
+      "access": "readonly"
+    },
+    "push": {
+      "description": "Required for notifications"
+    },
+    "device-storage:music": {
+      "description": "Required for voice notes download",
+      "access": "createonly"
+    },
+    "device-storage:pictures": {
+    "description": "Required for photos download",
+      "access": "createonly"
+    },
+    "device-storage:sdcard": {
+    "description": "Required for documents download",
+      "access": "createonly"
+    },
+    "device-storage:videos": {
+    "description": "Required for videos download",
+      "access": "createonly"
+    },
+    "audio-capture" : {
+    "description" : "Required to record voice messages"
     }
   },
+  "activities": {
+    "share": {
+      "href": "/index.html",
+      "disposition": "window",
+      "filters": {
+        "type": ["image/*","audio/*","video/*", "url"],
+        "url": {
+          "pattern": "https?:.{1,16384}",
+          "regexp": "^https?:"
+        }
+      },
+      "returnValue": false
+    },
+    "view": {
+      "href": "/index.html",
+      "disposition": "window",
+      "filters": {
+        "type": "url",
+        "url": {
+          "required": true,
+          "pattern": "tg:.{1,16384}",
+          "regexp": "^tg:"
+        }
+      },
+      "returnValue": false
+    }
+  },
+  "orientation": "portrait-primary",
   "icons": {
     "16": "/img/icons/icon16.png",
     "32": "/img/icons/icon32.png",

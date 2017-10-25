@@ -1,0 +1,37 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <div class="modal_simple_form">
+
+      <h4 my-i18n="group_invite_link_modal_title"></h4>
+
+      <div ng-switch="exportedInvite.canRevoke">
+        <div ng-switch-when="true">
+          <div class="md-input-group md-textarea-group" my-labeled-input>
+            <label class="md-input-label" my-i18n="group_invite_link_link_label"></label>
+            <textarea class="md-input" ng-model="exportedInvite.link" rows="2" my-copy-field="'ui_invite_select'"></textarea>
+          </div>
+        </div>
+
+        <div ng-switch-default>
+          <div class="md-input-group" my-labeled-input>
+            <label class="md-input-label" my-i18n="group_invite_link_link_label"></label>
+            <input class="md-input" type="text" ng-model="exportedInvite.link" my-copy-field="'ui_invite_select'" />
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="md_simple_modal_footer" ng-switch="exportedInvite.canRevoke">
+    <div ng-switch-when="true">
+      <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+      <button class="btn btn-md btn-md-primary" ng-class="{disabled: exportedInvite.revoking}" ng-click="revokeLink()" ng-bind="exportedInvite.revoking ? 'group_invite_revoke_active' : 'group_invite_revoke' | i18n" ng-disabled="exportedInvite.revoking"></button>
+    </div>
+  </div>
+
+</div>

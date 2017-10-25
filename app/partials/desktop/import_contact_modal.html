@@ -1,0 +1,36 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <form class="modal_simple_form" ng-submit="doImport()" name="importContactForm">
+
+      <h4 my-i18n="contact_import_modal_title"></h4>
+
+      <div class="md-input-group" my-labeled-input ng-class="{'md-input-error': importContactForm.phone.$invalid && importContactForm.phone.$touched}" my-labeled-input>
+        <label class="md-input-label" ng-switch="importContactForm.phone.$invalid && importContactForm.phone.$touched">
+          <span ng-switch-when="true" my-i18n="login_incorrect_number"></span>
+          <span ng-switch-default my-i18n="contact_import_modal_phone"></span>
+        </label>
+        <input class="md-input" my-focused type="tel" ng-model="importContact.phone" ng-pattern="/^[-\+\(\)\d\s]{7,32}$/" my-submit-on-enter name="phone" />
+      </div>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label" my-i18n="contact_edit_modal_first_name"></label>
+        <input class="md-input" type="text" ng-model="importContact.first_name"  my-submit-on-enter />
+      </div>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label" my-i18n="contact_edit_modal_last_name"></label>
+        <input class="md-input" type="text" ng-model="importContact.last_name"  my-submit-on-enter />
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+    <button class="btn btn-md btn-md-primary" ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'contact_import_modal_submit_active' : 'contact_import_modal_submit' | i18n" ng-disabled="progress.enabled"></button>
+  </div>
+
+</div>

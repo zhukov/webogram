@@ -1,0 +1,47 @@
+<div class="import_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-right">
+              <a ng-class="{disabled: progress.enabled}" ng-click="doImport()" ng-bind="progress.enabled ? 'contact_edit_modal_submit_active' : 'contact_edit_modal_submit'| i18n" ng-disabled="progress.enabled"></a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="contact_edit_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body">
+
+    <form class="modal_simple_form" ng-submit="doImport()" my-vertical-position="0.3">
+
+      <div class="form-group">
+        <span class="form-control uneditable_input input-lg disabled" disabled my-focused type="text" ng-bind="importContact.phone | phoneNumber"></span>
+      </div>
+      <div class="form-group">
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_first_name' | i18n}}" ng-model="importContact.first_name" my-submit-on-enter/>
+      </div>
+      <div class="form-group">
+        <input class="form-control input-lg" type="text" placeholder="{{'contact_edit_modal_last_name' | i18n}}" ng-model="importContact.last_name" my-submit-on-enter/>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

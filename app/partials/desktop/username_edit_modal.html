@@ -1,0 +1,27 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <form class="modal_simple_form" ng-submit="updateUsername()">
+
+      <h4 my-i18n="username_edit_modal_title"></h4>
+
+      <div class="md-input-group" ng-class="{'md-input-error': checked.error}" my-labeled-input>
+        <label class="md-input-label" my-i18n="username_edit_placeholder"></label>
+        <input class="md-input" my-focused type="text" ng-model="profile.username" name="username" ng-model-options="{updateOn: 'default blur', debounce: {default: 600, blur: 0}}" />
+      </div>
+
+      <div class="md_simple_form_description" my-i18n="username_edit_description_md"></div>
+
+    </form>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+
+    <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+    <button class="btn btn-md btn-md-primary" ng-class="{disabled: profile.updating}" ng-click="updateUsername()" ng-bind="profile.updating ? 'username_edit_submit_active' : 'username_edit_submit' | i18n" ng-disabled="profile.updating"></button>
+
+  </div>
+
+</div>

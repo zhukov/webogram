@@ -1,0 +1,45 @@
+<div class="audio_player_wrap clearfix">
+	<a class="im_message_file_button" ng-click="togglePlay()" ng-class="{im_message_file_button_dl_audio: audio.downloaded}">
+	  <i class="im_message_file_button_icon" ng-class="{audio_player_btn_icon_pause: mediaPlayer.player.playing}"></i>
+	</a>
+	<div class="audio_player_title_wrap">
+		<div class="audio_player_meta pull-right" ng-if="audio.downloaded &amp;&amp; (mediaPlayer.player.duration || audio.duration)" ng-switch="mediaPlayer.player.playing || mediaPlayer.player.currentTime > 0">
+			<span ng-switch-when="true" class="audio_player_duration" ng-bind="mediaPlayer.player.currentTime | durationRemains : duration()"></span>
+			<span ng-switch-default class="audio_player_duration" ng-bind="duration() | duration"></span>
+		</div>
+		<span class="copyonly">[ </span>
+		<a ng-attr-title="{{audio.file_name}}" ng-click="download()" class="audio_player_title" ng-switch="::audio.audioTitle.length > 0 ? 2 : (audio.file_name.length > 0 ? 1 : 0)">
+			<span ng-switch-when="2">
+				<strong ng-bind="::audio.audioPerformer"></strong>
+				<span ng-bind="::(audio.audioPerformer ? '– ' : '') + audio.audioTitle"></span>
+			</span>
+			<span ng-switch-when="1" ng-bind="::audio.file_name"></span>
+			<span ng-switch-default my-i18n="message_attach_audio_message"></span>
+		</a>
+		<span class="copyonly">]</span>
+		<i ng-if="::message.pFlags.media_unread || false" ng-show="message.pFlags.media_unread" class="icon icon-audio-unread"></i>
+		<div class="audio_player_meta" ng-if="!audio.downloaded || !duration()" ng-switch="audio.progress.enabled">
+			<span ng-switch-when="true" class="audio_player_size" ng-bind="audio.progress | formatSizeProgress"></span>
+			<span ng-switch-default class="audio_player_size" ng-bind="audio.size | formatSize"></span>
+		</div>
+	</div>
+	<div class="audio_player_actions noselect" ng-if="!audio.progress.enabled &amp;&amp; !audio.downloaded">
+    <a class="nocopy" ng-if="audio._ == 'document'" ng-click="download()" my-i18n="message_attach_document_download"></a>
+    <a class="nocopy" ng-click="togglePlay()" my-i18n="message_attach_audio_play"></a>
+	</div>
+	<div class="audio_player_progress_wrap" ng-if="audio.progress.enabled || audio.downloaded" ng-switch="audio.progress.enabled">
+		<div ng-switch-when="true" class="clearfix im_message_cancelable_progress_wrap">
+		  <a class="im_message_media_progress_cancel pull-right nocopy" ng-click="audio.progress.cancel()" my-i18n="modal_cancel"></a>
+		  <div class="im_message_download_progress_wrap">
+		    <div class="progress tg_down_progress">
+		      <div class="progress-bar progress-bar-success" ng-style="{width: audio.progress.percent + '%'}"></div>
+		    </div>
+		  </div>
+		</div>
+	  <div ng-switch-default class="im_message_playback_progress_wrap">
+	  	<div class="audio_player_seek_slider" my-slider slider-model="mediaPlayer.player.currentTime" slider-max="duration()" slider-onchange="seek(value)"></div>
+	  	<div class="audio_player_volume_slider" my-slider slider-model="mediaPlayer.player.volume" slider-min="0" slider-max="1" slider-onchange="setVolume(value)"></div>
+	  </div>
+	</div>
+	<div class="audio_player_media" ng-if="audio.url" my-ogv-player="mediaPlayer.player" src="audio.url" volume="{{::volume}}"></div>
+</div>

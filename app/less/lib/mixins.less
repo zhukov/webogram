@@ -1,0 +1,113 @@
+@user_colors:   '#8365ab',
+                '#539e4f',
+                '#ae9661',
+                '#4979a3',
+                '#b7635d',
+                '#b3577a',
+                '#5397b4',
+                '#c07844';
+
+@user_bgcolors: '#cc90e2',
+                '#80d066',
+                '#ecd074',
+                '#6fb1e4',
+                '#e57979',
+                '#f98bae',
+                '#73cdd0',
+                '#fba76f';
+
+.generate_user(@arr, @isColor) {
+    .-(@i: 1) when (@i <= length(@arr)) {
+        @color: e(extract(@arr, @i));
+        & when (@isColor) {
+          &_color_@{i},
+          &_color_@{i}:hover {
+            color: @color;
+          }
+        }
+        & when not (@isColor) {
+          &_bgcolor_@{i} {
+            background: @color;
+          }
+        }
+        .-((@i + 1));
+    } .-;
+}
+
+.user-select(@argument: none) {
+  -webkit-user-select: @argument;
+  -moz-user-select: @argument;
+  -ms-user-select: @argument;
+  user-select: @argument;
+}
+
+.box-shadow(@arguments) {
+  -webkit-box-shadow: @arguments;
+  -moz-box-shadow: @arguments;
+  box-shadow: @arguments;
+}
+
+.transform(@arguments) {
+  -webkit-transform: @arguments;
+  -moz-transform: @arguments;
+  -o-transform: @arguments;
+  -ms-transform: @arguments;
+  transform: @arguments;
+}
+
+.box-sizing(@sizing: border-box) {
+  -ms-box-sizing: @sizing;
+  -moz-box-sizing: @sizing;
+  -webkit-box-sizing: @sizing;
+  box-sizing: @sizing;
+}
+
+.rounded(@radius: 2px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  border-radius: @radius;
+}
+
+.noTransition() {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+
+/* Thanks to @brandonb927
+   https://gist.github.com/brandonb927/3874012
+
+   Prepending 'only screen and ' to each media query breaks nested media queries */
+
+// .image-2x(@image, @width, @height, @repeat: no-repeat) {
+//   @filename  : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[1]`;
+//   @extension : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[2]`;
+//   background-image: ~`"url(@{filename}.@{extension}?1)"`;
+//   background-repeat: @repeat;
+
+//   /* on retina, use image that's scaled by 2 */
+//   @media
+//     (-webkit-min-device-pixel-ratio: 2),
+//     (   min--moz-device-pixel-ratio: 2),
+//     (     -o-min-device-pixel-ratio: 2/1),
+//     (        min-device-pixel-ratio: 2),
+//     (                min-resolution: 192dpi),
+//     (                min-resolution: 2dppx) {
+//       background-image: ~`"url(@{filename}_2x.@{extension}?1)"`;
+//       background-size: @width @height;
+//   }
+// }
+
+
+
+.image-2x(@image, @width, @height, @repeat: no-repeat) {
+  @filename  : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[1]`;
+  @extension : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[2]`;
+  background-image: ~`"url(@{filename}.@{extension})"`;
+  background-repeat: @repeat;
+  .is_2x & {
+    background-image: ~`"url(@{filename}_2x.@{extension})"`;
+    background-size: @width @height;
+  }
+}

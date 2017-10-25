@@ -1,0 +1,11 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": ".",
+			"folder_exclude_patterns": ["*dist*", ".publish", "node_modules", "releases", ".tx", "css"],
+			"file_exclude_patterns": ["*.zip", "templates.js"]
+		}
+	]
+}

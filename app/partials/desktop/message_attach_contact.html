@@ -1,0 +1,8 @@
+<div class="im_message_contact">
+  <a ng-if="::media.user_id > 0"  class="im_message_contact_photo pull-left" my-peer-photolink="media.user_id" img-class="im_message_contact_photo" user-override="media"></a>
+  <div class="im_message_contact_name" ng-switch="media.user_id > 0">
+    <a ng-switch-when="true" my-peer-link="media.user_id" user-override="media"></a>
+    <span ng-switch-default ng-bind-html="::media.rFullName"></span>
+  </div>
+  <div class="im_message_contact_phone" ng-bind="::media.phone_number | phoneNumber"></div>
+</div>

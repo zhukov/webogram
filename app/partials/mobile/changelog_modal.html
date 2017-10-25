@@ -1,0 +1,573 @@
+<div class="changelog_modal_wrap">
+
+  <a class="modal-close-button" ng-click="$close()"><i></i></a>
+
+  <div class="modal-body">
+
+    <div class="changelog_card_wrap" ng-switch="lastVersion === false">
+      <div ng-switch-when="true">
+        <div class="changelog_card"></div>
+        <h2 class="changelog_header" my-i18n="changelog_modal_header_recent_updates_md"></h2>
+      </div>
+      <div ng-switch-default>
+        <div class="changelog_card"></div>
+        <h2 class="changelog_header" my-i18n="changelog_modal_header_new_updates_md"></h2>
+      </div>
+    </div>
+
+    <div class="changelog_versions_wrap">
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.6
+          <span class="pull-right" my-i18n="changelog_modal_title_current_version"></span>
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Edit the text of your messages after sending them. This works across all Telegram chats, including groups and one-on-one conversations. Select a message and click 'Edit' or just press the up arrow button to edit your last message.</li>
+            <li>Unsend Messages: retract any messages within 48 hours of sending them. Check out the <a href="https://telegram.org/blog/unsend-and-usage" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Pinned chats. Check out the <a href="https://telegram.org/blog/pin-and-ifttt" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Sticker suggestions by emoji.</li>
+            <li>Search for messages in specific chats.</li>
+            <li>Background notifications in Chrome and Firefox (can be disabled in Settings)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.5
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Introducing Drafts: Seamless syncing for unsent messages on all your devices. Drafts are now visible in your chats list.</li>
+            <li>Mention people in groups by typing @ and selecting them from the list — even if they don't have a username.</li>
+            <li>Share links to specific posts in channels via quick forwarding menu (click on the date in a message to try this out).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.4
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Introducing Bot API 2.0, the biggest update to our bot platform since June 2015.</li>
+            <li>New inline keyboards with callback, 'open URL' or 'switch to inline mode' buttons help create seamless interfaces.</li>
+            <li>Bots can now update existing messages on the fly as you interact with them.</li>
+            <li>Prepare for the rise of location-based bots: all bots can now ask users to share their location.</li>
+            <li>Inline bots can now send all attachments supported in Telegram (videos, music, stickers, files, etc.).</li>
+            <li>Try out these sample bots to see what's coming your way soon: @music, @sticker, @youtube, @foursquare</li>
+            <li>Check out the <a href="https://telegram.org/blog/bots-2-0" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>New quick forwarding in channels (click on the date in a message to try this out).</li>
+            <li>Improved performance.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.3
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Inline bots: A new way to add bot content to any chat. Type a bot's username and your query in the text field to get instant results and send them to your chat partner. Try typing <code>@gif dog</code> in your next chat. Sample bots: @gif, @wiki, @bing, @vid, @bold.</li>
+            <li>Check out the <a href="https://telegram.org/blog/inline-bots" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Improved GIFs: 20x faster sending and downloading, nice animated progress</li>
+            <li>Click on message date to reply (or to forward from channels).</li>
+            <li>Preview images before sending when pasting from clipboard.</li>
+            <li>Improved formatting for copy-pasted history fragments (date, time and sender names inserted automatically).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.2
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Unread counters for muted chats now colored in gray.</li>
+            <li>Improved previews for sticker sets: Click on a sticker to view the whole set, click on stickers in a set to send right away, added a 'Share' button.</li>
+            <li>Improved performance.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.1
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Groups that have reached their capacity of 200 users can be upgraded to supergroups of up to 1,000 members.</li>
+            <li>[Mobile] Supported web page previews.</li>
+            <li>[FirefoxOS] Added sender userpic to notifications.</li>
+            <li>[FirefoxOS] Supported share url from Browser.</li>
+            <li>Check out the <a href="https://telegram.org/blog/supergroups" target="_blank">Telegram Blog</a> for more info</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.5.0
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Removed annoying "multiple tabs open" error.</li>
+            <li>Improved message forwarding.</li>
+            <li>Added view counter to messages from channels.</li>
+            <li>Improved image loading in Safari and Firefox.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.9
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>New emoji and sticker menu, tabs for sticker packs.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.8
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Introducing Channels – a great new way to broadcast your messages to unlimited audiences.</li>
+            <li>Check out the <a href="https://telegram.org/blog/channels" target="_blank">Telegram Blog</a> for more info</li>
+            <li>Improved performance in Safari on OS X El Capitan.</li>
+            <li>Added formatting for fixed-width code, surround text with `single backticks` for inline text and ```triple backticks``` for blocks of pre-formatted text.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.7
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>New bot API, free for everyone. If you're an engineer, create your own bots for games, services or integrations.
+            </li>
+            <li>Check out <a href="https://telegram.org/blog/bot-revolution" target="_blank">Telegram Blog</a> for more info</li>
+            <li>Improved Stickers support: now stickers are loading much faster.</li>
+            <li>Click on any custom stickers in chats to view and add sticker sets.</li>
+            <li>[Mobile] Reply to a message easily: tap on any message and select "Reply".</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.6
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Install and share custom sticker sets like this one: <a href="tg://addstickers?set=Animals">telegram.me/addstickers/Animals</a></li>
+            <li>If you're an artist, create custom sticker sets using our <a href="tg://resolve?domain=stickers">@Stickers</a> bot.</li>
+            <li>Check out <a href="https://telegram.org/blog/stickers-revolution" target="_blank">Telegram Blog</a> for more info</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.5
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>
+              Invite links for group chats:<br/>
+              Check out <a href="https://telegram.org/blog/invite-links" target="_blank">Telegram Blog</a> for more info
+            </li>
+            <li>Smart notifications</li>
+            <li>'Listened' status for voice messages</li>
+            <li>Places in locations (venues, landmarks)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.4
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Link Previews:<br/>
+            Get rich link summaries for tweets, YouTube videos, Instagram photos and other content.</li>
+
+            <li>Check out <a href="https://telegram.org/blog/link-preview" target="_blank">Telegram Blog</a> for more info.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.3
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Sessions List:<br/>
+            View your active Telegram sessions (on desktop, tablet and mobile devices) and close specific sessions remotely.</li>
+
+            <li>Two-step verification:<br/>
+            Set up an additional password that will be required to log into your Telegram account.</li>
+
+            <li>Check out <a href="https://telegram.org/blog/sessions-and-2-step-verification" target="_blank">Telegram Blog</a> for more info.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.2
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Optimization for screens with smaller Y-resolutions.</li>
+            <li>Supported Spotify URL embeds.</li>
+            <li>Mentions of the current user in group chats are now highlighted.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.1
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Reply to specific messages in groups.</li>
+            <li>Mention @usernames in groups to notify multiple users.</li>
+            <li>Revised notifications in groups: mentioned users and people you reply to will be notified (private chat notification settings apply in this case instead of group settings). Check out <a href="https://telegram.org/blog/replies-mentions-hashtags" target="_blank">Telegram Blog</a> for more info.</li>
+            <li>Setting to disable message preview</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.4.0
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Full stickers support</li>
+            <li>Multisearch box: instantly find chats, usernames and messages</li>
+            <li>Emoji autocomplete: e.g., type <strong>:kiss</strong> in the message field to see the list. <a href="http://www.emoji-cheat-sheet.com/" target="_blank">Full cheat sheet &raquo;</a></li>
+            <li>Added 'typing' notification in chats list</li>
+            <li>Online members counter in group headers</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.9
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>[Desktop] Material design completed</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.8
+          <span class="pull-right" my-i18n="changelog_modal_title_current_version"></span>
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Telegram.me links open right in Telegram Web when authorized</li>
+            <li>@username mentions in messages are clickable and open a conversation with the user</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.7
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>[Desktop] [Beta] New material design for modal windows</li>
+            <li>[Desktop] Forward messages to multiple recipients</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.6
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>New viewer for photos, videos, documents.</li>
+            <li>[FirefoxOS] Improved media downloads.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.5
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added embedded Soundcloud tracks and playlists.</li>
+            <li>Added global user search to contacts list.</li>
+            <li>Added switch to mobile version on window resize.</li>
+            <li>Migrate to HTTPS notification</li>
+            <li>Bugfixes.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.4
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added embedded Facebook posts and Vimeo videos.</li>
+            <li>Improved IE10+ support: downloading files and style fixes.</li>
+            <li>Added unsupported media playback warning.</li>
+            <li>Bugfixes.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.3
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added Native Client module: dramatically improved encryption speed; Download and upload speed is now as high as in native applications.</li>
+            <li>HTTPS. We recommend you to use <a href="https://web.telegram.org" target="_blank">https://web.telegram.org</a>.</li>
+            <li>Added multiple open tabs warning. Please note, that only one tab with Telegram Web will work.</li>
+            <li>Added embedded Instagram, Twitter, Vine, YouTube links.</li>
+            <li>Jump to selected spot when playing back audio.</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.2
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Usernames support: <a href="" ng-click="changeUsername()">Choose a username right now!</a></li>
+            <li>Search can now find public users by username.</li>
+            <li>Most popular emoticons shown in 'recent' when empty</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.1
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>New languages: Spanish, German and Italian are now available </li>
+            <li>New custom-made audio player</li>
+            <li>Bad browser page for IE 6-9</li>
+            <li>Perfomance improvements and bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.3.0
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Log in codes may be received in other Telegram apps</li>
+            <li>Partner's online status updates automatically</li>
+            <li>Added support for non-english hashtags in messages</li>
+            <li>Fixed invalid scrollbar width bug</li>
+            <li>[Desktop] Added automatic country code detection</li>
+            <li>[FirefoxOS] Improved PUSH-notifications for &lt;= 1.1</li>
+            <li>[FirefoxOS] Fixed emoji in notifications</li>
+            <li>[FirefoxOS] Fixed attachment bug for &lt;= 1.1</li>
+            <li>[FirefoxOS] Added phonebook permissions handling</li>
+            <li>[FirefoxOS] Added ability to share Gallery photos in Telegram</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.2.9
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Updated mobile layout</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.2.5
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Updated mobile layout</li>
+            <li>Improved performance</li>
+            <li>Improved messages grouping</li>
+            <li>[FirefoxOS] Fixed notifications for &lt;= 1.1</li>
+            <li>[FirefoxOS] Fixed phonebook import</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.2.1
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improved key generation performance on slow devices</li>
+            <li>Added network sleep for mobile devices</li>
+            <li>[FirefoxOS] Added support of PUSH notifications</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.2
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Updated contacts list, added edit mode</li>
+            <li>First Firefox OS release. See <a href="https://marketplace.firefox.com/app/telegram" target="_blank">Firefox Marketplace</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.9')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.9
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improvements of performance</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.8')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.8
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improved mobile layout</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.7')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.7
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Improved mobile layout</li>
+            <li>Added file cache for Firefox and Android</li>
+            <li>New design for forwarded messages</li>
+            <li>Hash-tags support</li>
+            <li>Messaging bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.6')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.6
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added search of messages</li>
+            <li>Improved performance of chats with lots of unread messages</li>
+            <li>Bugfixes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.5')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.5
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added registration</li>
+            <li>Improved experience for newly registered users</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.4')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.4
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Browse userpic history (click on the photo in user info)</li>
+            <li>New <a href="https://github.com/zhukov/webogram" target="_blank" title="Source code on GitHub">GitHub</a>, <a href="https://twitter.com/telegram_web" target="_blank" title="Follow us on Twitter!">Twitter</a> buttons in Settings</li>
+            <li>Updated keyboard shortcuts:</li>
+            <ul>
+              <li><strong>Alt+Home</strong> - switch to first (most recent) conversation</li>
+              <li>Removed <strong>Alt+1, 2, 3..</strong> shortcuts due to conflicts in different browsers</li>
+            </ul>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal_section changelog_version_wrap" ng-show="canShowVersion('0.1.3')">
+        <h3 class="modal_section_header changelog_version_title">
+          Version 0.1.3
+        </h3>
+        <div class="modal_section_body changelog_version_changes">
+          <ul class="list-unstyled changelog_version_changes_list">
+            <li>Added version history to welcome screen</li>
+            <li>Added keyboard shortcuts:</li>
+            <ul>
+              <li><strong>Tab</strong> - set focus to message field</li>
+              <li><strong>Esc</strong> or <strong>Shift+Tab</strong> - set focus to search field</li>
+              <li><strong>Up/Down</strong> (while in search field) - move between conversations</li>
+              <li><strong>Enter</strong> (while in search field) - open selected or first conversation</li>
+              <li><strong>Alt+Up/Down</strong> - move to previous/next conversation</li>
+            </ul>
+            <li>Improved grouping for messages</li>
+            <li>Fixed video modal positioning bug</li>
+            <li>Fixed focusing issues on mobile</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

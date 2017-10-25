@@ -1,0 +1,132 @@
+<div class="chat_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()" my-i18n="modal_close"></a>
+        <a class="md_modal_action" ng-if="hasRights('edit_title')" ng-click="editTitle()" my-i18n="modal_edit"></a>
+      </div>
+      <div class="md_modal_title" my-i18n="group_modal_info"></div>
+    </div>
+
+    <div class="peer_modal_profile_wrap clearfix">
+      <div class="peer_modal_photo_wrap pull-left" ng-switch="photo.updating">
+        <div ng-switch-when="true" class="peer_modal_photo md_photo_loading loading_dots">
+          <i></i><i></i><i></i>
+        </div>
+        <a ng-switch-default ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})" class="peer_modal_photo" my-peer-photolink="::-chatFull.chat.id" img-class="peer_modal_photo" no-open="true" watch="true" ng-class="{disabled: !chatFull.chat.photo.photo_small}" ng-disabled="!chatFull.chat.photo.photo_small"></a>
+      </div>
+      <div class="peer_modal_profile">
+        <div class="peer_modal_profile_name" my-peer-link="-chatFull.chat.id"></div>
+        <div class="peer_modal_profile_description" ng-if="chatFull.chat.participants_count > 0">
+          <ng-pluralize count="chatFull.chat.participants_count"
+                        when="group_modal_pluralize_participants">
+          </ng-pluralize>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <div class="md_modal_split_action">
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" title="{{'group_modal_update_photo' | i18n}}" />
+        <i class="md_modal_split_action_camera"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="md_modal_sections clearfix">
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="hasRights('invite') && chatFull.participants.participants.length < maxParticipants">
+        <i class="md_modal_section_icon md_modal_section_icon_person"></i>
+
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="inviteToGroup()" my-i18n="group_modal_add_member"></a>
+        </div>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat._ != 'chatForbidden' && !chatFull.chat.pFlags.left && chatFull.chat.pFlags.creator">
+
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="inviteViaLink()" my-i18n="group_modal_menu_share_link"></a>
+        </div>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_toggle">
+        <i class="md_modal_section_icon md_modal_section_icon_notification"></i>
+
+        <a class="md_modal_section_toggle_wrap tg_checkbox" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="group_modal_notifications"></span>
+        </a>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link">
+        <i class="md_modal_section_icon md_modal_section_icon_more"></i>
+
+        <div class="md_modal_section_link_wrap" ng-switch="chatFull.chat.pFlags.left || chatFull.chat.pFlags.kicked || chatFull.chat._ == 'chatForbidden'">
+          <a ng-switch-when="true" class="md_modal_section_link" ng-click="flushHistory(false)" my-i18n="group_modal_menu_delete_group"></a>
+          <a ng-switch-default class="md_modal_section_link" ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></a>
+        </div>
+
+      </div>
+
+      <div class="md_modal_iconed_section_wrap  md_modal_iconed_section_link" ng-if="chatFull.chat.pFlags.creator">
+
+        <div class="md_modal_section_link_wrap">
+          <a class="md_modal_section_link" ng-click="migrateToSuperGroup()" my-i18n="group_modal_migrate_to_supergroup"></a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div ng-if="chatFull.chat._ != 'chatForbidden' &amp;&amp; !chatFull.chat.pFlags.left &amp;&amp; chatFull.participants.participants.length > 0">
+
+      <div ng-switch="chatFull.chat.pFlags.creator && needMigrate">
+        <div ng-switch-when="true" class="md_modal_section_splitter md_modal_section_splitter_content">
+          <h4 class="chat_modal_migrate_header" my-i18n="group_modal_migrate_header"></h4>
+          <p class="chat_modal_migrate_description" my-i18n="group_modal_migrate_desc"></p>
+          <ul class="chat_modal_migrate_list">
+           <li my-i18n="group_modal_migrate_item1"></li>
+           <li my-i18n="group_modal_migrate_item2"></li>
+           <li my-i18n="group_modal_migrate_item3"></li>
+           <li my-i18n="group_modal_migrate_item4"></li>
+          </ul>
+        </div>
+        <div ng-switch-default class="md_modal_section_splitter"></div>
+      </div>
+
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_peers">
+        <i class="md_modal_section_icon md_modal_section_icon_people"></i>
+
+        <div class="md_modal_section_peers_wrap">
+
+          <div class="md_modal_list_peer_wrap clearfix" ng-repeat="participant in chatFull.participants.participants | orderBy:'-user.sortStatus'">
+
+            <a ng-if="participant.canLeave" ng-click="leaveGroup()" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_menu_delete_group"></a>
+            <a ng-if="participant.canKick" ng-click="kickFromGroup(participant.user_id)" class="md_modal_list_peer_action pull-right" my-i18n="group_modal_members_kick"></a>
+
+            <a class="md_modal_list_peer_photo pull-left" my-peer-photolink="::participant.user_id" img-class="md_modal_list_peer_photo"></a>
+
+            <div class="md_modal_list_peer_name">
+              <a class="md_modal_list_peer_name" my-peer-link="participant.user_id"></a>
+            </div>
+            <div class="md_modal_list_peer_description" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+</div>

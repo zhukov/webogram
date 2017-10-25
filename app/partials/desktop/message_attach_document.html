@@ -1,0 +1,90 @@
+<div ng-switch="::media.document.type">
+
+  <div ng-switch-when="gif" my-load-gif document="media.document"></div>
+
+  <div ng-switch-when="round" my-load-round document="media.document"></div>
+
+  <div ng-switch-when="sticker" my-load-sticker document="media.document" open="true"></div>
+
+  <div ng-switch-when="voice" class="im_message_audio">
+    <div my-audio-player audio="media.document"></div>
+  </div>
+
+  <div ng-switch-when="audio" class="im_message_audio">
+    <div my-audio-player audio="media.document"></div>
+  </div>
+
+  <div ng-switch-when="video" class="im_message_video im_message_document_thumbed">
+    <a class="im_message_video_thumb" ng-click="videoOpen()" ng-style="::{width: media.document.thumb.width + 'px'}">
+      <span class="im_message_video_duration nocopy" data-content="{{::media.document.duration | duration}}"></span>
+      <i class="icon icon-videoplay"></i>
+      <img
+        class="im_message_video_thumb im_message_video_thumb_blurred"
+        my-load-thumb
+        thumb="media.document.thumb"
+      />
+    </a>
+
+    <div class="im_message_document_info">
+      <div class="im_message_document_name_wrap">
+        <span class="copyonly">[</span><span class="im_message_document_name" my-i18n="message_attach_video_video"></span><span class="copyonly">&nbsp;<span  ng-bind="::media.document.duration | duration"></span>]</span>
+        <span class="im_message_document_size" ng-if="!media.document.progress.enabled" ng-bind="::media.document.size | formatSize"></span>
+        <span class="im_message_document_size" ng-if="media.document.progress.enabled" ng-bind="media.document.progress | formatSizeProgress"></span>
+      </div>
+      <div class="im_message_document_actions noselect" ng-if="!media.document.progress.enabled">
+        <a href="" ng-click="docSave()" ng-switch="media.document.downloaded">
+          <span class="nocopy" ng-switch-when="true" my-i18n="message_attach_video_save"></span>
+          <span class="nocopy" ng-switch-default my-i18n="message_attach_video_download"></span>
+        </a>
+        <a class="nocopy" href="" ng-click="videoOpen()" my-i18n="message_attach_video_play"></a>
+      </div>
+      <div class="clearfix im_message_cancelable_progress_wrap" ng-if="media.document.progress.enabled">
+        <a class="im_message_media_progress_cancel pull-right nocopy" ng-click="media.document.progress.cancel()" my-i18n="modal_cancel"></a>
+        <div class="im_message_download_progress_wrap">
+          <div class="progress tg_down_progress">
+            <div class="progress-bar progress-bar-success" ng-style="{width: media.document.progress.percent + '%'}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div ng-switch-default class="im_message_document clearfix" ng-class="{im_message_document_thumbed: !!media.document.thumb, im_message_document_progress: media.document.progress.enabled}">
+
+    <a ng-if="::!media.document.thumb" class="im_message_file_button" ng-click="docOpen()" ng-class="{im_message_file_button_dl_doc: media.document.downloaded}">
+      <i class="im_message_file_button_icon"></i>
+    </a>
+    <a ng-if="::media.document.thumb" ng-click="docOpen()">
+      <div class="im_message_document_thumb_wrap">
+        <img
+          class="im_message_document_thumb"
+          my-load-thumb
+          thumb="media.document.thumb"
+        />
+      </div>
+    </a>
+
+    <div class="im_message_document_info">
+      <div class="im_message_document_name_wrap">
+        <a href="" ng-attr-title="{{media.document.file_name}}" ng-attr-data-name="{{media_file_name_without_ext}}" ng-attr-data-ext="{{media_file_ext}}" ng-click="docOpen()" class="im_message_document_name"></a><span class="copyonly">[<span ng-bind="::media.document.file_name"></span>]</span>
+        <span class="im_message_document_size" ng-if="!media.document.progress.enabled" ng-bind="::media.document.size | formatSize"></span>
+        <span class="im_message_document_size" ng-if="media.document.progress.enabled" ng-bind="media.document.progress | formatSizeProgress"></span>
+      </div>
+      <div class="im_message_document_actions" ng-if="!media.document.progress.enabled" ng-switch="media.document.downloaded">
+        <a class="nocopy" ng-switch-when="true" href="" ng-click="docSave()" my-i18n="message_attach_document_save"></a>
+        <a class="nocopy" ng-switch-default href="" ng-click="docSave()" my-i18n="message_attach_document_download"></a>
+        <a class="nocopy" ng-if="::media.document.withPreview" href="" ng-click="docOpen()" my-i18n="message_attach_document_open"></a>
+      </div>
+      <div class="clearfix im_message_cancelable_progress_wrap" ng-if="media.document.progress.enabled">
+        <a class="im_message_media_progress_cancel pull-right nocopy" ng-click="media.document.progress.cancel()" my-i18n="modal_cancel"></a>
+        <div class="im_message_download_progress_wrap">
+          <div class="progress tg_down_progress">
+            <div class="progress-bar progress-bar-success" ng-style="{width: media.document.progress.percent + '%'}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div ng-if="::media.rCaption" class="im_message_document_caption" ng-bind-html="::media.rCaption"></div>

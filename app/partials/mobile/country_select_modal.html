@@ -1,0 +1,50 @@
+<div class="countries_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 class="modal_simple_header" my-i18n="country_select_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="countries_modal_search">
+      <input class="form-control countries_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+      <a class="countries_modal_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
+    </div>
+
+    <div class="countries_modal_col countries_wrap countries_scrollable_wrap mobile_scrollable_wrap" my-countries-list-mobile my-infinite-scroller-mobile>
+      <ul class="countries_modal_members_list nav nav-pills nav-stacked">
+
+        <li class="countries_modal_country_wrap clearfix" ng-repeat="country in countries | limitTo : slice.limit track by $index">
+          <a class="countries_modal_country" ng-click="$close(country)">
+            <span class="countries_modal_country_code pull-right" ng-bind="country.code"></span>
+            <span class="countries_modal_country_name" ng-bind="country.name"></span>
+          </a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+
+</div>

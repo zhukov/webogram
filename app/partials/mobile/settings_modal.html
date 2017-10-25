@@ -1,0 +1,169 @@
+<div class="settings_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-toggle-wrap dropdown" dropdown>
+          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-if="photo.location">
+              <a ng-click="deletePhoto()" my-i18n="settings_modal_delete_photo"></a>
+            </li>
+            <li>
+              <a ng-click="editProfile()" my-i18n="settings_modal_edit_profile"></a>
+            </li>
+            <li>
+              <a ng-click="changeUsername()" my-i18n="settings_modal_edit_username"></a>
+            </li>
+            <li>
+              <a ng-if="password._ == 'account.noPassword' && password.email_unconfirmed_pattern.length" ng-click="changePassword({action: 'cancel_email'})" my-i18n="settings_modal_password_email_pending_cancel_mobile">
+              </a>
+              <a ng-if="password._ == 'account.noPassword' && !password.email_unconfirmed_pattern" ng-click="changePassword({action: 'create'})" my-i18n="settings_modal_set_password"></a>
+              <a ng-if="password._ == 'account.password'" ng-click="changePassword({action: 'change'})" my-i18n="settings_modal_change_password"></a>
+            </li>
+            <li ng-if="password._ == 'account.password'">
+              <a ng-click="changePassword({action: 'disable'})" my-i18n="settings_modal_disable_password_mobile"></a>
+            </li>
+
+            <li>
+              <a ng-click="showSessions()" my-i18n="settings_modal_active_sessions"></a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$close()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="settings_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="mobile_user_modal_photo_profile_wrap">
+
+      <a ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::profile.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
+
+      <div class="mobile_user_modal_info_wrap clearfix">
+        <h4 class="mobile_user_modal_header" my-peer-link="profile.id"></h4>
+        <p class="mobile_user_modal_status" my-user-status="::profile.id"></p>
+      </div>
+
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-switch="photo.updating">
+      <span ng-switch-when="true" class="mobile_modal_action" my-i18n>
+        <my-i18n msgid="settings_modal_photo_updating"></my-i18n>
+        <span my-loading-dots></span>
+      </span>
+      <span ng-switch-default class="mobile_modal_action mobile_modal_upload_action">
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+        <my-i18n msgid="settings_modal_set_photo"></my-i18n>
+      </span>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_notification_alert"></span>
+      </a>
+    </div>
+
+    <div ng-if="notify.desktop && notify.pushAvailable" class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="togglePush()" ng-class="notify.push ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_notification_push"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="togglePreview()" ng-class="notify.preview ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_message_preview"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="!notify.desktop &amp;&amp; notify.canVibrate">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleVibrate()" ng-class="notify.vibrate ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_vibrate"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleSound()" ng-class="notify.volume ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_sounds"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleCtrlEnter(send.enter == 1 ? 0 : 1)" ng-class="send.enter == 1 ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_send_on_enter"></span>
+      </a>
+    </div>
+
+
+    <div class="mobile_modal_action_wrap" ng-controller="AppLangSelectController">
+      <div class="mobile_modal_select_wrap pull-right">
+        <select class="form-control" ng-change="localeSelect()" ng-model="form.locale">
+          <option ng-repeat="locale in ::supportedLocales" value="{{locale}}" ng-bind="langNames[locale]" ng-selected="locale == curLocale"></option>
+        </select>
+      </div>
+      <span class="mobile_modal_action" my-i18n="settings_modal_language"></span>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="profile.phone">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_phone"></h4>
+      <div class="mobile_modal_section_value" ng-bind="profile.phone | phoneNumber"></div>
+    </div>
+
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header" my-i18n="user_modal_username"></h4>
+      <div class="mobile_modal_section_value" ng-click="changeUsername()" ng-switch="profile.username.length > 0">
+        <a class="settings_modal_username_link" ng-switch-when="true" href="" ng-click="changeUsername()" ng-bind="'@' + profile.username"></a>
+        <a ng-switch-default href="" ng-click="changeUsername()" my-i18n="settings_modal_empty_username_set"></a>
+      </div>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="switchBackToDesktop">
+      <div class="mobile_modal_section_value">
+        <a href="" ng-click="switchToDesktop()" my-i18n="settings_switch_back_to_desktop"></a>
+      </div>
+    </div>
+
+    <div class="mobile_modal_section">
+      <h4 class="mobile_modal_section_header" my-i18n="settings_modal_about"></h4>
+      <div class="mobile_modal_section_body settings_about_section_body clearfix">
+        <div class="settings_external_services pull-right">
+          <a href="https://github.com/zhukov/webogram" target="_blank" title="{{'settings_modal_source_code_github' | i18n}}" class="settings_external_service"><i class="icon icon-github"></i></a>
+          <a href="https://twitter.com/telegram_web" target="_blank" title="{{'settings_modal_follow_us_twitter' | i18n}}" class="settings_external_service"><i class="icon icon-twitter"></i></a>
+        </div>
+        <p>
+          <a href="https://github.com/zhukov/webogram/blob/master/CHANGELOG.md" target="_blank" my-i18n="settings_modal_recent_updates">
+            <my-i18n-param name="version" ng-bind="version"></my-i18n-param>
+          </a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,79 @@
+<a class="im_dialog" ng-mousedown="dialogSelect(dialogMessage.peerString, dialogMessage.unreadCount == -1 && dialogMessage.mid)">
+
+  <div class="im_dialog_meta pull-right text-right">
+    <div class="im_dialog_date" ng-bind="dialogMessage.dateText"></div>
+    <span
+      class="im_dialog_badge badge ng-hide"
+      ng-show="dialogMessage.unreadCount > 0 && !dialogMessage.pFlags.out"
+      ng-bind="dialogMessage.unreadCount"
+      my-peer-muted="dialogMessage.peerID" muted-class="im_dialog_badge_muted"
+    ></span>
+    <i
+      class="im_dialog_unread ng-hide"
+      ng-show="dialogMessage.pFlags.out && dialogMessage.pFlags.unread"
+    ></i>
+    <i
+      class="im_dialog_pinned ng-hide"
+      ng-show="dialogMessage.pinned && !dialogMessage.unreadCount && !dialogMessage.pFlags.unread"
+    ></i>
+  </div>
+
+  <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true"></div>
+
+  <div class="im_dialog_message_wrap" ng-class="{im_dialog_message_wtyping: dialogMessage.typing > 0}">
+
+    <div class="im_dialog_peer">
+      <span my-peer-link="dialogMessage.peerID" verified="true"></span>
+    </div>
+
+    <div ng-switch="dialogMessage.typing ? 'typing' : (!dialogMessage.unreadCount && dialogMessage.draft ? 'draft' : (dialogMessage.deleted ? 'deleted' : 'message'))">
+
+      <div ng-switch-when="typing" class="im_dialog_message im_dialog_message_typing">
+        <span class="im_short_message_service" my-i18n="im_conversation_group_typing">
+          <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+        </span>
+      </div>
+
+      <div ng-switch-when="draft" class="im_dialog_message">
+        <span class="im_dialog_chat_from_wrap">
+          <span class="im_dialog_draft_from" my-i18n="conversation_draft"></span>
+        </span>
+        <span class="im_short_message_text" ng-bind-html="dialogMessage.draft.richMessage"></span>
+      </div>
+
+      <div ng-switch-when="deleted" class="im_dialog_message">
+        <span class="im_short_message_text">&nbsp;</span>
+      </div>
+
+      <div ng-switch-when="message" class="im_dialog_message">
+        <span ng-switch="dialogMessage.peerID > 0 || dialogMessage.fromID < 0">
+          <span ng-switch-when="true">
+            <span class="im_dialog_chat_from_wrap" ng-if="dialogMessage.pFlags.out && dialogMessage.fromID > 0">
+              <span
+                class="im_dialog_chat_from"
+                my-i18n="conversation_you"
+              ></span><span ng-if="dialogMessage.message.length > 0 || !!dialogMessage.media">:</span>
+            </span>
+          </span>
+          <span ng-switch-default>
+            <span class="im_dialog_chat_from_wrap" ng-switch="dialogMessage.pFlags.out && dialogMessage._ != 'messageService'">
+              <span
+                ng-switch-when="false"
+                class="im_dialog_chat_from"
+                my-peer-link="dialogMessage.from_id" short="true" peer-watch="true"
+              ></span><span
+                ng-switch-when="true"
+                class="im_dialog_chat_from"
+                my-i18n="conversation_you"
+              ></span><span ng-if="dialogMessage.message.length || dialogMessage.media">:</span>
+            </span>
+          </span>
+        </span>
+
+        <span my-short-message="dialogMessage"></span>
+      </div>
+    </div>
+
+  </div>
+
+</a>

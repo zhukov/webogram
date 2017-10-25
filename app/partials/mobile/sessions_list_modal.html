@@ -1,0 +1,73 @@
+<div class="sessions_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header">
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 my-i18n="sessions_modal_title"></h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div my-sessions-list class="sessions_modal_col">
+
+      <div class="sessions_wrap nano" my-infinite-scroller>
+        <div class="sessions_scrollable_wrap nano-content" ng-switch="!sessionsLoaded">
+
+          <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.2" padding="true" my-i18n="sessions_modal_loading">
+            <my-i18n-param name="dots">
+              <span my-loading-dots></span>
+            </my-i18n-param>
+          </div>
+
+          <ul ng-switch-default class="sessions_modal_sessions_list nav nav-pills nav-stacked">
+
+            <li class="sessions_modal_session_wrap clearfix" ng-repeat="authorization in authorizations | limitTo: slice.limit track by authorization.hash">
+              <div class="sessions_modal_session">
+                <div class="session_meta_wrap pull-right">
+                  <div class="session_active_date" ng-switch="authorization.current">
+                    <span ng-switch-when="true" class="session_active_date_online" my-i18n="sessions_modal_current_session"></span>
+                    <span ng-switch-default ng-bind="authorization.date_active | dateOrTime"></span>
+                  </div>
+
+                  <a ng-if="!authorization.current" class="session_terminate_btn" ng-click="terminateSession(authorization.hash)" my-i18n="sessions_modal_terminate_one"></a>
+                </div>
+
+                <div class="sessions_modal_session_app" ng-bind="authorization.app_name + ' ' + authorization.app_version"></div>
+                <div class="sessions_modal_session_device" ng-bind="authorization.device_model + ', ' + authorization.platform + ' ' + authorization.system_version"></div>
+                <div class="sessions_modal_session_location" ng-bind="authorization.ip + ' - ' + authorization.country"></div>
+              </div>
+              <div ng-if="authorization.current && authorizations.length > 1">
+                <div class="sessions_modal_terminate_all_wrap">
+                  <a ng-click="terminateAllSessions()" my-i18n="sessions_modal_terminate_all"></a>
+                </div>
+
+                <hr class="sessions_modal_other_splitter"></hr>
+              </div>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,98 @@
+<div class="contacts_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-header" ng-switch="action">
+
+          <ul ng-switch-when="edit" class="nav navbar-nav navbar-quick-nav">
+            <li class="navbar-quick-left">
+              <a ng-click="toggleEdit(false)" my-i18n="contacts_modal_edit_cancel"></a>
+            </li>
+            <li class="navbar-quick-right">
+              <a ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="deleteSelected()">
+                <my-i18n msgid="contacts_modal_edit_delete"></my-i18n>
+                <strong ng-bind="selectedCount"></strong>
+              </a>
+            </li>
+          </ul>
+
+          <div ng-switch-default class="navbar-toggle-wrap dropdown" ng-show="!action" dropdown>
+            <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a ng-click="toggleEdit(true)" my-i18n="contacts_modal_edit_list"></a>
+              </li>
+              <li>
+                <a ng-click="importContact()" my-i18n="contacts_modal_new_contact"></a>
+              </li>
+            </ul>
+          </div>
+
+          <ul ng-switch-default class="nav navbar-nav navbar-quick-nav">
+            <li ng-if="action == 'select' || action == 'new_group'" class="navbar-quick-right">
+              <a ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" ng-click="submitSelected()" my-i18n="modal_next"></a>
+            </li>
+            <li>
+              <a ng-click="$dismiss()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title">
+                  <h4 ng-switch="action">
+                    <div ng-switch-when="new_group" ng-switch="selectedCount > 0">
+                      <span ng-switch-when="true">
+                        <ng-pluralize count="selectedCount" when="contacts_modal_pluralize_new_group_members">
+                        </ng-pluralize>
+                      </span>
+                      <span ng-switch-default my-i18n="group_create_contacts_modal_title"></span>
+                    </div>
+                    <span ng-switch-default my-i18n="contacts_modal_title"></span>
+                  </h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="contacts_modal_search">
+      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query"/>
+      <a class="im_dialogs_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">
+        <i class="icon icon-search-clear"></i>
+      </a>
+    </div>
+
+
+    <div class="contacts_modal_col contacts_wrap contacts_scrollable_wrap mobile_scrollable_wrap" my-contacts-list-mobile my-infinite-scroller-mobile>
+      <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
+
+        <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
+          <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
+
+            <i ng-if="multiSelect" class="icon icon-contact-tick"></i>
+
+            <div class="contacts_modal_contact_photo pull-left" my-peer-photolink="contact.userID" status="true" img-class="contacts_modal_contact_photo"></div>
+            <div class="contacts_modal_contact_name" my-peer-link="contact.userID"></div>
+            <div class="contacts_modal_contact_status" ng-switch="contact.found">
+              <span ng-switch-when="true" ng-bind="'@' + contact.user.username"></span>
+              <span ng-switch-default my-user-status="::contact.userID"></span>
+            </div>
+          </a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+
+</div>

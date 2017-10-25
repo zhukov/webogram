@@ -1,0 +1,154 @@
+<div class="login_page_wrap" my-custom-background="#e7ebf0">
+  <div class="login_head_bg"></div>
+  <div class="login_page">
+    <div class="login_head_wrap clearfix" ng-switch="progress.enabled">
+      <div ng-switch-when="true" class="login_head_submit_progress">
+        <my-i18n ng-if="!credentials.phone_code_hash" msgid="login_generating_key"></my-i18n><my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" msgid="login_checking_password"></my-i18n><span my-loading-dots></span>
+      </div>
+      <div ng-switch-default class="login_head_submit_wrap">
+        <a class="login_head_submit_btn" ng-if="!credentials.phone_code_hash" ng-click="sendCode()">
+          <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
+        </a>
+        <a class="login_head_submit_btn" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-click="logIn()">
+          <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
+        </a>
+        <a class="login_head_submit_btn" ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" ng-click="logIn(true)">
+          <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
+        </a>
+        <a class="login_head_submit_btn" ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" ng-click="checkPassword()">
+          <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
+        </a>
+      </div>
+      <a class="login_head_logo_link" href="https://telegram.org" target="_blank">
+        <i class="icon icon-tg-logo"></i><i class="icon icon-tg-title"></i>
+      </a>
+    </div>
+
+    <div class="login_form_wrap">
+      <div class="error" ng-if="error.message" ng-bind="error.message"></div>
+
+      <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
+        <h3 class="login_form_head" my-i18n="login_sign_in"></h3>
+        <p class="login_form_lead" my-i18n="login_enter_number_description"></p>
+
+        <div class="md-input-group md-input-has-value login_phone_country_input_group" ng-click="chooseCountry()">
+          <label class="md-input-label" my-i18n="login_country_select_placeholder"></label>
+          <div autocomplete="off" class="md-input" ng-bind="credentials.phone_country_name"></div>
+        </div>
+
+        <div class="login_phone_groups_wrap clearfix">
+
+          <div class="md-input-group login_phone_code_input_group" ng-class="{'md-input-error': error.field == 'phone'}" my-labeled-input>
+            <label class="md-input-label" my-i18n="login_code_input_placeholder"></label>
+            <input autocomplete="off" class="md-input" my-focused name="phone_country" type="tel" ng-model="credentials.phone_country" />
+          </div>
+
+          <div class="md-input-group login_phone_num_input_group" ng-class="{'md-input-error': error.field == 'phone'}" my-labeled-input ng-switch="error.field == 'phone'">
+            <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_number"></label>
+            <label ng-switch-default class="md-input-label" my-i18n="login_tel_input_placeholder"></label>
+            <input required autocomplete="off" my-submit-on-enter class="md-input" my-focus-on="country_selected" name="phone_number" type="tel" ng-model="credentials.phone_number" />
+          </div>
+
+        </div>
+        <div class="login_form_messaging" ng-show="progress.enabled" my-i18n="login_generating_keys_info"></div>
+      </form>
+
+      <form name="myLoginForm" ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-submit="logIn()">
+        <h3 class="login_phone_head"><span ng-bind="credentials.phone_country"></span> <span ng-bind="credentials.phone_number"></span></h3>
+        <div class="login_edit_phone"><a ng-click="editPhone()" my-i18n="login_edit_number"></a></div>
+
+        <div ng-switch="credentials.type._">
+          <p ng-switch-when="auth.sentCodeTypeApp" class="login_smscode_lead" my-i18n="login_enter_code_label_md"></p>
+          <p ng-switch-when="auth.sentCodeTypeCall" class="login_smscode_lead" my-i18n="login_enter_call_code_label_md"></p>
+          <p ng-switch-default class="login_smscode_lead" my-i18n="login_enter_sms_code_label_md"></p>
+        </div>
+
+        <div ng-if="nextPending.type" ng-switch="nextPending.remaining > 0">
+          <p ng-switch-when="true" class="login_smscode_lead">
+            <span ng-switch="nextPending.type._" my-i18n>
+              <span ng-switch-when="auth.codeTypeCall" my-i18n-format="login_call_remaining"></span>
+              <span ng-switch-default my-i18n-format="login_code_remaining"></span>
+              <my-i18n-param name="remaining" ng-bind="nextPending.remaining | duration"></my-i18n-param>
+            </span>
+          </p>
+          <p ng-switch-default class="login_smscode_lead" ng-switch="nextPending.progress">
+            <a ng-switch-when="true" ng-disabled class="disabled">
+              <span my-i18n="login_code_requesting"></span><span my-loading-dots></span>
+            </a>
+            <a ng-switch-default ng-click="sendNext()" ng-switch="nextPending.type._">
+              <span ng-switch-when="auth.codeTypeCall" my-i18n="login_code_not_received_call"></span>
+              <span ng-switch-default my-i18n="login_code_not_received"></span>
+            </a>
+          </p>
+        </div>
+
+        <div class="md-input-group md-input-group-centered" ng-class="{'md-input-error': error.field == 'phone_code'}" my-labeled-input ng-switch="error.field == 'phone_code'">
+          <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_sms_code"></label>
+          <label ng-switch-default class="md-input-label" my-i18n="login_number_input_placeholder"></label>
+          <input autocomplete="off" class="md-input" my-focused name="phone_code" type="tel" ng-model="credentials.phone_code" required />
+        </div>
+      </form>
+
+      <form name="myFullNameForm" ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" ng-submit="logIn(true)">
+        <h3 class="login_form_head" my-i18n="login_your_info"></h3>
+        <p class="login_form_lead" my-i18n="login_fulll_name_label"></p>
+
+        <div class="md-input-group" ng-class="{'md-input-error': error.field == 'first_name'}" my-labeled-input ng-switch="error.field == 'first_name'">
+          <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_first_name"></label>
+          <label ng-switch-default class="md-input-label" my-i18n="login_first_name"></label>
+          <input autocomplete="off" class="md-input" my-focused name="first_name" type="text" ng-model="credentials.first_name" my-submit-on-enter required />
+        </div>
+
+        <div class="md-input-group" ng-class="{'md-input-error': error.field == 'last_name'}" my-labeled-input ng-switch="error.field == 'last_name'">
+          <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_last_name"></label>
+          <label ng-switch-default class="md-input-label" my-i18n="login_last_name"></label>
+          <input autocomplete="off" class="md-input" name="last_name" type="text" ng-model="credentials.last_name" my-submit-on-enter />
+        </div>
+
+      </form>
+
+      <form name="myPasswordForm" ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" ng-submit="checkPassword()">
+        <h3 class="login_form_head" my-i18n="login_password_title"></h3>
+        <p class="login_form_lead" my-i18n="login_password_label"></p>
+
+        <div class="md-input-group" ng-class="{'md-input-error': error.field == 'password'}" my-labeled-input ng-switch="error.field == 'password'">
+          <label ng-switch-when="true" class="md-input-label" my-i18n="login_incorrect_password"></label>
+          <label ng-switch-default class="md-input-label" my-i18n="login_password"></label>
+          <input autocomplete="off" class="md-input" my-focused name="password" type="password" ng-model="credentials.password" my-submit-on-enter required />
+        </div>
+
+        <p ng-if="password.hint.length > 0" class="login_form_hint" ng-bind="password.hint"></p>
+
+        <div class="login_forgot_button">
+          <button class="btn btn-md" ng-click="forgotPassword($event)" my-i18n="login_password_forgot_link"></button>
+        </div>
+
+        <div ng-if="canReset" class="login_reset_button">
+          <button class="btn btn-md btn-md-danger" ng-click="resetAccount($event)" my-i18n="login_account_reset"></button>
+        </div>
+
+      </form>
+
+    </div>
+
+    <div ng-switch="about.shown">
+      <div ng-switch-when="true" class="login_footer_about_wrap" my-scroll-to-on="$init">
+        <h3><span my-i18n="login_about_title"></span><a ng-click="about.shown = false" class="login_footer_about_hide" my-i18n="login_about_hide"></a></h3>
+        <p my-i18n="login_about_desc1_md"></p>
+        <p my-i18n="login_about_desc2_md"></p>
+        <p my-i18n="login_about_desc3_md">
+          <my-i18n-param name="source-link">
+            <a href="https://github.com/zhukov/webogram" target="_blank">{0}</a>
+          </my-i18n-param>
+        </p>
+      </div>
+      <div ng-switch-default class="login_footer_wrap">
+        <p my-i18n="login_about_intro"></p>
+        <a class="logo_footer_learn_more_link" href="" ng-click="about.shown = true" my-i18n="login_about_learn"></a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
