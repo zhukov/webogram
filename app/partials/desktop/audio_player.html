@@ -4,8 +4,8 @@
 	</a>
 	<div class="audio_player_title_wrap">
 		<div class="audio_player_meta pull-right" ng-if="audio.downloaded &amp;&amp; (mediaPlayer.player.duration || audio.duration)" ng-switch="mediaPlayer.player.playing || mediaPlayer.player.currentTime > 0">
-			<span ng-switch-when="true" class="audio_player_duration" ng-bind="mediaPlayer.player.currentTime | durationRemains : (mediaPlayer.player.duration || audio.duration)"></span>
-			<span ng-switch-default class="audio_player_duration" ng-bind="mediaPlayer.player.duration || audio.duration | duration"></span>
+			<span ng-switch-when="true" class="audio_player_duration" ng-bind="mediaPlayer.player.currentTime | durationRemains : duration()"></span>
+			<span ng-switch-default class="audio_player_duration" ng-bind="duration() | duration"></span>
 		</div>
 		<span class="copyonly">[ </span>
 		<a ng-attr-title="{{audio.file_name}}" ng-click="download()" class="audio_player_title" ng-switch="::audio.audioTitle.length > 0 ? 2 : (audio.file_name.length > 0 ? 1 : 0)">
@@ -18,7 +18,7 @@
 		</a>
 		<span class="copyonly">]</span>
 		<i ng-if="::message.pFlags.media_unread || false" ng-show="message.pFlags.media_unread" class="icon icon-audio-unread"></i>
-		<div class="audio_player_meta" ng-if="!audio.downloaded || !(mediaPlayer.player.duration || audio.duration)" ng-switch="audio.progress.enabled">
+		<div class="audio_player_meta" ng-if="!audio.downloaded || !duration()" ng-switch="audio.progress.enabled">
 			<span ng-switch-when="true" class="audio_player_size" ng-bind="audio.progress | formatSizeProgress"></span>
 			<span ng-switch-default class="audio_player_size" ng-bind="audio.size | formatSize"></span>
 		</div>
@@ -37,11 +37,9 @@
 		  </div>
 		</div>
 	  <div ng-switch-default class="im_message_playback_progress_wrap">
-	  	<div class="audio_player_seek_slider" my-slider slider-model="mediaPlayer.player.currentTime" slider-max="mediaPlayer.player.duration || audio.duration" slider-onchange="seek(value)"></div>
+	  	<div class="audio_player_seek_slider" my-slider slider-model="mediaPlayer.player.currentTime" slider-max="duration()" slider-onchange="seek(value)"></div>
 	  	<div class="audio_player_volume_slider" my-slider slider-model="mediaPlayer.player.volume" slider-min="0" slider-max="1" slider-onchange="setVolume(value)"></div>
 	  </div>
 	</div>
-	<audio ng-if="audio.url" media-player="mediaPlayer.player">
-	  <source ng-src="{{::audio.url}}" type="{{audio.mime_type || 'audio/ogg'}}" volume="{{::volume}}" />
-	</audio>
+	<div class="audio_player_media" ng-if="audio.url" my-ogv-player="mediaPlayer.player" src="audio.url" volume="{{::volume}}"></div>
 </div>

@@ -574,6 +574,16 @@ html {
 .audio_player_button {
   margin-right: 8px;
 }
+.audio_player_volume_slider .tg_slider_wrap {
+  display: none;
+}
+.audio_player_seek_slider {
+  width: 100%;
+}
+
+.audio_player_seek_slider .tg_slider_track {
+  background: rgba(200, 200, 200, 0.6);
+}
 
 .im_message_body_media {
   .im_message_document,
@@ -1329,6 +1339,11 @@ a.im_message_fwd_author {
   &_modal_section_value {
     font-size: 15px;
     padding: 0 12px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    width: 100%;
   }
 
   &_modal_section_body {
@@ -1416,9 +1431,9 @@ a.im_message_fwd_author {
   }
 }
 
-.icon-paperclip {
+.icon-paperclip, .icon-mic {
   display: inline-block;
-  width: 19px;
+  width: 18px;
   height: 23px;
   vertical-align: text-top;
   opacity: 0.8;
@@ -1427,17 +1442,25 @@ a.im_message_fwd_author {
   background-position: -12px -68px;
 }
 
+.icon-mic {
+  background-position: -12px -285px;
+}
+.im_voice_recording .icon-mic {
+  background-position: -12px -705px;
+}
+
 .im_attach {
   cursor: pointer;
-  display: none;
+  display: block;
   overflow: hidden;
   position: absolute;
-  right: 0;
+  left: 0;
   top: 0;
   margin: 0;
   width: 50px;
   height: 32px;
   padding: 3px 13px 4px 16px;
+  right: auto;
 
   &:active {
     .icon-paperclip {
@@ -1447,13 +1470,73 @@ a.im_message_fwd_author {
   }
 }
 
-.im_send_form_empty {
-  .im_submit {
+.im_record {
+  display: none;
+  right: 0;
+  top: -8px;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  padding: 13px 16px 13px 16px;
+
+  border-radius: 50px;
+  overflow: hidden;
+  background: #fff;
+  transition: background-color linear 0.2s;
+
+  .im_record_supported .im_send_form_empty & {
+    display: block;
+  }
+}
+.im_send_form_hover .im_voice_recording .im_record {
+  background: #cae9ff;
+}
+
+.im_send_form_empty .im_submit {
+  opacity: 0.4;
+}
+.im_record_supported .im_send_form_empty .im_submit {
+  display: none;
+}
+
+.im_voice_recorder_wrap {
+  height: 32px;
+  line-height: 32px;
+  right: 50px;
+  left: 0;
+  padding: 0 0 0 20px;
+}
+.im_recorder_label {
+  padding-right: 48px;
+}
+
+
+.im_voice_recording,
+.im_processing_recording {
+  color: #AAA;
+
+  .im_voice_recorder_wrap {
+    display: block;
+  }
+  .im_send_field_wrap,
+  .im_submit,
+  .im_attach {
     display: none;
+    // visibility: hidden;
+  }
+}
+
+.im_processing_recording {
+  .im_recorder_indicator i {
+    background-color: green;
   }
 
-  .im_attach {
-    display: block;
+  .im_record {
+    display: none;
   }
 }
 
@@ -1470,17 +1553,12 @@ a.im_message_fwd_author {
 }
 
 .composer_emoji_insert_btn {
-  position: absolute;
-  left: 0;
-  top: 0;
-  margin: 0;
-  padding: 3px 13px 4px 13px;
-  width: 48px;
-  height: 32px;
+  top: 3px;
+  right: 5px;
 
-  &.on,
+  &.composer_emoji_insert_btn_on,
   &:active,
-  .is_1x &.on,
+  .is_1x &.composer_emoji_insert_btn_on,
   .is_1x &:active {
     .icon-emoji {
       background-position: -10px -803px;
@@ -1524,8 +1602,8 @@ a.im_message_fwd_author {
 }
 
 .composer_emoji_tooltip {
-  margin-left: 6px;
-  margin-top: -176px;
+  margin-left: -246px;
+  margin-top: -181px;
   z-index: 10000;
 }
 .composer_emoji_tooltip_tab {
@@ -1844,6 +1922,8 @@ a.media_modal_date:hover {
 }
 .composer_rich_textarea,
 .composer_textarea {
+  padding-right: 28px;
+
   .im_send_field_wrap_2ndbtn & {
     padding-right: 35px;
   }
@@ -1866,17 +1946,16 @@ a.media_modal_date:hover {
   position: relative;
 }
 .composer_command_btn {
-  right: 10px;
+  right: 35px;
   top: 6px;
 }
 .composer_keyboard_btn {
-  right: 10px;
+  right: 35px;
   top: 6px;
 }
 .im_send_keyboard_wrap {
   padding: 0 5px;
 }
-
 .composer_progress_icon_wrap {
   right: 6px;
   top: 4px;

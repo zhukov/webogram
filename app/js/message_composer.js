@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.6 - messaging web application for MTProto
+ * Webogram v0.6.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1610,7 +1610,7 @@ MessageComposer.prototype.resetTyping = function () {
 }
 
 MessageComposer.prototype.setPlaceholder = function (newPlaceholder) {
-  (this.richTextareaEl || this.textareaEl).attr('placeholder', newPlaceholder)
+  ;(this.richTextareaEl || this.textareaEl).attr('placeholder', newPlaceholder)
 }
 
 function Scroller (content, options) {

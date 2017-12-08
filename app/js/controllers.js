@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.6 - messaging web application for MTProto
+ * Webogram v0.6.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -31,7 +31,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start()
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, WebPushApiManager, TelegramMeWebService, _) {
     $modalStack.dismissAll()
     IdleManager.start()
 
@@ -47,6 +47,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       TelegramMeWebService.setAuthorized(false)
+      WebPushApiManager.forceUnsubscribe()
     })
 
     var options = {dcID: 2, createNetworker: true}
@@ -218,6 +219,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             case 'PHONE_NUMBER_INVALID':
               $scope.error = {field: 'phone'}
               error.handled = true
+              break
+
+            case 'PHONE_NUMBER_APP_SIGNUP_FORBIDDEN':
+              $scope.error = {field: 'phone'}
               break
           }
         })['finally'](function () {
@@ -1224,7 +1229,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       photos: 'inputMessagesFilterPhotos',
       video: 'inputMessagesFilterVideo',
       documents: 'inputMessagesFilterDocument',
-      audio: 'inputMessagesFilterVoice'
+      audio: 'inputMessagesFilterVoice',
+      round: 'inputMessagesFilterRoundVideo',
     }
     var jump = 0
     var moreJump = 0
@@ -2146,8 +2152,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var lastIsRead = !historyMessage || !historyMessage.pFlags.unread
         for (i = 0; i < len; i++) {
           messageID = msgs[i]
-          if (messageID < maxID ||
-            history.ids.indexOf(messageID) !== -1) {
+          if (messageID > 0 && messageID < maxID ||
+              history.ids.indexOf(messageID) !== -1) {
             continue
           }
           historyMessage = AppMessagesManager.wrapForHistory(messageID)
@@ -2315,6 +2321,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       send: submitMessage,
       replyClear: replyClear,
       fwdsClear: fwdsClear,
+      toggleSlash: toggleSlash,
+      replyKeyboardToggle: replyKeyboardToggle,
       type: 'new'
     }
     $scope.mentions = {}
@@ -2340,9 +2348,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('inline_bots_popular', updateMentions)
 
     $scope.$on('last_message_edit', setEditLastMessage)
-
-    $scope.replyKeyboardToggle = replyKeyboardToggle
-    $scope.toggleSlash = toggleSlash
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
       if ($rootScope.idle.initial) {
@@ -3537,7 +3542,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('history_delete', function (e, historyUpdate) {
-      if (historyUpdate.msgs[$scope.messageID]) {
+      if (historyUpdate && historyUpdate.msgs && historyUpdate.msgs[$scope.messageID]) {
         $modalInstance.dismiss()
       }
     })
@@ -3571,7 +3576,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('history_delete', function (e, historyUpdate) {
-      if (historyUpdate.msgs[$scope.messageID]) {
+      if (historyUpdate && historyUpdate.msgs && historyUpdate.msgs[$scope.messageID]) {
         $modalInstance.dismiss()
       }
     })
@@ -4455,9 +4460,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppUsersManager.saveApiUser(user)
         $modalInstance.close()
       }, function (error) {
-        if (error.type == 'USERNAME_NOT_MODIFIED') {
-          error.handled = true
-          $modalInstance.close()
+        switch (error.type) {
+          case 'USERNAME_NOT_MODIFIED':
+            error.handled = true
+            $modalInstance.close()
+            break
         }
       })['finally'](function () {
         delete $scope.profile.updating
@@ -4470,9 +4477,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       MtpApiManager.invokeApi('account.checkUsername', {
-        username: newVal || ''
+        username: newVal
       }).then(function (valid) {
-        if ($scope.profile.username != newVal) {
+        if ($scope.profile.username !== newVal) {
           return
         }
         if (valid) {
@@ -4481,7 +4488,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.checked = {error: true}
         }
       }, function (error) {
-        if ($scope.profile.username != newVal) {
+        if ($scope.profile.username !== newVal) {
           return
         }
         switch (error.type) {

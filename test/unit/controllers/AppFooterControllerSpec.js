@@ -2,34 +2,32 @@
 /* global describe, it, inject, expect, beforeEach */
 
 describe('AppFooterController', function () {
-  var $controller, $scope, service, serviceFlag
-
   beforeEach(module('myApp.controllers'))
 
   beforeEach(function () {
-    serviceFlag = false
-    service = {
+    this.LayoutSwitchService = {
+      serviceFlag: false,
       switchLayout: function (parameter) {
-        serviceFlag = true
+        this.serviceFlag = true
       }
     }
 
     inject(function (_$controller_, _$rootScope_) {
-      $controller = _$controller_
+      this.$controller = _$controller_
 
-      $scope = _$rootScope_.$new()
-      $controller('AppFooterController', {
-        $scope: $scope,
-        LayoutSwitchService: service
+      this.$scope = _$rootScope_.$new()
+      this.$controller('AppFooterController', {
+        $scope: this.$scope,
+        LayoutSwitchService: this.LayoutSwitchService
       })
     })
   })
 
   // define tests
   it('calls the right function', function (done) {
-    expect(serviceFlag).toBe(false)
-    $scope.switchLayout(null)
-    expect(serviceFlag).toBe(true)
+    expect(this.LayoutSwitchService.serviceFlag).toBe(false)
+    this.$scope.switchLayout(true)
+    expect(this.LayoutSwitchService.serviceFlag).toBe(true)
     done()
   })
 })

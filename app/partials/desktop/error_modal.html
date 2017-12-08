@@ -40,6 +40,10 @@
       <span ng-switch-when="USERNAME_INVALID" my-i18n="error_modal_username_invalid_description"></span>
       <span ng-switch-when="USERNAME_OCCUPIED" my-i18n="error_modal_username_occupied_description"></span>
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_description"></span>
+      <span ng-switch-when="PHONE_NUMBER_APP_SIGNUP_FORBIDDEN" my-i18n="error_modal_app_signup_forbidden_md">
+        <my-i18n-param name="signup-link"><a href="https://telegram.org/dl" target="_blank">{0}</a></my-i18n-param>
+      </span>
+
       <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_username_not_found_description"></span>
       <span ng-switch-when="USER_NOT_MUTUAL_CONTACT" my-i18n="error_modal_user_not_mutual_contact"></span>
       <span ng-switch-when="INVITE_HASH_INVALID" my-i18n="error_modal_invite_link_invalid"></span>
@@ -58,8 +62,16 @@
         <my-i18n-param name="download-link"><a href="https://telegram.org/dl" target="_blank">{0}</a></my-i18n-param>
         
       </span>
-      
+
       <span ng-switch-when="CALLBACK_RESPONSE" ng-bind-html="error.description_html"></span>
+
+      <span ng-switch-when="UPDATE_SERVICE_NOTIFICATION">
+        <div my-message-body="historyMessage">
+          <div class="im_message_text" dir="auto"></div>
+          <div class="im_message_media"></div>
+        </div>
+      </span>
+
 
 
       <div ng-switch-default ng-switch="error.code">

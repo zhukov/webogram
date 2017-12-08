@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.6 - messaging web application for MTProto
+ * Webogram v0.6.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -1494,6 +1494,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
         if ($(sendFormWrap).is(':visible')) {
+          if (!sendForm || !sendForm.offsetHeight) {
+            sendForm = $('.im_send_form', element)[0]
+          }
           $(sendFormWrap).css({
             height: $(sendForm).height()
           })
@@ -1547,29 +1550,43 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('mySendForm', function (_, $q, $timeout, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+  .directive('mySendForm', function (_, $q, $timeout, $interval, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+
     return {
       link: link,
+      templateUrl: templateUrl('send_form'),
       scope: {
         draftMessage: '=',
+        replyKeyboard: '=',
         mentions: '=',
         commands: '='
       }
     }
 
     function link ($scope, element, attrs) {
+      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
       var messageField = $('textarea', element)[0]
       var emojiButton = $('.composer_emoji_insert_btn', element)[0]
       var emojiPanel = $('.composer_emoji_panel', element)[0]
       var fileSelects = $('input', element)
       var dropbox = $('.im_send_dropbox_wrap', element)[0]
-      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
       var dragStarted
       var dragTimeout
       var submitBtn = $('.im_submit', element)[0]
+      var voiceRecorderWrap = $('.im_voice_recorder_wrap', element)[0]
+      var voiceRecordBtn = $('.im_record', element)[0]
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>')
       var cachedStickerImages = {}
+
+      var voiceRecorder = null
+      var voiceRecordSupported = Recorder.isRecordingSupported()
+      var voiceRecordDurationInterval = null
+      if (voiceRecordSupported) {
+        element.addClass('im_record_supported')
+      }
+
+      $scope.voiceRecorder = {duration: 0, recording: false, processing: false}
 
       var emojiTooltip = new EmojiTooltip(emojiButton, {
         getStickers: function (callback) {
@@ -1682,6 +1699,138 @@ angular.module('myApp.directives', ['myApp.filters'])
           }, 1000)
         })
       })
+
+      $(voiceRecordBtn).on('contextmenu', cancelEvent)
+
+      var voiceRecordTouch = Config.Navigator.touch ? true : false
+      var voiceRecordEvents = {
+        start: voiceRecordTouch ? 'touchstart' : 'mousedown',
+        move: voiceRecordTouch ? 'touchmove' : 'mousemove',
+        stop: voiceRecordTouch ? 'touchend blur' : 'mouseup blur'
+      }
+      var onRecordStart, onRecordStreamReady, onRecordStop
+
+      $(voiceRecordBtn).on(voiceRecordEvents.start, function(event) {
+        if ($scope.voiceRecorder.processing) {
+          return
+        }
+
+        voiceRecorder = new Recorder({
+          monitorGain: 0,
+          numberOfChannels: 1,
+          bitRate: 64000,
+          encoderSampleRate: 48000,
+          encoderPath: 'vendor/recorderjs/encoder_worker.js'
+        })
+
+        onRecordStart = function(e) {
+          var startTime = tsNow(true)
+
+          voiceRecordDurationInterval = $interval(function() {
+            $scope.voiceRecorder.duration = tsNow(true) - startTime
+          }, 1000)
+
+          $scope.$apply(function() {
+            $scope.voiceRecorder.recording = true
+          })
+        }
+        voiceRecorder.addEventListener('start', onRecordStart)
+
+        onRecordStreamReady = function(e) {
+          voiceRecorder.start()
+        }
+        voiceRecorder.addEventListener('streamReady', onRecordStreamReady)
+
+        voiceRecorder.initStream()
+
+        var curHover = false
+        var curBoundaries = {}
+
+        var updateVoiceHoverBoundaries = function () {
+          var boundElement = $('.im_bottom_panel_wrap')
+          var offset = boundElement.offset()
+          curBoundaries = {
+            top: offset.top,
+            left: offset.left,
+            width: boundElement.outerWidth(),
+            height: boundElement.outerHeight(),
+          }
+        }
+
+        var updateVoiceHoveredClass = function (event, returnHover) {
+          var originalEvent = event.originalEvent || event
+          var touch = voiceRecordTouch
+                  ? originalEvent.changedTouches && originalEvent.changedTouches[0]
+                  : originalEvent
+          var isHover = touch &&
+                        touch.pageX >= curBoundaries.left &&
+                        touch.pageX <= curBoundaries.left + curBoundaries.width &&
+                        touch.pageY >= curBoundaries.top &&
+                        touch.pageY <= curBoundaries.top + curBoundaries.height
+
+          if (curHover != isHover) {
+            element.toggleClass('im_send_form_hover', isHover)
+            curHover = isHover
+          }
+          return returnHover && isHover
+        }
+
+        updateVoiceHoverBoundaries()
+        updateVoiceHoveredClass(event)
+
+        onRecordStop = function(event) {
+          $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
+          $($window).off(voiceRecordEvents.stop, onRecordStop)
+
+          var isHover = event == 'blur' ? false : updateVoiceHoveredClass(event, true)
+
+          if ($scope.voiceRecorder.duration > 0 && isHover) {
+            $scope.voiceRecorder.processing = true
+            voiceRecorder.addEventListener('dataAvailable', function(e) {
+              var blob = blobConstruct([e.detail], 'audio/ogg')
+              console.warn(dT(), 'got audio', blob)
+
+              $scope.$apply(function () {
+                if (blob.size !== undefined && 
+                    blob.size > 1024) {
+                  $scope.draftMessage.files = [blob]
+                  $scope.draftMessage.isMedia = true
+                }
+
+                $scope.voiceRecorder.processing = false
+              })
+            })
+          }
+          cancelRecord()
+        }
+
+        if (!Config.Mobile) {
+          $(voiceRecorderWrap).css({
+            height: messageFieldWrap.offsetHeight,
+            width: messageFieldWrap.offsetWidth
+          })
+        }
+
+        $($window).on(voiceRecordEvents.move, updateVoiceHoveredClass)
+        $($window).one(voiceRecordEvents.stop, onRecordStop)
+      })
+
+      function cancelRecord() {
+        if (voiceRecorder) {
+          voiceRecorder.stop()
+          voiceRecorder.removeEventListener('streamReady', onRecordStreamReady)
+          voiceRecorder.removeEventListener('start', onRecordStart)
+        }
+
+        if ($scope.voiceRecorder.recording) {
+          $interval.cancel(voiceRecordDurationInterval)
+
+          $scope.$apply(function() {
+            $scope.voiceRecorder.recording = false
+            $scope.voiceRecorder.duration = 0
+          })
+        }
+      }
 
       var sendOnEnter = true
       function updateSendSettings () {
@@ -1867,12 +2016,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
-              if (!Config.Mobile) {
-                $(emojiButton).hide()
-              }
-              $(dropbox)
-                .css({height: messageFieldWrap.offsetHeight + 2, width: messageFieldWrap.offsetWidth})
-                .show()
+              $(dropbox).css({
+                height: messageFieldWrap.offsetHeight,
+                width: messageFieldWrap.offsetWidth
+              })
+              element.addClass('im_send_form_dragging')
             }
           } else {
             if (e.type == 'drop') {
@@ -1882,10 +2030,7 @@ angular.module('myApp.directives', ['myApp.filters'])
               })
             }
             dragTimeout = setTimeout(function () {
-              $(dropbox).hide()
-              if (!Config.Mobile) {
-                $(emojiButton).show()
-              }
+              element.removeClass('im_send_form_dragging')
               dragStarted = false
               dragTimeout = false
             }, 300)
@@ -2195,13 +2340,95 @@ angular.module('myApp.directives', ['myApp.filters'])
           }, 200)
         })
       }
+    }
+  })
 
-    // Autoplay small GIFs
-    // if (!Config.Mobile &&
-    //     $scope.document.size &&
-    //     $scope.document.size < 1024 * 1024) {
-    //   $scope.toggle()
-    // }
+  .directive('myLoadRound', function (AppDocsManager, $timeout) {
+
+    var currentPlayer = false
+    var currentPlayerScope = false
+
+    return {
+      link: link,
+      templateUrl: templateUrl('full_round'),
+      scope: {
+        document: '='
+      }
+    }
+
+    function checkPlayer(newPlayer, newScope) {
+      if (currentPlayer === newPlayer) {
+        return false
+      }
+      if (currentPlayer) {
+        currentPlayer.pause()
+        currentPlayer.currentTime = 0
+        currentPlayerScope.isActive = false
+      }
+      currentPlayer = newPlayer
+      currentPlayerScope = newScope
+    }
+
+    function link ($scope, element, attrs) {
+      var imgWrap = $('.img_round_image_wrap', element)
+      imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
+
+      var downloadPromise = false
+
+      $scope.isActive = false
+
+      $scope.toggle = function (e) {
+        if (e && checkClick(e, true)) {
+          AppDocsManager.saveDocFile($scope.document.id)
+          return false
+        }
+
+        if ($scope.document.url) {
+          $scope.isActive = !$scope.isActive
+          onContentLoaded(function () {
+            $scope.$emit('ui_height')
+
+            var video = $('video', element)[0]
+            if (video) {
+              if (!$scope.isActive) {
+                video.pause()
+                video.currentTime = 0
+              } else {
+                checkPlayer(video, $scope)
+                video.play()
+              }
+            }
+          })
+          return
+        }
+
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
+          return
+        }
+
+        downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
+
+        downloadPromise.then(function () {
+          $timeout(function () {
+            var video = $('video', element)[0]
+            checkPlayer(video, $scope)
+            $(video).on('ended', function () {
+              if ($scope.isActive) {
+                $scope.toggle()
+              }
+            })
+            $scope.isActive = true
+          }, 200)
+        })
+      }
+
+      $scope.$on('ui_history_change', function () {
+        if ($scope.isActive) {
+          $scope.toggle()
+        }
+      })
     }
   })
 
@@ -2411,17 +2638,22 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var width = element.attr('width') || 200
       var height = element.attr('height') || 200
-      var apiKey = Config.ExtCredentials.gmaps.api_key
       var zoom = width > 200 ? 15 : 13
+      var useGoogle = false
+      var src
+
+      if (useGoogle) {
+        var apiKey = Config.ExtCredentials.gmaps.api_key
+        var useApiKey = true
+        src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
+        if (useApiKey) {
+          src += '&key=' + apiKey
+        }
+      } else {
+        src = 'https://static-maps.yandex.ru/1.x/?l=map&ll=' + $scope.point['long'] + ',' + $scope.point['lat'] + '&z=' + zoom + '&size=' + width + ',' + height + '&scale=1&pt=' + $scope.point['long'] + ',' + $scope.point['lat'] + ',pm2rdm&lang=en_US'
+      }
 
       element.attr('src', 'img/blank.gif')
-
-      var src = 'https://maps.googleapis.com/maps/api/staticmap?sensor=false&center=' + $scope.point['lat'] + ',' + $scope.point['long'] + '&zoom=' + zoom + '&size=' + width + 'x' + height + '&scale=2&markers=color:red|size:big|' + $scope.point['lat'] + ',' + $scope.point['long']
-      var useApiKey = true
-
-      if (useApiKey) {
-        src += '&key=' + apiKey
-      }
 
       ExternalResourcesManager.downloadByURL(src).then(function (url) {
         element.attr('src', url.valueOf())
@@ -3033,8 +3265,31 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myOgvPlayer', function ($compile) {
+    return {
+      link: function ($scope, $element, $attrs) {
+        var audio = $scope.audio
+        var playerEl
+        if (audio.mime_type == 'audio/ogg' &&
+            // false &&
+            OGVCompat.hasWebAudio() && // we don't want to use Flash
+            OGVCompat.supported('OGVPlayer')) {
+          playerEl = new OGVPlayer({debug: false, worker: false})
+        } else {
+          playerEl = document.createElement('audio')
+        }
+
+        $(playerEl).attr('media-player', $attrs.myOgvPlayer)
+        $(playerEl).attr('src', '{{::' + $attrs.src + '}}')
+
+        $compile(playerEl)($scope)
+        $($element).append(playerEl)
+      }
+    }
+  })
+
   .directive('myAudioPlayer', function ($timeout, $q, Storage, AppDocsManager, AppMessagesManager, ErrorService) {
-    var currentPlayer = false
+    var currentPlayerScope = false
     var audioVolume = 0.5
 
     Storage.get('audio_volume').then(function (newAudioVolume) {
@@ -3060,20 +3315,23 @@ angular.module('myApp.directives', ['myApp.filters'])
     return {
       link: link,
       scope: {
-        audio: '=',
-        message: '='
+        audio: '='
       },
       templateUrl: templateUrl('audio_player')
     }
 
-    function checkPlayer (newPlayer) {
-      if (newPlayer === currentPlayer) {
+    function checkAudioPlayer (newPlayerScope) {
+      if (newPlayerScope === currentPlayerScope) {
         return false
       }
-      if (currentPlayer) {
-        currentPlayer.pause()
+      if (currentPlayerScope) {
+        ;(function ($scope) {
+          setZeroTimeout(function () {
+            $scope.mediaPlayer.player.pause()
+          })
+        })(currentPlayerScope)
       }
-      currentPlayer = newPlayer
+      currentPlayerScope = newPlayerScope
     }
 
     function link ($scope, element, attrs) {
@@ -3081,20 +3339,34 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $scope.volume = audioVolume
       $scope.mediaPlayer = {}
+      if ($scope.$parent.messageId) {
+        $scope.message = AppMessagesManager.wrapForHistory($scope.$parent.messageId)
+      }
 
       $scope.download = function () {
         AppDocsManager.saveDocFile($scope.audio.id)
       }
 
+      $scope.duration = function () {
+        if ($scope.mediaPlayer.player &&
+            $scope.mediaPlayer.player.duration > 0 &&
+            $scope.mediaPlayer.player.duration < Infinity) {
+          return $scope.mediaPlayer.player.duration
+        }
+        return $scope.audio && $scope.audio.duration || 0
+      }
+
       $scope.togglePlay = function () {
         if ($scope.audio.url) {
-          checkPlayer($scope.mediaPlayer.player)
-          $scope.mediaPlayer.player.playPause()
+          checkAudioPlayer($scope)
+          setZeroTimeout(function () {
+            $scope.mediaPlayer.player.playPause()
+          })
         } else if ($scope.audio.progress && $scope.audio.progress.enabled) {
         } else {
           AppDocsManager.downloadDoc($scope.audio.id).then(function () {
             onContentLoaded(function () {
-              var errorListenerEl = $('audio', element)[0] || element[0]
+              var errorListenerEl = $('audio, ogvjs', element)[0] || element[0]
               if (errorListenerEl) {
                 var errorAlready = false
                 var onAudioError = function (event) {
@@ -3122,13 +3394,13 @@ angular.module('myApp.directives', ['myApp.filters'])
                 })
               }
               setTimeout(function () {
-                checkPlayer($scope.mediaPlayer.player)
+                checkAudioPlayer($scope)
                 $scope.mediaPlayer.player.setVolume(audioVolume)
                 $scope.mediaPlayer.player.play()
 
                 if ($scope.message &&
-                  !$scope.message.pFlags.out &&
-                  $scope.message.pFlags.media_unread) {
+                    !$scope.message.pFlags.out &&
+                    $scope.message.pFlags.media_unread) {
                   AppMessagesManager.readMessages([$scope.message.mid])
                 }
               }, 300)
