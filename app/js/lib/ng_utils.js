@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.6.0 - messaging web application for MTProto
+ * Webogram v0.6.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -56,8 +56,10 @@ angular.module('izhukov.utils', [])
   .service('FileManager', function ($window, $q, $timeout, qSync) {
     $window.URL = $window.URL || $window.webkitURL
     $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder
-    var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1 &&
-      navigator.userAgent.indexOf('Chrome') == -1
+    var isSafari = 'safari' in window
+    var safariVersion = parseFloat(isSafari && (navigator.userAgent.match(/Version\/(\d+\.\d+).* Safari/) || [])[1])
+    var safariWithDownload = isSafari && safariVersion >= 11.0
+    var buggyUnknownBlob = isSafari && !safariWithDownload
 
     var blobSupported = true
 
@@ -284,7 +286,7 @@ angular.module('izhukov.utils', [])
       }
 
       var popup = false
-      if (window.safari) {
+      if (isSafari && !safariWithDownload) {
         popup = window.open()
       }
 
@@ -297,7 +299,9 @@ angular.module('izhukov.utils', [])
         }
         var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
         anchor.href = url
-        anchor.target = '_blank'
+        if (!safariWithDownload) {
+          anchor.target = '_blank'
+        }
         anchor.download = fileName
         if (anchor.dataset) {
           anchor.dataset.downloadurl = ['video/quicktime', fileName, url].join(':')

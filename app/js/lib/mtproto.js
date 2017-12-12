@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.6.0 - messaging web application for MTProto
+ * Webogram v0.6.1 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -60,21 +60,83 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     /**
     *  Server public key, obtained from here: https://core.telegram.org/api/obtaining_api_id
+    * 
+    * 
+    *  -----BEGIN RSA PUBLIC KEY-----
+    *  MIIBCgKCAQEAwVACPi9w23mF3tBkdZz+zwrzKOaaQdr01vAbU4E1pvkfj4sqDsm6
+    *  lyDONS789sVoD/xCS9Y0hkkC3gtL1tSfTlgCMOOul9lcixlEKzwKENj1Yz/s7daS
+    *  an9tqw3bfUV/nqgbhGX81v/+7RFAEd+RwFnK7a+XYl9sluzHRyVVaTTveB2GazTw
+    *  Efzk2DWgkBluml8OREmvfraX3bkHZJTKX4EQSjBbbdJ2ZXIsRrYOXfaA+xayEGB+
+    *  8hdlLmAjbCVfaigxX0CDqWeR1yFL9kwd9P0NsZRPsmoqVwMbMu7mStFai6aIhc3n
+    *  Slv8kg9qv1m6XHVQY3PnEw+QQtqSIXklHwIDAQAB
+    *  -----END RSA PUBLIC KEY-----
+    *  
+    *  -----BEGIN PUBLIC KEY-----
+    *  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAruw2yP/BCcsJliRoW5eB
+    *  VBVle9dtjJw+OYED160Wybum9SXtBBLXriwt4rROd9csv0t0OHCaTmRqBcQ0J8fx
+    *  hN6/cpR1GWgOZRUAiQxoMnlt0R93LCX/j1dnVa/gVbCjdSxpbrfY2g2L4frzjJvd
+    *  l84Kd9ORYjDEAyFnEA7dD556OptgLQQ2e2iVNq8NZLYTzLp5YpOdO1doK+ttrltg
+    *  gTCy5SrKeLoCPPbOgGsdxJxyz5KKcZnSLj16yE5HvJQn0CNpRdENvRUXe6tBP78O
+    *  39oJ8BTHp9oIjd6XWXAsp2CvK45Ol8wFXGF710w9lwCGNbmNxNYhtIkdqfsEcwR5
+    *  JwIDAQAB
+    *  -----END PUBLIC KEY-----
+    *  
+    *  -----BEGIN PUBLIC KEY-----
+    *  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvfLHfYH2r9R70w8prHbl
+    *  Wt/nDkh+XkgpflqQVcnAfSuTtO05lNPspQmL8Y2XjVT4t8cT6xAkdgfmmvnvRPOO
+    *  KPi0OfJXoRVylFzAQG/j83u5K3kRLbae7fLccVhKZhY46lvsueI1hQdLgNV9n1cQ
+    *  3TDS2pQOCtovG4eDl9wacrXOJTG2990VjgnIKNA0UMoP+KF03qzryqIt3oTvZq03
+    *  DyWdGK+AZjgBLaDKSnC6qD2cFY81UryRWOab8zKkWAnhw2kFpcqhI0jdV5QaSCEx
+    *  vnsjVaX0Y1N0870931/5Jb9ICe4nweZ9kSDF/gip3kWLG0o8XQpChDfyvsqB9OLV
+    *  /wIDAQAB
+    *  -----END PUBLIC KEY-----
+    *  
+    *  -----BEGIN PUBLIC KEY-----
+    *  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs/ditzm+mPND6xkhzwFI
+    *  z6J/968CtkcSE/7Z2qAJiXbmZ3UDJPGrzqTDHkO30R8VeRM/Kz2f4nR05GIFiITl
+    *  4bEjvpy7xqRDspJcCFIOcyXm8abVDhF+th6knSU0yLtNKuQVP6voMrnt9MV1X92L
+    *  GZQLgdHZbPQz0Z5qIpaKhdyA8DEvWWvSUwwc+yi1/gGaybwlzZwqXYoPOhwMebzK
+    *  Uk0xW14htcJrRrq+PXXQbRzTMynseCoPIoke0dtCodbA3qQxQovE16q9zz4Otv2k
+    *  4j63cz53J+mhkVWAeWxVGI0lltJmWtEYK6er8VqqWot3nqmWMXogrgRLggv/Nbbo
+    *  oQIDAQAB
+    *  -----END PUBLIC KEY-----
+    *  
+    *  -----BEGIN PUBLIC KEY-----
+    *  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvmpxVY7ld/8DAjz6F6q0
+    *  5shjg8/4p6047bn6/m8yPy1RBsvIyvuDuGnP/RzPEhzXQ9UJ5Ynmh2XJZgHoE9xb
+    *  nfxL5BXHplJhMtADXKM9bWB11PU1Eioc3+AXBB8QiNFBn2XI5UkO5hPhbb9mJpjA
+    *  9Uhw8EdfqJP8QetVsI/xrCEbwEXe0xvifRLJbY08/Gp66KpQvy7g8w7VB8wlgePe
+    *  xW3pT13Ap6vuC+mQuJPyiHvSxjEKHgqePji9NP3tJUFQjcECqcm0yV7/2d0t/pbC
+    *  m+ZH1sadZspQCEPPrtbkQBlvHb4OLiIWPGHKSMeRFvp3IWcmdJqXahxLCUS1Eh6M
+    *  AQIDAQAB
+    *  -----END PUBLIC KEY-----
     *
-    * -----BEGIN RSA PUBLIC KEY-----
-    * MIIBCgKCAQEAwVACPi9w23mF3tBkdZz+zwrzKOaaQdr01vAbU4E1pvkfj4sqDsm6
-    * lyDONS789sVoD/xCS9Y0hkkC3gtL1tSfTlgCMOOul9lcixlEKzwKENj1Yz/s7daS
-    * an9tqw3bfUV/nqgbhGX81v/+7RFAEd+RwFnK7a+XYl9sluzHRyVVaTTveB2GazTw
-    * Efzk2DWgkBluml8OREmvfraX3bkHZJTKX4EQSjBbbdJ2ZXIsRrYOXfaA+xayEGB+
-    * 8hdlLmAjbCVfaigxX0CDqWeR1yFL9kwd9P0NsZRPsmoqVwMbMu7mStFai6aIhc3n
-    * Slv8kg9qv1m6XHVQY3PnEw+QQtqSIXklHwIDAQAB
-    * -----END RSA PUBLIC KEY-----
+    * Bytes can be got via 
+    * $ openssl rsa -pubin -in key.pub -text -noout
     */
 
-    var publisKeysHex = [{
-      modulus: 'c150023e2f70db7985ded064759cfecf0af328e69a41daf4d6f01b538135a6f91f8f8b2a0ec9ba9720ce352efcf6c5680ffc424bd634864902de0b4bd6d49f4e580230e3ae97d95c8b19442b3c0a10d8f5633fecedd6926a7f6dab0ddb7d457f9ea81b8465fcd6fffeed114011df91c059caedaf97625f6c96ecc74725556934ef781d866b34f011fce4d835a090196e9a5f0e4449af7eb697ddb9076494ca5f81104a305b6dd27665722c46b60e5df680fb16b210607ef217652e60236c255f6a28315f4083a96791d7214bf64c1df4fd0db1944fb26a2a57031b32eee64ad15a8ba68885cde74a5bfc920f6abf59ba5c75506373e7130f9042da922179251f',
-      exponent: '010001'
-    }]
+    var publisKeysHex = [
+      {
+        modulus: 'c150023e2f70db7985ded064759cfecf0af328e69a41daf4d6f01b538135a6f91f8f8b2a0ec9ba9720ce352efcf6c5680ffc424bd634864902de0b4bd6d49f4e580230e3ae97d95c8b19442b3c0a10d8f5633fecedd6926a7f6dab0ddb7d457f9ea81b8465fcd6fffeed114011df91c059caedaf97625f6c96ecc74725556934ef781d866b34f011fce4d835a090196e9a5f0e4449af7eb697ddb9076494ca5f81104a305b6dd27665722c46b60e5df680fb16b210607ef217652e60236c255f6a28315f4083a96791d7214bf64c1df4fd0db1944fb26a2a57031b32eee64ad15a8ba68885cde74a5bfc920f6abf59ba5c75506373e7130f9042da922179251f',
+        exponent: '010001'
+      },
+      {
+        modulus: 'aeec36c8ffc109cb099624685b97815415657bd76d8c9c3e398103d7ad16c9bba6f525ed0412d7ae2c2de2b44e77d72cbf4b7438709a4e646a05c43427c7f184debf72947519680e651500890c6832796dd11f772c25ff8f576755afe055b0a3752c696eb7d8da0d8be1faf38c9bdd97ce0a77d3916230c4032167100edd0f9e7a3a9b602d04367b689536af0d64b613ccba7962939d3b57682beb6dae5b608130b2e52aca78ba023cf6ce806b1dc49c72cf928a7199d22e3d7ac84e47bc9427d0236945d10dbd15177bab413fbf0edfda09f014c7a7da088dde9759702ca760af2b8e4e97cc055c617bd74c3d97008635b98dc4d621b4891da9fb0473047927',
+        exponent: '010001'
+      },
+      {
+        modulus: 'bdf2c77d81f6afd47bd30f29ac76e55adfe70e487e5e48297e5a9055c9c07d2b93b4ed3994d3eca5098bf18d978d54f8b7c713eb10247607e69af9ef44f38e28f8b439f257a11572945cc0406fe3f37bb92b79112db69eedf2dc71584a661638ea5becb9e23585074b80d57d9f5710dd30d2da940e0ada2f1b878397dc1a72b5ce2531b6f7dd158e09c828d03450ca0ff8a174deacebcaa22dde84ef66ad370f259d18af806638012da0ca4a70baa83d9c158f3552bc9158e69bf332a45809e1c36905a5caa12348dd57941a482131be7b2355a5f4635374f3bd3ddf5ff925bf4809ee27c1e67d9120c5fe08a9de458b1b4a3c5d0a428437f2beca81f4e2d5ff',
+        exponent: '010001'
+      },
+      {
+        modulus: 'b3f762b739be98f343eb1921cf0148cfa27ff7af02b6471213fed9daa0098976e667750324f1abcea4c31e43b7d11f1579133f2b3d9fe27474e462058884e5e1b123be9cbbc6a443b2925c08520e7325e6f1a6d50e117eb61ea49d2534c8bb4d2ae4153fabe832b9edf4c5755fdd8b19940b81d1d96cf433d19e6a22968a85dc80f0312f596bd2530c1cfb28b5fe019ac9bc25cd9c2a5d8a0f3a1c0c79bcca524d315b5e21b5c26b46babe3d75d06d1cd33329ec782a0f22891ed1db42a1d6c0dea431428bc4d7aabdcf3e0eb6fda4e23eb7733e7727e9a1915580796c55188d2596d2665ad1182ba7abf15aaa5a8b779ea996317a20ae044b820bff35b6e8a1',
+        exponent: '010001'
+      },
+      {
+        modulus: 'be6a71558ee577ff03023cfa17aab4e6c86383cff8a7ad38edb9fafe6f323f2d5106cbc8cafb83b869cffd1ccf121cd743d509e589e68765c96601e813dc5b9dfc4be415c7a6526132d0035ca33d6d6075d4f535122a1cdfe017041f1088d1419f65c8e5490ee613e16dbf662698c0f54870f0475fa893fc41eb55b08ff1ac211bc045ded31be27d12c96d8d3cfc6a7ae8aa50bf2ee0f30ed507cc2581e3dec56de94f5dc0a7abee0be990b893f2887bd2c6310a1e0a9e3e38bd34fded2541508dc102a9c9b4c95effd9dd2dfe96c29be647d6c69d66ca500843cfaed6e440196f1dbe0e2e22163c61ca48c79116fa77216726749a976a1c4b0944b5121e8c01',
+        exponent: '010001'
+      }
+    ]
 
     var publicKeysParsed = {}
     var prepared = false
@@ -180,7 +242,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
   .factory('MtpAuthorizer', function (MtpDcConfigurator, MtpRsaKeysManager, MtpSecureRandom, MtpTimeManager, CryptoWorker, $http, $q, $timeout) {
     var chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/)
     var chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false
-    var xhrSendBuffer = !('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30)
+    var xhrSendBuffer = !('ArrayBufferView' in window) && (chromeVersion > 0 && chromeVersion < 30)
 
     delete $http.defaults.headers.post['Content-Type']
     delete $http.defaults.headers.common['Accept']
@@ -411,7 +473,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     function mtpVerifyDhParams(g, dhPrime, gA) {
       console.log(dT(), 'Verifying DH params')
-      var dhPrimeHex = bytesToHex(dhPrime);
+      var dhPrimeHex = bytesToHex(dhPrime)
       if (g != 3 ||
           dhPrimeHex !== 'c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b') {
         // The verified value is from https://core.telegram.org/mtproto/security_guidelines
@@ -597,7 +659,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     var akStopped = false
     var chromeMatches = navigator.userAgent.match(/Chrome\/(\d+(\.\d+)?)/)
     var chromeVersion = chromeMatches && parseFloat(chromeMatches[1]) || false
-    var xhrSendBuffer = !('ArrayBufferView' in window) && (!chromeVersion || chromeVersion < 30)
+    var xhrSendBuffer = !('ArrayBufferView' in window) && (chromeVersion > 0 && chromeVersion < 30)
 
     delete $http.defaults.headers.post['Content-Type']
     delete $http.defaults.headers.common['Accept']
@@ -837,8 +899,8 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }).then(function () {
         delete self.longPollPending
         setZeroTimeout(self.checkLongPoll.bind(self))
-      }, function () {
-        console.log('Long-poll failed')
+      }, function (error) {
+        console.log('Long-poll failed', error)
       })
     }
 
@@ -874,48 +936,44 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       this.sheduleRequest(delay)
     }
 
-    MtpNetworker.prototype.getMsgKeyIv = function (msgKey, isOut) {
+    MtpNetworker.prototype.getMsgKey = function (dataWithPadding, isOut) {
       var authKey = this.authKeyUint8
       var x = isOut ? 0 : 8
-      var sha1aText = new Uint8Array(48)
-      var sha1bText = new Uint8Array(48)
-      var sha1cText = new Uint8Array(48)
-      var sha1dText = new Uint8Array(48)
+      var msgKeyLargePlain = bufferConcat(authKey.subarray(88 + x, 88 + x + 32), dataWithPadding)
+      return CryptoWorker.sha256Hash(msgKeyLargePlain).then(function (msgKeyLarge) {
+        var msgKey = new Uint8Array(msgKeyLarge).subarray(8, 24)
+        return msgKey
+      })
+    }
+
+    MtpNetworker.prototype.getAesKeyIv = function (msgKey, isOut) {
+      var authKey = this.authKeyUint8
+      var x = isOut ? 0 : 8
+      var sha2aText = new Uint8Array(52)
+      var sha2bText = new Uint8Array(52)
       var promises = {}
 
-      sha1aText.set(msgKey, 0)
-      sha1aText.set(authKey.subarray(x, x + 32), 16)
-      promises.sha1a = CryptoWorker.sha1Hash(sha1aText)
+      sha2aText.set(msgKey, 0)
+      sha2aText.set(authKey.subarray(x, x + 36), 16)
+      promises.sha2a = CryptoWorker.sha256Hash(sha2aText)
 
-      sha1bText.set(authKey.subarray(x + 32, x + 48), 0)
-      sha1bText.set(msgKey, 16)
-      sha1bText.set(authKey.subarray(x + 48, x + 64), 32)
-      promises.sha1b = CryptoWorker.sha1Hash(sha1bText)
-
-      sha1cText.set(authKey.subarray(x + 64, x + 96), 0)
-      sha1cText.set(msgKey, 32)
-      promises.sha1c = CryptoWorker.sha1Hash(sha1cText)
-
-      sha1dText.set(msgKey, 0)
-      sha1dText.set(authKey.subarray(x + 96, x + 128), 16)
-      promises.sha1d = CryptoWorker.sha1Hash(sha1dText)
+      sha2bText.set(authKey.subarray(40 + x, 40 + x + 36), 0)
+      sha2bText.set(msgKey, 36)
+      promises.sha2b = CryptoWorker.sha256Hash(sha2bText)
 
       return $q.all(promises).then(function (result) {
         var aesKey = new Uint8Array(32)
         var aesIv = new Uint8Array(32)
-        sha1a = new Uint8Array(result.sha1a),
-        sha1b = new Uint8Array(result.sha1b),
-        sha1c = new Uint8Array(result.sha1c),
-        sha1d = new Uint8Array(result.sha1d)
+        var sha2a = new Uint8Array(result.sha2a)
+        var sha2b = new Uint8Array(result.sha2b)
 
-        aesKey.set(sha1a.subarray(0, 8))
-        aesKey.set(sha1b.subarray(8, 20), 8)
-        aesKey.set(sha1c.subarray(4, 16), 20)
+        aesKey.set(sha2a.subarray(0, 8))
+        aesKey.set(sha2b.subarray(8, 24), 8)
+        aesKey.set(sha2a.subarray(24, 32), 24)
 
-        aesIv.set(sha1a.subarray(8, 20))
-        aesIv.set(sha1b.subarray(0, 8), 12)
-        aesIv.set(sha1c.subarray(16, 20), 20)
-        aesIv.set(sha1d.subarray(0, 8), 24)
+        aesIv.set(sha2b.subarray(0, 8))
+        aesIv.set(sha2a.subarray(8, 24), 8)
+        aesIv.set(sha2b.subarray(24, 32), 24)
 
         return [aesKey, aesIv]
       })
@@ -1144,7 +1202,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
           this.checkConnectionPeriod = Math.max(1.1, Math.sqrt(this.checkConnectionPeriod))
         })
       }, function (error) {
-        console.log('Encrypted request failed', error)
+        console.error('Encrypted request failed', error)
 
         if (message.container) {
           angular.forEach(message.inner, function (msgID) {
@@ -1172,16 +1230,12 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       }
     }
 
-    MtpNetworker.prototype.getEncryptedMessage = function (bytes) {
+    MtpNetworker.prototype.getEncryptedMessage = function (dataWithPadding) {
       var self = this
-
-      // console.log(dT(), 'Start encrypt', bytes.byteLength)
-      return CryptoWorker.sha1Hash(bytes).then(function (bytesHash) {
-        // console.log(dT(), 'after hash')
-        var msgKey = new Uint8Array(bytesHash).subarray(4, 20)
-        return self.getMsgKeyIv(msgKey, true).then(function (keyIv) {
+      return self.getMsgKey(dataWithPadding, true).then(function (msgKey) {
+        return self.getAesKeyIv(msgKey, true).then(function (keyIv) {
           // console.log(dT(), 'after msg key iv')
-          return CryptoWorker.aesEncrypt(bytes, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
+          return CryptoWorker.aesEncrypt(dataWithPadding, keyIv[0], keyIv[1]).then(function (encryptedBytes) {
             // console.log(dT(), 'Finish encrypt')
             return {
               bytes: encryptedBytes,
@@ -1194,7 +1248,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
     MtpNetworker.prototype.getDecryptedMessage = function (msgKey, encryptedData) {
       // console.log(dT(), 'get decrypted start')
-      return this.getMsgKeyIv(msgKey, false).then(function (keyIv) {
+      return this.getAesKeyIv(msgKey, false).then(function (keyIv) {
         // console.log(dT(), 'after msg key iv')
         return CryptoWorker.aesDecrypt(encryptedData, keyIv[0], keyIv[1])
       })
@@ -1205,7 +1259,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       options = options || {}
       // console.log(dT(), 'Send encrypted'/*, message*/)
       // console.trace()
-      var data = new TLSerialization({startMaxLength: message.body.length + 64})
+      var data = new TLSerialization({startMaxLength: message.body.length + 2048})
 
       data.storeIntBytes(this.serverSalt, 64, 'salt')
       data.storeIntBytes(this.sessionID, 64, 'session_id')
@@ -1216,7 +1270,17 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       data.storeInt(message.body.length, 'message_data_length')
       data.storeRawBytes(message.body, 'message_data')
 
-      return this.getEncryptedMessage(data.getBuffer()).then(function (encryptedResult) {
+      var dataBuffer = data.getBuffer()
+
+      var paddingLength = (16 - (data.offset % 16)) + 16 * (1 + nextRandomInt(5))
+      var padding = new Array(paddingLength)
+      MtpSecureRandom.nextBytes(padding)
+
+      var dataWithPadding = bufferConcat(dataBuffer, padding)
+      // console.log(dT(), 'Adding padding', dataBuffer, padding, dataWithPadding)
+      // console.log(dT(), 'auth_key_id', bytesToHex(self.authKeyID))
+
+      return this.getEncryptedMessage(dataWithPadding).then(function (encryptedResult) {
         // console.log(dT(), 'Got encrypted out message'/*, encryptedResult*/)
         var request = new TLSerialization({startMaxLength: encryptedResult.bytes.byteLength + 256})
         request.storeIntBytes(self.authKeyID, 64, 'auth_key_id')
@@ -1258,7 +1322,6 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
     MtpNetworker.prototype.parseResponse = function (responseBuffer) {
       // console.log(dT(), 'Start parsing response')
       var self = this
-
       var deserializer = new TLDeserialization(responseBuffer)
 
       var authKeyID = deserializer.fetchIntBytes(64, false, 'auth_key_id')
@@ -1268,43 +1331,44 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       var msgKey = deserializer.fetchIntBytes(128, true, 'msg_key')
       var encryptedData = deserializer.fetchRawBytes(responseBuffer.byteLength - deserializer.getOffset(), true, 'encrypted_data')
 
-      return this.getDecryptedMessage(msgKey, encryptedData).then(function (dataWithPadding) {
+      return self.getDecryptedMessage(msgKey, encryptedData).then(function (dataWithPadding) {
         // console.log(dT(), 'after decrypt')
-        var deserializer = new TLDeserialization(dataWithPadding, {mtproto: true})
-
-        var salt = deserializer.fetchIntBytes(64, false, 'salt')
-        var sessionID = deserializer.fetchIntBytes(64, false, 'session_id')
-        var messageID = deserializer.fetchLong('message_id')
-
-        if (!bytesCmp(sessionID, self.sessionID) &&
-            (!self.prevSessionID || !bytesCmp(sessionID, self.prevSessionID))) {
-          console.warn('Sessions', sessionID, self.sessionID, self.prevSessionID)
-          throw new Error('[MT] Invalid server session_id: ' + bytesToHex(sessionID))
-        }
-
-        var seqNo = deserializer.fetchInt('seq_no')
-
-        var offset = deserializer.getOffset()
-        var totalLength = dataWithPadding.byteLength
-
-        var messageBodyLength = deserializer.fetchInt('message_data[length]')
-        if ((messageBodyLength % 4) ||
-            messageBodyLength > totalLength - offset) {
-          throw new Error('[MT] Invalid body length: ' + messageBodyLength)
-        }
-        var messageBody = deserializer.fetchRawBytes(messageBodyLength, true, 'message_data')
-
-        var offset = deserializer.getOffset()
-        var paddingLength = totalLength - offset
-        if (paddingLength < 0 || paddingLength > 15) {
-          throw new Error('[MT] Invalid padding length: ' + paddingLength)
-        }
-        var hashData = convertToUint8Array(dataWithPadding).subarray(0, offset)
-
-        return CryptoWorker.sha1Hash(hashData).then(function (dataHash) {
-          if (!bytesCmp(msgKey, bytesFromArrayBuffer(dataHash).slice(-16))) {
-            console.warn(msgKey, bytesFromArrayBuffer(dataHash))
+        return self.getMsgKey(dataWithPadding, false).then(function (calcMsgKey) {
+          if (!bytesCmp(msgKey, calcMsgKey)) {
+            console.warn('[MT] msg_keys', msgKey, bytesFromArrayBuffer(calcMsgKey))
             throw new Error('[MT] server msgKey mismatch')
+          }
+          // console.log(dT(), 'after msgKey check')
+
+          var deserializer = new TLDeserialization(dataWithPadding, {mtproto: true})
+
+          var salt = deserializer.fetchIntBytes(64, false, 'salt')
+          var sessionID = deserializer.fetchIntBytes(64, false, 'session_id')
+          var messageID = deserializer.fetchLong('message_id')
+
+          if (!bytesCmp(sessionID, self.sessionID) &&
+              (!self.prevSessionID || !bytesCmp(sessionID, self.prevSessionID))) {
+            console.warn('Sessions', sessionID, self.sessionID, self.prevSessionID)
+            throw new Error('[MT] Invalid server session_id: ' + bytesToHex(sessionID))
+          }
+
+          var seqNo = deserializer.fetchInt('seq_no')
+
+          var totalLength = dataWithPadding.byteLength
+
+          var messageBodyLength = deserializer.fetchInt('message_data[length]')
+          var offset = deserializer.getOffset()
+
+          if ((messageBodyLength % 4) ||
+              messageBodyLength > totalLength - offset) {
+            throw new Error('[MT] Invalid body length: ' + messageBodyLength)
+          }
+          var messageBody = deserializer.fetchRawBytes(messageBodyLength, true, 'message_data')
+
+          var offset = deserializer.getOffset()
+          var paddingLength = totalLength - offset
+          if (paddingLength < 12 || paddingLength > 1024) {
+            throw new Error('[MT] Invalid padding length: ' + paddingLength)
           }
 
           var buffer = bytesToArrayBuffer(messageBody)
