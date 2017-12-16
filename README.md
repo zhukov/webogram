@@ -9,6 +9,20 @@ MTProto data can be carried over HTTP (SSL is also supported), so this project i
 
 That said, I'm using this app myself and I'd like to share its sources, so anyone can contribute to the development. Any help is welcome!
 
+### Table of Contents
+
+  - [Interface](#interface)
+  - [Unsupported at the moment](#unsupported-at-the-moment)
+  - [Maintained locations](#maintained-locations)
+- [Technical details](#technical-details)
+  - [Running locally](#running-locally)
+    - [Running web-server](#running-web-server)
+    - [Running as Chrome Packaged App](#running-as-chrome-packaged-app)
+    - [Running as Firefox OS App](#running-as-firefox-os-app)
+    - [Running in production](#running-in-production)
+  - [Third party libraries](#third-party-libraries)
+  - [Licensing](#licensing)
+  - [Contribute](#contribute)
 
 ### Interface
 
