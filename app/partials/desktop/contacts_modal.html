@@ -40,7 +40,7 @@
 
           <ul ng-switch-default class="contacts_modal_members_list nav nav-pills nav-stacked">
 
-            <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
+            <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
               <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
 
                 <div class="md_modal_list_peer_photo pull-left" my-peer-photolink="::contact.userID" img-class="md_modal_list_peer_photo"></div>

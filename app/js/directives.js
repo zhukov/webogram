@@ -2969,6 +2969,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var allPluralize = _.pluralize('group_modal_pluralize_participants')
     var onlinePluralize = _.pluralize('group_modal_pluralize_online_participants')
+    var subscribersPluralize = _.pluralize('group_modal_pluralize_subscribers')
 
     var myID = 0
     MtpApiManager.getUserID().then(function (newMyID) {
@@ -2998,8 +2999,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         var curJump = ++jump
         participantsCount = 0
         participants = {}
+        var chat = AppChatsManager.getChat(chatID)
+        if (chat.participants_count) {
+          participantsCount = chat.participants_count
+        }
+        update()
         if (!chatID) {
-          update()
           return
         }
         AppProfileManager.getChatFull(chatID).then(function (chatFull) {
@@ -3014,12 +3019,20 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (chatFull.participants_count) {
             participantsCount = chatFull.participants_count || 0
           }
+          if (!participantsCount) {
+            var chat = AppChatsManager.getChat(chatID)
+            if (chat.participants_count) {
+              participantsCount = chat.participants_count
+            }
+          }
           update()
         })
       }
 
       var update = function () {
-        var html = allPluralize(participantsCount)
+        var html = AppChatsManager.isBroadcast(chatID)
+          ? subscribersPluralize(participantsCount)
+          : allPluralize(participantsCount)
         var onlineCount = 0
         if (!AppChatsManager.isChannel(chatID)) {
           var wasMe = false

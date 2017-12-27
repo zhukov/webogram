@@ -1345,10 +1345,18 @@ angular.module('myApp.services')
               delete apiMessage.media
               break
             case 'messageMediaPhoto':
-              AppPhotosManager.savePhoto(apiMessage.media.photo, mediaContext)
+              if (apiMessage.media.ttl_seconds) {
+                apiMessage.media = {_: 'messageMediaUnsupported'}
+              } else {
+                AppPhotosManager.savePhoto(apiMessage.media.photo, mediaContext)
+              }
               break
             case 'messageMediaDocument':
-              AppDocsManager.saveDoc(apiMessage.media.document, mediaContext)
+              if (apiMessage.media.ttl_seconds) {
+                apiMessage.media = {_: 'messageMediaUnsupported'}
+              } else {
+                AppDocsManager.saveDoc(apiMessage.media.document, mediaContext)
+              }
               break
             case 'messageMediaWebPage':
               AppWebPagesManager.saveWebPage(apiMessage.media.webpage, apiMessage.mid, mediaContext)
@@ -1359,6 +1367,9 @@ angular.module('myApp.services')
               break
             case 'messageMediaInvoice':
               apiMessage.media = {_: 'messageMediaUnsupported'}
+              break
+            case 'messageMediaGeoLive':
+              apiMessage.media._ = 'messageMediaGeo'
               break
           }
         }
@@ -1435,7 +1446,12 @@ angular.module('myApp.services')
                      : 'ok'
                 )
               break
+
+            case 'messageActionScreenshotTaken':
+              apiMessage.media = {_: 'messageMediaUnsupported'}
+              delete apiMessage.action
           }
+          
           if (migrateFrom &&
             migrateTo &&
             !migratedFromTo[migrateFrom] &&

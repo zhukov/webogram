@@ -30,7 +30,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return contactsFillPromise
       }
       return contactsFillPromise = MtpApiManager.invokeApi('contacts.getContacts', {
-        hash: ''
+        hash: 0
       }).then(function (result) {
         var userID, searchText
         var i
@@ -69,6 +69,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           contactsList = filteredContactsList
         }
+
+        contactsList.sort(function (userID1, userID2) {
+          var sortName1 = (users[userID1] || {}.sortName) || ''
+          var sortName2 = (users[userID2] || {}.sortName) || ''
+          if (sortName1 == sortName2) {
+            return 0
+          }
+          return sortName1 > sortName2 ? 1 : -1
+        })
 
         return contactsList
       })
@@ -607,6 +616,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (result !== undefined) {
           return
         }
+      }
+      if (apiChat.pFlags.channel &&
+          apiChat.participants_count === undefined &&
+          result !== undefined &&
+          result.participants_count) {
+        apiChat.participants_count = result.participants_count
       }
 
       if (apiChat.username) {
@@ -4082,7 +4097,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       MtpApiManager.invokeApi('account.registerDevice', {
         token_type: tokenData.tokenType,
-        token: tokenData.tokenValue
+        token: tokenData.tokenValue,
+        other_uids: []
       }).then(function () {
         registeredDevice = tokenData
       }, function (error) {
@@ -4096,7 +4112,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       MtpApiManager.invokeApi('account.unregisterDevice', {
         token_type: tokenData.tokenType,
-        token: tokenData.tokenValue
+        token: tokenData.tokenValue,
+        other_uids: []
       }).then(function () {
         registeredDevice = false
       }, function (error) {

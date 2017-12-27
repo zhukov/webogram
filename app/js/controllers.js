@@ -690,7 +690,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppProfileManager, AppPeersManager, PhonebookContactsService, ErrorService, AppRuntimeManager) {
     $scope.dialogs = []
-    $scope.contacts = []
+    $scope.myResults = []
     $scope.foundPeers = []
     $scope.foundMessages = []
 
@@ -989,7 +989,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       getDialogs(force).then(function (dialogsResult) {
         if (!searchMessages) {
           $scope.dialogs = []
-          $scope.contacts = []
+          $scope.myResults = []
           $scope.foundPeers = []
         }
         $scope.foundMessages = []
@@ -1115,12 +1115,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var curJump = ++contactsJump
       AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
         if (curJump != contactsJump) return
-        $scope.contacts = []
+        $scope.myResults = []
         angular.forEach(contactsList, function (userID) {
           if (peersInDialogs[userID] === undefined) {
-            $scope.contacts.push({
-              userID: userID,
-              user: AppUsersManager.getUser(userID),
+            $scope.myResults.push({
+              id: userID,
               peerString: AppUsersManager.getUserString(userID)
             })
           }
@@ -1134,22 +1133,45 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_dialogs_append')
       })
 
-      if ($scope.search.query && $scope.search.query.length >= 5) {
+      if ($scope.search.query && $scope.search.query.length >= 2) {
         $timeout(function () {
           if (curJump != contactsJump) return
           MtpApiManager.invokeApi('contacts.search', {q: $scope.search.query, limit: 10}).then(function (result) {
             AppUsersManager.saveApiUsers(result.users)
             AppChatsManager.saveApiChats(result.chats)
             if (curJump != contactsJump) return
-            $scope.foundPeers = []
-            angular.forEach(result.results, function (contactFound) {
-              var peerID = AppPeersManager.getPeerID(contactFound)
-              if (peersInDialogs[peerID] === undefined) {
+            var alreadyPeers = []
+            angular.forEach($scope.myResults, function (peerFound) {
+              alreadyPeers.push(peerFound.id)
+            })
+            angular.forEach(result.my_results, function (peerFound) {
+              var peerID = AppPeersManager.getPeerID(peerFound)
+              if (peersInDialogs[peerID] === undefined &&
+                  alreadyPeers.indexOf(peerID) == -1) {
+                alreadyPeers.push(peerID)
                 if ($scope.canSend &&
                   AppPeersManager.isChannel(peerID) &&
                   !AppChatsManager.hasRights(-peerID, 'send')) {
                   return
                 }
+                $scope.myResults.push({
+                  id: peerID,
+                  peerString: AppPeersManager.getPeerString(peerID)
+                })
+              }
+            })
+
+            $scope.foundPeers = []
+            angular.forEach(result.results, function (peerFound) {
+              var peerID = AppPeersManager.getPeerID(peerFound)
+              if (peersInDialogs[peerID] === undefined &&
+                  alreadyPeers.indexOf(peerID) == -1) {
+                if ($scope.canSend &&
+                  AppPeersManager.isChannel(peerID) &&
+                  !AppChatsManager.hasRights(-peerID, 'send')) {
+                  return
+                }
+                alreadyPeers.push(peerID)
                 $scope.foundPeers.push({
                   id: peerID,
                   username: AppPeersManager.getPeer(peerID).username,

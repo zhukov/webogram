@@ -27,18 +27,19 @@
           <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
         </ul>
 
-        <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
-          <h5 my-i18n="im_contacts_title"></h5>
+        <div class="im_dialogs_contacts_wrap" ng-show="myResults.length > 0">
+          <h5 my-i18n="im_chat_contacts_title"></h5>
           <ul class="nav nav-pills nav-stacked">
-            <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
-              <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
-                <div class="im_dialog_photo pull-left" my-peer-photolink="contact.userID" img-class="im_dialog_photo" watch="true"></div>
+            <li class="im_dialog_wrap" ng-repeat="myResult in myResults track by myResult.id" ng-class="{active: curDialog.peerID == myResult.id}">
+              <a class="im_dialog" ng-mousedown="dialogSelect(myResult.peerString)">
+                <div class="im_dialog_photo pull-left" my-peer-photolink="myResult.id" img-class="im_dialog_photo" watch="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" my-peer-link="contact.userID"  verified="true"></span>
+                    <span class="im_dialog_user" my-peer-link="myResult.id"  verified="true"></span>
                   </div>
-                  <div class="im_dialog_message">
-                    <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                  <div class="im_dialog_message" ng-switch="myResult.id > 0">
+                    <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::myResult.id"></span>
+                    <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-myResult.id"></span>
                   </div>
                 </div>
               </a>
