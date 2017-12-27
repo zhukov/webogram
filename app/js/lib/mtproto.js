@@ -672,11 +672,9 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
       options = options || {}
 
       this.dcID = dcID
-      this.iii = iii++
 
       this.authKey = authKey
       this.authKeyUint8 = convertToUint8Array(authKey)
-      this.authKeyBuffer = convertToArrayBuffer(authKey)
       this.authKeyID = sha1BytesSync(authKey).slice(-8)
 
       this.serverSalt = serverSalt
@@ -687,18 +685,15 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
       this.lastServerMessages = []
 
-      this.currentRequests = 0
       this.checkConnectionPeriod = 0
 
       this.sentMessages = {}
-      this.clientMessages = []
 
       this.pendingMessages = {}
       this.pendingAcks = []
       this.pendingResends = []
       this.connectionInited = false
 
-      this.pendingTimeouts = []
 
       this.longPollInt = $interval(this.checkLongPoll.bind(this), 10000)
       this.checkLongPoll()
