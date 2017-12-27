@@ -53,9 +53,14 @@
 
       <div class="mobile_user_modal_info_wrap clearfix">
         <h4 class="mobile_user_modal_header" my-peer-link="-chatFull.chat.id"></h4>
-        <p class="mobile_user_modal_status"  ng-if="chatFull.participants_count > 0">
-          <ng-pluralize count="chatFull.participants_count"
+        <p class="mobile_user_modal_status"  ng-if="chatFull.participants_count > 0" ng-switch="isMegagroup">
+          <ng-pluralize ng-switch-when="true"
+                        count="chatFull.participants_count"
                         when="group_modal_pluralize_participants">
+          </ng-pluralize>
+          <ng-pluralize ng-switch-default
+                        count="chatFull.participants_count"
+                        when="group_modal_pluralize_subscribers">
           </ng-pluralize>
         </p>
       </div>

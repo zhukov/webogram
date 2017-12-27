@@ -1322,13 +1322,12 @@ angular.module('myApp.services')
         var fwdHeader = apiMessage.fwd_from
         if (fwdHeader) {
           apiMessage.fwdFromID = fwdHeader.channel_id ? -fwdHeader.channel_id : fwdHeader.from_id
+          apiMessage.fwdPostID = fwdHeader.channel_post
           fwdHeader.date -= ServerTimeManager.serverTimeOffset
         }
 
         apiMessage.peerID = peerID
         apiMessage.fromID = apiMessage.pFlags.post ? peerID : apiMessage.from_id
-        apiMessage.signID = apiMessage.pFlags.post && apiMessage.from_id ||
-          fwdHeader && fwdHeader.channel_id && fwdHeader.from_id
 
         if (apiMessage.via_bot_id > 0) {
           apiMessage.viaBotID = apiMessage.via_bot_id

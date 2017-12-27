@@ -54,7 +54,7 @@
           <div ng-if="::!!historyMessage.fwdFromID &amp;&amp; !historyMessage.media" class="im_message_fwd_header" ng-switch="!!historyMessage.viaBotID" my-i18n>
             <span ng-switch-when="true" my-i18n-format="message_forwarded_via_message_mobile"></span>
             <span ng-switch-default my-i18n-format="message_forwarded_message_mobile"></span>
-            <my-i18n-param name="from"><a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID" no-watch="true"></a></my-i18n-param>
+            <my-i18n-param name="from"><a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID" no-watch="true" post-id="historyMessage.fwdPostID"></a></my-i18n-param>
             <my-i18n-param name="bot"><a class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></a></my-i18n-param>
           </div>
 

@@ -617,7 +617,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           return
         }
       }
-      if (apiChat.pFlags.channel &&
+      if (apiChat._ == 'channel' &&
           apiChat.participants_count === undefined &&
           result !== undefined &&
           result.participants_count) {
@@ -772,6 +772,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     function wrapForFull (id, fullChat) {
       var chatFull = angular.copy(fullChat)
       var chat = getChat(id)
+
+      console.warn(chat, chatFull)
+      if (!chatFull.participants_count) {
+        chatFull.participants_count = chat.participants_count
+      }
 
       if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
         MtpApiManager.getUserID().then(function (myID) {

@@ -212,16 +212,14 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function updateMessageSignature ($scope, element, message) {
-      if (!message.signID) {
+      var postAuthor = message.post_author || (message.fwd_from && message.fwd_from.post_author)
+      if (!postAuthor) {
         $('.im_message_sign', element).hide()
         return
       }
 
-      var scope = $scope.$new(true)
-      scope.signID = message.signID
-      messageSignCompiled(scope, function (clonedElement) {
-        $('.im_message_sign', element).replaceWith(clonedElement)
-      })
+      var html = RichTextProcessor.wrapRichText(postAuthor, {noLinks: true, noLinebreaks: true})
+      $('.im_message_sign', element).html('<span class="im_message_sign_link">' + html.valueOf() + '</span>')
     }
 
     function updateMessageKeyboard ($scope, element, message) {
@@ -3004,7 +3002,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           participantsCount = chat.participants_count
         }
         update()
-        if (!chatID) {
+        if (!chatID || AppChatsManager.isChannel(chatID) && participantsCount) {
           return
         }
         AppProfileManager.getChatFull(chatID).then(function (chatFull) {
@@ -3104,7 +3102,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myPeerLink', function (AppChatsManager, AppUsersManager) {
+  .directive('myPeerLink', function ($rootScope, AppChatsManager, AppUsersManager, AppMessagesIDsManager) {
     return {
       link: link
     }
@@ -3147,7 +3145,16 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (peerID > 0) {
             AppUsersManager.openUser(peerID, override)
           } else {
-            AppChatsManager.openChat(-peerID)
+            var chatID = -peerID
+            var postID = $scope.$eval(attrs.postId)
+            if (postID) {
+              $rootScope.$broadcast('history_focus', {
+                peerString: AppChatsManager.getChatString(chatID),
+                messageID: AppMessagesIDsManager.getFullMessageID(parseInt(postID), chatID)
+              })
+            } else {
+              AppChatsManager.openChat(chatID)
+            }
           }
         })
       }
