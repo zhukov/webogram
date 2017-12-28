@@ -934,12 +934,19 @@ a.im_message_author_via {
 .im_message_author {
   display: none;
 }
+.im_message_author_admin {
+  display: none;
+}
 
 .im_history_messages_group {
   a.im_message_author {
     display: inline;
     font-size: 13px;
     font-weight: normal;
+  }
+  .im_message_author_admin {
+    display: inline;
+    font-size: 13px;
   }
   .im_message_sign_link {
     font-size: 12px;
@@ -953,19 +960,25 @@ a.im_message_author_via {
 
 .im_grouped_short a.im_message_from_photo,
 .im_grouped_short a.im_message_author,
+.im_grouped_short .im_message_author_admin,
 .im_grouped_short a.im_message_author_via,
 .im_grouped a.im_message_from_photo,
 .im_grouped a.im_message_author,
 .im_grouped a.im_message_author_via,
+.im_grouped a.im_message_author_admin,
 .im_grouped_fwd a.im_message_from_photo,
 .im_grouped_fwd a.im_message_author,
 .im_grouped_fwd a.im_message_author_via,
+.im_grouped_fwd a.im_message_author_admin,
 .im_grouped_fwd_short a.im_message_from_photo,
 .im_grouped_fwd_short a.im_message_author,
 .im_grouped_fwd_short a.im_message_author_via,
+.im_grouped_fwd_short a.im_message_author_admin,
 .im_message_out a.im_message_from_photo,
 .im_message_out a.im_message_author,
-.im_message_body_media a.im_message_author {
+.im_message_out a.im_message_author_admin,
+.im_message_body_media a.im_message_author,
+.im_message_body_media a.im_message_author_admin {
   display: none;
 }
 .im_message_wrap {

@@ -1046,6 +1046,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     var botInfos = {}
     var chatsFull = {}
     var chatFullPromises = {}
+    var chatParticipantsPromises = {}
 
     function saveBotInfo (botInfo) {
       var botID = botInfo && botInfo.user_id
@@ -1183,18 +1184,49 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       })
     }
 
-    function getChannelParticipants (id) {
-      return MtpApiManager.invokeApi('channels.getParticipants', {
-        channel: AppChatsManager.getChannelInput(id),
-        filter: {_: 'channelParticipantsRecent'},
-        offset: 0,
-        limit: AppChatsManager.isMegagroup(id) ? 50 : 200
-      }).then(function (result) {
-        AppUsersManager.saveApiUsers(result.users)
-        var participants = result.participants
+    function getChannelParticipants (id, filter, limit, offset) {
+      filter = filter || {_: 'channelParticipantsRecent'}
+      limit = limit || 200
+      offset = offset || 0
+      var promiseKey = [id, filter._, offset, limit].join('_')
+      var promiseData = chatParticipantsPromises[promiseKey]
 
+      var fetchParticipants = function (cachedParticipants) {
+        var hash = 0
+        if (cachedParticipants) {
+          var userIDs = []
+          angular.forEach(cachedParticipants, function (participant) {
+            userIDs.push(participant.user_id)
+          })
+          userIDs.sort()
+          angular.forEach(userIDs, function (userID) {
+            hash = ((hash * 20261) + 0x80000000 + userID) % 0x80000000
+          })
+        }
+        return MtpApiManager.invokeApi('channels.getParticipants', {
+          channel: AppChatsManager.getChannelInput(id),
+          filter: filter,
+          offset: offset,
+          limit: limit,
+          hash: hash
+        }).then(function (result) {
+          if (result._ == 'channels.channelParticipantsNotModified') {
+            return cachedParticipants
+          }
+          AppUsersManager.saveApiUsers(result.users)
+          return result.participants
+        })
+      }
+
+      var maybeAddSelf = function (participants) {
         var chat = AppChatsManager.getChat(id)
-        if (!chat.pFlags.kicked && !chat.pFlags.left) {
+        var selfMustBeFirst = filter._ == 'channelParticipantsRecent' &&
+                              !offset &&
+                              !chat.pFlags.kicked &&
+                              !chat.pFlags.left
+
+        if (selfMustBeFirst) {
+          participants = angular.copy(participants)
           var myID = AppUsersManager.getSelf().id
           var myIndex = false
           var myParticipant
@@ -1212,9 +1244,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           participants.unshift(myParticipant)
         }
-
         return participants
-      })
+      }
+
+      var timeNow = tsNow()
+      if (promiseData !== undefined) {
+        var promise = promiseData[1]
+        if (promiseData[0] > timeNow - 60000) {
+          return promise
+        }
+        var newPromise = promise.then(function (cachedParticipants) {
+          return fetchParticipants(cachedParticipants).then(maybeAddSelf)
+        })
+        chatParticipantsPromises[promiseKey] = [timeNow, newPromise]
+        return newPromise
+      }
+
+      var newPromise = fetchParticipants().then(maybeAddSelf)
+      chatParticipantsPromises[promiseKey] = [timeNow, newPromise]
+      return newPromise
     }
 
     function getChannelFull (id, force) {
@@ -1355,7 +1403,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getProfile: getProfile,
       getChatInviteLink: getChatInviteLink,
       getChatFull: getChatFull,
-      getChannelFull: getChannelFull
+      getChannelFull: getChannelFull,
+      getChannelParticipants: getChannelParticipants
     }
   })
 

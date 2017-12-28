@@ -757,6 +757,46 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myMessageAdminBadge', function (_, AppPeersManager, AppMessagesManager, AppProfileManager) {
+
+    var adminBadgeText = _('message_admin_badge')
+
+    return {
+      scope: {},
+      link: link
+    }
+
+    function link($scope, element, attrs) {
+      var message = $scope.$parent.$eval(attrs.myMessageAdminBadge)
+      var fromID = message && message.fromID
+      var peerID = message && AppMessagesManager.getMessagePeer(message)
+      console.warn(dT(), 'admin', message, fromID, peerID)
+      if (!fromID || !AppPeersManager.isMegagroup(peerID)) {
+        element.hide()
+        return
+      }
+
+      var channelID = -peerID
+
+      AppProfileManager.getChannelParticipants(channelID, {_: 'channelParticipantsAdmins'}).then(function (participants) {
+        var isAdmin = false
+        for (var i = 0, len = participants.length; i < len; i++) {
+          if (participants[i].user_id == fromID) {
+            isAdmin = true
+            break
+          }
+        }
+        if (isAdmin) {
+          element.text(adminBadgeText).show()
+        } else {
+          element.hide()
+        }
+      }, function () {
+        element.hide()
+      })
+    }
+  })
+
   .directive('myDialogs', function ($modalStack, $transition, $window, $timeout) {
     return {
       link: link

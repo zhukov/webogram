@@ -384,6 +384,8 @@
 	"message_service_scored_X": "{'one': 'scored {}', 'other': 'scored {}'}",
 	"message_service_payment_sent": "Payment sent",
 
+	"message_admin_badge": "admin",
+	
 	"message_action_reply": "Reply",
 	"message_action_edit": "Edit",
 	"message_action_delete": "Delete",
