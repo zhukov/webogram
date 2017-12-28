@@ -2341,7 +2341,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myLoadRound', function (AppDocsManager, $timeout) {
+  .directive('myLoadRound', function (AppMessagesManager, AppDocsManager, $timeout) {
 
     var currentPlayer = false
     var currentPlayerScope = false
@@ -2367,13 +2367,52 @@ angular.module('myApp.directives', ['myApp.filters'])
       currentPlayerScope = newScope
     }
 
+    function readVideoMessage($scope) {
+      if ($scope.message &&
+          !$scope.message.pFlags.out &&
+          $scope.message.pFlags.media_unread) {
+        AppMessagesManager.readMessages([$scope.message.mid])
+      }
+    }
+
+    function toggleVideoPlayer ($scope, element) {
+      var video = $('video', element)[0]
+      if (video) {
+        if (!$scope.isActive) {
+          video.pause()
+          video.currentTime = 0
+        } else {
+          checkPlayer(video, $scope)
+
+          var promise = video.play()
+          if (promise && promise.then) {
+            promise.then(function () {
+              $scope.needClick = false
+              readVideoMessage($scope)
+            }, function () {
+              $scope.needClick = true
+            })
+          } else {
+            readVideoMessage($scope)
+          }
+        }
+        return video
+      }
+      return false
+    }
+
     function link ($scope, element, attrs) {
       var imgWrap = $('.img_round_image_wrap', element)
       imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
 
       var downloadPromise = false
+      var peerChanged = false
 
       $scope.isActive = false
+
+      if ($scope.$parent.messageId) {
+        $scope.message = AppMessagesManager.wrapForHistory($scope.$parent.messageId)
+      }
 
       $scope.toggle = function (e) {
         if (e && checkClick(e, true)) {
@@ -2382,20 +2421,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if ($scope.document.url) {
+          if ($scope.needClick) {
+            if (toggleVideoPlayer($scope, element)) {
+              return;
+            }
+          }
           $scope.isActive = !$scope.isActive
           onContentLoaded(function () {
             $scope.$emit('ui_height')
-
-            var video = $('video', element)[0]
-            if (video) {
-              if (!$scope.isActive) {
-                video.pause()
-                video.currentTime = 0
-              } else {
-                checkPlayer(video, $scope)
-                video.play()
-              }
-            }
+            toggleVideoPlayer($scope, element)
           })
           return
         }
@@ -2406,18 +2440,22 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
 
+        peerChanged = false
         downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
 
         downloadPromise.then(function () {
           $timeout(function () {
-            var video = $('video', element)[0]
-            checkPlayer(video, $scope)
-            $(video).on('ended', function () {
-              if ($scope.isActive) {
-                $scope.toggle()
-              }
-            })
-            $scope.isActive = true
+            if (!peerChanged) {
+              $scope.isActive = true
+            }
+            var video = toggleVideoPlayer($scope, element)
+            if (video) {
+              $(video).on('ended', function () {
+                if ($scope.isActive) {
+                  $scope.toggle()
+                }
+              })
+            }
           }, 200)
         })
       }
@@ -2425,6 +2463,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_history_change', function () {
         if ($scope.isActive) {
           $scope.toggle()
+        }
+        peerChanged = true
+      })
+
+      $scope.$on('$destroy', function () {
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
         }
       })
     }

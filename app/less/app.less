@@ -1618,17 +1618,15 @@ div.im_message_video_thumb {
   display: inline-block;
   top: 50%;
   left: 50%;
-  margin-left: -21px;
-  margin-top: -21px;
-  width: 42px;
-  height: 42px;
+  margin-left: -5px;
+  margin-top: -9px;
   z-index: 1;
 
-  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
-  background-position: 0 -590px;
-  .is_2x & {
-    background-position: 0 -591px;
-  }
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 9px 0 9px 14px;
+  border-color: transparent transparent transparent #fff;
 }
 
 .im_message_geopoint {
@@ -4210,6 +4208,10 @@ h5 {
 }
 .img_round_meta {
   background: rgba(0,0,0,0.4);
+  .img_round_video_unread & {
+    background: rgba(100,144,177,0.6);
+  }
+
   width: 40px;
   height: 40px;
   line-height: 0;

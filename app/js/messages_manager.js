@@ -1221,19 +1221,40 @@ angular.module('myApp.services')
     }
 
     function readMessages (messageIDs) {
-      MtpApiManager.invokeApi('messages.readMessageContents', {
-        id: messageIDs
-      }).then(function (affectedMessages) {
-        ApiUpdatesManager.processUpdateMessage({
-          _: 'updateShort',
-          update: {
-            _: 'updateReadMessagesContents',
-            messages: messageIDs,
-            pts: affectedMessages.pts,
-            pts_count: affectedMessages.pts_count
-          }
-        })
+      var splitted = AppMessagesIDsManager.splitMessageIDsByChannels(messageIDs)
+      angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
+        if (channelID > 0) {
+          MtpApiManager.invokeApi('channels.readMessageContents', {
+            channel: AppChatsManager.getChannelInput(channelID),
+            id: msgIDs
+          }).then(function () {
+            ApiUpdatesManager.processUpdateMessage({
+              _: 'updateShort',
+              update: {
+                _: 'updateChannelReadMessagesContents',
+                channel_id: channelID,
+                messages: msgIDs
+              }
+            })
+          })
+        } else {
+          MtpApiManager.invokeApi('messages.readMessageContents', {
+            id: msgIDs
+          }).then(function (affectedMessages) {
+            ApiUpdatesManager.processUpdateMessage({
+              _: 'updateShort',
+              update: {
+                _: 'updateReadMessagesContents',
+                messages: msgIDs,
+                pts: affectedMessages.pts,
+                pts_count: affectedMessages.pts_count
+              }
+            })
+          })
+        }
       })
+
+
     }
 
     function doFlushHistory (inputPeer, justClear) {
@@ -3363,6 +3384,14 @@ angular.module('myApp.services')
           }
           break
 
+        case 'updateChannelReadMessagesContents':
+          var channelID = update.channel_id
+          var newMessages = []
+          angular.forEach(update.messages, function (msgID) {
+            newMessages.push(AppMessagesIDsManager.getFullMessageID(msgID, channelID))
+          })
+          update.messages = newMessages
+
         case 'updateReadMessagesContents':
           var messages = update.messages
           var len = messages.length
@@ -3394,7 +3423,6 @@ angular.module('myApp.services')
             })
           }
           update.messages = messages
-          console.warn(dT(), update, channelID, messages, history)
 
         case 'updateDeleteMessages':
         case 'updateDeleteChannelMessages':
