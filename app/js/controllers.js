@@ -469,6 +469,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         } else {
           $scope.$broadcast('ui_history_focus')
         }
+        $modalStack.dismissAll()
       } else {
         var peerID = AppPeersManager.getPeerID(peerData.peerString)
         var username = AppPeersManager.getPeer(peerID).username
@@ -4000,6 +4001,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         MtpApiManager.invokeApi('channels.deleteChannel', {
           channel: AppChatsManager.getChannelInput($scope.chatID)
         }).then(onChatUpdated)
+      })
+    }
+
+    $scope.flushHistory = function () {
+      ErrorService.confirm({type: 'HISTORY_FLUSH'}).then(function () {
+        AppMessagesManager.flushHistory(-$scope.chatID).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString})
+        })
       })
     }
 

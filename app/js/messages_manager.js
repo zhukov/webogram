@@ -1262,6 +1262,26 @@ angular.module('myApp.services')
     }
 
     function flushHistory (peerID, justClear) {
+      if (AppPeersManager.isChannel(peerID)) {
+        return getHistory(peerID, false, 1).then(function (historyResult) {
+          var channelID = -peerID
+          var maxID = AppMessagesIDsManager.getMessageLocalID(historyResult.history[0] || 0)
+          return MtpApiManager.invokeApi('channels.deleteHistory', {
+            channel: AppChatsManager.getChannelInput(channelID),
+            max_id: maxID
+          }).then(function () {
+            ApiUpdatesManager.processUpdateMessage({
+              _: 'updateShort',
+              update: {
+                _: 'updateChannelAvailableMessages',
+                channel_id: channelID,
+                available_min_id: maxID
+              }
+            })
+            return true
+          })
+        })
+      }
       return doFlushHistory(AppPeersManager.getInputPeerByID(peerID), justClear).then(function () {
         if (justClear) {
           $rootScope.$broadcast('dialog_flush', {peerID: peerID})
@@ -3359,6 +3379,22 @@ angular.module('myApp.services')
             }
           }
           break
+
+        case 'updateChannelAvailableMessages':
+          var channelID = update.channel_id
+          var messages = []
+          var peerID = -channelID
+          var history = (historiesStorage[peerID] || {}).history || []
+          if (history.length) {
+            angular.forEach(history, function (msgID) {
+              if (!update.available_min_id ||
+                  AppMessagesIDsManager.getMessageLocalID(msgID) <= update.available_min_id) {
+                messages.push(msgID)
+              }
+            })
+          }
+          update.messages = messages
+          console.warn(dT(), update, channelID, messages, history)
 
         case 'updateDeleteMessages':
         case 'updateDeleteChannelMessages':

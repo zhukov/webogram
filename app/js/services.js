@@ -796,7 +796,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (chatFull.participants && chatFull.participants._ == 'channelParticipants') {
         var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator
         angular.forEach(chatFull.participants.participants, function (participant) {
-          participant.canLeave = !chat.pFlags.creator && participant._ == 'channelParticipantSelf'
+          participant.canLeave = participant._ == 'channelParticipantSelf'
           participant.canKick = isAdmin && participant._ == 'channelParticipant'
 
           // just for order by last seen
