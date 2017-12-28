@@ -2275,6 +2275,10 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
   .directive('myLoadGif', function (AppDocsManager, $timeout) {
+
+    var currentPlayer = false
+    var currentPlayerScope = false
+
     return {
       link: link,
       templateUrl: templateUrl('full_gif'),
@@ -2283,22 +2287,50 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     }
 
+    function checkPlayer(newPlayer, newScope) {
+      if (currentPlayer === newPlayer) {
+        return false
+      }
+      if (currentPlayer) {
+        currentPlayer.pause()
+        currentPlayer.currentTime = 0
+        currentPlayerScope.isActive = false
+      }
+      currentPlayer = newPlayer
+      currentPlayerScope = newScope
+    }
+
+    function toggleVideoPlayer ($scope, element) {
+      var video = $('video', element)[0]
+      if (video) {
+        if (!$scope.isActive) {
+          video.pause()
+          video.currentTime = 0
+        } else {
+          checkPlayer(video, $scope)
+
+          var promise = video.play()
+          if (promise && promise.then) {
+            promise.then(function () {
+              $scope.needClick = false
+            }, function () {
+              $scope.needClick = true
+            })
+          }
+        }
+        return video
+      }
+      return false
+    }
+
     function link ($scope, element, attrs) {
       var imgWrap = $('.img_gif_image_wrap', element)
       imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
 
       var downloadPromise = false
+      var peerChanged = false
 
       $scope.isActive = false
-
-      // Demo
-      // $scope.document.progress = {enabled: true, percent: 30}
-      // $timeout(function () {
-      //   $scope.document.progress.percent = 60
-      // }, 3000)
-      // $timeout(function () {
-      //   $scope.document.progress.percent = 100
-      // }, 10000)
 
       $scope.toggle = function (e) {
         if (e && checkClick(e, true)) {
@@ -2307,19 +2339,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if ($scope.document.url) {
-          onContentLoaded(function () {
-            $scope.isActive = !$scope.isActive
-            $scope.$emit('ui_height')
-
-            var video = $('video', element)[0]
-            if (video) {
-              if (!$scope.isActive) {
-                video.pause()
-                video.currentTime = 0
-              } else {
-                video.play()
-              }
+          if ($scope.needClick) {
+            if (toggleVideoPlayer($scope, element)) {
+              return;
             }
+          }
+          $scope.isActive = !$scope.isActive
+          onContentLoaded(function () {
+            $scope.$emit('ui_height')
+            toggleVideoPlayer($scope, element)
           })
           return
         }
@@ -2330,14 +2358,39 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
 
+        peerChanged = false
         downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
 
         downloadPromise.then(function () {
           $timeout(function () {
-            $scope.isActive = true
+            if (!peerChanged) {
+              $scope.isActive = true
+            }
+            var video = toggleVideoPlayer($scope, element)
+            if (video) {
+              $(video).on('ended', function () {
+                if ($scope.isActive) {
+                  $scope.toggle()
+                }
+              })
+            }
           }, 200)
         })
       }
+
+      $scope.$on('ui_history_change', function () {
+        if ($scope.isActive) {
+          $scope.toggle()
+        }
+        peerChanged = true
+      })
+
+      $scope.$on('$destroy', function () {
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
+        }
+      })
     }
   })
 
