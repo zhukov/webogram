@@ -1254,6 +1254,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       documents: 'inputMessagesFilterDocument',
       audio: 'inputMessagesFilterVoice',
       round: 'inputMessagesFilterRoundVideo',
+      music: 'inputMessagesFilterMusic',
+      urls: 'inputMessagesFilterUrl',
+      mentions: 'inputMessagesFilterMyMentions'
     }
     var jump = 0
     var moreJump = 0
@@ -1693,6 +1696,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           if (target.className &&
             target.className.indexOf('im_message_date') != -1) {
+            if ($scope.historyFilter.mediaType) {
+              $rootScope.$broadcast('history_focus', {
+                peerString: $scope.curDialog.peer,
+                messageID: messageID
+              })
+              return
+            }
             if (AppPeersManager.isBroadcast(peerID)) {
               quickForward(messageID)
             } else {
@@ -1955,7 +1965,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       $scope.historyFilter.mediaType = mediaType || false
-      $scope.curDialog.messageID = false
+      if (mediaType) {
+        $scope.curDialog.messageID = false
+      }
       peerHistory.messages = []
       peerHistory.ids = []
       $scope.state.empty = true

@@ -808,6 +808,19 @@ angular.module('myApp.services')
               neededDocType = 'round'
               break
 
+            case 'inputMessagesFilterMusic':
+              neededContents['messageMediaDocument'] = true
+              neededDocType = 'audio'
+              break
+
+            case 'inputMessagesFilterUrl':
+              neededContents['url'] = true
+              break
+
+            case 'inputMessagesFilterMyMentions':
+              neededContents['mentioned'] = true
+              break
+
             default:
               return $q.when({
                 count: 0,
@@ -867,7 +880,10 @@ angular.module('myApp.services')
           min_date: 0,
           max_date: 0,
           limit: limit || 20,
-          max_id: AppMessagesIDsManager.getMessageLocalID(maxID) || 0
+          offset_id: AppMessagesIDsManager.getMessageLocalID(maxID) || 0,
+          add_offset: 0,
+          max_id: 0,
+          min_id: 0
         }, {
           timeout: 300,
           noErrorBox: true
