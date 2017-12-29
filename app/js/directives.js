@@ -759,7 +759,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
   .directive('myMessageAdminBadge', function (_, AppPeersManager, AppMessagesManager, AppProfileManager) {
 
-    var adminBadgeText = _('message_admin_badge')
+    var adminBadgeText = _('message_admin_badge_raw')
 
     return {
       scope: {},
@@ -770,7 +770,6 @@ angular.module('myApp.directives', ['myApp.filters'])
       var message = $scope.$parent.$eval(attrs.myMessageAdminBadge)
       var fromID = message && message.fromID
       var peerID = message && AppMessagesManager.getMessagePeer(message)
-      console.warn(dT(), 'admin', message, fromID, peerID)
       if (!fromID || !AppPeersManager.isMegagroup(peerID)) {
         element.hide()
         return
