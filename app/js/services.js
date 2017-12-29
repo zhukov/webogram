@@ -773,35 +773,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var chatFull = angular.copy(fullChat)
       var chat = getChat(id)
 
-      console.warn(chat, chatFull)
       if (!chatFull.participants_count) {
         chatFull.participants_count = chat.participants_count
       }
 
-      if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
-        MtpApiManager.getUserID().then(function (myID) {
-          var isAdmin = chat.pFlags.creator || chat.pFlags.admins_enabled && chat.pFlags.admin
-          angular.forEach(chatFull.participants.participants, function (participant) {
-            participant.canLeave = myID == participant.user_id
-            participant.canKick = !participant.canLeave && (
-              chat.pFlags.creator ||
-              participant._ == 'chatParticipant' && (isAdmin || myID == participant.inviter_id)
-            )
-
-            // just for order by last seen
-            participant.user = AppUsersManager.getUser(participant.user_id)
-          })
-        })
-      }
-      if (chatFull.participants && chatFull.participants._ == 'channelParticipants') {
-        var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator
-        angular.forEach(chatFull.participants.participants, function (participant) {
-          participant.canLeave = participant._ == 'channelParticipantSelf'
-          participant.canKick = isAdmin && participant._ == 'channelParticipant'
-
-          // just for order by last seen
-          participant.user = AppUsersManager.getUser(participant.user_id)
-        })
+      if (chatFull.participants &&
+          chatFull.participants._ == 'chatParticipants') {
+        chatFull.participants.participants = wrapParticipants(id, chatFull.participants.participants)
       }
 
       if (chatFull.about) {
@@ -812,6 +790,34 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       chatFull.chat = chat
 
       return chatFull
+    }
+
+    function wrapParticipants(id, participants) {
+      var chat = getChat(id)
+      if (isChannel(id)) {
+        var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator
+        angular.forEach(participants, function (participant) {
+          participant.canLeave = participant._ == 'channelParticipantSelf'
+          participant.canKick = isAdmin && participant._ == 'channelParticipant'
+
+          // just for order by last seen
+          participant.user = AppUsersManager.getUser(participant.user_id)
+        })
+      } else {
+        var myID = AppUsersManager.getSelf().id
+        var isAdmin = chat.pFlags.creator || chat.pFlags.admins_enabled && chat.pFlags.admin
+        angular.forEach(participants, function (participant) {
+          participant.canLeave = myID == participant.user_id
+          participant.canKick = !participant.canLeave && (
+            chat.pFlags.creator ||
+            participant._ == 'chatParticipant' && (isAdmin || myID == participant.inviter_id)
+          )
+
+          // just for order by last seen
+          participant.user = AppUsersManager.getUser(participant.user_id)
+        })
+      }
+      return participants
     }
 
     function openChat (chatID, accessHash) {
@@ -862,6 +868,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       resolveUsername: resolveUsername,
       hasChat: hasChat,
       wrapForFull: wrapForFull,
+      wrapParticipants: wrapParticipants,
       openChat: openChat
     }
   })
@@ -1042,7 +1049,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, ApiUpdatesManager, RichTextProcessor) {
+  .service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppMessagesIDsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, ApiUpdatesManager, RichTextProcessor, Storage) {
     var botInfos = {}
     var chatsFull = {}
     var chatFullPromises = {}
@@ -1191,6 +1198,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var promiseKey = [id, filter._, offset, limit].join('_')
       var promiseData = chatParticipantsPromises[promiseKey]
 
+      if (filter._ == 'channelParticipantsRecent') {
+        var chat = AppChatsManager.getChat(id)
+        if (chat.pFlags.kicked ||
+            chat.pFlags.broadcast && !chat.pFlags.creator && !chat.admin_rights) {
+          return $q.reject()
+        }
+      }
+
       var fetchParticipants = function (cachedParticipants) {
         var hash = 0
         if (cachedParticipants) {
@@ -1279,32 +1294,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         AppChatsManager.saveApiChats(result.chats)
         AppUsersManager.saveApiUsers(result.users)
         var fullChannel = result.full_chat
-        var chat = AppChatsManager.getChat(id)
         if (fullChannel && fullChannel.chat_photo.id) {
           AppPhotosManager.savePhoto(fullChannel.chat_photo)
         }
         NotificationsManager.savePeerSettings(-id, fullChannel.notify_settings)
-        var participantsPromise
-        if (fullChannel.flags & 8) {
-          participantsPromise = getChannelParticipants(id).then(function (participants) {
-            delete chatFullPromises[id]
-            fullChannel.participants = {
-              _: 'channelParticipants',
-              participants: participants
-            }
-          }, function (error) {
-            error.handled = true
-          })
-        } else {
-          participantsPromise = $q.when()
-        }
-        return participantsPromise.then(function () {
-          delete chatFullPromises[id]
-          chatsFull[id] = fullChannel
-          $rootScope.$broadcast('chat_full_update', id)
 
-          return fullChannel
-        })
+        if (fullChannel.pinned_msg_id) {
+          fullChannel.pinned_msg_id = AppMessagesIDsManager.getFullMessageID(fullChannel.pinned_msg_id, id)
+        }
+
+        delete chatFullPromises[id]
+        chatsFull[id] = fullChannel
+        $rootScope.$broadcast('chat_full_update', id)
+
+        return fullChannel
+
       }, function (error) {
         switch (error.type) {
           case 'CHANNEL_PRIVATE':
@@ -1323,6 +1327,28 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         return $q.reject(error)
       })
+    }
+
+    function getChannelPinnedMessage(id) {
+      return getChannelFull(id).then(function (fullChannel) {
+        var pinnedMessageID = fullChannel && fullChannel.pinned_msg_id
+        if (!pinnedMessageID) {
+          return false
+        }
+        return Storage.get('pinned_hidden' + id).then(function (hiddenMessageID) {
+          if (AppMessagesIDsManager.getMessageLocalID(pinnedMessageID) == hiddenMessageID) {
+            return false
+          }
+          return pinnedMessageID
+        })
+      })
+    }
+
+    function hideChannelPinnedMessage(id, pinnedMessageID) {
+      var setKeys = {}
+      setKeys['pinned_hidden' + id] = AppMessagesIDsManager.getMessageLocalID(pinnedMessageID)
+      Storage.set(setKeys)
+      $rootScope.$broadcast('peer_pinned_message', -id)      
     }
 
     $rootScope.$on('apiUpdate', function (e, update) {
@@ -1372,6 +1398,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           break
 
+        case 'updateChannelPinnedMessage':
+          var channelID = update.channel_id
+          var fullChannel = chatsFull[channelID]
+          if (fullChannel !== undefined) {
+            fullChannel.pinned_msg_id = AppMessagesIDsManager.getFullMessageID(update.id, channelID)
+            $rootScope.$broadcast('peer_pinned_message', -channelID)
+          }
+          break
+
       }
     })
 
@@ -1404,7 +1439,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getChatInviteLink: getChatInviteLink,
       getChatFull: getChatFull,
       getChannelFull: getChannelFull,
-      getChannelParticipants: getChannelParticipants
+      getChannelParticipants: getChannelParticipants,
+      getChannelPinnedMessage: getChannelPinnedMessage,
+      hideChannelPinnedMessage: hideChannelPinnedMessage
     }
   })
 

@@ -3793,8 +3793,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.needMigrate = true
       }
 
-      NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings)
-
       NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
         $scope.settings.notifications = !muted
 
@@ -3953,8 +3951,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull)
       $scope.$broadcast('ui_height')
 
-      NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings)
-
       NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
         $scope.settings.notifications = !muted
 
@@ -3982,6 +3978,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
     })
+
+    AppProfileManager.getChannelParticipants($scope.chatID).then(function (participants) {
+      $scope.participants = AppChatsManager.wrapParticipants($scope.chatID, participants)
+      $scope.$broadcast('ui_height')
+    })
+
 
     function onChatUpdated (updates) {
       ApiUpdatesManager.processUpdateMessage(updates)

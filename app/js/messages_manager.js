@@ -2365,7 +2365,7 @@ angular.module('myApp.services')
       }
 
       if (message.message && message.message.length) {
-        message.richMessage = RichTextProcessor.wrapRichText(message.message.substr(0, 64), {noLinks: true, noLinebreaks: true})
+        message.richMessage = RichTextProcessor.wrapRichText(message.message.substr(0, 128), {noLinks: true, noLinebreaks: true})
       }
 
       message.dateText = dateOrTimeFilter(message.date)

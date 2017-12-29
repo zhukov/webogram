@@ -1499,6 +1499,42 @@ a.im_dialog_selected {
   }
 }
 
+.im_history_pinned_wrap {
+  padding: 7px 10px 7px 20px;
+  border-bottom: 1px solid #E9EBED;
+}
+.im_history_pinned_message {
+  cursor: pointer;
+}
+.im_history_pinned_message:hover {
+  text-decoration: none;
+}
+.im_history_pinned_hide {
+  float: right;
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  margin-top: 11px;
+  -webkit-transform: translate3d(0, 0, 0);
+  padding-top: 7px;
+
+  .icon-reply-bar {
+    display: block;
+    background: #999;
+    width: 18px;
+    height: 2px;
+    transform-origin: 50% 50%;
+  }
+
+  &:hover {
+    .icon-reply-bar {
+      background: #44a1e8;
+    }
+  }
+}
+
+
 .im_history {
   // padding: 20px 0 0 0;
   padding: 0;

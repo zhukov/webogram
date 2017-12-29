@@ -586,6 +586,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function checkMessage ($scope, element, mid, isEdit) {
       var message = $scope.replyMessage = AppMessagesManager.wrapSingleMessage(mid)
+      $scope.thumb = false
       $scope.isEdit = isEdit || false
       if (message.loading) {
         var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
@@ -665,6 +666,60 @@ angular.module('myApp.directives', ['myApp.filters'])
       onContentLoaded(function () {
         $scope.$emit('ui_height')
       })
+    }
+  })
+
+  .directive('myPeerPinnedMessageBar', function (AppMessagesManager, AppPeersManager, AppProfileManager) {
+
+    return {
+      templateUrl: templateUrl('peer_pinned_message_bar'),
+      scope: {},
+      link: link
+    }
+
+    function updatePeerID(peerID, $scope, force) {
+      if (force) {
+        $scope.pinnedMessageID = 0
+        $scope.$emit('ui_height')
+      }
+      if (!AppPeersManager.isChannel(peerID)) {
+        return
+      }
+      var channelID = -peerID
+      var jump = ++$scope.jump
+      AppProfileManager.getChannelPinnedMessage(channelID).then(function (pinnedMessageID) {
+        if (jump != $scope.jump) {
+          return
+        }
+        $scope.pinnedMessageID = pinnedMessageID || 0
+        $scope.$emit('ui_height')
+      })
+    }
+
+    function link ($scope, element, attrs) {
+      $scope.jump = 0
+
+      $scope.$parent.$watch(attrs.myPeerPinnedMessageBar, function (peerID) {
+        $scope.peerID = peerID
+        updatePeerID(peerID, $scope, true)
+      })
+
+      $scope.$on('peer_pinned_message', function (e, updPeerID) {
+        if (updPeerID == $scope.peerID) {
+          updatePeerID($scope.peerID, $scope)
+        }
+      })
+      $scope.$on('chat_full_update', function (e, updChatID) {
+        if (updChatID == -$scope.peerID) {
+          updatePeerID($scope.peerID, $scope)
+        }
+      })
+
+      $scope.hidePinned = function () {
+        AppProfileManager.hideChannelPinnedMessage(-$scope.peerID, $scope.pinnedMessageID)
+        $scope.pinnedMessageID = 0
+        $scope.$emit('ui_height')
+      }
     }
   })
 
@@ -1213,6 +1268,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var scrollableWrap = $('.im_history_scrollable_wrap', element)[0]
       var scrollable = $('.im_history_scrollable', element)[0]
       var emptyWrapEl = $('.im_history_empty_wrap', element)[0]
+      var pinnedPanelEl = $('.im_history_pinned_panel', element)[0]
       var bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0]
       var sendFormWrap = $('.im_send_form_wrap', element)[0]
       var headWrap = $('.tg_page_head')[0]
@@ -1545,11 +1601,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!footer || !footer.offsetHeight) {
           footer = $('.footer_wrap')[0]
         }
+        if (!pinnedPanelEl || !pinnedPanelEl.offsetHeight) {
+          pinnedPanelEl = $('.im_history_pinned_panel', element)[0]
+        }
+
         var footerHeight = footer ? footer.offsetHeight : 0
         if (footerHeight) {
           footerHeight++ // Border bottom
         }
-        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 48) - footerHeight
+        var pinnedHeight = pinnedPanelEl && pinnedPanelEl.offsetHeight || 0
+        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 48) - footerHeight - pinnedHeight
+
         $(historyWrap).css({
           height: historyH
         })

@@ -92,8 +92,6 @@
                           <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::foundPeer.id"></span>
                           <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-foundPeer.id"></span>
                         </span>
-                        <!-- <div class="im_dialog_message">
-                        </div> -->
                       </div>
                     </div>
                   </a>
@@ -130,6 +128,7 @@
 
       <div class="im_history_selected_wrap">
         <div my-history class="im_history_col">
+          <div my-peer-pinned-message-bar="curDialog.peerID" class="im_history_pinned_panel"></div>
 
           <div class="im_history_wrap nano">
 
