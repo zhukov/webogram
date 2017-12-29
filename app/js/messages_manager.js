@@ -2681,7 +2681,7 @@ angular.module('myApp.services')
         }
 
         if (curMessage.views &&
-          !incrementedMessageViews[curMessage.mid]) {
+            !incrementedMessageViews[curMessage.mid]) {
           incrementedMessageViews[curMessage.mid] = true
           needIncrementMessageViews.push(curMessage.mid)
           if (incrementMessageViewsTimeout === false) {
@@ -2689,14 +2689,14 @@ angular.module('myApp.services')
           }
         }
 
-        if (prevMessage &&
-          // !curMessage.views &&
-          prevMessage.fromID == curMessage.fromID &&
-          !prevMessage.fwdFromID == !curMessage.fwdFromID &&
-          prevMessage.viaBotID == curMessage.viaBotID &&
-          !prevMessage.action &&
-          !curMessage.action &&
-          curMessage.date < prevMessage.date + 900) {
+        if ((!AppPeersManager.isBroadcast(getMessagePeer(curMessage)) || curMessage.fwdFromID) &&
+            prevMessage &&
+            prevMessage.fromID == curMessage.fromID &&
+            !prevMessage.fwdFromID == !curMessage.fwdFromID &&
+            prevMessage.viaBotID == curMessage.viaBotID &&
+            !prevMessage.action &&
+            !curMessage.action &&
+            curMessage.date < prevMessage.date + 900) {
           var singleLine = curMessage.message && curMessage.message.length < 70 && curMessage.message.indexOf('\n') == -1 && !curMessage.reply_to_mid
           if (groupFwd &&
             curMessage.fwdFromID &&
