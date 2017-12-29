@@ -1746,6 +1746,8 @@ angular.module('myApp.directives', ['myApp.filters'])
         stop: voiceRecordTouch ? 'touchend blur' : 'mouseup blur'
       }
       var onRecordStart, onRecordStreamReady, onRecordStop
+      var recInited = false
+      var recCancelAfterInit = false
 
       $(voiceRecordBtn).on(voiceRecordEvents.start, function(event) {
         if ($scope.voiceRecorder.processing) {
@@ -1759,6 +1761,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           encoderSampleRate: 48000,
           encoderPath: 'vendor/recorderjs/encoder_worker.js'
         })
+
+        recInited = false
+        recCancelAfterInit = false
 
         onRecordStart = function(e) {
           var startTime = tsNow(true)
@@ -1774,6 +1779,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         voiceRecorder.addEventListener('start', onRecordStart)
 
         onRecordStreamReady = function(e) {
+          recInited = true
+          if (recCancelAfterInit) {
+            voiceRecorderStop()
+            return
+          }
           voiceRecorder.start()
         }
         voiceRecorder.addEventListener('streamReady', onRecordStreamReady)
@@ -1852,12 +1862,31 @@ angular.module('myApp.directives', ['myApp.filters'])
         $($window).one(voiceRecordEvents.stop, onRecordStop)
       })
 
-      function cancelRecord() {
+      function voiceRecorderStop() {
+        if (!recInited) {
+          recCancelAfterInit = true
+          return
+        }
         if (voiceRecorder) {
           voiceRecorder.stop()
           voiceRecorder.removeEventListener('streamReady', onRecordStreamReady)
           voiceRecorder.removeEventListener('start', onRecordStart)
+
+
+          if (voiceRecorder.audioContext) {
+            if (voiceRecorder.scriptProcessorNode) {
+              voiceRecorder.scriptProcessorNode.disconnect()
+            }
+            voiceRecorder.clearStream()
+
+            voiceRecorder.audioContext.close()
+            voiceRecorder.audioContext = null
+          }
         }
+      }
+
+      function cancelRecord() {
+        voiceRecorderStop()
 
         if ($scope.voiceRecorder.recording) {
           $interval.cancel(voiceRecordDurationInterval)
