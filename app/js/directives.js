@@ -3100,14 +3100,16 @@ angular.module('myApp.directives', ['myApp.filters'])
       var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {}
       var short = attrs.short && $scope.$eval(attrs.short)
       var username = attrs.username && $scope.$eval(attrs.username)
-
-      var peerID
+      var dialogList = attrs.dialogList && $scope.$eval(attrs.dialogList) || false
+      var myID = AppUsersManager.getSelf().id
+     
+      var peerID        
       var update = function () {
         if (element[0].className.indexOf('user_color_') != -1) {
           element[0].className = element[0].className.replace(/user_color_\d+/g, '')
         }
-        if (peerID > 0) {
-          var user = AppUsersManager.getUser(peerID)
+        if (peerID > 0) {          
+          var user = dialogList && myID == peerID ? AppUsersManager.getSavedMessages() : AppUsersManager.getUser(peerID)
           var prefix = username ? '@' : ''
           var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName')
 
@@ -3170,6 +3172,8 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function link ($scope, element, attrs) {
       element.addClass('peer_photo_init')
+      var dialogList = attrs.dialogList && $scope.$eval(attrs.dialogList) || false
+      var myID = AppUsersManager.getSelf().id
 
       var peerID, peer
       var peerPhoto
@@ -3183,7 +3187,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return false
         }
         peerID = newPeerID
-        peer = AppPeersManager.getPeer(peerID)
+        peer = dialogList && myID == peerID ? AppUsersManager.getSavedMessages() : AppPeersManager.getPeer(peerID)
 
         var newClass = 'user_bgcolor_' + (peer.num || 1)
         if (newClass != prevClass) {
@@ -3204,12 +3208,20 @@ angular.module('myApp.directives', ['myApp.filters'])
 
         peerPhoto = peer.photo && angular.copy(peer.photo.photo_small)
 
+        var self = peer.photo && peer.photo._ === 'self'
+        if(self) {
+          initEl.remove()
+          imgEl.prependTo(element).addClass('im_dialog_photo_self')
+          imgEl.prependTo(element).attr('src', 'img/placeholders/Saved_messages.png')
+          return
+        } 
         var hasPhoto = peerPhoto !== undefined
 
         if (hasPhoto) {
           var cachedBlob = MtpApiFileManager.getCachedFile(peer.photo.photo_small)
           if (cachedBlob) {
             initEl.remove()
+            imgEl.prependTo(element).removeClass('im_dialog_photo_self')
             imgEl.prependTo(element).attr('src', FileManager.getUrl(cachedBlob, 'image/jpeg'))
             return
           }

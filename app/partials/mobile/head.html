@@ -3,7 +3,7 @@
     <div class="container">
 
 
-      <a class="navbar-peer-wrap" my-peer-photolink="historyPeer.id" peer-watch="true"></a>
+      <a class="navbar-peer-wrap" my-peer-photolink="historyPeer.id" peer-watch="true" dialog-list="true" ng-attr-no-open="{{!historyPeer.self}}"></a>
 
       <div class="navbar-toggle-wrap dropdown" dropdown ng-switch="!curDialog.peer">
         <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
@@ -15,6 +15,7 @@
           <li><a ng-click="openGroup()" my-i18n="head_new_group"></a></li>
           <li><a ng-click="importContact()" my-i18n="head_new_contact"></a></li>
           <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()" my-i18n="head_contacts"></a></li>
+          <li><a ng-click="openSavedMessages()" my-i18n="head_saved_messages"></a></li>
           <li><a ng-click="openSettings()" my-i18n="head_settings"></a></li>
           <li><a ng-click="logOut()" my-i18n="head_log_out"></a></li>
         </ul>
@@ -68,8 +69,8 @@
                 <a href="#/im" class="navbar-quick-profile-back">
                   <i class="icon icon-back"></i>
                   <div class="navbar-quick-back-title">
-                    <h4 my-peer-link="historyPeer.id" peer-watch="true"></h4>
-                    <small ng-switch="historyState.typing.length">
+                    <h4 my-peer-link="historyPeer.id" peer-watch="true" dialog-list="true" ng-class="{navbar_peer_self: historyPeer.self}"></h4>
+                    <small ng-switch="historyState.typing.length" ng-if="!historyPeer.self">
                       <span ng-switch-when="1" class="status_online">
                         <my-i18n msgid="head_typing"></my-i18n><span my-loading-dots></span>
                       </span>

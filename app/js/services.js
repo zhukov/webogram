@@ -189,6 +189,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       return getUser(myID)
     }
 
+    function getSavedMessages () {      
+      var apiUser = jQuery.extend(true, {}, getUser(myID))
+        apiUser.rFirstName = _('user_first_name_self')
+        apiUser.rFullName = _('user_name_self')
+        apiUser.photo._ = 'self'
+      return apiUser
+    }
+
     function isBot (id) {
       return users[id] && users[id].pFlags.bot
     }
@@ -474,6 +482,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       saveUserAccess: saveUserAccess,
       getUser: getUser,
       getSelf: getSelf,
+      getSavedMessages: getSavedMessages,
       getUserInput: getUserInput,
       setUserStatus: setUserStatus,
       forceUserOnline: forceUserOnline,

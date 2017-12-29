@@ -579,6 +579,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
+    $scope.openSavedMessages = function () {
+      $scope.dialogSelect(AppUsersManager.getUserString(AppUsersManager.getSelf().id))      
+    }
+
     $scope.importContact = function () {
       AppUsersManager.openImportContact().then(function (foundContact) {
         if (foundContact) {
@@ -1316,14 +1320,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       peerHistory = historiesQueuePush(peerID)
-
+   
       safeReplaceObject($scope.historyPeer, {
         id: peerID,
-        data: peerData
-      })
-
+        data: peerData,
+        self: peerID == AppUsersManager.getSelf().id
+      })      
+         
       MtpApiManager.getUserID().then(function (myID) {
-        $scope.ownID = myID
+        $scope.ownID = myID        
       })
 
       if (preload) {
