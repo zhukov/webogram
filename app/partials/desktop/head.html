@@ -18,6 +18,9 @@
           <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
             <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
           </a></li>
+          <li><a ng-click="openSavedMessages()">
+            <i class="icon icon-saved-messages"></i><span my-i18n="im_saved_messages"></span>
+          </a></li>
           <li><a ng-click="openSettings()">
             <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
           </a></li>
@@ -81,7 +84,7 @@
             <i class="icon icon-filter-audio"></i><span my-i18n="im_media_audio"></span>
           </div>
 
-          <a class="tg_head_btn" ng-switch-default ng-click="showPeerInfo()">
+          <a class="tg_head_btn" ng-switch-default ng-click="showPeerInfo()" ng-if="!historyPeer.self">
             <div class="tg_head_peer_info">
               <span class="tg_head_peer_title" my-peer-link="historyPeer.id" peer-watch="true" dir="auto"></span>
               <span class="tg_head_peer_status" ng-switch="historyPeer.id > 0">

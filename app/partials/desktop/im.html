@@ -206,7 +206,7 @@
 
                 <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController" ng-class="{im_send_reply_form_wrap: draftMessage.replyToMsgID > 0}">
 
-                  <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true" ng-show="!draftMessage.isBroadcast">
+                  <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true" ng-show="!draftMessage.isBroadcast" ng-if="!historyPeer.self">
                     <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
                   </a>
                   <a class="pull-left im_panel_own_photo" my-peer-photolink="draftMessage.isBroadcast ? historyPeer.id : ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>

@@ -18,19 +18,19 @@
     ></i>
   </div>
 
-  <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true"></div>
+  <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true" dialog-list="true"></div>
 
   <div class="im_dialog_message_wrap">
 
     <div class="im_dialog_peer">
-      <span my-peer-link="dialogMessage.peerID" verified="true"></span>
+      <span my-peer-link="dialogMessage.peerID" verified="true" dialog-list="true"></span>
     </div>
 
     <div ng-switch="dialogMessage.typing ? 'typing' : (!dialogMessage.unreadCount && dialogMessage.draft ? 'draft' : (dialogMessage.deleted ? 'deleted' : 'message'))">
 
       <div ng-switch-when="typing" class="im_dialog_message">
         <span class="im_short_message_service" my-i18n="im_conversation_group_typing">
-          <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+          <my-i18n-param name="name"><span my-peer-link="dialogMessage.typing" short="true" class="im_dialog_chat_from_wrap" dialog-list="false"></span></my-i18n-param><my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
         </span>
       </div>
 
@@ -60,7 +60,7 @@
               <span
                 ng-switch-when="false"
                 class="im_dialog_chat_from"
-                my-peer-link="dialogMessage.from_id" short="true" peer-watch="true"
+                my-peer-link="dialogMessage.from_id" short="true" peer-watch="true" dialog-list="false"
               ></span><span
                 ng-switch-when="true"
                 class="im_dialog_chat_from"
