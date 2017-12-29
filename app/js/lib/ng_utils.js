@@ -1931,7 +1931,8 @@ angular.module('izhukov.utils', [])
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
       }
       else if ((tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
-        var path = tgMeMatch[1].split('/')
+        var fullPath = tgMeMatch[1]
+        var path = fullPath.split('/')
         switch (path[0]) {
           case 'joinchat':
             url = 'tg://join?invite=' + path[1]
@@ -1943,9 +1944,21 @@ angular.module('izhukov.utils', [])
             if (path[1] && path[1].match(/^\d+$/)) {
               url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1]
             }
-            else if (!path[1]) {
+            else if (path.length == 1) {
               var domainQuery = path[0].split('?')
-              url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '')
+              var domain = domainQuery[0]
+              var query = domainQuery[1]
+              if (domain == 'iv') {
+                var match = (query || '').match(/url=([^&=]+)/)
+                if (match) {
+                  url = match[1]
+                  try {
+                    url = decodeURIComponent(url)
+                  } catch (e) {}
+                  return wrapUrl(url, unsafe)
+                }
+              }
+              url = 'tg://resolve?domain=' + domain + (query ? '&' + query : '')
             }
         }
       }
