@@ -3109,7 +3109,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           element[0].className = element[0].className.replace(/user_color_\d+/g, '')
         }
         if (peerID > 0) {          
-          var user = dialogList && myID === peerID ? AppUsersManager.getSavedMessages() : AppUsersManager.getUser(peerID)
+          var user = dialogList && myID == peerID ? AppUsersManager.getSavedMessages() : AppUsersManager.getUser(peerID)
           var prefix = username ? '@' : ''
           var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName')
 
@@ -3187,7 +3187,7 @@ angular.module('myApp.directives', ['myApp.filters'])
           return false
         }
         peerID = newPeerID
-        peer = dialogList && myID === peerID ? AppUsersManager.getSavedMessages() : AppPeersManager.getPeer(peerID)
+        peer = dialogList && myID == peerID ? AppUsersManager.getSavedMessages() : AppPeersManager.getPeer(peerID)
 
         var newClass = 'user_bgcolor_' + (peer.num || 1)
         if (newClass != prevClass) {
