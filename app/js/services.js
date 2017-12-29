@@ -52,8 +52,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (!user) {
         return false
       }
+      var serviceText = ''
+      if (user.pFlags.self) {
+        serviceText = _('user_name_saved_msgs_raw')
+      }
 
-      return (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '') + ' ' + (user.username || '')
+      return (user.first_name || '') +
+              ' ' + (user.last_name || '') +
+              ' ' + (user.phone || '') +
+              ' ' + (user.username || '') +
+              ' ' + serviceText
     }
 
     function getContacts (query) {
@@ -4385,6 +4393,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var scope = $rootScope.$new()
       scope.multiSelect = false
       scope.noMessages = true
+      scope.forPeerSelect = true
       if (options) {
         angular.extend(scope, options)
       }
@@ -4408,6 +4417,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var scope = $rootScope.$new()
       scope.multiSelect = true
       scope.noMessages = true
+      scope.forPeerSelect = true
       if (options) {
         angular.extend(scope, options)
       }

@@ -32,13 +32,13 @@
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="myResult in myResults track by myResult.id" ng-class="{active: curDialog.peerID == myResult.id}">
               <a class="im_dialog" ng-mousedown="dialogSelect(myResult.peerString)">
-                <div class="im_dialog_photo pull-left" my-peer-photolink="myResult.id" img-class="im_dialog_photo" watch="true"></div>
+                <div class="im_dialog_photo pull-left" my-peer-photolink="myResult.id" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" my-peer-link="myResult.id"  verified="true"></span>
+                    <span class="im_dialog_user" my-peer-link="myResult.id"  verified="true" for-dialog="true"></span>
                   </div>
                   <div class="im_dialog_message" ng-switch="myResult.id > 0">
-                    <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::myResult.id"></span>
+                    <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::myResult.id" for-dialog="true"></span>
                     <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-myResult.id"></span>
                   </div>
                 </div>
@@ -52,15 +52,15 @@
           <ul class="nav nav-pills nav-stacked">
             <li class="im_dialog_wrap" ng-repeat="foundPeer in foundPeers track by foundPeer.id" ng-class="{active: curDialog.peerID == foundPeer.id}">
               <a class="im_dialog" ng-mousedown="dialogSelect(foundPeer.peerString)">
-                <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true"></div>
+                <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
                 <div class="im_dialog_message_wrap">
                   <div class="im_dialog_peer">
-                    <span class="im_dialog_user" my-peer-link="foundPeer.id"  verified="true"></span>
+                    <span class="im_dialog_user" my-peer-link="foundPeer.id" verified="true" for-dialog="true"></span>
                   </div>
                   <div class="im_dialog_message">
                     <span class="im_dialog_message_text" ng-switch="foundPeer.id > 0">
                       <span ng-bind="::'@' + foundPeer.username + ', '"></span>
-                      <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::foundPeer.id"></span>
+                      <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::foundPeer.id" for-dialog="true"></span>
                       <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-foundPeer.id"></span>
                     </span>
                   </div>
@@ -88,7 +88,7 @@
 
       <div class="im_history_selected_wrap">
         <div my-history-mobile class="im_history_col">
-          
+
           <div my-peer-pinned-message-bar="curDialog.peerID" class="im_history_pinned_panel"></div>
 
           <div class="im_history_wrap im_history_scrollable_wrap mobile_scrollable_wrap">

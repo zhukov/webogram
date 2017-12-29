@@ -169,6 +169,7 @@
 
 	"user_name_deleted": "DELETED",
 	"user_first_name_deleted": "DELETED",
+	"user_name_saved_msgs": "Saved Messages",
 	"user_status_online": "online",
 	"user_status_last_seen": "last seen {0}",
 	"user_status_recently": "last seen recently",

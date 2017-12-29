@@ -116,6 +116,19 @@ angular.module('myApp.services')
       })
     }
 
+    function getConversation(peerID) {
+      var foundDialog = getDialogByPeerID(peerID)
+      if (foundDialog.length) {
+        return $q.when(foundDialog[0])
+      }
+      return $q.when({
+        peerID: peerID,
+        top_message: 0,
+        index: generateDialogIndex(generateDialogPinnedDate()),
+        pFlags: {}
+      })
+    }
+
     function getDialogByPeerID (peerID) {
       for (var i = 0; i < dialogsStorage.dialogs.length; i++) {
         if (dialogsStorage.dialogs[i].peerID == peerID) {
@@ -1376,15 +1389,24 @@ angular.module('myApp.services')
 
         apiMessage.date -= ServerTimeManager.serverTimeOffset
 
-        var fwdHeader = apiMessage.fwd_from
-        if (fwdHeader) {
-          apiMessage.fwdFromID = fwdHeader.channel_id ? -fwdHeader.channel_id : fwdHeader.from_id
-          apiMessage.fwdPostID = fwdHeader.channel_post
-          fwdHeader.date -= ServerTimeManager.serverTimeOffset
-        }
-
         apiMessage.peerID = peerID
         apiMessage.fromID = apiMessage.pFlags.post ? peerID : apiMessage.from_id
+
+        var fwdHeader = apiMessage.fwd_from
+        if (fwdHeader) {
+          if (peerID == AppUsersManager.getSelf().id) {
+            if (fwdHeader.saved_from_peer && fwdHeader.saved_from_msg_id) {
+              var savedFromPeerID = AppPeersManager.getPeerID(fwdHeader.saved_from_peer)
+              var savedFromMid = AppMessagesIDsManager.getFullMessageID(fwdHeader.saved_from_msg_id, AppPeersManager.isChannel(savedFromPeerID) ? -savedFromPeerID : 0)
+              apiMessage.savedFrom = savedFromPeerID + '_' + savedFromMid
+            }
+            apiMessage.fromID = fwdHeader.channel_id ? -fwdHeader.channel_id : fwdHeader.from_id
+          } else {
+            apiMessage.fwdFromID = fwdHeader.channel_id ? -fwdHeader.channel_id : fwdHeader.from_id
+            apiMessage.fwdPostID = fwdHeader.channel_post
+          }
+          fwdHeader.date -= ServerTimeManager.serverTimeOffset
+        }
 
         if (apiMessage.via_bot_id > 0) {
           apiMessage.viaBotID = apiMessage.via_bot_id
@@ -2362,7 +2384,7 @@ angular.module('myApp.services')
             to_id: AppPeersManager.getOutputPeer(dialog.peerID),
             deleted: true,
             date: tsNow(true),
-            pFlags: {}
+            pFlags: {out: true}
           }
         } else {
           return message
@@ -3754,6 +3776,7 @@ angular.module('myApp.services')
 
     return {
       getConversations: getConversations,
+      getConversation: getConversation,
       getHistory: getHistory,
       getSearch: getSearch,
       getMessage: getMessage,

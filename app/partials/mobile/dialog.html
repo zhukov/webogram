@@ -18,12 +18,12 @@
     ></i>
   </div>
 
-  <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true"></div>
+  <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
 
   <div class="im_dialog_message_wrap" ng-class="{im_dialog_message_wtyping: dialogMessage.typing > 0}">
 
     <div class="im_dialog_peer">
-      <span my-peer-link="dialogMessage.peerID" verified="true"></span>
+      <span my-peer-link="dialogMessage.peerID" verified="true" for-dialog="true"></span>
     </div>
 
     <div ng-switch="dialogMessage.typing ? 'typing' : (!dialogMessage.unreadCount && dialogMessage.draft ? 'draft' : (dialogMessage.deleted ? 'deleted' : 'message'))">

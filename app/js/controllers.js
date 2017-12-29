@@ -790,7 +790,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function sortDialogs () {
+      var myID = false
+      if ($scope.forPeerSelect) {
+        myID = AppUsersManager.getSelf().id
+      }
       $scope.dialogs.sort(function (d1, d2) {
+        if (d1.peerID == myID) {
+          return -1
+        }
+        else if (d2.peerID == myID) {
+          return 1
+        }
         return d2.index - d1.index
       })
     }
@@ -974,6 +984,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (curJump != jump) {
           return $q.reject()
         }
+        if (!query && !offsetIndex && $scope.forPeerSelect) {
+          var myID = AppUsersManager.getSelf().id
+          return AppMessagesManager.getConversation(myID).then(function (dialog) {
+            result.dialogs.unshift(dialog)
+            return result
+          })
+        }
         return result
       })
     }
@@ -1018,7 +1035,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
-              peersInDialogs[dialog.peerID] = true
+              if (peersInDialogs[dialog.peerID]) {
+                return
+              } else {
+                peersInDialogs[dialog.peerID] = true
+              }
             }
             dialogsList.push(wrappedDialog)
           })

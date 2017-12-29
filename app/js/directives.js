@@ -3140,7 +3140,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
+  .directive('myUserStatus', function (_, $filter, $rootScope, AppUsersManager) {
     var statusFilter = $filter('userStatus')
     var ind = 0
     var statuses = {}
@@ -3166,12 +3166,18 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var userID
       var curInd = ind++
+      var forDialog = attrs.forDialog && $scope.$eval(attrs.forDialog)
+
       var update = function () {
         var user = AppUsersManager.getUser(userID)
-        element
-          .html(statusFilter(user, attrs.botChatPrivacy))
-          .toggleClass('status_online', (user.status && user.status._ == 'userStatusOnline') || false)
-      // console.log(dT(), 'update status', element[0], user.status && user.status, tsNow(true), element.html())
+        if (forDialog && user.pFlags.self) {
+          element.html('')
+        } else {
+          element
+            .html(statusFilter(user, attrs.botChatPrivacy))
+            .toggleClass('status_online', (user.status && user.status._ == 'userStatusOnline') || false)
+        }
+        // console.log(dT(), 'update status', element[0], user.status && user.status, tsNow(true), element.html())
       }
 
       $scope.$watch(attrs.myUserStatus, function (newUserID) {
@@ -3331,7 +3337,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myPeerLink', function ($rootScope, AppChatsManager, AppUsersManager, AppMessagesIDsManager) {
+  .directive('myPeerLink', function (_, $rootScope, AppPeersManager, AppChatsManager, AppUsersManager, AppMessagesIDsManager) {
     return {
       link: link
     }
@@ -3340,6 +3346,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {}
       var short = attrs.short && $scope.$eval(attrs.short)
       var username = attrs.username && $scope.$eval(attrs.username)
+      var forDialog = attrs.forDialog && $scope.$eval(attrs.forDialog)
 
       var peerID
       var update = function () {
@@ -3348,16 +3355,21 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         if (peerID > 0) {
           var user = AppUsersManager.getUser(peerID)
-          var prefix = username ? '@' : ''
-          var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName')
+          if (forDialog && user.pFlags.self) {
+            element.text(_('user_name_saved_msgs_raw'))
+          } else {
+            var prefix = username ? '@' : ''
+            var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName')
 
-          element.html(
-            prefix +
-            (override[key] || user[key] || '').valueOf() +
-            (attrs.verified && user.pFlags && user.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
-          )
-          if (attrs.color && $scope.$eval(attrs.color)) {
-            element.addClass('user_color_' + user.num)
+            element.html(
+              prefix +
+              (override[key] || user[key] || '').valueOf() +
+              (attrs.verified && user.pFlags && user.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
+            )
+
+            if (attrs.color && $scope.$eval(attrs.color)) {
+              element.addClass('user_color_' + user.num)
+            }
           }
         } else {
           var chat = AppChatsManager.getChat(-peerID)
@@ -3375,11 +3387,18 @@ angular.module('myApp.directives', ['myApp.filters'])
             AppUsersManager.openUser(peerID, override)
           } else {
             var chatID = -peerID
-            var postID = $scope.$eval(attrs.postId)
+            var postID = attrs.postId && $scope.$eval(attrs.postId)
+            var savedFrom = attrs.savedFrom && $scope.$eval(attrs.savedFrom)
             if (postID) {
               $rootScope.$broadcast('history_focus', {
                 peerString: AppChatsManager.getChatString(chatID),
                 messageID: AppMessagesIDsManager.getFullMessageID(parseInt(postID), chatID)
+              })
+            } else if (savedFrom) {
+              var peerMid = savedFrom.split('_')
+              $rootScope.$broadcast('history_focus', {
+                peerString: AppPeersManager.getPeerString(peerMid[0]),
+                messageID: peerMid[1]
               })
             } else {
               AppChatsManager.openChat(chatID)
@@ -3426,6 +3445,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var initEl = $('<span class="peer_initials nocopy ' + (attrs.imgClass || '') + '"></span>')
       var jump = 0
       var prevClass = false
+      var forDialog = attrs.forDialog && $scope.$eval(attrs.forDialog)
 
       var setPeerID = function (newPeerID) {
         if (peerID == newPeerID) {
@@ -3452,6 +3472,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         var curJump = ++jump
 
         peerPhoto = peer.photo && angular.copy(peer.photo.photo_small)
+
+        if (forDialog && peer.pFlags && peer.pFlags.self) {
+          initEl.remove()
+          imgEl.prependTo(element).attr('src', 'img/icons/icon120.png')
+          return
+        }
 
         var hasPhoto = peerPhoto !== undefined
 
