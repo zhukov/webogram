@@ -173,6 +173,7 @@
     "changelog_modal_title_current_version": "текущая версия",
     "changelog_modal_full_description_md": "Official free messaging app based on Telegram API for speed and security.\n\nThis software is licensed under GNU GPL version 3.",
     "changelog_modal_changelog_link": "Changelog",
+    "changelog_app_version": "Version {version}",
     "group_create_contacts_modal_title": "Новая группа",
     "group_create_modal_title": "Создать группу",
     "group_create_name": "Название группы",
