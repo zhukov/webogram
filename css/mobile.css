@@ -666,11 +666,17 @@ img.im_message_video_thumb,
 }
 .im_message_date {
   font-size: 10px;
+  line-height: 12px;
   padding: 0;
+  display: block;
 }
 .im_message_edited {
-  position: absolute;
-  top: -11px;
+  display: block;
+  margin-top: 4px;
+}
+.im_message_date_text {
+  display: block;
+  margin-top: 3px;
 }
 .im_message_out .im_message_fwd_date {
   color: #93a2ae;
@@ -727,10 +733,17 @@ a.im_message_author_via .im_message_fwd_author {
 .im_message_author {
   display: none;
 }
+.im_message_author_admin {
+  display: none;
+}
 .im_history_messages_group a.im_message_author {
   display: inline;
   font-size: 13px;
   font-weight: normal;
+}
+.im_history_messages_group .im_message_author_admin {
+  display: inline;
+  font-size: 13px;
 }
 .im_history_messages_group .im_message_sign_link {
   font-size: 12px;
@@ -742,19 +755,25 @@ a.im_message_author_via .im_message_fwd_author {
 }
 .im_grouped_short a.im_message_from_photo,
 .im_grouped_short a.im_message_author,
+.im_grouped_short .im_message_author_admin,
 .im_grouped_short a.im_message_author_via,
 .im_grouped a.im_message_from_photo,
 .im_grouped a.im_message_author,
 .im_grouped a.im_message_author_via,
+.im_grouped a.im_message_author_admin,
 .im_grouped_fwd a.im_message_from_photo,
 .im_grouped_fwd a.im_message_author,
 .im_grouped_fwd a.im_message_author_via,
+.im_grouped_fwd a.im_message_author_admin,
 .im_grouped_fwd_short a.im_message_from_photo,
 .im_grouped_fwd_short a.im_message_author,
 .im_grouped_fwd_short a.im_message_author_via,
+.im_grouped_fwd_short a.im_message_author_admin,
 .im_message_out a.im_message_from_photo,
 .im_message_out a.im_message_author,
-.im_message_body_media a.im_message_author {
+.im_message_out a.im_message_author_admin,
+.im_message_body_media a.im_message_author,
+.im_message_body_media a.im_message_author_admin {
   display: none;
 }
 .im_message_wrap {
