@@ -1,3 +1,20 @@
+### 0.7
+* Improved chats search
+* Pinned messages in supergroups and channels
+* Saved messages
+* Improved chat history filters: added audio, links and mentions. Click on message date opens found message in context.
+* Added ability to clean history in private supergroups
+* Supported unread status for video messages
+* Admin badges in supergroups
+* Improved PUSH handling in Chrome
+* [Safari] Voice record is now available
+* [Safari] Improved downloads (files now have names and download automatically)
+
+
+### 0.6.1
+* Fixed networking problems
+* Supported [MTProto v2](https://core.telegram.org/mtproto)
+
 ### 0.5.7
 * Video messages and Telescope
 * Notifications about new logins
