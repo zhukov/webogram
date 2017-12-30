@@ -15,6 +15,10 @@
 * Fixed networking problems
 * Supported [MTProto v2](https://core.telegram.org/mtproto)
 
+### 0.6.0
+* Voice messages record button
+* Added support for voice messages playback in Safari
+
 ### 0.5.7
 * Video messages and Telescope
 * Notifications about new logins
