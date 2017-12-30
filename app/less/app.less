@@ -4254,7 +4254,11 @@ h5 {
   position: relative;
   overflow: hidden;
   border-radius: 50%;
-  overflow: hidden;
+
+  // Safari doesn't use border radius without this
+  -webkit-transform: translateZ(0);
+  // -webkit-perspective: 1000;
+  // -webkit-backface-visibility: hidden;
 }
 .img_round_meta {
   background: rgba(0,0,0,0.4);
