@@ -19,7 +19,8 @@
     <span my-emoji-image="🎮"></span>
     <span ng-bind-html="message.media.game.rTitle"></span>
   </span>
-  <span ng-switch-default my-i18n="conversation_media_unsupported"></span>
+  <span ng-switch-when="messageMediaUnsupported" my-i18n="conversation_media_unsupported"></span>
+  <span ng-switch-when="messageMediaUnsupportedWeb" my-i18n="conversation_media_unsupported"></span>
 </span><span class="im_short_message_service" ng-if="message._ == 'messageService'" ng-switch="message.action._">
   <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
   <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
