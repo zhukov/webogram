@@ -56,8 +56,8 @@
             <li><a ng-click="toggleMedia('urls')" my-i18n="head_media_links"></a></li>
             <li><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
             <li><a ng-click="toggleMedia('round')" my-i18n="head_media_round"></a></li>
-            <li class="divider ng-scope"></li>
-            <li><a ng-click="toggleMedia('mentions')" my-i18n="head_media_mymentions"></a></li>
+            <li ng-if="isHistoryPeerGroup()" class="divider ng-scope"></li>
+            <li ng-if="isHistoryPeerGroup()"><a ng-click="toggleMedia('mentions')" my-i18n="head_media_mymentions"></a></li>
           </ul>
         </div>
 

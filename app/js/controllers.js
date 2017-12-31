@@ -528,6 +528,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
+    $scope.isHistoryPeerGroup = function () {
+      return $scope.historyPeer.id < 0 && !AppPeersManager.isBroadcast($scope.historyPeer.id)
+    }
+
     // setTimeout($scope.openSettings, 1000)
 
     $scope.openFaq = function () {
