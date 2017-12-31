@@ -384,6 +384,7 @@
 	"message_service_removed_channel_photo": "Channel photo removed",
 	"message_service_scored_X": "{'one': 'scored {}', 'other': 'scored {}'}",
 	"message_service_payment_sent": "Payment sent",
+	"message_service_screenshot_taken": "took a screenshot!",
 
 	"message_admin_badge": "admin",
 
@@ -617,6 +618,7 @@
 	"message_attach_video_play": "Play video",
 
 	"message_attach_unsupported": "The message is not supported on your version of Telegram Web. Update the app to view: {link}.",
+	"message_attach_notweb": "The message is not supported on Telegram Web yet. Use Telegram mobile apps to view: {link}.",
 
 	"conversation_select_modal_title": "Select conversation",
 	"conversation_select_modal_chats_contacts": "Chats and contacts",
