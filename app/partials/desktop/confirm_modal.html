@@ -35,7 +35,7 @@
             </my-i18n-param>
           </span>
         </a>
-        <p class="tg_checkbox" ng-if="!revocable && !isChannel" ng-switch="isUser ? 'user' : (isSupergroup ? 'supergroup' : (isUsualGroup ? 'group' : 'default'))">
+        <p class="tg_checkbox" ng-if="!revocable && !isChannel && !isSavedMessages" ng-switch="isUser ? 'user' : (isSupergroup ? 'supergroup' : (isUsualGroup ? 'group' : 'default'))">
           <span ng-switch-when="supergroup" my-i18n="confirm_modal_delete_messages_for_everyone_chat"></span>
           <span ng-switch-when="group" my-i18n="confirm_modal_delete_messages_for_you_only_chat"></span>
           <span ng-switch-when="user" my-i18n="confirm_modal_delete_messages_for_you_only_pm"><my-i18n-param name="user"><strong my-peer-link="peerID"></strong></my-i18n-param></span>
