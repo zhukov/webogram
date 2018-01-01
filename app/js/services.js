@@ -4008,10 +4008,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function notify (data) {
+      console.log('notify', data, $rootScope.idle.isIDLE, notificationsUiSupport, stopped)
       if (stopped) {
         return
       }
-      // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport)
 
       // FFOS Notification blob src bug workaround
       if (Config.Navigator.ffos && !Config.Navigator.ffos2p) {
