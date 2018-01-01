@@ -3329,7 +3329,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         updatesState.syncPending = false
       }
 
-      MtpApiManager.invokeApi('updates.getDifference', {pts: updatesState.pts, date: updatesState.date, qts: -1}).then(function (differenceResult) {
+      MtpApiManager.invokeApi('updates.getDifference', {pts: updatesState.pts, date: updatesState.date, qts: -1}, {
+        timeout: 0x7fffffff
+      }).then(function (differenceResult) {
         if (differenceResult._ == 'updates.differenceEmpty') {
           console.log(dT(), 'apply empty diff', differenceResult.seq)
           updatesState.date = differenceResult.date
