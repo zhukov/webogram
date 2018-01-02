@@ -1033,6 +1033,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               var message = AppMessagesManager.getMessage(dialog.top_message)
               if (message.fromID > 0) {
                 wrappedDialog.peerID = message.fromID
+                wrappedDialog.foundInHistory = true
               }
             }
 
