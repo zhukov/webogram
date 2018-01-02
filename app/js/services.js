@@ -1208,8 +1208,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       if (filter._ == 'channelParticipantsRecent') {
         var chat = AppChatsManager.getChat(id)
-        if (chat.pFlags.kicked ||
-            chat.pFlags.broadcast && !chat.pFlags.creator && !chat.admin_rights) {
+        if (chat &&
+            chat.pFlags && (
+              chat.pFlags.kicked ||
+              chat.pFlags.broadcast && !chat.pFlags.creator && !chat.admin_rights
+            )) {
           return $q.reject()
         }
       }
