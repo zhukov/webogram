@@ -29,6 +29,23 @@ js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
 img/changelog/card_wecandoit.png
+img/icons/AboutLogos.png
+img/icons/AboutLogos_2x.png
+img/icons/General.png
+img/icons/General_2x.png
+img/icons/IconsetSmiles.png
+img/icons/IconsetSmiles_2x.png
+img/icons/IconsetW.png
+img/icons/IconsetW_2x.png
+img/icons/Major.png
+img/icons/Major_2x.png
+img/icons/MobileIcons.png
+img/icons/MobileIcons_2x.png
+img/icons/PhotoIcons.png
+img/icons/PhotoIcons_2x.png
+img/icons/ProfileIcons.png
+img/icons/ProfileIcons_2x.png
+img/icons/icon.svg
 img/placeholders/DialogListAvatarSystem@2x.png
 img/placeholders/Fave.png
 img/placeholders/GroupAvatar1@2x.png
@@ -47,23 +64,6 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-img/icons/AboutLogos.png
-img/icons/AboutLogos_2x.png
-img/icons/General.png
-img/icons/General_2x.png
-img/icons/IconsetSmiles.png
-img/icons/IconsetSmiles_2x.png
-img/icons/IconsetW.png
-img/icons/IconsetW_2x.png
-img/icons/Major.png
-img/icons/Major_2x.png
-img/icons/MobileIcons.png
-img/icons/MobileIcons_2x.png
-img/icons/PhotoIcons.png
-img/icons/PhotoIcons_2x.png
-img/icons/ProfileIcons.png
-img/icons/ProfileIcons_2x.png
-img/icons/icon.svg
 js/lib/bin_utils.js
 js/lib/crypto_worker.js
 js/lib/polyfill.js
@@ -75,8 +75,8 @@ js/locales/it-it.json
 js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
-vendor/cryptoJS/crypto.js
 vendor/closure/long.js
+vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/recorderjs/encoder_worker.js
@@ -95,4 +95,4 @@ http://*
 https://*
 *
 
-# hash: 9351f6672d7fd1054abdfc03984ca768381bdf331c75608746a653c19e04abd4
+# hash: b868c29b91f6fb9606099295f72194da9ce287e34dcd25021d746116ff1219c5
