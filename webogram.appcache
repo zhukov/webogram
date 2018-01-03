@@ -47,10 +47,6 @@ img/placeholders/UserAvatar7@2x.png
 img/placeholders/UserAvatar8@2x.png
 img/placeholders/VideoThumbConversation.gif
 img/placeholders/VideoThumbModal.gif
-js/lib/bin_utils.js
-js/lib/crypto_worker.js
-js/lib/polyfill.js
-js/lib/push_worker.js
 img/icons/AboutLogos.png
 img/icons/AboutLogos_2x.png
 img/icons/General.png
@@ -68,6 +64,10 @@ img/icons/PhotoIcons_2x.png
 img/icons/ProfileIcons.png
 img/icons/ProfileIcons_2x.png
 img/icons/icon.svg
+js/lib/bin_utils.js
+js/lib/crypto_worker.js
+js/lib/polyfill.js
+js/lib/push_worker.js
 js/locales/de-de.json
 js/locales/en-us.json
 js/locales/es-es.json
@@ -75,8 +75,8 @@ js/locales/it-it.json
 js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
-vendor/closure/long.js
 vendor/cryptoJS/crypto.js
+vendor/closure/long.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/recorderjs/encoder_worker.js
@@ -95,4 +95,4 @@ http://*
 https://*
 *
 
-# hash: 47e9b1a1ea5fb768ad232eeeeaad921e8268643ad85814300c18018f85a832c1
+# hash: 9351f6672d7fd1054abdfc03984ca768381bdf331c75608746a653c19e04abd4
