@@ -1941,15 +1941,34 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
       if (selectedMessageIDs.length) {
-        PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
-          selectedCancel()
-          $rootScope.$broadcast('history_focus', {
-            peerString: peerString,
-            attachment: {
-              _: 'fwd_messages',
-              id: selectedMessageIDs
-            }
-          })
+        PeersSelectService.selectPeer({canSend: true}).then(function (peerStrings) {          
+          if(Array.isArray(peerStrings) && peerStrings.length > 1) {
+            angular.forEach(peerStrings, function (peerString) {
+              var peerID = AppPeersManager.getPeerID(peerString)
+              AppMessagesManager.forwardMessages(peerID, selectedMessageIDs)
+            })
+            var toastData = toaster.pop({
+              type: 'info',
+              body: _('confirm_modal_forward_to_peer_success'),
+              bodyOutputType: 'trustedHtml',
+              clickHandler: function () {
+                $rootScope.$broadcast('history_focus', {
+                  peerString: peerStrings[0]
+                })
+                toaster.clear(toastData)
+              },
+              showCloseButton: false
+            })
+          } else {            
+            $rootScope.$broadcast('history_focus', {
+              peerString: peerStrings,
+              attachment: {
+                _: 'fwd_messages',
+                id: selectedMessageIDs
+              }
+            })
+          }
+          selectedCancel()          
         })
       }
     }
@@ -4918,6 +4937,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }, function () {
         delete $scope.shareLink
       })
+    }
+
+    $scope.dialogMultiSelect = function(peerString){
+      var peerID = AppPeersManager.getPeerID(peerString)
+      var wasMultiSelect = $scope.multiSelect
+      $scope.multiSelect = $scope.selectedPeers[peerID] == undefined || 
+        $scope.selectedPeers[peerID] != undefined && Object.keys($scope.selectedPeers).length > 1
+      if ($scope.selectedPeers[peerID]) {
+        delete $scope.selectedPeers[peerID]
+        $scope.selectedCount--
+        var pos = $scope.selectedPeerIDs.indexOf(peerID)
+        if (pos >= 0) {
+          $scope.selectedPeerIDs.splice(pos, 1)
+        }
+      } else {
+        $scope.selectedPeers[peerID] = AppPeersManager.getPeer(peerID)
+        $scope.selectedCount++
+        $scope.selectedPeerIDs.unshift(peerID)
+      }
+    }
+
+    $scope.isSelected = function(peerString){
+      var peerID = AppPeersManager.getPeerID(peerString)
+      return $scope.selectedPeers[peerID] != undefined
     }
 
     $scope.dialogSelect = function (peerString) {
