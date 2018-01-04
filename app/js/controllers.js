@@ -4940,8 +4940,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.dialogMultiSelect = function(peerString){
-      var peerID = AppPeersManager.getPeerID(peerString)
-      var wasMultiSelect = $scope.multiSelect
+      var peerID = AppPeersManager.getPeerID(peerString)      
       $scope.multiSelect = $scope.selectedPeers[peerID] == undefined || 
         $scope.selectedPeers[peerID] != undefined && Object.keys($scope.selectedPeers).length > 1
       if ($scope.selectedPeers[peerID]) {
