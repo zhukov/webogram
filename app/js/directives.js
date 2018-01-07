@@ -682,11 +682,11 @@ angular.module('myApp.directives', ['myApp.filters'])
         $scope.pinnedMessageID = 0
         $scope.$emit('ui_height')
       }
+      var jump = ++$scope.jump
       if (!AppPeersManager.isChannel(peerID)) {
         return
       }
       var channelID = -peerID
-      var jump = ++$scope.jump
       AppProfileManager.getChannelPinnedMessage(channelID).then(function (pinnedMessageID) {
         if (jump != $scope.jump) {
           return

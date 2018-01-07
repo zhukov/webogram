@@ -2512,7 +2512,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return ids
       })
       var chatParticipantsPromise
-      if (peerID < 0) {
+      if (peerID < 0 && !AppPeersManager.isBroadcast(peerID)) {
         if (AppPeersManager.isChannel(peerID)) {
           chatParticipantsPromise = AppProfileManager.getChannelParticipants(-peerID)
         } else {
