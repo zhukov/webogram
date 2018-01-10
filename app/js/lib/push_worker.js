@@ -57,7 +57,9 @@ self.addEventListener('push', function(event) {
     if (userInvisibleIsSupported() || hasActiveWindows) {
       return closeAllNotifications()
     }
-    var promise = self.registration.showNotification('Telegram').then(function () {
+    return self.registration.showNotification('Telegram', {
+      tag: 'unknown_peer'
+    }).then(function () {
       if (hasActiveWindows) {
         return closeAllNotifications()
       }
