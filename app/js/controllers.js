@@ -4034,6 +4034,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function onChatUpdated (updates) {
       ApiUpdatesManager.processUpdateMessage(updates)
       $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString})
+      if (updates &&
+          updates.updates &&
+          updates.updates.length &&
+          AppChatsManager.isChannel($scope.chatID)) {
+        AppProfileManager.invalidateChannelParticipants($scope.chatID)
+      }
     }
 
     $scope.leaveChannel = function () {
@@ -4085,10 +4091,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.kickFromChannel = function (userID) {
-      MtpApiManager.invokeApi('channels.kickFromChannel', {
+      MtpApiManager.invokeApi('channels.editBanned', {
         channel: AppChatsManager.getChannelInput($scope.chatID),
         user_id: AppUsersManager.getUserInput(userID),
-        kicked: true
+        banned_rights: {_: 'channelBannedRights', flags: 1, until_date: 0}
       }).then(onChatUpdated)
     }
 

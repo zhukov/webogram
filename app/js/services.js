@@ -1340,6 +1340,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       })
     }
 
+    function invalidateChannelParticipants(id) {
+      delete chatsFull[id]
+      delete chatFullPromises[id]
+      angular.forEach(chatParticipantsPromises, function (val, key) {
+        if (key.split('_')[0] == id) {
+          delete chatParticipantsPromises[key]
+        }
+      })
+      $rootScope.$broadcast('chat_full_update', id)
+    }
+
     function getChannelPinnedMessage(id) {
       return getChannelFull(id).then(function (fullChannel) {
         var pinnedMessageID = fullChannel && fullChannel.pinned_msg_id
@@ -1451,6 +1462,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getChatFull: getChatFull,
       getChannelFull: getChannelFull,
       getChannelParticipants: getChannelParticipants,
+      invalidateChannelParticipants: invalidateChannelParticipants,
       getChannelPinnedMessage: getChannelPinnedMessage,
       hideChannelPinnedMessage: hideChannelPinnedMessage
     }
