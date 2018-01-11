@@ -36,10 +36,12 @@
         <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
           <i class="icon-message-status" tooltip="{{'message_action_retry' | i18n}}"></i>
         </a>
-        <i ng-if="::historyMessage.pFlags.unread &amp;&amp; historyMessage.pFlags.out || historyMessage.pending || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
         <span class="im_message_date">
           <span class="im_message_edited" my-message-edited="historyMessage.mid"></span>
-          <span class="im_message_date_text" ng-bind="::historyMessage.date | time"></span>
+          <span class="im_message_date_text">
+            <i ng-if="::historyMessage.pFlags.out &amp;&amp; (historyMessage.pFlags.unread || historyMessage.pending) || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
+            <span ng-bind="::historyMessage.date | time"></span>
+          </span>
         </span>
       </div>
 
