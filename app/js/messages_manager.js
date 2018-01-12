@@ -1703,7 +1703,15 @@ angular.module('myApp.services')
               }
             })
           }
-          ApiUpdatesManager.processUpdateMessage(updates)
+          // Testing bad situations
+          // var upd = angular.copy(updates)
+          // updates.updates.splice(0, 1)
+
+          ApiUpdatesManager.processUpdateMessage(upd)
+
+          // $timeout(function () {
+          // ApiUpdatesManager.processUpdateMessage(upd)
+          // }, 5000)
         }, function (error) {
           toggleError(true)
         })['finally'](function () {
@@ -3097,8 +3105,27 @@ angular.module('myApp.services')
           var pendingData = pendingByRandomID[randomID]
           if (pendingData) {
             var peerID = pendingData[0]
+            var tempID = pendingData[1]
             var channelID = AppPeersManager.isChannel(peerID) ? -peerID : 0
-            pendingByMessageID[AppMessagesIDsManager.getFullMessageID(update.id, channelID)] = randomID
+            var mid = AppMessagesIDsManager.getFullMessageID(update.id, channelID)
+            var message = messagesStorage[mid]
+            console.warn(dT(), update, pendingData, message)
+            if (message) {
+              var historyStorage = historiesStorage[peerID]
+              var pos = historyStorage.pending.indexOf(tempID)
+              if (pos != -1) {
+                historyStorage.pending.splice(pos, 1)
+              }
+              delete messagesForHistory[tempID]
+              delete messagesStorage[tempID]
+
+              var msgs = {}
+              msgs[tempID] = true
+
+              $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: msgs})
+            } else {
+              pendingByMessageID[mid] = randomID
+            }
           }
           break
 
@@ -3328,7 +3355,9 @@ angular.module('myApp.services')
             if (isTopMessage) {
               $rootScope.$broadcast('dialog_flush', {peerID: peerID})
             } else {
-              $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: [mid]})
+              var msgs = {}
+              msgs[mid] = true
+              $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: msgs})
             }
           } else {
             $rootScope.$broadcast('message_edit', {
