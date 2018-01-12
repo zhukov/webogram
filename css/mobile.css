@@ -790,7 +790,7 @@ a.im_message_author_via .im_message_fwd_author {
   vertical-align: text-top;
   margin-right: 2px;
   opacity: 1;
-  margin-top: 6px;
+  margin-top: 1px;
   background: none;
 }
 .im_message_unread .icon-message-status {

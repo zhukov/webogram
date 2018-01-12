@@ -828,6 +828,28 @@ a.footer_link.active:active {
 .icon-select-tick {
   display: none;
 }
+.im_dialogs_modal_list .im_dialog_wrap .im_dialog .icon-select-tick {
+  display: block;
+  margin: 10px 5px 0 -5px;
+  position: relative;
+  float: left;
+  width: 26px;
+  height: 26px;
+  background-image: url(../img/icons/IconsetW.png);
+  background-repeat: no-repeat;
+  background-position: -9px -481px;
+  opacity: 0.5;
+}
+.is_2x .im_dialogs_modal_list .im_dialog_wrap .im_dialog .icon-select-tick {
+  background-image: url(../img/icons/IconsetW_2x.png);
+  background-size: 42px 1171px;
+}
+.im_dialogs_modal_list .im_dialog_wrap:hover .im_dialog .icon-select-tick {
+  opacity: 0.75;
+}
+.icon-select-tick.dialog_selected {
+  opacity: 1 !important;
+}
 @media (min-width: 900px) {
   .im_message_wrap {
     position: relative;

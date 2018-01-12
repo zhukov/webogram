@@ -987,7 +987,7 @@ button.close{padding:0;cursor:pointer;background:0 0;border:0;-webkit-appearance
 .modal.fade .modal-dialog{-webkit-transform:translate3d(0,-25%,0);transform:translate3d(0,-25%,0)}
 .modal.in .modal-dialog{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
 .modal-open .modal{overflow-x:hidden;overflow-y:auto}
-.modal-dialog{position:relative;width:auto}
+.modal-dialog{position:relative}
 .modal-content{position:relative;background-color:#fff;background-clip:padding-box;outline:0}
 .modal-backdrop{position:fixed;top:0;right:0;bottom:0;left:0;z-index:1040;background-color:#000}
 .modal-backdrop.fade{opacity:0;filter:alpha(opacity=0)}
@@ -1876,6 +1876,7 @@ img.chat_modal_participant_photo{width:40px;height:40px}
 .stickerset_modal_sticker_alt{position:absolute;bottom:0;right:0}
 .stickerset_actions{padding:10px 20px;height:50px;text-align:center}
 .stickerset_modal_loading{text-align:center;color:#999;font-size:16px;line-height:18px;padding:1px 50px;margin:0}
+.modal-dialog{width:100%}
 .confirm_modal_window .modal-dialog,.error_modal_window .modal-dialog,.md_simple_modal_window .modal-dialog{max-width:348px}
 .im_message_focus_active .audio_player_duration,.im_message_focus_active .audio_player_size,.im_message_focus_active .im_message_author_admin,.im_message_focus_active .im_message_date,.im_message_focus_active .im_message_document_size,.im_message_focus_active .im_message_edited,.im_message_focus_active .im_message_fwd_date,.im_message_focus_active .im_message_sign_link,.im_message_focus_active .im_message_views_cnt{color:#899daf}
 .im_message_focus_active .im_message_outer_wrap{background-color:rgba(242,246,250,0);animation-name:im_message_focus_fade;-webkit-animation-timing-function:ease-in;animation-timing-function:ease-out;animation-duration:4s}
