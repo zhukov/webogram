@@ -1941,8 +1941,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
       if (selectedMessageIDs.length) {
-        PeersSelectService.selectPeer({canSend: true}).then(function (peerStrings) {          
-          if(Array.isArray(peerStrings) && peerStrings.length > 1) {
+        PeersSelectService.selectPeer({canSend: true}).then(function (peerStrings) {
+          selectedCancel()
+          if (Array.isArray(peerStrings) && peerStrings.length > 1) {
             angular.forEach(peerStrings, function (peerString) {
               var peerID = AppPeersManager.getPeerID(peerString)
               AppMessagesManager.forwardMessages(peerID, selectedMessageIDs)
@@ -1967,8 +1968,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                 id: selectedMessageIDs
               }
             })
-          }
-          selectedCancel()          
+          }    
         })
       }
     }
@@ -4939,7 +4939,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
-    $scope.dialogMultiSelect = function(peerString){
+    $scope.dialogMultiSelect = function(peerString, event) {
       var peerID = AppPeersManager.getPeerID(peerString)      
       $scope.multiSelect = $scope.selectedPeers[peerID] == undefined || 
         $scope.selectedPeers[peerID] != undefined && Object.keys($scope.selectedPeers).length > 1
@@ -4955,6 +4955,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.selectedCount++
         $scope.selectedPeerIDs.unshift(peerID)
       }
+      cancelEvent(event)
     }
 
     $scope.isSelected = function(peerString){
