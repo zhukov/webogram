@@ -108,7 +108,7 @@
 
       </div>
 
-      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="!chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked && !isMegagroup">
+      <div class="md_modal_iconed_section_wrap md_modal_iconed_section_link" ng-if="chatFull.chat.pFlags.creator || !chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked && !isMegagroup">
         <i class="md_modal_section_icon md_modal_section_icon_more"></i>
 
         <div class="md_modal_section_link_wrap" ng-if="!chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked && !isMegagroup">
