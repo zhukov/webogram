@@ -1707,7 +1707,7 @@ angular.module('myApp.services')
           // var upd = angular.copy(updates)
           // updates.updates.splice(0, 1)
 
-          ApiUpdatesManager.processUpdateMessage(upd)
+          ApiUpdatesManager.processUpdateMessage(updates)
 
           // $timeout(function () {
           // ApiUpdatesManager.processUpdateMessage(upd)
