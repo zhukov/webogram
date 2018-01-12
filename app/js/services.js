@@ -3419,7 +3419,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         filter: {_: 'channelMessagesFilterEmpty'},
         pts: channelState.pts,
         limit: 30
-      }).then(function (differenceResult) {
+      }, {timeout: 0x7fffffff}).then(function (differenceResult) {
         // console.log(dT(), 'channel diff result', differenceResult)
         channelState.pts = differenceResult.pts
 
@@ -3467,6 +3467,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           $rootScope.$broadcast('stateSynchronized')
           channelState.syncLoading = false
         }
+      }, function () {
+        channelState.syncLoading = false
       })
     }
 

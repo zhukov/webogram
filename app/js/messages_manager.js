@@ -3109,7 +3109,6 @@ angular.module('myApp.services')
             var channelID = AppPeersManager.isChannel(peerID) ? -peerID : 0
             var mid = AppMessagesIDsManager.getFullMessageID(update.id, channelID)
             var message = messagesStorage[mid]
-            console.warn(dT(), update, pendingData, message)
             if (message) {
               var historyStorage = historiesStorage[peerID]
               var pos = historyStorage.pending.indexOf(tempID)
