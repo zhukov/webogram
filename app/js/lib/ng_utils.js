@@ -1029,6 +1029,9 @@ angular.module('izhukov.utils', [])
       hidden = 'webkitHidden'
       visibilityChange = 'webkitvisibilitychange'
     }
+    if (!Config.Mobile) {
+      visibilityChange = ''
+    }
 
     return {
       start: start

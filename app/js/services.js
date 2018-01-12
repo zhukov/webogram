@@ -3398,6 +3398,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           $rootScope.$broadcast('stateSynchronized')
           updatesState.syncLoading = false
         }
+      }, function () {
+        updatesState.syncLoading = false
       })
     }
 
@@ -4083,6 +4085,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       if ('Notification' in window) {
         try {
+          if (data.tag) {
+            angular.forEach(notificationsShown, function (notification) {
+              if (notification &&
+                  notification.tag == data.tag) {
+                notification.hidden = true
+              }
+            })
+          }
           notification = new Notification(data.title, {
             icon: data.image || '',
             body: data.message || '',
@@ -4160,6 +4170,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         try {
           if (notification.close) {
+            notification.hidden = true
             notification.close()
           }
           else if (notificationsMsSiteMode &&
