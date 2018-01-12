@@ -18,6 +18,8 @@
     ></i>
   </div>
 
+  <i class="icon icon-select-tick" ng-class="{dialog_selected: isSelected(dialogMessage.peerString)}" ng-mousedown="dialogMultiSelect(dialogMessage.peerString, $event)"></i>
+  
   <div class="im_dialog_photo pull-left" my-peer-photolink="::dialogMessage.peerID" img-class="im_dialog_photo" watch="true" for-dialog="!dialogMessage.foundInHistory"></div>
 
   <div class="im_dialog_message_wrap">

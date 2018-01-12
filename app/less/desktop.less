@@ -964,6 +964,26 @@ a.footer_link.active:active {
 
 .icon-select-tick {
   display: none;
+
+  .im_dialogs_modal_list .im_dialog_wrap .im_dialog &{
+    display: block;
+    margin: 10px 5px 0 -5px;
+    position: relative;
+    float: left;
+    width: 26px;
+    height: 26px;
+    .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+    background-position: -9px -481px;
+    opacity: 0.5;
+  }
+
+  .im_dialogs_modal_list .im_dialog_wrap:hover .im_dialog &{
+    opacity: 0.75;
+  }
+
+  &.dialog_selected{
+    opacity: 1 !important;
+  }
 }
 
 @media (min-width: 900px) {
