@@ -1,7 +1,7 @@
 {
   "name": "Telegram",
   "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
-  "version": "0.7",
+  "version": "0.7.0",
   "main": "app/index.html",
   "single-instance": true,
   "dom_storage_quota": 40,
