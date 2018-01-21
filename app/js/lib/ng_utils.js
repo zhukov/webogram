@@ -609,7 +609,7 @@ angular.module('izhukov.utils', [])
     }
 
     function isAvailable () {
-      return Config.allow_tmpfs && storageIsAvailable
+      return Config.Modes.allow_tmpfs && storageIsAvailable
     }
 
     function getFile (fileName, size) {
