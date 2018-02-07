@@ -1527,9 +1527,9 @@ angular.module('myApp.services')
           }
           
           if (migrateFrom &&
-            migrateTo &&
-            !migratedFromTo[migrateFrom] &&
-            !migratedToFrom[migrateTo]) {
+              migrateTo &&
+              !migratedFromTo[migrateFrom] &&
+              !migratedToFrom[migrateTo]) {
             migrateChecks(migrateFrom, migrateTo)
           }
         }
@@ -1552,6 +1552,7 @@ angular.module('myApp.services')
       if (!angular.isString(text)) {
         return
       }
+      peerID = AppPeersManager.getPeerMigratedTo(peerID) || peerID
       options = options || {}
       var entities = options.entities || []
       if (!options.viaBotID) {
@@ -1740,6 +1741,7 @@ angular.module('myApp.services')
     }
 
     function sendFile (peerID, file, options) {
+      peerID = AppPeersManager.getPeerMigratedTo(peerID) || peerID
       options = options || {}
       var messageID = tempID--
       var randomID = [nextRandomInt(0xFFFFFFFF), nextRandomInt(0xFFFFFFFF)]
@@ -1924,6 +1926,7 @@ angular.module('myApp.services')
     }
 
     function sendOther (peerID, inputMedia, options) {
+      peerID = AppPeersManager.getPeerMigratedTo(peerID) || peerID
       options = options || {}
 
       var messageID = tempID--
@@ -2126,6 +2129,7 @@ angular.module('myApp.services')
     }
 
     function forwardMessages (peerID, mids, options) {
+      peerID = AppPeersManager.getPeerMigratedTo(peerID) || peerID
       mids = mids.sort()
       options = options || {}
 

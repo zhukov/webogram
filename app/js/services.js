@@ -1019,6 +1019,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         : AppChatsManager.getChatPhoto(-peerID)
     }
 
+    function getPeerMigratedTo(peerID) {
+      if (peerID >= 0) {
+        return false
+      }
+      var chat = AppChatsManager.getChat(-peerID)
+      if (chat && chat.migrated_to && chat.pFlags.deactivated) {
+        return getPeerID(chat.migrated_to)
+      }
+      return false
+    }
+
     function isChannel (peerID) {
       return (peerID < 0) && AppChatsManager.isChannel(-peerID)
     }
@@ -1048,6 +1059,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getPeerID: getPeerID,
       getPeer: getPeer,
       getPeerPhoto: getPeerPhoto,
+      getPeerMigratedTo: getPeerMigratedTo,
       resolveUsername: resolveUsername,
       isChannel: isChannel,
       isAnyGroup: isAnyGroup,

@@ -1293,6 +1293,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function applyDialogSelect (newDialog, oldDialog) {
       peerID = $rootScope.selectedPeerID = newDialog.peerID
+      var migratedToPeer = AppPeersManager.getPeerMigratedTo(peerID)
+      if (migratedToPeer) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: AppPeersManager.getPeerString(migratedToPeer)
+        })
+        return
+      }
       $scope.historyFilter.mediaType = false
 
       AppPeersManager.getInputPeer(newDialog.peer || $scope.curDialog.peer || '')
