@@ -1308,8 +1308,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       selectedCancel(true)
 
       if (oldDialog.peer &&
-        oldDialog.peer == newDialog.peer &&
-        newDialog.messageID) {
+          oldDialog.peer == newDialog.peer &&
+          newDialog.messageID) {
         messageFocusHistory()
       } else if (peerID) {
         updateHistoryPeer(true)
@@ -4800,7 +4800,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, $rootScope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
+  .controller('ContactsModalController', function ($scope, $rootScope, $timeout, $modal, $modalInstance, MtpApiManager, AppPeersManager, AppUsersManager, ErrorService) {
     $scope.contacts = []
     $scope.foundPeers = []
     $scope.search = {}
@@ -4852,20 +4852,25 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('contacts_change')
       })
 
-      if (query && query.length >= 5) {
+      if (query && query.length >= 2) {
         $timeout(function () {
           if (curJump != jump) return
           MtpApiManager.invokeApi('contacts.search', {q: query, limit: 10}).then(function (result) {
             AppUsersManager.saveApiUsers(result.users)
             if (curJump != jump) return
-            angular.forEach(result.results, function (contactFound) {
-              var userID = contactFound.user_id
-              if (doneIDs.indexOf(userID) != -1) return
+            var myPeersLen = result.my_results.length
+            var foundPeers = result.my_results.concat(result.results)
+            angular.forEach(foundPeers, function (peerFound, i) {
+              var peerID = AppPeersManager.getPeerID(peerFound)
+              if (peerID <= 0 ||
+                  doneIDs.indexOf(peerID) != -1) {
+                return
+              }
               $scope.contacts.push({
-                userID: userID,
-                user: AppUsersManager.getUser(userID),
-                peerString: AppUsersManager.getUserString(userID),
-                found: true
+                userID: peerID,
+                user: AppUsersManager.getUser(peerID),
+                peerString: AppUsersManager.getUserString(peerID),
+                found: i >= myPeersLen
               })
             })
           }, function (error) {
