@@ -21,6 +21,7 @@ angular.module('myApp.services')
     var pendingTopMsgs = {}
     var sendFilePromise = $q.when()
     var tempID = -1
+    var tempFinalizeCallbacks = {}
 
     var dialogsIndex = SearchIndexManager.createIndex()
     var cachedResults = {query: false}
@@ -994,8 +995,7 @@ angular.module('myApp.services')
     }
 
     function canEditMessage(messageID) {
-      if (messageID <= 0 ||
-          !messagesStorage[messageID]) {
+      if (!messagesStorage[messageID]) {
         return false
       }
       var message = messagesStorage[messageID]
@@ -2311,10 +2311,23 @@ angular.module('myApp.services')
         delete messagesForHistory[tempID]
         delete messagesStorage[tempID]
 
+        finalizePendingMessageCallbacks(tempID, finalMessage.mid)
+
         return message
       }
 
       return false
+    }
+
+    function finalizePendingMessageCallbacks(tempID, mid) {
+      var callbacks = tempFinalizeCallbacks[tempID]
+      console.warn(dT(), callbacks, tempID)
+      if (callbacks !== undefined) {
+        angular.forEach(callbacks, function (callback) {
+          callback(mid)
+        })
+        delete tempFinalizeCallbacks[tempID]
+      }
     }
 
     function getInputEntities(entities) {
@@ -2332,6 +2345,21 @@ angular.module('myApp.services')
       if (!angular.isString(text) ||
           !canEditMessage(messageID)) {
         return $q.reject()
+      }
+      if (messageID < 0) {
+        if (tempFinalizeCallbacks[messageID] === undefined) {
+          tempFinalizeCallbacks[messageID] = {}
+        }
+        var deferred = $q.defer()
+        tempFinalizeCallbacks[messageID].edit = function (mid) {
+          console.log('invoke callback', mid)
+          editMessage(mid, text).then(function (result) {
+            deferred.resolve(result)
+          }, function (error) {
+            deferred.reject(error)
+          })
+        }
+        return deferred.promise
       }
       var entities = []
       text = RichTextProcessor.parseMarkdown(text, entities)
@@ -3126,6 +3154,8 @@ angular.module('myApp.services')
               msgs[tempID] = true
 
               $rootScope.$broadcast('history_delete', {peerID: peerID, msgs: msgs})
+
+              finalizePendingMessageCallbacks(tempID, finalMessage.mid)
             } else {
               pendingByMessageID[mid] = randomID
             }
