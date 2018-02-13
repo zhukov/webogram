@@ -1925,7 +1925,7 @@ angular.module('izhukov.utils', [])
     }
 
     function wrapUrl (url, unsafe) {
-      if (!url.match(/^(https?|tg):\/\//i)) {
+      if (!url.match(/^https?:\/\//i)) {
         url = 'http://' + url
       }
       var tgMeMatch

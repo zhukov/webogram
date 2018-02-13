@@ -4797,6 +4797,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               url.search('https://t.me/') === 0) {
             target = '_self'
           }
+          else if (!url.match(/^https?:\/\//)) {
+            url = 'http://' + url
+          }
           var popup = window.open(url, target)
           try {
             popup.opener = null;
