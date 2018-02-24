@@ -73,7 +73,8 @@
     "phantomjs-prebuilt": "^2.1.14",
     "run-sequence": "^1.0.2",
     "st": "^0.5.2",
-    "sw-precache": "^3.2.0"
+    "sw-precache": "^3.2.0",
+    "webpack": "^3.11.0"
   },
   "standard": {
     "globals": [
@@ -81,5 +82,8 @@
       "$",
       "chrome"
     ]
+  },
+  "dependencies": {
+    "gulp-webpack": "^1.5.0"
   }
 }

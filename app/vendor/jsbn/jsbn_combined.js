@@ -12,10 +12,10 @@ var canary = 0xdeadbeefcafe;
 var j_lm = ((canary&0xffffff)==0xefcafe);
 
 // (public) Constructor
-function BigInteger(a,b,c) {
+export function BigInteger(a,b,c) {
   if(a != null)
-    if("number" == typeof a) this.fromNumber(a,b,c);
-    else if(b == null && "string" != typeof a) this.fromString(a,256);
+    if('number' == typeof a) this.fromNumber(a,b,c);
+    else if(b == null && 'string' != typeof a) this.fromString(a,256);
     else this.fromString(a,b);
 }
 
@@ -67,11 +67,11 @@ function am3(i,x,w,j,c,n) {
   }
   return c;
 }
-if(j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
+if(j_lm && (navigator.appName == 'Microsoft Internet Explorer')) {
   BigInteger.prototype.am = am2;
   dbits = 30;
 }
-else if(j_lm && (navigator.appName != "Netscape")) {
+else if(j_lm && (navigator.appName != 'Netscape')) {
   BigInteger.prototype.am = am1;
   dbits = 26;
 }
@@ -90,14 +90,14 @@ BigInteger.prototype.F1 = BI_FP-dbits;
 BigInteger.prototype.F2 = 2*dbits-BI_FP;
 
 // Digit conversions
-var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
+var BI_RM = '0123456789abcdefghijklmnopqrstuvwxyz';
 var BI_RC = new Array();
 var rr,vv;
-rr = "0".charCodeAt(0);
+rr = '0'.charCodeAt(0);
 for(vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
-rr = "a".charCodeAt(0);
+rr = 'a'.charCodeAt(0);
 for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-rr = "A".charCodeAt(0);
+rr = 'A'.charCodeAt(0);
 for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
 
 function int2char(n) { return BI_RM.charAt(n); }
@@ -141,7 +141,7 @@ function bnpFromString(s,b,signed) {
   while(--i >= 0) {
     var x = (k==8)?s[i]&0xff:intAt(s,i);
     if(x < 0) {
-      if(s.charAt(i) == "-") mi = true;
+      if(s.charAt(i) == '-') mi = true;
       continue;
     }
     mi = false;
@@ -173,7 +173,7 @@ function bnpClamp() {
 
 // (public) return string representation in given radix
 function bnToString(b) {
-  if(this.s < 0) return "-"+this.negate().toString(b);
+  if(this.s < 0) return '-'+this.negate().toString(b);
   var k;
   if(b == 16) k = 4;
   else if(b == 8) k = 3;
@@ -181,7 +181,7 @@ function bnToString(b) {
   else if(b == 32) k = 5;
   else if(b == 4) k = 2;
   else return this.toRadix(b);
-  var km = (1<<k)-1, d, m = false, r = "", i = this.t;
+  var km = (1<<k)-1, d, m = false, r = '', i = this.t;
   var p = this.DB-(i*this.DB)%k;
   if(i-- > 0) {
     if(p < this.DB && (d = this[i]>>p) > 0) { m = true; r = int2char(d); }
@@ -198,7 +198,7 @@ function bnToString(b) {
       if(m) r += int2char(d);
     }
   }
-  return m?r:"0";
+  return m?r:'0';
 }
 
 // (public) -this
@@ -604,10 +604,10 @@ function bnSigNum() {
 // (protected) convert to radix string
 function bnpToRadix(b) {
   if(b == null) b = 10;
-  if(this.signum() == 0 || b < 2 || b > 36) return "0";
+  if(this.signum() == 0 || b < 2 || b > 36) return '0';
   var cs = this.chunkSize(b);
   var a = Math.pow(b,cs);
-  var d = nbv(a), y = nbi(), z = nbi(), r = "";
+  var d = nbv(a), y = nbi(), z = nbi(), r = '';
   this.divRemTo(d,y,z);
   while(y.signum() > 0) {
     r = (a+z.intValue()).toString(b).substr(1) + r;
@@ -625,7 +625,7 @@ function bnpFromRadix(s,b) {
   for(var i = 0; i < s.length; ++i) {
     var x = intAt(s,i);
     if(x < 0) {
-      if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
+      if(s.charAt(i) == '-' && this.signum() == 0) mi = true;
       continue;
     }
     w = b*w+x;
@@ -645,7 +645,7 @@ function bnpFromRadix(s,b) {
 
 // (protected) alternate constructor
 function bnpFromNumber(a,b,c) {
-  if("number" == typeof b) {
+  if('number' == typeof b) {
     // new BigInteger(int,int,RNG)
     if(a < 2) this.fromInt(1);
     else {
@@ -1242,7 +1242,7 @@ function rng_seed_int(x) {
 }
 
 // Mix in the current time (w/milliseconds) into the pool
-function rng_seed_time() {
+export function rng_seed_time() {
   rng_seed_int(new Date().getTime());
 }
 
@@ -1259,7 +1259,7 @@ if(rng_pool == null) {
     for(t = 0; t < 32; ++t)
       rng_pool[rng_pptr++] = ua[t];
   }
-  if(navigator.appName == "Netscape" && navigator.appVersion < "5" && global && global.crypto) {
+  if(navigator.appName == 'Netscape' && navigator.appVersion < '5' && global && global.crypto) {
     // Extract entropy (256 bits) from NS4 RNG if available
     var z = global.crypto.random(32);
     for(t = 0; t < z.length; ++t)
@@ -1295,7 +1295,7 @@ function rng_get_bytes(ba) {
   for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
 }
 
-function SecureRandom() {}
+export function SecureRandom() {}
 
 SecureRandom.prototype.nextBytes = rng_get_bytes;
 
