@@ -7,7 +7,8 @@
  */
 
 var _logTimer = (new Date()).getTime();
-function dT () {
+
+export function dT () {
   return '[' + (((new Date()).getTime() - _logTimer) / 1000).toFixed(3) + ']';
 }
 
@@ -70,6 +71,8 @@ function cancelEvent (event) {
 
   return false;
 }
+
+window.cancelEvent = cancelEvent;
 
 function hasOnclick (element) {
   if (element.onclick ||
@@ -359,7 +362,7 @@ function onContentLoaded (cb) {
 
 window.onContentLoaded = onContentLoaded;
 
-function tsNow (seconds) {
+export function tsNow (seconds) {
   var t = +new Date() + (window.tsOffset || 0);
   return seconds ? Math.floor(t / 1000) : t;
 }
@@ -443,7 +446,7 @@ function templateUrl (tplName) {
 
 window.templateUrl = templateUrl;
 
-function encodeEntities (value) {
+export function encodeEntities (value) {
   return value.replace(/&/g, '&amp;').replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (value) {
     var hi = value.charCodeAt(0);
     var low = value.charCodeAt(1);

@@ -104,18 +104,12 @@ gulp.task('copy', function () {
       .pipe(gulp.dest('dist/vendor/closure')),
     gulp.src(['app/css/desktop.css', 'app/css/mobile.css'])
       .pipe(gulp.dest('dist/css')),
-    gulp.src('app/vendor/jsbn/jsbn_combined.js')
-      .pipe(gulp.dest('dist/vendor/jsbn')),
-    gulp.src('app/vendor/leemon_bigint/bigint.js')
-      .pipe(gulp.dest('dist/vendor/leemon_bigint')),
-    gulp.src('app/vendor/rusha/rusha.js')
-      .pipe(gulp.dest('dist/vendor/rusha')),
-    gulp.src('app/vendor/cryptoJS/crypto.js')
-      .pipe(gulp.dest('dist/vendor/cryptoJS')),
     gulp.src(['app/nacl/mtproto_crypto.pexe', 'app/nacl/mtproto_crypto.nmf'])
       .pipe(gulp.dest('dist/nacl/')),
     gulp.src('app/js/background.js')
-      .pipe(gulp.dest('dist/js'))
+      .pipe(gulp.dest('dist/js')),
+    gulp.src('app/vendor/recorderjs/encoder_worker.js')
+      .pipe(gulp.dest('dist/vendor/recorderjs/'))
   );
 });
 

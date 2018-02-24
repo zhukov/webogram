@@ -26,8 +26,7 @@ module.exports = {
   plugins: [
     new webpack.IgnorePlugin(/^fs$/),
     new webpack.ProvidePlugin({
-      $: 'jquery/jquery.min',
-      jQuery: 'jquery/jquery.min.js',
+      CryptoJS: 'exports-loader?CryptoJS!cryptoJS/crypto',
     })
   ]
 

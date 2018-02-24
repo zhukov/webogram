@@ -1,15 +1,16 @@
-/* globals angular, CryptoJS, Rusha, BlobBuilder, Zlib */
+/* globals angular, CryptoJS, BlobBuilder */
 /*!
  * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
-
+import Rusha from 'rusha/rusha';
 import { BigInteger, SecureRandom } from 'jsbn/jsbn_combined';
 import { bigInt2str, str2bigInt, bpe, copyInt_, copy_, isZero, add_, greater,
     sub_, rightShift_, eGCD_, equalsInt, powMod, one, divide_ } from 'leemon_bigint/bigint';
 import { goog } from 'closure/long';
+import { Zlib } from 'zlib/gunzip.min';
 
 var rushaInstance = null;
 
@@ -134,7 +135,7 @@ export function dataUrlToBlob (url) {
   return blob;
 }
 
-function blobConstruct (blobParts, mimeType) {
+export function blobConstruct (blobParts, mimeType) {
   var blob;
   var safeMimeType = blobSafeMimeType(mimeType);
   try {
@@ -149,7 +150,7 @@ function blobConstruct (blobParts, mimeType) {
   return blob;
 }
 
-function blobSafeMimeType(mimeType) {
+export function blobSafeMimeType(mimeType) {
   if ([
     'image/jpeg',
     'image/png',
@@ -370,7 +371,7 @@ export function rsaEncrypt (publicKey, bytes) {
   return encryptedBytes;
 }
 
-function addPadding (bytes, blockSize, zeroes) {
+export function addPadding (bytes, blockSize, zeroes) {
   blockSize = blockSize || 16;
   var len = bytes.byteLength || bytes.length;
   var needPadding = blockSize - (len % blockSize);

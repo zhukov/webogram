@@ -1,9 +1,17 @@
+/* globals Config, ConfigStorage, angular, chrome, setZeroTimeout, $, Exception,
+            WebPDecoder, EmojiHelper */
 /*!
  * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
+import { convertToUint8Array,
+    bytesToArrayBuffer, aesDecryptSync, aesEncryptSync, blobSafeMimeType,
+    blobConstruct, bytesToBase64, dataUrlToBlob, sha1HashSync, sha256HashSync,
+    addPadding, convertToArrayBuffer, bytesModPow, pqPrimeFactorization,
+    convertToByteArray } from './bin_utils';
+import { dT, tsNow, encodeEntities } from './utils';
 
 angular.module('izhukov.utils', [])
 
@@ -90,7 +98,7 @@ angular.module('izhukov.utils', [])
       var deferred = $q.defer();
 
       fileWriter.onwriteend = function (e) {
-        deferred.resolve();
+        deferred.resolve(e);
       };
       fileWriter.onerror = function (e) {
         deferred.reject(e);
@@ -345,8 +353,13 @@ angular.module('izhukov.utils', [])
   })
 
   .service('IdbFileStorage', function ($q, $window, FileManager) {
-    $window.indexedDB = $window.indexedDB || $window.webkitIndexedDB || $window.mozIndexedDB || $window.OIndexedDB || $window.msIndexedDB;
-    $window.IDBTransaction = $window.IDBTransaction || $window.webkitIDBTransaction || $window.OIDBTransaction || $window.msIDBTransaction;
+    if (!$window.indexedDB) {
+      $window.indexedDB = $window.indexedDB || $window.webkitIndexedDB || $window.mozIndexedDB || $window.OIndexedDB || $window.msIndexedDB;
+    }
+
+    if (!$window.IDBTransaction) {
+      $window.IDBTransaction = $window.IDBTransaction || $window.webkitIDBTransaction || $window.OIDBTransaction || $window.msIDBTransaction;
+    }
 
     var dbName = 'cachedFiles';
     var dbStoreName = 'files';
@@ -397,7 +410,7 @@ angular.module('izhukov.utils', [])
         }
       }, 3000);
 
-      request.onsuccess = function (event) {
+      request.onsuccess = function () {
         finished = true;
         var db = request.result;
 
@@ -454,7 +467,7 @@ angular.module('izhukov.utils', [])
 
         var deferred = $q.defer();
 
-        request.onsuccess = function (event) {
+        request.onsuccess = function () {
           deferred.resolve(blob);
         };
 
@@ -520,7 +533,7 @@ angular.module('izhukov.utils', [])
 
       var deferred = $q.defer();
 
-      request.onsuccess = function (event) {
+      request.onsuccess = function () {
         deferred.resolve();
       };
 
@@ -583,7 +596,7 @@ angular.module('izhukov.utils', [])
     $window.requestFileSystem = $window.requestFileSystem || $window.webkitRequestFileSystem;
 
     var reqFsPromise,
-      fileSystem;
+      cachedFs;
     var storageIsAvailable = $window.requestFileSystem !== undefined;
 
     function requestFS () {
@@ -743,8 +756,8 @@ angular.module('izhukov.utils', [])
 
       // console.log('[webpjs] status code', decoder.VP8StatusCode)
       var StatusCode = decoder.VP8StatusCode;
+      var status = decoder.WebPGetFeatures(data, data.length, bitstream);
 
-      status = decoder.WebPGetFeatures(data, data.length, bitstream);
       if (status != (StatusCode.VP8_STATUS_OK || 0)) {
         console.error('[webpjs] status error', status, StatusCode);
       }
@@ -759,7 +772,7 @@ angular.module('izhukov.utils', [])
         status = e;
       }
 
-      ok = (status == 0);
+      var ok = (status == 0);
       if (!ok) {
         console.error('[webpjs] decoding failed', status, StatusCode);
         return false;
@@ -846,7 +859,7 @@ angular.module('izhukov.utils', [])
       navigator.mimeTypes &&
       navigator.mimeTypes['application/x-pnacl'] !== undefined) {
       var listener = $('<div id="nacl_listener"><embed id="mtproto_crypto" width="0" height="0" src="nacl/mtproto_crypto.nmf" type="application/x-pnacl" /></div>').appendTo($('body'))[0];
-      listener.addEventListener('load', function (e) {
+      listener.addEventListener('load', function () {
         naClEmbed = listener.firstChild;
         console.log(dT(), 'NaCl ready');
       }, true);
@@ -1051,7 +1064,7 @@ angular.module('izhukov.utils', [])
     function onEvent (e) {
       // console.log('event', e.type)
       if (e.type == 'mousemove') {
-        var e = e.originalEvent || e;
+        e = e.originalEvent || e;
         if (e && e.movementX === 0 && e.movementY === 0) {
           return;
         }
@@ -1324,10 +1337,10 @@ angular.module('izhukov.utils', [])
               length: match[4].length
             });
           } else {
-            var url = false;
             var protocol = match[5];
             var tld = match[6];
             var excluded = '';
+            url = false;
 
             if (tld) { // URL
               if (!protocol && (tld.substr(0, 4) === 'xn--' || Config.TLD.indexOf(tld.toLowerCase()) !== -1)) {
@@ -1412,7 +1425,7 @@ angular.module('izhukov.utils', [])
     }
 
     function parseMarkdown (text, entities, noTrim) {
-           if (!markdownTestRegExp.test(text)) {
+      if (!markdownTestRegExp.test(text)) {
         return noTrim ? text : text.trim();
       }
       var raw = text;
@@ -1420,11 +1433,11 @@ angular.module('izhukov.utils', [])
       var newText = [];
       var rawOffset = 0;
       var matchIndex;
-      while (match = raw.match(markdownRegExp)) {
+      while ((match = raw.match(markdownRegExp))) {
         matchIndex = rawOffset + match.index;
         newText.push(raw.substr(0, match.index));
 
-        var text = (match[3] || match[8] || match[11]);
+        text = (match[3] || match[8] || match[11]);
         rawOffset -= text.length;
         text = text.replace(/^\s+|\s+$/g, '');
         rawOffset += text.length;
@@ -2088,7 +2101,7 @@ angular.module('izhukov.utils', [])
             pushSubscriptionNotify('unsubscribe', subscription);
 
             setTimeout(function() {
-              subscription.unsubscribe().then(function(successful) {
+              subscription.unsubscribe().then(function() {
                 isPushEnabled = false;
               }).catch(function(e) {
                 console.error('Unsubscription error: ', e);

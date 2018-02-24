@@ -448,7 +448,7 @@ function multMod(x,y,n) {
 //generate a k-bit true random prime using Maurer's algorithm,
 //and put it into ans.  The bigInt ans must be large enough to hold it.
 function randTruePrime_(ans,k) {
-  var c,m,pm,dd,j,r,B,divisible,z,zz,recSize;
+  var c,m,pm,dd,j,r,B,divisible,z,zz,recSize,recLimit,w;
 
   if (primes.length==0)
     primes=findPrimes(30000);  //check for divisibility by primes <=30000
@@ -614,7 +614,7 @@ function GCD(x,y) {
 //set x to the greatest common divisor of bigInts x and y (each with same number of elements).
 //y is destroyed.
 function GCD_(x,y) {
-  var i,xp,yp,A,B,C,D,q,sing;
+  var i,xp,yp,A,B,C,D,q,sing,qp;
   if (T.length!=x.length)
     T=dup(x);
 
@@ -840,7 +840,8 @@ function negative(x) {
 //shift is a nonnegative integer
 function greaterShift(x,y,shift) {
   var i, kx=x.length, ky=y.length;
-  k=((kx+shift)<ky) ? (kx+shift) : ky;
+  var k = ((kx+shift)<ky) ? (kx+shift) : ky;
+
   for (i=ky-1-shift; i<kx && i>=0; i++)
     if (x[i]>0)
       return 1; //if there are nonzeros in x to the left of the first column of y, then x is bigger

@@ -44,6 +44,7 @@
   "devDependencies": {
     "del": "^1.2.0",
     "event-stream": "^3.1.0",
+    "exports-loader": "^0.7.0",
     "gulp": "^3.9.0",
     "gulp-angular-templatecache": "^1.1.0",
     "gulp-concat": "^2.1.7",

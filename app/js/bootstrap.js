@@ -1,3 +1,4 @@
+import './jquery_loader';
 import './lib/polyfill.js';
 import './lib/config.js';
 import './offline_manager.js';
@@ -11,23 +12,13 @@ import '../vendor/angular/angular-touch.js';
 import '../vendor/ui-bootstrap/ui-bootstrap-custom-tpls-0.12.0.js';
 import '../vendor/angular-media-player/angular-media-player.js';
 
-import '../vendor/jsbn/jsbn_combined.js';
-import '../vendor/cryptoJS/crypto.js';
-import '../vendor/rusha/rusha.js';
-import '../vendor/zlib/gunzip.min.js';
-import '../vendor/closure/long.js';
-import '../vendor/leemon_bigint/bigint.js';
 import '../vendor/libwebpjs/libwebp-0.2.0.js';
 import '../vendor/angularjs-toaster/toaster.js';
 import '../vendor/clipboard/clipboard.js';
 
-import '../vendor/ogv.js/ogv.js';
-import '../vendor/ogv.js/ogv-demuxer-ogg.js';
-import '../vendor/ogv.js/ogv-decoder-audio-opus.js';
-import '../vendor/ogv.js/ogv-decoder-audio-vorbis.js';
-import '../vendor/ogv.js/ogv-support.js';
-
-import '../vendor/recorderjs/recorder.min.js';
+import 'ogv.js/ogv.js';
+import 'ogv.js/ogv-support.js';
+import './ogv_loader';
 
 import './lib/utils.js';
 import './lib/bin_utils.js';

@@ -1206,7 +1206,7 @@ angular.module('izhukov.mtproto', ['izhukov.utils'])
 
           self.checkLongPoll();
 
-          this.checkConnectionPeriod = Math.max(1.1, Math.sqrt(this.checkConnectionPeriod));
+          self.checkConnectionPeriod = Math.max(1.1, Math.sqrt(self.checkConnectionPeriod));
         });
       }, function (error) {
         console.error('Encrypted request failed', error);
