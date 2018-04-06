@@ -206,7 +206,7 @@
               </div>
             </div>
 
-            <div class="im_send_panel_wrap noselect" ng-show="!historyState.actions()">
+            <div class="im_send_panel_wrap noselect" ng-show="!historyState.actions() &amp;&amp; !historyPeer.data.pFlags.deleted">
 
               <div class="im_send_form_wrap1">
 
