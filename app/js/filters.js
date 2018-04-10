@@ -133,6 +133,18 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   })
 
+  .filter('mediumDateTime', function ($filter) {
+    var cachedDates = {}
+    var dateFilter = $filter('date')
+    return function (timestamp) {
+      if (cachedDates[timestamp]) {
+        return cachedDates[timestamp]
+      }
+
+      return cachedDates[timestamp] = dateFilter(timestamp * 1000, 'medium')
+    }
+  })
+
   .filter('duration', [function () {
     return function (duration) {
       duration = parseInt(duration)
