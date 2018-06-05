@@ -106,6 +106,14 @@ angular.module('myApp.filters', ['myApp.i18n'])
     }
   })
 
+  .filter('dateMedium', function ($filter) {
+    var dateFilter = $filter('date')
+    return function (timestamp, extended) {
+      var ticks = timestamp * 1000
+      return dateFilter(ticks, 'medium')
+    }
+  })
+
   .filter('time', function ($filter) {
     var cachedDates = {}
     var dateFilter = $filter('date')
