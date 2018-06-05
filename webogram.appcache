@@ -5,9 +5,6 @@ CACHE:
 favicon.ico
 favicon_unread.ico
 service_worker.js
-css/app.css
-css/desktop.css
-css/mobile.css
 img/Manytabs.png
 img/Manytabs_2x.png
 img/Telegram.png
@@ -25,6 +22,9 @@ img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
 img/sound_a.mp3
+css/app.css
+css/desktop.css
+css/mobile.css
 js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
@@ -75,8 +75,8 @@ js/locales/it-it.json
 js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
-vendor/cryptoJS/crypto.js
 vendor/closure/long.js
+vendor/cryptoJS/crypto.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/recorderjs/encoder_worker.js
@@ -95,4 +95,4 @@ http://*
 https://*
 *
 
-# hash: 1a6a93f2a7e580a36512090636fa69aa2d00e18cdab1772b46b0bfa74b7582c1
+# hash: d7899eff121a99648004fb5ce57cfd2b765c52d56e1bbe271e62c5d8342394ef
