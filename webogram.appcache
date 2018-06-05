@@ -75,8 +75,8 @@ js/locales/it-it.json
 js/locales/nl-nl.json
 js/locales/pt-br.json
 js/locales/ru-ru.json
-vendor/closure/long.js
 vendor/cryptoJS/crypto.js
+vendor/closure/long.js
 vendor/jsbn/jsbn_combined.js
 vendor/leemon_bigint/bigint.js
 vendor/recorderjs/encoder_worker.js
@@ -95,4 +95,4 @@ http://*
 https://*
 *
 
-# hash: d6461c26872b1802cc44eadcd9cad08fa8835de00e0a203ce509545ccf7a354d
+# hash: 1a6a93f2a7e580a36512090636fa69aa2d00e18cdab1772b46b0bfa74b7582c1
