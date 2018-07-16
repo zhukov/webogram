@@ -1,4 +1,4 @@
-<div ng-switch="::media.document.type">
+<div ng-switch="::media.document.type" data-doc-id="{{::media.document.id}}">
 
   <div ng-switch-when="gif" my-load-gif document="media.document"></div>
 

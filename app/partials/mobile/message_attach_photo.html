@@ -1,4 +1,5 @@
-<a class="im_message_photo_thumb" ng-click="openPhoto(media.photo.id, {m: messageId})" ng-style="::{width: media.photo.thumb.width + 'px'}" ng-mouseover="preloadPhoto(media.photo.id)">
+<a class="im_message_photo_thumb" ng-click="openPhoto(media.photo.id, {m: messageId})" ng-style="::{width: media.photo.thumb.width + 'px'}" ng-mouseover="preloadPhoto(media.photo.id)" data-photo-id="{{::media.photo.id}}">
+
   <img
     class="im_message_photo_thumb"
     my-load-thumb

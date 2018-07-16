@@ -1,4 +1,4 @@
-<div class="im_message_outer_wrap hasselect" ng-click="toggleMessage(historyMessage.mid, $event)">
+ <div class="im_message_outer_wrap hasselect" ng-click="toggleMessage(historyMessage.mid, $event)" data-msg-id="{{::historyMessage.id}}">
 
   <div class="im_message_wrap clearfix" ng-switch="::historyMessage._ == 'messageService'">
 
