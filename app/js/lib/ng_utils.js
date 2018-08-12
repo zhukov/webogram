@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.7.1 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -56,8 +56,10 @@ angular.module('izhukov.utils', [])
   .service('FileManager', function ($window, $q, $timeout, qSync) {
     $window.URL = $window.URL || $window.webkitURL
     $window.BlobBuilder = $window.BlobBuilder || $window.WebKitBlobBuilder || $window.MozBlobBuilder
-    var buggyUnknownBlob = navigator.userAgent.indexOf('Safari') != -1 &&
-      navigator.userAgent.indexOf('Chrome') == -1
+    var isSafari = 'safari' in window
+    var safariVersion = parseFloat(isSafari && (navigator.userAgent.match(/Version\/(\d+\.\d+).* Safari/) || [])[1])
+    var safariWithDownload = isSafari && safariVersion >= 11.0
+    var buggyUnknownBlob = isSafari && !safariWithDownload
 
     var blobSupported = true
 
@@ -284,7 +286,7 @@ angular.module('izhukov.utils', [])
       }
 
       var popup = false
-      if (window.safari) {
+      if (isSafari && !safariWithDownload) {
         popup = window.open()
       }
 
@@ -297,7 +299,9 @@ angular.module('izhukov.utils', [])
         }
         var anchor = document.createElementNS('http://www.w3.org/1999/xhtml', 'a')
         anchor.href = url
-        anchor.target = '_blank'
+        if (!safariWithDownload) {
+          anchor.target = '_blank'
+        }
         anchor.download = fileName
         if (anchor.dataset) {
           anchor.dataset.downloadurl = ['video/quicktime', fileName, url].join(':')
@@ -1024,6 +1028,9 @@ angular.module('izhukov.utils', [])
     } else if (typeof document.webkitHidden !== 'undefined') {
       hidden = 'webkitHidden'
       visibilityChange = 'webkitvisibilitychange'
+    }
+    if (!Config.Mobile) {
+      visibilityChange = ''
     }
 
     return {
@@ -1918,7 +1925,7 @@ angular.module('izhukov.utils', [])
     }
 
     function wrapUrl (url, unsafe) {
-      if (!url.match(/^(https?|tg):\/\//i)) {
+      if (!url.match(/^https?:\/\//i)) {
         url = 'http://' + url
       }
       var tgMeMatch
@@ -1927,7 +1934,8 @@ angular.module('izhukov.utils', [])
         url = 'tg://unsafe_url?url=' + encodeURIComponent(url)
       }
       else if ((tgMeMatch = url.match(/^https?:\/\/t(?:elegram)?\.me\/(.+)/))) {
-        var path = tgMeMatch[1].split('/')
+        var fullPath = tgMeMatch[1]
+        var path = fullPath.split('/')
         switch (path[0]) {
           case 'joinchat':
             url = 'tg://join?invite=' + path[1]
@@ -1939,9 +1947,21 @@ angular.module('izhukov.utils', [])
             if (path[1] && path[1].match(/^\d+$/)) {
               url = 'tg://resolve?domain=' + path[0] + '&post=' + path[1]
             }
-            else if (!path[1]) {
+            else if (path.length == 1) {
               var domainQuery = path[0].split('?')
-              url = 'tg://resolve?domain=' + domainQuery[0] + (domainQuery[1] ? '&' + domainQuery[1] : '')
+              var domain = domainQuery[0]
+              var query = domainQuery[1]
+              if (domain == 'iv') {
+                var match = (query || '').match(/url=([^&=]+)/)
+                if (match) {
+                  url = match[1]
+                  try {
+                    url = decodeURIComponent(url)
+                  } catch (e) {}
+                  return wrapUrl(url, unsafe)
+                }
+              }
+              url = 'tg://resolve?domain=' + domain + (query ? '&' + query : '')
             }
         }
       }

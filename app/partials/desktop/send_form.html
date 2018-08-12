@@ -1,0 +1,70 @@
+<form class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length, composer_progress_enabled: draftMessage.inlineProgress, im_voice_recording: voiceRecorder.recording, im_processing_recording: voiceRecorder.processing}">
+
+  <div class="im_send_form_inline_results" my-inline-results="inlineResults"></div>
+
+  <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMsgID > 0">
+    <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear(true)"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+    <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMsgID" watch="true" edit="{{draftMessage.type == 'edit'}}"></a>
+  </div>
+
+  <div class="im_send_reply_wrap im_send_fwds_wrap" ng-if="draftMessage.fwdMessages.length > 0">
+    <a class="im_send_reply_cancel" ng-mousedown="draftMessage.fwdsClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
+    <div class="im_message_reply_wrap" my-forwarded-messages="draftMessage.fwdMessages"></div>
+  </div>
+
+  <div class="im_send_field_wrap hasselect" ng-class="replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">
+    <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
+    <div class="composer_progress_icon_wrap">
+      <div class="composer_progress_icon" my-arc-progress width="22" stroke="2.5"></div>
+    </div>
+    <a class="composer_command_btn" ng-show="!replyKeyboard && commands.list.length > 0 && (!draftMessage.text.length || draftMessage.text == '/')" ng-mousedown="draftMessage.toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
+    <a class="composer_keyboard_btn" ng-show="replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="draftMessage.replyKeyboardToggle($event)" ng-class="!replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
+
+    <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
+    <div class="im_voice_recorder_wrap">
+      <div class="im_recorder_indicator"><i></i></div>
+      <div class="im_recorder_time" ng-bind="voiceRecorder.duration | duration"></div>
+      <div class="im_recorder_label" ng-switch="voiceRecorder.processing">
+        <span ng-switch-when="true" my-i18n="im_voice_processing_label">
+          <my-i18n-param name="dots"></my-i18n-param>
+        </span>
+        <span ng-switch-default>
+          <span class="im_recorder_label_hover" my-i18n="im_voice_recording_label"></span>
+          <span class="im_recorder_label_hout" my-i18n="im_voice_recording_cancel_label"></span>
+        </span>
+      </div>
+    </div>
+
+    <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto" ng-trim="false"></textarea>
+  </div>
+
+  <div class="im_send_buttons_wrap clearfix">
+    <button type="submit" class="btn btn-md im_submit" ng-class="draftMessage.type == 'edit' ? 'im_submit_edit' : 'im_submit_send'">
+      <span class="im_submit_send_label nocopy" my-i18n="im_submit_message"></span>
+      <span class="im_submit_edit_label nocopy" my-i18n="im_submit_edit_message"></span>
+    </button>
+
+    <div class="im_attach pull-left">
+      <input type="file" class="im_attach_input" size="28" multiple="multiple" title="{{'im_attach_file_title' | i18n}}" />
+      <i class="icon icon-paperclip"></i>
+    </div>
+
+    <div class="im_media_attach pull-left">
+      <input type="file" class="im_media_attach_input" size="28" multiple="multiple" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
+      <i class="icon icon-camera"></i>
+    </div>
+
+    <a class="im_record pull-left">
+      <div class="im_record_bg">
+        <i class="icon icon-mic"></i>
+      </div>
+    </a>
+
+    <div class="composer_emoji_panel"></div>
+  </div>
+
+  <div class="im_send_keyboard_wrap" ng-if="replyKeyboard._ == 'replyKeyboardMarkup'" ng-show="!replyKeyboard.pFlags.hidden">
+    <div my-reply-markup="replyKeyboard"></div>
+  </div>
+
+</form>

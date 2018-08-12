@@ -50,7 +50,11 @@
     <span ng-if="historyMessage.action.duration > 0" ng-bind="historyMessage.action.duration | duration" class="im_service_message_phonecall_duration"></span>
   </a>
   
-  <span ng-switch-when="messageActionPaymentSent" class="message_service_payment_sent"></span>
+  <span ng-switch-when="messageActionPaymentSent" my-i18n="message_service_payment_sent"></span>
+
+  <span ng-switch-when="messageActionScreenshotTaken" my-i18n="message_service_screenshot_taken"></span>
+
+  <span ng-switch-when="messageActionCustomAction" ng-bind="historyMessage.action.message"></span>
 
   <span ng-switch-default my-i18n="message_service_unsupported_action">
     <my-i18n-param name="action"><span ng-bind="historyMessage.action._"></span></my-i18n-param>

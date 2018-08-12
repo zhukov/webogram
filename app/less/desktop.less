@@ -689,9 +689,11 @@ a.footer_link.active:active {
 
   &_scrollable_wrap {
     /* Hardware acceleration in Safari */
-    -webkit-transform: translateZ(0);
-    -webkit-perspective: 1000;
-    -webkit-backface-visibility: hidden;
+    
+    // Caused flickering and bluring in webkit
+    // -webkit-transform: translateZ(0);
+    // -webkit-perspective: 1000;
+    // -webkit-backface-visibility: hidden;
   }
 }
 
@@ -946,6 +948,7 @@ a.footer_link.active:active {
 .im_message_selected .im_message_audio_duration,
 .im_message_selected .im_message_audio_size,
 .im_message_selected .im_message_fwd_date,
+.im_message_selected .im_message_author_admin,
 .im_message_selected .im_message_views_cnt,
 .im_message_selected .im_message_sign_link,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_date,
@@ -953,6 +956,7 @@ a.footer_link.active:active {
 .im_history_select_active .im_message_outer_wrap:hover .im_message_audio_duration,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_audio_size,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_fwd_date,
+.im_history_select_active .im_message_outer_wrap:hover .im_message_author_admin,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_views_cnt,
 .im_history_select_active .im_message_outer_wrap:hover .im_message_sign_link {
   color: #899daf;
@@ -960,6 +964,26 @@ a.footer_link.active:active {
 
 .icon-select-tick {
   display: none;
+
+  .im_dialogs_modal_list .im_dialog_wrap .im_dialog &{
+    display: block;
+    margin: 10px 5px 0 -5px;
+    position: relative;
+    float: left;
+    width: 26px;
+    height: 26px;
+    .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+    background-position: -9px -481px;
+    opacity: 0.5;
+  }
+
+  .im_dialogs_modal_list .im_dialog_wrap:hover .im_dialog &{
+    opacity: 0.75;
+  }
+
+  &.dialog_selected{
+    opacity: 1 !important;
+  }
 }
 
 @media (min-width: 900px) {
@@ -1109,7 +1133,8 @@ a.peer_select_modal_share_link {
 
   .im_message_fwd_author_wrap,
   .im_message_text,
-  .im_message_media {
+  .im_message_media,
+  .im_message_sign {
     margin-left: 52px;
   }
 }
@@ -1290,6 +1315,86 @@ a.im_panel_peer_photo .peer_initials {
   }
 }
 
+.im_record {
+  display: none;
+  width: 18px;
+  height: 23px;
+  margin-right: 15px;
+  
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  
+  position: relative;
+
+  .im_record_supported & {
+    display: block;
+  }
+}
+.im_record_bg {
+  position: absolute;
+  margin: -10px 0 0 -16px; 
+  padding: 13px 16px 13px 16px;
+
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50px;
+  overflow: hidden;
+  background: #fff;
+  transition: background-color linear 0.2s;
+
+  .im_send_form_hover .im_voice_recording & {
+    background: #cae9ff;
+  }
+}
+
+.icon-mic {
+  display: inline-block;
+  width: 18px;
+  height: 22px;
+  vertical-align: text-top;
+  opacity: 0.8;
+
+  .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
+  background-position: -12px -285px;
+  background-color: transparent;
+
+  .im_record:hover & {
+    opacity: 1;
+  }
+  .im_record:active &,
+  .im_voice_recording & {
+    background-position: -12px -705px;
+  }
+
+}
+
+.im_voice_recorder_wrap {
+  padding: 17px 10px 0;
+  display: none;
+  position: absolute;
+}
+
+.im_voice_recording,
+.im_processing_recording {
+  .im_voice_recorder_wrap {
+    display: block;
+  }
+
+  .composer_rich_textarea,
+  .im_message_field,
+  .composer_emoji_insert_btn,
+  .composer_progress_icon_wrap,
+  .composer_command_btn,
+  .composer_keyboard_btn,
+  .im_inline_placeholder_wrap {
+    visibility: hidden;
+  }
+}
+
+
 @media (max-height: 600px) {
   a {
     &.im_panel_peer_photo,
@@ -1340,6 +1445,10 @@ a.im_panel_peer_photo .peer_initials {
     top: 0;
     left: 100%;
     margin: 0 0 0 15px;
+
+    .im_record_supported .im_send_form_empty & {
+      display: none;
+    }
   }
   .im_media_attach {
     position: absolute;
@@ -1412,6 +1521,23 @@ a.im_panel_peer_photo .peer_initials {
     padding-top: 5px;
     padding-bottom: 5px;
   }
+
+  .im_record {
+    display: none;
+    position: absolute;
+    top: 5px;
+    right: -56px;
+    margin-top: -8px;
+
+    .im_record_supported .im_send_form_empty & {
+      display: block;
+    }
+  }
+
+  .im_voice_recorder_wrap {
+    padding-top: 4px;
+  }
+
 }
 
 .im_edit_panel {

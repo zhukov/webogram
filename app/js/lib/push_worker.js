@@ -54,13 +54,15 @@ self.addEventListener('push', function(event) {
 
   var closePromise = notificationPromise.catch(function () {
     console.log('[SW] Closing all notifications on push', hasActiveWindows)
-    if (userInvisibleIsSupported()) {
+    if (userInvisibleIsSupported() || hasActiveWindows) {
       return closeAllNotifications()
     }
-    var promise = self.registration.showNotification('Telegram').then(function () {
-      // if (hasActiveWindows) {
-      //   return closeAllNotifications()
-      // }
+    return self.registration.showNotification('Telegram', {
+      tag: 'unknown_peer'
+    }).then(function () {
+      if (hasActiveWindows) {
+        return closeAllNotifications()
+      }
       setTimeout(closeAllNotifications, hasActiveWindows ? 0 : 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
@@ -132,6 +134,8 @@ function fireNotification(obj, settings, lang) {
     body = lang.push_message_nopreview || 'You have a new message'
     tag = 'unknown_peer'
   }
+
+  console.log('[SW] show notify', title, body, icon, obj)
 
   var notificationPromise = self.registration.showNotification(title, {
     body: body,

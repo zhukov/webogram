@@ -36,10 +36,12 @@
         <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
           <i class="icon-message-status" tooltip="{{'message_action_retry' | i18n}}"></i>
         </a>
-        <i ng-if="::historyMessage.pFlags.unread &amp;&amp; historyMessage.pFlags.out || historyMessage.pending || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
         <span class="im_message_date">
           <span class="im_message_edited" my-message-edited="historyMessage.mid"></span>
-          <span class="im_message_date_text" ng-bind="::historyMessage.date | time"></span>
+          <span class="im_message_date_text">
+            <i ng-if="::historyMessage.pFlags.out &amp;&amp; (historyMessage.pFlags.unread || historyMessage.pending) || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
+            <span ng-bind="::historyMessage.date | time"></span>
+          </span>
         </span>
       </div>
 
@@ -48,13 +50,14 @@
 
           <a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.peerID > 0" color="historyMessage.peerID < 0" no-watch="true"></a>
           <a ng-if="::historyMessage.viaBotID && !historyMessage.fwdFromID" class="im_message_author_via" my-i18n="message_via_bot" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></a>
+          <span class="im_message_author_admin" my-message-admin-badge="historyMessage"></span>
 
           <a class="im_message_reply_wrap" my-reply-message="::historyMessage.reply_to_mid" ng-if="::historyMessage.reply_to_mid"></a>
 
           <div ng-if="::!!historyMessage.fwdFromID &amp;&amp; !historyMessage.media" class="im_message_fwd_header" ng-switch="!!historyMessage.viaBotID" my-i18n>
             <span ng-switch-when="true" my-i18n-format="message_forwarded_via_message_mobile"></span>
             <span ng-switch-default my-i18n-format="message_forwarded_message_mobile"></span>
-            <my-i18n-param name="from"><a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID" no-watch="true"></a></my-i18n-param>
+            <my-i18n-param name="from"><a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID" no-watch="true" post-id="historyMessage.fwdPostID"></a></my-i18n-param>
             <my-i18n-param name="bot"><a class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></a></my-i18n-param>
           </div>
 

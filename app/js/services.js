@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.7.1 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -30,7 +30,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return contactsFillPromise
       }
       return contactsFillPromise = MtpApiManager.invokeApi('contacts.getContacts', {
-        hash: ''
+        hash: 0
       }).then(function (result) {
         var userID, searchText
         var i
@@ -52,8 +52,16 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       if (!user) {
         return false
       }
+      var serviceText = ''
+      if (user.pFlags.self) {
+        serviceText = _('user_name_saved_msgs_raw')
+      }
 
-      return (user.first_name || '') + ' ' + (user.last_name || '') + ' ' + (user.phone || '') + ' ' + (user.username || '')
+      return (user.first_name || '') +
+              ' ' + (user.last_name || '') +
+              ' ' + (user.phone || '') +
+              ' ' + (user.username || '') +
+              ' ' + serviceText
     }
 
     function getContacts (query) {
@@ -69,6 +77,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           contactsList = filteredContactsList
         }
+
+        contactsList.sort(function (userID1, userID2) {
+          var sortName1 = (users[userID1] || {}.sortName) || ''
+          var sortName2 = (users[userID2] || {}.sortName) || ''
+          if (sortName1 == sortName2) {
+            return 0
+          }
+          return sortName1 > sortName2 ? 1 : -1
+        })
 
         return contactsList
       })
@@ -608,6 +625,12 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           return
         }
       }
+      if (apiChat._ == 'channel' &&
+          apiChat.participants_count === undefined &&
+          result !== undefined &&
+          result.participants_count) {
+        apiChat.participants_count = result.participants_count
+      }
 
       if (apiChat.username) {
         var searchUsername = SearchIndexManager.cleanUsername(apiChat.username)
@@ -758,30 +781,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var chatFull = angular.copy(fullChat)
       var chat = getChat(id)
 
-      if (chatFull.participants && chatFull.participants._ == 'chatParticipants') {
-        MtpApiManager.getUserID().then(function (myID) {
-          var isAdmin = chat.pFlags.creator || chat.pFlags.admins_enabled && chat.pFlags.admin
-          angular.forEach(chatFull.participants.participants, function (participant) {
-            participant.canLeave = myID == participant.user_id
-            participant.canKick = !participant.canLeave && (
-              chat.pFlags.creator ||
-              participant._ == 'chatParticipant' && (isAdmin || myID == participant.inviter_id)
-            )
-
-            // just for order by last seen
-            participant.user = AppUsersManager.getUser(participant.user_id)
-          })
-        })
+      if (!chatFull.participants_count) {
+        chatFull.participants_count = chat.participants_count
       }
-      if (chatFull.participants && chatFull.participants._ == 'channelParticipants') {
-        var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator
-        angular.forEach(chatFull.participants.participants, function (participant) {
-          participant.canLeave = !chat.pFlags.creator && participant._ == 'channelParticipantSelf'
-          participant.canKick = isAdmin && participant._ == 'channelParticipant'
 
-          // just for order by last seen
-          participant.user = AppUsersManager.getUser(participant.user_id)
-        })
+      if (chatFull.participants &&
+          chatFull.participants._ == 'chatParticipants') {
+        chatFull.participants.participants = wrapParticipants(id, chatFull.participants.participants)
       }
 
       if (chatFull.about) {
@@ -792,6 +798,34 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       chatFull.chat = chat
 
       return chatFull
+    }
+
+    function wrapParticipants(id, participants) {
+      var chat = getChat(id)
+      var myID = AppUsersManager.getSelf().id
+      if (isChannel(id)) {
+        var isAdmin = chat.pFlags.creator || chat.pFlags.editor || chat.pFlags.moderator
+        angular.forEach(participants, function (participant) {
+          participant.canLeave = myID == participant.user_id
+          participant.canKick = isAdmin && participant._ == 'channelParticipant'
+
+          // just for order by last seen
+          participant.user = AppUsersManager.getUser(participant.user_id)
+        })
+      } else {
+        var isAdmin = chat.pFlags.creator || chat.pFlags.admins_enabled && chat.pFlags.admin
+        angular.forEach(participants, function (participant) {
+          participant.canLeave = myID == participant.user_id
+          participant.canKick = !participant.canLeave && (
+            chat.pFlags.creator ||
+            participant._ == 'chatParticipant' && (isAdmin || myID == participant.inviter_id)
+          )
+
+          // just for order by last seen
+          participant.user = AppUsersManager.getUser(participant.user_id)
+        })
+      }
+      return participants
     }
 
     function openChat (chatID, accessHash) {
@@ -842,6 +876,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       resolveUsername: resolveUsername,
       hasChat: hasChat,
       wrapForFull: wrapForFull,
+      wrapParticipants: wrapParticipants,
       openChat: openChat
     }
   })
@@ -984,6 +1019,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         : AppChatsManager.getChatPhoto(-peerID)
     }
 
+    function getPeerMigratedTo(peerID) {
+      if (peerID >= 0) {
+        return false
+      }
+      var chat = AppChatsManager.getChat(-peerID)
+      if (chat && chat.migrated_to && chat.pFlags.deactivated) {
+        return getPeerID(chat.migrated_to)
+      }
+      return false
+    }
+
     function isChannel (peerID) {
       return (peerID < 0) && AppChatsManager.isChannel(-peerID)
     }
@@ -1013,6 +1059,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getPeerID: getPeerID,
       getPeer: getPeer,
       getPeerPhoto: getPeerPhoto,
+      getPeerMigratedTo: getPeerMigratedTo,
       resolveUsername: resolveUsername,
       isChannel: isChannel,
       isAnyGroup: isAnyGroup,
@@ -1022,10 +1069,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
   })
 
-  .service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, ApiUpdatesManager, RichTextProcessor) {
+  .service('AppProfileManager', function ($q, $rootScope, AppUsersManager, AppChatsManager, AppMessagesIDsManager, AppPeersManager, AppPhotosManager, NotificationsManager, MtpApiManager, ApiUpdatesManager, RichTextProcessor, Storage) {
     var botInfos = {}
     var chatsFull = {}
     var chatFullPromises = {}
+    var chatParticipantsPromises = {}
 
     function saveBotInfo (botInfo) {
       var botID = botInfo && botInfo.user_id
@@ -1163,18 +1211,60 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       })
     }
 
-    function getChannelParticipants (id) {
-      return MtpApiManager.invokeApi('channels.getParticipants', {
-        channel: AppChatsManager.getChannelInput(id),
-        filter: {_: 'channelParticipantsRecent'},
-        offset: 0,
-        limit: AppChatsManager.isMegagroup(id) ? 50 : 200
-      }).then(function (result) {
-        AppUsersManager.saveApiUsers(result.users)
-        var participants = result.participants
+    function getChannelParticipants (id, filter, limit, offset) {
+      filter = filter || {_: 'channelParticipantsRecent'}
+      limit = limit || 200
+      offset = offset || 0
+      var promiseKey = [id, filter._, offset, limit].join('_')
+      var promiseData = chatParticipantsPromises[promiseKey]
 
+      if (filter._ == 'channelParticipantsRecent') {
         var chat = AppChatsManager.getChat(id)
-        if (!chat.pFlags.kicked && !chat.pFlags.left) {
+        if (chat &&
+            chat.pFlags && (
+              chat.pFlags.kicked ||
+              chat.pFlags.broadcast && !chat.pFlags.creator && !chat.admin_rights
+            )) {
+          return $q.reject()
+        }
+      }
+
+      var fetchParticipants = function (cachedParticipants) {
+        var hash = 0
+        if (cachedParticipants) {
+          var userIDs = []
+          angular.forEach(cachedParticipants, function (participant) {
+            userIDs.push(participant.user_id)
+          })
+          userIDs.sort()
+          angular.forEach(userIDs, function (userID) {
+            hash = ((hash * 20261) + 0x80000000 + userID) % 0x80000000
+          })
+        }
+        return MtpApiManager.invokeApi('channels.getParticipants', {
+          channel: AppChatsManager.getChannelInput(id),
+          filter: filter,
+          offset: offset,
+          limit: limit,
+          hash: hash
+        }).then(function (result) {
+          if (result._ == 'channels.channelParticipantsNotModified') {
+            return cachedParticipants
+          }
+          AppUsersManager.saveApiUsers(result.users)
+          return result.participants
+        })
+      }
+
+      var maybeAddSelf = function (participants) {
+        var chat = AppChatsManager.getChat(id)
+        var selfMustBeFirst = filter._ == 'channelParticipantsRecent' &&
+                              !offset &&
+                              !chat.pFlags.kicked &&
+                              !chat.pFlags.left
+
+        if (selfMustBeFirst) {
+          participants = angular.copy(participants)
           var myID = AppUsersManager.getSelf().id
           var myIndex = false
           var myParticipant
@@ -1192,9 +1282,25 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           participants.unshift(myParticipant)
         }
-
         return participants
-      })
+      }
+
+      var timeNow = tsNow()
+      if (promiseData !== undefined) {
+        var promise = promiseData[1]
+        if (promiseData[0] > timeNow - 60000) {
+          return promise
+        }
+        var newPromise = promise.then(function (cachedParticipants) {
+          return fetchParticipants(cachedParticipants).then(maybeAddSelf)
+        })
+        chatParticipantsPromises[promiseKey] = [timeNow, newPromise]
+        return newPromise
+      }
+
+      var newPromise = fetchParticipants().then(maybeAddSelf)
+      chatParticipantsPromises[promiseKey] = [timeNow, newPromise]
+      return newPromise
     }
 
     function getChannelFull (id, force) {
@@ -1211,32 +1317,21 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         AppChatsManager.saveApiChats(result.chats)
         AppUsersManager.saveApiUsers(result.users)
         var fullChannel = result.full_chat
-        var chat = AppChatsManager.getChat(id)
         if (fullChannel && fullChannel.chat_photo.id) {
           AppPhotosManager.savePhoto(fullChannel.chat_photo)
         }
         NotificationsManager.savePeerSettings(-id, fullChannel.notify_settings)
-        var participantsPromise
-        if (fullChannel.flags & 8) {
-          participantsPromise = getChannelParticipants(id).then(function (participants) {
-            delete chatFullPromises[id]
-            fullChannel.participants = {
-              _: 'channelParticipants',
-              participants: participants
-            }
-          }, function (error) {
-            error.handled = true
-          })
-        } else {
-          participantsPromise = $q.when()
-        }
-        return participantsPromise.then(function () {
-          delete chatFullPromises[id]
-          chatsFull[id] = fullChannel
-          $rootScope.$broadcast('chat_full_update', id)
 
-          return fullChannel
-        })
+        if (fullChannel.pinned_msg_id) {
+          fullChannel.pinned_msg_id = AppMessagesIDsManager.getFullMessageID(fullChannel.pinned_msg_id, id)
+        }
+
+        delete chatFullPromises[id]
+        chatsFull[id] = fullChannel
+        $rootScope.$broadcast('chat_full_update', id)
+
+        return fullChannel
+
       }, function (error) {
         switch (error.type) {
           case 'CHANNEL_PRIVATE':
@@ -1255,6 +1350,39 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         return $q.reject(error)
       })
+    }
+
+    function invalidateChannelParticipants(id) {
+      delete chatsFull[id]
+      delete chatFullPromises[id]
+      angular.forEach(chatParticipantsPromises, function (val, key) {
+        if (key.split('_')[0] == id) {
+          delete chatParticipantsPromises[key]
+        }
+      })
+      $rootScope.$broadcast('chat_full_update', id)
+    }
+
+    function getChannelPinnedMessage(id) {
+      return getChannelFull(id).then(function (fullChannel) {
+        var pinnedMessageID = fullChannel && fullChannel.pinned_msg_id
+        if (!pinnedMessageID) {
+          return false
+        }
+        return Storage.get('pinned_hidden' + id).then(function (hiddenMessageID) {
+          if (AppMessagesIDsManager.getMessageLocalID(pinnedMessageID) == hiddenMessageID) {
+            return false
+          }
+          return pinnedMessageID
+        })
+      })
+    }
+
+    function hideChannelPinnedMessage(id, pinnedMessageID) {
+      var setKeys = {}
+      setKeys['pinned_hidden' + id] = AppMessagesIDsManager.getMessageLocalID(pinnedMessageID)
+      Storage.set(setKeys)
+      $rootScope.$broadcast('peer_pinned_message', -id)      
     }
 
     $rootScope.$on('apiUpdate', function (e, update) {
@@ -1304,6 +1432,15 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           }
           break
 
+        case 'updateChannelPinnedMessage':
+          var channelID = update.channel_id
+          var fullChannel = chatsFull[channelID]
+          if (fullChannel !== undefined) {
+            fullChannel.pinned_msg_id = AppMessagesIDsManager.getFullMessageID(update.id, channelID)
+            $rootScope.$broadcast('peer_pinned_message', -channelID)
+          }
+          break
+
       }
     })
 
@@ -1335,7 +1472,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       getProfile: getProfile,
       getChatInviteLink: getChatInviteLink,
       getChatFull: getChatFull,
-      getChannelFull: getChannelFull
+      getChannelFull: getChannelFull,
+      getChannelParticipants: getChannelParticipants,
+      invalidateChannelParticipants: invalidateChannelParticipants,
+      getChannelPinnedMessage: getChannelPinnedMessage,
+      hideChannelPinnedMessage: hideChannelPinnedMessage
     }
   })
 
@@ -3095,6 +3236,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       curState.pendingPtsUpdates.sort(function (a, b) {
         return a.pts - b.pts
       })
+      // console.log(dT(), 'pop update', channelID, curState.pendingPtsUpdates)
 
       var curPts = curState.pts
       var goodPts = false
@@ -3214,7 +3356,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         updatesState.syncPending = false
       }
 
-      MtpApiManager.invokeApi('updates.getDifference', {pts: updatesState.pts, date: updatesState.date, qts: -1}).then(function (differenceResult) {
+      MtpApiManager.invokeApi('updates.getDifference', {pts: updatesState.pts, date: updatesState.date, qts: -1}, {
+        timeout: 0x7fffffff
+      }).then(function (differenceResult) {
         if (differenceResult._ == 'updates.differenceEmpty') {
           console.log(dT(), 'apply empty diff', differenceResult.seq)
           updatesState.date = differenceResult.date
@@ -3266,6 +3410,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           $rootScope.$broadcast('stateSynchronized')
           updatesState.syncLoading = false
         }
+      }, function () {
+        updatesState.syncLoading = false
       })
     }
 
@@ -3285,7 +3431,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         filter: {_: 'channelMessagesFilterEmpty'},
         pts: channelState.pts,
         limit: 30
-      }).then(function (differenceResult) {
+      }, {timeout: 0x7fffffff}).then(function (differenceResult) {
         // console.log(dT(), 'channel diff result', differenceResult)
         channelState.pts = differenceResult.pts
 
@@ -3333,6 +3479,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           $rootScope.$broadcast('stateSynchronized')
           channelState.syncLoading = false
         }
+      }, function () {
+        channelState.syncLoading = false
       })
     }
 
@@ -3387,7 +3535,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       if (update._ == 'updateChannelTooLong') {
-        getChannelDifference(channelID)
+        if (!curState.lastPtsUpdateTime ||
+            curState.lastPtsUpdateTime < tsNow() - 10000) {
+          // console.trace(dT(), 'channel too long, get diff', channelID, update)
+          getChannelDifference(channelID)
+        }
         return false
       }
 
@@ -3398,12 +3550,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         var message = update.message
         var toPeerID = AppPeersManager.getPeerID(message.to_id)
         var fwdHeader = message.fwd_from || {}
-        if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post) ||
-          fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) ||
-          fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id, true) ||
-          toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) ||
-          toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID)) {
-          console.warn(dT(), 'Not enough data for message update', message)
+        var reason = false
+        if (message.from_id && !AppUsersManager.hasUser(message.from_id, message.pFlags.post/* || channelID*/) && (reason = 'author') ||
+            fwdHeader.from_id && !AppUsersManager.hasUser(fwdHeader.from_id, !!fwdHeader.channel_id) && (reason = 'fwdAuthor') ||
+            fwdHeader.channel_id && !AppChatsManager.hasChat(fwdHeader.channel_id, true) && (reason = 'fwdChannel') ||
+            toPeerID > 0 && !AppUsersManager.hasUser(toPeerID) && (reason = 'toPeer User') ||
+            toPeerID < 0 && !AppChatsManager.hasChat(-toPeerID) && (reason = 'toPeer Chat')) {
+          console.warn(dT(), 'Not enough data for message update', toPeerID, reason, message)
           if (channelID && AppChatsManager.hasChat(channelID)) {
             getChannelDifference(channelID)
           } else {
@@ -3442,6 +3595,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (update.pts > curState.pts) {
           curState.pts = update.pts
           popPts = true
+
+          curState.lastPtsUpdateTime = tsNow()
         }
         else if (update.pts_count) {
           // console.warn(dT(), 'Duplicate update', update)
@@ -3886,10 +4041,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     }
 
     function notify (data) {
+      console.log('notify', data, $rootScope.idle.isIDLE, notificationsUiSupport, stopped)
       if (stopped) {
         return
       }
-      // console.log('notify', $rootScope.idle.isIDLE, notificationsUiSupport)
 
       // FFOS Notification blob src bug workaround
       if (Config.Navigator.ffos && !Config.Navigator.ffos2p) {
@@ -3944,6 +4099,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
 
       if ('Notification' in window) {
         try {
+          if (data.tag) {
+            angular.forEach(notificationsShown, function (notification) {
+              if (notification &&
+                  notification.tag == data.tag) {
+                notification.hidden = true
+              }
+            })
+          }
           notification = new Notification(data.title, {
             icon: data.image || '',
             body: data.message || '',
@@ -4021,6 +4184,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         try {
           if (notification.close) {
+            notification.hidden = true
             notification.close()
           }
           else if (notificationsMsSiteMode &&
@@ -4074,7 +4238,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       MtpApiManager.invokeApi('account.registerDevice', {
         token_type: tokenData.tokenType,
-        token: tokenData.tokenValue
+        token: tokenData.tokenValue,
+        other_uids: []
       }).then(function () {
         registeredDevice = tokenData
       }, function (error) {
@@ -4088,7 +4253,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
       MtpApiManager.invokeApi('account.unregisterDevice', {
         token_type: tokenData.tokenType,
-        token: tokenData.tokenValue
+        token: tokenData.tokenValue,
+        other_uids: []
       }).then(function () {
         registeredDevice = false
       }, function (error) {
@@ -4269,6 +4435,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var scope = $rootScope.$new()
       scope.multiSelect = false
       scope.noMessages = true
+      scope.forPeerSelect = true
       if (options) {
         angular.extend(scope, options)
       }
@@ -4292,6 +4459,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var scope = $rootScope.$new()
       scope.multiSelect = true
       scope.noMessages = true
+      scope.forPeerSelect = true
       if (options) {
         angular.extend(scope, options)
       }
@@ -4628,6 +4796,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           if (url.search('https://telegram.me/') === 0 ||
               url.search('https://t.me/') === 0) {
             target = '_self'
+          }
+          else if (!url.match(/^https?:\/\//)) {
+            url = 'http://' + url
           }
           var popup = window.open(url, target)
           try {

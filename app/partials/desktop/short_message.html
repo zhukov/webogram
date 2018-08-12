@@ -20,6 +20,7 @@
     <span ng-bind-html="message.media.game.rTitle"></span>
   </span>
   <span ng-switch-when="messageMediaUnsupported" my-i18n="conversation_media_unsupported"></span>
+  <span ng-switch-when="messageMediaUnsupportedWeb" my-i18n="conversation_media_unsupported"></span>
 </span><span class="im_short_message_service" ng-if="message._ == 'messageService'" ng-switch="message.action._">
   <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
   <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
@@ -58,5 +59,8 @@
     <span ng-switch-when="in_ok" my-i18n="message_service_phonecall_incoming"></span>
   </span>
   <span ng-switch-when="messageActionPaymentSent" my-i18n="message_service_payment_sent"></span>
+  <span ng-switch-when="messageActionScreenshotTaken" my-i18n="message_service_screenshot_taken"></span>
+  <span ng-switch-when="messageActionCustomAction" ng-bind="message.action.message"></span>
+
 
 </span><span class="im_short_message_text" ng-if="message.message.length && (!message.media || message.media._ == 'messageMediaWebPage')" ng-bind-html="message.richMessage"></span>

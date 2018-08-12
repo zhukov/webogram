@@ -47,7 +47,7 @@
       <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media ? true : false}">
 
         <span class="im_message_author_wrap">
-          <span class="copyonly">[<span ng-bind="::historyMessage.date | time"></span>] </span><a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.peerID > 0" color="historyMessage.peerID < 0" no-watch="true"></a><a ng-if="::historyMessage.viaBotID && !historyMessage.fwdFromID" class="im_message_author_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">:</span>
+          <span class="copyonly">[<span ng-bind="::historyMessage.date | time"></span>] </span><a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.peerID > 0" color="historyMessage.peerID < 0" no-watch="true" saved-from="historyMessage.savedFrom"></a><a ng-if="::historyMessage.viaBotID && !historyMessage.fwdFromID" class="im_message_author_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">:</span><span class="im_message_author_admin" my-message-admin-badge="historyMessage"></span>
         </span>
 
 
@@ -57,7 +57,7 @@
           <span class="copyonly"><span my-i18n="message_forwarded_message"></span>:&nbsp;</span>
           <a class="im_message_fwd_photo pull-left" my-peer-photolink="::historyMessage.fwdFromID" img-class="im_message_fwd_photo"></a>
           <div class="im_message_fwd_author_wrap">
-            <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID"></a><a ng-if="::historyMessage.viaBotID" class="im_message_fwd_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">&nbsp;[</span><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_from.date | dateOrTime"></span><span class="copyonly">]&nbsp;</span>
+            <a class="im_message_fwd_author" my-peer-link="historyMessage.fwdFromID" post-id="historyMessage.fwdPostID"></a><a ng-if="::historyMessage.viaBotID" class="im_message_fwd_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">&nbsp;[</span><span class="im_message_fwd_date" ng-bind="::historyMessage.fwd_from.date | dateMedium"></span><span class="copyonly">]&nbsp;</span>
             <span class="im_message_views_inline" ng-if="::historyMessage.views > 0">
               <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
             </span>

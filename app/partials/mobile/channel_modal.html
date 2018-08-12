@@ -1,0 +1,161 @@
+<div class="chat_modal_wrap">
+
+  <div class="tg_page_head tg_modal_head">
+    <div class="navbar navbar-static-top navbar-inverse">
+      <div class="container">
+
+        <div class="navbar-toggle-wrap dropdown" dropdown ng-if="hasRights('edit_title') || hasRights('edit_photo')">
+          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-if="chatFull.chat.photo.photo_small" ng-if="hasRights('edit_photo')">
+              <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
+            </li>
+            <li ng-if="hasRights('edit_title')">
+              <a ng-click="editChannel()" ng-switch="isMegagroup">
+                <span ng-switch-when="true" my-i18n="group_modal_menu_edit_group"></span>
+                <span ng-switch-default my-i18n="channel_modal_menu_edit"></span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="navbar-header">
+
+          <ul class="nav navbar-nav navbar-quick-nav">
+            <li>
+              <a ng-click="$close()" class="navbar-quick-media-back">
+                <i class="icon icon-back"></i>
+                <div class="navbar-quick-back-title" ng-switch="isMegagroup">
+                  <h4>
+                    <span ng-switch-when="true" my-i18n="group_modal_info"></span>
+                    <span ng-switch-default my-i18n="channel_modal_info"></span>
+                  </h4>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-body mobile_modal_body">
+
+    <div class="mobile_user_modal_photo_profile_wrap">
+
+      <a ng-click="openPhoto(chatFull.chat_photo.id, {p: -chatFull.chat.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::-chatFull.chat.id" img-class="mobile_user_modal_image mobile_chat_modal_image" no-open="true" watch="true" ng-class="{disabled: !chatFull.chat.photo.photo_small}" ng-disabled="!chatFull.chat.photo.photo_small"></a>
+
+      <div class="mobile_user_modal_info_wrap clearfix">
+        <h4 class="mobile_user_modal_header" my-peer-link="-chatFull.chat.id"></h4>
+        <p class="mobile_user_modal_status"  ng-if="chatFull.participants_count > 0" ng-switch="isMegagroup">
+          <ng-pluralize ng-switch-when="true"
+                        count="chatFull.participants_count"
+                        when="group_modal_pluralize_participants">
+          </ng-pluralize>
+          <ng-pluralize ng-switch-default
+                        count="chatFull.participants_count"
+                        when="group_modal_pluralize_subscribers">
+          </ng-pluralize>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="mobile_modal_section" ng-if="chatFull.chat.username">
+      <h4 class="mobile_modal_section_header" my-i18n="channel_modal_share_link"></h4>
+      <div class="mobile_modal_section_value">
+        <a class="settings_modal_username_link" ng-click="shareLink($event)" ng-bind="'https://t.me/' + chatFull.chat.username" ng-href="https://t.me/{{chatFull.chat.username}}" target="_blank"></a>
+      </div>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="!chatFull.chat.username &amp;&amp; chatFull.chat.pFlags.creator">
+      <h4 class="mobile_modal_section_header" my-i18n="channel_modal_share_link"></h4>
+      <div class="mobile_modal_section_value" ng-switch="chatFull.exported_invite._">
+        <a ng-switch-when="chatInviteExported" class="settings_modal_username_link" ng-click="shareLink($event)" ng-bind="chatFull.exported_invite.link" ng-href="{{chatFull.exported_invite.link}}" target="_blank"></a>
+        <span ng-switch-default my-i18n="channel_modal_share_loading">
+          <my-i18n-param name="dots"><span my-loading-dots></span></my-i18n-param>
+        </span>
+      </div>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="chatFull.rAbout">
+      <h4 class="mobile_modal_section_header" my-i18n="channel_modal_description"></h4>
+      <div class="mobile_modal_section_value" ng-bind-html="chatFull.rAbout"></div>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="hasRights('edit_photo') &amp;&amp; !photo.updating">
+      <span class="mobile_modal_action mobile_modal_upload_action">
+        <input my-file-upload  type="file" multiple="false" class="im_attach_input" size="120" multiple="false" accept="image/x-png, image/png, image/gif, image/jpeg" />
+        <span my-i18n="group_modal_update_photo"></span>
+      </span>
+    </div>
+    <div class="mobile_modal_action_wrap" ng-if="photo.updating">
+      <span class="mobile_modal_action" my-i18n>
+        <span my-i18n="group_modal_update_active"></span>
+        <span my-loading-dots></span>
+      </span>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="hasRights('invite') || chatFull.chat.pFlags.left" ng-switch="chatFull.chat.pFlags.left">
+      <a ng-switch-when="true" class="mobile_modal_action" ng-click="joinChannel()" ng-switch="isMegagroup">
+        <span ng-switch-when="true" my-i18n="group_modal_join"></span>
+        <span ng-switch-default my-i18n="channel_modal_join"></span>
+      </a>
+      <a ng-switch-default class="mobile_modal_action" ng-click="inviteToChannel()" my-i18n="channel_modal_add_member"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="settings.notifications = !settings.notifications" ng-class="settings.notifications ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="group_modal_notifications"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="isMegagroup && !chatFull.chat.username && !chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked">
+      <a class="mobile_modal_action" ng-click="flushHistory()" my-i18n="group_modal_menu_clear_history"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="!chatFull.chat.pFlags.left && !chatFull.chat.pFlags.kicked && !isMegagroup">
+      <a class="mobile_modal_action" ng-click="leaveChannel()" my-i18n="channel_modal_leave_channel"></a>
+    </div>
+
+    <div class="mobile_modal_action_wrap" ng-if="chatFull.chat.pFlags.creator">
+      <a class="mobile_modal_action" ng-click="deleteChannel()" ng-switch="isMegagroup">
+        <span ng-switch-when="true" my-i18n="group_modal_delete_group"></span>
+        <span ng-switch-default my-i18n="channel_modal_delete_channel"></span>
+      </a>
+    </div>
+
+    <div class="mobile_modal_section" ng-if="participants.length > 0">
+      <h4 class="mobile_modal_section_header" my-i18n="group_modal_members"></h4>
+      <div class="mobile_modal_section_body">
+
+        <div class="chat_modal_members_list">
+
+          <div class="chat_modal_participant_wrap clearfix" ng-repeat="participant in participants | orderBy:'-user.sortStatus'">
+
+            <a ng-if="participant.canLeave" ng-click="leaveChannel()" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_menu_leave"></a>
+            <a ng-if="participant.canKick" ng-click="kickFromChannel(participant.user_id)" class="chat_modal_participant_kick pull-right" my-i18n="group_modal_members_kick"></a>
+
+            <a class="chat_modal_participant_photo pull-left" my-peer-photolink="participant.user_id" img-class="chat_modal_participant_photo" status="true"></a>
+
+            <div class="chat_modal_participant_name">
+              <a my-peer-link="participant.user_id"></a>
+            </div>
+            <div class="chat_modal_participant_status" my-user-status="::participant.user_id" bot-chat-privacy="true"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

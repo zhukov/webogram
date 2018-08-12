@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.7.1 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -212,16 +212,14 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
 
     function updateMessageSignature ($scope, element, message) {
-      if (!message.signID) {
+      var postAuthor = message.post_author || (message.fwd_from && message.fwd_from.post_author)
+      if (!postAuthor) {
         $('.im_message_sign', element).hide()
         return
       }
 
-      var scope = $scope.$new(true)
-      scope.signID = message.signID
-      messageSignCompiled(scope, function (clonedElement) {
-        $('.im_message_sign', element).replaceWith(clonedElement)
-      })
+      var html = RichTextProcessor.wrapRichText(postAuthor, {noLinks: true, noLinebreaks: true})
+      $('.im_message_sign', element).html('<span class="im_message_sign_link">' + html.valueOf() + '</span>')
     }
 
     function updateMessageKeyboard ($scope, element, message) {
@@ -588,6 +586,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     function checkMessage ($scope, element, mid, isEdit) {
       var message = $scope.replyMessage = AppMessagesManager.wrapSingleMessage(mid)
+      $scope.thumb = false
       $scope.isEdit = isEdit || false
       if (message.loading) {
         var stopWaiting = $scope.$on('messages_downloaded', function (e, mids) {
@@ -667,6 +666,60 @@ angular.module('myApp.directives', ['myApp.filters'])
       onContentLoaded(function () {
         $scope.$emit('ui_height')
       })
+    }
+  })
+
+  .directive('myPeerPinnedMessageBar', function (AppMessagesManager, AppPeersManager, AppProfileManager) {
+
+    return {
+      templateUrl: templateUrl('peer_pinned_message_bar'),
+      scope: {},
+      link: link
+    }
+
+    function updatePeerID(peerID, $scope, force) {
+      if (force) {
+        $scope.pinnedMessageID = 0
+        $scope.$emit('ui_height')
+      }
+      var jump = ++$scope.jump
+      if (!AppPeersManager.isChannel(peerID)) {
+        return
+      }
+      var channelID = -peerID
+      AppProfileManager.getChannelPinnedMessage(channelID).then(function (pinnedMessageID) {
+        if (jump != $scope.jump) {
+          return
+        }
+        $scope.pinnedMessageID = pinnedMessageID || 0
+        $scope.$emit('ui_height')
+      })
+    }
+
+    function link ($scope, element, attrs) {
+      $scope.jump = 0
+
+      $scope.$parent.$watch(attrs.myPeerPinnedMessageBar, function (peerID) {
+        $scope.peerID = peerID
+        updatePeerID(peerID, $scope, true)
+      })
+
+      $scope.$on('peer_pinned_message', function (e, updPeerID) {
+        if (updPeerID == $scope.peerID) {
+          updatePeerID($scope.peerID, $scope)
+        }
+      })
+      $scope.$on('chat_full_update', function (e, updChatID) {
+        if (updChatID == -$scope.peerID) {
+          updatePeerID($scope.peerID, $scope)
+        }
+      })
+
+      $scope.hidePinned = function () {
+        AppProfileManager.hideChannelPinnedMessage(-$scope.peerID, $scope.pinnedMessageID)
+        $scope.pinnedMessageID = 0
+        $scope.$emit('ui_height')
+      }
     }
   })
 
@@ -756,6 +809,45 @@ angular.module('myApp.directives', ['myApp.filters'])
         return false
       }
       return true
+    }
+  })
+
+  .directive('myMessageAdminBadge', function (_, AppPeersManager, AppMessagesManager, AppProfileManager) {
+
+    var adminBadgeText = _('message_admin_badge_raw')
+
+    return {
+      scope: {},
+      link: link
+    }
+
+    function link($scope, element, attrs) {
+      var message = $scope.$parent.$eval(attrs.myMessageAdminBadge)
+      var fromID = message && message.fromID
+      var peerID = message && AppMessagesManager.getMessagePeer(message)
+      if (!fromID || !AppPeersManager.isMegagroup(peerID)) {
+        element.hide()
+        return
+      }
+
+      var channelID = -peerID
+
+      AppProfileManager.getChannelParticipants(channelID, {_: 'channelParticipantsAdmins'}).then(function (participants) {
+        var isAdmin = false
+        for (var i = 0, len = participants.length; i < len; i++) {
+          if (participants[i].user_id == fromID) {
+            isAdmin = true
+            break
+          }
+        }
+        if (isAdmin) {
+          element.text(adminBadgeText).show()
+        } else {
+          element.hide()
+        }
+      }, function () {
+        element.hide()
+      })
     }
   })
 
@@ -1176,6 +1268,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var scrollableWrap = $('.im_history_scrollable_wrap', element)[0]
       var scrollable = $('.im_history_scrollable', element)[0]
       var emptyWrapEl = $('.im_history_empty_wrap', element)[0]
+      var pinnedPanelEl = $('.im_history_pinned_panel', element)[0]
       var bottomPanelWrap = $('.im_bottom_panel_wrap', element)[0]
       var sendFormWrap = $('.im_send_form_wrap', element)[0]
       var headWrap = $('.tg_page_head')[0]
@@ -1494,6 +1587,9 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
         if ($(sendFormWrap).is(':visible')) {
+          if (!sendForm || !sendForm.offsetHeight) {
+            sendForm = $('.im_send_form', element)[0]
+          }
           $(sendFormWrap).css({
             height: $(sendForm).height()
           })
@@ -1505,11 +1601,17 @@ angular.module('myApp.directives', ['myApp.filters'])
         if (!footer || !footer.offsetHeight) {
           footer = $('.footer_wrap')[0]
         }
+        if (!pinnedPanelEl || !pinnedPanelEl.offsetHeight) {
+          pinnedPanelEl = $('.im_history_pinned_panel', element)[0]
+        }
+
         var footerHeight = footer ? footer.offsetHeight : 0
         if (footerHeight) {
           footerHeight++ // Border bottom
         }
-        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 48) - footerHeight
+        var pinnedHeight = pinnedPanelEl && pinnedPanelEl.offsetHeight || 0
+        var historyH = $($window).height() - bottomPanelWrap.offsetHeight - (headWrap ? headWrap.offsetHeight : 48) - footerHeight - pinnedHeight
+
         $(historyWrap).css({
           height: historyH
         })
@@ -1548,38 +1650,39 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
   .directive('mySendForm', function (_, $q, $timeout, $interval, $window, $compile, $modalStack, $http, $interpolate, Storage, AppStickersManager, AppDocsManager, ErrorService, AppInlineBotsManager, FileManager, shouldFocusOnInteraction) {
+
     return {
       link: link,
+      templateUrl: templateUrl('send_form'),
       scope: {
         draftMessage: '=',
+        replyKeyboard: '=',
         mentions: '=',
         commands: '='
       }
     }
 
     function link ($scope, element, attrs) {
+      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
       var messageField = $('textarea', element)[0]
       var emojiButton = $('.composer_emoji_insert_btn', element)[0]
       var emojiPanel = $('.composer_emoji_panel', element)[0]
       var fileSelects = $('input', element)
       var dropbox = $('.im_send_dropbox_wrap', element)[0]
-      var messageFieldWrap = $('.im_send_field_wrap', element)[0]
-      var sendFieldPanel = $('.im_send_field_panel', element)[0]
       var dragStarted
       var dragTimeout
       var submitBtn = $('.im_submit', element)[0]
+      var voiceRecorderWrap = $('.im_voice_recorder_wrap', element)[0]
       var voiceRecordBtn = $('.im_record', element)[0]
 
       var stickerImageCompiled = $compile('<a class="composer_sticker_btn" data-sticker="{{::document.id}}" my-load-sticker document="document" thumb="true" img-class="composer_sticker_image"></a>')
       var cachedStickerImages = {}
 
       var voiceRecorder = null
-      var voiceRecordSuccess = false
       var voiceRecordSupported = Recorder.isRecordingSupported()
       var voiceRecordDurationInterval = null
-      var voiceRecorderPromise = null
       if (voiceRecordSupported) {
-        $(sendFieldPanel).addClass('im_record_supported')
+        element.addClass('im_record_supported')
       }
 
       $scope.voiceRecorder = {duration: 0, recording: false, processing: false}
@@ -1698,12 +1801,20 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       $(voiceRecordBtn).on('contextmenu', cancelEvent)
 
-      $(voiceRecordBtn).on('touchstart', function(e) {
+      var voiceRecordTouch = Config.Navigator.touch ? true : false
+      var voiceRecordEvents = {
+        start: voiceRecordTouch ? 'touchstart' : 'mousedown',
+        move: voiceRecordTouch ? 'touchmove' : 'mousemove',
+        stop: voiceRecordTouch ? 'touchend blur' : 'mouseup blur'
+      }
+      var onRecordStart, onRecordStreamReady, onRecordStop
+      var recInited = false
+      var recCancelAfterInit = false
+
+      $(voiceRecordBtn).on(voiceRecordEvents.start, function(event) {
         if ($scope.voiceRecorder.processing) {
           return
         }
-
-        voiceRecorderPromise = null
 
         voiceRecorder = new Recorder({
           monitorGain: 0,
@@ -1713,10 +1824,11 @@ angular.module('myApp.directives', ['myApp.filters'])
           encoderPath: 'vendor/recorderjs/encoder_worker.js'
         })
 
-        voiceRecorder.addEventListener('start', function(e) {
-          var startTime = tsNow(true)
+        recInited = false
+        recCancelAfterInit = false
 
-          voiceRecordSuccess = false
+        onRecordStart = function(e) {
+          var startTime = tsNow(true)
 
           voiceRecordDurationInterval = $interval(function() {
             $scope.voiceRecorder.duration = tsNow(true) - startTime
@@ -1725,51 +1837,128 @@ angular.module('myApp.directives', ['myApp.filters'])
           $scope.$apply(function() {
             $scope.voiceRecorder.recording = true
           })
+        }
+        voiceRecorder.addEventListener('start', onRecordStart)
 
-          console.warn(dT(), 'recording now!')
-        })
-
-        voiceRecorder.addEventListener('streamReady', function(e) {
+        onRecordStreamReady = function(e) {
+          recInited = true
+          if (recCancelAfterInit) {
+            voiceRecorderStop()
+            return
+          }
           voiceRecorder.start()
-        })
+        }
+        voiceRecorder.addEventListener('streamReady', onRecordStreamReady)
 
         voiceRecorder.initStream()
 
-        $($window).one('touchend', function() {
-          var deferred = $q.defer()
-          voiceRecorder.addEventListener('dataAvailable', function(e) {
-            var blob = blobConstruct([e.detail], 'audio/ogg')
-            deferred.resolve(blob)
-          })
-          voiceRecorderPromise = deferred.promise
-          voiceRecorder.stop()
+        var curHover = false
+        var curBoundaries = {}
 
+        var updateVoiceHoverBoundaries = function () {
+          var boundElement = $('.im_bottom_panel_wrap')
+          var offset = boundElement.offset()
+          curBoundaries = {
+            top: offset.top,
+            left: offset.left,
+            width: boundElement.outerWidth(),
+            height: boundElement.outerHeight(),
+          }
+        }
+
+        var updateVoiceHoveredClass = function (event, returnHover) {
+          var originalEvent = event.originalEvent || event
+          var touch = voiceRecordTouch
+                  ? originalEvent.changedTouches && originalEvent.changedTouches[0]
+                  : originalEvent
+          var isHover = touch &&
+                        touch.pageX >= curBoundaries.left &&
+                        touch.pageX <= curBoundaries.left + curBoundaries.width &&
+                        touch.pageY >= curBoundaries.top &&
+                        touch.pageY <= curBoundaries.top + curBoundaries.height
+
+          if (curHover != isHover) {
+            element.toggleClass('im_send_form_hover', isHover)
+            curHover = isHover
+          }
+          return returnHover && isHover
+        }
+
+        updateVoiceHoverBoundaries()
+        updateVoiceHoveredClass(event)
+
+        onRecordStop = function(event) {
+          $($window).off(voiceRecordEvents.move, updateVoiceHoveredClass)
+          $($window).off(voiceRecordEvents.stop, onRecordStop)
+
+          var isHover = event == 'blur' ? false : updateVoiceHoveredClass(event, true)
+
+          if ($scope.voiceRecorder.duration > 0 && isHover) {
+            $scope.voiceRecorder.processing = true
+            voiceRecorder.addEventListener('dataAvailable', function(e) {
+              var blob = blobConstruct([e.detail], 'audio/ogg')
+              console.warn(dT(), 'got audio', blob)
+
+              $scope.$apply(function () {
+                if (blob.size !== undefined && 
+                    blob.size > 1024) {
+                  $scope.draftMessage.files = [blob]
+                  $scope.draftMessage.isMedia = true
+                }
+
+                $scope.voiceRecorder.processing = false
+              })
+            })
+          }
+          cancelRecord()
+        }
+
+        if (!Config.Mobile) {
+          $(voiceRecorderWrap).css({
+            height: messageFieldWrap.offsetHeight,
+            width: messageFieldWrap.offsetWidth
+          })
+        }
+
+        $($window).on(voiceRecordEvents.move, updateVoiceHoveredClass)
+        $($window).one(voiceRecordEvents.stop, onRecordStop)
+      })
+
+      function voiceRecorderStop() {
+        if (!recInited) {
+          recCancelAfterInit = true
+          return
+        }
+        if (voiceRecorder) {
+          voiceRecorder.stop()
+          voiceRecorder.removeEventListener('streamReady', onRecordStreamReady)
+          voiceRecorder.removeEventListener('start', onRecordStart)
+
+
+          if (voiceRecorder.audioContext) {
+            if (voiceRecorder.scriptProcessorNode) {
+              voiceRecorder.scriptProcessorNode.disconnect()
+            }
+            voiceRecorder.clearStream()
+
+            voiceRecorder.audioContext.close()
+            voiceRecorder.audioContext = null
+          }
+        }
+      }
+
+      function cancelRecord() {
+        voiceRecorderStop()
+
+        if ($scope.voiceRecorder.recording) {
           $interval.cancel(voiceRecordDurationInterval)
 
           $scope.$apply(function() {
             $scope.voiceRecorder.recording = false
+            $scope.voiceRecorder.duration = 0
           })
-        })
-      })
-
-      $(voiceRecordBtn).on('touchend', function(e) {
-        voiceRecordSuccess = true
-        $timeout(function () {
-          if (voiceRecorderPromise) {
-            $scope.voiceRecorder.processing = true
-
-            voiceRecorderPromise.then(function(blob) {
-              console.warn(dT(), 'got audio', blob)
-              $scope.draftMessage.files = [blob]
-              $scope.draftMessage.isMedia = true
-
-              $scope.voiceRecorder.processing = false
-
-              voiceRecorderPromise = null
-            })
-          }
-        }, 100)
-      })
+        }
+      }
 
       var sendOnEnter = true
       function updateSendSettings () {
@@ -1955,12 +2144,11 @@ angular.module('myApp.directives', ['myApp.filters'])
 
           if (e.type == 'dragenter' || e.type == 'dragover') {
             if (dragStateChanged) {
-              if (!Config.Mobile) {
-                $(emojiButton).hide()
-              }
-              $(dropbox)
-                .css({height: messageFieldWrap.offsetHeight + 2, width: messageFieldWrap.offsetWidth})
-                .show()
+              $(dropbox).css({
+                height: messageFieldWrap.offsetHeight,
+                width: messageFieldWrap.offsetWidth
+              })
+              element.addClass('im_send_form_dragging')
             }
           } else {
             if (e.type == 'drop') {
@@ -1970,10 +2158,7 @@ angular.module('myApp.directives', ['myApp.filters'])
               })
             }
             dragTimeout = setTimeout(function () {
-              $(dropbox).hide()
-              if (!Config.Mobile) {
-                $(emojiButton).show()
-              }
+              element.removeClass('im_send_form_dragging')
               dragStarted = false
               dragTimeout = false
             }, 300)
@@ -2220,6 +2405,10 @@ angular.module('myApp.directives', ['myApp.filters'])
   })
 
   .directive('myLoadGif', function (AppDocsManager, $timeout) {
+
+    var currentPlayer = false
+    var currentPlayerScope = false
+
     return {
       link: link,
       templateUrl: templateUrl('full_gif'),
@@ -2228,22 +2417,50 @@ angular.module('myApp.directives', ['myApp.filters'])
       }
     }
 
+    function checkPlayer(newPlayer, newScope) {
+      if (currentPlayer === newPlayer) {
+        return false
+      }
+      if (currentPlayer) {
+        currentPlayer.pause()
+        currentPlayer.currentTime = 0
+        currentPlayerScope.isActive = false
+      }
+      currentPlayer = newPlayer
+      currentPlayerScope = newScope
+    }
+
+    function toggleVideoPlayer ($scope, element) {
+      var video = $('video', element)[0]
+      if (video) {
+        if (!$scope.isActive) {
+          video.pause()
+          video.currentTime = 0
+        } else {
+          checkPlayer(video, $scope)
+
+          var promise = video.play()
+          if (promise && promise.then) {
+            promise.then(function () {
+              $scope.needClick = false
+            }, function () {
+              $scope.needClick = true
+            })
+          }
+        }
+        return video
+      }
+      return false
+    }
+
     function link ($scope, element, attrs) {
       var imgWrap = $('.img_gif_image_wrap', element)
       imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
 
       var downloadPromise = false
+      var peerChanged = false
 
       $scope.isActive = false
-
-      // Demo
-      // $scope.document.progress = {enabled: true, percent: 30}
-      // $timeout(function () {
-      //   $scope.document.progress.percent = 60
-      // }, 3000)
-      // $timeout(function () {
-      //   $scope.document.progress.percent = 100
-      // }, 10000)
 
       $scope.toggle = function (e) {
         if (e && checkClick(e, true)) {
@@ -2252,19 +2469,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if ($scope.document.url) {
-          onContentLoaded(function () {
-            $scope.isActive = !$scope.isActive
-            $scope.$emit('ui_height')
-
-            var video = $('video', element)[0]
-            if (video) {
-              if (!$scope.isActive) {
-                video.pause()
-                video.currentTime = 0
-              } else {
-                video.play()
-              }
+          if ($scope.needClick) {
+            if (toggleVideoPlayer($scope, element)) {
+              return;
             }
+          }
+          $scope.isActive = !$scope.isActive
+          onContentLoaded(function () {
+            $scope.$emit('ui_height')
+            toggleVideoPlayer($scope, element)
           })
           return
         }
@@ -2275,18 +2488,43 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
 
+        peerChanged = false
         downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
 
         downloadPromise.then(function () {
           $timeout(function () {
-            $scope.isActive = true
+            if (!peerChanged) {
+              $scope.isActive = true
+            }
+            var video = toggleVideoPlayer($scope, element)
+            if (video) {
+              $(video).on('ended', function () {
+                if ($scope.isActive) {
+                  $scope.toggle()
+                }
+              })
+            }
           }, 200)
         })
       }
+
+      $scope.$on('ui_history_change', function () {
+        if ($scope.isActive) {
+          $scope.toggle()
+        }
+        peerChanged = true
+      })
+
+      $scope.$on('$destroy', function () {
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
+        }
+      })
     }
   })
 
-  .directive('myLoadRound', function (AppDocsManager, $timeout) {
+  .directive('myLoadRound', function (AppMessagesManager, AppDocsManager, $timeout) {
 
     var currentPlayer = false
     var currentPlayerScope = false
@@ -2312,13 +2550,52 @@ angular.module('myApp.directives', ['myApp.filters'])
       currentPlayerScope = newScope
     }
 
+    function readVideoMessage($scope) {
+      if ($scope.message &&
+          !$scope.message.pFlags.out &&
+          $scope.message.pFlags.media_unread) {
+        AppMessagesManager.readMessages([$scope.message.mid])
+      }
+    }
+
+    function toggleVideoPlayer ($scope, element) {
+      var video = $('video', element)[0]
+      if (video) {
+        if (!$scope.isActive) {
+          video.pause()
+          video.currentTime = 0
+        } else {
+          checkPlayer(video, $scope)
+
+          var promise = video.play()
+          if (promise && promise.then) {
+            promise.then(function () {
+              $scope.needClick = false
+              readVideoMessage($scope)
+            }, function () {
+              $scope.needClick = true
+            })
+          } else {
+            readVideoMessage($scope)
+          }
+        }
+        return video
+      }
+      return false
+    }
+
     function link ($scope, element, attrs) {
       var imgWrap = $('.img_round_image_wrap', element)
       imgWrap.css({width: $scope.document.thumb.width, height: $scope.document.thumb.height})
 
       var downloadPromise = false
+      var peerChanged = false
 
       $scope.isActive = false
+
+      if ($scope.$parent.messageId) {
+        $scope.message = AppMessagesManager.wrapForHistory($scope.$parent.messageId)
+      }
 
       $scope.toggle = function (e) {
         if (e && checkClick(e, true)) {
@@ -2327,20 +2604,15 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
 
         if ($scope.document.url) {
+          if ($scope.needClick) {
+            if (toggleVideoPlayer($scope, element)) {
+              return;
+            }
+          }
           $scope.isActive = !$scope.isActive
           onContentLoaded(function () {
             $scope.$emit('ui_height')
-
-            var video = $('video', element)[0]
-            if (video) {
-              if (!$scope.isActive) {
-                video.pause()
-                video.currentTime = 0
-              } else {
-                checkPlayer(video, $scope)
-                video.play()
-              }
-            }
+            toggleVideoPlayer($scope, element)
           })
           return
         }
@@ -2351,18 +2623,22 @@ angular.module('myApp.directives', ['myApp.filters'])
           return
         }
 
+        peerChanged = false
         downloadPromise = AppDocsManager.downloadDoc($scope.document.id)
 
         downloadPromise.then(function () {
           $timeout(function () {
-            var video = $('video', element)[0]
-            checkPlayer(video, $scope)
-            $(video).on('ended', function () {
-              if ($scope.isActive) {
-                $scope.toggle()
-              }
-            })
-            $scope.isActive = true
+            if (!peerChanged) {
+              $scope.isActive = true
+            }
+            var video = toggleVideoPlayer($scope, element)
+            if (video) {
+              $(video).on('ended', function () {
+                if ($scope.isActive) {
+                  $scope.toggle()
+                }
+              })
+            }
           }, 200)
         })
       }
@@ -2370,6 +2646,14 @@ angular.module('myApp.directives', ['myApp.filters'])
       $scope.$on('ui_history_change', function () {
         if ($scope.isActive) {
           $scope.toggle()
+        }
+        peerChanged = true
+      })
+
+      $scope.$on('$destroy', function () {
+        if (downloadPromise) {
+          downloadPromise.cancel()
+          downloadPromise = false
         }
       })
     }
@@ -2856,7 +3140,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myUserStatus', function ($filter, $rootScope, AppUsersManager) {
+  .directive('myUserStatus', function (_, $filter, $rootScope, AppUsersManager) {
     var statusFilter = $filter('userStatus')
     var ind = 0
     var statuses = {}
@@ -2882,12 +3166,18 @@ angular.module('myApp.directives', ['myApp.filters'])
     function link ($scope, element, attrs) {
       var userID
       var curInd = ind++
+      var forDialog = attrs.forDialog && $scope.$eval(attrs.forDialog)
+
       var update = function () {
         var user = AppUsersManager.getUser(userID)
-        element
-          .html(statusFilter(user, attrs.botChatPrivacy))
-          .toggleClass('status_online', (user.status && user.status._ == 'userStatusOnline') || false)
-      // console.log(dT(), 'update status', element[0], user.status && user.status, tsNow(true), element.html())
+        if (forDialog && user.pFlags.self) {
+          element.html('')
+        } else {
+          element
+            .html(statusFilter(user, attrs.botChatPrivacy))
+            .toggleClass('status_online', (user.status && user.status._ == 'userStatusOnline') || false)
+        }
+        // console.log(dT(), 'update status', element[0], user.status && user.status, tsNow(true), element.html())
       }
 
       $scope.$watch(attrs.myUserStatus, function (newUserID) {
@@ -2912,6 +3202,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
     var allPluralize = _.pluralize('group_modal_pluralize_participants')
     var onlinePluralize = _.pluralize('group_modal_pluralize_online_participants')
+    var subscribersPluralize = _.pluralize('group_modal_pluralize_subscribers')
 
     var myID = 0
     MtpApiManager.getUserID().then(function (newMyID) {
@@ -2941,8 +3232,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         var curJump = ++jump
         participantsCount = 0
         participants = {}
-        if (!chatID) {
-          update()
+        var chat = AppChatsManager.getChat(chatID)
+        if (chat.participants_count) {
+          participantsCount = chat.participants_count
+        }
+        update()
+        if (!chatID || AppChatsManager.isChannel(chatID) && participantsCount) {
           return
         }
         AppProfileManager.getChatFull(chatID).then(function (chatFull) {
@@ -2957,12 +3252,20 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (chatFull.participants_count) {
             participantsCount = chatFull.participants_count || 0
           }
+          if (!participantsCount) {
+            var chat = AppChatsManager.getChat(chatID)
+            if (chat.participants_count) {
+              participantsCount = chat.participants_count
+            }
+          }
           update()
         })
       }
 
       var update = function () {
-        var html = allPluralize(participantsCount)
+        var html = AppChatsManager.isBroadcast(chatID)
+          ? subscribersPluralize(participantsCount)
+          : allPluralize(participantsCount)
         var onlineCount = 0
         if (!AppChatsManager.isChannel(chatID)) {
           var wasMe = false
@@ -3034,7 +3337,7 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
-  .directive('myPeerLink', function (AppChatsManager, AppUsersManager) {
+  .directive('myPeerLink', function (_, $rootScope, AppPeersManager, AppChatsManager, AppUsersManager, AppMessagesIDsManager) {
     return {
       link: link
     }
@@ -3043,6 +3346,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var override = attrs.userOverride && $scope.$eval(attrs.userOverride) || {}
       var short = attrs.short && $scope.$eval(attrs.short)
       var username = attrs.username && $scope.$eval(attrs.username)
+      var forDialog = attrs.forDialog && $scope.$eval(attrs.forDialog)
 
       var peerID
       var update = function () {
@@ -3051,16 +3355,21 @@ angular.module('myApp.directives', ['myApp.filters'])
         }
         if (peerID > 0) {
           var user = AppUsersManager.getUser(peerID)
-          var prefix = username ? '@' : ''
-          var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName')
+          if (forDialog && user.pFlags.self) {
+            element.text(_('user_name_saved_msgs_raw'))
+          } else {
+            var prefix = username ? '@' : ''
+            var key = username ? 'username' : (short ? 'rFirstName' : 'rFullName')
 
-          element.html(
-            prefix +
-            (override[key] || user[key] || '').valueOf() +
-            (attrs.verified && user.pFlags && user.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
-          )
-          if (attrs.color && $scope.$eval(attrs.color)) {
-            element.addClass('user_color_' + user.num)
+            element.html(
+              prefix +
+              (override[key] || user[key] || '').valueOf() +
+              (attrs.verified && user.pFlags && user.pFlags.verified ? ' <i class="icon-verified"></i>' : '')
+            )
+
+            if (attrs.color && $scope.$eval(attrs.color)) {
+              element.addClass('user_color_' + user.num)
+            }
           }
         } else {
           var chat = AppChatsManager.getChat(-peerID)
@@ -3077,7 +3386,23 @@ angular.module('myApp.directives', ['myApp.filters'])
           if (peerID > 0) {
             AppUsersManager.openUser(peerID, override)
           } else {
-            AppChatsManager.openChat(-peerID)
+            var chatID = -peerID
+            var postID = attrs.postId && $scope.$eval(attrs.postId)
+            var savedFrom = attrs.savedFrom && $scope.$eval(attrs.savedFrom)
+            if (postID) {
+              $rootScope.$broadcast('history_focus', {
+                peerString: AppChatsManager.getChatString(chatID),
+                messageID: AppMessagesIDsManager.getFullMessageID(parseInt(postID), chatID)
+              })
+            } else if (savedFrom) {
+              var peerMid = savedFrom.split('_')
+              $rootScope.$broadcast('history_focus', {
+                peerString: AppPeersManager.getPeerString(peerMid[0]),
+                messageID: peerMid[1]
+              })
+            } else {
+              AppChatsManager.openChat(chatID)
+            }
           }
         })
       }
@@ -3120,6 +3445,7 @@ angular.module('myApp.directives', ['myApp.filters'])
       var initEl = $('<span class="peer_initials nocopy ' + (attrs.imgClass || '') + '"></span>')
       var jump = 0
       var prevClass = false
+      var forDialog = attrs.forDialog && $scope.$eval(attrs.forDialog)
 
       var setPeerID = function (newPeerID) {
         if (peerID == newPeerID) {
@@ -3146,6 +3472,12 @@ angular.module('myApp.directives', ['myApp.filters'])
         var curJump = ++jump
 
         peerPhoto = peer.photo && angular.copy(peer.photo.photo_small)
+
+        if (forDialog && peer.pFlags && peer.pFlags.self) {
+          initEl.remove()
+          imgEl.prependTo(element).attr('src', 'img/placeholders/Fave.png')
+          return
+        }
 
         var hasPhoto = peerPhoto !== undefined
 

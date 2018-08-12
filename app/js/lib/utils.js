@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.7.1 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -393,7 +393,8 @@ function templateUrl (tplName) {
     channel_edit_modal: 'desktop',
     megagroup_edit_modal: 'desktop',
     inline_results: 'desktop',
-    composer_dropdown: 'desktop'
+    composer_dropdown: 'desktop',
+    peer_pinned_message_bar: 'desktop'
   }
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop')
   return 'partials/' + layout + '/' + tplName + '.html'
@@ -477,7 +478,8 @@ function versionCompare (ver1, ver2) {
     var hasTag = text.charAt(0) == '%'
     text = text.replace(badCharsRe, ' ').replace(trimRe, '')
     text = text.replace(/[^A-Za-z0-9]/g, function (ch) {
-      return Config.LatinizeMap[ch] || ch
+      var latinizeCh = Config.LatinizeMap[ch]
+      return latinizeCh !== undefined ? latinizeCh : ch
     })
     text = text.toLowerCase()
     if (hasTag) {

@@ -36,12 +36,12 @@
                     </div>
                   </div>
 
-                  <div class="im_dialog_photo pull-left" my-peer-photolink="searchPeer" img-class="im_dialog_photo" watch="true"></div>
+                  <div class="im_dialog_photo pull-left" my-peer-photolink="searchPeer" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
 
                   <div class="im_dialog_message_wrap">
 
                     <div class="im_dialog_peer">
-                      <span my-peer-link="searchPeer"></span>
+                      <span my-peer-link="searchPeer" for-dialog="true"></span>
                     </div>
 
                     <div class="im_dialog_message">
@@ -56,18 +56,19 @@
               <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
             </ul>
 
-            <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
-              <h5 my-i18n="im_contacts_title"></h5>
+            <div class="im_dialogs_contacts_wrap" ng-show="myResults.length > 0">
+              <h5 my-i18n="im_chat_contacts_title"></h5>
               <ul class="nav nav-pills nav-stacked">
-                <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: curDialog.peerID == contact.userID}">
-                  <a class="im_dialog" ng-mousedown="dialogSelect(contact.peerString)">
-                    <div class="im_dialog_photo pull-left" my-peer-photolink="contact.userID" img-class="im_dialog_photo" watch="true"></div>
+                <li class="im_dialog_wrap" ng-repeat="myResult in myResults track by myResult.id" ng-class="{active: curDialog.peerID == myResult.id}">
+                  <a class="im_dialog" ng-mousedown="dialogSelect(myResult.peerString)">
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="myResult.id" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" my-peer-link="contact.userID"  verified="true"></span>
+                        <span class="im_dialog_user" my-peer-link="myResult.id"  verified="true" for-dialog="true"></span>
                       </div>
-                      <div class="im_dialog_message">
-                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                      <div class="im_dialog_message" ng-switch="myResult.id > 0">
+                        <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::myResult.id" for-dialog="true"></span>
+                        <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-myResult.id"></span>
                       </div>
                     </div>
                   </a>
@@ -80,13 +81,17 @@
               <ul class="nav nav-pills nav-stacked">
                 <li class="im_dialog_wrap" ng-repeat="foundPeer in foundPeers track by foundPeer.id" ng-class="{active: curDialog.peerID == foundPeer.id}">
                   <a class="im_dialog" ng-mousedown="dialogSelect(foundPeer.peerString)">
-                    <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true"></div>
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="foundPeer.id" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" my-peer-link="foundPeer.id"  verified="true"></span>
+                        <span class="im_dialog_user" my-peer-link="foundPeer.id"  verified="true" for-dialog="true"></span>
                       </div>
                       <div class="im_dialog_message">
-                        <span class="im_dialog_message_text" ng-bind="::'@' + foundPeer.username"></span>
+                        <span class="im_dialog_message_text" ng-switch="foundPeer.id > 0">
+                          <span ng-bind="::'@' + foundPeer.username + ', '"></span>
+                          <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::foundPeer.id" for-dialog="true"></span>
+                          <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-foundPeer.id"></span>
+                        </span>
                       </div>
                     </div>
                   </a>
@@ -123,6 +128,7 @@
 
       <div class="im_history_selected_wrap">
         <div my-history class="im_history_col">
+          <div my-peer-pinned-message-bar="curDialog.peerID" class="im_history_pinned_panel"></div>
 
           <div class="im_history_wrap nano">
 
@@ -206,61 +212,13 @@
 
                 <div class="im_send_form_wrap clearfix" ng-controller="AppImSendController" ng-class="{im_send_reply_form_wrap: draftMessage.replyToMsgID > 0}">
 
-                  <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true" ng-show="!draftMessage.isBroadcast">
+                  <a class="pull-right im_panel_peer_photo" my-peer-photolink="historyPeer.id" img-class="im_panel_peer_photo" watch="true" for-dialog="true" ng-show="!draftMessage.isBroadcast">
                     <i class="icon im_panel_peer_online" ng-show="historyPeer.id > 0 &amp;&amp; historyPeer.data.status._ == 'userStatusOnline'"></i>
                   </a>
                   <a class="pull-left im_panel_own_photo" my-peer-photolink="draftMessage.isBroadcast ? historyPeer.id : ownID" img-class="im_panel_own_photo" watch="true" ng-click="openSettings()" no-open="true"></a>
 
-                  <form my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" class="im_send_form" ng-class="{im_send_form_empty: !draftMessage.text.length, composer_progress_enabled: draftMessage.inlineProgress}">
+                  <div my-send-form draft-message="draftMessage" mentions="mentions" commands="commands" reply-keyboard="historyState.replyKeyboard"></div>
 
-                    <div class="im_send_form_inline_results" my-inline-results="inlineResults"></div>
-
-                    <div class="im_send_reply_wrap" ng-if="draftMessage.replyToMsgID > 0">
-                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.replyClear(true)"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
-                      <a class="im_message_reply_wrap" my-reply-message="draftMessage.replyToMsgID" watch="true" edit="{{draftMessage.type == 'edit'}}"></a>
-                    </div>
-
-                    <div class="im_send_reply_wrap im_send_fwds_wrap" ng-if="draftMessage.fwdMessages.length > 0">
-                      <a class="im_send_reply_cancel" ng-mousedown="draftMessage.fwdsClear()"><i class="icon icon-reply-bar"></i><i class="icon icon-reply-bar"></i></a>
-                      <div class="im_message_reply_wrap" my-forwarded-messages="draftMessage.fwdMessages"></div>
-                    </div>
-
-                    <div class="im_send_field_wrap hasselect" ng-class="historyState.replyKeyboard._ == 'replyKeyboardMarkup' ? 'im_send_field_wrap_2ndbtn' : ''">
-                      <a class="composer_emoji_insert_btn"><i class="icon icon-emoji"></i></a>
-                      <div class="composer_progress_icon_wrap">
-                        <div class="composer_progress_icon" my-arc-progress width="22" stroke="2.5"></div>
-                      </div>
-                      <a class="composer_command_btn" ng-show="!historyState.replyKeyboard && commands.list.length > 0 && (!draftMessage.text.length || draftMessage.text == '/')" ng-mousedown="toggleSlash($event)" ng-class="draftMessage.text[0] == '/' ? 'active' : ''"><i class="icon icon-slash"></i></a>
-                      <a class="composer_keyboard_btn" ng-show="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-mousedown="replyKeyboardToggle($event)" ng-class="!historyState.replyKeyboard.pFlags.hidden ? 'active' : ''"><i class="icon icon-keyboard"></i></a>
-
-                      <div class="im_send_dropbox_wrap" my-i18n="im_photos_drop_text"></div>
-                      <textarea ng-model="draftMessage.text" class="form-control im_message_field no_outline" dir="auto" ng-trim="false"></textarea>
-                    </div>
-
-                    <div class="im_send_buttons_wrap clearfix">
-                      <button type="submit" class="btn btn-md im_submit" ng-class="draftMessage.type == 'edit' ? 'im_submit_edit' : 'im_submit_send'">
-                        <span class="im_submit_send_label nocopy" my-i18n="im_submit_message"></span>
-                        <span class="im_submit_edit_label nocopy" my-i18n="im_submit_edit_message"></span>
-                      </button>
-
-                      <div class="im_attach pull-left">
-                        <input type="file" class="im_attach_input" size="28" multiple="multiple" title="{{'im_attach_file_title' | i18n}}" />
-                        <i class="icon icon-paperclip"></i>
-                      </div>
-
-                      <div class="im_media_attach pull-left">
-                        <input type="file" class="im_media_attach_input" size="28" multiple="multiple" accept="image/*, video/*, audio/*" title="{{'im_media_attach_title' | i18n}}"/>
-                        <i class="icon icon-camera"></i>
-                      </div>
-
-                      <div class="composer_emoji_panel"></div>
-                    </div>
-
-                    <div class="im_send_keyboard_wrap" ng-if="historyState.replyKeyboard._ == 'replyKeyboardMarkup'" ng-show="!historyState.replyKeyboard.pFlags.hidden">
-                      <div my-reply-markup="historyState.replyKeyboard"></div>
-                    </div>
-
-                  </form>
                 </div>
 
               </div>

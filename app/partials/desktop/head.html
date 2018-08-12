@@ -52,8 +52,12 @@
             <li><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
             <li><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
             <li><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
+            <li><a ng-click="toggleMedia('music')" my-i18n="head_media_music"></a></li>
+            <li><a ng-click="toggleMedia('urls')" my-i18n="head_media_links"></a></li>
             <li><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
             <li><a ng-click="toggleMedia('round')" my-i18n="head_media_round"></a></li>
+            <li ng-if="isHistoryPeerGroup()" class="divider ng-scope"></li>
+            <li ng-if="isHistoryPeerGroup()"><a ng-click="toggleMedia('mentions')" my-i18n="head_media_mymentions"></a></li>
           </ul>
         </div>
 
@@ -80,12 +84,24 @@
           <div class="tg_head_peer_media" ng-switch-when="audio">
             <i class="icon icon-filter-audio"></i><span my-i18n="im_media_audio"></span>
           </div>
+          <div class="tg_head_peer_media" ng-switch-when="round">
+            <i class="icon icon-filter-audio"></i><span my-i18n="im_media_round"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="music">
+            <i class="icon icon-filter-documents"></i><span my-i18n="im_media_music"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="urls">
+            <span my-i18n="im_media_links"></span>
+          </div>
+          <div class="tg_head_peer_media" ng-switch-when="mentions">
+            <span my-i18n="im_media_mentions"></span>
+          </div>
 
           <a class="tg_head_btn" ng-switch-default ng-click="showPeerInfo()">
             <div class="tg_head_peer_info">
-              <span class="tg_head_peer_title" my-peer-link="historyPeer.id" peer-watch="true" dir="auto"></span>
+              <span class="tg_head_peer_title" my-peer-link="historyPeer.id" peer-watch="true" dir="auto" for-dialog="true"></span>
               <span class="tg_head_peer_status" ng-switch="historyPeer.id > 0">
-                <span ng-switch-when="true" my-user-status="historyPeer.id"></span>
+                <span ng-switch-when="true" my-user-status="historyPeer.id" for-dialog="true"></span>
                 <span ng-switch-default my-chat-status="-historyPeer.id"></span>
               </span>
             </div>
