@@ -10,7 +10,7 @@
     "group_modal_info": "Информация о группе",
     "group_modal_pluralize_participants": "{'one': '{} участник', 'few': '{} участника', 'many': '{} участников', 'other': '{} участников'}",
     "group_modal_pluralize_online_participants": "{'one': '1 в сети', 'other': '{} в сети'}",
-    "group_modal_pluralize_subscribers": "{'0': 'No subscribers', 'one': '1 subscriber', 'other': '{} subscribers'}",
+    "group_modal_pluralize_subscribers": "{'one': '{} участник', 'few': '{} участника', 'many': '{} участников', 'other': '{} участников'}",
     "group_modal_participants": "{total}, {online}",
     "group_modal_add_member": "Добавить участника",
     "group_modal_return": "Вернуться в группу",

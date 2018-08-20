@@ -62,9 +62,9 @@ Config.I18n = {
     , 'es-es'
     , 'de-de'
     , 'it-it'
+    , 'ru-ru'
     , 'nl-nl'
     , 'pt-br'
-  // ,"ru-ru"
   ], // To be copied to package.json
   languages: {
     'en-us': 'English',
