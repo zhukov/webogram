@@ -109,7 +109,7 @@ The i18n filter is basically just an alias/other way to call `_` and can be used
 ```html
 <input placeholder="{{'modal_serach' | i18n}}" />
 <span>{{"user_status_last_seen" | i18n:relativeTime}}</span>
-<div>{{"format_size_progress" | i18n:{done: bytesLoaded, total: totalSize} }}</div>
+<div>{{"format_size_progress" | i18n:{done: bytesLoaded, total: totalSize}}}</div>
 ```
 
 ### Together with `ngPluralize`
