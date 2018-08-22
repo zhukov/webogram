@@ -11,22 +11,41 @@
           </div><i class="icon icon-tg-title"></i>
         </a>
 
+        <a class="tg_head_btn toggle-visibility" ng-click="toggleVisibility()">
+          <i class="fas fa-{{visible == 'true' ? 'eye-slash' : 'eye'}}"></i>
+          {{visible == 'true' ? 'visibility_off' : 'visibility_on' | i18n}}
+        </a>
+
         <ul class="dropdown-menu">
-          <li><a ng-click="openGroup()">
-            <i class="icon icon-new-group"></i><span my-i18n="im_new_group"></span>
-          </a></li>
-          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
-            <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
-          </a></li>
-          <li><a ng-click="openSettings()">
-            <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
-          </a></li>
-          <li><a ng-click="openFaq()">
-            <i class="icon icon-faq"></i><span my-i18n="head_telegram_faq"></span>
-          </a></li>
-          <li><a href="" ng-click="openChangelog()">
-            <i class="icon icon-about"></i><span my-i18n="head_about"></span>
-          </a></li>
+          <li>
+            <a ng-click="openGroup()">
+              <i class="icon icon-new-group"></i><span my-i18n="im_new_group"></span>
+            </a>
+          </li>
+
+          <li ng-if="!isEmpty.contacts">
+            <a ng-click="openContacts()">
+              <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
+            </a>
+          </li>
+
+          <li>
+            <a ng-click="openSettings()">
+              <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
+            </a>
+          </li>
+
+          <li>
+            <a ng-click="openFaq()">
+              <i class="icon icon-faq"></i><span my-i18n="head_telegram_faq"></span>
+            </a>
+          </li>
+
+          <li>
+            <a href="" ng-click="openChangelog()">
+              <i class="icon icon-about"></i><span my-i18n="head_about"></span>
+            </a>
+          </li>
         </ul>
       </div>
     </div>

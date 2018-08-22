@@ -37,6 +37,11 @@
         <i class="icon-search"></i>
       </a>
 
+      <a class="navbar-toggle-visibility" ng-click="toggleVisibility()">
+        <i class="fas fa-{{visible == 'true' ? 'eye-slash' : 'eye'}}"></i>
+        {{visible == 'true' ? 'visibility_off' : 'visibility_on' | i18n}}
+      </a>
+
       <div class="navbar-header">
 
         <a class="navbar-brand tg_logo_wrap" href="#/im"><i class="icon icon-tg-logo"></i><i class="icon icon-tg-title"></i></a>

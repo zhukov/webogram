@@ -1173,6 +1173,7 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_panel {
   padding: 12px 12px 12px;
   position: relative;
+  border-bottom: 2px solid #E9EBED;
   .im_dialogs_modal_col_wrap & {
     padding: 7px 12px 6px;
     .box-shadow(0px 1px 1px rgba(0,0,0,0.15));
@@ -1186,12 +1187,12 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_search_field {
   font-size: 12px;
   line-height: normal;
-  border: 1px solid #F2F2F2;
+  border: 1px solid #E9EBED;
   border-radius: 2px;
   padding: 6px 26px 6px 30px;
   margin: 0 0 0;
 
-  background-color: #F2F2F2;
+  background-color: #E9EBED;
   .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
   background-position: -6px -205px;
 
@@ -5023,4 +5024,21 @@ a.countries_modal_search_clear {
   }
 }
 
+.im_dialogs_filter {
+  display: flex;
+  text-align: center;
+  justify-content: space-between;
+
+  .btn-md-primary {
+    font-size: 10px;
+
+    &:hover, &.active {
+      background: #E9EBED;
+    }
+
+    .fas {
+      display: block;
+    }
+  }
+}
 

@@ -391,7 +391,8 @@ html {
 
   .navbar-quick-nav li > a > .navbar-quick-back-title,
   .navbar-search-wrap,
-  .navbar-history-edit {
+  .navbar-history-edit,
+  .navbar-toggle-visibility {
     display: none;
   }
 }
@@ -1978,4 +1979,32 @@ a.media_modal_date:hover {
 .composer_progress_icon_wrap {
   right: 6px;
   top: 4px;
+}
+
+.im_dialogs_filter {
+  .btn-md-primary {
+    border-radius: 0px;
+
+    .fas {
+      font-size: 20px !important;
+    }
+  }
+}
+
+.navbar-toggle-visibility {
+  display: none;
+  float: right;
+  margin: 0;
+  color: #fff;
+  padding: 14px;
+
+  &:hover {
+    color: #E9EBED;
+    text-decoration: none;
+  }
+}
+
+.tg_page_head .navbar_peer_not_selected .navbar-toggle-visibility,
+.tg_modal_head .navbar-toggle-visibility {
+  display: block;
 }
