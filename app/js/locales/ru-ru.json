@@ -16,6 +16,7 @@
   "modal_next": "Далее",
   "modal_ok": "OK",
   "modal_done": "Готово",
+
   "group_modal_info": "Информация о группе",
   "group_modal_pluralize_participants": "{'one': '{} участник', 'few': '{} участника', 'many': '{} участников', 'other': '{} участников'}",
   "group_modal_pluralize_online_participants": "{'one': '1 в сети', 'other': '{} в сети'}",

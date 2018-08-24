@@ -1,6 +1,7 @@
 {
   "visibility_on": "ON",
   "visibility_off": "OFF",
+
   "filter_online": "Online",
   "filter_dialogs": "Dialogs",
   "filter_groups": "Groups",
@@ -15,6 +16,7 @@
   "modal_next": "Próxima",
   "modal_ok": "OK",
   "modal_done": "Pronto",
+
   "group_modal_info": "Informações do Grupo",
   "group_modal_pluralize_participants": "{'0': 'Nenhum membro', 'one': '1 membro', 'other': '{} membros'}",
   "group_modal_pluralize_online_participants": "{'one': '1 online', 'other': '{} online'}",
