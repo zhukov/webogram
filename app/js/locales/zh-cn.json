@@ -579,7 +579,7 @@
 	"login_about_desc1_md": "Telegram 网页版免费、快速、安全，且能让你在**浏览器**中体验到大多数的 **Telegram** 特性。",
 	"login_about_desc2_md": "客户端会与您移动设备上的 **Telegram 应用**保持同步，让您拥有完美的通信与文件分享的体验。",
 	"login_about_desc3_md": "我们的{source-link: 源代码}是开源的，每个人都能做出贡献。",
-	"login_about_intro": "欢迎使用 Telegram 网页版非官方中文客户端。",
+	"login_about_intro": "欢迎使用 Telegram 网页版官方客户端。",
 	"login_about_learn": "了解更多",
 	"login_password_title": "密码",
 	"login_password_label": "您已启用了两步验证，因此您的账号被一个附加密码保护。",
