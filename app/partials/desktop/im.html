@@ -12,6 +12,33 @@
             <i class="icon icon-search-clear"></i>
           </a>
         </div>
+
+        <div class="im_dialogs_filter" ng-init="show = 1">
+          <a ng-click="show = 1" class="btn btn-md-primary" ng-class="{active: show == 1}">
+            <i class="fas fa-dot-circle"></i>
+            {{'filter_online' | i18n}}
+          </a>
+
+          <a ng-click="show = 2" class="btn btn-md-primary" ng-class="{active: show == 2}">
+            <i class="fas fa-comment-alt"></i>
+            {{'filter_dialogs' | i18n}}
+          </a>
+
+          <a ng-click="show = 3" class="btn btn-md-primary" ng-class="{active: show == 3}">
+            <i class="fas fa-users"></i>
+            {{'filter_groups' | i18n}}
+          </a>
+
+          <a ng-click="show = 4" class="btn btn-md-primary" ng-class="{active: show == 4}">
+            <i class="fas fa-bullhorn"></i>
+            {{'filter_channels' | i18n}}
+          </a>
+
+          <a ng-click="show = 5" class="btn btn-md-primary" ng-class="{active: show == 5}">
+            <i class="fas fa-robot"></i>
+            {{'filter_bots' | i18n}}
+          </a>
+        </div>
       </div>
 
       <div my-dialogs-list class="im_dialogs_col">
@@ -25,35 +52,44 @@
               <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-sm im_dialogs_import_phonebook" ng-click="importPhonebook()" my-i18n="im_import_phonebook"></button>
             </div>
 
-            <ul class="nav nav-pills nav-stacked">
-              <li class="im_dialog_wrap" ng-if="searchPeer">
-                <a class="im_dialog im_dialog_searchpeer disabled" ng-mousedown="setSearchPeer()">
+            <ul ng-if="show == 1" class="nav nav-pills nav-stacked">
+              <li ng-if="dialogMessage.peerData.status._ == 'userStatusOnline'"
+                class="im_dialog_wrap" my-dialog
+                dialog-message="dialogMessage"
+                ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+                ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            </ul>
 
-                  <div class="im_dialog_meta pull-right">
-                    <div class="im_dialog_clear_searchpeer">
-                      <!-- <i class="icon icon-clear-searchpeer"></i> -->
-                      <i class="icon icon-search-clear"></i>
-                    </div>
-                  </div>
+            <ul ng-if="show == 2" class="nav nav-pills nav-stacked">
+              <li ng-if="dialogMessage.peerData._ == 'user' && !dialogMessage.peerData.bot_info_version"
+                  class="im_dialog_wrap" my-dialog
+                  dialog-message="dialogMessage"
+                  ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+                  ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            </ul>
 
-                  <div class="im_dialog_photo pull-left" my-peer-photolink="searchPeer" img-class="im_dialog_photo" watch="true" for-dialog="true"></div>
+            <ul ng-if="show == 3" class="nav nav-pills nav-stacked">
+              <li ng-if="dialogMessage.peerData._ == 'chat' || dialogMessage.peerData.pFlags.megagroup == true"
+                  class="im_dialog_wrap" my-dialog
+                  dialog-message="dialogMessage"
+                  ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+                  ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            </ul>
 
-                  <div class="im_dialog_message_wrap">
+            <ul ng-if="show == 4" class="nav nav-pills nav-stacked">
+              <li ng-if="dialogMessage.peerData._ == 'channel' && dialogMessage.peerData.pFlags.broadcast == true"
+                  class="im_dialog_wrap" my-dialog
+                  dialog-message="dialogMessage"
+                  ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+                  ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            </ul>
 
-                    <div class="im_dialog_peer">
-                      <span my-peer-link="searchPeer" for-dialog="true"></span>
-                    </div>
-
-                    <div class="im_dialog_message">
-                      <span class="" my-i18n="conversation_search_peer"></span>
-                    </div>
-
-                  </div>
-
-                </a>
-
-              </li>
-              <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+            <ul ng-if="show == 5" class="nav nav-pills nav-stacked">
+              <li ng-if="dialogMessage.peerData.bot_info_version"
+                  class="im_dialog_wrap" my-dialog
+                  dialog-message="dialogMessage"
+                  ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+                  ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
             </ul>
 
             <div class="im_dialogs_contacts_wrap" ng-show="myResults.length > 0">

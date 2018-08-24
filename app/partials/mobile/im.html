@@ -23,8 +23,71 @@
           <button ng-if="phonebookAvailable" type="button" class="btn btn-primary btn-block im_dialogs_import_phonebook" ng-click="importPhonebook()" my-i18n="im_import_phonebook"></button>
         </div>
 
-        <ul class="nav nav-pills nav-stacked">
-          <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+        <div class="im_dialogs_filter" ng-init="show = 1">
+          <a ng-click="show = 1" class="btn btn-md-primary" ng-class="{active: show == 1}">
+            <i class="fas fa-dot-circle"></i>
+            {{'filter_online' | i18n}}
+          </a>
+
+          <a ng-click="show = 2" class="btn btn-md-primary" ng-class="{active: show == 2}">
+            <i class="fas fa-comment-alt"></i>
+            {{'filter_dialogs' | i18n}}
+          </a>
+
+          <a ng-click="show = 3" class="btn btn-md-primary" ng-class="{active: show == 3}">
+            <i class="fas fa-users"></i>
+            {{'filter_groups' | i18n}}
+          </a>
+
+          <a ng-click="show = 4" class="btn btn-md-primary" ng-class="{active: show == 4}">
+            <i class="fas fa-bullhorn"></i>
+            {{'filter_channels' | i18n}}
+          </a>
+
+          <a ng-click="show = 5" class="btn btn-md-primary" ng-class="{active: show == 5}">
+            <i class="fas fa-robot"></i>
+            {{'filter_bots' | i18n}}
+          </a>
+        </div>
+
+        <ul ng-if="show == 1" class="nav nav-pills nav-stacked">
+          <li ng-if="dialogMessage.peerData.status._ == 'userStatusOnline'"
+            class="im_dialog_wrap" my-dialog
+            dialog-message="dialogMessage"
+            ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+            ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+        </ul>
+
+        <ul ng-if="show == 2" class="nav nav-pills nav-stacked">
+          <li ng-if="dialogMessage.peerData._ == 'user' && !dialogMessage.peerData.bot_info_version"
+              class="im_dialog_wrap" my-dialog
+              dialog-message="dialogMessage"
+              ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+              ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+        </ul>
+
+        <ul ng-if="show == 3" class="nav nav-pills nav-stacked">
+          <li ng-if="dialogMessage.peerData._ == 'chat' || dialogMessage.peerData.pFlags.megagroup == true"
+              class="im_dialog_wrap" my-dialog
+              dialog-message="dialogMessage"
+              ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+              ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+        </ul>
+
+        <ul ng-if="show == 4" class="nav nav-pills nav-stacked">
+          <li ng-if="dialogMessage.peerData._ == 'channel' && dialogMessage.peerData.pFlags.broadcast == true"
+              class="im_dialog_wrap" my-dialog
+              dialog-message="dialogMessage"
+              ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+              ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
+        </ul>
+
+        <ul ng-if="show == 5" class="nav nav-pills nav-stacked">
+          <li ng-if="dialogMessage.peerData.bot_info_version"
+              class="im_dialog_wrap" my-dialog
+              dialog-message="dialogMessage"
+              ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID"
+              ng-class="{active: curDialog.peerID == dialogMessage.peerID}"></li>
         </ul>
 
         <div class="im_dialogs_contacts_wrap" ng-show="myResults.length > 0">

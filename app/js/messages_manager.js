@@ -1157,6 +1157,11 @@ angular.module('myApp.services')
     }
 
     function readHistory (peerID) {
+      var visible = localStorage.getItem('visible')
+      if (visible == 'false') {
+        return false
+      }
+
       // console.trace('start read')
       var isChannel = AppPeersManager.isChannel(peerID)
       var historyStorage = historiesStorage[peerID]
@@ -1250,6 +1255,11 @@ angular.module('myApp.services')
     }
 
     function readMessages (messageIDs) {
+      var visible = localStorage.getItem('visible')
+      if (visible == 'false') {
+        return false
+      }
+
       var splitted = AppMessagesIDsManager.splitMessageIDsByChannels(messageIDs)
       angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
         if (channelID > 0) {

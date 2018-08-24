@@ -565,6 +565,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
+    $scope.visible = localStorage.getItem('visible');
+
+    $scope.toggleVisibility = function () {
+      var visible = $scope.visible == 'true' ? 'false' : 'true';
+
+      localStorage.setItem('visible', visible);
+
+      $scope.visible = visible;
+    }
+
     $scope.openGroup = function () {
       ContactsSelectService.selectContacts({action: 'new_group'}).then(function (userIDs) {
         if (userIDs && 

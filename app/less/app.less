@@ -3,7 +3,7 @@
 /* app common css */
 
 html {
-  background: #e7ebf0;
+  background: #e7ebf0 url(../img/bg_tile.png) 0 0 repeat;
   overflow: visible;
 }
 
@@ -1173,6 +1173,7 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_panel {
   padding: 12px 12px 12px;
   position: relative;
+  border-bottom: 2px solid #E9EBED;
   .im_dialogs_modal_col_wrap & {
     padding: 7px 12px 6px;
     .box-shadow(0px 1px 1px rgba(0,0,0,0.15));
@@ -1186,12 +1187,12 @@ a.tg_radio_on:hover i.icon-radio {
 .im_dialogs_search_field {
   font-size: 12px;
   line-height: normal;
-  border: 1px solid #F2F2F2;
+  border: 1px solid #E9EBED;
   border-radius: 2px;
   padding: 6px 26px 6px 30px;
   margin: 0 0 0;
 
-  background-color: #F2F2F2;
+  background-color: #E9EBED;
   .image-2x('../img/icons/IconsetW.png', 42px, 1171px);
   background-position: -6px -205px;
 
@@ -3582,10 +3583,10 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
   margin-right: 5px;
   vertical-align: baseline;
   display: inline-block;
-  animation: blinker 0.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
+  animation: blinker 0.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;
 }
 
-@keyframes blinker {  
+@keyframes blinker {
   from { opacity: 1; }
   to { opacity: 0; }
 }
@@ -3598,11 +3599,11 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
   color: #3a6d99;
 
   transition: color linear 0.2s;
-  
+
   i {
     margin-right: 5px;
   }
-  
+
   .im_send_form_hover & {
     color: #CCC;
   }
@@ -4093,7 +4094,7 @@ ul.chat_modal_migrate_list {
 
 .modal-dialog {
   width: 100%;
-  
+
   .md_simple_modal_window &,
   .confirm_modal_window &,
   .error_modal_window & {
@@ -5023,4 +5024,22 @@ a.countries_modal_search_clear {
   }
 }
 
+.im_dialogs_filter {
+  display: flex;
+  text-align: center;
+  justify-content: space-between;
+
+  .btn-md-primary {
+    width: 100%;
+    font-size: 10px;
+
+    &:hover, &.active {
+      background: #E9EBED;
+    }
+
+    .fas {
+      display: block;
+    }
+  }
+}
 
