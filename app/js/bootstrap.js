@@ -38,3 +38,18 @@ import './message_composer.js';
 import './directives.js';
 import './directives_mobile.js';
 import './init.js';
+
+import './webcomponentsjs_loader';
+import 'web-animations-js/web-animations-next-lite.min';
+import '@material/mwc-icon/mwc-icon';
+import '@material/mwc-button/mwc-button';
+import '@polymer/app-layout/app-header-layout/app-header-layout';
+import '@polymer/app-layout/app-header/app-header';
+import '@polymer/app-layout/app-toolbar/app-toolbar';
+import '@polymer/paper-icon-button/paper-icon-button';
+import '@polymer/iron-icons/iron-icons';
+import '@polymer/paper-menu-button/paper-menu-button';
+import '@polymer/paper-listbox/paper-listbox';
+import '@polymer/paper-item/paper-item';
+import '@polymer/paper-item/paper-icon-item';
+import '@polymer/paper-button/paper-button';

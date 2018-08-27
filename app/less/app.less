@@ -8,6 +8,8 @@ html {
 }
 
 body {
+  --primary-color: #497495;
+
   color: #000;
   background: none;
   font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
@@ -20,6 +22,35 @@ body {
 
 h1, h2, h3, h4, h5 {
   color: #222;
+}
+
+app-header {
+  z-index: 2;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+app-toolbar {
+  color: white;
+  display: flex;
+  align-items: center;
+
+  a, h4, a:hover, a:visited {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  [main-title] {
+    display: inline-flex;
+    align-items: center;
+    pointer-events: auto;
+  }
+}
+
+paper-listbox {
+    hr {
+        margin: 0;
+    }
 }
 
 .non_osx {
@@ -3582,10 +3613,10 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
   margin-right: 5px;
   vertical-align: baseline;
   display: inline-block;
-  animation: blinker 0.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
+  animation: blinker 0.5s cubic-bezier(.5, 0, 1, 1) infinite alternate;
 }
 
-@keyframes blinker {  
+@keyframes blinker {
   from { opacity: 1; }
   to { opacity: 0; }
 }
@@ -3598,11 +3629,11 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
   color: #3a6d99;
 
   transition: color linear 0.2s;
-  
+
   i {
     margin-right: 5px;
   }
-  
+
   .im_send_form_hover & {
     color: #CCC;
   }
@@ -3729,7 +3760,7 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 }
 
 .settings_modal_wrap .im_attach_input {
-  z-index: 999;
+  z-index: 0;
 }
 
 .settings_modal_username_link {
@@ -4093,7 +4124,7 @@ ul.chat_modal_migrate_list {
 
 .modal-dialog {
   width: 100%;
-  
+
   .md_simple_modal_window &,
   .confirm_modal_window &,
   .error_modal_window & {
@@ -5022,5 +5053,3 @@ a.countries_modal_search_clear {
     margin: 0 auto;
   }
 }
-
-

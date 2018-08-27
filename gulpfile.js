@@ -109,7 +109,9 @@ gulp.task('copy', function () {
     gulp.src('app/js/background.js')
       .pipe(gulp.dest('dist/js')),
     gulp.src('app/vendor/recorderjs/encoder_worker.js')
-      .pipe(gulp.dest('dist/vendor/recorderjs/'))
+      .pipe(gulp.dest('dist/vendor/recorderjs/')),
+    gulp.src('app/js/lib/push_worker.js')
+        .pipe(gulp.dest('dist/js/lib/'))
   );
 });
 
@@ -203,7 +205,7 @@ function writeServiceWorkerFile (rootDir, handleFetch, callback) {
     importScripts: ['js/lib/push_worker.js'],
     verbose: true,
     maximumFileSizeToCacheInBytes: 3004152, // about 3MB, default is "2097152" 2MB,
-    navigateFallback: 'index.html',
+    navigateFallback: 'index.html'
   };
   swPrecache.write(path.join(rootDir, 'service_worker.js'), config, callback);
 }

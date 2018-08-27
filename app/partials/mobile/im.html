@@ -1,9 +1,6 @@
-<div my-head></div>
+<app-header class="tg_page_head" slot="header" fixed effects="waterfall" my-head></app-header>
 
 <div class="im_page_wrap" ng-class="{im_page_peer_not_selected: !curDialog.peer}">
-
-  <div class="im_page_split clearfix">
-
     <div ng-controller="AppImDialogsController" my-dialogs class="im_dialogs_col_wrap" ng-class="search.query.length > 0 ? 'im_dialogs_col_search' : ''">
       <div class="im_dialogs_panel">
         <div class="im_dialogs_search">
@@ -14,7 +11,7 @@
         </div>
       </div>
 
-      <div my-dialogs-list-mobile class="im_dialogs_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
+      <div class="im_dialogs_col im_dialogs_scrollable_wrap mobile_scrollable_wrap">
 
         <div class="im_dialogs_empty_wrap" ng-if="isEmpty.contacts" my-vertical-position="0.4">
           <h3 class="im_dialogs_empty_header" my-i18n="im_no_contacts"></h3>
@@ -156,9 +153,6 @@
       </div>
 
     </div>
-
-  </div>
-
 </div>
 
 <toaster-container toaster-options="{'position-class': 'toast-bottom-center'}"></toaster-container>

@@ -85,6 +85,18 @@
     ]
   },
   "dependencies": {
-    "gulp-webpack": "^1.5.0"
+    "@material/mwc-button": "0.1.1",
+    "@material/mwc-icon": "0.1.1",
+    "@polymer/app-layout": "^3.0.0-pre.23",
+    "@polymer/iron-icons": "^3.0.0-pre.23",
+    "@polymer/paper-button": "^3.0.0-pre.23",
+    "@polymer/paper-icon-button": "^3.0.0-pre.23",
+    "@polymer/paper-item": "^3.0.0-pre.23",
+    "@polymer/paper-listbox": "^3.0.0-pre.23",
+    "@polymer/paper-menu-button": "^3.0.0-pre.23",
+    "@polymer/polymer": "^3.0.5",
+    "@webcomponents/webcomponentsjs": "^2.1.0",
+    "gulp-webpack": "^1.5.0",
+    "web-animations-js": "^2.3.1"
   }
 }

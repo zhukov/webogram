@@ -1,115 +1,95 @@
-<div class="tg_page_head tg_head_wrap noselect clearfix">
-  <div class="tg_head_split">
+<app-header class="tg_head_split">
+  <div class="tg_split_view">
+    <app-toolbar class="left">
+      <paper-menu-button>
+        <paper-icon-button icon="menu" slot="dropdown-trigger"></paper-icon-button>
+        <paper-listbox slot="dropdown-content">
+          <paper-icon-item ng-click="openGroup()">
+            <mwc-icon slot="item-icon">group_add</mwc-icon><span my-i18n="im_new_group"></span>
+          </paper-icon-item>
+          <paper-icon-item ng-if="!isEmpty.contacts" ng-click="openContacts()">
+            <mwc-icon slot="item-icon">contacts</mwc-icon><span my-i18n="im_contacts"></span>
+          </paper-icon-item>
+          <paper-icon-item ng-click="openSettings()">
+            <mwc-icon slot="item-icon">settings</mwc-icon><span my-i18n="im_settings"></span>
+          </paper-icon-item>
+          <paper-icon-item ng-click="openFaq()">
+            <mwc-icon slot="item-icon">question_answer</mwc-icon><span my-i18n="head_telegram_faq"></span>
+          </paper-icon-item>
+          <paper-icon-item ng-click="openChangelog()">
+            <mwc-icon slot="item-icon">change_history</mwc-icon><span my-i18n="head_about"></span>
+          </paper-icon-item>
+          <paper-icon-item ng-click="logOut()">
+            <mwc-icon slot="item-icon">lock</mwc-icon><span my-i18n="head_log_out"></span>
+          </paper-icon-item>
+        </paper-listbox>
+      </paper-menu-button>
 
-    <div class="tg_head_logo_wrap">
-      <div class="tg_head_logo_dropdown dropdown" dropdown>
-        <a class="tg_head_btn dropdown-toggle" dropdown-toggle>
-          <div class="icon-hamburger-wrap">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </div><i class="icon icon-tg-title"></i>
-        </a>
+      <div ng-if="!offline" main-title>Telegram</div>
 
-        <ul class="dropdown-menu">
-          <li><a ng-click="openGroup()">
-            <i class="icon icon-new-group"></i><span my-i18n="im_new_group"></span>
-          </a></li>
-          <li ng-if="!isEmpty.contacts"><a ng-click="openContacts()">
-            <i class="icon icon-contacts"></i><span my-i18n="im_contacts"></span>
-          </a></li>
-          <li><a ng-click="openSettings()">
-            <i class="icon icon-settings"></i><span my-i18n="im_settings"></span>
-          </a></li>
-          <li><a ng-click="openFaq()">
-            <i class="icon icon-faq"></i><span my-i18n="head_telegram_faq"></span>
-          </a></li>
-          <li><a href="" ng-click="openChangelog()">
-            <i class="icon icon-about"></i><span my-i18n="head_about"></span>
-          </a></li>
-        </ul>
-      </div>
-    </div>
+      <div ng-if="offline" main-title ng-switch="offlineConnecting">
+          <span ng-switch-default><my-i18n msgid="head_waiting_for_network"></my-i18n><span my-loading-dots></span></span>
+          <mwc-button ng-switch-default ng-click="retryOnline()" my-i18n="head_retry"></mwc-button>
+          <span ng-switch-when="true"><my-i18n msgid="head_connecting"></my-i18n><span my-loading-dots></span></span>
+       </div>
+    </app-toolbar>
+    <app-toolbar class="right" ng-if="!!historyPeer.id">
 
-    <div class="tg_head_main_wrap" ng-switch="offline">
-      <div ng-switch-when="true" class="tg_head_connecting_wrap" ng-switch="offlineConnecting">
-        <span ng-switch-default class="tg_head_connecting_text"><my-i18n msgid="head_waiting_for_network"></my-i18n><span my-loading-dots></span></span>
-        <a ng-switch-default class="tg_head_btn" ng-click="retryOnline()" my-i18n="head_retry"></a>
-        <span ng-switch-when="true" class="tg_head_connecting_text"><my-i18n msgid="head_connecting"></my-i18n><span my-loading-dots></span></span>
-      </div>
+      <paper-icon-button icon="arrow-back" ng-show="historyFilter.mediaType.length || historyState.skipped" ng-click="returnToRecent()"></paper-icon-button>
 
-      <div ng-switch-default ng-if="!!historyPeer.id" class="tg_head_main_peer_wrap">
-
-        <div class="tg_head_peer_dropdown tg_head_peer_media_dropdown dropdown" dropdown>
-          <a class="tg_head_btn dropdown-toggle" dropdown-toggle>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a ng-click="toggleEdit()" my-i18n="head_select_messages"></a></li>
-            <li class="divider ng-scope"></li>
-            <li><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
-            <li><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
-            <li><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
-            <li><a ng-click="toggleMedia('music')" my-i18n="head_media_music"></a></li>
-            <li><a ng-click="toggleMedia('urls')" my-i18n="head_media_links"></a></li>
-            <li><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
-            <li><a ng-click="toggleMedia('round')" my-i18n="head_media_round"></a></li>
-            <li ng-if="isHistoryPeerGroup()" class="divider ng-scope"></li>
-            <li ng-if="isHistoryPeerGroup()"><a ng-click="toggleMedia('mentions')" my-i18n="head_media_mymentions"></a></li>
-          </ul>
+      <div main-title ng-switch="historyFilter.mediaType">
+        <div ng-switch-when="photos">
+          <mwc-icon>photo</mwc-icon><span my-i18n="im_media_photos"></span>
+        </div>
+        <div ng-switch-when="video">
+          <mwc-icon>local_movies</mwc-icon><span my-i18n="im_media_video"></span>
+        </div>
+        <div ng-switch-when="documents">
+          <mwc-icon>insert_drive_file</mwc-icon><span my-i18n="im_media_documents"></span>
+        </div>
+        <div ng-switch-when="audio">
+          <mwc-icon>audiotrack</mwc-icon><span my-i18n="im_media_audio"></span>
+        </div>
+        <div ng-switch-when="round">
+          <mwc-icon>mic</mwc-icon><span my-i18n="im_media_round"></span>
+        </div>
+        <div ng-switch-when="music">
+          <mwc-icon>mic</mwc-icon><span my-i18n="im_media_music"></span>
+        </div>
+        <div ng-switch-when="urls">
+          <span my-i18n="im_media_links"></span>
+        </div>
+        <div ng-switch-when="mentions">
+          <span my-i18n="im_media_mentions"></span>
         </div>
 
-        <a class="tg_head_btn tg_head_peer_search_btn" ng-click="toggleMedia('search')">
-          <i class="icon icon-search"></i>
+        <a ng-switch-default ng-click="showPeerInfo()">
+          <span class="tg_head_peer_title" my-peer-link="historyPeer.id" peer-watch="true" dir="auto" for-dialog="true"></span>
+          <span class="tg_head_peer_status" ng-switch="historyPeer.id > 0">
+            <span ng-switch-when="true" my-user-status="historyPeer.id" for-dialog="true"></span>
+            <span ng-switch-default my-chat-status="-historyPeer.id"></span>
+          </span>
         </a>
-
-        <a class="tg_head_btn tg_head_peer_return_btn" ng-show="historyFilter.mediaType.length || historyState.skipped" ng-click="returnToRecent()" ng-switch="historyState.skipped">
-          <span ng-switch-when="true" my-i18n="im_show_recent_messages"></span>
-          <span ng-switch-default my-i18n="im_show_all_messages"></span>
-          <strong class="tg_head_peer_return_count" ng-show="historyState.missedCount > 0" ng-bind="'+' + historyState.missedCount"></strong>
-        </a>
-
-        <div class="tg_head_peer_title_wrap" ng-switch="historyFilter.mediaType">
-          <div class="tg_head_peer_media" ng-switch-when="photos">
-            <i class="icon icon-filter-photos"></i><span my-i18n="im_media_photos"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="video">
-            <i class="icon icon-filter-video"></i><span my-i18n="im_media_video"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="documents">
-            <i class="icon icon-filter-documents"></i><span my-i18n="im_media_documents"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="audio">
-            <i class="icon icon-filter-audio"></i><span my-i18n="im_media_audio"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="round">
-            <i class="icon icon-filter-audio"></i><span my-i18n="im_media_round"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="music">
-            <i class="icon icon-filter-documents"></i><span my-i18n="im_media_music"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="urls">
-            <span my-i18n="im_media_links"></span>
-          </div>
-          <div class="tg_head_peer_media" ng-switch-when="mentions">
-            <span my-i18n="im_media_mentions"></span>
-          </div>
-
-          <a class="tg_head_btn" ng-switch-default ng-click="showPeerInfo()">
-            <div class="tg_head_peer_info">
-              <span class="tg_head_peer_title" my-peer-link="historyPeer.id" peer-watch="true" dir="auto" for-dialog="true"></span>
-              <span class="tg_head_peer_status" ng-switch="historyPeer.id > 0">
-                <span ng-switch-when="true" my-user-status="historyPeer.id" for-dialog="true"></span>
-                <span ng-switch-default my-chat-status="-historyPeer.id"></span>
-              </span>
-            </div>
-          </a>
-
-        </div>
-
       </div>
-    </div>
+
+      <paper-icon-button icon="search" ng-click="toggleMedia('search')"></paper-icon-button>
+
+      <paper-menu-button horizontal-align="right">
+        <paper-icon-button icon="more-vert" slot="dropdown-trigger"></paper-icon-button>
+        <paper-listbox slot="dropdown-content">
+          <paper-item ng-click="toggleEdit()" my-i18n="head_select_messages"></paper-item>
+          <hr>
+          <paper-item ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></paper-item>
+          <paper-item ng-click="toggleMedia('video')" my-i18n="head_media_video"></paper-item>
+          <paper-item ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></paper-item>
+          <paper-item ng-click="toggleMedia('music')" my-i18n="head_media_music"></paper-item>
+          <paper-item ng-click="toggleMedia('urls')" my-i18n="head_media_links"></paper-item>
+          <paper-item ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></paper-item>
+          <paper-item ng-click="toggleMedia('round')" my-i18n="head_media_round"></paper-item>
+          <hr ng-if="isHistoryPeerGroup()">
+          <paper-item ng-if="isHistoryPeerGroup()" ng-click="toggleMedia('mentions')" my-i18n="head_media_mymentions"></paper-item>
+        </paper-listbox>
+      </paper-menu-button>
+    </app-toolbar>
   </div>
-</div>
+</app-header>

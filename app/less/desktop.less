@@ -6,8 +6,6 @@
   &_split {
     max-width: 1010px;
     margin: 0 auto;
-    height: 48px;
-    background: #5682a3;
   }
 
   &_logo_wrap {
@@ -41,6 +39,18 @@
       z-index: 5;
     }
   }
+}
+
+.tg_split_view {
+    display: flex;
+
+    .left {
+        flex: 0 0 31%;
+    }
+
+    .right {
+        flex: 0 0 69%;
+    }
 }
 
 .tg_head_logo_dropdown {
@@ -689,7 +699,7 @@ a.footer_link.active:active {
 
   &_scrollable_wrap {
     /* Hardware acceleration in Safari */
-    
+
     // Caused flickering and bluring in webkit
     // -webkit-transform: translateZ(0);
     // -webkit-perspective: 1000;
@@ -1320,12 +1330,12 @@ a.im_panel_peer_photo .peer_initials {
   width: 18px;
   height: 23px;
   margin-right: 15px;
-  
+
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-  
+
   position: relative;
 
   .im_record_supported & {
@@ -1334,7 +1344,7 @@ a.im_panel_peer_photo .peer_initials {
 }
 .im_record_bg {
   position: absolute;
-  margin: -10px 0 0 -16px; 
+  margin: -10px 0 0 -16px;
   padding: 13px 16px 13px 16px;
 
   width: 50px;

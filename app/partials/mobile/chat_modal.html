@@ -1,49 +1,23 @@
 <div class="chat_modal_wrap">
 
-  <div class="tg_page_head tg_modal_head">
-    <div class="navbar navbar-static-top navbar-inverse">
-      <div class="container">
+  <app-header>
+    <app-toolbar>
+      <paper-icon-button ng-click="$close()" icon="arrow-back"></paper-icon-button>
 
-        <div class="navbar-toggle-wrap dropdown" dropdown>
-          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li ng-if="chatFull.thumb.location" ng-if="hasRights('edit_title')">
-              <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
-            </li>
-            <li ng-if="hasRights('edit_title')">
-              <a ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></a>
-            </li>
-            <li>
-              <a ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></a>
-            </li>
-            <li ng-if="chatFull.chat.pFlags.creator">
-              <a ng-click="migrateToSuperGroup()" my-i18n="group_modal_migrate_to_supergroup"></a>
-            </li>
-          </ul>
-        </div>
+      <div main-title my-i18n="group_modal_info"></div>
 
-        <div class="navbar-header">
+      <paper-menu-button horizontal-align="right">
+          <paper-icon-button icon="more-vert" slot="dropdown-trigger"></paper-icon-button>
 
-          <ul class="nav navbar-nav navbar-quick-nav">
-            <li>
-              <a ng-click="$close()" class="navbar-quick-media-back">
-                <i class="icon icon-back"></i>
-                <div class="navbar-quick-back-title">
-                  <h4 my-i18n="group_modal_info"></h4>
-                </div>
-              </a>
-            </li>
-          </ul>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
+          <paper-listbox slot="dropdown-content">
+              <paper-item ng-if="chatFull.thumb.location" ng-if="hasRights('edit_title')" ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></paper-item>
+              <paper-item ng-if="hasRights('edit_title')" ng-click="editTitle()" my-i18n="group_modal_menu_edit_group"></paper-item>
+              <paper-item ng-click="flushHistory(true)" my-i18n="group_modal_menu_clear_history"></paper-item>
+              <paper-item ng-if="chatFull.chat.pFlags.creator" ng-click="migrateToSuperGroup()" my-i18n="group_modal_migrate_to_supergroup"></paper-item>
+          </paper-listbox>
+      </paper-menu-button>
+    </app-toolbar>
+  </app-header>
 
   <div class="modal-body mobile_modal_body">
 
