@@ -19,8 +19,10 @@
     "show": true
   },
   "scripts": {
+    "clean": "gulp clean",
     "start": "gulp watch",
-    "test": "gulp test"
+    "test": "gulp test",
+    "build": "gulp publish"
   },
   "repository": {
     "type": "git",
