@@ -58,11 +58,13 @@ The app is based on the AngularJS JavaScript framework, and written in pure Java
 The project repository is based on angularjs-seed and includes gulp tasks, so it's easy to launch the app locally on your desktop.
 Install [node.js](http://nodejs.org/).
 
+Install dependancies with:
+
 ```lang=bash
 npm install
 ```
 
-Optionnaly, run the following commands in the project directory to install gulp globally:
+Optionaly, run the following commands in the project directory to install gulp globally:
 
 ```lang=bash
 sudo npm install -g gulp
