@@ -1241,8 +1241,8 @@ angular.module('izhukov.utils', [])
     var soundcloudRegExp = /^https?:\/\/(?:soundcloud\.com|snd\.sc)\/([a-zA-Z0-9%\-\_]+)\/([a-zA-Z0-9%\-\_]+)/i
     var spotifyRegExp = /(https?:\/\/(open\.spotify\.com|play\.spotify\.com|spoti\.fi)\/(.+)|spotify:(.+))/i
 
-    var markdownTestRegExp = /[`_*@]/
-    var markdownRegExp = /(^|\s|\n)(````?)([\s\S]+?)(````?)([\s\n\.,:?!;]|$)|(^|\s)(`|\*\*|__)([^\n]+?)\7([\s\.,:?!;]|$)|@(\d+)\s*\((.+?)\)/m
+    var markdownTestRegExp = /[`_*@]|\]\(/
+    var markdownRegExp = new RegExp('(^|\\s|\\n)(````?)([\\s\\S]+?)(````?)([\\s\\n\\.,:?!;]|$)|(^|\\s)(`|\\*\\*|__)([^\\n]+?)\\7([\\s\\.,:?!;]|$)|@(\\d+)\\s*\\((.+?)\\)|\\[([^\\]]+)\\]\\((' + urlRegExp + ')\\)', 'm')
 
     var siteHashtags = {
       Telegram: 'tg://search_hashtag?hashtag={1}',
@@ -1424,7 +1424,7 @@ angular.module('izhukov.utils', [])
         matchIndex = rawOffset + match.index
         newText.push(raw.substr(0, match.index))
 
-        var text = (match[3] || match[8] || match[11])
+        var text = (match[3] || match[8] || match[11] || match[12])
         rawOffset -= text.length
         text = text.replace(/^\s+|\s+$/g, '')
         rawOffset += text.length
@@ -1460,6 +1460,15 @@ angular.module('izhukov.utils', [])
             user_id: match[10],
             offset: matchIndex,
             length: text.length
+          })
+          rawOffset -= match[0].length - text.length
+        } else if (match[12]) {
+          newText.push(text)
+          entities.push({
+            _: 'messageEntityTextUrl',
+            offset: matchIndex,
+            length: text.length,
+            url: match[13]
           })
           rawOffset -= match[0].length - text.length
         }
@@ -1846,6 +1855,12 @@ angular.module('izhukov.utils', [])
           case 'messageEntityMentionName':
             code.push(
               '@', entity.user_id, ' (', entityText, ')'
+            )
+            break
+
+          case 'messageEntityTextUrl':
+            code.push(
+              '[', entityText, ']', '(', entity.url, ')'
             )
             break
 
