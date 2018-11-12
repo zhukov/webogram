@@ -96,7 +96,7 @@ Run `npm start` (`gulp watch`) to watch for file changes and automatically rebui
 
 #### Running in production
 
-Run `npm run clean` (`gulp clean`), then `npm run publish` (`gulp publish`) to build the minimized production version of the app. Copy `dist` folder contents to your web server. Don't forget to set `X-Frame-Options SAMEORIGIN` header ([docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)).
+Run `npm run clean` (`gulp clean`), then `npm run build` (`gulp publish`) to build the minimized production version of the app. Copy `dist` folder contents to your web server. Don't forget to set `X-Frame-Options SAMEORIGIN` header ([docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)).
 
 
 ### Third party libraries
