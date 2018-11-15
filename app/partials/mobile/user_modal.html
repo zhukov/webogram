@@ -1,52 +1,24 @@
 <div class="mobile_user_modal_wrap">
 
-  <div class="tg_page_head tg_modal_head">
-    <div class="navbar navbar-static-top navbar-inverse">
-      <div class="container">
+  <app-header>
+    <app-toolbar>
+      <paper-icon-button ng-click="$close()"  icon="arrow-back"></paper-icon-button>
 
-        <div class="navbar-toggle-wrap dropdown" dropdown>
-          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li ng-if="user.pFlags.contact">
-              <a ng-click="importContact(true)" my-i18n="user_modal_edit_contact"></a>
-            </li>
-            <li ng-if="user.pFlags.contact">
-              <a ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></a>
-            </li>
-            <li ng-if="user.phone.length > 0 &amp;&amp; !user.pFlags.contact &amp;&amp; !user.pFlags.self">
-              <a ng-click="importContact()" my-i18n="user_modal_add_contact"></a>
-            </li>
-            <li>
-              <a ng-click="flushHistory(true)" my-i18n="user_modal_clear_history"></a>
-            </li>
-            <li>
-              <a ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></a>
-            </li>
-          </ul>
-        </div>
+      <div main-title my-i18n="user_modal_contact_info"></div>
 
-        <div class="navbar-header">
+      <paper-menu-button horizontal-align="right">
+        <paper-icon-button icon="more-vert" slot="dropdown-trigger"></paper-icon-button>
 
-          <ul class="nav navbar-nav navbar-quick-nav">
-            <li>
-              <a ng-click="$close()" class="navbar-quick-media-back">
-                <i class="icon icon-back"></i>
-                <div class="navbar-quick-back-title">
-                  <h4 my-i18n="user_modal_contact_info"></h4>
-                </div>
-              </a>
-            </li>
-          </ul>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
+        <paper-listbox slot="dropdown-content">
+          <paper-item ng-if="user.pFlags.contact" ng-click="importContact(true)" my-i18n="user_modal_edit_contact"></paper-item>
+          <paper-item ng-if="user.pFlags.contact" ng-click="deleteContact()" my-i18n="user_modal_delete_contact"></paper-item>
+          <paper-item ng-if="user.phone.length > 0 && !user.pFlags.contact && !user.pFlags.self" ng-click="importContact()" my-i18n="user_modal_add_contact"></paper-item>
+          <paper-item ng-click="flushHistory(true)" my-i18n="user_modal_clear_history"></paper-item>
+          <paper-item ng-click="flushHistory()" my-i18n="user_modal_delete_chat"></paper-item>
+        </paper-listbox>
+      </paper-menu-button>
+    </app-toolbar>
+  </app-header>
 
   <div class="modal-body mobile_modal_body">
 

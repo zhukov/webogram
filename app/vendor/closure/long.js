@@ -27,8 +27,7 @@
 /*! MODIFICATION
 The following line was added by Igor Zhukov in order to make library compatibile with other app parts
 */
-this.goog = {provide: function () {}, math: {}};
-
+export var goog = {provide: function () {}, math: {}};
 
 goog.provide('goog.math.Long');
 

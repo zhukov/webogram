@@ -46,6 +46,7 @@
   "devDependencies": {
     "del": "^1.2.0",
     "event-stream": "^3.1.0",
+    "exports-loader": "^0.7.0",
     "gulp": "^3.9.0",
     "gulp-angular-templatecache": "^1.1.0",
     "gulp-concat": "^2.1.7",
@@ -75,7 +76,8 @@
     "phantomjs-prebuilt": "^2.1.14",
     "run-sequence": "^1.0.2",
     "st": "^0.5.2",
-    "sw-precache": "^3.2.0"
+    "sw-precache": "^3.2.0",
+    "webpack": "^3.11.0"
   },
   "standard": {
     "globals": [
@@ -83,5 +85,20 @@
       "$",
       "chrome"
     ]
+  },
+  "dependencies": {
+    "@material/mwc-button": "0.1.1",
+    "@material/mwc-icon": "0.1.1",
+    "@polymer/app-layout": "^3.0.0-pre.23",
+    "@polymer/iron-icons": "^3.0.0-pre.23",
+    "@polymer/paper-button": "^3.0.0-pre.23",
+    "@polymer/paper-icon-button": "^3.0.0-pre.23",
+    "@polymer/paper-item": "^3.0.0-pre.23",
+    "@polymer/paper-listbox": "^3.0.0-pre.23",
+    "@polymer/paper-menu-button": "^3.0.0-pre.23",
+    "@polymer/polymer": "^3.0.5",
+    "@webcomponents/webcomponentsjs": "^2.1.0",
+    "gulp-webpack": "^1.5.0",
+    "web-animations-js": "^2.3.1"
   }
 }

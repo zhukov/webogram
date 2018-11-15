@@ -287,4 +287,4 @@ Config.LangCountries = {'es': 'ES', 'ru': 'RU', 'en': 'US', 'de': 'DE', 'it': 'I
     remove: storageRemoveValue,
     clear: storageClear
   }
-})(this)
+})(window)

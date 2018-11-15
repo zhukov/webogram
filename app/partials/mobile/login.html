@@ -1,36 +1,34 @@
-<div class="tg_page_head">
-  <div class="navbar navbar-static-top navbar-inverse navbar_peer_not_selected">
-    <div class="container">
-      <div class="navbar-header">
+<app-header class="tg_modal_head">
+  <app-toolbar>
+    <paper-icon-button ng-click="$close()" icon="arrow-back"></paper-icon-button>
 
-        <ul class="nav navbar-nav navbar-quick-nav">
-          <li class="navbar-quick-right login_head_submit_wrap">
-            <a class="disabled" disabled="disabled" ng-if="progress.enabled" class="login_head_submit_progress">
-              <my-i18n ng-if="!credentials.phone_code_hash" msgid="login_generating_key"></my-i18n><my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n><my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" msgid="login_checking_password"></my-i18n><span my-loading-dots></span>
-            </a>
-            <a ng-if="!progress.enabled &amp;&amp; !credentials.phone_code_hash" ng-click="sendCode()">
-              <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
-            </a>
-            <a ng-if="!progress.enabled &amp;&amp; credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" ng-click="logIn()">
-              <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
-            </a>
-            <a ng-if="!progress.enabled &amp;&amp; credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" ng-click="logIn(true)">
-              <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
-            </a>
-            <a ng-if="!progress.enabled &amp;&amp; credentials.phone_code_valid &amp;&amp; credentials.password_needed" ng-click="checkPassword()">
-              <my-i18n msgid="modal_next"></my-i18n><i class="icon icon-next-submit"></i>
-            </a>
-          </li>
-          <li>
-            <a class="navbar-brand tg_logo_wrap" href="https://telegram.org" target="_blank"><i class="icon icon-tg-logo"></i><i class="icon icon-tg-title"></i></a>
-          </li>
-        </ul>
-      </div>
-
+    <div main-title>
+      <a href="https://telegram.org" target="_blank">
+        Telegram
+      </a>
     </div>
-  </div>
-</div>
 
+    <paper-button disabled ng-if="progress.enabled">
+      <my-i18n ng-if="!credentials.phone_code_hash" msgid="login_generating_key"></my-i18n>
+      <my-i18n ng-if="credentials.phone_code_hash &amp;&amp; !credentials.phone_code_valid" msgid="login_checking_code"></my-i18n>
+      <my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.phone_unoccupied" msgid="login_signing_up"></my-i18n>
+      <my-i18n ng-if="credentials.phone_code_valid &amp;&amp; credentials.password_needed" msgid="login_checking_password"></my-i18n>
+      <span my-loading-dots></span>
+    </paper-button>
+    <paper-button ng-if="!progress.enabled && !credentials.phone_code_hash" ng-click="sendCode()">
+      <my-i18n msgid="modal_next"></my-i18n>
+    </paper-button>
+    <paper-button ng-if="!progress.enabled && credentials.phone_code_hash && !credentials.phone_code_valid" ng-click="logIn()">
+      <my-i18n msgid="modal_next"></my-i18n>
+    </paper-button>
+    <paper-button ng-if="!progress.enabled && credentials.phone_code_valid && credentials.phone_unoccupied" ng-click="logIn(true)">
+      <my-i18n msgid="modal_next"></my-i18n>
+    </paper-button>
+    <paper-button ng-if="!progress.enabled && credentials.phone_code_valid && credentials.password_needed" ng-click="checkPassword()">
+      <my-i18n msgid="modal_next"></my-i18n>
+    </paper-button>
+  </app-toolbar>
+</app-header>
 
 <div class="login_page_wrap" my-custom-background="#e7ebf0">
   <div class="login_page">
@@ -161,4 +159,3 @@
   </div>
 
 </div>
-

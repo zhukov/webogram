@@ -1,30 +1,14 @@
 <div class="profile_edit_modal_wrap">
 
-  <div class="tg_page_head tg_modal_head">
-    <div class="navbar navbar-static-top navbar-inverse">
-      <div class="container">
+  <app-header>
+    <app-toolbar>
+      <paper-icon-button ng-click="$dismiss()" icon="arrow-back"></paper-icon-button>
 
-        <div class="navbar-header">
+      <div main-title my-i18n="profile_edit_modal_title"></div>
 
-          <ul class="nav navbar-nav navbar-quick-nav">
-            <li class="navbar-quick-right">
-              <a ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="profile.updating"></a>
-            </li>
-            <li>
-              <a ng-click="$dismiss()" class="navbar-quick-media-back">
-                <i class="icon icon-back"></i>
-                <div class="navbar-quick-back-title">
-                  <h4 my-i18n="profile_edit_modal_title"></h4>
-                </div>
-              </a>
-            </li>
-          </ul>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
+      <paper-button ng-class="{disabled: profile.updating}" ng-click="updateProfile()" ng-bind="profile.updating ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="profile.updating"></paper-button>
+    </app-toolbar>
+  </app-header>
 
   <div class="modal-body">
 

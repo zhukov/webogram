@@ -1,44 +1,22 @@
 <div class="game_modal_wrap">
+  <app-header class="tg_modal_head">
+    <app-toolbar>
+      <paper-icon-button ng-click="$close()" icon="arrow-back"></paper-icon-button>
 
-  <div class="tg_page_head tg_modal_head">
-    <div class="navbar navbar-static-top navbar-inverse">
-      <div class="container">
-
-        <div class="navbar-toggle-wrap dropdown" dropdown>
-          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li>
-              <a ng-click="forward()" my-i18n="game_modal_share_game"></a>
-            </li>
-            <li>
-              <a ng-click="forward(true)" my-i18n="game_modal_share_score"></a>
-            </li>
-          </ul>
-        </div>
-
-        <div class="navbar-header">
-
-          <ul class="nav navbar-nav navbar-quick-nav">
-            <li>
-              <a ng-click="$close()" class="navbar-quick-back">
-                <i class="icon icon-back"></i>
-                <div class="navbar-quick-back-title">
-                  <h4 ng-bind-html="game.rTitle"></h4>
-                  <small>@<span my-peer-link="botID"></span></small>
-                </div>
-              </a>
-            </li>
-          </ul>
-
-        </div>
-
+      <div main-title ng-bind-html="game.rTitle">
+        <small>@<span my-peer-link="botID"></span></small>
       </div>
-    </div>
-  </div>
+
+      <paper-menu-button horizontal-align="right">
+          <paper-icon-button icon="more-vert" slot="dropdown-trigger"></paper-icon-button>
+
+          <paper-listbox slot="dropdown-content">
+              <paper-item ng-click="forward()" my-i18n="game_modal_share_game"></paper-item>
+              <paper-item ng-click="forward(true)" my-i18n="game_modal_share_score"></paper-item>
+          </paper-listbox>
+      </paper-menu-button>
+    </app-toolbar>
+  </app-header>
 
   <div class="modal-body mobile_modal_body" ng-bind-html="game.full.html" my-game-communication></div>
 

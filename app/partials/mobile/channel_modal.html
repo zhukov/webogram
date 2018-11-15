@@ -1,50 +1,28 @@
 <div class="chat_modal_wrap">
 
-  <div class="tg_page_head tg_modal_head">
-    <div class="navbar navbar-static-top navbar-inverse">
-      <div class="container">
+  <app-header>
+    <app-toolbar>
+      <paper-icon-button ng-click="$close()" icon="arrow-back"></paper-icon-button>
 
-        <div class="navbar-toggle-wrap dropdown" dropdown ng-if="hasRights('edit_title') || hasRights('edit_photo')">
-          <a class="dropdown-toggle navbar-toggle" dropdown-toggle>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li ng-if="chatFull.chat.photo.photo_small" ng-if="hasRights('edit_photo')">
-              <a ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></a>
-            </li>
-            <li ng-if="hasRights('edit_title')">
-              <a ng-click="editChannel()" ng-switch="isMegagroup">
+      <div main-title ng-switch="isMegagroup">
+        <span ng-switch-when="true" my-i18n="group_modal_info"></span>
+        <span ng-switch-default my-i18n="channel_modal_info"></span>
+      </div>
+
+      <paper-menu-button horizontal-align="right" ng-if="hasRights('edit_title') || hasRights('edit_photo')">
+          <paper-icon-button icon="more-vert" slot="dropdown-trigger"></paper-icon-button>
+
+          <paper-listbox slot="dropdown-content">
+              <paper-item ng-if="chatFull.chat.photo.photo_small" ng-if="hasRights('edit_photo')" ng-click="deletePhoto()" my-i18n="group_modal_menu_delete_photo"></paper-item>
+              <paper-item ng-if="hasRights('edit_title')" ng-switch="isMegagroup">
                 <span ng-switch-when="true" my-i18n="group_modal_menu_edit_group"></span>
                 <span ng-switch-default my-i18n="channel_modal_menu_edit"></span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div class="navbar-header">
-
-          <ul class="nav navbar-nav navbar-quick-nav">
-            <li>
-              <a ng-click="$close()" class="navbar-quick-media-back">
-                <i class="icon icon-back"></i>
-                <div class="navbar-quick-back-title" ng-switch="isMegagroup">
-                  <h4>
-                    <span ng-switch-when="true" my-i18n="group_modal_info"></span>
-                    <span ng-switch-default my-i18n="channel_modal_info"></span>
-                  </h4>
-                </div>
-              </a>
-            </li>
-          </ul>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
-
+              </paper-item>
+          </paper-listbox>
+      </paper-menu-button>
+    </app-toolbar>
+  </app-header>
+  
   <div class="modal-body mobile_modal_body">
 
     <div class="mobile_user_modal_photo_profile_wrap">
