@@ -486,7 +486,7 @@
     "im_reply_loading": "Lade{dots}",
     "im_X_forwarded_messages": "{'one': 'hat {} Nachricht weitergeleitet', 'other': 'hat {} Nachrichten weitergeleitet'}",
     "im_photos_drop_text": "Bilder hier reinschieben um sie zu verschicken",
-    "im_message_field_placeholder": "Schreibe eine Nachricht...",
+    "im_message_field_placeholder": "Nachricht",
     "im_broadcast_field_placeholder": "Broadcast...",
     "im_emoji_tab": "Emoji",
     "im_stickers_tab": "Sticker",

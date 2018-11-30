@@ -1,10 +1,12 @@
 CACHE MANIFEST
 
-
 CACHE:
 favicon.ico
 favicon_unread.ico
 service_worker.js
+css/app.css
+css/desktop.css
+css/mobile.css
 img/Manytabs.png
 img/Manytabs_2x.png
 img/Telegram.png
@@ -22,9 +24,6 @@ img/iphone_home120.png
 img/iphone_startup.png
 img/logo_share.png
 img/sound_a.mp3
-css/app.css
-css/desktop.css
-css/mobile.css
 js/app.js
 nacl/mtproto_crypto.nmf
 nacl/mtproto_crypto.pexe
@@ -89,10 +88,9 @@ vendor/angular/i18n/angular-locale_nl-nl.js
 vendor/angular/i18n/angular-locale_pt-br.js
 vendor/angular/i18n/angular-locale_ru-ru.js
 
-
 NETWORK:
 http://*
 https://*
 *
 
-# hash: d7899eff121a99648004fb5ce57cfd2b765c52d56e1bbe271e62c5d8342394ef
+# hash: d567d2eb2ca50cbdc0a9f7380a9d040148db7c0d50c5b3adb88a1f18c51cd088
