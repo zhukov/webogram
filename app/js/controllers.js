@@ -1100,6 +1100,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             var wrapDialog = searchMessages ? undefined : dialog
             var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, wrapDialog)
 
+            if (searchMessages &&
+                $scope.searchPeer) {
+              var message = AppMessagesManager.getMessage(dialog.top_message)
+              if (message.fromID > 0) {
+                wrappedDialog.peerID = message.fromID
+                wrappedDialog.foundInHistory = true
+              }
+            }
+
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
