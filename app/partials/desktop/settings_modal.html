@@ -14,7 +14,7 @@
         <div ng-switch-when="true" class="peer_modal_photo md_photo_loading loading_dots">
           <i></i><i></i><i></i>
         </div>
-        <a ng-switch-default ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})" class="peer_modal_photo" my-peer-photolink="::profile.id" img-class="peer_modal_photo" watch="true" no-open="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
+        <a ng-switch-default ng-click="openUserPic()" class="peer_modal_photo" my-peer-photolink="::profile.id" img-class="peer_modal_photo" watch="true" no-open="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
       </div>
       <div class="peer_modal_profile">
         <div class="peer_modal_profile_name" my-peer-link="profile.id"></div>

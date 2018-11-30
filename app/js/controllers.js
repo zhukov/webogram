@@ -3787,7 +3787,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.settings = {notifications: true}
 
-    AppProfileManager.getProfile($scope.userID, $scope.override).then(function (userFull) {
+    var profilePromise = AppProfileManager.getProfile($scope.userID, $scope.override)
+
+    profilePromise.then(function (userFull) {
       $scope.blocked = userFull.pFlags.blocked
       $scope.bot_info = userFull.bot_info
       $scope.rAbout = userFull.rAbout
@@ -3809,6 +3811,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.goToHistory = function () {
       $rootScope.$broadcast('history_focus', {peerString: peerString})
+    }
+
+    $scope.openUserPic = function () {
+      profilePromise.then(function () {
+        $scope.openPhoto($scope.user.photo.photo_id, {p: $scope.userID})
+      })
     }
 
     $scope.flushHistory = function (justClear) {
@@ -4239,6 +4247,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   })
 
   .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+
     $scope.profile = {}
     $scope.photo = {}
     $scope.version = Config.App.version
@@ -4247,7 +4256,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.profile = AppUsersManager.getUser(id)
     })
 
-    MtpApiManager.invokeApi('users.getFullUser', {
+    var profilePromise = MtpApiManager.invokeApi('users.getFullUser', {
       id: {_: 'inputUserSelf'}
     }).then(function (userFullResult) {
       AppUsersManager.saveApiUser(userFullResult.user)
@@ -4267,6 +4276,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     updatePasswordState()
     var updatePasswordTimeout = false
     var stopped = false
+
+    $scope.openUserPic = function () {
+      profilePromise.then(function () {
+        $scope.openPhoto($scope.profile.photo.photo_id, {p: $scope.profile.id})
+      })
+    }
 
     $scope.changePassword = function (options) {
       options = options || {}
