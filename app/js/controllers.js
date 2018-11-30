@@ -511,6 +511,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       canReply: false,
       canDelete: false,
       canEdit: false,
+      canReport: false,
       actions: function () {
         return $scope.historyState.selectActions ? 'selected' : ($scope.historyState.botActions ? 'bot' : ($scope.historyState.channelActions ? 'channel' : false))
       },
@@ -1246,6 +1247,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedEdit = selectedEdit
     $scope.selectedCancel = selectedCancel
     $scope.selectedFlush = selectedFlush
+    $scope.selectedReport = selectedReport
     $scope.selectInlineBot = selectInlineBot
 
     $scope.startBot = startBot
@@ -1755,6 +1757,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (Config.Mobile) {
           $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
+          $scope.historyState.canReport = AppMessagesManager.canReportMessage(messageID)
 
           $modal.open({
             templateUrl: templateUrl('message_actions_modal'),
@@ -1776,6 +1779,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
               case 'forward':
                 selectedForward(messageID)
+                break
+
+              case 'report':
+                selectedReport(messageID)
                 break
 
               case 'select':
@@ -1837,6 +1844,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if ($scope.selectedCount == 1) {
         angular.forEach($scope.selectedMsgs, function (t, messageID) {
           $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
+          $scope.historyState.canReport = AppMessagesManager.canReportMessage(messageID)
+        })
+      } else {
+        $scope.historyState.canEdit = false
+        $scope.historyState.canReport = false
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          if (AppMessagesManager.canReportMessage(messageID)) {
+            $scope.historyState.canReport = true
+          }
         })
       }
       $scope.$broadcast('messages_select')
@@ -1975,6 +1991,38 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               }
             })
           }    
+        })
+      }
+    }
+
+    function selectedReport (selectedMessageID) {
+      var selectedMessageIDs = []
+      if (selectedMessageID) {
+        selectedMessageIDs.push(selectedMessageID)
+      } else if ($scope.selectedCount > 0) {
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          selectedMessageIDs.push(messageID)
+        })
+      }
+      if (selectedMessageIDs.length) {
+        $modal.open({
+          templateUrl: templateUrl('report_msgs_modal'),
+          controller: 'ReportMessagesModalController',
+          windowClass: 'md_simple_modal_window mobile_modal',
+          scope: $scope.$new()
+        }).result.then(function (inputReason) {
+          selectedCancel()
+          AppMessagesManager.reportMessages(selectedMessageIDs, inputReason).then(function () {
+            var toastData = toaster.pop({
+              type: 'info',
+              body: _('confirm_modal_report_success'),
+              bodyOutputType: 'trustedHtml',
+              clickHandler: function () {
+                toaster.clear(toastData)
+              },
+              showCloseButton: false
+            })
+          })
         })
       }
     }
@@ -4500,6 +4548,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         controller: 'UsernameEditModalController',
         windowClass: 'md_simple_modal_window mobile_modal'
       })
+    }
+  })
+
+  .controller('ReportMessagesModalController', function ($scope, $modalInstance) {
+    $scope.reason = {_: 'inputReportReasonSpam', text: ''}
+    $scope.toggleReportReason = function (reason) {
+      $scope.reason = {_: reason}
+      if (reason == 'inputReportReasonOther') {
+        onContentLoaded(function () {
+          $scope.$broadcast('ui_reason_text_focus')
+        })
+      }
     }
   })
 

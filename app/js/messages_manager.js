@@ -1013,6 +1013,19 @@ angular.module('myApp.services')
       return true
     }
 
+    function canReportMessage(messageID) {
+      if (!messagesStorage[messageID]) {
+        return false
+      }
+      if (!canEditMessage(messageID)) {
+        var message = messagesStorage[messageID]
+        if (!message.pFlags.out) {
+          return true
+        }
+      }
+      return false
+    }
+
     function getMessageEditData(messageID) {
       if (!canEditMessage(messageID)) {
         return $q.reject()
@@ -2171,6 +2184,25 @@ angular.module('myApp.services')
           }
         })
         pendingAfterMsgs[peerID] = sentRequestOptions
+        promises.push(promise)
+      })
+
+      return $q.all(promises)
+    }
+
+    function reportMessages (mids, reason) {
+      mids = mids.sort()
+      var splitted = AppMessagesIDsManager.splitMessageIDsByChannels(mids)
+      var promises = []
+      angular.forEach(splitted.msgIDs, function (msgIDs, channelID) {
+        var peerID = -channelID || getMessagePeer(getMessage(msgIDs[0]))
+        var promise = MtpApiManager.invokeApi('messages.report', {
+          peer: AppPeersManager.getInputPeerByID(peerID),
+          id: msgIDs,
+          reason: reason
+        }).then(function (updates) {
+          ApiUpdatesManager.processUpdateMessage(updates)
+        })
         promises.push(promise)
       })
 
@@ -3847,6 +3879,7 @@ angular.module('myApp.services')
       sendFile: sendFile,
       sendOther: sendOther,
       forwardMessages: forwardMessages,
+      reportMessages: reportMessages,
       startBot: startBot,
       shareGame: shareGame,
       editMessage: editMessage,
@@ -3856,6 +3889,7 @@ angular.module('myApp.services')
       getMessageShareLink: getMessageShareLink,
       canMessageBeEdited: canMessageBeEdited,
       canEditMessage: canEditMessage,
+      canReportMessage: canReportMessage,
       getMessageEditData: getMessageEditData,
       canRevokeMessage: canRevokeMessage,
       clearDialogCache: clearDialogCache,

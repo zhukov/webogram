@@ -200,6 +200,7 @@
                 <a class="btn btn-md btn-md-primary im_edit_cancel_link" ng-click="selectedCancel()" my-i18n="modal_cancel"></a>
                 <a class="btn btn-primary im_edit_forward_btn" ng-click="selectedForward()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_forward"></a>
                 <a class="btn btn-primary im_edit_delete_btn" ng-click="selectedDelete()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_delete" ng-show="historyState.canDelete"></a>
+                <a class="btn btn-primary im_edit_delete_btn" ng-click="selectedReport()" ng-class="{disabled: !selectedCount}" ng-disabled="!selectedCount" my-i18n-format="im_report" ng-show="historyState.canReport"></a>
                 <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedReply()" ng-show="selectedCount == 1 &amp;&amp; historyState.canReply" my-i18n="im_reply"></a>
                 <a class="btn btn-primary im_edit_reply_btn" ng-click="selectedEdit()" ng-show="selectedCount == 1 &amp;&amp; historyState.canEdit" my-i18n="im_edit"></a>
                 <my-i18n-param name="count"><strong class="im_selected_count" ng-show="selectedCount > 0" ng-bind="selectedCount"></strong></my-i18n-param>

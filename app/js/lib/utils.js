@@ -394,7 +394,8 @@ function templateUrl (tplName) {
     megagroup_edit_modal: 'desktop',
     inline_results: 'desktop',
     composer_dropdown: 'desktop',
-    peer_pinned_message_bar: 'desktop'
+    peer_pinned_message_bar: 'desktop',
+    report_msgs_modal: 'desktop'
   }
   var layout = forceLayout[tplName] || (Config.Mobile ? 'mobile' : 'desktop')
   return 'partials/' + layout + '/' + tplName + '.html'
