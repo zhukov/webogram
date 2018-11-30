@@ -7,7 +7,7 @@
       <div class="inline_result_ind"></div>
       <div ng-switch-when="botInlineMediaResult" ng-switch="result.document.url !== undefined" class="inline_result_gif_mtproto">
         <div ng-switch-when="true" ng-switch="result.document.mime_type == 'video/mp4'">
-          <video ng-switch-when="true" width="{{result.thumbW}}" height="{{result.thumbH}}" loop autoplay class="img_gif_video">
+          <video ng-switch-when="true" width="{{result.thumbW}}" height="{{result.thumbH}}" loop autoplay muted class="img_gif_video">
             <source ng-src="{{result.document.url}}" type="video/mp4">
           </video>
           <img ng-switch-default class="img_gif_image" ng-src="{{result.document.url}}" width="{{result.thumbW}}" height="{{result.thumbH}}" />
@@ -18,7 +18,7 @@
       </div>
       <div ng-switch-default ng-switch="result.contentUrl !== undefined" class="inline_result_gif_http">
         <div ng-switch-when="true" ng-switch="result.content_type == 'video/mp4'">
-          <video ng-switch-when="true" width="{{result.thumbW}}" height="{{result.thumbH}}" loop autoplay class="img_gif_video">
+          <video ng-switch-when="true" width="{{result.thumbW}}" height="{{result.thumbH}}" loop autoplay muted class="img_gif_video">
             <source ng-src="{{result.contentUrl}}" type="video/mp4">
           </video>
           <img ng-switch-default class="img_gif_image" ng-src="{{result.contentUrl}}" width="{{result.thumbW}}" height="{{result.thumbH}}" />
