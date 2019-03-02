@@ -10,12 +10,10 @@ html {
 body {
   color: #000;
   background: none;
-  font: 12px/18px 'Open Sans', "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  font-size: @font_size_normal;
+  line-height: 18px;
   overflow: hidden;
-
-  &.non_osx {
-    font: 13px/18px Tahoma, sans-serif, Arial, Helvetica;
-  }
 }
 
 h1, h2, h3, h4, h5 {
@@ -224,7 +222,7 @@ input[type="number"] {
   border-radius: 2px;
   overflow: hidden;
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: @font_size_md;
   padding: 6px 10px;
   font-weight: bold;
 
@@ -277,7 +275,7 @@ input[type="number"] {
   color: #999;
   cursor: pointer;
   display: block;
-  font-size: 13px;
+  font-size: @font_size_md;
   margin: 0;
   padding: 0;
   z-index: 1;
@@ -309,7 +307,7 @@ input[type="number"] {
   display: inline-block;
   border: 0;
   outline: 0;
-  font-size: 13px;
+  font-size: @font_size_md;
   padding: 3px 0;
   margin: 3px 0 0;
   width: 100%;
@@ -394,7 +392,6 @@ a {
 .md_modal_title {
   font-weight: bold;
   padding: 18px 0 5px;
-  font-size: 13px;
 }
 
 .navbar_offline {
@@ -412,7 +409,7 @@ a {
   &-text {
     color: #b9cfe3;
     padding: 13px 15px;
-    font-size: 13px;
+    font-size: @font_size_md;
     display: block;
     line-height: 20px;
   }
@@ -540,7 +537,6 @@ a {
   & > li {
     & > a {
       padding: 5px 14px;
-      font-size: 13px;
     }
   }
 }
@@ -592,7 +588,7 @@ a {
 
   &-close-link,
   &-head-link {
-    font-size: 12px;
+    font-size: @font_size_sm;
     line-height: 1.4;
     float: right;
     padding: 0 2px 0;
@@ -645,7 +641,7 @@ a {
 
 .modal_simple {
   &_header {
-    font-size: 14px;
+    font-size: @font_size_normal;
     margin: 0 0 10px;
     text-align: center;
     font-weight: bold;
@@ -657,7 +653,7 @@ a {
     /*padding: 70px 0 50px;*/
 
     h4 {
-      font-size: 14px;
+      font-size: @font_size_normal;
       margin-bottom: 38px;
       text-align: left;
     }
@@ -677,7 +673,7 @@ a {
 
 .md_simple {
   &_header {
-    font-size: 14px;
+    font-size: @font_size_normal;
     margin: 0 0 10px;
     font-weight: bold;
   }
@@ -692,7 +688,7 @@ a {
     }
 
     .modal_simple_form h4 {
-      font-size: 14px;
+      font-size: @font_size_normal;
       margin-top: 0;
       margin-bottom: 38px;
       text-align: left;
@@ -719,7 +715,7 @@ a {
 
 .modal_section {
   &_header {
-    font-size: 12px;
+    font-size: @font_size_sm;
     line-height: 14px;
     color: #999;
     background: #f5f5f5;
@@ -995,7 +991,7 @@ a.tg_radio_on:hover i.icon-radio {
 }
 .login_head_submit_btn,
 .login_head_submit_progress {
-  font-size: 13px;
+  font-size: @font_size_md;
   line-height: 20px;
   padding: 27px 15px 28px;
   display: inline-block;
@@ -1021,7 +1017,7 @@ a.tg_radio_on:hover i.icon-radio {
 
 .login_footer_wrap {
   color: #84a2bc;
-  font-size: 13px;
+  font-size: @font_size_md;
   line-height: 16px;
   margin-top: 25px;
   text-align: center;
@@ -1087,7 +1083,7 @@ a.tg_radio_on:hover i.icon-radio {
 
   p {
     margin: 0 0 20px;
-    font-size: 13px;
+    font-size: @font_size_md;
     line-height: 160%;
 
     &:last-child {
@@ -1105,18 +1101,18 @@ a.tg_radio_on:hover i.icon-radio {
 .login_form_lead {
   color: #999;
   margin: 15px 0 30px;
-  font-size: 13px;
+  font-size: @font_size_md;
   line-height: 160%;
 }
 .login_form_hint {
   color: #999;
   margin: 0 0 20px;
-  font-size: 13px;
+  font-size: @font_size_md;
   line-height: 160%;
 }
 .login_form_messaging {
   color: #999;
-  font-size: 13px;
+  font-size: @font_size_md;
   margin-top: 20px;
   line-height: 160%;
 }
@@ -1184,7 +1180,7 @@ a.tg_radio_on:hover i.icon-radio {
 }
 
 .im_dialogs_search_field {
-  font-size: 12px;
+  font-size: @font_size_sm;
   line-height: normal;
   border: 1px solid #F2F2F2;
   border-radius: 2px;
@@ -1370,7 +1366,7 @@ a.im_dialog_selected {
 
 .im_dialog_badge {
   background: #64c270;
-  font-size: 11px;
+  font-size: @font_size_sm;
   padding: 5px;
   border-radius: 11px;
   min-width: 21px;
@@ -1565,7 +1561,7 @@ a.im_dialog_selected {
 }
 .non_osx .im_message_author_wrap,
 .non_osx .im_message_fwd_author_wrap {
-  font-size: 12px;
+  font-size: @font_size_sm;
 }
 .im_message_author_via {
   color: #3a6d99;
@@ -1577,7 +1573,7 @@ a.im_dialog_selected {
 .im_message_author_admin {
   color: #adadad;
   margin-left: 6px;
-  font-size: 11px;
+  font-size: @font_size_sm;
 }
 
 .im_message_from_photo,
@@ -1598,7 +1594,7 @@ a.im_message_contact_photo {
   margin: 0 15px 0 0;
 }
 .non_osx .im_message_contact_name {
-  font-size: 12px;
+  font-size: @font_size_sm;
 }
 .im_message_contact_name {
   font-weight: bold;
@@ -1647,7 +1643,7 @@ div.im_message_video_thumb {
   bottom: 4px;
   right: 4px;
   padding: 2px 6px;
-  font-size: 11px;
+  font-size: @font_size_sm;
   line-height: 15px;
   border-radius: 2px;
   overflow: hidden;
@@ -2171,7 +2167,7 @@ img.im_message_document_thumb {
   color: #000;
   line-height: 1.4;
   text-align: left;
-  font-size: 13px;
+  font-size: @font_size_md;
 }
 .im_bot_intro_message_header {
   font-weight: bold;
@@ -2336,7 +2332,7 @@ div.im_message_body {
   margin-bottom: 3px;
 }
 .non_osx .im_message_reply_author {
-  font-size: 12px;
+  font-size: @font_size_sm;
 }
 .im_message_reply_loading {
   padding: 7px 0 8px;
@@ -2428,7 +2424,7 @@ a.im_message_fwd_photo {
   width: 100%;
   background: #f0f4f7;
   height: 30px;
-  font-size: 13px;
+  font-size: @font_size_md;
   margin: 0;
   padding: 6px 6px;
   overflow: hidden;
@@ -2613,7 +2609,7 @@ a.im_message_fwd_photo {
   position: relative;
 }
 textarea.im_message_field {
-  font-size: 12px;
+  font-size: @font_size_sm;
   margin-bottom: 10px;
   padding: 6px;
   min-height: 50px;
@@ -2763,7 +2759,7 @@ img.img_fullsize {
     color: inherit;
   }
   .non_osx & {
-    font-size: 12px;
+    font-size: @font_size_sm;
   }
 }
 
@@ -3171,7 +3167,7 @@ a.composer_emoji_btn {
 
   & > li > a {
     display: block;
-    font-size: 13px;
+    font-size: @font_size_md;
     line-height: 15px;
     padding: 4px 10px;
     color: #52719a;
@@ -3226,7 +3222,7 @@ a.composer_emoji_btn {
   span& {
     .peer_initials {
       line-height: 32px;
-      font-size: 14px;
+      font-size: @font_size_normal;
     }
   }
 }
@@ -3275,7 +3271,7 @@ a.composer_command_option:hover .composer_command_desc,
   white-space: nowrap;
   text-overflow: ellipsis;
   font-weight: bold;
-  font-size: 13px;
+  font-size: @font_size_md;
   color: #444;
   margin: 10px 0 3px;
   padding: 0 6px;
@@ -3307,7 +3303,6 @@ a.composer_command_option:hover .composer_command_desc,
 }
 
 .composer_rich_textarea {
-  font-size: 12px;
   margin-bottom: 10px;
   padding: 6px;
   min-height: 38px;
@@ -3433,7 +3428,7 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
 .inline_switch_pm {
   text-decoration: none !important;
   display: block;
-  font-size: 13px;
+  font-size: @font_size_md;
   font-weight: bold;
   line-height: 15px;
   padding: 10px 10px;
@@ -3507,12 +3502,12 @@ _:-ms-lang(x), .composer_rich_textarea:empty:focus:before {
 .inline_article_title {
   color: #222;
   font-weight: bold;
-  font-size: 12px;
+  font-size: @font_size_sm;
 }
 .inline_article_description {
   color: #808080;
   padding-top: 4px;
-  font-size: 12px;
+  font-size: @font_size_sm;
   li a:hover &,
   li.composer_autocomplete_option_active a & {
     color: #698192;
@@ -3592,7 +3587,7 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 
 .im_recorder_label {
   overflow: auto;
-  font-size: 12px;
+  font-size: @font_size_sm;
   text-align: center;
   vertical-align: middle;
   color: #3a6d99;
@@ -3635,7 +3630,7 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 .error_modal_description {
   color: #999;
   padding: 5px 0;
-  font-size: 13px;
+  font-size: @font_size_md;
   line-height: 160%;
 }
 
@@ -3670,7 +3665,7 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 .error_modal_details_link {
   &,
   &:hover {
-    font-size: 11px;
+    font-size: @font_size_sm;
     color: #999
   }
 }
@@ -3678,7 +3673,7 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 .confirm_modal_description {
   text-align: center;
   padding: 20px 0;
-  font-size: 14px;
+  font-size: @font_size_normal;
   line-height: 160%;
 }
 .confirm_phone_number {
@@ -3790,7 +3785,7 @@ li.inline_result_sticker.composer_autocomplete_option_active a {
 }
 
 .contacts_modal_search_field {
-  font-size: 12px;
+  font-size: @font_size_sm;
   line-height: normal;
   border: 1px solid #fff  !important;
   border-radius: 2px;
@@ -3860,7 +3855,7 @@ a.contacts_modal_search_clear {
   margin: 1px 0 2px;
 
   .non_osx & {
-    font-size: 12px;
+    font-size: @font_size_sm;
   }
 }
 
@@ -3917,7 +3912,7 @@ ul.chat_modal_migrate_list {
   margin: 1px 0 2px;
 
   .non_osx & {
-    font-size: 12px;
+    font-size: @font_size_sm;
   }
 }
 
@@ -3990,7 +3985,7 @@ ul.chat_modal_migrate_list {
   }
   &_sessions_header {
     color: #999;
-    font-size: 13px;
+    font-size: @font_size_md;
     margin-left: 16px;
     margin-top: 20px;
     font-weight: bold;
@@ -4160,7 +4155,7 @@ h5 {
   .im_dialogs_contacts_wrap &,
   .im_dialogs_messages_wrap & {
     color: #999;
-    font-size: 13px;
+    font-size: @font_size_md;
     margin-left: 20px;
     font-weight: bold;
   }
@@ -4192,7 +4187,7 @@ h5 {
   color: #FFF;
   display: block;
   line-height: 40px;
-  font-size: 13px;
+  font-size: @font_size_md;
   text-align: center;
 }
 .icon-cancel {
@@ -4354,7 +4349,7 @@ h5 {
 
 
 .countries_modal_search_field {
-  font-size: 12px;
+  font-size: @font_size_sm;
   line-height: normal;
   background-size: 42px 1171px;
   border: 1px solid #F2F2F2;
@@ -4391,7 +4386,7 @@ a.countries_modal_search_clear {
     overflow: hidden;
     color: #000;
     padding: 8px 26px;
-    font-size: 12px;
+    font-size: @font_size_sm;
     border-radius: 0;
 
     &:hover {
@@ -4542,13 +4537,13 @@ a.countries_modal_search_clear {
   }
 
   &_github_link {
-    font-size: 13px;
+    font-size: @font_size_md;
     float: right;
     color: #999;
   }
 
   &_more_link {
-    font-size: 13px;
+    font-size: @font_size_md;
   }
 }
 
@@ -4566,7 +4561,7 @@ a.countries_modal_search_clear {
 }
 
 .bad_browser_text {
-  font-size: 14px;
+  font-size: @font_size_normal;
   line-height: 160%;
   margin: 25px 0 30px;
 }
@@ -4599,7 +4594,6 @@ a.countries_modal_search_clear {
 }
 
 .peer_modal_profile_name {
-  font-size: 14px;
   padding: 15px 0 9px;
   font-weight: bold;
 }
@@ -4781,8 +4775,8 @@ a.countries_modal_search_clear {
 
     .md_modal_section_param_name {
       color: #909090;
-      font-size: 11px;
-      line-height: 14px;
+      font-size: @font_size_sm;
+      line-height: 110%;
       margin-top: 4px;
     }
     .md_modal_section_param_value {
@@ -4804,7 +4798,6 @@ a.countries_modal_search_clear {
 
   &_select {
     float: right;
-    font-size: 12px;
     padding: 0;
   }
 
@@ -4814,7 +4807,6 @@ a.countries_modal_search_clear {
 
   &_select {
     .dropdown-toggle {
-      font-size: 12px;
       padding: 0;
       line-height: normal;
     }
@@ -4865,7 +4857,7 @@ a.countries_modal_search_clear {
     height: auto;
     padding-left: 120px;
     color: #777;
-    font-size: 12px;
+    font-size: @font_size_sm;
     padding: 5px 20px 3px 55px;
   }
 }
@@ -4887,7 +4879,7 @@ a.countries_modal_search_clear {
   }
 
   &_action {
-    font-size: 13px;
+    font-size: @font_size_md;
     padding: 3px;
     margin: -3px;
   }
@@ -4906,7 +4898,7 @@ a.countries_modal_search_clear {
   }
 
   &_name {
-    font-size: 13px;
+    font-size: @font_size_md;
     font-weight: bold;
 
     a& {

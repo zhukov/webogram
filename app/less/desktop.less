@@ -26,8 +26,6 @@
     font-weight: bold;
     padding: 16px 19px;
     color: #b9cfe3;
-    font-size: 13px;
-    line-height: 16px;
 
     .dropdown.open &,
     &:hover {
@@ -48,7 +46,6 @@
     color: #fff;
     padding: 17px 20px 15px 22px;
     display: block;
-    font-size: 14px;
     line-height: 16px;
     vertical-align: top;
 
@@ -179,8 +176,7 @@
   .dropdown-menu {
     & > li {
       & > a {
-        font-size: 12px;
-        line-height: 21px;
+        line-height: 2;
         padding: 11px 19px 10px 21px;
         color: #42749b;
 
@@ -259,7 +255,6 @@
   &_text {
     color: #b9cfe3;
     padding: 14px 15px;
-    font-size: 13px;
     display: block;
     line-height: 20px;
     float: left;
@@ -315,8 +310,7 @@
     .dropdown-menu {
       & > li {
         & > a {
-          font-size: 13px;
-          line-height: 15px;
+          line-height: 1.2;
           padding: 11px 18px 11px 18px;
           color: #52719a;
 
@@ -368,7 +362,6 @@
   &_media {
     padding: 14px 19px;
     color: #fff;
-    font-size: 13px;
     line-height: 20px;
     float: left;
     font-weight: bold;
@@ -596,7 +589,7 @@
 
 .footer {
   &_wrap {
-    font-size: 11px;
+    font-size: @font_size_sm;
     text-align: center;
     color: #9cacb9;
     line-height: 40px;
@@ -792,7 +785,7 @@ a.footer_link.active:active {
   }
 
   &_typing {
-    font-size: 11px;
+    font-size: @font_size_sm;
     color: #999;
     max-width: 556px;
     margin: 0 auto;
@@ -857,7 +850,7 @@ a.footer_link.active:active {
     border-radius: 2px;
     padding: 7px 17px;
     font-weight: bold;
-    font-size: 12px;
+    font-size: @font_size_sm;
     line-height: 18px;
     margin: 6px 0 6px 14px;
   }
@@ -901,7 +894,7 @@ a.footer_link.active:active {
 
   &_submit {
     color: #499dd9;
-    font-size: 13px;
+    font-size: @font_size_md;
     line-height: 18px;
     height: 18px;
     border-radius: 0;
@@ -1600,7 +1593,7 @@ a.im_panel_peer_photo .peer_initials {
 .user_modal {
   &_main_btn {
     border: 0;
-    font-size: 12px;
+    font-size: @font_size_sm;
     padding-left: 16px;
     padding-right: 16px;
     margin: 8px 10px 0 0;
@@ -1613,7 +1606,7 @@ a.im_panel_peer_photo .peer_initials {
 
     .dropdown-toggle {
       border: 0;
-      font-size: 12px;
+      font-size: @font_size_sm;
     }
 
     .dropdown-menu {
@@ -1665,7 +1658,7 @@ a.im_panel_peer_photo .peer_initials {
 
   &_main_btn {
     border: 0;
-    font-size: 12px;
+    font-size: @font_size_sm;
     padding-left: 16px;
     padding-right: 16px;
     float: left;
@@ -1677,7 +1670,7 @@ a.im_panel_peer_photo .peer_initials {
 
   &_invite_btn {
     border: 0;
-    font-size: 12px;
+    font-size: @font_size_sm;
     padding-left: 16px;
     padding-right: 16px;
     float: left;
@@ -1688,7 +1681,7 @@ a.im_panel_peer_photo .peer_initials {
 
   &_delete_btn {
     border: 0;
-    font-size: 12px;
+    font-size: @font_size_sm;
     padding-left: 16px;
     padding-right: 16px;
     float: left;
@@ -1702,7 +1695,7 @@ a.im_panel_peer_photo .peer_initials {
 
     .dropdown-toggle {
       border: 0;
-      font-size: 12px;
+      font-size: @font_size_sm;
     }
 
     .dropdown-menu {
@@ -1718,7 +1711,7 @@ a.im_panel_peer_photo .peer_initials {
     line-height: 1.428571429;
     color: #333333;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: @font_size_md;
     overflow: hidden;
     position: relative;
 
@@ -1800,7 +1793,7 @@ a.im_panel_peer_photo .peer_initials {
       margin-bottom: 0;
 
       input {
-        font-size: 12px;
+        font-size: @font_size_sm;
         line-height: normal;
         background: #f2f2f2;
         border: 1px solid #f2f2f2;
@@ -1844,7 +1837,6 @@ a.im_panel_peer_photo .peer_initials {
 }
 
 .settings_modal_language_select {
-  font-size: 12px;
   height: 21px;
   line-height: 21px;
   padding: 0;
@@ -2253,7 +2245,6 @@ a.im_panel_peer_photo .peer_initials {
     max-width: 300px;
     margin: 0 auto;
     text-align: center;
-    font-size: 13px;
     font-weight: bold;
     line-height: 16px;
     padding: 24px 0;
@@ -2286,7 +2277,6 @@ a.im_panel_peer_photo .peer_initials {
   }
 
   div&_author_name {
-    font-size: 13px;
     margin-top: 1px;
     overflow: hidden;
     white-space: nowrap;
@@ -2296,7 +2286,7 @@ a.im_panel_peer_photo .peer_initials {
   &_date {
     &,
     a&:hover {
-      font-size: 11px;
+      font-size: @font_size_sm;
       color: rgba(255, 255, 255, 0.4);
     }
 
