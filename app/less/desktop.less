@@ -648,10 +648,12 @@ a.footer_link.active:active {
 .im_dialogs_scrollable_wrap {
   padding: 0 7px 0 0;
 
-  /* Hardware acceleration in Safari */
-  -webkit-transform: translateZ(0);
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
+  body:not(.non_osx) & {
+      /* Hardware acceleration in Safari */
+      -webkit-transform: translateZ(0);
+      -webkit-perspective: 1000;
+      -webkit-backface-visibility: hidden;
+  }
 }
 
 .im_dialogs_col {
