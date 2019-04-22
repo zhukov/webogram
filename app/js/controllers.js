@@ -4435,7 +4435,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.notify.preview = !settings[4]
 
       // Set default to false
-      $scope.appearance.nightmode = settings[5];
+      $scope.appearance.nightmode = settings[6];
 
       $scope.notify.volumeOf4 = function () {
         return 1 + Math.ceil(($scope.notify.volume - 0.1) / 0.33)
