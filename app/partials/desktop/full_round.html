@@ -1,0 +1,27 @@
+<a class="img_round_with_progress_wrap" ng-click="toggle($event)">
+
+  <div class="img_round_image_wrap" ng-style="::{width: document.thumb.width + 'px'}" ng-class="message.pFlags.media_unread ? 'img_round_video_unread' : ''">
+
+    <div class="img_round_meta" ng-show="!isActive || needClick" ng-switch="document.progress.enabled">
+      <div ng-switch-when="true" class="img_round_meta_contents">
+        <i class="icon icon-cancel">
+          <i class="icon icon-bar"></i>
+          <i class="icon icon-bar"></i>
+        </i>
+        <div my-arc-progress="document.progress.percent"></div>
+      </div>
+      
+      <div ng-switch-default class="img_round_meta_contents"><i class="icon icon-videoplay"></i></div>
+    </div>
+
+    <div ng-if="document.url" ng-show="document.downloaded &amp;&amp; isActive" ng-switch="document.mime_type == 'video/mp4'">
+      <video ng-switch-when="true" width="{{document.thumb.width}}" height="{{document.thumb.height}}" class="img_round_video">
+        <source ng-src="{{document.url}}" type="video/mp4">
+      </video>
+      <img ng-switch-default class="img_round_image" ng-src="{{document.url}}" width="{{document.thumb.width}}" height="{{document.thumb.height}}" />
+    </div>
+    <img ng-hide="document.downloaded &amp;&amp; isActive" class="img_round_thumb" my-load-thumb thumb="document.thumb" />
+
+  </div>
+
+</a>

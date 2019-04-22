@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" manifest="webogram.appcache" ng-csp="" xmlns:ng="http://angularjs.org" id="ng-app">
+<html lang="en" manifest="webogram.appcache" ng-csp="" xmlns:ng="http://angularjs.org" id="ng-app" style="display: none;">
 <head>
   <!--[if lte IE 9]>
   <meta HTTP-EQUIV="REFRESH" content="0; url=badbrowser.html">
@@ -11,8 +11,11 @@
   <!-- build:css css/app.css -->
   <link rel="stylesheet" href="vendor/angular/angular-csp.css"/>
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.css"/>
+  <link rel="stylesheet" href="vendor/angularjs-toaster/toaster.css"/>
   <link rel="stylesheet" href="css/app.css"/>
   <!-- endbuild -->
+
+  <link rel="manifest" href="manifest.webapp.json"/>
 
   <!-- <link rel="stylesheet" href="css/font.css"/> -->
   <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&amp;subset=cyrillic,cyrillic-ext,latin,latin-ext" rel="stylesheet" type="text/css"> -->
@@ -34,6 +37,7 @@
   <meta property="og:url" content="https://web.telegram.org/">
   <meta property="og:image" content="https://web.telegram.org/img/logo_share.png">
   <meta property="og:site_name" content="Telegram Web">
+  <meta property="description" content="Welcome to the Web application of Telegram messenger. See https://github.com/zhukov/webogram for more info.">
   <meta property="og:description" content="Welcome to the Web application of Telegram messenger. See https://github.com/zhukov/webogram for more info.">
 
 </head>
@@ -48,8 +52,9 @@
   <script type="text/javascript" src="vendor/jquery/jquery.min.js"></script>
   <script type="text/javascript" src="js/lib/config.js"></script>
   <script type="text/javascript" src="js/init.js"></script>
-  <script type="text/javascript" src="vendor/jquery.nanoscroller/nanoscroller.js"></script>
+  <script type="text/javascript" src="js/offline_manager.js"></script>
 
+  <script type="text/javascript" src="vendor/jquery.nanoscroller/nanoscroller.js"></script>
   <script type="text/javascript" src="vendor/angular/angular.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-route.js"></script>
   <script type="text/javascript" src="vendor/angular/angular-animate.js"></script>
@@ -65,7 +70,16 @@
   <script type="text/javascript" src="vendor/closure/long.js"></script>
   <script type="text/javascript" src="vendor/leemon_bigint/bigint.js"></script>
   <script type="text/javascript" src="vendor/libwebpjs/libwebp-0.2.0.js"></script>
+  <script type="text/javascript" src="vendor/angularjs-toaster/toaster.js"></script>
+  <script type="text/javascript" src="vendor/clipboard/clipboard.js"></script>
 
+  <script type="text/javascript" src="vendor/ogv.js/ogv.js"></script>
+  <script type="text/javascript" src="vendor/ogv.js/ogv-demuxer-ogg.js"></script>
+  <script type="text/javascript" src="vendor/ogv.js/ogv-decoder-audio-opus.js"></script>
+  <script type="text/javascript" src="vendor/ogv.js/ogv-decoder-audio-vorbis.js"></script>
+  <script type="text/javascript" src="vendor/ogv.js/ogv-support.js"></script>
+
+  <script type="text/javascript" src="vendor/recorderjs/recorder.min.js"></script>
 
   <script type="text/javascript" src="js/lib/utils.js"></script>
   <script type="text/javascript" src="js/lib/bin_utils.js"></script>

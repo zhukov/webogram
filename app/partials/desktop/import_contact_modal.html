@@ -2,13 +2,16 @@
 
   <div class="md_simple_modal_body">
 
-    <form class="modal_simple_form" ng-submit="doImport()">
+    <form class="modal_simple_form" ng-submit="doImport()" name="importContactForm">
 
       <h4 my-i18n="contact_import_modal_title"></h4>
 
-      <div class="md-input-group" my-labeled-input>
-        <label class="md-input-label" my-i18n="contact_import_modal_phone"></label>
-        <input class="md-input" my-focused type="text" ng-model="importContact.phone" my-submit-on-enter />
+      <div class="md-input-group" my-labeled-input ng-class="{'md-input-error': importContactForm.phone.$invalid && importContactForm.phone.$touched}" my-labeled-input>
+        <label class="md-input-label" ng-switch="importContactForm.phone.$invalid && importContactForm.phone.$touched">
+          <span ng-switch-when="true" my-i18n="login_incorrect_number"></span>
+          <span ng-switch-default my-i18n="contact_import_modal_phone"></span>
+        </label>
+        <input class="md-input" my-focused type="tel" ng-model="importContact.phone" ng-pattern="/^[-\+\(\)\d\s]{7,32}$/" my-submit-on-enter name="phone" />
       </div>
 
       <div class="md-input-group" my-labeled-input>

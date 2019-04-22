@@ -76,7 +76,7 @@
     <div class="contacts_modal_col contacts_wrap contacts_scrollable_wrap mobile_scrollable_wrap" my-contacts-list-mobile my-infinite-scroller-mobile>
       <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
 
-        <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | orderBy:'user.sortName' | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
+        <li class="contacts_modal_contact_wrap clearfix" ng-repeat="contact in contacts | limitTo: slice.limit track by contact.userID" ng-class="{active: selectedContacts[contact.userID], disabled: disabledContacts[contact.userID]}">
           <a class="contacts_modal_contact" ng-click="contactSelect(contact.userID)">
 
             <i ng-if="multiSelect" class="icon icon-contact-tick"></i>

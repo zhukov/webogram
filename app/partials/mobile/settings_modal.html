@@ -59,7 +59,7 @@
 
     <div class="mobile_user_modal_photo_profile_wrap">
 
-      <a ng-click="openPhoto(profile.photo.photo_id, {p: profile.id})"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::profile.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
+      <a ng-click="openUserPic()"  class="mobile_user_modal_image_wrap pull-left" my-peer-photolink="::profile.id" img-class="mobile_user_modal_image" no-open="true" watch="true" ng-class="{disabled: !profile.photo.photo_id}" ng-disabled="!profile.photo.photo_id"></a>
 
       <div class="mobile_user_modal_info_wrap clearfix">
         <h4 class="mobile_user_modal_header" my-peer-link="profile.id"></h4>
@@ -83,6 +83,13 @@
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleDesktop()" ng-class="notify.desktop ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
         <span class="tg_checkbox_label" my-i18n="settings_modal_notification_alert"></span>
+      </a>
+    </div>
+
+    <div ng-if="notify.desktop && notify.pushAvailable" class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="togglePush()" ng-class="notify.push ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_notification_push"></span>
       </a>
     </div>
 
@@ -151,7 +158,7 @@
           <a href="https://twitter.com/telegram_web" target="_blank" title="{{'settings_modal_follow_us_twitter' | i18n}}" class="settings_external_service"><i class="icon icon-twitter"></i></a>
         </div>
         <p>
-          <a ng-click="openChangelog()" my-i18n="settings_modal_recent_updates">
+          <a href="https://github.com/zhukov/webogram/blob/master/CHANGELOG.md" target="_blank" my-i18n="settings_modal_recent_updates">
             <my-i18n-param name="version" ng-bind="version"></my-i18n-param>
           </a>
         </p>

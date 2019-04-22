@@ -1,4 +1,6 @@
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![Stories in Ready](https://badge.waffle.io/zhukov/webogram.png?label=ready&title=Ready)](https://waffle.io/zhukov/webogram)
+
 ## [Webogram](https://web.telegram.org) — Telegram Web App
 
 Telegram offers great [apps for mobile communication](https://www.telegram.org). It is based on the [MTProto protocol](https://core.telegram.org/mtproto) and has an [Open API](https://core.telegram.org/api). I personally like Telegram for its speed and cloud-support (that makes a web app possible, unlike in the case of WA and others).
@@ -54,11 +56,18 @@ The app is based on the AngularJS JavaScript framework, and written in pure Java
 
 
 The project repository is based on angularjs-seed and includes gulp tasks, so it's easy to launch the app locally on your desktop.
-Install [node.js](http://nodejs.org/) and run the following commands in the project directory
+Install [node.js](http://nodejs.org/).
 
-```
-sudo npm install -g gulp
+Install dependencies with:
+
+```lang=bash
 npm install
+```
+
+Optionaly, run the following commands in the project directory to install gulp globally:
+
+```lang=bash
+sudo npm install -g gulp
 ```
 
 This will install all the needed dependencies.
@@ -67,7 +76,7 @@ This will install all the needed dependencies.
 #### Running web-server
 
 
-Just run `gulp watch` to start the web server and the livereload task.
+Just run `npm start` (`gulp watch`) to start the web server and the livereload task.
 Open http://localhost:8000/app/index.html in your browser.
 
 
@@ -76,14 +85,18 @@ Open http://localhost:8000/app/index.html in your browser.
 
 To run this application in Google Chrome as a packaged app, open this URL (in Chrome): `chrome://extensions/`, then tick "Developer mode" and press "Load unpacked extension...". Select the downloaded `app` folder and Webogram should appear in the list.
 
-Run `gulp watch` to watch for file changes and automatically rebuild the app.
+Run `npm start` (`gulp watch`) to watch for file changes and automatically rebuild the app.
 
 
 #### Running as Firefox OS App
 
 To run this application in Firefox as a packaged app, open "Menu" -> "Developer" -> "WebIDE" (or hit `Shift + F8`). Choose "Open packaged app" from the Project menu and select the `app` folder.
 
-Run `gulp watch` to watch for file changes and automatically rebuild the app.
+Run `npm start` (`gulp watch`) to watch for file changes and automatically rebuild the app.
+
+#### Running in production
+
+Run `npm run clean` (`gulp clean`), then `npm run build` (`gulp publish`) to build the minimized production version of the app. Copy `dist` folder contents to your web server. Don't forget to set `X-Frame-Options SAMEORIGIN` header ([docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)).
 
 
 ### Third party libraries

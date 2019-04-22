@@ -1,0 +1,66 @@
+<span class="im_short_message_media" ng-if="message.media" ng-switch="message.media._">
+  <span ng-switch-when="messageMediaPhoto" my-i18n="conversation_media_photo"></span>
+  <span ng-switch-when="messageMediaDocument" ng-switch="message.media.document.type || false">
+    <span ng-switch-when="sticker">
+      <span ng-bind-html="message.media.document.stickerEmoji"></span>
+      <my-i18n msgid="conversation_media_sticker"></my-i18n>
+    </span>
+    <span ng-switch-when="gif" my-i18n="conversation_media_gif"></span>
+    <span ng-switch-when="round" my-i18n="conversation_media_round"></span>
+    <span ng-switch-when="audio" my-i18n="conversation_media_audio"></span>
+    <span ng-switch-when="voice" my-i18n="conversation_media_audio"></span>
+    <span ng-switch-when="video" my-i18n="conversation_media_video"></span>
+    <span ng-switch-default ng-bind="message.media.document.file_name"></span>
+  </span>
+  <span ng-switch-when="messageMediaGeo" my-i18n="conversation_media_location"></span>
+  <span ng-switch-when="messageMediaVenue" my-i18n="conversation_media_location"></span>
+  <span ng-switch-when="messageMediaContact" my-i18n="conversation_media_contact"></span>
+  <span ng-switch-when="messageMediaGame">
+    <span my-emoji-image="🎮"></span>
+    <span ng-bind-html="message.media.game.rTitle"></span>
+  </span>
+  <span ng-switch-when="messageMediaUnsupported" my-i18n="conversation_media_unsupported"></span>
+  <span ng-switch-when="messageMediaUnsupportedWeb" my-i18n="conversation_media_unsupported"></span>
+</span><span class="im_short_message_service" ng-if="message._ == 'messageService'" ng-switch="message.action._">
+  <span ng-switch-when="messageActionChatCreate" my-i18n="conversation_group_created"></span>
+  <span ng-switch-when="messageActionChatEditTitle" my-i18n="conversation_group_renamed"></span>
+  <span ng-switch-when="messageActionChatEditPhoto" my-i18n="conversation_group_photo_updated"></span>
+  <span ng-switch-when="messageActionChatDeletePhoto" my-i18n="conversation_group_photo_removed"></span>
+  <span ng-switch-when="messageActionChatJoinedByLink" my-i18n="conversation_joined_by_link"></span>
+  <span ng-switch-when="messageActionChatReturn" my-i18n="conversation_returned_to_group"></span>
+  <span ng-switch-when="messageActionChatJoined" my-i18n="conversation_joined_group"></span>
+  <span ng-switch-when="messageActionChatAddUser" my-i18n="conversation_invited_user">
+      <my-i18n-param name="user"><span my-peer-link="message.action.user_id"></span></my-i18n-param>
+  </span>
+  <span ng-switch-when="messageActionChatAddUsers" my-i18n="">
+    <ng-pluralize count="message.action.users.length"
+                  when="conversation_invited_users">
+    </ng-pluralize>
+  </span>
+  <span ng-switch-when="messageActionChatLeave" my-i18n="conversation_left_group"></span>
+  <span ng-switch-when="messageActionChatDeleteUser" my-i18n="conversation_kicked_user">
+    <my-i18n-param name="user"><span my-peer-link="message.action.user_id"></span></my-i18n-param>
+  </span>
+  <span ng-switch-when="messageActionChatMigrateTo" my-i18n="conversation_converted_to_supergroup"></span>
+  <span ng-switch-when="messageActionChannelMigrateFrom" my-i18n="conversation_converted_to_supergroup"></span>
+  <span ng-switch-when="messageActionChannelCreate" my-i18n="conversation_created_channel"></span>
+  <span ng-switch-when="messageActionChannelEditTitle" my-i18n="conversation_changed_channel_name"></span>
+  <span ng-switch-when="messageActionChannelEditPhoto" my-i18n="conversation_changed_channel_photo"></span>
+  <span ng-switch-when="messageActionPinMessage" my-i18n="conversation_pinned_message"></span>
+  <span ng-switch-when="messageActionGameScore">
+      <ng-pluralize count="message.action.score"
+                     when="conversation_scored_X"></ng-pluralize>
+    </my-i18n-param>
+  </span>
+  <span ng-switch-when="messageActionPhoneCall" ng-switch="message.action.type">
+    <span ng-switch-when="out_missed" my-i18n="message_service_phonecall_canceled"></span>
+    <span ng-switch-when="in_missed" my-i18n="message_service_phonecall_missed"></span>
+    <span ng-switch-when="out_ok" my-i18n="message_service_phonecall_outgoing"></span>
+    <span ng-switch-when="in_ok" my-i18n="message_service_phonecall_incoming"></span>
+  </span>
+  <span ng-switch-when="messageActionPaymentSent" my-i18n="message_service_payment_sent"></span>
+  <span ng-switch-when="messageActionScreenshotTaken" my-i18n="message_service_screenshot_taken"></span>
+  <span ng-switch-when="messageActionCustomAction" ng-bind="message.action.message"></span>
+
+
+</span><span class="im_short_message_text" ng-if="message.message.length && (!message.media || message.media._ == 'messageMediaWebPage')" ng-bind-html="message.richMessage"></span>
