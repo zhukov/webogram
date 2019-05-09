@@ -39,7 +39,7 @@ $provide.value("$locale", {
       "\u0645\u0649\u0644\u0627\u062f\u0649\u064a\u06d5"
     ],
     "ERAS": [
-      "\u0645\u0649\u0644\u0627\u062f\u0649\u064a\u06d5\u062f\u0649\u0646 \u0628\u06c7\u0631\u06c7\u0646",
+      "BCE",
       "\u0645\u0649\u0644\u0627\u062f\u0649\u064a\u06d5"
     ],
     "FIRSTDAYOFWEEK": 6,
@@ -54,7 +54,7 @@ $provide.value("$locale", {
       "\u0626\u0627\u06cb\u063a\u06c7\u0633\u062a",
       "\u0633\u06d0\u0646\u062a\u06d5\u0628\u0649\u0631",
       "\u0626\u06c6\u0643\u062a\u06d5\u0628\u0649\u0631",
-      "\u0628\u0648\u064a\u0627\u0628\u0649\u0631",
+      "\u0646\u0648\u064a\u0627\u0628\u0649\u0631",
       "\u062f\u06d0\u0643\u0627\u0628\u0649\u0631"
     ],
     "SHORTDAY": [
@@ -63,7 +63,7 @@ $provide.value("$locale", {
       "\u0633\u06d5",
       "\u0686\u0627",
       "\u067e\u06d5",
-      "\u0686\u06c8",
+      "\u062c\u06c8",
       "\u0634\u06d5"
     ],
     "SHORTMONTH": [
@@ -91,20 +91,20 @@ $provide.value("$locale", {
       "\u0626\u0627\u06cb\u063a\u06c7\u0633\u062a",
       "\u0633\u06d0\u0646\u062a\u06d5\u0628\u0649\u0631",
       "\u0626\u06c6\u0643\u062a\u06d5\u0628\u0649\u0631",
-      "\u0628\u0648\u064a\u0627\u0628\u0649\u0631",
+      "\u0646\u0648\u064a\u0627\u0628\u0649\u0631",
       "\u062f\u06d0\u0643\u0627\u0628\u0649\u0631"
     ],
     "WEEKENDRANGE": [
       5,
       6
     ],
-    "fullDate": "EEEE\u060c MMMM d\u060c y",
-    "longDate": "MMMM d\u060c y",
-    "medium": "MMM d\u060c y h:mm:ss a",
-    "mediumDate": "MMM d\u060c y",
+    "fullDate": "y d-MMMM\u060c EEEE",
+    "longDate": "d-MMMM\u060c y",
+    "medium": "d-MMM\u060c y h:mm:ss a",
+    "mediumDate": "d-MMM\u060c y",
     "mediumTime": "h:mm:ss a",
-    "short": "M/d/yy h:mm a",
-    "shortDate": "M/d/yy",
+    "short": "y-MM-dd h:mm a",
+    "shortDate": "y-MM-dd",
     "shortTime": "h:mm a"
   },
   "NUMBER_FORMATS": {
