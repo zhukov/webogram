@@ -407,6 +407,7 @@
     "error_modal_gelocation_na": "App kann deinen aktuellen Standort nicht bestimmen",
     "error_modal_2fa_recent_confirm": "Deine vorherigen Versuche das Konto zurückzusetzen wurden durch den aktiven Nutzer abgebrochen. Bitte in 7 Tagen erneut probieren.",
     "error_modal_2fa_delayed_time_md": "Du kannst dein Konto zurücksetzen in: **{time}**",
+    "head_mainmenu": "Hauptmenü",
     "head_telegram": "Telegram",
     "head_new_group": "Neue Gruppe",
     "head_new_contact": "Neuer Kontakt",
