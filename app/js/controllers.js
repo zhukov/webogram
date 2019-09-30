@@ -4278,7 +4278,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.notify = {volume: 0.5}
     $scope.send = {}
-    $scope.appearance = {};
+    $scope.theme = {};
 
     $scope.$watch('photo.file', onPhotoSelected)
 
@@ -4416,7 +4416,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
-    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview', 'notify_nopush', 'appearance_nightmode').then(function (settings) {
+    Storage.get('notify_nodesktop', 'send_ctrlenter', 'notify_volume', 'notify_novibrate', 'notify_nopreview', 'notify_nopush', 'theme_darkmode').then(function (settings) {
       $scope.notify.desktop = !settings[0]
       $scope.send.enter = settings[1] ? '' : '1'
 
@@ -4435,7 +4435,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.notify.preview = !settings[4]
 
       // Set default to false
-      $scope.appearance.nightmode = settings[6];
+      $scope.theme.darkmode = settings[6];
 
       $scope.notify.volumeOf4 = function () {
         return 1 + Math.ceil(($scope.notify.volume - 0.1) / 0.33)
@@ -4521,11 +4521,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
 
       $scope.toggleNightmode = function () {
-        $scope.appearance.nightmode = !$scope.appearance.nightmode;
-        if (!$scope.appearance.nightmode) {
-          Storage.remove('appearance_nightmode');
+        $scope.theme.darkmode = !$scope.theme.darkmode;
+        if (!$scope.theme.darkmode) {
+          Storage.remove('theme_darkmode');
         } else {
-          Storage.set({appearance_nightmode: true});
+          Storage.set({theme_darkmode: true});
         }
         $rootScope.$broadcast('settings_changed');
         LayoutSwitchService.switchLayout(false);
