@@ -44,7 +44,7 @@ $provide.value("$locale", {
       "\u0938\u094b\u092e",
       "\u092e\u0919\u094d\u0917\u0932",
       "\u092c\u0941\u0927",
-      "\u092c\u093f\u0939\u0940",
+      "\u092c\u093f\u0939\u093f",
       "\u0936\u0941\u0915\u094d\u0930",
       "\u0936\u0928\u093f"
     ],
@@ -82,12 +82,12 @@ $provide.value("$locale", {
     ],
     "fullDate": "y MMMM d, EEEE",
     "longDate": "y MMMM d",
-    "medium": "y MMM d HH:mm:ss",
+    "medium": "y MMM d h:mm:ss a",
     "mediumDate": "y MMM d",
-    "mediumTime": "HH:mm:ss",
-    "short": "y-MM-dd HH:mm",
+    "mediumTime": "h:mm:ss a",
+    "short": "y-MM-dd h:mm a",
     "shortDate": "y-MM-dd",
-    "shortTime": "HH:mm"
+    "shortTime": "h:mm a"
   },
   "NUMBER_FORMATS": {
     "CURRENCY_SYM": "\u20b9",

@@ -4,12 +4,12 @@ var PLURAL_CATEGORY = {ZERO: "zero", ONE: "one", TWO: "two", FEW: "few", MANY: "
 $provide.value("$locale", {
   "DATETIME_FORMATS": {
     "AMPMS": [
-      "\u1796\u17d2\u179a\u17b9\u1780",
-      "\u179b\u17d2\u1784\u17b6\u1785"
+      "AM",
+      "PM"
     ],
     "DAY": [
       "\u17a2\u17b6\u1791\u17b7\u178f\u17d2\u1799",
-      "\u1785\u1793\u17d2\u1791",
+      "\u1785\u17d0\u1793\u17d2\u1791",
       "\u17a2\u1784\u17d2\u1782\u17b6\u179a",
       "\u1796\u17bb\u1792",
       "\u1796\u17d2\u179a\u17a0\u179f\u17d2\u1794\u178f\u17b7\u17cd",
@@ -41,7 +41,7 @@ $provide.value("$locale", {
     ],
     "SHORTDAY": [
       "\u17a2\u17b6\u1791\u17b7\u178f\u17d2\u1799",
-      "\u1785\u1793\u17d2\u1791",
+      "\u1785\u17d0\u1793\u17d2\u1791",
       "\u17a2\u1784\u17d2\u1782\u17b6\u179a",
       "\u1796\u17bb\u1792",
       "\u1796\u17d2\u179a\u17a0\u179f\u17d2\u1794\u178f\u17b7\u17cd",
@@ -111,10 +111,10 @@ $provide.value("$locale", {
         "maxFrac": 2,
         "minFrac": 2,
         "minInt": 1,
-        "negPre": "-\u00a4",
-        "negSuf": "",
-        "posPre": "\u00a4",
-        "posSuf": ""
+        "negPre": "-",
+        "negSuf": "\u00a4",
+        "posPre": "",
+        "posSuf": "\u00a4"
       }
     ]
   },

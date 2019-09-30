@@ -40,13 +40,13 @@ $provide.value("$locale", {
       "dezembro"
     ],
     "SHORTDAY": [
-      "dom",
-      "seg",
-      "ter",
-      "qua",
-      "qui",
-      "sex",
-      "s\u00e1b"
+      "domingo",
+      "segunda",
+      "ter\u00e7a",
+      "quarta",
+      "quinta",
+      "sexta",
+      "s\u00e1bado"
     ],
     "SHORTMONTH": [
       "jan",
@@ -108,8 +108,8 @@ $provide.value("$locale", {
       {
         "gSize": 3,
         "lgSize": 3,
-        "maxFrac": 2,
-        "minFrac": 2,
+        "maxFrac": 0,
+        "minFrac": 0,
         "minInt": 1,
         "negPre": "-",
         "negSuf": "\u00a0\u00a4",
@@ -120,6 +120,6 @@ $provide.value("$locale", {
   },
   "id": "pt-st",
   "localeID": "pt_ST",
-  "pluralCat": function(n, opt_precision) {  if (n >= 0 && n <= 2 && n != 2) {    return PLURAL_CATEGORY.ONE;  }  return PLURAL_CATEGORY.OTHER;}
+  "pluralCat": function(n, opt_precision) {  var i = n | 0;  if (i >= 0 && i <= 1) {    return PLURAL_CATEGORY.ONE;  }  return PLURAL_CATEGORY.OTHER;}
 });
 }]);

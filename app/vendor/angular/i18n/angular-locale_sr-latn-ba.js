@@ -22,21 +22,21 @@ function getVF(n, opt_precision) {
 $provide.value("$locale", {
   "DATETIME_FORMATS": {
     "AMPMS": [
-      "pre podne",
+      "prije podne",
       "po podne"
     ],
     "DAY": [
-      "nedelja",
+      "nedjelja",
       "ponedeljak",
       "utorak",
-      "sreda",
+      "srijeda",
       "\u010detvrtak",
       "petak",
       "subota"
     ],
     "ERANAMES": [
-      "Pre nove ere",
-      "Nove ere"
+      "prije nove ere",
+      "nove ere"
     ],
     "ERAS": [
       "p. n. e.",
@@ -58,27 +58,27 @@ $provide.value("$locale", {
       "decembar"
     ],
     "SHORTDAY": [
-      "ned",
-      "pon",
-      "uto",
-      "sre",
-      "\u010det",
-      "pet",
-      "sub"
+      "ned.",
+      "pon.",
+      "ut.",
+      "sr.",
+      "\u010det.",
+      "pet.",
+      "sub."
     ],
     "SHORTMONTH": [
-      "jan",
-      "feb",
-      "mar",
-      "apr",
+      "jan.",
+      "feb.",
+      "mart",
+      "apr.",
       "maj",
       "jun",
       "jul",
-      "avg",
-      "sep",
-      "okt",
-      "nov",
-      "dec"
+      "avg.",
+      "sept.",
+      "okt.",
+      "nov.",
+      "dec."
     ],
     "STANDALONEMONTH": [
       "januar",

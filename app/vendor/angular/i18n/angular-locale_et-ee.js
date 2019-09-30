@@ -35,12 +35,12 @@ $provide.value("$locale", {
       "laup\u00e4ev"
     ],
     "ERANAMES": [
-      "enne meie aega",
-      "meie aja j\u00e4rgi"
+      "enne Kristust",
+      "p\u00e4rast Kristust"
     ],
     "ERAS": [
-      "e.m.a.",
-      "m.a.j."
+      "eKr",
+      "pKr"
     ],
     "FIRSTDAYOFWEEK": 0,
     "MONTH": [
@@ -100,12 +100,12 @@ $provide.value("$locale", {
     ],
     "fullDate": "EEEE, d. MMMM y",
     "longDate": "d. MMMM y",
-    "medium": "d. MMM y H:mm.ss",
+    "medium": "d. MMM y HH:mm:ss",
     "mediumDate": "d. MMM y",
-    "mediumTime": "H:mm.ss",
-    "short": "dd.MM.yy H:mm",
+    "mediumTime": "HH:mm:ss",
+    "short": "dd.MM.yy HH:mm",
     "shortDate": "dd.MM.yy",
-    "shortTime": "H:mm"
+    "shortTime": "HH:mm"
   },
   "NUMBER_FORMATS": {
     "CURRENCY_SYM": "\u20ac",

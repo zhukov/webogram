@@ -35,14 +35,14 @@ $provide.value("$locale", {
       "Sabti"
     ],
     "ERANAMES": [
-      "Ciise ka hor (CS)",
-      "Ciise ka dib (CS)"
+      "CK",
+      "CD"
     ],
     "ERAS": [
       "CK",
       "CD"
     ],
-    "FIRSTDAYOFWEEK": 0,
+    "FIRSTDAYOFWEEK": 6,
     "MONTH": [
       "Bisha Koobaad",
       "Bisha Labaad",
@@ -100,12 +100,12 @@ $provide.value("$locale", {
     ],
     "fullDate": "EEEE, MMMM dd, y",
     "longDate": "dd MMMM y",
-    "medium": "dd-MMM-y h:mm:ss a",
+    "medium": "dd-MMM-y HH:mm:ss",
     "mediumDate": "dd-MMM-y",
-    "mediumTime": "h:mm:ss a",
-    "short": "dd/MM/yy h:mm a",
+    "mediumTime": "HH:mm:ss",
+    "short": "dd/MM/yy HH:mm",
     "shortDate": "dd/MM/yy",
-    "shortTime": "h:mm a"
+    "shortTime": "HH:mm"
   },
   "NUMBER_FORMATS": {
     "CURRENCY_SYM": "Ksh",
