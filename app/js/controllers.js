@@ -4520,7 +4520,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $rootScope.$broadcast('settings_changed')
       }
 
-      $scope.toggleNightmode = function () {
+      $scope.toggleDarkmode = function () {
         $scope.theme.darkmode = !$scope.theme.darkmode;
         if (!$scope.theme.darkmode) {
           Storage.remove('theme_darkmode');
