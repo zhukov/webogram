@@ -18,10 +18,10 @@
   }
   $(document.body).addClass(classes.join(' '))
 
-  ConfigStorage.get('layout_selected', 'i18n_locale', 'appearance_nightmode', function (params) {
+  ConfigStorage.get('layout_selected', 'i18n_locale', 'theme_darkmode', function (params) {
     var layout = params[0]
     var locale = params[1]
-    var nightmode = params[2]
+    var darkmode = params[2]
     var defaultLocale = 'en-us'
     var bootReady = {
       dom: false,
@@ -68,7 +68,7 @@
     )
 
     // Nightmode CSS injection if found in stored configs
-    if (nightmode) {
+    if (darkmode) {
       $('head').append(
         '<link rel="stylesheet" href="css/dark.css" />'
       );
