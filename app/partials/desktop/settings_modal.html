@@ -131,6 +131,13 @@
           <a ng-if="password._ == 'account.password'" class="md_modal_section_link" ng-click="changePassword({action: 'change'})" my-i18n="settings_modal_change_password"></a>
         </div>
 
+        <a class="md_modal_section_toggle_wrap settings_modal_content_settings_wrap tg_checkbox" ng-click="toggleContentSettings()" ng-class="contentSettings.pFlags.sensitive_enabled ? 'tg_checkbox_on' : ''" ng-show="contentSettings.pFlags.sensitive_can_change">
+          <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+          <span class="tg_checkbox_label" my-i18n="settings_modal_show_sensitive_content"></span>
+        </a>
+
+        
+
         <div class="md_modal_section_link_wrap">
           <a class="md_modal_section_link" ng-click="showSessions()" my-i18n="settings_modal_active_sessions"></a>
         </div>

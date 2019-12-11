@@ -225,7 +225,6 @@ function writeServiceWorkerFile (rootDir, handleFetch, callback) {
   var config = {
     cacheId: packageJson.name,
     handleFetch: handleFetch,
-    logger: $.util.log,
     staticFileGlobs: fileGlobs,
     stripPrefix: './' + rootDir + '/',
     importScripts: ['js/lib/push_worker.js'],
@@ -242,7 +241,7 @@ gulp.task('generate-service-worker', gulp.series('build', function (callback) {
 
 gulp.task('add-appcache-manifest', gulp.series('build', function () {
   return gulp.src(fileGlobs)
-    .pipe($.manifest({
+    .pipe($.manifest3({
       timestamp: false,
       hash: true,
       network: ['http://*', 'https://*', '*'],

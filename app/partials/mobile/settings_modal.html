@@ -122,13 +122,20 @@
     </div>
 
 
-    <div class="mobile_modal_action_wrap" ng-controller="AppLangSelectController">
+    <div class="mobile_modal_action_wrap clearfix" ng-controller="AppLangSelectController">
       <div class="mobile_modal_select_wrap pull-right">
         <select class="form-control" ng-change="localeSelect()" ng-model="form.locale">
           <option ng-repeat="locale in ::supportedLocales" value="{{locale}}" ng-bind="langNames[locale]" ng-selected="locale == curLocale"></option>
         </select>
       </div>
       <span class="mobile_modal_action" my-i18n="settings_modal_language"></span>
+    </div>
+
+    <div class="mobile_modal_action_wrap">
+      <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleContentSettings()" ng-class="contentSettings.pFlags.sensitive_enabled ? 'tg_checkbox_on' : ''">
+        <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
+        <span class="tg_checkbox_label" my-i18n="settings_modal_show_sensitive_content"></span>
+      </a>
     </div>
 
     <div class="mobile_modal_section" ng-if="profile.phone">

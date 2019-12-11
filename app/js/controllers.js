@@ -4276,6 +4276,24 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     })
 
+    $scope.contentSettings = {notReady: true}
+    var contentSettingsPromise = MtpApiManager.invokeApi('account.getContentSettings', {}).then(function (contentsResult) {
+      $scope.contentSettings = contentsResult
+    })
+
+    $scope.toggleContentSettings = function () {
+      if ($scope.contentSettings.pFlags &&
+          $scope.contentSettings.pFlags.sensitive_enabled) {
+        delete $scope.contentSettings.pFlags.sensitive_enabled
+        MtpApiManager.invokeApi('account.setContentSettings', {flags: 0})
+      } else {
+        return ErrorService.confirm({type: 'CONTENT_SETTINGS_SENSITIVE'}).then(function () {
+          $scope.contentSettings.pFlags.sensitive_enabled = true
+          MtpApiManager.invokeApi('account.setContentSettings', {flags: 1})
+        })
+      }
+    }
+
     $scope.notify = {volume: 0.5}
     $scope.send = {}
 

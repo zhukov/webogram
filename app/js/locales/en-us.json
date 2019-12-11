@@ -86,6 +86,7 @@
 	"settings_modal_password_email_pending": "Click the link in {email} to complete Two-Step Verification setup.",
 	"settings_modal_password_email_pending_cancel": "Abort",
 	"settings_modal_password_email_pending_cancel_mobile": "Abort password",
+  "settings_modal_show_sensitive_content": "Show Sensitive Content",
 
 	"password_delete_title": "Turn password off",
 	"password_change_title": "Two-Step Verification",
@@ -277,7 +278,9 @@
 	"confirm_modal_migrate_supergroup_md": "Please note that group members will need to update their Telegram apps to the latest version to see your supergroup.\n\nAre you sure you want to upgrade this group?",
 	"confirm_modal_bot_access_phone": "The bot will know your phone number. This can be useful for integration with other services.",
 	"confirm_modal_bot_access_geo": "This will send your current location to the bot.",
-	"confirm_modal_bot_access_geo_inline": "This bot would like to know your location each time you send it a request. This can be used to provide location-specific results.",
+  "confirm_modal_bot_access_geo_inline": "This bot would like to know your location each time you send it a request. This can be used to provide location-specific results.",
+	"confirm_modal_content_settings_sensitive_md": "**Disable filtering**\nIf you disable filtering, Telegram will display sensitive media in public channels on all your connected devices.",
+  "confirm_modal_content_settings_sensitive_submit": "Disable",
 
 	"confirm_modal_are_u_sure": "Are you sure?",
 
