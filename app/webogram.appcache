@@ -3,4 +3,5 @@ CACHE MANIFEST
 # 78
 
 NETWORK:
-*
+*command shift p
+editor: log cursor scope
