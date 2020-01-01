@@ -86,6 +86,7 @@
 	"settings_modal_password_email_pending": "Click the link in {email} to complete Two-Step Verification setup.",
 	"settings_modal_password_email_pending_cancel": "Abort",
 	"settings_modal_password_email_pending_cancel_mobile": "Abort password",
+  "settings_modal_show_sensitive_content": "Show Sensitive Content",
 
 	"password_delete_title": "Turn password off",
 	"password_change_title": "Two-Step Verification",
@@ -277,7 +278,9 @@
 	"confirm_modal_migrate_supergroup_md": "Please note that group members will need to update their Telegram apps to the latest version to see your supergroup.\n\nAre you sure you want to upgrade this group?",
 	"confirm_modal_bot_access_phone": "The bot will know your phone number. This can be useful for integration with other services.",
 	"confirm_modal_bot_access_geo": "This will send your current location to the bot.",
-	"confirm_modal_bot_access_geo_inline": "This bot would like to know your location each time you send it a request. This can be used to provide location-specific results.",
+  "confirm_modal_bot_access_geo_inline": "This bot would like to know your location each time you send it a request. This can be used to provide location-specific results.",
+	"confirm_modal_content_settings_sensitive_md": "**Disable filtering**\nIf you disable filtering, Telegram will display sensitive media in public channels on all your connected devices.",
+  "confirm_modal_content_settings_sensitive_submit": "Disable",
 
 	"confirm_modal_are_u_sure": "Are you sure?",
 
@@ -452,7 +455,7 @@
 	"error_modal_recovery_na_description": "Since you haven't provided a recovery e-mail when setting up your password, your remaining options are either to remember your password or to reset your account.",
 	"error_modal_password_success_descripion": "Your password for Two-Step Verification is now active.",
 	"error_modal_password_disabled_descripion": "You have disabled Two-Step Verification.",
-	"error_modal_user_not_mutual_contact": "The user can be invited by his contact only",
+	"error_modal_user_not_mutual_contact": "The user can be invited by their contact only",
 	"error_modal_invite_link_invalid": "The invite link is invalid",
 	"error_modal_channel_not_accessible": "Sorry, this channel is not accessible.",
 	"error_modal_not_contact_flood": "Sorry, you can only send messages to mutual contacts at the moment. {more-info-link: More info »}",
@@ -460,7 +463,7 @@
 	"error_modal_2fa_recent_confirm": "Your recent attempts to reset this account have been cancelled by its active user. Please try again in 7 days.",
 	"error_modal_2fa_delayed_time_md": "You'll be able to reset your account in: **{time}**",
 
-
+	"head_mainmenu": "Main menu",
 	"head_telegram": "Telegram",
 	"head_new_group": "New group",
 	"head_new_contact": "New contact",
@@ -549,6 +552,7 @@
 	"im_emoji_tab": "Emoji",
 	"im_stickers_tab": "Stickers",
 	"im_stickers_tab_recent": "Frequently used",
+	"im_voice_record_title": "Record a message",
 	"im_media_attach_title": "Send media",
 	"im_attach_file_title": "Send file",
 	"im_emoji_btn_title": "Insert emoticon",

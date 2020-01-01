@@ -433,11 +433,11 @@
   bottom: 0;
   visibility: hidden\9;
   /* Target only IE7 and IE8 with this hack */
-  opacity: .01;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
-  -o-transition: .2s;
-  transition: .2s;
+  opacity: 0.01;
+  -webkit-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
@@ -493,10 +493,10 @@
   width: 3px;
   right: 6px;
   top: 0;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
-  -o-transition: .2s;
-  transition: .2s;
+  -webkit-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
@@ -909,7 +909,7 @@ a.footer_link.active:active {
   opacity: 0;
 }
 .im_message_unread .icon-message-status {
-  opacity: 1.0;
+  opacity: 1;
 }
 .im_message_pending .icon-message-status {
   opacity: 0.5;
@@ -1477,7 +1477,7 @@ a.im_panel_peer_photo .peer_initials {
   padding: 5px 14px;
   clear: both;
   font-weight: normal;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
   color: #333333;
   white-space: nowrap;
   font-size: 13px;
@@ -1787,10 +1787,10 @@ div.im_dialog_photo .peer_initials {
   margin: 43px 40px 0 0;
   opacity: 0.5;
   pointer-events: none;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
-  -o-transition: .2s;
-  transition: .2s;
+  -webkit-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
   background-image: url(../img/icons/PhotoIcons.png);
   background-repeat: no-repeat;
   background-position: -10px -10px;
@@ -1837,10 +1837,10 @@ div.im_dialog_photo .peer_initials {
   top: 50%;
   pointer-events: none;
   margin: 0 0 0 38px;
-  -webkit-transition: .2s;
-  -moz-transition: .2s;
-  -o-transition: .2s;
-  transition: .2s;
+  -webkit-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
   background-image: url(../img/icons/PhotoIcons.png);
   background-repeat: no-repeat;
   background-position: -12px -41px;

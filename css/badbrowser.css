@@ -2001,3 +2001,4 @@ body .nano-pane{display:none}
 body .nano>.nano-content{position:static}
 body .tg_head_peer_info{text-align:center}
 body .im_history_col_wrap,body .tg_head_main_wrap{width:auto;max-width:700px;float:none;margin:0 auto}}
+.visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px 1px 1px 1px);clip:rect(1px,1px,1px,1px)}
