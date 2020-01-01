@@ -349,9 +349,4 @@ gulp.task('package', gulp.series('cleanup-dist'))
 
 gulp.task('publish', gulp.series('add-appcache-manifest', 'generate-service-worker'))
 
-gulp.task('deploy', function () {
-  return gulp.src('./dist/**/*')
-    .pipe($.ghPages())
-})
-
 gulp.task('default', gulp.series('build'))

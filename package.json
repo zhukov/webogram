@@ -48,7 +48,6 @@
     "gulp": "^4.0.2",
     "gulp-angular-templatecache": "^3.0.0",
     "gulp-concat": "^2.1.7",
-    "gulp-gh-pages": "^0.5.4",
     "gulp-grep-stream": "0.0.2",
     "gulp-imagemin": "^5.0.3",
     "gulp-less": "^4.0.1",
