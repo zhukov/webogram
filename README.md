@@ -63,7 +63,7 @@ Install dependencies with:
 npm install
 ```
 
-Optionaly, run the following commands in the project directory to install gulp globally:
+Optionally, run the following commands in the project directory to install gulp globally:
 
 ```lang=bash
 sudo npm install -g gulp

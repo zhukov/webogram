@@ -463,7 +463,7 @@
 	"error_modal_2fa_recent_confirm": "Your recent attempts to reset this account have been cancelled by its active user. Please try again in 7 days.",
 	"error_modal_2fa_delayed_time_md": "You'll be able to reset your account in: **{time}**",
 
-
+	"head_mainmenu": "Main menu",
 	"head_telegram": "Telegram",
 	"head_new_group": "New group",
 	"head_new_contact": "New contact",
@@ -552,6 +552,7 @@
 	"im_emoji_tab": "Emoji",
 	"im_stickers_tab": "Stickers",
 	"im_stickers_tab_recent": "Frequently used",
+	"im_voice_record_title": "Record a message",
 	"im_media_attach_title": "Send media",
 	"im_attach_file_title": "Send file",
 	"im_emoji_btn_title": "Insert emoticon",
