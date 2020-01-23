@@ -131,7 +131,7 @@
       <span class="mobile_modal_action" my-i18n="settings_modal_language"></span>
     </div>
 
-    <div class="mobile_modal_action_wrap">
+    <div class="mobile_modal_action_wrap" ng-show="contentSettings.pFlags.sensitive_can_change">
       <a class="mobile_modal_action tg_checkbox clearfix" ng-click="toggleContentSettings()" ng-class="contentSettings.pFlags.sensitive_enabled ? 'tg_checkbox_on' : ''">
         <span class="icon icon-checkbox-outer"><i class="icon-checkbox-inner"></i></span>
         <span class="tg_checkbox_label" my-i18n="settings_modal_show_sensitive_content"></span>

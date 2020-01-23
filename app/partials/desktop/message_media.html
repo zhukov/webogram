@@ -9,13 +9,13 @@
   <div ng-switch-when="messageMediaPending"   my-message-pending="media"></div>  
 
   <div ng-switch-when="messageMediaUnsupported">
-    <div class="im_message_text" my-i18n="message_attach_unsupported">
-      <my-i18n-param name="link"><a href="https://web.telegram.org" target="_blank">web.telegram.org</a></my-i18n-param>
+    <div class="im_message_text" my-i18n="message_attach_unsupported_desktop">
+      <my-i18n-param name="link"><a href="https://getdesktop.telegram.org" target="_blank">getdesktop.telegram.org</a></my-i18n-param>
     </div>
   </div>
 
   <div ng-switch-when="messageMediaUnsupportedWeb">
-    <div class="im_message_text" my-i18n="message_attach_unsupported">
+    <div class="im_message_text" my-i18n="message_attach_notweb">
       <my-i18n-param name="link"><a href="https://web.telegram.org" target="_blank">web.telegram.org</a></my-i18n-param>
     </div>
   </div>

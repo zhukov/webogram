@@ -633,7 +633,8 @@
 	"message_attach_video_save": "Save file",
 	"message_attach_video_play": "Play video",
 
-	"message_attach_unsupported": "The message is not supported on your version of Telegram Web. Update the app to view: {link}.",
+  "message_attach_unsupported": "The message is not supported on your version of Telegram Web. Update the app to view: {link}.",
+	"message_attach_unsupported_desktop": "This message is currently not supported on Telegram Web. Try {link}.",
 	"message_attach_notweb": "The message is not supported on Telegram Web yet. Use Telegram mobile apps to view: {link}.",
 
 	"conversation_select_modal_title": "Select conversation",

@@ -951,11 +951,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function getDialogs (force) {
       var curJump = ++jump
 
-      $timeout.cancel(searchTimeoutPromise)
+      if (searchTimeoutPromise) {
+        $timeout.cancel(searchTimeoutPromise)
+      }
 
       if (searchMessages) {
         searchTimeoutPromise = (force || maxID) ? $q.when() : $timeout(angular.noop, 500)
         return searchTimeoutPromise.then(function () {
+          searchTimeoutPromise = false;
           var searchPeerID = $scope.searchPeer || false
           return AppMessagesManager.getSearch(searchPeerID, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
             if (curJump != jump) {
