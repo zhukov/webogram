@@ -66,7 +66,6 @@ Config.I18n = {
     , 'pt-br'
   // ,"ru-ru"
     , 'uk-ua'
-
   ], // To be copied to package.json
   languages: {
     'en-us': 'English',
