@@ -1,6 +1,6 @@
 {
   "name": "Telegram",
-  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/reboot13-git/telegram",
   "version": "0.7.0",
   "type": "privileged",
   "launch_path": "/index.html",
