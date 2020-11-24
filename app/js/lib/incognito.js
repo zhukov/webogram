@@ -2,7 +2,7 @@ angular.module('incognito', [])
 
   .factory('InAPIConfigurator', function() {
     return {
-      chooseServer: () => ('http://localhost:8080')
+      chooseServer: function () {return ('http://localhost:8080')}
     }
   })
 
@@ -12,14 +12,13 @@ angular.module('incognito', [])
 
     function getAccountData() {
       var url = InAPIConfigurator.chooseServer();
-      let requestPromise;
       try {
         // requestPromise = $http.get(url);
-        requestPromise = new Promise((resolve, reject) => {
+        var requestPromise = new Promise(function(resolve, reject)  {
           resolve(
             {
               data: {
-                accounts: {
+                accounts : {
                   "Anon" : {
                     balance: 2,
                     address: "12S3CcAtftrYJn1woQVUx94RdcTTRXoSyFM76wjyTesf6AvhMPw94u16TUJCdubsQMuu7J9L4pzukxY1DxqVFv91Y72b3LoDgRKKknJ",
@@ -55,6 +54,6 @@ angular.module('incognito', [])
     }
 
     return {
-      getAccountData
+      getAccountData: getAccountData
     }
   })
