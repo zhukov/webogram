@@ -1,0 +1,43 @@
+<div class="sessions_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()" my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title">Your accounts</div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div my-sessions-list class="sessions_modal_col">
+
+      <div class="sessions_wrap nano" my-infinite-scroller>
+        <div class="sessions_scrollable_wrap nano-content" ng-switch="!sessionsLoaded">
+
+          <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.2" padding="true" my-i18n="sessions_modal_loading">
+            <my-i18n-param name="dots">
+              <span my-loading-dots></span>
+            </my-i18n-param>
+          </div>
+
+          <ul ng-switch-default class="sessions_modal_sessions_list nav nav-pills nav-stacked">
+
+            <li class="sessions_modal_session_wrap clearfix" ng-repeat="account in accounts">
+              <div class="sessions_modal_session clickable" ng-click="selectAccount(account.name)">
+                <div class="sessions_modal_session_app" ng-bind="account.name" style="overflow: hidden"></div>
+                <div class="sessions_modal_session_location" ng-bind="account.address" style="overflow: hidden"></div>
+              </div>
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

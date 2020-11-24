@@ -23,9 +23,7 @@
 
   <div class="md_modal_split_actions_wrap">
     <div class="md_modal_split_actions">
-      <input id="IncognitoAccounts" type="checkbox" ng-model="showAccounts" style="display: none">
-      <label for="IncognitoAccounts" class="md_incognito_modal_label clickable">{{ currentAccount }}
-        <img src="../../../app/img/incognito/arrow_down.svg" alt="" title="Select account" class="rotate_to_{{ showAccounts ? 'opposite' : 'initial' }}" /></label>
+      <span ng-click="showAccounts()" class="md_incognito_modal_label clickable">{{ account.name }}</span>
     </div>
   </div>
 
@@ -33,17 +31,19 @@
     <div class="md_modal_sections clearfix">
       <div class="md_incognito_modal_column_align_center">
         <div class="md_incognito_header_1">
-          {{ accounts[currentAccount].balance }}
+          {{ account.balance }}
         </div>
         <div class="md_incognito_small">Balance</div>
         <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
       </div>
     </div>
     <ul class="full_width md_incognito_list clearfix">
-      <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between" ng-repeat="wallet in accounts[currentAccount].wallets">
+      <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
+          ng-repeat="wallet in account.wallets">
         <span class="md_incognito_modal_row_align_center">
           <span>{{ wallet.name }}</span>
-          <span ng-if="wallet.verified" class="md_incognito_icon md_incognito_icons_verified"></span>
+          <span ng-if="wallet.verified"
+                class="md_incognito_icon md_incognito_icons_verified"></span>
         </span>
         <span class="md_incognito_modal_row_align_center">
           <span>{{ wallet.balance }} </span>

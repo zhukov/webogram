@@ -4565,16 +4565,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       LayoutSwitchService.switchLayout(false)
     }
   })
-  .controller('IncognitoModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
-
-    $scope.accounts = {};
-    $scope.currentAccount = "Anon";
-
-    InAPIManager.getAccountData().then(function (data) {
-      $scope.accounts = data.accounts;
-      console.log($scope.accounts);
-    })
-  })
 
   .controller('ChangelogModalController', function ($scope, $modal) {
     $scope.currentVersion = Config.App.version
@@ -4791,6 +4781,47 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $timeout.cancel(updateSessionsTimeout)
       stopped = true
     })
+  })
+
+  .controller('IncognitoModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+
+    $scope.account = {};
+
+    AppIncognitoStateManager.getAccountInfo().then(function(data){
+      $scope.account = data;
+    });
+
+    $scope.showAccounts = function () {
+      $modal.open({
+        templateUrl: templateUrl('accounts_list_modal'),
+        controller: 'AccountsListModalController',
+        windowClass: 'md_simple_modal_window mobile_modal'
+      })
+    }
+    $scope.$on('incognitoUpdate', function (event, update) {
+      if(update === 'accountsList'){
+        AppIncognitoStateManager.getAccountInfo().then(function(data){
+          $scope.account = data;
+        });
+      }
+    })
+  })
+
+  .controller('AccountsListModalController', function ($scope, $q, $timeout, _, AppIncognitoStateManager ) {
+
+    $scope.accounts = {};
+    AppIncognitoStateManager.getAccountsList().then(function (data) {
+      $scope.sessionsLoaded = true
+      $scope.accounts = data;
+    })
+
+    $scope.selectAccount = function (accountName) {
+      AppIncognitoStateManager.selectAccount(accountName).then(function () {
+        $scope.sessionsLoaded = true;
+        $scope.$dismiss();
+      })
+    }
+
   })
 
   .controller('PasswordUpdateModalController', function ($scope, $q, _, PasswordManager, MtpApiManager, ErrorService, $modalInstance) {
