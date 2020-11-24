@@ -30,7 +30,8 @@ angular.module('myApp', [
   'myApp.templates',
   PRODUCTION_ONLY_END*/
   'myApp.directives',
-  'myApp.controllers'
+  'myApp.controllers',
+  'incognito'
 ].concat(extraModules)).config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvider', function ($locationProvider, $routeProvider, $compileProvider, StorageProvider) {
   $locationProvider.hashPrefix('');
   $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//)

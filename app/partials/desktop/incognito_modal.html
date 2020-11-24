@@ -1,0 +1,35 @@
+<div class="settings_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()"
+           my-i18n="modal_close"></a>
+      </div>
+      <div class="md_modal_title">Incognito</div>
+    </div>
+    <div class="md_incognito_wrap">
+      <div class="mmd_incognito_modal_row_align_center">
+        <div class="md_incognito_icon md_incognito_icons_key">Keys</div>
+      </div>
+    </div>
+    <div class="md_incognito_wrap">
+      <div class="md_incognito_modal_row_align_center">
+        <div class="md_incognito_icon md_incognito_icons_trade">Trade</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+    <div class="md_modal_sections md_incognito_modal_row_justify_center clearfix">
+      <div class="md_incognito_modal_column_align_center">
+        <div class="md_incognito_header_1">
+          {{ accounts[currentAccount].balance }}
+        </div>
+        <div class="md_incognito_small">Balance</div>
+        <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
+      </div>
+    </div>
+  </div>
+
+</div>
