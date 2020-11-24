@@ -5318,7 +5318,46 @@ a.countries_modal_search_clear {
   padding: 10px 27px 0;
 }
 
+.full {
+
+  &_width {
+    width: 100%;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+  user-select: none;
+
+  &:active {
+    filter: grayscale(100%);
+  }
+}
+
 .md_incognito {
+  &_list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    padding: 20px 55px;
+
+    & > li {
+      list-style: none;
+      font-size: 18px;
+      line-height: 24px;
+      margin-bottom: 30px;
+    }
+
+    & > li:last-child {
+      margin-bottom: 0;
+    }
+
+    & > li > span > span:first-child {
+      margin-right: 5px;
+    }
+  }
+
   &_button {
     height: 56px;
     background: #5580a3;
@@ -5330,9 +5369,11 @@ a.countries_modal_search_clear {
     line-height: 23px;
     margin: 25px 0;
   }
+
   &_button:focus {
     outline: none;
   }
+
   &_header {
     &_1 {
       font-size: 72px;
@@ -5340,6 +5381,7 @@ a.countries_modal_search_clear {
       line-height: 1em;
     }
   }
+
   &_small {
     font-size: 18px;
     color: #909090;
@@ -5354,6 +5396,12 @@ a.countries_modal_search_clear {
 
   &_modal {
 
+    &_row_justify_between {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
     &_row_align_center {
       display: flex;
       flex-direction: row;
@@ -5364,6 +5412,19 @@ a.countries_modal_search_clear {
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    &_label {
+      background: white;
+      padding: 13px 30px;
+      border-radius: 30px;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      color: #8c8c8c;
+      font-size: 18px;
+
+      &:hover {
+        color: #5f8fb6;
+      }
     }
   }
 
@@ -5384,8 +5445,27 @@ a.countries_modal_search_clear {
         height: 43px;
         .image-2x('../img/incognito/trade.png', 43px, 43px);
       }
+
+      &_verified {
+        min-width: 16px;
+        height: 16px;
+        .image-2x('../img/incognito/verified.png', 16px, 16px);
+      }
     }
   }
+}
+
+.rotate_to {
+  &_initial {
+    transform: rotate(0);
+    transition: transform 0.2s;
+  }
+
+  &_opposite {
+    transform: rotate(180deg);
+    transition: transform 0.2s;
+  }
+
 }
 
 .md_photo_loading {

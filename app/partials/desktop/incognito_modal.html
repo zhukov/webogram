@@ -8,20 +8,29 @@
       </div>
       <div class="md_modal_title">Incognito</div>
     </div>
-    <div class="md_incognito_wrap">
+    <div class="md_incognito_wrap clickable">
       <div class="mmd_incognito_modal_row_align_center">
         <div class="md_incognito_icon md_incognito_icons_key">Keys</div>
       </div>
     </div>
-    <div class="md_incognito_wrap">
+    <div class="md_incognito_wrap clickable">
       <div class="md_incognito_modal_row_align_center">
         <div class="md_incognito_icon md_incognito_icons_trade">Trade</div>
       </div>
     </div>
   </div>
 
-  <div class="md_modal_body">
-    <div class="md_modal_sections md_incognito_modal_row_justify_center clearfix">
+
+  <div class="md_modal_split_actions_wrap">
+    <div class="md_modal_split_actions">
+      <input id="IncognitoAccounts" type="checkbox" ng-model="showAccounts" style="display: none">
+      <label for="IncognitoAccounts" class="md_incognito_modal_label clickable">{{ currentAccount }}
+        <img src="../../../app/img/incognito/arrow_down.svg" alt="" title="Select account" class="rotate_to_{{ showAccounts ? 'opposite' : 'initial' }}" /></label>
+    </div>
+  </div>
+
+  <div class="md_modal_body" style="padding-bottom: 50px">
+    <div class="md_modal_sections clearfix">
       <div class="md_incognito_modal_column_align_center">
         <div class="md_incognito_header_1">
           {{ accounts[currentAccount].balance }}
@@ -30,6 +39,18 @@
         <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
       </div>
     </div>
+    <ul class="full_width md_incognito_list clearfix">
+      <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between" ng-repeat="wallet in accounts[currentAccount].wallets">
+        <span class="md_incognito_modal_row_align_center">
+          <span>{{ wallet.name }}</span>
+          <span ng-if="wallet.verified" class="md_incognito_icon md_incognito_icons_verified"></span>
+        </span>
+        <span class="md_incognito_modal_row_align_center">
+          <span>{{ wallet.balance }} </span>
+          <span>{{ wallet.symbol }}</span>
+        </span>
+      </li>
+    </ul>
   </div>
 
 </div>
