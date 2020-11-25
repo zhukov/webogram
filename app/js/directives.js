@@ -1231,6 +1231,31 @@ angular.module('myApp.directives', ['myApp.filters'])
     }
   })
 
+  .directive('myAccountsList', function ($window, $timeout) {
+    return {
+      link: link
+    }
+
+    function link ($scope, element, attrs) {
+      var accountsWrap = $('.accounts_wrap', element)[0]
+
+      onContentLoaded(function () {
+        $(accountsWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true})
+        updateSizes()
+      })
+
+      function updateSizes () {
+        $(element).css({
+          height: Math.min(210, $($window).height() -
+            (Config.Mobile ? 46 + 18 : 200))
+        })
+        $(accountsWrap).nanoScroller()
+      }
+
+      $($window).on('resize', updateSizes)
+    }
+  })
+
   .directive('myStickersList', function ($window, $timeout) {
     return {
       link: link
@@ -1900,7 +1925,7 @@ angular.module('myApp.directives', ['myApp.filters'])
               console.warn(dT(), 'got audio', blob)
 
               $scope.$apply(function () {
-                if (blob.size !== undefined && 
+                if (blob.size !== undefined &&
                     blob.size > 1024) {
                   $scope.draftMessage.files = [blob]
                   $scope.draftMessage.isMedia = true

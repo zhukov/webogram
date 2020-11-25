@@ -48,6 +48,13 @@ angular.module('incognito', [])
               balance: 0,
               price: 0.581684746,
               verified: false
+            },
+            {
+              name: "Tether USD",
+              symbol: "USDT",
+              balance: 0,
+              price: 0.581684746,
+              verified: false
             }
           ]
         },

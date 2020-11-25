@@ -11,9 +11,9 @@
 
   <div class="md_modal_body">
 
-    <div my-sessions-list class="sessions_modal_col">
+    <div my-accounts-list class="sessions_modal_col">
 
-      <div class="sessions_wrap nano" my-infinite-scroller>
+      <div class="accounts_wrap nano" my-infinite-scroller>
         <div class="sessions_scrollable_wrap nano-content" ng-switch="!sessionsLoaded">
 
           <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.2" padding="true" my-i18n="sessions_modal_loading">
@@ -22,7 +22,7 @@
             </my-i18n-param>
           </div>
 
-          <ul ng-switch-default class="sessions_modal_sessions_list nav nav-pills nav-stacked">
+          <ul ng-switch-default class="accounts_list sessions_modal_sessions_list nav nav-pills nav-stacked">
 
             <li class="sessions_modal_session_wrap clearfix" ng-repeat="account in accounts">
               <div class="sessions_modal_session clickable" ng-click="selectAccount(account.name)">
