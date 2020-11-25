@@ -1255,6 +1255,30 @@ angular.module('myApp.directives', ['myApp.filters'])
       $($window).on('resize', updateSizes)
     }
   })
+  .directive('myKeychainsList', function ($window, $timeout) {
+    return {
+      link: link
+    }
+
+    function link ($scope, element, attrs) {
+      var keychainsWrap = $('.keychains_wrap', element)[0]
+
+      onContentLoaded(function () {
+        $(keychainsWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true})
+        updateSizes()
+      })
+
+      function updateSizes () {
+        $(element).css({
+          height: Math.min(325, $($window).height() -
+            (Config.Mobile ? 46 + 18 : 200))
+        })
+        $(keychainsWrap).nanoScroller()
+      }
+
+      $($window).on('resize', updateSizes)
+    }
+  })
 
   .directive('myStickersList', function ($window, $timeout) {
     return {

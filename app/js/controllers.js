@@ -4798,12 +4798,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         windowClass: 'md_simple_modal_window mobile_modal'
       })
     }
+
+    $scope.showKeys = function () {
+      $modal.open({
+        templateUrl: templateUrl('incognito_keys_modal'),
+        controller: 'IncognitoKeysModalController',
+        windowClass: 'settings_modal_window mobile_modal',
+        backdrop: 'single'
+      })
+    }
+
     $scope.$on('incognitoUpdate', function (event, update) {
       if(update === 'accountsList'){
         AppIncognitoStateManager.getAccountInfo().then(function(data){
           $scope.account = data;
         });
       }
+    })
+  })
+
+  .controller('IncognitoKeysModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+
+    $scope.accounts = {};
+    AppIncognitoStateManager.getAccountsList().then(function (data) {
+      $scope.sessionsLoaded = true
+      $scope.accounts = data;
     })
   })
 

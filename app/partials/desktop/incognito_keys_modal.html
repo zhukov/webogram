@@ -1,0 +1,33 @@
+<div class="settings_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$close()">Back</a>
+      </div>
+      <div class="md_modal_title">Incognito Keys</div>
+    </div>
+  </div>
+
+  <div my-keychains-list class="md_modal_body md_incognito_modal_column_align_center">
+    <div class="md_incognito_header_3" style="margin-top: 25px">Your keychains</div>
+    <div class="keychains_wrap nano" my-infinite-scroller>
+      <ul class="full_width md_incognito_keys_list nano-content">
+        <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
+            ng-repeat="account in accounts">
+        <span class="md_incognito_modal_row_align_center clickable">
+          <img src="../../../app/img/incognito/horizontal_dots.png" alt="More" title="More"/>
+          <span>{{ account.name }}</span>
+        </span>
+          <img src="../../../app/img/incognito/trash.png" alt="Remove" title="Remove" class="clickable"/>
+        </li>
+      </ul>
+    </div>
+
+    <div class="full_width md_incognito_modal_column_align_start clickable" style="margin-left: 130px; margin-bottom: 30px">
+      <span class="md_incognito_header_3">Import</span>
+      <span class="md_incognito_small">Import an existing keychain</span>
+    </div>
+  </div>
+
+</div>
