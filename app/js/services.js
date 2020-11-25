@@ -1123,7 +1123,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (userFull.bot_info) {
           userFull.bot_info = saveBotInfo(userFull.bot_info)
         }
-
+        console.log(userFull);
         return userFull
       })
     }
@@ -1382,7 +1382,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var setKeys = {}
       setKeys['pinned_hidden' + id] = AppMessagesIDsManager.getMessageLocalID(pinnedMessageID)
       Storage.set(setKeys)
-      $rootScope.$broadcast('peer_pinned_message', -id)      
+      $rootScope.$broadcast('peer_pinned_message', -id)
     }
 
     $rootScope.$on('apiUpdate', function (e, update) {
@@ -3903,7 +3903,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         })
       }
     })
-    
+
 
     return {
       start: start,
@@ -4922,7 +4922,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         if (target &&
             target.tagName == 'A') {
           var href = $(target).attr('href') || target.href || ''
-          if (Config.Modes.chrome_packed && 
+          if (Config.Modes.chrome_packed &&
               href.length &&
               $(target).attr('target') == '_blank') {
             $(target).attr('rel', '')

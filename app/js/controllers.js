@@ -454,7 +454,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start()
   })
 
-  .controller('AppIMController', function ($q, qSync, $scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
+  .controller('AppIMController', function ($q, qSync, $scope, $location, $routeParams, $modal, $rootScope, $modalStack, MtpApiManager, AppUsersManager, InAPIManager, AppChatsManager, AppMessagesManager, AppPeersManager, ContactsSelectService, ChangelogNotifyService, ErrorService, AppRuntimeManager, HttpsMigrateService, LayoutSwitchService, LocationParamsService, AppStickersManager) {
     $scope.$on('$routeUpdate', updateCurDialog)
 
     var pendingParams = false
@@ -529,6 +529,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       })
     }
 
+    $scope.openIncognitoDialog = function () {
+      $modal.open({
+        templateUrl: templateUrl('incognito_modal'),
+        controller: 'IncognitoModalController',
+        windowClass: 'settings_modal_window mobile_modal',
+        backdrop: 'single'
+      })
+    }
+
     $scope.isHistoryPeerGroup = function () {
       return $scope.historyPeer.id < 0 && !AppPeersManager.isBroadcast($scope.historyPeer.id)
     }
@@ -568,7 +577,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.openGroup = function () {
       ContactsSelectService.selectContacts({action: 'new_group'}).then(function (userIDs) {
-        if (userIDs && 
+        if (userIDs &&
             userIDs.length) {
           var scope = $rootScope.$new()
           scope.userIDs = userIDs
@@ -1994,7 +2003,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               },
               showCloseButton: false
             })
-          } else {            
+          } else {
             $rootScope.$broadcast('history_focus', {
               peerString: peerStrings,
               attachment: {
@@ -2002,7 +2011,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
                 id: selectedMessageIDs
               }
             })
-          }    
+          }
         })
       }
     }
@@ -4556,6 +4565,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       LayoutSwitchService.switchLayout(false)
     }
   })
+  .controller('IncognitoModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+
+    $scope.accounts = {};
+    $scope.currentAccount = "Anon";
+
+    InAPIManager.getAccountData().then(function (data) {
+      $scope.accounts = data.accounts;
+      console.log($scope.accounts);
+    })
+  })
 
   .controller('ChangelogModalController', function ($scope, $modal) {
     $scope.currentVersion = Config.App.version
@@ -5062,8 +5081,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.dialogMultiSelect = function(peerString, event) {
-      var peerID = AppPeersManager.getPeerID(peerString)      
-      $scope.multiSelect = $scope.selectedPeers[peerID] == undefined || 
+      var peerID = AppPeersManager.getPeerID(peerString)
+      $scope.multiSelect = $scope.selectedPeers[peerID] == undefined ||
         $scope.selectedPeers[peerID] != undefined && Object.keys($scope.selectedPeers).length > 1
       if ($scope.selectedPeers[peerID]) {
         delete $scope.selectedPeers[peerID]
