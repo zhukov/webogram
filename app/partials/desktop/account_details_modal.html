@@ -1,0 +1,93 @@
+<div class="sessions_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()"
+           my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title">{{ accountInfo.name }}'s keys</div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <div class="sessions_modal_col" style="height: 310px">
+
+      <div class="sessions_scrollable_wrap nano-content" ng-switch="!sessionsLoaded">
+
+        <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.2"
+             padding="true" my-i18n="sessions_modal_loading">
+          <my-i18n-param name="dots">
+            <span my-loading-dots></span>
+          </my-i18n-param>
+        </div>
+        <ul class="full_width nano-content" style="padding: 10px 25px">
+          <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between">
+            <div class="md_incognito_modal_row_align_center clickable full_width" my-copy-text data-clipboard-text="{{accountInfo.address}}">
+              <div class="md_incognito_modal_column_align_center">
+                <div class="md_incognito_icons_copy" ></div>
+              </div>
+              <div class="md_incognito_list_item clickable">
+                <div class="sessions_modal_session_app">Your incognito address</div>
+                <div class="sessions_modal_session_location"
+                     ng-bind="accountInfo.address"></div>
+              </div>
+            </div>
+          </li>
+          <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between">
+            <div class="md_incognito_modal_row_align_center clickable full_width" my-copy-text data-clipboard-text="{{accountInfo.keys.privateKey}}">
+              <div class="md_incognito_modal_column_align_center">
+                <div class="md_incognito_icons_copy"></div>
+              </div>
+              <div class="md_incognito_list_item clickable">
+                <div class="sessions_modal_session_app">Private key</div>
+                <div class="sessions_modal_session_location"
+                     ng-bind="accountInfo.keys.privateKey"></div>
+              </div>
+            </div>
+          </li>
+          <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between">
+            <div class="md_incognito_modal_row_align_center clickable full_width" my-copy-text data-clipboard-text="{{accountInfo.keys.publicKey}}">
+              <div class="md_incognito_modal_column_align_center">
+                <div class="md_incognito_icons_copy"></div>
+              </div>
+              <div class="md_incognito_list_item clickable">
+                <div class="sessions_modal_session_app">Public key</div>
+                <div class="sessions_modal_session_location"
+                     ng-bind="accountInfo.keys.publicKey"></div>
+              </div>
+            </div>
+          </li>
+          <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between">
+            <div class="md_incognito_modal_row_align_center clickable full_width" my-copy-text data-clipboard-text="{{accountInfo.keys.readOnlyKey}}">
+              <div class="md_incognito_modal_column_align_center">
+                <div class="md_incognito_icons_copy"></div>
+              </div>
+              <div class="md_incognito_list_item clickable">
+                <div class="sessions_modal_session_app">Readonly key</div>
+                <div class="sessions_modal_session_location"
+                     ng-bind="accountInfo.keys.readOnlyKey"></div>
+              </div>
+            </div>
+          </li>
+          <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between">
+            <div class="md_incognito_modal_row_align_center clickable full_width" my-copy-text data-clipboard-text="{{accountInfo.keys.validatorKey}}">
+              <div class="md_incognito_modal_column_align_center">
+                <div class="md_incognito_icons_copy"></div>
+              </div>
+              <div class="md_incognito_list_item clickable">
+                <div class="sessions_modal_session_app">Validator key</div>
+                <div class="sessions_modal_session_location"
+                     ng-bind="accountInfo.keys.validatorKey"></div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

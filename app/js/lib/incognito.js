@@ -17,10 +17,12 @@ angular.module('incognito', [])
         Anon: {
           balance: 0,
           address: "12S3CcAtftrYJn1woQVUx94RdcTTRXoSyFM76wjyTesf6AvhMPw94u16TUJCdubsQMuu7J9L4pzukxY1DxqVFv91Y72b3LoDgRKKknJ",
-          privateKey: "112t8rnXB9Tej38VBMAYMQGZz1KUaKYbhqDQpdBwga2aGF92GNULFW8buLFidMvxZJvQvDVyfZCU8T8KJ6vb7sRDCbJg81QeoJJC3EgLuvfT",
-          publicKey: "12WHkqsGtbZ66xS8iawqruhN7DyHv6jgBAmEb9PiyrAsiehei4E",
-          readOnlyKey: "13henmYoRgvwKVgRRUfqnq3MZLVedYny5TYvMvQZYbzu1Ys6Y8MBEaE4GmyJwQnZQ5j1fHTbSLMrFz2vV7TcRUvNphk8ZY6vWnDbCT6",
-          validatorKey: "1kitnhgpfRyg8VHLWxb2jrirYm1gnM1sr8AK9fc2zoHJd8vPYm",
+          keys: {
+            privateKey: "112t8rnXB9Tej38VBMAYMQGZz1KUaKYbhqDQpdBwga2aGF92GNULFW8buLFidMvxZJvQvDVyfZCU8T8KJ6vb7sRDCbJg81QeoJJC3EgLuvfT",
+            publicKey: "12WHkqsGtbZ66xS8iawqruhN7DyHv6jgBAmEb9PiyrAsiehei4E",
+            readOnlyKey: "13henmYoRgvwKVgRRUfqnq3MZLVedYny5TYvMvQZYbzu1Ys6Y8MBEaE4GmyJwQnZQ5j1fHTbSLMrFz2vV7TcRUvNphk8ZY6vWnDbCT6",
+            validatorKey: "1kitnhgpfRyg8VHLWxb2jrirYm1gnM1sr8AK9fc2zoHJd8vPYm",
+          },
           wallets: [
             {
               name: "Privacy",
@@ -61,10 +63,12 @@ angular.module('incognito', [])
         pDEX: {
           balance: 2,
           address: "12S1JXdHZFTGon2C1sZCE59noGRA6rL6qoo9Rf6fberdni2ezwstj9HLCzPPqy3ojUkk8PGMADhyR7tWDewLZmKGW6vK7RF8ZjVAJyF",
-          privateKey: "112t8rnXB9Tej38VBMAYMQGZz1KUaKYbhqDQpdBwga2aGF92GNULFW8buLFidMvxZJvQvDVyfZCU8T8KJ6vb7sRDCbJg81QeoJJC3EgLuvfT",
-          publicKey: "12WHkqsGtbZ66xS8iawqruhN7DyHv6jgBAmEb9PiyrAsiehei4E",
-          readOnlyKey: "13henmYoRgvwKVgRRUfqnq3MZLVedYny5TYvMvQZYbzu1Ys6Y8MBEaE4GmyJwQnZQ5j1fHTbSLMrFz2vV7TcRUvNphk8ZY6vWnDbCT6",
-          validatorKey: "1kitnhgpfRyg8VHLWxb2jrirYm1gnM1sr8AK9fc2zoHJd8vPYm",
+          keys: {
+            privateKey: "112t8rnXB9Tej38VBMAYMQGZz1KUaKYbhqDQpdBwga2aGF92GNULFW8buLFidMvxZJvQvDVyfZCU8T8KJ6vb7sRDCbJg81QeoJJC3EgLuvfT",
+            publicKey: "12WHkqsGtbZ66xS8iawqruhN7DyHv6jgBAmEb9PiyrAsiehei4E",
+            readOnlyKey: "13henmYoRgvwKVgRRUfqnq3MZLVedYny5TYvMvQZYbzu1Ys6Y8MBEaE4GmyJwQnZQ5j1fHTbSLMrFz2vV7TcRUvNphk8ZY6vWnDbCT6",
+            validatorKey: "1kitnhgpfRyg8VHLWxb2jrirYm1gnM1sr8AK9fc2zoHJd8vPYm",
+          },
           wallets: [
             {
               name: "Privacy",
@@ -84,10 +88,12 @@ angular.module('incognito', [])
         pDEXWithdraw: {
           balance: 4.3,
           address: "12RuZPdB1jvroAnqwpZweSW4QJbTEi34x58TP8CnEpCjHV5wrHaTdPPRieYtBe7ZUn6F37nv7scPf4hNLJ3XbrsyywgMWiufEAedJmf",
-          privateKey: "122t8rnXB9Tej38VBMAYMQGZz1KUaKYbhqDQpdBwga2aGF92GNULFW8buLFidMvxZJvQvDVyfZCU8T8KJ6vb7sRDCbJg81QeoJJC3EgLuvfT",
-          publicKey: "13WHkqsGtbZ66xS8iawqruhN7DyHv6jgBAmEb9PiyrAsiehei4E",
-          readOnlyKey: "14henmYoRgvwKVgRRUfqnq3MZLVedYny5TYvMvQZYbzu1Ys6Y8MBEaE4GmyJwQnZQ5j1fHTbSLMrFz2vV7TcRUvNphk8ZY6vWnDbCT6",
-          validatorKey: "13itnhgpfRyg8VHLWxb2jrirYm1gnM1sr8AK9fc2zoHJd8vPYm",
+          keys: {
+            privateKey: "112t8rnXB9Tej38VBMAYMQGZz1KUaKYbhqDQpdBwga2aGF92GNULFW8buLFidMvxZJvQvDVyfZCU8T8KJ6vb7sRDCbJg81QeoJJC3EgLuvfT",
+            publicKey: "12WHkqsGtbZ66xS8iawqruhN7DyHv6jgBAmEb9PiyrAsiehei4E",
+            readOnlyKey: "13henmYoRgvwKVgRRUfqnq3MZLVedYny5TYvMvQZYbzu1Ys6Y8MBEaE4GmyJwQnZQ5j1fHTbSLMrFz2vV7TcRUvNphk8ZY6vWnDbCT6",
+            validatorKey: "1kitnhgpfRyg8VHLWxb2jrirYm1gnM1sr8AK9fc2zoHJd8vPYm",
+          },
           wallets: [
             {
               name: "Privacy",

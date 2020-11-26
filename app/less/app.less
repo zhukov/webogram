@@ -5350,10 +5350,6 @@ a.countries_modal_search_clear {
         display: flex;
         justify-content: space-between;
         margin-bottom: 30px;
-
-        & span img {
-          margin-right: 25px;
-        }
       }
 
     }
@@ -5380,6 +5376,11 @@ a.countries_modal_search_clear {
 
     & > li > span > span:first-child {
       margin-right: 5px;
+    }
+
+    &_item {
+      overflow: hidden;
+      margin: 8px 0 8px 24px
     }
   }
 
@@ -5491,6 +5492,27 @@ a.countries_modal_search_clear {
         min-width: 16px;
         height: 16px;
         .image-2x('../img/incognito/verified.png', 16px, 16px);
+      }
+
+      &_option {
+
+        &_horizontal {
+          min-width: 16px;
+          height: 16px;
+          .image-2x('../img/incognito/horizontal_dots.png', 16px, 16px);
+          margin-right: 25px;
+        }
+      }
+      &_trash {
+        width: 22px;
+        height: 26px;
+        .image-2x('../img/incognito/trash.png', 22px, 26x);
+      }
+
+      &_copy {
+        width: 20px;
+        height: 20px;
+        .image-2x('../img/incognito/copy_icon.png', 20px, 20x);
       }
     }
   }
