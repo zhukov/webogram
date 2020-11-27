@@ -3985,7 +3985,57 @@ angular.module('myApp.directives', ['myApp.filters'])
       })
     }
   })
+  .directive('myCopyText', function ($compile, $timeout, _) {
+    return {
+      restrict: 'A',
+      replace: false,
+      terminal: true,
+      priority: 1000,
+      link: link
+    }
 
+    function link ($scope, element, attrs) {
+      element.attr('tooltip', '{{ttLabel}}')
+      element.removeAttr('my-copy-text')
+      element.removeAttr('data-my-copy-text')
+
+      var resetPromise = false
+      var resetTooltip = function () {
+        $timeout.cancel(resetPromise)
+        resetPromise = false
+        $scope.ttLabel = 'Click to copy!'
+      }
+
+      resetTooltip()
+
+      $compile(element)($scope)
+
+      var clipboard = new Clipboard(element[0])
+
+      clipboard.on('success', function (e) {
+        $timeout.cancel(resetPromise)
+        $scope.$apply(function () {
+          $scope.ttLabel = 'Copied'
+        })
+        resetPromise = $timeout(resetTooltip, 2000)
+      })
+
+      clipboard.on('error', function (e) {
+        $timeout.cancel(resetPromise)
+        var langKey = Config.Navigator.osX
+          ? 'clipboard_press_cmd_c'
+          : 'clipboard_press_ctrl_c'
+        $scope.$apply(function () {
+          $scope.ttLabel = _(langKey + '_raw')
+        })
+        resetPromise = $timeout(resetTooltip, 5000)
+      })
+
+      $scope.$on('$destroy', function () {
+        clipboard.destroy()
+      })
+    }
+  })
   .directive('mySubmitOnEnter', function () {
     return {
       link: link

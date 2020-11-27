@@ -4824,8 +4824,29 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.sessionsLoaded = true
       $scope.accounts = data;
     })
-  })
 
+    $scope.showDetails = function (accountName) {
+      var scope = $rootScope.$new();
+      scope.accountName = accountName;
+
+      $modal.open({
+        templateUrl: templateUrl('account_details_modal'),
+        controller: 'AccountModalController',
+        windowClass: 'md_simple_modal_window mobile_modal',
+        scope: scope
+      })
+    }
+  })
+  .controller('AccountModalController', function ($scope, $q, $timeout, _, AppIncognitoStateManager ) {
+
+
+    $scope.accountInfo = {};
+    AppIncognitoStateManager.getAccountInfo($scope.$parent.accountName).then(function (data) {
+      $scope.sessionsLoaded = true
+      $scope.accountInfo = data;
+    })
+
+  })
   .controller('AccountsListModalController', function ($scope, $q, $timeout, _, AppIncognitoStateManager ) {
 
     $scope.accounts = {};
