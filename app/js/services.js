@@ -534,6 +534,13 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         });
       }
 
+      function importAccount(name, privateKey) {
+        return InAPIManager.importAccount(name, privateKey).then(function(data) {
+          return InAPIManager.getAccounts().then(function(data) {
+            accountsList = data.accounts;
+          })
+        });
+      }
       function getAccountInfo(account) {
 
         if (!account && !angular.equals(currentAccountInfo, {})) {
@@ -558,11 +565,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           return currentAccountInfo;
         })
       }
-
       return {
         getAccountsList: getAccountsList,
         getAccountInfo: getAccountInfo,
-        selectAccount: selectAccount
+        selectAccount: selectAccount,
+        importAccount: importAccount
       }
     })
 

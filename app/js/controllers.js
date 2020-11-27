@@ -4836,7 +4836,42 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         scope: scope
       })
     }
+    $scope.importKeyChain = function () {
+      $modal.open({
+        templateUrl: templateUrl('import_key_chair_modal'),
+        controller: 'ImportKeyChairModalController',
+        windowClass: 'md_simple_modal_window mobile_modal'
+      })
+    }
+    $rootScope.$on('incognitoAPIUpdate', function(event, update){
+      console.log(update);
+      switch (update) {
+        case 'importedAccount':
+          AppIncognitoStateManager.getAccountsList().then(function (data) {
+            console.log("Update:", data);
+            $scope.sessionsLoaded = true
+            $scope.accounts = data;
+          })
+          break;
+      }
+    })
   })
+
+  .controller('ImportKeyChairModalController', function ($rootScope, $scope, AppIncognitoStateManager) {
+    $scope.keyChair = {};
+
+    $scope.importKeyChain = function() {
+      $scope.isLoading = true;
+      AppIncognitoStateManager.importAccount($scope.keyChair.name, $scope.keyChair.privateKey).then(function (data) {
+        $rootScope.$broadcast('incognitoAPIUpdate', 'importedAccount');
+        console.log("Successfully imported")
+        $scope.isLoading = false;
+        $scope.$close();
+      })
+
+    }
+  })
+
   .controller('AccountModalController', function ($scope, $q, $timeout, _, AppIncognitoStateManager ) {
 
 

@@ -1,0 +1,28 @@
+<div class="md_simple_modal_wrap" my-modal-position>
+
+  <div class="md_simple_modal_body">
+
+    <form class="modal_simple_form" ng-submit="importKeyChain()">
+
+      <h4>Import keychain</h4>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label">Keychain name</label>
+        <input class="md-input" my-focused type="text" ng-model="keyChair.name" />
+      </div>
+
+      <div class="md-input-group" my-labeled-input>
+        <label class="md-input-label">Private Key</label>
+        <input class="md-input" type="text" ng-model="keyChair.privateKey" />
+      </div>
+
+    </form>
+
+  </div>
+
+  <div class="md_simple_modal_footer">
+    <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+    <button class="btn btn-md btn-md-primary" ng-class="{disabled: isLoading}" ng-click="importKeyChain()" ng-bind="isLoading ? 'profile_edit_submit_active' : 'profile_edit_submit' | i18n" ng-disabled="isLoading"></button>
+  </div>
+
+</div>
