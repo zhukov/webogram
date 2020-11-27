@@ -180,7 +180,6 @@ angular.module('incognito', [])
           });
 
         }
-        console.log(list);
         return list;
       },
       importAccount: function(name, privateKey) {
@@ -190,6 +189,9 @@ angular.module('incognito', [])
         this.storage[name] = this.example;
         this.storage[name].keys.privateKey = privateKey;
         return this.storage[name];
+      },
+      deleteAccount: function(name){
+        delete this.storage[name];
       }
     }
 
@@ -212,7 +214,6 @@ angular.module('incognito', [])
         function(result) {
           try {
             // var deserializer = new TLDeserialization(result.data);
-            console.log(result)
             return result.data
           }
           catch (e) {
@@ -291,10 +292,31 @@ angular.module('incognito', [])
         }
       )
     }
+    function deleteAccount(name) {
+      // var url = InAPIConfigurator.chooseServer();
+      try {
+        // requestPromise = $http.get(url);
+        var requestPromise = new Promise(function(resolve, reject) {
+          api.deleteAccount(name);
+          resolve();
+        });
+      }
+      catch (e) {
+        console.log(e)
+      }
+      return requestPromise.then(
+        function(result) {},
+        function(error) {
+          console.log(error);
+          return $q.reject(error)
+        }
+      )
+    }
 
     return {
       getAccountInfo: getAccountInfo,
       getAccounts: getAccounts,
-      importAccount: importAccount
+      importAccount: importAccount,
+      deleteAccount: deleteAccount
     }
   })
