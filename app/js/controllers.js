@@ -4798,7 +4798,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         windowClass: 'md_simple_modal_window mobile_modal'
       })
     }
-
     $scope.showKeys = function () {
       $modal.open({
         templateUrl: templateUrl('incognito_keys_modal'),
@@ -4836,7 +4835,52 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         scope: scope
       })
     }
+    $scope.deleteAccount = function (account){
+      if($scope.accounts.length === 1){
+        ErrorService.alert('Impossible action', 'You cannot delete the last account');
+        return;
+      }
+      ErrorService.confirm({type: 'DELETE_KEY_CHAIRS'}).then(function () {
+        AppIncognitoStateManager.deleteAccount(account).then(function (data) {
+          $scope.sessionsLoaded = true
+          $scope.accounts = data;
+        })
+      })
+    }
+
+    $scope.importKeyChain = function () {
+      $modal.open({
+        templateUrl: templateUrl('import_key_chair_modal'),
+        controller: 'ImportKeyChairModalController',
+        windowClass: 'md_simple_modal_window mobile_modal'
+      })
+    }
+    $rootScope.$on('incognitoAPIUpdate', function(event, update){
+      switch (update) {
+        case 'importedAccount':
+          AppIncognitoStateManager.getAccountsList().then(function (data) {
+            $scope.sessionsLoaded = true
+            $scope.accounts = data;
+          })
+          break;
+      }
+    })
   })
+
+  .controller('ImportKeyChairModalController', function ($rootScope, $scope, AppIncognitoStateManager) {
+    $scope.keyChair = {};
+
+    $scope.importKeyChain = function() {
+      $scope.isLoading = true;
+      AppIncognitoStateManager.importAccount($scope.keyChair.name, $scope.keyChair.privateKey).then(function (data) {
+        $rootScope.$broadcast('incognitoAPIUpdate', 'importedAccount');
+        $scope.isLoading = false;
+        $scope.$close();
+      })
+
+    }
+  })
+
   .controller('AccountModalController', function ($scope, $q, $timeout, _, AppIncognitoStateManager ) {
 
 
