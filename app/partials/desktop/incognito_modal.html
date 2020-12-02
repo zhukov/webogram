@@ -22,33 +22,41 @@
 
 
   <div class="md_modal_split_actions_wrap">
-    <span ng-click="showAccounts()" class="md_incognito_modal_label clickable">{{ account.name }}</span>
+    <span ng-if="accountLoaded" ng-click="showAccounts()"
+          class="md_incognito_modal_label clickable">{{ account.name }}</span>
   </div>
 
   <div class="md_modal_body" style="padding-bottom: 50px">
-    <div class="md_modal_sections clearfix">
-      <div class="md_incognito_modal_column_align_center">
-        <div class="md_incognito_header_1">
-          {{ account.balance }}
-        </div>
-        <div class="md_incognito_small">Balance</div>
-        <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
+    <div ng-switch="!accountLoaded">
+      <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.1" padding="true" my-i18n="sessions_modal_loading">
+        <my-i18n-param name="dots">
+          <span my-loading-dots></span>
+        </my-i18n-param>
       </div>
-    </div>
-    <ul class="full_width md_incognito_list clearfix" style="height: 280px">
-      <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
-          ng-repeat="wallet in account.wallets">
+      <div ng-switch-when="false" class="md_modal_sections clearfix" style="padding-top: 25px">
+        <div class="md_incognito_modal_column_align_center">
+          <div class="md_incognito_header_1">
+            {{ account.balance }}
+          </div>
+          <div class="md_incognito_small">Balance</div>
+          <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
+        </div>
+      </div>
+      <ul g-switch-when="false" class="full_width md_incognito_list clearfix" style="height: 280px">
+        <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
+            ng-repeat="wallet in account.followingTokens">
         <span class="md_incognito_modal_row_align_center">
           <span>{{ wallet.name }}</span>
           <span ng-if="wallet.verified"
                 class="md_incognito_icon md_incognito_icons_verified"></span>
         </span>
-        <span class="md_incognito_modal_row_align_center">
+          <span class="md_incognito_modal_row_align_center">
           <span>{{ wallet.balance }} </span>
           <span>{{ wallet.symbol }}</span>
         </span>
-      </li>
-    </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 
 </div>

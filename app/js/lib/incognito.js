@@ -3,7 +3,7 @@ angular.module('incognito', [])
   .factory('InAPIConfigurator', function() {
     return {
       chooseServer: function() {
-        return ('http://localhost:8080')
+        return ('http://localhost:1823/api/v1')
       }
     }
   })
@@ -183,16 +183,42 @@ angular.module('incognito', [])
         return list;
       },
       importAccount: function(name, privateKey) {
-        if(this.storage[name]){
+        if (this.storage[name]) {
           return undefined;
         }
         this.storage[name] = this.example;
         this.storage[name].keys.privateKey = privateKey;
         return this.storage[name];
       },
-      deleteAccount: function(name){
+      deleteAccount: function(name) {
         delete this.storage[name];
       }
+    }
+
+    function authenticateUser(userId = 'v12345', name = "someName") {
+      var url = InAPIConfigurator.chooseServer();
+      try {
+        var requestPromise = $http.post(`${url}/account`,
+          { id: userId, name },
+          { headers: { 'Content-Type': 'application/json' } });
+      }
+      catch (e) {
+        console.log(e)
+      }
+      return requestPromise.then(
+        function(result) {
+          try {
+            return result.data
+          }
+          catch (e) {
+            console.log(e)
+          }
+        },
+        function(error) {
+          console.log(error);
+          return $q.reject(error)
+        }
+      )
     }
 
     function getAccountInfo(account) {
@@ -226,6 +252,7 @@ angular.module('incognito', [])
         }
       )
     }
+
     function getAccounts() {
       // var url = InAPIConfigurator.chooseServer();
       try {
@@ -259,6 +286,7 @@ angular.module('incognito', [])
         }
       )
     }
+
     function importAccount(name, privateKey) {
       // var url = InAPIConfigurator.chooseServer();
       try {
@@ -292,6 +320,7 @@ angular.module('incognito', [])
         }
       )
     }
+
     function deleteAccount(name) {
       // var url = InAPIConfigurator.chooseServer();
       try {
@@ -305,7 +334,8 @@ angular.module('incognito', [])
         console.log(e)
       }
       return requestPromise.then(
-        function(result) {},
+        function(result) {
+        },
         function(error) {
           console.log(error);
           return $q.reject(error)
@@ -314,6 +344,7 @@ angular.module('incognito', [])
     }
 
     return {
+      authUser: authenticateUser,
       getAccountInfo: getAccountInfo,
       getAccounts: getAccounts,
       importAccount: importAccount,

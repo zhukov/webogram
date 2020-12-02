@@ -517,10 +517,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
     })
 
   .service('AppIncognitoStateManager',
-    function($rootScope, $modal, $modalStack, $filter, $q, qSync, MtpApiManager, InAPIManager, ServerTimeManager, Storage, _) {
+    function($rootScope, $modal, $modalStack, $filter, $q, qSync, AppUsersManager, InAPIManager, ServerTimeManager, Storage, _) {
       var accountsList = [];
       var currentAccountInfo = {};
-
+      var isLoggedIn = false;
 
       function getAccountsList() {
         if(accountsList.length === 0){
@@ -533,7 +533,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           resolve(accountsList);
         });
       }
-
       function importAccount(name, privateKey) {
         return InAPIManager.importAccount(name, privateKey).then(function(data) {
           return InAPIManager.getAccounts().then(function(data) {
@@ -577,7 +576,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           return currentAccountInfo;
         })
       }
+      function authUser() {
+        if(isLoggedIn) return new Promise(function(resolve, reject) {
+          resolve(currentAccountInfo)
+        })
+        var user = AppUsersManager.getSelf();
+        return InAPIManager.authUser(user.id, user.username).then(function(data){
+          accountsList = data.accountsList;
+          currentAccountInfo = data.accountInfo;
+          isLoggedIn = true;
+          return currentAccountInfo;
+        })
+      }
       return {
+        authUser: authUser,
         getAccountsList: getAccountsList,
         getAccountInfo: getAccountInfo,
         selectAccount: selectAccount,
