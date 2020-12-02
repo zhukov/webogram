@@ -4787,8 +4787,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.account = {};
 
-    AppIncognitoStateManager.getAccountInfo().then(function(data){
+    AppIncognitoStateManager.authUser().then(function(data){
       $scope.account = data;
+      $scope.accountLoaded = true;
     });
 
     $scope.showAccounts = function () {
@@ -4840,12 +4841,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         ErrorService.alert('Impossible action', 'You cannot delete the last account');
         return;
       }
-      ErrorService.confirm({type: 'DELETE_KEY_CHAIRS'}).then(function () {
-        AppIncognitoStateManager.deleteAccount(account).then(function (data) {
-          $scope.sessionsLoaded = true
-          $scope.accounts = data;
-        })
-      })
+      // ErrorService.confirm({type: 'DELETE_KEY_CHAIRS'}).then(function () {
+      //   AppIncognitoStateManager.deleteAccount(account).then(function (data) {
+      //     $scope.sessionsLoaded = true
+      //     $scope.accounts = data;
+      //   })
+      // })
     }
 
     $scope.importKeyChain = function () {
@@ -4858,10 +4859,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $rootScope.$on('incognitoAPIUpdate', function(event, update){
       switch (update) {
         case 'importedAccount':
-          AppIncognitoStateManager.getAccountsList().then(function (data) {
-            $scope.sessionsLoaded = true
-            $scope.accounts = data;
-          })
+          // AppIncognitoStateManager.getAccountsList().then(function (data) {
+          //   $scope.sessionsLoaded = true
+          //   $scope.accounts = data;
+          // })
           break;
       }
     })
@@ -4872,11 +4873,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.importKeyChain = function() {
       $scope.isLoading = true;
-      AppIncognitoStateManager.importAccount($scope.keyChair.name, $scope.keyChair.privateKey).then(function (data) {
-        $rootScope.$broadcast('incognitoAPIUpdate', 'importedAccount');
-        $scope.isLoading = false;
-        $scope.$close();
-      })
+      // AppIncognitoStateManager.importAccount($scope.keyChair.name, $scope.keyChair.privateKey).then(function (data) {
+      //   $rootScope.$broadcast('incognitoAPIUpdate', 'importedAccount');
+      //   $scope.isLoading = false;
+      //   $scope.$close();
+      // })
 
     }
   })
