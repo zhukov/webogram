@@ -18,10 +18,15 @@ Config = window.Config || {}
 */
 
 Config.App = {
-  id: 2496,
-  hash: '8da85b0d5bfe62527e5b244c209159c3',
+  id: 2748640,
+  hash: '83a653dd404fdc2a2cd71d6f8491c85f',
   version: '0.7.0',
   domains: ['web.telegram.org', 'zhukov.github.io']
+}
+
+Config.Incognito = {
+  serverUrl: 'http://localhost:1823',
+  basePath: 'api/v1'
 }
 
 Config.Modes = {

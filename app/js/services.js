@@ -523,78 +523,90 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var isLoggedIn = false;
 
       function getAccountsList() {
-        if(accountsList.length === 0){
-          return InAPIManager.getAccounts().then(function(data) {
-            accountsList = data.accounts;
-            return accountsList;
-          })
-        }
-        return new Promise(function(resolve, reject) {
-          resolve(accountsList);
-        });
+        if (!angular.isArray(accountsList))
+          accountsList = [];
+        return accountsList;
       }
+
       function importAccount(name, privateKey) {
-        return InAPIManager.importAccount(name, privateKey).then(function(data) {
-          return InAPIManager.getAccounts().then(function(data) {
-            accountsList = data.accounts;
-          })
+        var userId = AppUsersManager.getSelf().id;
+        return InAPIManager.importAccount(userId, name, privateKey).then(function(data) {
+          accountsList = data.accountsList;
         });
       }
+
       function deleteAccount(name) {
-        return InAPIManager.deleteAccount(name).then(function() {
-          return InAPIManager.getAccounts().then(function(data) {
-            accountsList = data.accounts;
-            if (currentAccountInfo.name === name && accountsList.length > 0){
-              selectAccount(accountsList[0].name).then();
-            }
-            return accountsList;
-          })
-
+        var user = AppUsersManager.getSelf();
+        return InAPIManager.deleteAccount(user.id, name).then(function(data) {
+          accountsList = data.accountsList;
+          if (currentAccountInfo.name === name && accountsList.length > 0) {
+            selectAccount(accountsList[0].name).then();
+          }
+          return accountsList;
         });
       }
-      function getAccountInfo(account) {
 
+      function getAccountInfo(account) {
         if (!account && !angular.equals(currentAccountInfo, {})) {
           return new Promise(function(resolve, reject) {
             resolve(currentAccountInfo);
           });
         }
+        var userId = AppUsersManager.getSelf().id;
         if (!account && angular.equals(currentAccountInfo, {})) {
-          return InAPIManager.getAccountInfo('Anon').then(function(data) {
-            currentAccountInfo = data.account;
+          var currentAccountName = accountsList[0].name;
+          return InAPIManager.getAccountInfo(userId, currentAccountName).then(function(data) {
+            currentAccountInfo = data.accountInfo;
             return currentAccountInfo;
           })
         }
-        return InAPIManager.getAccountInfo(account).then(function(data) {
-          return data.account;
+        return InAPIManager.getAccountInfo(userId, account).then(function(data) {
+          return data.accountInfo;
         });
       }
-      function selectAccount(account){
-        return InAPIManager.getAccountInfo(account).then(function(data) {
-          currentAccountInfo = data.account;
-          $rootScope.$broadcast('incognitoUpdate', 'accountsList')
+
+      function selectAccount(account) {
+        if (account === currentAccountInfo.name) {
+          return new Promise(function(resolve) {
+            resolve(currentAccountInfo);
+          })
+        }
+        var userId = AppUsersManager.getSelf().id;
+        return InAPIManager.getAccountInfo(userId, account).then(function(data) {
+          currentAccountInfo = data.accountInfo;
           return currentAccountInfo;
         })
       }
+
+      function createAccount(account) {
+        var userId = AppUsersManager.getSelf().id;
+        return InAPIManager.createAccount(userId, account).then(function(data) {
+          accountsList = data.accountsList;
+          return accountsList;
+        })
+      }
+
       function authUser() {
-        if(isLoggedIn) return new Promise(function(resolve, reject) {
+        if (isLoggedIn) return new Promise(function(resolve, reject) {
           resolve(currentAccountInfo)
         })
         var user = AppUsersManager.getSelf();
-        return InAPIManager.authUser(user.id, user.username).then(function(data){
+        return InAPIManager.authUser(user.id, user.username).then(function(data) {
           accountsList = data.accountsList;
           currentAccountInfo = data.accountInfo;
           isLoggedIn = true;
           return currentAccountInfo;
         })
       }
+
       return {
         authUser: authUser,
         getAccountsList: getAccountsList,
         getAccountInfo: getAccountInfo,
         selectAccount: selectAccount,
         importAccount: importAccount,
-        deleteAccount: deleteAccount
+        deleteAccount: deleteAccount,
+        createAccount: createAccount
       }
     })
 
@@ -4525,7 +4537,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       options = options || {}
-      var scope = $rootScope.$new()
+      var scope = $rootScope.$new();
       angular.extend(scope, params)
 
       shownBoxes++
