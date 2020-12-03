@@ -16,17 +16,17 @@
 
       <div class="sessions_scrollable_wrap nano-content" ng-switch="!sessionsLoaded">
 
-        <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.2"
+        <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.1"
              padding="true" my-i18n="sessions_modal_loading">
           <my-i18n-param name="dots">
             <span my-loading-dots></span>
           </my-i18n-param>
         </div>
-        <ul class="full_width nano-content" style="padding: 10px 25px">
+        <ul ng-switch-when="false" class="full_width nano-content" style="padding: 10px 25px">
           <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between">
             <div class="md_incognito_modal_row_align_center clickable full_width" my-copy-text data-clipboard-text="{{accountInfo.address}}">
               <div class="md_incognito_modal_column_align_center">
-                <div class="md_incognito_icons_copy" ></div>
+                <div class="md_incognito_icons_copy"></div>
               </div>
               <div class="md_incognito_list_item clickable">
                 <div class="sessions_modal_session_app">Your incognito address</div>
