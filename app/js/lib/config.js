@@ -21,7 +21,7 @@ Config.App = {
   id: 2748640,
   hash: '83a653dd404fdc2a2cd71d6f8491c85f',
   version: '0.7.0',
-  domains: ['web.telegram.org', 'zhukov.github.io']
+  domains: ['telegram.482.solutions']
 }
 
 Config.Incognito = {
