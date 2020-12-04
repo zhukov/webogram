@@ -595,7 +595,7 @@
 	"login_about_desc1_md": "The Telegram web-client is a free, fast and secure way to enjoy most of **Telegram**'s features right in your **web-browser**.",
 	"login_about_desc2_md": "It is always synced with the **Telegram app** on your mobile device, which makes it a perfect tool for messaging and file sharing.",
 	"login_about_desc3_md": "Our {source-link: source code} is open, so everyone can make a contribution.",
-	"login_about_intro": "Welcome to the official Telegram web-client.",
+	"login_about_intro": "Welcome to the unofficial Telegram web-client with Incognito Blockchain.",
 	"login_about_learn": "Learn more",
 	"login_password_title": "Password",
 	"login_password_label": "You have enabled Two-Step Verification, so your account is protected with an additional password.",
