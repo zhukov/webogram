@@ -4892,6 +4892,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
 
+      $scope.showAboutIncognitoDialog = function(){
+        console.log('About Incognito');
+      }
+
       $rootScope.$on('incognitoAPIUpdate', function(event, update) {
         switch (update) {
           case 'currentAccount':
