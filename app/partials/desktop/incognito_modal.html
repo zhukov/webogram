@@ -26,7 +26,7 @@
           class="md_incognito_modal_label clickable">{{ account.name }}</span>
   </div>
 
-  <div class="md_modal_body" style="padding-bottom: 50px">
+  <div class="md_modal_body">
     <div ng-switch="!accountLoaded">
       <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.1" padding="true" my-i18n="sessions_modal_loading">
         <my-i18n-param name="dots">
@@ -36,7 +36,7 @@
       <div ng-switch-when="false" class="md_modal_sections clearfix" style="padding-top: 25px">
         <div class="md_incognito_modal_column_align_center">
           <div class="md_incognito_header_1">
-            {{ account.balance }}
+            {{ account.balance/1e9 }}
           </div>
           <div class="md_incognito_small">Balance</div>
           <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
@@ -51,11 +51,14 @@
                 class="md_incognito_icon md_incognito_icons_verified"></span>
         </span>
           <span class="md_incognito_modal_row_align_center">
-          <span>{{ wallet.balance }} </span>
+          <span>{{ wallet.balance/1e9 }} </span>
           <span>{{ wallet.symbol }}</span>
         </span>
         </li>
       </ul>
+    </div>
+    <div class="clearfix" style="padding: 15px 28px 30px;">
+      <span ng-click="showAboutIncognitoDialog()" style="color: #3a6d99; cursor: pointer;">About Incognito</span>
     </div>
   </div>
 

@@ -4892,6 +4892,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
 
+      $scope.showAboutIncognitoDialog = function(){
+        var $scope = $rootScope.$new()
+
+        $modal.open({
+          templateUrl: templateUrl('incognito_about_modal'),
+          scope: $scope,
+          windowClass: 'changelog_modal_window mobile_modal'
+        })
+      }
+
       $rootScope.$on('incognitoAPIUpdate', function(event, update) {
         switch (update) {
           case 'currentAccount':
