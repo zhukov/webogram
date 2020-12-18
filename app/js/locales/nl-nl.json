@@ -517,7 +517,7 @@
     "im_voice_recording_cancel_label": "Loslaten om te annuleren",
     "im_voice_processing_label": "Verwerken{dots}",
     "login_sign_in": "Inloggen",
-    "login_enter_number_description": "Kies je land en voer je volledige telefoonnummer in.",
+    "login_enter_number_description_md": "Please choose your country and enter your full phone number.\n\nNote that you need an existing account to log in to Telegram Web. To sign up for Telegram, use one of our {apps-link: mobile apps}.",
     "login_incorrect_number": "Onjuist telefoonnummer",
     "login_code_input_placeholder": "Code",
     "login_tel_input_placeholder": "Telefoonnummer",
