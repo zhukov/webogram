@@ -28,7 +28,8 @@
 
   <div class="md_modal_body">
     <div ng-switch="!accountLoaded">
-      <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.1" padding="true" my-i18n="sessions_modal_loading">
+      <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.1"
+           padding="true" my-i18n="sessions_modal_loading">
         <my-i18n-param name="dots">
           <span my-loading-dots></span>
         </my-i18n-param>
@@ -36,23 +37,32 @@
       <div ng-switch-when="false" class="md_modal_sections clearfix" style="padding-top: 25px">
         <div class="md_incognito_modal_column_align_center">
           <div class="md_incognito_header_1">
-            {{ account.balance/1e9 }}
+            ${{ account.balance }}
           </div>
           <div class="md_incognito_small">Balance</div>
-          <button type="button" class="btn btn-primary md_incognito_button">Send my crypto</button>
+          <button type="button" class="btn btn-primary md_incognito_button"
+                  ng-click="showTransferModal()">Send my crypto
+          </button>
         </div>
       </div>
-      <ul g-switch-when="false" class="full_width md_incognito_list clearfix" style="height: 280px">
+      <ul ng-switch-when="false" class="full_width md_incognito_list clearfix"
+          style="height: 280px">
         <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
             ng-repeat="wallet in account.followingTokens">
-        <span class="md_incognito_modal_row_align_center">
+        <span class="md_incognito_modal_column_align_start">
+          <span class="md_incognito_modal_row_align_center">
           <span>{{ wallet.name }}</span>
           <span ng-if="wallet.verified"
                 class="md_incognito_icon md_incognito_icons_verified"></span>
+          </span>
+          <span>${{ wallet.PriceUsd }}</span>
         </span>
-          <span class="md_incognito_modal_row_align_center">
-          <span>{{ wallet.balance/1e9 }} </span>
-          <span>{{ wallet.symbol }}</span>
+        <span class="md_incognito_modal_column_align_end">
+          <span class="md_incognito_modal_row_align_center" style="margin: 0">
+            <span>{{ wallet.balance }}</span>
+            <span style="margin-left: 5px">{{ wallet.symbol }}</span>
+          </span>
+          <span>${{ wallet.PriceUsd * wallet.balance }}</span>
         </span>
         </li>
       </ul>

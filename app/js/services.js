@@ -528,6 +528,20 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return accountsList;
       }
 
+      function transfer(data) {
+        const transferData = {
+          amount: data.amount*1e9,
+          fee: data.fee(),
+          message: data.message
+        }
+        transferData.senderAccount = currentAccountInfo.name;
+        transferData.senderId = AppUsersManager.getSelf().id;
+        transferData.address = data.to.value;
+        return InAPIManager.transfer(transferData).then(function(data) {
+          return data;
+        });
+      }
+
       function importAccount(name, privateKey) {
         var userId = AppUsersManager.getSelf().id;
         return InAPIManager.importAccount(userId, name, privateKey).then(function(data) {
@@ -606,7 +620,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         selectAccount: selectAccount,
         importAccount: importAccount,
         deleteAccount: deleteAccount,
-        createAccount: createAccount
+        createAccount: createAccount,
+        transfer: transfer
       }
     })
 

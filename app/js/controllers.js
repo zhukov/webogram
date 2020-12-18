@@ -4870,9 +4870,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
 
       $scope.account = {};
+
+      function handleAccountData (data) {
+        var accountData = data;
+        var sum = 0;
+        accountData.followingTokens.map(function(wallet){
+          wallet.balance = toFixed(wallet.balance / Math.pow(10, wallet.decimals),6);
+          wallet.PriceUsd = toFixed(wallet.PriceUsd,4) || "0.000074944";
+          sum += wallet.balance * wallet.PriceUsd;
+        });
+        accountData.balance = toFixed(sum,4);
+        return accountData;
+      }
       AppIncognitoStateManager.authUser()
         .then(function(data) {
-          $scope.account = data;
+          $scope.account = handleAccountData(data);
           $scope.accountLoaded = true;
         })
 
@@ -4887,6 +4899,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $modal.open({
           templateUrl: templateUrl('incognito_keys_modal'),
           controller: 'IncognitoKeysModalController',
+          windowClass: 'settings_modal_window mobile_modal',
+          backdrop: 'single'
+        })
+      }
+      $scope.showTransferModal = function() {
+        $modal.open({
+          templateUrl: templateUrl('incognito_transfer_modal'),
+          controller: 'IncognitoTransferModalController',
           windowClass: 'settings_modal_window mobile_modal',
           backdrop: 'single'
         })
@@ -4906,7 +4926,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         switch (update) {
           case 'currentAccount':
             AppIncognitoStateManager.getAccountInfo().then(function(data) {
-              $scope.account = data;
+              $scope.account = handleAccountData(data);
             })
             break;
         }
@@ -4964,6 +4984,31 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             break;
         }
       })
+    })
+
+  .controller('IncognitoTransferModalController',
+    function($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+      $scope.isLoading = false;
+    $scope.transferData = {
+        amount: 0,
+        receiver: {
+          type: null,
+          value: null
+        },
+        fee: function() {
+          const fee = this.amount ? 0.0000001 : 0;
+          return Number(fee).toFixed(7);
+        },
+        message: null
+      }
+      $scope.transfer = function() {
+        $scope.isLoading = true;
+        AppIncognitoStateManager.transfer($scope.transferData).then(function(data){
+          ErrorService.alert( "Transfer was successful");
+          $scope.isLoading = false
+          $scope.$close();
+        });
+      }
     })
 
   .controller('KeyChairModalController', function($rootScope, $scope, AppIncognitoStateManager) {

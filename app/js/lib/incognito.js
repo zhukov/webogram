@@ -39,6 +39,19 @@ angular.module('incognito', [])
         )
       }
 
+      function transfer(transferData) {
+        return $http.post(url + "/transfer",
+          transferData).then(
+          function(result) {
+            return result.data;
+          },
+          function(error) {
+            errorHandler(error);
+            return $q.reject(error)
+          }
+        )
+      }
+
       function getAccountInfo(userId, account) {
         return $http.get(url + "/account/" + userId + "/" + account).then(
           function(result) {
@@ -91,6 +104,7 @@ angular.module('incognito', [])
 
       return {
         authUser: authenticateUser,
+        transfer: transfer,
         getAccountInfo: getAccountInfo,
         importAccount: importAccount,
         deleteAccount: deleteAccount,
