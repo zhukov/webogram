@@ -24,7 +24,7 @@ function removeTrailingZeroes (amountString) {
   return formattedString;
 }
 
-function toFixed (number, decimals) {
+function toFixed (number, decimals = 0) {
   if(!decimals) {
     decimals = 0;
   }

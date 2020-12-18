@@ -26,12 +26,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zhukov/webogram.git"
+    "url": "https://github.com/482solutions/webogram.git"
   },
   "author": "zhukov",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/zhukov/webogram/issues"
+    "url": "https://github.com/482solutions/webogram/issues"
   },
   "locales": [
     "en-us",
@@ -42,7 +42,7 @@
     "nl-nl",
     "pt-br"
   ],
-  "homepage": "http://zhukov.github.io/webogram",
+  "homepage": "https://github.com/482solutions/webogram",
   "devDependencies": {
     "del": "^4.1.1",
     "gulp": "^4.0.2",
