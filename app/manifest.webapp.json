@@ -5,7 +5,7 @@
   "display": "standalone",
   "theme_color": "#497495",
   "gcm_sender_id": "122867383838",
-  "start_url": "./?utm_source=web_app_manifest",
+  "start_url": "./",
   "scope": "/",
   "background_color": "#fff",
   "icons": [
