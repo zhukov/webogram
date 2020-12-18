@@ -1,6 +1,6 @@
 {
   "name": "Telegram",
-  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "description": "Telegram Web App wit Incognito wallet.\nMore info & source code here: https://github.com/482solutions/webogram",
   "version": "0.7.0",
   "main": "app/index.html",
   "single-instance": true,
@@ -26,12 +26,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zhukov/webogram.git"
+    "url": "https://github.com/482solutions/webogram.git"
   },
   "author": "zhukov",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/zhukov/webogram/issues"
+    "url": "https://github.com/482solutions/webogram/issues"
   },
   "locales": [
     "en-us",
@@ -42,7 +42,7 @@
     "nl-nl",
     "pt-br"
   ],
-  "homepage": "http://zhukov.github.io/webogram",
+  "homepage": "https://github.com/482solutions/webogram",
   "devDependencies": {
     "del": "^4.1.1",
     "gulp": "^4.0.2",
@@ -64,6 +64,7 @@
     "gulp-usemin": "^0.3.29",
     "gulp-zip": "^0.1.2",
     "http": "0.0.0",
+    "husky": "^4.3.6",
     "jasmine-core": "^2.5.2",
     "karma": "^4.1.0",
     "karma-coverage": "^1.1.1",
@@ -80,5 +81,10 @@
       "chrome"
     ]
   },
-  "dependencies": {}
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run build"
+    }
+  }
 }
