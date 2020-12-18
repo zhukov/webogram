@@ -1,6 +1,6 @@
 {
   "name": "Telegram",
-  "description": "Telegram Web App.\nMore info & source code here: https://github.com/zhukov/webogram",
+  "description": "Telegram Web App wit Incognito wallet.\nMore info & source code here: https://github.com/482solutions/webogram",
   "version": "0.7.0",
   "main": "app/index.html",
   "single-instance": true,
