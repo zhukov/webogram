@@ -10,6 +10,31 @@ function dT () {
   return '[' + (((new Date()).getTime() - _logTimer) / 1000).toFixed(3) + ']'
 }
 
+function removeTrailingZeroes (amountString) {
+  var formattedString = String(amountString);
+  while (
+    formattedString.length > 0 &&
+    ((formattedString.includes('.') &&
+      formattedString[formattedString.length - 1] === '0') ||
+      formattedString[formattedString.length - 1] === '.')
+    ) {
+    formattedString = formattedString.slice(0, formattedString.length - 1);
+  }
+
+  return formattedString;
+}
+
+function toFixed (number, decimals) {
+  if(!decimals) {
+    decimals = 0;
+  }
+  if (angular.isNumber(number) && String(number) !== "NaN") {
+    return removeTrailingZeroes(number.toFixed(decimals));
+  }
+
+  return number;
+}
+
 function checkClick (e, noprevent) {
   if (e.which == 1 && (e.ctrlKey || e.metaKey) || e.which == 2) {
     return true
