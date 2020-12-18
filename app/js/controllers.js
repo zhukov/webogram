@@ -4877,6 +4877,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         accountData.followingTokens.map(function(wallet){
           wallet.balance = toFixed(wallet.balance / Math.pow(10, wallet.decimals),6);
           wallet.PriceUsd = toFixed(wallet.PriceUsd,4) || "0.000074944";
+          wallet.balanceUSD = toFixed(wallet.PriceUsd * wallet.balance, 7);
           sum += wallet.balance * wallet.PriceUsd;
         });
         accountData.balance = toFixed(sum,4);
