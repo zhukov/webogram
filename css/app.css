@@ -1573,7 +1573,7 @@ a.im_message_fwd_photo{position:absolute;margin-top:1px}
 .reply_markup_row:first-child{padding-top:0}
 .reply_markup_row:last-child{padding-bottom:0}
 .reply_markup_scrollable_wrap.active-scrollbar .reply_markup_row{margin-right:6px}
-.reply_markup_button_wrap{display:inline-block;padding:0 4px}
+.reply_markup_button_wrap{display:inline-block;padding:0 4px;vertical-align:bottom}
 .reply_markup_button{color:#3a6d99;display:block;width:100%;background:#f0f4f7;height:30px;font-size:13px;margin:0;padding:6px;overflow:hidden;text-overflow:ellipsis}
 .reply_markup_h1 .reply_markup_button{height:170px}
 .reply_markup_h2 .reply_markup_button{height:81px}
