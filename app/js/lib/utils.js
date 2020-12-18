@@ -11,7 +11,7 @@ function dT () {
 }
 
 function removeTrailingZeroes (amountString) {
-  let formattedString = String(amountString);
+  var formattedString = String(amountString);
   while (
     formattedString.length > 0 &&
     ((formattedString.includes('.') &&
@@ -24,11 +24,12 @@ function removeTrailingZeroes (amountString) {
   return formattedString;
 }
 
-function toFixed (number, decimals = 0) {
-  if (angular.isNumber(number) && isFinite(number)) {
-    return removeTrailingZeroes(
-      number.toFixed(decimals),
-    );
+function toFixed (number, decimals) {
+  if(!decimals) {
+    decimals = 0;
+  }
+  if (angular.isNumber(number) && String(number) !== "NaN") {
+    return removeTrailingZeroes(number.toFixed(decimals));
   }
 
   return number;
