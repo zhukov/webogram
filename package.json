@@ -64,6 +64,7 @@
     "gulp-usemin": "^0.3.29",
     "gulp-zip": "^0.1.2",
     "http": "0.0.0",
+    "husky": "^4.3.6",
     "jasmine-core": "^2.5.2",
     "karma": "^4.1.0",
     "karma-coverage": "^1.1.1",
@@ -80,5 +81,11 @@
       "chrome"
     ]
   },
-  "dependencies": {}
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run build",
+      "pre-push": "npm run build"
+    }
+  }
 }
