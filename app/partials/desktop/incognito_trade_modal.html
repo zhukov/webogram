@@ -1,0 +1,49 @@
+<div class="sessions_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()">back</a>
+      </div>
+    </div>
+    <div class="md_modal_title">Incognito Transfer</div>
+  </div>
+
+  <div class="md_modal_body">
+    <div class="md_simple_modal_body">
+      <form class="modal_simple_form" ng-submit="transfer()">
+        <div class="md-input-group" my-labeled-input>
+          <label class="md-input-label">Amount</label>
+          <input class="md-input" my-focused type="number" ng-model="transferData.amount"/>
+        </div>
+
+        <div class="md-input-group" my-labeled-input>
+          <label class="md-input-label">To</label>
+          <input class="md-input" type="text" ng-model="transferData.to.value"/>
+        </div>
+
+        <div class="md-input-group" my-labeled-input>
+          <label class="md-input-label">Fee</label>
+          <input class="md-input" disabled type="text" value="{{transferData.fee()}}"/>
+        </div>
+
+        <div class="md-input-group" my-labeled-input>
+          <label class="md-input-label">Memo</label>
+          <input class="md-input" type="text" ng-model="transferData.message"/>
+        </div>
+
+      </form>
+
+    </div>
+
+    <div class="md_simple_modal_footer">
+      <button class="btn btn-md" ng-click="$dismiss()" my-i18n="modal_cancel"></button>
+      <button class="btn btn-md btn-md-primary" ng-class="{disabled: isLoading}"
+              ng-click="showTokensList('from')"
+              ng-bind="isLoading ? 'sending...' : 'send'"
+              ng-disabled="isLoading"></button>
+    </div>
+  </div>
+
+
+</div>

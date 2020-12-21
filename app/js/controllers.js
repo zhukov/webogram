@@ -4870,7 +4870,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
 
       $scope.account = {};
-
       function handleAccountData (data) {
         var accountData = data;
         var sum = 0;
@@ -4883,11 +4882,17 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         accountData.balance = toFixed(sum,4);
         return accountData;
       }
-      AppIncognitoStateManager.authUser()
-        .then(function(data) {
-          $scope.account = handleAccountData(data);
-          $scope.accountLoaded = true;
-        })
+
+      $scope.getAccountInfo = function() {
+        $scope.accountLoaded = false;
+        AppIncognitoStateManager.authUser()
+          .then(function(data) {
+            $scope.account = handleAccountData(data);
+            $scope.accountLoaded = true;
+          })
+      }
+
+      $scope.getAccountInfo();
 
       $scope.showAccounts = function() {
         $modal.open({
@@ -4904,6 +4909,16 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           backdrop: 'single'
         })
       }
+
+      // $scope.showTradeModal = function() {
+      //   $modal.open({
+      //     templateUrl: templateUrl('incognito_trade_modal'),
+      //     controller: 'IncognitoTradeModalController',
+      //     windowClass: 'settings_modal_window mobile_modal',
+      //     backdrop: 'single'
+      //   })
+      // }
+
       $scope.showTransferModal = function() {
         $modal.open({
           templateUrl: templateUrl('incognito_transfer_modal'),
@@ -4913,12 +4928,36 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
 
+      $scope.showAboutCompanyDialog = function(){
+        var $scope = $rootScope.$new()
+
+        $modal.open({
+          templateUrl: templateUrl('incognito_about_company_modal'),
+          scope: $scope,
+          windowClass: 'changelog_modal_window mobile_modal'
+        })
+      }
+
       $scope.showAboutIncognitoDialog = function(){
         var $scope = $rootScope.$new()
 
         $modal.open({
           templateUrl: templateUrl('incognito_about_modal'),
           scope: $scope,
+          windowClass: 'changelog_modal_window mobile_modal'
+        })
+      }
+
+      $scope.showTokensList = function() {
+        var scope = $rootScope.$new();
+        scope.selectTokenEvent = function(response) {
+          console.log("M", response)
+          $scope.getAccountInfo();
+        }
+        $modal.open({
+          templateUrl: templateUrl('incognito_tokens_modal'),
+          controller: 'IncognitoTokensListModalController',
+          scope: scope,
           windowClass: 'changelog_modal_window mobile_modal'
         })
       }
@@ -4990,7 +5029,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   .controller('IncognitoTransferModalController',
     function($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
       $scope.isLoading = false;
-    $scope.transferData = {
+      $scope.transferData = {
         amount: 0,
         receiver: {
           type: null,
@@ -5007,6 +5046,26 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppIncognitoStateManager.transfer($scope.transferData).then(function(data){
           ErrorService.alert( "Transfer was successful");
           $scope.isLoading = false
+          $scope.$close();
+        });
+      }
+  })
+
+  .controller('IncognitoTokensListModalController',
+    function($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppIncognitoStateManager, InAPIManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+      $scope.tokens = [];
+      $scope.isLoading = true;
+      $scope.slice = { limit: 20, limitDelta: 20 }
+      AppIncognitoStateManager.getTokensList().then(function(data){
+        $scope.isLoading = false;
+        $scope.tokens = data;
+      });
+      $scope.selectToken = function(tokenId) {
+        $scope.isLoading = true;
+        $scope.tokens = [];
+        AppIncognitoStateManager.followToken(tokenId).then(function (){
+          $scope.isLoading = false;
+          $scope.selectTokenEvent();
           $scope.$close();
         });
       }

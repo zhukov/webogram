@@ -1,0 +1,53 @@
+<div class="contacts_modal_wrap md_modal_wrap" my-modal-position>
+
+  <div class="md_modal_head md_modal_head_simple">
+    <div class="md_modal_title_wrap">
+      <div class="md_modal_actions_wrap clearfix">
+        <a class="md_modal_action md_modal_action_close" ng-click="$dismiss()"
+           my-i18n="modal_close"></a>
+      </div>
+    </div>
+    <div class="md_modal_title">
+      <span>Tokens</span>
+    </div>
+  </div>
+
+  <div class="md_modal_body">
+
+    <!--    <div class="contacts_modal_search">-->
+    <!--      <input class="form-control contacts_modal_search_field no_outline" my-focused type="search" placeholder="{{'modal_search' | i18n}}" ng-model="search.query" autocomplete="off" />-->
+    <!--      <a class="im_dialogs_search_clear tg_search_clear" ng-click="search.query = ''" ng-show="search.query.length">-->
+    <!--        <i class="icon icon-search-clear"></i>-->
+    <!--      </a>-->
+    <!--    </div>-->
+
+    <div my-contacts-list class="contacts_modal_col">
+
+      <div class="contacts_wrap nano" my-infinite-scroller>
+        <div ng-if="isLoading" class="sessions_modal_loading" my-vertical-position="0.1"
+             padding="true" my-i18n="sessions_modal_loading">
+          <my-i18n-param name="dots">
+            <span my-loading-dots></span>
+          </my-i18n-param>
+        </div>
+        <div class="contacts_scrollable_wrap nano-content">
+          <ul class="contacts_modal_members_list nav nav-pills nav-stacked">
+            <li class="contacts_modal_contact_wrap clearfix"
+                ng-repeat="token in tokens | limitTo: slice.limit track by $index">
+              <a class="contacts_modal_contact" ng-click="selectToken(token.tokenId)">
+                <div class="md_modal_list_peer_name" ng-bind="token.name"></div>
+                <div class="md_modal_list_peer_description">
+                  <span ng-bind="token.symbol"></span>
+                </div>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
