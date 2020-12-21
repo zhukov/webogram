@@ -1255,6 +1255,31 @@ angular.module('myApp.directives', ['myApp.filters'])
       $($window).on('resize', updateSizes)
     }
   })
+
+  .directive('myFollowingTokensList', function ($window, $timeout) {
+    return {
+      link: link
+    }
+
+    function link ($scope, element, attrs) {
+      var tokenWrap = $('.tokens_wrap', element)[0];
+
+      onContentLoaded(function () {
+        $(tokenWrap).nanoScroller({preventPageScrolling: true, tabIndex: -1, iOSNativeScrolling: true})
+        updateSizes()
+      })
+
+      function updateSizes () {
+        $(element).css({
+          height: Math.min(277, $($window).height() -
+            (Config.Mobile ? 46 + 18 : 200))
+        })
+        $(tokenWrap).nanoScroller()
+      }
+
+      $($window).on('resize', updateSizes)
+    }
+  })
   .directive('myKeychainsList', function ($window, $timeout) {
     return {
       link: link

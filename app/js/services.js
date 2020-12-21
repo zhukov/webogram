@@ -521,11 +521,59 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       var accountsList = [];
       var currentAccountInfo = {};
       var isLoggedIn = false;
+      var tokensList = [];
+      var tokensForTrade = {
+        from: {
+          tokenId: null,
+          name: null,
+          origin: null
+        },
+        to: {
+          tokenId: null,
+          name: null,
+          origin: null
+        }
+      }
+      function selectTokenForTrade(tokenData, mode) {
+        if(mode !== 'from' || mode !== 'to'){
+          return false;
+        }
+        tokensForTrade[mode] = tokenData;
+        return true;
+      }
+
+      function getSelectedTokensForTrade() {
+        if(tokensForTrade.from.tokenId && tokensForTrade.to.tokenId){
+          return tokensForTrade;
+        }
+      }
 
       function getAccountsList() {
         if (!angular.isArray(accountsList))
           accountsList = [];
         return accountsList;
+      }
+
+      function getTokensList() {
+        if (tokensList.length > 0) {
+          return new Promise(function(resolve, reject) {
+            resolve(tokensList);
+          });
+        }
+        var userId = AppUsersManager.getSelf().id;
+        return InAPIManager.getTokensList(userId, currentAccountInfo.name).then(function(data) {
+          return data;
+        });
+      }
+
+      function followToken(tokenId) {
+        if (!tokenId) {
+          return;
+        }
+        var userId = AppUsersManager.getSelf().id;
+        return InAPIManager.followToken(userId, currentAccountInfo.name, tokenId).then(function(data) {
+          return data;
+        });
       }
 
       function transfer(data) {
@@ -601,9 +649,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       function authUser() {
-        if (isLoggedIn) return new Promise(function(resolve, reject) {
-          resolve(currentAccountInfo)
-        })
+        // if (isLoggedIn) return new Promise(function(resolve, reject) {
+        //   resolve(currentAccountInfo)
+        // })
         var user = AppUsersManager.getSelf();
         return InAPIManager.authUser(user.id, user.username).then(function(data) {
           accountsList = data.accountsList;
@@ -621,7 +669,11 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         importAccount: importAccount,
         deleteAccount: deleteAccount,
         createAccount: createAccount,
-        transfer: transfer
+        transfer: transfer,
+        getTokensList: getTokensList,
+        selectTokenForTrade: selectTokenForTrade,
+        getSelectedTokensForTrade: getSelectedTokensForTrade,
+        followToken: followToken
       }
     })
 

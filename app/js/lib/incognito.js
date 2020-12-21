@@ -52,6 +52,30 @@ angular.module('incognito', [])
         )
       }
 
+      function getTokensList(userId, name) {
+        return $http.get(url + "/tokenList/" + userId + "/" + name).then(
+          function(result) {
+            return result.data;
+          },
+          function(error) {
+            errorHandler(error);
+            return $q.reject(error)
+          }
+        )
+      }
+
+      function followToken(userId, name, tokenId) {
+        return $http.post(url + "/followToken/" + userId + "/" + name, { tokenId : tokenId }).then(
+          function(result) {
+            return result.data;
+          },
+          function(error) {
+            errorHandler(error);
+            return $q.reject(error)
+          }
+        )
+      }
+
       function getAccountInfo(userId, account) {
         return $http.get(url + "/account/" + userId + "/" + account).then(
           function(result) {
@@ -108,6 +132,8 @@ angular.module('incognito', [])
         getAccountInfo: getAccountInfo,
         importAccount: importAccount,
         deleteAccount: deleteAccount,
-        createAccount: createAccount
+        createAccount: createAccount,
+        getTokensList: getTokensList,
+        followToken:followToken
       }
     })

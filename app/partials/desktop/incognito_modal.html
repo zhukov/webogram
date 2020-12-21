@@ -13,20 +13,19 @@
         <div class="md_incognito_icon md_incognito_icons_key">Keys</div>
       </div>
     </div>
-    <div class="md_incognito_wrap clickable">
-      <div class="md_incognito_modal_row_align_center">
-        <div class="md_incognito_icon md_incognito_icons_trade">Trade</div>
-      </div>
-    </div>
+    <!--    <div class="md_incognito_wrap clickable" ng-click="showTradeModal()">-->
+    <!--      <div class="md_incognito_modal_row_align_center">-->
+    <!--        <div class="md_incognito_icon md_incognito_icons_trade">Trade</div>-->
+    <!--      </div>-->
+    <!--    </div>-->
   </div>
-
 
   <div class="md_modal_split_actions_wrap">
     <span ng-if="accountLoaded" ng-click="showAccounts()"
           class="md_incognito_modal_label clickable">{{ account.name }}</span>
   </div>
 
-  <div class="md_modal_body">
+  <div class="md_modal_body ">
     <div ng-switch="!accountLoaded">
       <div ng-switch-when="true" class="sessions_modal_loading" my-vertical-position="0.1"
            padding="true" my-i18n="sessions_modal_loading">
@@ -45,10 +44,11 @@
           </button>
         </div>
       </div>
-      <ul ng-switch-when="false" class="full_width md_incognito_list clearfix"
-          style="height: 280px">
-        <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
-            ng-repeat="wallet in account.followingTokens">
+      <div my-following-tokens-list class="nano" my-infinite-scroller>
+        <ul ng-switch-when="false"
+            class="full_width md_incognito_list clearfix tokens_wrap nano-content">
+          <li class="md_incognito_modal_row_align_center md_incognito_modal_row_justify_between"
+              ng-repeat="wallet in account.followingTokens">
         <span class="md_incognito_modal_column_align_start">
           <span class="md_incognito_modal_row_align_center">
           <span>{{ wallet.name }}</span>
@@ -57,18 +57,25 @@
           </span>
           <span>${{ wallet.PriceUsd }}</span>
         </span>
-        <span class="md_incognito_modal_column_align_end">
+            <span class="md_incognito_modal_column_align_end">
           <span class="md_incognito_modal_row_align_center" style="margin: 0">
             <span>{{ wallet.balance }}</span>
             <span style="margin-left: 5px">{{ wallet.symbol }}</span>
           </span>
           <span>${{ wallet.balanceUSD }}</span>
         </span>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
     <div class="clearfix" style="padding: 15px 28px 30px;">
-      <span ng-click="showAboutIncognitoDialog()" style="color: #3a6d99; cursor: pointer;">About Incognito</span>
+      <div ng-if="accountLoaded" style="cursor: pointer;font-size: 18px; margin-bottom: 10px;"
+           ng-click="showTokensList()">Add a coin +
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span ng-click="showAboutCompanyDialog()" style="color: #3a6d99; cursor: pointer;">About 482.solutions</span>
+        <span ng-click="showAboutIncognitoDialog()" style="color: #3a6d99; cursor: pointer;">About Incognito</span>
+      </div>
     </div>
   </div>
 
