@@ -1295,7 +1295,7 @@ angular.module('myApp.directives', ['myApp.filters'])
 
       function updateSizes () {
         $(element).css({
-          height: Math.min(325, $($window).height() -
+          height: Math.min(400, $($window).height() -
             (Config.Mobile ? 46 + 18 : 200))
         })
         $(keychainsWrap).nanoScroller()
