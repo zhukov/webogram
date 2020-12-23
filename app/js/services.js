@@ -606,10 +606,8 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         var user = AppUsersManager.getSelf();
         return InAPIManager.deleteAccount(user.id, name).then(function(data) {
           accountsList = data.accountsList;
-          console.log(data);
           if (currentAccountInfo.name === name && accountsList.length > 0) {
-            console.log("Same Name:", accountsList);
-            return selectAccount(accountsList[0].name).then(()=>{
+            return selectAccount(accountsList[0].name).then(function (){
               return accountsList;
             });
           }
@@ -618,8 +616,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       function getAccountInfo(account) {
-        console.log("Account:", account);
-        console.log("Current account:", JSON.stringify(currentAccountInfo, null, 2));
         if (!account && !angular.equals(currentAccountInfo, {})) {
           return new Promise(function(resolve, reject) {
             resolve(currentAccountInfo);
@@ -639,8 +635,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       function selectAccount(account) {
-        console.log("Account:", account);
-        console.log("Current Account:", currentAccountInfo);
         if (account === currentAccountInfo.name) {
           return new Promise(function(resolve) {
             resolve(currentAccountInfo);
