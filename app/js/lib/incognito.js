@@ -134,6 +134,6 @@ angular.module('incognito', [])
         deleteAccount: deleteAccount,
         createAccount: createAccount,
         getTokensList: getTokensList,
-        followToken:followToken
+        followToken: followToken
       }
     })

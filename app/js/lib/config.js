@@ -25,7 +25,8 @@ Config.App = {
 }
 
 Config.Incognito = {
-  serverUrl: 'http://localhost:1823',
+  // serverUrl: 'http://localhost:1823',
+  serverUrl: 'http://192.168.88.8:1823',
   basePath: 'api/v1'
 }
 
