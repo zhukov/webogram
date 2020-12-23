@@ -572,7 +572,10 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         }
         var userId = AppUsersManager.getSelf().id;
         return InAPIManager.followToken(userId, currentAccountInfo.name, tokenId).then(function(data) {
-          return data;
+          return InAPIManager.getAccountInfo(userId, currentAccountInfo.name).then(function(data) {
+            currentAccountInfo = data.accountInfo;
+            return currentAccountInfo;
+          })
         });
       }
 
