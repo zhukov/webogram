@@ -4948,13 +4948,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       $scope.showTokensList = function() {
         var scope = $rootScope.$new();
-        scope.selectTokenEvent = function() {
-          $scope.accountLoaded = false;
-          AppIncognitoStateManager.getAccountInfo()
-            .then(function(data) {
-              $scope.account = handleAccountData(data);
-              $scope.accountLoaded = true;
-            })
+        scope.selectTokenEvent = function(accountInfo) {
+          $scope.account = accountInfo;
         }
         $modal.open({
           templateUrl: templateUrl('incognito_tokens_modal'),
@@ -5066,9 +5061,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.selectToken = function(tokenId) {
         $scope.isLoading = true;
         $scope.tokens = [];
-        AppIncognitoStateManager.followToken(tokenId).then(function (){
+        AppIncognitoStateManager.followToken(tokenId).then(function (data){
           $scope.isLoading = false;
-          $scope.selectTokenEvent();
+          $scope.selectTokenEvent(data);
           $scope.$close();
         });
       }
