@@ -579,12 +579,17 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       function transfer(data) {
         const transferData = {
           amount: data.amount*1e9,
-          fee: data.fee(),
+          fee: data.fee()*1e9,
           message: data.message
         }
         transferData.senderAccount = currentAccountInfo.name;
-        transferData.senderId = AppUsersManager.getSelf().id;
-        transferData.address = data.to.value;
+        transferData.senderId = String(AppUsersManager.getSelf().id);
+        if(data.to.value.length >= 100){
+          transferData.address = data.to.value;
+        }else{
+          transferData.receiverId = String(AppUsersManager.resolveUsername(data.to.value));
+        }
+
         return InAPIManager.transfer(transferData).then(function(data) {
           return data;
         });
@@ -602,7 +607,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         return InAPIManager.deleteAccount(user.id, name).then(function(data) {
           accountsList = data.accountsList;
           if (currentAccountInfo.name === name && accountsList.length > 0) {
-            selectAccount(accountsList[0].name).then();
+            return selectAccount(accountsList[0].name).then(function (){
+              return accountsList;
+            });
           }
           return accountsList;
         });
@@ -649,9 +656,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
       }
 
       function authUser() {
-        // if (isLoggedIn) return new Promise(function(resolve, reject) {
-        //   resolve(currentAccountInfo)
-        // })
+        if (isLoggedIn) return new Promise(function(resolve, reject) {
+          resolve(currentAccountInfo)
+        })
         var user = AppUsersManager.getSelf();
         return InAPIManager.authUser(user.id, user.username).then(function(data) {
           accountsList = data.accountsList;

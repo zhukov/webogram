@@ -4871,7 +4871,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       $scope.account = {};
       function handleAccountData (data) {
-        var accountData = data;
+        var accountData = JSON.parse(JSON.stringify(data));
         var sum = 0;
         accountData.followingTokens.map(function(wallet){
           wallet.balance = toFixed(wallet.balance / Math.pow(10, wallet.decimals),6);
@@ -4883,16 +4883,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return accountData;
       }
 
+      AppIncognitoStateManager.authUser()
+        .then(function(data) {
+          $scope.account = handleAccountData(data);
+          $scope.accountLoaded = true;
+        })
       $scope.getAccountInfo = function() {
-        $scope.accountLoaded = false;
-        AppIncognitoStateManager.authUser()
-          .then(function(data) {
-            $scope.account = handleAccountData(data);
-            $scope.accountLoaded = true;
-          })
-      }
 
-      $scope.getAccountInfo();
+      }
 
       $scope.showAccounts = function() {
         $modal.open({
@@ -4950,9 +4948,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
       $scope.showTokensList = function() {
         var scope = $rootScope.$new();
-        scope.selectTokenEvent = function(response) {
-          console.log("M", response)
-          $scope.getAccountInfo();
+        scope.selectTokenEvent = function() {
+          $scope.accountLoaded = false;
+          AppIncognitoStateManager.getAccountInfo()
+            .then(function(data) {
+              $scope.account = handleAccountData(data);
+              $scope.accountLoaded = true;
+            })
         }
         $modal.open({
           templateUrl: templateUrl('incognito_tokens_modal'),
@@ -4995,6 +4997,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         }
         ErrorService.confirm({ type: 'DELETE_KEY_CHAIRS' }).then(function() {
           AppIncognitoStateManager.deleteAccount(account).then(function(data) {
+            $rootScope.$broadcast('incognitoAPIUpdate', 'currentAccount');
             $scope.sessionsLoaded = true
             $scope.accounts = data;
           })
