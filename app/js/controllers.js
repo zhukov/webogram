@@ -4888,9 +4888,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.account = handleAccountData(data);
           $scope.accountLoaded = true;
         })
-      $scope.getAccountInfo = function() {
-
-      }
 
       $scope.showAccounts = function() {
         $modal.open({
@@ -4949,7 +4946,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.showTokensList = function() {
         var scope = $rootScope.$new();
         scope.selectTokenEvent = function(accountInfo) {
-          $scope.account = accountInfo;
+          $scope.account = handleAccountData(accountInfo);
         }
         $modal.open({
           templateUrl: templateUrl('incognito_tokens_modal'),
