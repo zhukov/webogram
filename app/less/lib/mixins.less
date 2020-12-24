@@ -100,8 +100,8 @@
 // }
 
 .image(@image, @width, @height, @repeat: no-repeat) {
-  @filename  : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[1]`;
-  @extension : ~`/(.*)\.(jpg|jpeg|png|gif)/.exec(@{image})[2]`;
+  @filename  : ~`/(.*)\.(jpg|jpeg|png|gif|svg)/.exec(@{image})[1]`;
+  @extension : ~`/(.*)\.(jpg|jpeg|png|gif|svg)/.exec(@{image})[2]`;
   background-image: ~`"url(@{filename}.@{extension})"`;
   background-repeat: @repeat;
 }

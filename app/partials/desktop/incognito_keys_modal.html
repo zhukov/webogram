@@ -19,7 +19,7 @@
           <span class="md_incognito_icons_option_horizontal"></span>
           <span>{{ account.name }}</span>
         </span>
-          <span class="md_incognito_icons_trash clickable" ng-click="deleteAccount(account.name)"></span>
+          <span ng-if="account.name !== 'pDEX' && account.name !== 'pDEXWithdraw'" class="md_incognito_icons_trash clickable" ng-click="deleteAccount(account.name)"></span>
         </li>
       </ul>
     </div>
