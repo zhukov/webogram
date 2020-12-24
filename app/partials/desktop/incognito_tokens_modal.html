@@ -35,7 +35,12 @@
             <li class="contacts_modal_contact_wrap clearfix"
                 ng-repeat="token in tokens | limitTo: slice.limit track by $index">
               <a class="contacts_modal_contact" ng-click="selectToken(token.tokenId)">
-                <div class="md_modal_list_peer_name" ng-bind="token.name"></div>
+                <div class="md_modal_list_peer_name md_incognito_modal_row_justify_between">
+                  <span class="md_incognito_modal_row_align_center">
+                    <span ng-bind="token.name"></span>
+                    <span ng-if="token.verified" class="md_incognito_icon md_incognito_icons_verified"></span>
+                   </span>
+                  <span ng-if="token.followed" style="color: #999;">Added</span></div>
                 <div class="md_modal_list_peer_description">
                   <span ng-bind="token.symbol"></span>
                 </div>
