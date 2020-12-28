@@ -600,7 +600,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
             return data;
           });
         }
-        return MtpApiManager.invokeApi('contacts.search', { q: data.to.value, limit: 1 }).then((result)=>{
+        return MtpApiManager.invokeApi('contacts.search', { q: data.to.value, limit: 1 }).then(function(result) {
           transferData.receiverId = String(result.results[0].user_id);
           return InAPIManager.transfer(transferData).then(function(data) {
             return data;
