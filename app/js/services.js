@@ -3812,9 +3812,9 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
               titleChanged = true
               document.title = langNotificationsPluralize(notificationsCount)
               if (notificationsCount <= 9) {
-                setFavicon('img/unread_favicons/favicon_unread_' + notificationsCount + '.ico')
+                setFavicon('img/favicons/favicon_unread_' + notificationsCount + '.ico')
               } else {
-                setFavicon('img/unread_favicons/favicon_unread_9_plus.ico')
+                setFavicon('img/favicons/favicon_unread_9_plus.ico')
               }
             }
           }, 1000)
