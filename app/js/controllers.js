@@ -161,6 +161,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var nextTimeout
     var updatePasswordTimeout = false
 
+    $scope.try_desktop = {
+      shown: false,
+      domain: Config.Navigator.osX ? 'macos.telegram.org' : 'desktop.telegram.org'
+    }
+    $scope.closeTryDesktop = function() {
+      $scope.try_desktop.shown = false;
+      ConfigStorage.set({try_desktop_hidden: 1})
+    };
+    ConfigStorage.get('try_desktop_hidden', function (td_hidden) {
+      $scope.try_desktop.shown = !Config.Navigator.mobile && !td_hidden;
+    })
+
     function saveAuth (result) {
       MtpApiManager.setUserAuth(options.dcID, {
         id: result.user.id
@@ -519,6 +531,22 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       missedCount: 0,
       skipped: false
     }
+
+    $scope.try_desktop = {
+      shown: false,
+      domain: Config.Navigator.osX ? 'macos.telegram.org' : 'desktop.telegram.org'
+    }
+    $scope.closeTryDesktop = function() {
+      $scope.try_desktop.shown = false;
+      onContentLoaded(function () {
+        $scope.$broadcast('ui_dialogs_update');
+        $scope.$broadcast('ui_panel_update');
+      })
+      ConfigStorage.set({try_desktop_hidden: 1})
+    };
+    ConfigStorage.get('try_desktop_hidden', function (td_hidden) {
+      $scope.try_desktop.shown = !Config.Navigator.mobile && !td_hidden;
+    })
 
     $scope.openSettings = function () {
       $modal.open({

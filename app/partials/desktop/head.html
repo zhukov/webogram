@@ -1,4 +1,8 @@
 <div class="tg_page_head tg_head_wrap noselect clearfix">
+  <div class="tg_try_desktop" ng-if="try_desktop.shown">
+    <span class="try_desktop_close" ng-click="closeTryDesktop()"></span>
+    <p class="try_desktop_text"><my-i18n msgid="login_try_desktop"><my-i18n-param name="telegram-link"><a href="https://{{try_desktop.domain}}/" target="_blank">{{try_desktop.domain}}</a></my-i18n-param></my-i18n><a class="try_desktop_btn" href="https://{{try_desktop.domain}}/" target="_blank" my-i18n="login_try_desktop_short_btn"></a></p>
+  </div>
   <div class="tg_head_split">
 
     <div class="tg_head_logo_wrap">
