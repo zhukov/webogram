@@ -1,11 +1,12 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
  */
 
 'use strict'
+/* global Config, tsNow */
 
 /* Filters */
 
@@ -16,7 +17,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
       if (!user || !user.first_name && !user.last_name) {
         return _('user_name_deleted')
       }
-      return user.first_name + (user.last_name ? ' ' + user.last_name : '')
+      return user.first_name ? (user.first_name + (user.last_name ? ' ' + user.last_name : '')) : user.last_name
     }
   })
 
@@ -32,8 +33,8 @@ angular.module('myApp.filters', ['myApp.i18n'])
   .filter('userStatus', function ($filter, _) {
     var relativeTimeFilter = $filter('relativeTime')
     return function (user, botChatPrivacy) {
-      if (!(user.id % 1000)) {
-        if (user.id == 777000) {
+      if (user && !(user.id % 1000)) {
+        if (user.id === 777000) {
           return _('user_status_service_notifications')
         }
         return _('user_status_support')
@@ -97,12 +98,19 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
       if (diff > 518400000) { // 6 days
         format = extended ? 'mediumDate' : 'shortDate'
-      }
-      else if (diff > 43200000) { // 12 hours
+      } else if (diff > 43200000) { // 12 hours
         format = extended ? 'EEEE' : 'EEE'
       }
 
       return dateFilter(ticks, format)
+    }
+  })
+
+  .filter('dateMedium', function ($filter) {
+    var dateFilter = $filter('date')
+    return function (timestamp, extended) {
+      var ticks = timestamp * 1000
+      return dateFilter(ticks, 'medium')
     }
   })
 
@@ -163,7 +171,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
     return function (phoneRaw) {
       var nbsp = ' '
       phoneRaw = (phoneRaw || '').replace(/\D/g, '')
-      if (phoneRaw.charAt(0) == '7' && phoneRaw.length == 11) {
+      if (phoneRaw.charAt(0) === '7' && phoneRaw.length === 11) {
         return '+' + phoneRaw.charAt(0) + nbsp + '(' + phoneRaw.substr(1, 3) + ')' + nbsp + phoneRaw.substr(4, 3) + '-' + phoneRaw.substr(7, 2) + '-' + phoneRaw.substr(9, 2)
       }
       return '+' + phoneRaw
@@ -174,11 +182,9 @@ angular.module('myApp.filters', ['myApp.i18n'])
     return function (size, progressing) {
       if (!size) {
         return '0'
-      }
-      else if (size < 1024) {
+      } else if (size < 1024) {
         return size + ' b'
-      }
-      else if (size < 1048576) {
+      } else if (size < 1048576) {
         return Math.round(size / 1024) + ' KB'
       }
       var mbs = size / 1048576
@@ -203,7 +209,7 @@ angular.module('myApp.filters', ['myApp.i18n'])
       var totalParts = total.split(' ')
 
       if (totalParts[1] === doneParts[1]) {
-        return _('format_size_progress_mulitple', {done: doneParts[0], total: totalParts[0], parts: (doneParts[1] || '')})
+        return _('format_size_progress_mulitple', {done: doneParts[0], total: totalParts[0], parts: doneParts[1]})
       }
       return _('format_size_progress', {done: done, total: total})
     }
@@ -211,17 +217,16 @@ angular.module('myApp.filters', ['myApp.i18n'])
 
   .filter('formatShortNumber', [function () {
     return function (num) {
+      var mult
       if (!num) {
         return '0'
-      }
-      else if (num < 1000) {
+      } else if (num < 1000) {
         return num.toString()
-      }
-      else if (num < 900000) {
-        var mult = num > 10000 ? 1 : 10
+      } else if (num < 900000) {
+        mult = num > 10000 ? 1 : 10
         return (Math.round(num / 1000 * mult) / mult) + 'K'
       }
-      var mult = num > 10000000 ? 1 : 10
+      mult = num > 10000000 ? 1 : 10
       return (Math.round(num / 1000000 * mult) / mult) + 'M'
     }
   }])

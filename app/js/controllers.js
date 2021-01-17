@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -31,7 +31,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     LayoutSwitchService.start()
   })
 
-  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, TelegramMeWebService, _) {
+  .controller('AppLoginController', function ($scope, $rootScope, $location, $timeout, $modal, $modalStack, MtpApiManager, ErrorService, NotificationsManager, PasswordManager, ChangelogNotifyService, IdleManager, LayoutSwitchService, WebPushApiManager, TelegramMeWebService, _) {
     $modalStack.dismissAll()
     IdleManager.start()
 
@@ -47,6 +47,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       TelegramMeWebService.setAuthorized(false)
+      WebPushApiManager.forceUnsubscribe()
     })
 
     var options = {dcID: 2, createNetworker: true}
@@ -176,7 +177,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var badPhone = !fullPhone.match(/^[\d\-+\s]+$/)
       if (!badPhone) {
         fullPhone = fullPhone.replace(/\D/g, '')
-        if (fullPhone.length < 7) {
+        if (fullPhone.length < 7 || fullPhone.length > 15) {
           badPhone = true
         }
       }
@@ -218,6 +219,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
             case 'PHONE_NUMBER_INVALID':
               $scope.error = {field: 'phone'}
               error.handled = true
+              break
+
+            case 'PHONE_NUMBER_APP_SIGNUP_FORBIDDEN':
+              $scope.error = {field: 'phone'}
               break
           }
         })['finally'](function () {
@@ -456,13 +461,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     var pendingAttachment = false
     $scope.$on('history_focus', function (e, peerData) {
       if (peerData.peerString == $scope.curDialog.peer &&
-        peerData.messageID == $scope.curDialog.messageID &&
-        !peerData.startParam) {
+          (peerData.messageID ? peerData.messageID == $scope.curDialog.messageID : !$scope.curDialog.messageID) &&
+          !peerData.startParam &&
+          !peerData.attachment) {
         if (peerData.messageID) {
           $scope.$broadcast('ui_history_change_scroll', true)
         } else {
           $scope.$broadcast('ui_history_focus')
         }
+        $modalStack.dismissAll()
       } else {
         var peerID = AppPeersManager.getPeerID(peerData.peerString)
         var username = AppPeersManager.getPeer(peerID).username
@@ -504,6 +511,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       canReply: false,
       canDelete: false,
       canEdit: false,
+      canReport: false,
       actions: function () {
         return $scope.historyState.selectActions ? 'selected' : ($scope.historyState.botActions ? 'bot' : ($scope.historyState.channelActions ? 'channel' : false))
       },
@@ -519,6 +527,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         windowClass: 'settings_modal_window mobile_modal',
         backdrop: 'single'
       })
+    }
+
+    $scope.isHistoryPeerGroup = function () {
+      return $scope.historyPeer.id < 0 && !AppPeersManager.isBroadcast($scope.historyPeer.id)
     }
 
     // setTimeout($scope.openSettings, 1000)
@@ -556,9 +568,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.openGroup = function () {
       ContactsSelectService.selectContacts({action: 'new_group'}).then(function (userIDs) {
-        if (userIDs.length == 1) {
-          $scope.dialogSelect(AppUsersManager.getUserString(userIDs[0]))
-        } else if (userIDs.length > 1) {
+        if (userIDs && 
+            userIDs.length) {
           var scope = $rootScope.$new()
           scope.userIDs = userIDs
 
@@ -684,7 +695,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
   .controller('AppImDialogsController', function ($scope, $location, $q, $timeout, $routeParams, MtpApiManager, AppUsersManager, AppChatsManager, AppMessagesManager, AppProfileManager, AppPeersManager, PhonebookContactsService, ErrorService, AppRuntimeManager) {
     $scope.dialogs = []
-    $scope.contacts = []
+    $scope.myResults = []
     $scope.foundPeers = []
     $scope.foundMessages = []
 
@@ -783,20 +794,35 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     function sortDialogs () {
+      var myID = false
+      if ($scope.forPeerSelect) {
+        myID = AppUsersManager.getSelf().id
+      }
       $scope.dialogs.sort(function (d1, d2) {
+        if (d1.peerID == myID) {
+          return -1
+        }
+        else if (d2.peerID == myID) {
+          return 1
+        }
         return d2.index - d1.index
       })
     }
 
     $scope.$on('dialog_top', function (e, dialog) {
-      var curDialog, i
-      for (i = 0; i < $scope.dialogs.length; i++) {
+      var curDialog, i, wrappedDialog
+      var len = $scope.dialogs.length
+      for (i = 0; i < len; i++) {
         curDialog = $scope.dialogs[i]
         if (curDialog.peerID == dialog.peerID) {
-          var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog)
+          wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, dialog)
           $scope.dialogs.splice(i, 1, wrappedDialog)
           break
         }
+      }
+      sortDialogs()
+      if (wrappedDialog == $scope.dialogs[len - 1]) {
+        $scope.dialogs.splice(len - 1, 1)
       }
     })
     $scope.$on('dialog_flush', function (e, update) {
@@ -925,11 +951,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     function getDialogs (force) {
       var curJump = ++jump
 
-      $timeout.cancel(searchTimeoutPromise)
+      if (searchTimeoutPromise) {
+        $timeout.cancel(searchTimeoutPromise)
+      }
 
       if (searchMessages) {
         searchTimeoutPromise = (force || maxID) ? $q.when() : $timeout(angular.noop, 500)
         return searchTimeoutPromise.then(function () {
+          searchTimeoutPromise = false;
           var searchPeerID = $scope.searchPeer || false
           return AppMessagesManager.getSearch(searchPeerID, $scope.search.query, {_: 'inputMessagesFilterEmpty'}, maxID).then(function (result) {
             if (curJump != jump) {
@@ -962,6 +991,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (curJump != jump) {
           return $q.reject()
         }
+        if (!query && !offsetIndex && $scope.forPeerSelect) {
+          var myID = AppUsersManager.getSelf().id
+          return AppMessagesManager.getConversation(myID).then(function (dialog) {
+            result.dialogs.unshift(dialog)
+            return result
+          })
+        }
         return result
       })
     }
@@ -978,7 +1014,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       getDialogs(force).then(function (dialogsResult) {
         if (!searchMessages) {
           $scope.dialogs = []
-          $scope.contacts = []
+          $scope.myResults = []
           $scope.foundPeers = []
         }
         $scope.foundMessages = []
@@ -988,8 +1024,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         if (dialogsResult.dialogs.length) {
           angular.forEach(dialogsResult.dialogs, function (dialog) {
             if ($scope.canSend &&
-              AppPeersManager.isChannel(dialog.peerID) &&
-              !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
+                AppPeersManager.isChannel(dialog.peerID) &&
+                !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
               return
             }
             var wrapDialog = searchMessages ? undefined : dialog
@@ -1000,13 +1036,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
               var message = AppMessagesManager.getMessage(dialog.top_message)
               if (message.fromID > 0) {
                 wrappedDialog.peerID = message.fromID
+                wrappedDialog.foundInHistory = true
               }
             }
 
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
-              peersInDialogs[dialog.peerID] = true
+              if (peersInDialogs[dialog.peerID]) {
+                return
+              } else {
+                peersInDialogs[dialog.peerID] = true
+              }
             }
             dialogsList.push(wrappedDialog)
           })
@@ -1055,17 +1096,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
           angular.forEach(dialogsResult.dialogs, function (dialog) {
             if ($scope.canSend &&
-              AppPeersManager.isChannel(dialog.peerID) &&
-              !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
+                AppPeersManager.isChannel(dialog.peerID) &&
+                !AppChatsManager.hasRights(-dialog.peerID, 'send')) {
               return
             }
             var wrapDialog = searchMessages ? undefined : dialog
             var wrappedDialog = AppMessagesManager.wrapForDialog(dialog.top_message, wrapDialog)
 
+            if (searchMessages &&
+                $scope.searchPeer) {
+              var message = AppMessagesManager.getMessage(dialog.top_message)
+              if (message.fromID > 0) {
+                wrappedDialog.peerID = message.fromID
+                wrappedDialog.foundInHistory = true
+              }
+            }
+
             if (searchMessages) {
               wrappedDialog.unreadCount = -1
             } else {
-              peersInDialogs[dialog.peerID] = true
+              if (peersInDialogs[dialog.peerID]) {
+                return
+              } else {
+                peersInDialogs[dialog.peerID] = true
+              }
             }
 
             if (searchMessages &&
@@ -1100,12 +1154,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var curJump = ++contactsJump
       AppUsersManager.getContacts($scope.search.query).then(function (contactsList) {
         if (curJump != contactsJump) return
-        $scope.contacts = []
+        $scope.myResults = []
         angular.forEach(contactsList, function (userID) {
           if (peersInDialogs[userID] === undefined) {
-            $scope.contacts.push({
-              userID: userID,
-              user: AppUsersManager.getUser(userID),
+            $scope.myResults.push({
+              id: userID,
               peerString: AppUsersManager.getUserString(userID)
             })
           }
@@ -1119,22 +1172,45 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('ui_dialogs_append')
       })
 
-      if ($scope.search.query && $scope.search.query.length >= 5) {
+      if ($scope.search.query && $scope.search.query.length >= 2) {
         $timeout(function () {
           if (curJump != contactsJump) return
           MtpApiManager.invokeApi('contacts.search', {q: $scope.search.query, limit: 10}).then(function (result) {
             AppUsersManager.saveApiUsers(result.users)
             AppChatsManager.saveApiChats(result.chats)
             if (curJump != contactsJump) return
-            $scope.foundPeers = []
-            angular.forEach(result.results, function (contactFound) {
-              var peerID = AppPeersManager.getPeerID(contactFound)
-              if (peersInDialogs[peerID] === undefined) {
+            var alreadyPeers = []
+            angular.forEach($scope.myResults, function (peerFound) {
+              alreadyPeers.push(peerFound.id)
+            })
+            angular.forEach(result.my_results, function (peerFound) {
+              var peerID = AppPeersManager.getPeerID(peerFound)
+              if (peersInDialogs[peerID] === undefined &&
+                  alreadyPeers.indexOf(peerID) == -1) {
+                alreadyPeers.push(peerID)
                 if ($scope.canSend &&
                   AppPeersManager.isChannel(peerID) &&
                   !AppChatsManager.hasRights(-peerID, 'send')) {
                   return
                 }
+                $scope.myResults.push({
+                  id: peerID,
+                  peerString: AppPeersManager.getPeerString(peerID)
+                })
+              }
+            })
+
+            $scope.foundPeers = []
+            angular.forEach(result.results, function (peerFound) {
+              var peerID = AppPeersManager.getPeerID(peerFound)
+              if (peersInDialogs[peerID] === undefined &&
+                  alreadyPeers.indexOf(peerID) == -1) {
+                if ($scope.canSend &&
+                  AppPeersManager.isChannel(peerID) &&
+                  !AppChatsManager.hasRights(-peerID, 'send')) {
+                  return
+                }
+                alreadyPeers.push(peerID)
                 $scope.foundPeers.push({
                   id: peerID,
                   username: AppPeersManager.getPeer(peerID).username,
@@ -1183,6 +1259,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.selectedEdit = selectedEdit
     $scope.selectedCancel = selectedCancel
     $scope.selectedFlush = selectedFlush
+    $scope.selectedReport = selectedReport
     $scope.selectInlineBot = selectInlineBot
 
     $scope.startBot = startBot
@@ -1214,7 +1291,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       photos: 'inputMessagesFilterPhotos',
       video: 'inputMessagesFilterVideo',
       documents: 'inputMessagesFilterDocument',
-      audio: 'inputMessagesFilterVoice'
+      audio: 'inputMessagesFilterVoice',
+      round: 'inputMessagesFilterRoundVideo',
+      music: 'inputMessagesFilterMusic',
+      urls: 'inputMessagesFilterUrl',
+      mentions: 'inputMessagesFilterMyMentions'
     }
     var jump = 0
     var moreJump = 0
@@ -1226,6 +1307,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     function applyDialogSelect (newDialog, oldDialog) {
       peerID = $rootScope.selectedPeerID = newDialog.peerID
+      var migratedToPeer = AppPeersManager.getPeerMigratedTo(peerID)
+      if (migratedToPeer) {
+        $rootScope.$broadcast('history_focus', {
+          peerString: AppPeersManager.getPeerString(migratedToPeer)
+        })
+        return
+      }
       $scope.historyFilter.mediaType = false
 
       AppPeersManager.getInputPeer(newDialog.peer || $scope.curDialog.peer || '')
@@ -1234,8 +1322,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       selectedCancel(true)
 
       if (oldDialog.peer &&
-        oldDialog.peer == newDialog.peer &&
-        newDialog.messageID) {
+          oldDialog.peer == newDialog.peer &&
+          newDialog.messageID) {
         messageFocusHistory()
       } else if (peerID) {
         updateHistoryPeer(true)
@@ -1654,6 +1742,13 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           }
           if (target.className &&
             target.className.indexOf('im_message_date') != -1) {
+            if ($scope.historyFilter.mediaType) {
+              $rootScope.$broadcast('history_focus', {
+                peerString: $scope.curDialog.peer,
+                messageID: messageID
+              })
+              return
+            }
             if (AppPeersManager.isBroadcast(peerID)) {
               quickForward(messageID)
             } else {
@@ -1674,6 +1769,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
         if (Config.Mobile) {
           $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
+          $scope.historyState.canReport = AppMessagesManager.canReportMessage(messageID)
 
           $modal.open({
             templateUrl: templateUrl('message_actions_modal'),
@@ -1695,6 +1791,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
               case 'forward':
                 selectedForward(messageID)
+                break
+
+              case 'report':
+                selectedReport(messageID)
                 break
 
               case 'select':
@@ -1756,6 +1856,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if ($scope.selectedCount == 1) {
         angular.forEach($scope.selectedMsgs, function (t, messageID) {
           $scope.historyState.canEdit = AppMessagesManager.canEditMessage(messageID)
+          $scope.historyState.canReport = AppMessagesManager.canReportMessage(messageID)
+        })
+      } else {
+        $scope.historyState.canEdit = false
+        $scope.historyState.canReport = false
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          if (AppMessagesManager.canReportMessage(messageID)) {
+            $scope.historyState.canReport = true
+          }
         })
       }
       $scope.$broadcast('messages_select')
@@ -1797,8 +1906,34 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
       if (selectedMessageIDs.length) {
-        ErrorService.confirm({type: 'MESSAGES_DELETE', count: selectedMessageIDs.length}).then(function () {
-          AppMessagesManager.deleteMessages(selectedMessageIDs).then(function () {
+        var peerID = $scope.curDialog.peerID
+        var isUser = peerID > 0
+        var isChannel = AppPeersManager.isChannel(peerID)
+        var isBroadcast = AppPeersManager.isBroadcast(peerID)
+        var isMegagroup = AppPeersManager.isMegagroup(peerID)
+        var isUsualGroup = !isChannel && !isUser
+        var isSavedMessages = peerID == AppUsersManager.getSelf().id
+
+        var revocable = !isChannel
+        for (var i = 0; revocable && i < selectedMessageIDs.length; i++) {
+          var messageID = selectedMessageIDs[i]
+          if (!AppMessagesManager.canRevokeMessage(messageID)) {
+            revocable = false
+          }
+        }
+
+        ErrorService.confirm({
+          type: 'MESSAGES_DELETE',
+          count: selectedMessageIDs.length,
+          revocable: revocable,
+          isUser: isUser,
+          peerID: peerID,
+          isSavedMessages: isSavedMessages,
+          isChannel: isBroadcast,
+          isSupergroup: isMegagroup,
+          isUsualGroup: isUsualGroup
+        }, {}, { revoke: false }).then(function (data) {
+          AppMessagesManager.deleteMessages(selectedMessageIDs, data.revoke).then(function () {
             selectedCancel()
           })
         })
@@ -1840,14 +1975,65 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         })
       }
       if (selectedMessageIDs.length) {
-        PeersSelectService.selectPeer({canSend: true}).then(function (peerString) {
+        PeersSelectService.selectPeer({canSend: true}).then(function (peerStrings) {
           selectedCancel()
-          $rootScope.$broadcast('history_focus', {
-            peerString: peerString,
-            attachment: {
-              _: 'fwd_messages',
-              id: selectedMessageIDs
-            }
+          if (Array.isArray(peerStrings) && peerStrings.length > 1) {
+            angular.forEach(peerStrings, function (peerString) {
+              var peerID = AppPeersManager.getPeerID(peerString)
+              AppMessagesManager.forwardMessages(peerID, selectedMessageIDs)
+            })
+            var toastData = toaster.pop({
+              type: 'info',
+              body: _('confirm_modal_forward_to_peer_success'),
+              bodyOutputType: 'trustedHtml',
+              clickHandler: function () {
+                $rootScope.$broadcast('history_focus', {
+                  peerString: peerStrings[0]
+                })
+                toaster.clear(toastData)
+              },
+              showCloseButton: false
+            })
+          } else {            
+            $rootScope.$broadcast('history_focus', {
+              peerString: peerStrings,
+              attachment: {
+                _: 'fwd_messages',
+                id: selectedMessageIDs
+              }
+            })
+          }    
+        })
+      }
+    }
+
+    function selectedReport (selectedMessageID) {
+      var selectedMessageIDs = []
+      if (selectedMessageID) {
+        selectedMessageIDs.push(selectedMessageID)
+      } else if ($scope.selectedCount > 0) {
+        angular.forEach($scope.selectedMsgs, function (t, messageID) {
+          selectedMessageIDs.push(messageID)
+        })
+      }
+      if (selectedMessageIDs.length) {
+        $modal.open({
+          templateUrl: templateUrl('report_msgs_modal'),
+          controller: 'ReportMessagesModalController',
+          windowClass: 'md_simple_modal_window mobile_modal',
+          scope: $scope.$new()
+        }).result.then(function (inputReason) {
+          selectedCancel()
+          AppMessagesManager.reportMessages(selectedMessageIDs, inputReason).then(function () {
+            var toastData = toaster.pop({
+              type: 'info',
+              body: _('confirm_modal_report_success'),
+              bodyOutputType: 'trustedHtml',
+              clickHandler: function () {
+                toaster.clear(toastData)
+              },
+              showCloseButton: false
+            })
           })
         })
       }
@@ -1892,7 +2078,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       $scope.historyFilter.mediaType = mediaType || false
-      $scope.curDialog.messageID = false
+      if (mediaType) {
+        $scope.curDialog.messageID = false
+      }
       peerHistory.messages = []
       peerHistory.ids = []
       $scope.state.empty = true
@@ -2112,8 +2300,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         var lastIsRead = !historyMessage || !historyMessage.pFlags.unread
         for (i = 0; i < len; i++) {
           messageID = msgs[i]
-          if (messageID < maxID ||
-            history.ids.indexOf(messageID) !== -1) {
+          if (messageID > 0 && messageID < maxID ||
+              history.ids.indexOf(messageID) !== -1) {
             continue
           }
           historyMessage = AppMessagesManager.wrapForHistory(messageID)
@@ -2263,7 +2451,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('user_update', angular.noop)
   })
 
-  .controller('AppImSendController', function ($rootScope, $q, $scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, DraftsManager, RichTextProcessor) {
+  .controller('AppImSendController', function ($rootScope, $q, $scope, $timeout, MtpApiManager, Storage, AppProfileManager, AppChatsManager, AppUsersManager, AppPeersManager, AppDocsManager, AppStickersManager, AppMessagesManager, AppInlineBotsManager, MtpApiFileManager, DraftsManager, RichTextProcessor) {
     $scope.$watch('curDialog.peer', resetDraft)
     $scope.$on('user_update', angular.noop)
     $scope.$on('peer_draft_attachment', applyDraftAttachment)
@@ -2281,6 +2469,8 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       send: submitMessage,
       replyClear: replyClear,
       fwdsClear: fwdsClear,
+      toggleSlash: toggleSlash,
+      replyKeyboardToggle: replyKeyboardToggle,
       type: 'new'
     }
     $scope.mentions = {}
@@ -2306,9 +2496,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     $scope.$on('inline_bots_popular', updateMentions)
 
     $scope.$on('last_message_edit', setEditLastMessage)
-
-    $scope.replyKeyboardToggle = replyKeyboardToggle
-    $scope.toggleSlash = toggleSlash
 
     $rootScope.$watch('idle.isIDLE', function (newVal) {
       if ($rootScope.idle.initial) {
@@ -2410,9 +2597,15 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return ids
       })
       var chatParticipantsPromise
-      if (peerID < 0) {
-        chatParticipantsPromise = AppProfileManager.getChatFull(-peerID).then(function (chatFull) {
-          var participantsVector = (chatFull.participants || {}).participants || []
+      if (peerID < 0 && !AppPeersManager.isBroadcast(peerID)) {
+        if (AppPeersManager.isChannel(peerID)) {
+          chatParticipantsPromise = AppProfileManager.getChannelParticipants(-peerID)
+        } else {
+          chatParticipantsPromise = AppProfileManager.getChatFull(-peerID).then(function (chatFull) {
+            return (chatFull.participants || {}).participants || []
+          })
+        }
+        chatParticipantsPromise = chatParticipantsPromise.then(function (participantsVector) {
           var ids = []
           angular.forEach(participantsVector, function (participant) {
             ids.push(participant.user_id)
@@ -2768,6 +2961,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     var inlineUsernameRegex = /^@([a-zA-Z\d_]{1,32})( | )([\s\S]*)$/
+    var inlineStickersEmojiRegex = /^\s*:(\S+):\s*$/
     var getInlineResultsTO = false
     var lastInlineBot = false
     var jump = 0
@@ -2784,6 +2978,39 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
       var matches = message.match(inlineUsernameRegex)
       if (!matches) {
+        matches = message.match(inlineStickersEmojiRegex)
+        if (matches) {
+          var emojiCode = EmojiHelper.shortcuts[matches[1]]
+          if (emojiCode) {
+            $scope.draftMessage.inlineProgress = true
+            AppStickersManager.searchStickers(emojiCode).then(function (docs) {
+              var inlineResults = []
+              angular.forEach(docs, function (doc) {
+                inlineResults.push({
+                  _: 'botInlineMediaResult',
+                  qID: '_sticker_' + doc.id,
+                  pFlags: {sticker: true},
+                  id: doc.id,
+                  type: 'sticker',
+                  document: doc,
+                  send_message: {_: 'botInlineMessageMediaAuto'}
+                })
+              })
+              var botResults = {
+                pFlags: {gallery: true},
+                query_id: 0,
+                results: inlineResults
+              }
+              botResults.text = message
+              $scope.$broadcast('inline_results', botResults)
+              delete $scope.draftMessage.inlineProgress
+            })
+          } else {
+            delete $scope.draftMessage.inlineProgress
+            $scope.$broadcast('inline_results', false)
+            return
+          }
+        }
         delete $scope.draftMessage.inlineProgress
         $scope.$broadcast('inline_results', false)
         return
@@ -2929,7 +3156,26 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         replyToMsgID: $scope.draftMessage.replyToMsgID,
         clearDraft: true
       }
-      AppInlineBotsManager.sendInlineResult($scope.curDialog.peerID, qID, options)
+
+      if (qID.substr(0, 9) == '_sticker_') {
+        var docID = qID.substr(9)
+        var doc = AppDocsManager.getDoc(docID)
+        if (doc.id && doc.access_hash) {
+          var inputMedia = {
+            _: 'inputMediaDocument',
+            id: {
+              _: 'inputDocument',
+              id: doc.id,
+              access_hash: doc.access_hash
+            }
+          }
+          AppMessagesManager.sendOther($scope.curDialog.peerID, inputMedia, options)
+        }
+      }
+      else {
+        AppInlineBotsManager.sendInlineResult($scope.curDialog.peerID, qID, options)
+      }
+
 
       if (forceDraft == $scope.curDialog.peer) {
         forceDraft = false
@@ -3450,7 +3696,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('history_delete', function (e, historyUpdate) {
-      if (historyUpdate.msgs[$scope.messageID]) {
+      if (historyUpdate && historyUpdate.msgs && historyUpdate.msgs[$scope.messageID]) {
         $modalInstance.dismiss()
       }
     })
@@ -3484,7 +3730,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.$on('history_delete', function (e, historyUpdate) {
-      if (historyUpdate.msgs[$scope.messageID]) {
+      if (historyUpdate && historyUpdate.msgs && historyUpdate.msgs[$scope.messageID]) {
         $modalInstance.dismiss()
       }
     })
@@ -3553,7 +3799,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.settings = {notifications: true}
 
-    AppProfileManager.getProfile($scope.userID, $scope.override).then(function (userFull) {
+    var profilePromise = AppProfileManager.getProfile($scope.userID, $scope.override)
+
+    profilePromise.then(function (userFull) {
       $scope.blocked = userFull.pFlags.blocked
       $scope.bot_info = userFull.bot_info
       $scope.rAbout = userFull.rAbout
@@ -3575,6 +3823,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
 
     $scope.goToHistory = function () {
       $rootScope.$broadcast('history_focus', {peerString: peerString})
+    }
+
+    $scope.openUserPic = function () {
+      profilePromise.then(function () {
+        $scope.openPhoto($scope.user.photo.photo_id, {p: $scope.userID})
+      })
     }
 
     $scope.flushHistory = function (justClear) {
@@ -3677,8 +3931,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       if (Config.Modes.test || Config.Modes.debug) {
         $scope.needMigrate = true
       }
-
-      NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings)
 
       NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
         $scope.settings.notifications = !muted
@@ -3838,8 +4090,6 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.chatFull = AppChatsManager.wrapForFull($scope.chatID, chatFull)
       $scope.$broadcast('ui_height')
 
-      NotificationsManager.savePeerSettings(-$scope.chatID, chatFull.notify_settings)
-
       NotificationsManager.getPeerMuted(-$scope.chatID).then(function (muted) {
         $scope.settings.notifications = !muted
 
@@ -3868,9 +4118,21 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     })
 
+    AppProfileManager.getChannelParticipants($scope.chatID).then(function (participants) {
+      $scope.participants = AppChatsManager.wrapParticipants($scope.chatID, participants)
+      $scope.$broadcast('ui_height')
+    })
+
+
     function onChatUpdated (updates) {
       ApiUpdatesManager.processUpdateMessage(updates)
       $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString})
+      if (updates &&
+          updates.updates &&
+          updates.updates.length &&
+          AppChatsManager.isChannel($scope.chatID)) {
+        AppProfileManager.invalidateChannelParticipants($scope.chatID)
+      }
     }
 
     $scope.leaveChannel = function () {
@@ -3886,6 +4148,14 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         MtpApiManager.invokeApi('channels.deleteChannel', {
           channel: AppChatsManager.getChannelInput($scope.chatID)
         }).then(onChatUpdated)
+      })
+    }
+
+    $scope.flushHistory = function () {
+      ErrorService.confirm({type: 'HISTORY_FLUSH'}).then(function () {
+        AppMessagesManager.flushHistory(-$scope.chatID).then(function () {
+          $rootScope.$broadcast('history_focus', {peerString: $scope.chatFull.peerString})
+        })
       })
     }
 
@@ -3914,10 +4184,10 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
 
     $scope.kickFromChannel = function (userID) {
-      MtpApiManager.invokeApi('channels.kickFromChannel', {
+      MtpApiManager.invokeApi('channels.editBanned', {
         channel: AppChatsManager.getChannelInput($scope.chatID),
         user_id: AppUsersManager.getUserInput(userID),
-        kicked: true
+        banned_rights: {_: 'channelBannedRights', flags: 1, until_date: 0}
       }).then(onChatUpdated)
     }
 
@@ -3989,6 +4259,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
   })
 
   .controller('SettingsModalController', function ($rootScope, $scope, $timeout, $modal, AppUsersManager, AppChatsManager, AppPhotosManager, MtpApiManager, Storage, NotificationsManager, MtpApiFileManager, PasswordManager, ApiUpdatesManager, ChangelogNotifyService, LayoutSwitchService, WebPushApiManager, AppRuntimeManager, ErrorService, _) {
+
     $scope.profile = {}
     $scope.photo = {}
     $scope.version = Config.App.version
@@ -3997,7 +4268,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       $scope.profile = AppUsersManager.getUser(id)
     })
 
-    MtpApiManager.invokeApi('users.getFullUser', {
+    var profilePromise = MtpApiManager.invokeApi('users.getFullUser', {
       id: {_: 'inputUserSelf'}
     }).then(function (userFullResult) {
       AppUsersManager.saveApiUser(userFullResult.user)
@@ -4008,6 +4279,24 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }
     })
 
+    $scope.contentSettings = {notReady: true}
+    var contentSettingsPromise = MtpApiManager.invokeApi('account.getContentSettings', {}).then(function (contentsResult) {
+      $scope.contentSettings = contentsResult
+    })
+
+    $scope.toggleContentSettings = function () {
+      if ($scope.contentSettings.pFlags &&
+          $scope.contentSettings.pFlags.sensitive_enabled) {
+        delete $scope.contentSettings.pFlags.sensitive_enabled
+        MtpApiManager.invokeApi('account.setContentSettings', {flags: 0})
+      } else {
+        return ErrorService.confirm({type: 'CONTENT_SETTINGS_SENSITIVE'}).then(function () {
+          $scope.contentSettings.pFlags.sensitive_enabled = true
+          MtpApiManager.invokeApi('account.setContentSettings', {flags: 1})
+        })
+      }
+    }
+
     $scope.notify = {volume: 0.5}
     $scope.send = {}
 
@@ -4017,6 +4306,12 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     updatePasswordState()
     var updatePasswordTimeout = false
     var stopped = false
+
+    $scope.openUserPic = function () {
+      profilePromise.then(function () {
+        $scope.openPhoto($scope.profile.photo.photo_id, {p: $scope.profile.id})
+      })
+    }
 
     $scope.changePassword = function (options) {
       options = options || {}
@@ -4301,6 +4596,18 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
+  .controller('ReportMessagesModalController', function ($scope, $modalInstance) {
+    $scope.reason = {_: 'inputReportReasonSpam', text: ''}
+    $scope.toggleReportReason = function (reason) {
+      $scope.reason = {_: reason}
+      if (reason == 'inputReportReasonOther') {
+        onContentLoaded(function () {
+          $scope.$broadcast('ui_reason_text_focus')
+        })
+      }
+    }
+  })
+
   .controller('ProfileEditModalController', function ($scope, $modalInstance, AppUsersManager, MtpApiManager) {
     $scope.profile = {}
     $scope.error = {}
@@ -4368,9 +4675,11 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         AppUsersManager.saveApiUser(user)
         $modalInstance.close()
       }, function (error) {
-        if (error.type == 'USERNAME_NOT_MODIFIED') {
-          error.handled = true
-          $modalInstance.close()
+        switch (error.type) {
+          case 'USERNAME_NOT_MODIFIED':
+            error.handled = true
+            $modalInstance.close()
+            break
         }
       })['finally'](function () {
         delete $scope.profile.updating
@@ -4383,9 +4692,9 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         return
       }
       MtpApiManager.invokeApi('account.checkUsername', {
-        username: newVal || ''
+        username: newVal
       }).then(function (valid) {
-        if ($scope.profile.username != newVal) {
+        if ($scope.profile.username !== newVal) {
           return
         }
         if (valid) {
@@ -4394,7 +4703,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
           $scope.checked = {error: true}
         }
       }, function (error) {
-        if ($scope.profile.username != newVal) {
+        if ($scope.profile.username !== newVal) {
           return
         }
         switch (error.type) {
@@ -4596,7 +4905,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
     }
   })
 
-  .controller('ContactsModalController', function ($scope, $rootScope, $timeout, $modal, $modalInstance, MtpApiManager, AppUsersManager, ErrorService) {
+  .controller('ContactsModalController', function ($scope, $rootScope, $timeout, $modal, $modalInstance, MtpApiManager, AppPeersManager, AppUsersManager, ErrorService) {
     $scope.contacts = []
     $scope.foundPeers = []
     $scope.search = {}
@@ -4648,20 +4957,25 @@ angular.module('myApp.controllers', ['myApp.i18n'])
         $scope.$broadcast('contacts_change')
       })
 
-      if (query && query.length >= 5) {
+      if (query && query.length >= 2) {
         $timeout(function () {
           if (curJump != jump) return
           MtpApiManager.invokeApi('contacts.search', {q: query, limit: 10}).then(function (result) {
             AppUsersManager.saveApiUsers(result.users)
             if (curJump != jump) return
-            angular.forEach(result.results, function (contactFound) {
-              var userID = contactFound.user_id
-              if (doneIDs.indexOf(userID) != -1) return
+            var myPeersLen = result.my_results.length
+            var foundPeers = result.my_results.concat(result.results)
+            angular.forEach(foundPeers, function (peerFound, i) {
+              var peerID = AppPeersManager.getPeerID(peerFound)
+              if (peerID <= 0 ||
+                  doneIDs.indexOf(peerID) != -1) {
+                return
+              }
               $scope.contacts.push({
-                userID: userID,
-                user: AppUsersManager.getUser(userID),
-                peerString: AppUsersManager.getUserString(userID),
-                found: true
+                userID: peerID,
+                user: AppUsersManager.getUser(peerID),
+                peerString: AppUsersManager.getUserString(peerID),
+                found: i >= myPeersLen
               })
             })
           }, function (error) {
@@ -4745,6 +5059,30 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       }, function () {
         delete $scope.shareLink
       })
+    }
+
+    $scope.dialogMultiSelect = function(peerString, event) {
+      var peerID = AppPeersManager.getPeerID(peerString)      
+      $scope.multiSelect = $scope.selectedPeers[peerID] == undefined || 
+        $scope.selectedPeers[peerID] != undefined && Object.keys($scope.selectedPeers).length > 1
+      if ($scope.selectedPeers[peerID]) {
+        delete $scope.selectedPeers[peerID]
+        $scope.selectedCount--
+        var pos = $scope.selectedPeerIDs.indexOf(peerID)
+        if (pos >= 0) {
+          $scope.selectedPeerIDs.splice(pos, 1)
+        }
+      } else {
+        $scope.selectedPeers[peerID] = AppPeersManager.getPeer(peerID)
+        $scope.selectedCount++
+        $scope.selectedPeerIDs.unshift(peerID)
+      }
+      cancelEvent(event)
+    }
+
+    $scope.isSelected = function(peerString){
+      var peerID = AppPeersManager.getPeerID(peerString)
+      return $scope.selectedPeers[peerID] != undefined
     }
 
     $scope.dialogSelect = function (peerString) {

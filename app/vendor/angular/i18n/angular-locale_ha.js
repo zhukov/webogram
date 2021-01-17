@@ -58,13 +58,13 @@ $provide.value("$locale", {
       "Disamba"
     ],
     "SHORTDAY": [
-      "Lh",
-      "Li",
-      "Ta",
-      "Lr",
-      "Al",
-      "Ju",
-      "As"
+      "Lah",
+      "Lit",
+      "Tal",
+      "Lar",
+      "Alh",
+      "Jum",
+      "Asa"
     ],
     "SHORTMONTH": [
       "Jan",

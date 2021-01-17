@@ -26,18 +26,19 @@
             <ul class="im_dialogs_modal_list nav nav-pills nav-stacked">
               <li class="im_dialog_wrap" my-dialog dialog-message="dialogMessage" ng-repeat="dialogMessage in dialogs track by dialogMessage.peerID" ng-class="{active: selectedPeers[dialogMessage.peerID] !== undefined}"></li>
             </ul>
-            <div class="im_dialogs_contacts_wrap" ng-show="contacts.length > 0">
-              <h5 my-i18n="conversation_select_modal_contacts"></h5>
+            <div class="im_dialogs_contacts_wrap" ng-show="myResults.length > 0">
+              <h5 my-i18n="conversation_select_modal_chats_contacts"></h5>
               <ul class="nav nav-pills nav-stacked">
-                <li class="im_dialog_wrap" ng-repeat="contact in contacts | orderBy:'user.sortName' track by contact.userID" ng-class="{active: selectedPeers[contact.userID] !== undefined}">
-                  <a class="im_dialog" ng-click="dialogSelect(contact.peerString)">
-                    <div class="im_dialog_photo pull-left" my-peer-photolink="::contact.userID" img-class="im_dialog_photo"></div>
+                <li class="im_dialog_wrap" ng-repeat="myResult in myResults track by myResult.id" ng-class="{active: selectedPeers[myResult.id] !== undefined}">
+                  <a class="im_dialog" ng-click="dialogSelect(myResult.peerString)">
+                    <div class="im_dialog_photo pull-left" my-peer-photolink="::myResult.id" img-class="im_dialog_photo"></div>
                     <div class="im_dialog_message_wrap">
                       <div class="im_dialog_peer">
-                        <span class="im_dialog_user" my-peer-link="contact.userID"></span>
+                        <span class="im_dialog_user" my-peer-link="myResult.id"></span>
                       </div>
-                      <div class="im_dialog_message">
-                        <span class="im_dialog_message_text" my-user-status="::contact.userID"></span>
+                      <div class="im_dialog_message" ng-switch="myResult.id > 0">
+                        <span ng-switch-when="true" class="im_dialog_message_text" my-user-status="::myResult.id"></span>
+                        <span ng-switch-default class="im_dialog_message_text" my-chat-status="::-myResult.id"></span>
                       </div>
                     </div>
                   </a>

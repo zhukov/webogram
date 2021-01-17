@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.5 - messaging web application for MTProto
+ * Webogram v0.7.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -32,6 +32,7 @@ angular.module('myApp', [
   'myApp.directives',
   'myApp.controllers'
 ].concat(extraModules)).config(['$locationProvider', '$routeProvider', '$compileProvider', 'StorageProvider', function ($locationProvider, $routeProvider, $compileProvider, StorageProvider) {
+  $locationProvider.hashPrefix('');
   $compileProvider.imgSrcSanitizationWhitelist(/^\s*(https?|ftp|file|blob|filesystem|chrome-extension|app):|data:image\//)
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|file|tg|mailto|blob|filesystem|chrome-extension|app):|data:/)
 

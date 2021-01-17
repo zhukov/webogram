@@ -21,32 +21,28 @@ self.addEventListener('push', function(event) {
 
   var hasActiveWindows = false
   var checksPromise = new Promise(function (resolve, reject) {
-    if (!obj.badge) {
-      return reject()
-    }
     var nowTime = +(new Date())
     Promise.all([getMuteUntil(), getLastAliveTime()]).then(function (result) {
       var muteUntil = result[0]
       var lastAliveTime = result[1]
-      if (userInvisibleIsSupported() &&
-          muteUntil &&
-          nowTime < muteUntil) {
-        console.log('Supress notification because mute for ', Math.ceil((muteUntil - nowTime) / 60000), 'min')
-        return reject()
-      }
-      if (lastAliveTime && 
-          nowTime - lastAliveTime < 60000) {
-        return clients.matchAll({type: 'window'}).then(function(clientList) {
-          console.log('matched clients', clientList)
-          hasActiveWindows = clientList.length > 0
-          if (hasActiveWindows) {
-            console.log('Supress notification because some instance is alive')
-            return reject()
-          }
-          return resolve()
-        })
-      }
-      return resolve()
+      return clients.matchAll({type: 'window'}).then(function(clientList) {
+        console.log('matched clients', clientList)
+        hasActiveWindows = clientList.length > 0
+        if (hasActiveWindows) {
+          console.log('Supress notification because some instance is alive')
+          return reject()
+        }
+        if (userInvisibleIsSupported() &&
+            muteUntil &&
+            nowTime < muteUntil) {
+          console.log('Supress notification because mute for ', Math.ceil((muteUntil - nowTime) / 60000), 'min')
+          return reject()
+        }
+        if (!obj.badge) {
+          return reject()
+        }
+        return resolve()
+      })
     })
   })
 
@@ -58,13 +54,15 @@ self.addEventListener('push', function(event) {
 
   var closePromise = notificationPromise.catch(function () {
     console.log('[SW] Closing all notifications on push', hasActiveWindows)
-    if (userInvisibleIsSupported()) {
+    if (userInvisibleIsSupported() || hasActiveWindows) {
       return closeAllNotifications()
     }
-    var promise = self.registration.showNotification('Telegram').then(function () {
-      // if (hasActiveWindows) {
-      //   return closeAllNotifications()
-      // }
+    return self.registration.showNotification('Telegram', {
+      tag: 'unknown_peer'
+    }).then(function () {
+      if (hasActiveWindows) {
+        return closeAllNotifications()
+      }
       setTimeout(closeAllNotifications, hasActiveWindows ? 0 : 100)
     }).catch(function (error) {
       console.error('Show notification error', error)
@@ -136,6 +134,8 @@ function fireNotification(obj, settings, lang) {
     body = lang.push_message_nopreview || 'You have a new message'
     tag = 'unknown_peer'
   }
+
+  console.log('[SW] show notify', title, body, icon, obj)
 
   var notificationPromise = self.registration.showNotification(title, {
     body: body,

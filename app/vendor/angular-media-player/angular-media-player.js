@@ -50,7 +50,9 @@ angular.module('mediaPlayer', ['mediaPlayer.helpers'])
         this.$domEl.load();
         this.ended = undefined;
         if (autoplay) {
-          this.$element.one('canplay', this.play.bind(this));
+          // ogv.js doesn't have support for canplay event yet
+          var canPlayEvent = this.$domEl.tagName == 'OGVJS' ? 'loadeddata' : 'canplay'
+          this.$element.one(canPlayEvent, this.play.bind(this));
         }
       },
       /**
@@ -242,6 +244,10 @@ angular.module('mediaPlayer', ['mediaPlayer.helpers'])
      * Returns an unbinding function
      */
     var bindListeners = function (au, al, element) {
+      var updateTime = function (scope) {
+        scope.currentTime = al.currentTime;
+        scope.formatTime = scope.$formatTime(scope.currentTime);
+      }
       var listeners = {
         playing: function () {
           au.$apply(function (scope) {
@@ -261,13 +267,13 @@ angular.module('mediaPlayer', ['mediaPlayer.helpers'])
             au.$apply(function (scope) {
               scope.ended = true;
               scope.playing = false; // IE9 does not throw 'pause' when file ends
+              updateTime(scope)
             });
           }
         },
         timeupdate: throttle(1000, false, function () {
           au.$apply(function (scope) {
-            scope.currentTime = al.currentTime;
-            scope.formatTime = scope.$formatTime(scope.currentTime);
+            updateTime(scope)
           });
         }),
         loadedmetadata: function () {
@@ -278,6 +284,7 @@ angular.module('mediaPlayer', ['mediaPlayer.helpers'])
             if (al.buffered.length) {
               scope.loadPercent = Math.round((al.buffered.end(al.buffered.length - 1) / scope.duration) * 100);
             }
+            updateTime(scope)
           });
         },
         progress: function () {
@@ -434,7 +441,7 @@ angular.module('mediaPlayer', ['mediaPlayer.helpers'])
           scope.$eval(mediaName + ' = player', {player: player});
         }
 
-        if (element[0].tagName !== 'AUDIO' && element[0].tagName !== 'VIDEO') {
+        if (element[0].tagName !== 'AUDIO' && element[0].tagName !== 'VIDEO' && element[0].tagName !== 'OGVJS') {
           return new Error('player directive works only when attached to an <audio>/<video> type tag');
         }
         var mediaElement = [],

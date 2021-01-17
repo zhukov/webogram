@@ -29,7 +29,12 @@
 
       <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
         <h3 class="login_form_head" my-i18n="login_sign_in"></h3>
-        <p class="login_form_lead" my-i18n="login_enter_number_description"></p>
+        <p class="login_form_lead" my-i18n="login_enter_number_description_md">
+          <my-i18n-param name="apps-link">
+            <a href="https://telegram.org/apps" target="_blank">{0}</a>
+          </my-i18n-param>
+        </p>
+
 
         <div class="md-input-group md-input-has-value login_phone_country_input_group" ng-click="chooseCountry()">
           <label class="md-input-label" my-i18n="login_country_select_placeholder"></label>

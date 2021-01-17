@@ -24,7 +24,12 @@
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('photos')" my-i18n="head_media_photos"></a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('video')" my-i18n="head_media_video"></a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('documents')" my-i18n="head_media_documents"></a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('music')" my-i18n="head_media_music"></a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('urls')" my-i18n="head_media_links"></a></li>
           <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('audio')" my-i18n="head_media_audio"></a></li>
+          <li ng-if="!historyFilter.mediaType"><a ng-click="toggleMedia('round')" my-i18n="head_media_round"></a></li>
+          <li ng-if="!historyFilter.mediaType && isHistoryPeerGroup()" class="divider"></li>
+          <li ng-if="!historyFilter.mediaType && isHistoryPeerGroup()"><a ng-click="toggleMedia('mentions')" my-i18n="head_media_mymentions"></a></li>
         </ul>
       </div>
 
@@ -44,10 +49,14 @@
               <a ng-click="toggleMedia()" class="navbar-quick-media-back">
                 <i class="icon icon-back"></i>
                 <div class="navbar-quick-back-title" ng-switch="historyFilter.mediaType">
-                  <h4 ng-switch-when="photos" my-i18n="head_media_photos"></h4>
-                  <h4 ng-switch-when="video" my-i18n="head_media_video"></h4>
-                  <h4 ng-switch-when="documents" my-i18n="head_media_documents"></h4>
-                  <h4 ng-switch-when="audio" my-i18n="head_media_audio"></h4>
+                  <h4 ng-switch-when="photos" my-i18n="im_media_photos"></h4>
+                  <h4 ng-switch-when="video" my-i18n="im_media_video"></h4>
+                  <h4 ng-switch-when="documents" my-i18n="im_media_documents"></h4>
+                  <h4 ng-switch-when="audio" my-i18n="im_media_audio"></h4>
+                  <h4 ng-switch-when="round" my-i18n="im_media_round"></h4>
+                  <h4 ng-switch-when="music" my-i18n="im_media_music"></h4>
+                  <h4 ng-switch-when="urls" my-i18n="im_media_links"></h4>
+                  <h4 ng-switch-when="mentions" my-i18n="im_media_mentions"></h4>
                 </div>
               </a>
             </li>
@@ -72,7 +81,7 @@
                       <span ng-switch-when="1" class="status_online">
                         <my-i18n msgid="head_typing"></my-i18n><span my-loading-dots></span>
                       </span>
-                      <span ng-switch-default my-user-status="historyPeer.id"></span>
+                      <span ng-switch-default my-user-status="historyPeer.id" for-dialog="true"></span>
                     </small>
                   </div>
                 </a>
@@ -81,7 +90,7 @@
                 <a href="#/im" class="navbar-quick-group-back">
                   <i class="icon icon-back"></i>
                   <div class="navbar-quick-back-title">
-                    <h4 my-peer-link="historyPeer.id" peer-watch="true"></h4>
+                    <h4 my-peer-link="historyPeer.id" peer-watch="true" for-dialog="true"></h4>
                     <small ng-switch="historyState.typing.length">
                       <span ng-switch-when="0" class="tg_head_peer_status" my-chat-status="-historyPeer.id"></span>
                       <my-i18n>

@@ -5,7 +5,7 @@ $provide.value("$locale", {
   "DATETIME_FORMATS": {
     "AMPMS": [
       "\u0442\u0430\u04a3\u043a\u044b",
-      "\u0442\u04af\u0448\u0442\u04e9\u043d \u043a\u0438\u0439\u0438\u043d"
+      "\u0442\u04af\u0448\u0442\u04e9\u043d \u043a\u0438\u0439\u0438\u043d\u043a\u0438"
     ],
     "DAY": [
       "\u0436\u0435\u043a\u0448\u0435\u043c\u0431\u0438",
@@ -80,13 +80,13 @@ $provide.value("$locale", {
       5,
       6
     ],
-    "fullDate": "EEEE, d-MMMM, y-'\u0436'.",
-    "longDate": "y MMMM d",
-    "medium": "y MMM d HH:mm:ss",
-    "mediumDate": "y MMM d",
+    "fullDate": "y-'\u0436'., d-MMMM, EEEE",
+    "longDate": "y-'\u0436'., d-MMMM",
+    "medium": "y-'\u0436'., d-MMM HH:mm:ss",
+    "mediumDate": "y-'\u0436'., d-MMM",
     "mediumTime": "HH:mm:ss",
-    "short": "dd.MM.yy HH:mm",
-    "shortDate": "dd.MM.yy",
+    "short": "d/M/yy HH:mm",
+    "shortDate": "d/M/yy",
     "shortTime": "HH:mm"
   },
   "NUMBER_FORMATS": {

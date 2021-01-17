@@ -4,6 +4,7 @@
 
     <h4 ng-if="error" class="md_simple_header" ng-switch="error.type">
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_title"></span>
+      <span ng-switch-when="PHONECALLS_NOT_SUPPORTED" my-i18n="error_modal_phonecalls_not_supported_title"></span>
       <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_not_found_title"></span>
       <span ng-switch-when="PASSWORD_RECOVERY_NA" my-i18n="error_modal_recovery_na_title"></span>
       <span ng-switch-default ng-switch="error.code">
@@ -39,6 +40,10 @@
       <span ng-switch-when="USERNAME_INVALID" my-i18n="error_modal_username_invalid_description"></span>
       <span ng-switch-when="USERNAME_OCCUPIED" my-i18n="error_modal_username_occupied_description"></span>
       <span ng-switch-when="MEDIA_TYPE_NOT_SUPPORTED" my-i18n="error_modal_media_not_supported_description"></span>
+      <span ng-switch-when="PHONE_NUMBER_APP_SIGNUP_FORBIDDEN" my-i18n="error_modal_app_signup_forbidden_md">
+        <my-i18n-param name="signup-link"><a href="https://telegram.org/dl" target="_blank">{0}</a></my-i18n-param>
+      </span>
+
       <span ng-switch-when="USERNAME_NOT_OCCUPIED" my-i18n="error_modal_username_not_found_description"></span>
       <span ng-switch-when="USER_NOT_MUTUAL_CONTACT" my-i18n="error_modal_user_not_mutual_contact"></span>
       <span ng-switch-when="INVITE_HASH_INVALID" my-i18n="error_modal_invite_link_invalid"></span>
@@ -52,8 +57,21 @@
       <span ng-switch-when="2FA_CONFIRM_WAIT_TIME" my-i18n="error_modal_2fa_delayed_time_md">
         <my-i18n-param name="time"><span ng-bind="error.waitTime | duration"></span></my-i18n-param>
       </span>
-      
+      <span ng-switch-when="PHONECALLS_NOT_SUPPORTED" my-i18n="error_modal_phonecalls_not_supported_description_md">
+        <my-i18n-param name="user"><strong my-peer-link="error.userID"></strong></my-i18n-param>
+        <my-i18n-param name="download-link"><a href="https://telegram.org/dl" target="_blank">{0}</a></my-i18n-param>
+        
+      </span>
+
       <span ng-switch-when="CALLBACK_RESPONSE" ng-bind-html="error.description_html"></span>
+
+      <span ng-switch-when="UPDATE_SERVICE_NOTIFICATION">
+        <div my-message-body="historyMessage">
+          <div class="im_message_text" dir="auto"></div>
+          <div class="im_message_media"></div>
+        </div>
+      </span>
+
 
 
       <div ng-switch-default ng-switch="error.code">
@@ -69,9 +87,8 @@
 
     </div>
 
-    <div ng-if="error" class="error_modal_details" ng-switch="error.detailsShown">
-      <textarea ng-switch-when="true" rows="3" onclick="this.select()">Method: {{error.input || 'N/A'}}
-Url: {{error.url || 'N/A'}}
+    <div ng-if="error && error.input" class="error_modal_details" ng-switch="error.detailsShown">
+      <textarea ng-switch-when="true" rows="3" onclick="this.select()">Method: {{error.input || 'N/A'}}{{error.url ? "\nUrl: " + error.url : ''}}
 Result: {{error.originalError ? error.originalError : (error.stack ? (error.name || '') + ' ' + (error.description || error.message) : error)}}</textarea>
       <div ng-switch-default>
         <a class="error_modal_details_link" href="" ng-click="error.detailsShown = true" my-i18n="error_modal_tech_details"></a>

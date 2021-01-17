@@ -15,7 +15,7 @@
 
     <div class="media_modal_info_wrap pull-left" ng-if="webpageID">
       <div class="media_modal_author_name">
-        <a class="media_modal_author" href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle"></a>
+        <a class="media_modal_author" href="{{webpage.url}}" target="_blank" ng-bind-html="webpage.rTitle" rel="noopener noreferrer"></a>
       </div>
       <div class="media_modal_date"  ng-bind="webpage.site_name || webpage.display_url"></div>
     </div>

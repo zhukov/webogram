@@ -42,7 +42,7 @@ $provide.value("$locale", {
       "BCE",
       "d.C."
     ],
-    "FIRSTDAYOFWEEK": 6,
+    "FIRSTDAYOFWEEK": 0,
     "MONTH": [
       "Qulla puquy",
       "Hatun puquy",
@@ -99,13 +99,13 @@ $provide.value("$locale", {
       6
     ],
     "fullDate": "EEEE, d MMMM, y",
-    "longDate": "y MMMM d",
-    "medium": "y MMM d hh:mm:ss a",
-    "mediumDate": "y MMM d",
-    "mediumTime": "hh:mm:ss a",
-    "short": "dd/MM/y hh:mm a",
+    "longDate": "d MMMM y",
+    "medium": "d MMM y HH:mm:ss",
+    "mediumDate": "d MMM y",
+    "mediumTime": "HH:mm:ss",
+    "short": "dd/MM/y HH:mm",
     "shortDate": "dd/MM/y",
-    "shortTime": "hh:mm a"
+    "shortTime": "HH:mm"
   },
   "NUMBER_FORMATS": {
     "CURRENCY_SYM": "Bs",

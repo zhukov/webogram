@@ -52,7 +52,7 @@
     </a>
     <div ng-if="media.webpage.site_name" class="im_message_webpage_site" ng-bind="media.webpage.site_name"></div>
     <div class="im_message_webpage_title">
-      <a ng-click="openEmbed($event)" href="{{media.webpage.url}}" target="_blank" ng-bind-html="media.webpage.rTitle"></a>
+      <a ng-click="openEmbed($event)" href="{{media.webpage.url}}" rel="noopener noreferrer" target="_blank" ng-bind-html="media.webpage.rTitle"></a>
     </div>
     <div ng-if="media.webpage.description.length" class="im_message_webpage_description" ng-bind-html="media.webpage.rDescription"></div>
   </div>
