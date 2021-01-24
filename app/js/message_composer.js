@@ -9,7 +9,7 @@
 
 /* EmojiHelper */
 
-;(function (global, emojiData, categories, spritesheets) {
+;(function (global, emojiData, categories, spritesheets, emojiAlias) {
   var emojis = {}
   var shortcuts = {}
   var emojiMap = {}
@@ -132,6 +132,7 @@
   global.EmojiHelper = {
     emojis: emojis,
     emojiMap: emojiMap,
+    emojiAlias: emojiAlias,
     shortcuts: shortcuts,
     spritesheetPositions: spritesheetPositions,
     getPopularEmoji: getPopularEmoji,
@@ -139,7 +140,7 @@
     indexEmojis: indexEmojis,
     searchEmojis: searchEmojis
   }
-})(window, Config.Emoji, Config.EmojiCategories, Config.EmojiCategorySpritesheetDimens)
+})(window, Config.Emoji, Config.EmojiCategories, Config.EmojiCategorySpritesheetDimens, Config.EmojiAlias)
 
 function EmojiTooltip (btnEl, options) {
   options = options || {}
@@ -229,10 +230,13 @@ EmojiTooltip.prototype.createTooltip = function () {
         <div class="composer_emoji_tooltip_categories">\
           <a class="composer_emoji_tooltip_category active" data-category="0"><i class="composer_emoji_tooltip_category_recent"></i></a>\
           <a class="composer_emoji_tooltip_category" data-category="1"><i class="composer_emoji_tooltip_category_smile"></i></a>\
-          <a class="composer_emoji_tooltip_category" data-category="2"><i class="composer_emoji_tooltip_category_flower"></i></a>\
-          <a class="composer_emoji_tooltip_category" data-category="3"><i class="composer_emoji_tooltip_category_bell"></i></a>\
-          <a class="composer_emoji_tooltip_category" data-category="4"><i class="composer_emoji_tooltip_category_car"></i></a>\
-          <a class="composer_emoji_tooltip_category" data-category="5"><i class="composer_emoji_tooltip_category_grid"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="2"><i class="composer_emoji_tooltip_category_animal"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="3"><i class="composer_emoji_tooltip_category_food"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="4"><i class="composer_emoji_tooltip_category_activity"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="5"><i class="composer_emoji_tooltip_category_car"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="6"><i class="composer_emoji_tooltip_category_object"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="7"><i class="composer_emoji_tooltip_category_symbol"></i></a>\
+          <a class="composer_emoji_tooltip_category" data-category="8"><i class="composer_emoji_tooltip_category_flag"></i></a>\
         </div>\
       </div>\
       <div class="composer_emoji_tooltip_tab_stickers_content">\
