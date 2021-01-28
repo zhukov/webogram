@@ -189,7 +189,7 @@ angular.module('myApp.controllers', ['myApp.i18n'])
       var badPhone = !fullPhone.match(/^[\d\-+\s]+$/)
       if (!badPhone) {
         fullPhone = fullPhone.replace(/\D/g, '')
-        if (fullPhone.length < 7 || fullPhone.length > 15) {
+        if (fullPhone.length < 7 || fullPhone.length > 25) {
           badPhone = true
         }
       }
