@@ -40,12 +40,12 @@
       "sizes": "128x128"
     },
     {
-      "src": "img/icons/icon192.png",
+      "src": "/img/favicons/android-chrome-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "img/icons/icon512.png",
+      "src": "/img/favicons/android-chrome-512x512.png",
       "type": "image/png",
       "sizes": "512x512"
     },
