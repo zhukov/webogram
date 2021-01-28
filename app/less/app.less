@@ -2937,7 +2937,7 @@ img.img_fullsize {
   .composer_emoji_tooltip_tab_emoji_content & {
     width: 100%;
     margin: 0 0 3px;
-    padding: 0 5px 15px;
+    padding: 0 11px 15px;
     line-height: 0;
   }
 
@@ -2973,7 +2973,7 @@ img.img_fullsize {
   display: inline-block;
   cursor: pointer;
   opacity: 0.3;
-  padding: 9px 12px;
+  padding: 9px 4px;
   // margin: 0 12px 0 12px;
 
   &:hover {
@@ -2990,32 +2990,44 @@ img.img_fullsize {
   width: 21px;
   height: 21px;
 
-  .image-2x('../img/icons/IconsetSmiles.png', 27px, 362px);
+  .image-2x('../img/icons/IconsetSmiles.png', 21px, 378px);
 }
 
 /* Recent */
-.composer_emoji_tooltip_category_recent {background-position: -3px 0; }
-.active .composer_emoji_tooltip_category_recent {background-position: -3px -31px; }
+.composer_emoji_tooltip_category_recent { background-position: 0 0; }
+.active .composer_emoji_tooltip_category_recent { background-position: 0 -21px; }
 
 /* Smile */
-.composer_emoji_tooltip_category_smile {background-position: -3px -62px; }
-.active .composer_emoji_tooltip_category_smile {background-position: -3px -93px; }
+.composer_emoji_tooltip_category_smile { background-position: 0 -42px; }
+.active .composer_emoji_tooltip_category_smile { background-position: 0 -63px; }
 
-/* Flower */
-.composer_emoji_tooltip_category_flower {background-position: -3px -124px; }
-.active .composer_emoji_tooltip_category_flower {background-position: -3px -155px; }
+/* Animal */
+.composer_emoji_tooltip_category_animal { background-position: 0 -84px; }
+.active .composer_emoji_tooltip_category_animal { background-position: 0 -105px; }
 
-/* Bell */
-.composer_emoji_tooltip_category_bell {background-position: -3px -185px; }
-.active .composer_emoji_tooltip_category_bell {background-position: -3px -213px; }
+/* Food */
+.composer_emoji_tooltip_category_food { background-position: 0 -126px; }
+.active .composer_emoji_tooltip_category_food { background-position: 0 -147px; }
+
+/* Activity */
+.composer_emoji_tooltip_category_activity { background-position: 0 -168px; }
+.active .composer_emoji_tooltip_category_activity { background-position: 0 -189px; }
 
 /* Car */
-.composer_emoji_tooltip_category_car {background-position: -3px -241px; }
-.active .composer_emoji_tooltip_category_car {background-position: -3px -269px; }
+.composer_emoji_tooltip_category_car { background-position: 0 -210px; }
+.active .composer_emoji_tooltip_category_car { background-position: 0 -231px; }
 
-/* Grid */
-.composer_emoji_tooltip_category_grid {background-position: -3px -297px; }
-.active .composer_emoji_tooltip_category_grid {background-position: -3px -324px; }
+/* Object */
+.composer_emoji_tooltip_category_object { background-position: 0 -252px; }
+.active .composer_emoji_tooltip_category_object { background-position: 0 -273px; }
+
+/* Symbol */
+.composer_emoji_tooltip_category_symbol { background-position: 0 -294px; }
+.active .composer_emoji_tooltip_category_symbol { background-position: 0 -315px; }
+
+/* Flag */
+.composer_emoji_tooltip_category_flag { background-position: 0 -336px; }
+.active .composer_emoji_tooltip_category_flag { background-position: 0 -357px; }
 
 
 .composer_emoji_tooltip_tabs_wrap {
@@ -3096,24 +3108,36 @@ a.composer_emoji_btn {
 
 /* widths and heights calculated according to spritesheet dimensions and icon size */
 .emoji-spritesheet-0 {
-  background-size: 486px 126px;
+  background-size: 1170px 468px;
   background-image: url('../img/emojisprite_0.png');
 }
 .emoji-spritesheet-1 {
-  background-size: 522px 72px;
+  background-size: 450px 144px;
   background-image: url('../img/emojisprite_1.png');
 }
 .emoji-spritesheet-2 {
-  background-size: 594px 126px;
+  background-size: 558px 72px;
   background-image: url('../img/emojisprite_2.png');
 }
 .emoji-spritesheet-3 {
-  background-size: 612px 54px;
+  background-size: 504px 216px;
   background-image: url('../img/emojisprite_3.png');
 }
 .emoji-spritesheet-4 {
-  background-size: 612px 126px;
+  background-size: 576px 72px;
   background-image: url('../img/emojisprite_4.png');
+}
+.emoji-spritesheet-5 {
+  background-size: 576px 126px;
+  background-image: url('../img/emojisprite_5.png');
+}
+.emoji-spritesheet-6 {
+  background-size: 522px 180px;
+  background-image: url('../img/emojisprite_6.png');
+}
+.emoji-spritesheet-7 {
+  background-size: 468px 180px;
+  background-image: url('../img/emojisprite_7.png');
 }
 
 .emoji-w20 {
@@ -3122,11 +3146,14 @@ a.composer_emoji_btn {
   vertical-align: middle;
   display: inline-block;
 
-  &.emoji-spritesheet-0 { background-size: 540px 140px; }
-  &.emoji-spritesheet-1 { background-size: 580px 80px;  }
-  &.emoji-spritesheet-2 { background-size: 660px 140px; }
-  &.emoji-spritesheet-3 { background-size: 680px 60px;  }
-  &.emoji-spritesheet-4 { background-size: 680px 140px; }
+  &.emoji-spritesheet-0 { background-size: 1300px 520px; }
+  &.emoji-spritesheet-1 { background-size: 500px 160px; }
+  &.emoji-spritesheet-2 { background-size: 620px 80px; }
+  &.emoji-spritesheet-3 { background-size: 560px 240px; }
+  &.emoji-spritesheet-4 { background-size: 640px 80px; }
+  &.emoji-spritesheet-5 { background-size: 640px 140px; }
+  &.emoji-spritesheet-6 { background-size: 580px 200px; }
+  &.emoji-spritesheet-7 { background-size: 520px 200px; }
 }
 
 .emoji-w26 {
@@ -3135,11 +3162,14 @@ a.composer_emoji_btn {
   vertical-align: middle;
   display: inline-block;
 
-  &.emoji-spritesheet-0 { background-size: 702px 182px; }
-  &.emoji-spritesheet-1 { background-size: 754px 104px; }
-  &.emoji-spritesheet-2 { background-size: 858px 182px; }
-  &.emoji-spritesheet-3 { background-size: 884px 78px;  }
-  &.emoji-spritesheet-4 { background-size: 884px 182px; }
+  &.emoji-spritesheet-0 { background-size: 1690px 676px; }
+  &.emoji-spritesheet-1 { background-size: 650px 208px; }
+  &.emoji-spritesheet-2 { background-size: 806px 104px; }
+  &.emoji-spritesheet-3 { background-size: 728px 312px; }
+  &.emoji-spritesheet-4 { background-size: 832px 104px; }
+  &.emoji-spritesheet-5 { background-size: 832px 182px; }
+  &.emoji-spritesheet-6 { background-size: 754px 260px; }
+  &.emoji-spritesheet-7 { background-size: 676px 260px; }
 }
 
 
