@@ -3804,14 +3804,18 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           titleBackup = document.title
 
           titlePromise = $interval(function () {
-            if (titleChanged || !notificationsCount) {
+            if (!notificationsCount) {
               titleChanged = false
               document.title = titleBackup
               setFavicon()
             } else {
               titleChanged = true
               document.title = langNotificationsPluralize(notificationsCount)
-              setFavicon('favicon_unread.ico')
+              if (notificationsCount <= 9) {
+                setFavicon('img/favicons/favicon_unread_' + notificationsCount + '.ico')
+              } else {
+                setFavicon('img/favicons/favicon_unread_9_plus.ico')
+              }
             }
           }, 1000)
         }
