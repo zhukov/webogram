@@ -1,4 +1,9 @@
 <div class="login_page_wrap" my-custom-background="#e7ebf0">
+  <div class="login_try_desktop" ng-if="try_desktop.shown">
+    <span class="try_desktop_close" ng-click="closeTryDesktop()"></span>
+    <p class="try_desktop_text" my-i18n="login_try_desktop"><my-i18n-param name="telegram-link"><a href="https://{{try_desktop.domain}}/" target="_blank">{{try_desktop.domain}}</a></my-i18n-param></p>
+    <a class="try_desktop_btn" href="https://{{try_desktop.domain}}/" target="_blank" my-i18n="login_try_desktop_btn"></a>
+  </div>
   <div class="login_head_bg"></div>
   <div class="login_page">
     <div class="login_head_wrap clearfix" ng-switch="progress.enabled">
@@ -29,11 +34,11 @@
 
       <form name="mySendCodeForm" ng-if="!credentials.phone_code_hash" ng-submit="sendCode()">
         <h3 class="login_form_head" my-i18n="login_sign_in"></h3>
-        <p class="login_form_lead" my-i18n="login_enter_number_description_md">
-          <my-i18n-param name="apps-link">
-            <a href="https://telegram.org/apps" target="_blank">{0}</a>
-          </my-i18n-param>
-        </p>
+        <p class="login_form_lead" my-i18n="login_enter_number_description_md"><!--
+          --><my-i18n-param name="apps-link"><!--
+            --><a href="https://telegram.org/apps" target="_blank">{0}</a><!--
+          --></my-i18n-param><!--
+        --></p>
 
 
         <div class="md-input-group md-input-has-value login_phone_country_input_group" ng-click="chooseCountry()">
