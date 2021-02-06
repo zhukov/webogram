@@ -351,7 +351,10 @@ angular.module('myApp.directives', ['myApp.filters'])
         'media': '=myMessageMedia',
         'messageId': '=messageId'
       },
-      templateUrl: templateUrl('message_media')
+      templateUrl: templateUrl('message_media'),
+      link: function ($scope, element, attrs) {
+        $scope.domain = Config.Navigator.osX ? 'macos.telegram.org' : (Config.Navigator.mobile ? 'telegram.org/apps' : 'desktop.telegram.org')
+      }
     }
   })
   .directive('myMessagePhoto', function (AppPhotosManager) {
