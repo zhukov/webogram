@@ -122,7 +122,7 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
         apiUser.rPhone = $filter('phoneNumber')(apiUser.phone)
       }
 
-      apiUser.num = (Math.abs(userID) % 8) + 1
+      apiUser.num = Math.abs(userID % 7) + 1
 
       if (apiUser.first_name) {
         apiUser.rFirstName = RichTextProcessor.wrapRichText(apiUser.first_name, {noLinks: true, noLinebreaks: true})
