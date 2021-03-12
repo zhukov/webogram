@@ -1,0 +1,7 @@
+{
+  "name": "Webogram",
+  "description": "Telegram web application",
+  "repository": "https://github.com/zhukov/webogram",
+  "logo": "https://web.telegram.org/img/icons/icon128.png",
+  "keywords": ["telegram", "javascript", "messenger"]
+}
