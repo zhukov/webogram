@@ -17,7 +17,7 @@ switch (location.hostname) {
 
 self.addEventListener('push', function(event) {
   var obj = event.data.json()
-  console.log('[SW] push', obj)
+  //console.log('[SW] push', obj)
 
   var hasActiveWindows = false
   var checksPromise = new Promise(function (resolve, reject) {
@@ -26,7 +26,7 @@ self.addEventListener('push', function(event) {
       var muteUntil = result[0]
       var lastAliveTime = result[1]
       return clients.matchAll({type: 'window'}).then(function(clientList) {
-        console.log('matched clients', clientList)
+        //console.log('matched clients', clientList)
         hasActiveWindows = clientList.length > 0
         if (hasActiveWindows) {
           console.log('Supress notification because some instance is alive')
@@ -82,7 +82,7 @@ self.addEventListener('activate', function(event) {
 
 
 self.addEventListener('message', function(event) {
-  console.log('[SW] on message', event.data)
+  //console.log('[SW] on message', event.data)
   var client = event.ports && event.ports[0] || event.source
   if (event.data.type == 'ping') {
     if (event.data.localNotifications) {
