@@ -1,1 +1,20 @@
 .git
+
+.DS_Store
+.idea
+.publish
+*.sublime-workspace
+*.*~
+*.swp
+
+# Node.js package manager
+node_modules
+npm-debug.log
+dist
+dist_package
+releases
+webogram*.zip
+app/js/templates.js
+app/css
+cldr
+coverage/
