@@ -15,6 +15,6 @@ chrome.app.runtime.onLaunched.addListener(function (launchData) {
     },
     minWidth: 320,
     minHeight: 400,
-    frame: isWindows ? { color: '#5682a3' } : 'chrome'
+    frame: isWindows ? { color: '#0088cc' } : 'chrome'
   })
 })
