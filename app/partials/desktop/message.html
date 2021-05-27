@@ -22,15 +22,15 @@
 
     </div>
 
-    <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.pFlags.out ? 'im_message_out' : 'im_message_in', historyMessage.fwdFromID ? 'im_message_fwd' : '']">
-      <i class="icon icon-select-tick"></i>
+    <div ng-switch-default class="im_content_message_wrap" ng-class="::[historyMessage.pFlags.out ? 'im_message_out pull-right' : 'im_message_in pull-left', historyMessage.fwdFromID ? 'im_message_fwd' : '']">
+      <!-- <i class="icon icon-select-tick"></i> -->
 
       <a class="im_message_error_btn" ng-if="::historyMessage.pending || historyMessage.error || false" ng-click="historyMessage.send()">
         <i class="icon-message-status" tooltip="{{'message_action_retry' | i18n}}"></i>
       </a>
       <i ng-if="::historyMessage.pFlags.unread &amp;&amp; historyMessage.pFlags.out || historyMessage.pending || false" class="icon-message-status" ng-show="!historyMessage.error"></i>
 
-      <a class="im_message_from_photo pull-left" my-peer-photolink="::historyMessage.fromID" img-class="im_message_from_photo"></a>
+      <a class="im_message_from_photo pull-left" img-class="im_message_from_photo"></a>
 
       <div class="im_message_meta pull-right text-right noselect">
         <div class="im_message_views_wrap" ng-if="::!historyMessage.fwdFromID && historyMessage.views > 0">
@@ -38,17 +38,20 @@
             <i class="icon-message-views"></i><span class="im_message_views_cnt" my-message-views="historyMessage.mid"></span>
           </div>
         </div>
-        <span class="im_message_date clickable">
+        <span class="im_message_date">
           <span class="im_message_edited" my-message-edited="historyMessage.mid"></span>
-          <span class="im_message_date_text nocopy" data-content="{{::historyMessage.date | time}}"></span>
+          <span class="im_message_date_text" data-content="{{::historyMessage.date | time}}">
+            <span ng-bind="::historyMessage.date | time"></span>
+          </span>
         </span>
       </div>
 
+
       <div class="im_message_body" ng-class="::{im_message_body_media: historyMessage._ == 'message' &amp;&amp; historyMessage.media ? true : false}">
 
-        <span class="im_message_author_wrap">
+        <!-- <span class="im_message_author_wrap">
           <span class="copyonly">[<span ng-bind="::historyMessage.date | time"></span>] </span><a class="im_message_author" my-peer-link="historyMessage.fromID" short="historyMessage.peerID > 0" color="historyMessage.peerID < 0" no-watch="true" saved-from="historyMessage.savedFrom"></a><a ng-if="::historyMessage.viaBotID && !historyMessage.fwdFromID" class="im_message_author_via" ng-click="selectInlineBot(historyMessage.viaBotID, $event)"><span class="copyonly">&nbsp;</span><span my-i18n="message_via_bot"><my-i18n-param name="bot"><span class="im_message_fwd_author" my-peer-link="historyMessage.viaBotID" username="true" no-watch="true"></span></my-i18n-param></span></a><span class="copyonly">:</span><span class="im_message_author_admin" my-message-admin-badge="historyMessage"></span>
-        </span>
+        </span> -->
 
 
         <a class="im_message_reply_wrap" my-reply-message="::historyMessage.reply_to_mid" ng-if="::historyMessage.reply_to_mid"></a>
