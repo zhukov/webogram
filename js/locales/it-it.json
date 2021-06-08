@@ -517,7 +517,7 @@
     "im_voice_recording_cancel_label": "Rilascia per annullare la registrazione",
     "im_voice_processing_label": "Elaboro{dots}",
     "login_sign_in": "Accedi",
-    "login_enter_number_description_md": "Scegli il tuo paese e inserisci il tuo numero di telefono completo.\n\nTieni presente che hai bisogno di un account esistente per accedere a Telegram Web. Per iscriverti a Telegram, usauna delle nostre {apps-link: app mobile}.",
+    "login_enter_number_description_md": "Scegli il tuo paese e inserisci il tuo numero di telefono completo.\n\nTieni presente che hai bisogno di un account esistente per accedere a Telegram Web. Per iscriverti a Telegram, usa una delle nostre {apps-link: app mobile}.",
     "login_incorrect_number": "Numero di telefono errato",
     "login_code_input_placeholder": "Codice",
     "login_tel_input_placeholder": "Numero di telefono",
