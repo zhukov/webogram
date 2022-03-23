@@ -1,5 +1,13 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
+## Project is DEPRECATED
+
+The project was superseeded by 2 new official Telegram Web Apps:
+
+* https://github.com/morethanwords/tweb - Telegram Web K, based on source code of Webogram, rewritten in TypeScript.
+* https://github.com/Ajaxy/telegram-tt - Telegram Web Z, based on its own Teact framework (which re-implements React paradigm), uses a custom version of GramJS as an MTProto implementation. Written also in Typescript.
+
+
 ## [Webogram](https://web.telegram.org) — Telegram Web App
 
 Telegram offers great [apps for mobile communication](https://www.telegram.org). It is based on the [MTProto protocol](https://core.telegram.org/mtproto) and has an [Open API](https://core.telegram.org/api). I personally like Telegram for its speed and cloud-support (that makes a web app possible, unlike in the case of WA and others).
