@@ -40,7 +40,7 @@
       bootReady.migration_check = true
     } else {
       if (kzVersion) {
-        location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/'
+        location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/' + location.hash
         return
       }
       $.getJSON('https://telegram.org/webogram_migrate').success(function(result) {
@@ -49,7 +49,7 @@
           ConfigStorage.set({
             kz_version: kzVersion
           })
-          location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/'
+          location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/' + location.hash
           return
         } else {
           bootReady.migration_check = true
