@@ -18,15 +18,43 @@
   }
   $(document.body).addClass(classes.join(' '))
 
-  ConfigStorage.get('layout_selected', 'i18n_locale', function (params) {
+  ConfigStorage.get('layout_selected', 'i18n_locale', 'kz_version', function (params) {
     var layout = params[0]
     var locale = params[1]
+    var kzVersion = params[2]
     var defaultLocale = 'en-us'
     var bootReady = {
       dom: false,
       i18n_ng: false,
       i18n_messages: false,
-      i18n_fallback: false
+      i18n_fallback: false,
+      migration_check: false
+    }
+    if ('K' !== kzVersion && 'Z' !== kzVersion) {
+      kzVersion = false
+    }
+    if ('web.telegram.org' !== location.hostname ||
+        Config.Modes.test ||
+        Config.Modes.ios_standalone ||
+        location.search.indexOf('legacy=1') != -1) {
+      bootReady.migration_check = true
+    } else {
+      if (kzVersion) {
+        location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/'
+        return
+      }
+      $.getJSON('https://telegram.org/webogram_migrate').success(function(result) {
+        kzVersion = result.kz_version
+        if ('K' === kzVersion || 'Z' === kzVersion) {
+          ConfigStorage.set({
+            kz_version: kzVersion
+          })
+          location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/'
+          return
+        } else {
+          bootReady.migration_check = true
+        }
+      })
     }
     var checkReady = function checkReady () {
       var i
