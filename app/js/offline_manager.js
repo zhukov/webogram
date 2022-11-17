@@ -17,6 +17,14 @@
     !window.addEventListener) {
     return
   }
+  if ('web.telegram.org' !== location.hostname ||
+      Config.Modes.test ||
+      Config.Modes.ios_standalone ||
+      location.search.indexOf('legacy=1') != -1) {
+    // procceed
+  } else {
+    return
+  }
 
   var declined = false
   function updateFound () {

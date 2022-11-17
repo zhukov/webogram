@@ -45,16 +45,15 @@
       }
       $.getJSON('https://telegram.org/webogram_migrate').success(function(result) {
         kzVersion = result.kz_version
-        if ('K' === kzVersion || 'Z' === kzVersion) {
-          ConfigStorage.set({
-            kz_version: kzVersion
-          })
-          location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/' + location.hash
-          return
-        } else {
-          bootReady.migration_check = true
+        if ('K' !== kzVersion && 'Z' !== kzVersion) {
+          kzVersion = Math.random() >= 0.5 ? 'K' : 'Z'
         }
+        ConfigStorage.set({
+          kz_version: kzVersion
+        })
+        location.href = 'https://web.telegram.org/' + kzVersion.toLowerCase() + '/' + location.hash
       })
+      return
     }
     var checkReady = function checkReady () {
       var i
