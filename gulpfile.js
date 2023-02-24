@@ -65,7 +65,7 @@ gulp.task('copy-images', function () {
 
 gulp.task('copy', gulp.parallel(
   function () {
-    return gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.webapp.json', 'app/manifest.json', 'app/**/*worker.js'])
+    return gulp.src(['app/favicon.ico', 'app/img/favicons/*.ico', 'app/manifest.webapp', 'app/manifest.webapp.json', 'app/manifest.json', 'app/**/*worker.js'])
       .pipe(gulp.dest('dist'))
   },
   function () {
@@ -263,7 +263,7 @@ gulp.task('package-dev', gulp.parallel(
       .pipe(gulp.dest('dist_package/js'));
   },
   function () {
-    return gulp.src(['app/favicon.ico', 'app/favicon_unread.ico', 'app/manifest.webapp', 'app/manifest.json'])
+    return gulp.src(['app/favicon.ico', 'app/img/favicons/*.ico', 'app/manifest.webapp', 'app/manifest.json'])
       .pipe(gulp.dest('dist_package'));
   },
   function () {
